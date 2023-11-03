@@ -7,8 +7,8 @@ import { IFullPageVideoConfigParams } from '@/interfaces/fullPage'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IStkProFeatures } from '@/interfaces/payment'
-import { IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
+import { IPrices, IStkProFeatures } from '@/interfaces/payment'
+import { IIosImgData, IMyDesign, IMyDesignTag, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -295,10 +295,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async setDefaultPrices() {
     const userInfo = this.getUserInfoFromStore()
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
-    const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
+    const defaultPrices = store.getters['payment/getPayment'].defaultPrices as { [key: string]: IPrices }
     const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
-    store.commit('vivisticker/UPDATE_payment', { prices: localPrices ?? defaultPrices[locale] })
-    store.commit('vivisticker/SET_paymentPending', { info: false })
+    store.commit('payment/UPDATE_payment', { prices: localPrices ?? defaultPrices[locale] })
+    store.commit('payment/SET_paymentPending', { info: false })
   }
 
   addDesignDisabled() {
@@ -1456,7 +1456,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   checkPro(item: { plan?: number }, target?: IStkProFeatures) {
-    const isPro = store.getters['vivisticker/getPayment'].subscribe
+    const isPro = store.getters['payment/getPayment'].subscribe
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
@@ -1473,7 +1473,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
     const prices = { currency: priceCurrency }
-    const planIds = store.getters['vivisticker/getPayment'].planId
+    const planIds = store.getters['payment/getPayment'].planId
     data.planInfo.forEach(p => {
       const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
       if (!plan) return
@@ -1485,8 +1485,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       })
     })
     const subscribeInfo = { subscribe: isSubscribed, prices }
-    store.commit('vivisticker/UPDATE_payment', subscribeInfo)
-    store.commit('vivisticker/SET_paymentPending', { info: false })
+    store.commit('payment/UPDATE_payment', subscribeInfo)
+    store.commit('payment/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {
       if (subscribeInfo?.subscribe && !isSubscribed) {
         this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
@@ -1498,7 +1498,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getSubscribeInfo() {
-    const planIds = store.getters['vivisticker/getPayment'].planId
+    const planIds = store.getters['payment/getPayment'].planId
     this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
     this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: Object.values(planIds) })
   }
@@ -1510,7 +1510,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (data.reason) return
       if (isGetProducts(data)) {
         const { planInfo, priceCurrency } = data
-        const planIds = store.getters['vivisticker/getPayment'].planId
+        const planIds = store.getters['payment/getPayment'].planId
         if (planInfo.length !== Object.keys(planIds).length) return
         const prices = { currency: priceCurrency }
         planInfo.forEach(p => {
@@ -1523,7 +1523,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
             }
           })
         })
-        store.commit('vivisticker/UPDATE_payment', { prices })
+        store.commit('payment/UPDATE_payment', { prices })
         this.setState('prices', prices)
       }
       else if (isCheckState(data)) {
@@ -1531,7 +1531,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         if (complete === '0') this.registerSticker()
         const isSubscribed = subscribe === '1'
         const subscribeInfo = { subscribe: isSubscribed }
-        store.commit('vivisticker/UPDATE_payment', subscribeInfo)
+        store.commit('payment/UPDATE_payment', subscribeInfo)
         this.getState('subscribeInfo').then(subscribeInfo => {
           if (subscribeInfo?.subscribe && !isSubscribed) {
             this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
@@ -1541,16 +1541,16 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       }
       return
     }
-    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
+    if (!store.getters['payment/getIsPaymentPending']) return // drop result if is timeout
     if (!data.reason) {
       const isSubscribed = data.subscribe === '1'
-      store.commit('vivisticker/UPDATE_payment', { subscribe: isSubscribed })
+      store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
       if (isSubscribed) store.commit('SET_fullPageConfig', { type: 'welcome', params: {} })
       this.getState('subscribeInfo').then(subscribeInfo => {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
     }
-    store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+    store.commit('payment/SET_paymentPending', { purchase: false, restore: false })
   }
 
   async registerSticker() {

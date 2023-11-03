@@ -173,12 +173,16 @@ export default defineComponent({
     }
   },
   created() {
+    console.log('created', this.isOldPrice);
+    if(!this.$isStk) return
+    
     const userInfo = stkWVUtils.getUserInfoFromStore()
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(this.$i18n.locale)
     this.defaultTrialToggled = this.payment.trialCountry.includes(locale) || this.isOldPrice
     this.isTrialToggled = this.defaultTrialToggled
   },
   mounted() {
+    console.log('mounted');
     const at = new AnyTouch((this.$refs.chevron as HTMLElement))
     at.on('tap', () => this.togglePanel())
     at.get('tap').maxDistance = 2
@@ -198,12 +202,12 @@ export default defineComponent({
       isTablet: 'isTablet',
       isLandscape: 'isLandscape'
     }),
-    ...mapState('vivisticker', {
-      pending: (state: any) => state.payment.pending as IPaymentPending,
+    ...mapState('payment', {
+      pending: (state: any) => state.pending as IPaymentPending,
     }),
     ...mapGetters({
-      payment: 'vivisticker/getPayment',
-      isPaymentPending: 'vivisticker/getIsPaymentPending',
+      payment: 'payment/getPayment',
+      isPaymentPending: 'payment/getIsPaymentPending',
     }),
     txtBtnSubscribe() {
       return this.isTrialToggled ? this.$t('STK0046') : this.$t('STK0047')
@@ -236,7 +240,7 @@ export default defineComponent({
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.isOldPrice ? this.$t('STK0048', { day: 3 }) : '',
-          price: (!stkWVUtils.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0.text : this.payment.prices.annually.text,
+          price: (!this.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0.text : this.payment.prices.annually.text,
           tag: this.localizedTag
         }
       ]
@@ -266,12 +270,12 @@ export default defineComponent({
       return this.planSelected === 'monthly' || this.isPaymentPending
     },
     isOldPrice() {
-      return stkWVUtils.isOldPrice
+      return this.$isStk ? stkWVUtils.isOldPrice : false
     }
   },
   methods: {
     ...mapMutations({
-      setPaymentPending: 'vivisticker/SET_paymentPending'
+      setPaymentPending: 'payment/SET_paymentPending'
     }),
     handleImageChange(index: number) {
       this.idxCurrImg = index
@@ -287,7 +291,7 @@ export default defineComponent({
         return
       }
       if (this.isPaymentPending) return
-      if (!stkWVUtils.isOldPrice) {
+      if (!this.isOldPrice) {
         if (option === 'monthly') option = this.payment.planId.monthly
         else if (option === 'annually') option = (this.isTrialDisabled || !this.isTrialToggled) ? this.payment.planId.annuallyFree0 : this.payment.planId.annually
       }

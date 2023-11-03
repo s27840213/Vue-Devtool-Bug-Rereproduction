@@ -65,36 +65,6 @@ export interface IMyDesignTag {
 export interface IIosImgData {
   images: Array<string>
 }
-export interface IPrice {
-  value: number,
-  text: string
-}
-export interface IPrices {
-  currency: string,
-  monthly: IPrice,
-  annually: IPrice,
-  annuallyFree0: IPrice
-}
-
-export interface IPaymentPending {
-  info: boolean,
-  purchase: boolean,
-  restore: boolean
-}
-
-export interface IPayment {
-  subscribe: boolean,
-  prices: IPrices,
-  defaultPrices: { [key: string]: IPrices },
-  trialDays: number,
-  trialCountry: string[],
-  pending: IPaymentPending,
-  planId: {
-    monthly: string,
-    annually: string,
-    annuallyFree0: string
-  },
-}
 
 export interface IPlanInfo {
   planId: string,

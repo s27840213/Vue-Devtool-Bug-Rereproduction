@@ -53,6 +53,7 @@ LayerType,
 SidebarPanelType,
 } from './types'
 import { IFullPageConfig } from '@/interfaces/fullPage'
+import payment from '@/store/module/payment'
 
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),
@@ -1580,7 +1581,7 @@ const mutations: MutationTree<IEditorState> = {
     state.modalInfo = modalInfo
   },
   SET_fullPageType(state: IEditorState, fullPageType: IFullPageConfig['type']) {
-  state.fullPageConfig.type = fullPageType
+    state.fullPageConfig.type = fullPageType
   },
   SET_fullPageParams(state: IEditorState, fullPageParams: IFullPageConfig['params']) {
     state.fullPageConfig.params = fullPageParams
@@ -1620,6 +1621,7 @@ export type IStoreRoot = IEditorState & {
   fontTag: typeof fontTag.state
   imgControl: typeof imgControl.state
   webView: typeof webView.state
+  payment: typeof payment.state
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1645,6 +1647,7 @@ const store = createStore({
     fontTag,
     imgControl,
     webView,
+    payment
   },
 })
 export default store

@@ -1,6 +1,5 @@
 import { IAsset } from '@nu/vivi-lib/interfaces/module'
-import { ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
-import constantData from '@nu/vivi-lib/utils/constantData'
+import { ILoadingOverlay, IMyDesign, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _ from 'lodash'
@@ -42,7 +41,6 @@ interface IViviStickerState {
   editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
-  payment: IPayment,
   uuid: string,
   loadedFonts: { [key: string]: true },
   templateShareType: 'none' | 'story' | 'post',
@@ -99,37 +97,6 @@ const getDefaultState = (): IViviStickerState => ({
   editingAssetInfo: {},
   selectedDesigns: {},
   modalInfo: {},
-  payment: {
-    subscribe: false,
-    prices: {
-      currency: '',
-      monthly: {
-        value: NaN,
-        text: ''
-      },
-      annually: {
-        value: NaN,
-        text: ''
-      },
-      annuallyFree0: {
-        value: NaN,
-        text: ''
-      }
-    },
-    defaultPrices: {},
-    trialDays: NaN,
-    trialCountry: [],
-    pending: {
-      info: true,
-      purchase: false,
-      restore: false
-    },
-    planId: {
-      monthly: constantData.planId.monthly,
-      annually: constantData.planId.annually,
-      annuallyFree0: constantData.planId.annuallyFree0
-    }
-  },
   uuid: '',
   loadedFonts: {},
   debugMode: process.env.NODE_ENV === 'development',
@@ -272,12 +239,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getLoadedFonts(state: IViviStickerState): { [key: string]: true } {
     return state.loadedFonts
   },
-  getPayment(state: IViviStickerState): IPayment {
-    return state.payment
-  },
-  getIsPaymentPending(state) {
-    return Object.entries(state.payment.pending).some(([key, value]) => value)
-  },
   getUuid(state: IViviStickerState): string {
     return state.uuid
   },
@@ -398,16 +359,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_modalInfo(state: IViviStickerState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
-  },
-  UPDATE_payment(state: IViviStickerState, data: Partial<IPayment>) {
-    Object.entries(data).forEach(([key, value]) => {
-      (state.payment as any)[key] = value
-    })
-  },
-  SET_paymentPending(state: IViviStickerState, data: Record<keyof IPaymentPending, boolean>) {
-    for (const item of Object.entries(data)) {
-      state.payment.pending[item[0] as keyof IPaymentPending] = item[1]
-    }
   },
   SET_uuid(state: IViviStickerState, uuid: string) {
     state.uuid = uuid

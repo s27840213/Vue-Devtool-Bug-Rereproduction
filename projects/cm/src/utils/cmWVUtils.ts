@@ -2,6 +2,8 @@ import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import { useWebViewStore } from '@/stores/webView'
 import { generalUtils, nativeAPIUtils } from '@nu/shared-lib'
+import { ICmProFeatures } from '@nu/vivi-lib/interfaces/payment'
+import store from '@nu/vivi-lib/store'
 import { storeToRefs } from 'pinia'
 
 export interface IGeneralSuccessResponse {
@@ -259,6 +261,10 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   async updateTutorialFlags(updateItem: { [key: string]: boolean }) {
     Object.assign(this.tutorialFlags, updateItem)
     await this.setState('tutorialFlags', this.tutorialFlags)
+  }
+
+  openPayment(target?: ICmProFeatures) {
+    store.commit('SET_fullPageConfig', { type: 'payment', params: { target } })
   }
 }
 

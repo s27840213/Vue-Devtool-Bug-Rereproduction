@@ -4,7 +4,7 @@ import ViviSticker from '@/views/ViviSticker.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
-import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
+import { IPrices } from '@nu/vivi-lib/interfaces/payment'
 import router from '@nu/vivi-lib/router'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -265,7 +265,7 @@ router.beforeEach(async (to, from, next) => {
 
     if (json.default_price && Object.keys(json.default_price).length) {
       const planPostfix = json.default_price.plan_id ? '_' + json.default_price.plan_id : ''
-      store.commit('vivisticker/UPDATE_payment', {
+      store.commit('payment/UPDATE_payment', {
         defaultPrices: Object.fromEntries(
           Object.entries(
             json.default_price.prices as { [key: string]: { monthly: number; annually: number } },

@@ -180,3 +180,18 @@ export type IPaymentView = IPaymentWarningView | IPaymentPayingView
 // for vivisticker & charmix
 export type IStkProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
 export type ICmProFeatures = ''
+export interface IPrice {
+  value: number,
+  text: string
+}
+export interface IPrices {
+  currency: string,
+  monthly: IPrice,
+  annually: IPrice,
+  annuallyFree0: IPrice
+}
+export interface IPaymentPending {
+  info: boolean,
+  purchase: boolean,
+  restore: boolean
+}
