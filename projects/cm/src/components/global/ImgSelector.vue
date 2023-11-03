@@ -34,7 +34,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
       v-for="img, i in demoImgs"
       :key="img.assetId"
       class="relative flex justify-center"
-      @click="sendDemo(i)")
+      @click="selectDemo(i)")
       img(class="w-44 h-44 object-cover rounded-[10px]" :src="img.assetId")
       span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
   //- 4-1. Photo
@@ -126,7 +126,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
       nubtn(@click="sendToEditor") {{ $t('NN0744') }}
     div(class="flex flex-row gap-20")
       div(v-for="img in targetImgs" :key="img.assetId" class="relative")
-        img(class="w-60 h-60 object-cover" :src="imageUtils.getSrc(img)")
+        img(class="w-60 h-60 object-cover" :src="imageUtils.getSrc(img, 'tiny')")
         cm-svg-icon(
           class="absolute -right-12 -top-12"
           iconName="close-btn"
@@ -210,7 +210,7 @@ const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
-const { createNewPage, setImgAspectRatio } = editorStore
+const { setPageSize, setImgAspectRatio } = editorStore
 const { setShowImgSelector } = useImgSelectorStore()
 
 const toggleAlbum = () => {
@@ -300,7 +300,7 @@ const selected = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => 
   )
 }
 
-const sendDemo = (i: number) => {
+const selectDemo = (i: number) => {
   targetImgs = []
   if (props.requireNum === 2) {
     targetImgs = demoImgs
@@ -327,9 +327,9 @@ const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') 
 
 const sendToEditor = async () => {
   setImgAspectRatio(targetImgs[0].ratio)
-  setShowImgSelector(false)
+  setShowImgSelector(0)
   await router.push({ name: 'Editor' })
-  createNewPage(900, 1600)
+  setPageSize(900, 1600)
   nextTick(() => {
     targetImgs.forEach((img) => {
       assetUtils.addImage(img, img.ratio, {

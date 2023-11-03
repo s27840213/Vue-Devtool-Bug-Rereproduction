@@ -14,8 +14,8 @@ import useStateInfo from '@/composable/useStateInfo';
 import { useEditorStore } from '@/stores/editor';
 import { useImgSelectorStore } from '@/stores/imgSelector';
 import { useModalStore } from '@/stores/modal';
+import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import { storeToRefs } from 'pinia';
-import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 /**
  * @Note - how to use this component?
@@ -63,7 +63,7 @@ const handleBackAction = (navagate: () => void) => {
   }
 
   if (showImgSelector.value) {
-    setShowImgSelector(false)
+    setShowImgSelector(0)
     return
   }
 
