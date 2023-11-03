@@ -4,7 +4,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
   //- 1. Top bar
   div(class="px-24 py-8 flex justify-between items-center")
     back-btn
-    span(class="text-app-btn-primary-text") {{ $tc('CM0058', 1, { num: 1 }) }}
+    span(class="text-app-btn-primary-text") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
     div(class="w-24")
   //- 2. Tabs for photo & stock
   tabs(
@@ -30,10 +30,13 @@ div(class="image-selector bg-app-bg text-app-tab-default \
       class="text-app-text-primary"
       @search="searchUnsplash")
     //- Demo img
-    template(v-for="i in 2" :key="i")
-      img(
-        class="w-44 h-44 object-cover rounded-[10px]"
-        :src="require(`@img/jpg/cm demo img${i}.jpg`)")
+    div(
+      v-for="img, i in demoImgs"
+      :key="img.assetId"
+      class="relative flex justify-center"
+      @click="sendDemo(i)")
+      img(class="w-44 h-44 object-cover rounded-[10px]" :src="img.assetId")
+      span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
   //- 4-1. Photo
   div(
     v-if="inPhoto"
@@ -50,13 +53,18 @@ div(class="image-selector bg-app-bg text-app-tab-default \
       div(
         v-for="img in currAlbumContent"
         :key="img.id"
-        class="aspect-square"
+        class="aspect-square relative"
         @click="selectImage(img, 'ios')")
         lazy-load(
           class="lazy-load w-full h-full"
           target=".img-selector__img-grid"
           :rootMargin="'1000px 0px 1000px 0px'")
           img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${img.id}?ssize=200`")
+        svg-icon(
+          v-if="selected(img, 'ios')"
+          class="absolute right-0 top-0"
+          iconName="item-check"
+          iconColor="app-tab-active")
       observer-sentinel(
         class="flex justify-center py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
@@ -89,12 +97,16 @@ div(class="image-selector bg-app-bg text-app-tab-default \
       v-for="col, i in unsplashCols"
       :key="i"
       class="grid gap-16 h-fit")
-      img(
-        v-for="img in col"
-        :key="img.id"
-        class="w-full"
-        :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
-        @click="selectImage(img, 'unsplash')")
+      div(v-for="img in col" :key="img.id" class="relative")
+        img(
+          class="w-full"
+          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
+          @click="selectImage(img, 'unsplash')")
+        svg-icon(
+          v-if="selected(img, 'unsplash')"
+          class="absolute right-0 top-0"
+          iconName="item-check"
+          iconColor="app-tab-active")
     observer-sentinel(
       class="flex justify-center py-12 col-span-2"
       :target="'.img-selector__img-grid'"
@@ -107,12 +119,18 @@ div(class="image-selector bg-app-bg text-app-tab-default \
         iconColor="app-text-secondary")
   //- 5. Multi-select candidate UI
   div(
-    v-if="requireNum > 1"
-    class="mx-16 mt-10 mb-20 gird grid-rows-2")
-    div(class="flex justify-between")
+    v-if="requireNum > 1 && targetImgs.length"
+    class="mx-16 mt-10 mb-20 grid gap-20")
+    div(class="flex justify-between items-center h-32")
       span {{ $t('CM0062', { num: requireNum }) }}
-      nubtn {{ $t('NN0744') }}
-    div
+      nubtn(@click="sendToEditor") {{ $t('NN0744') }}
+    div(class="flex flex-row gap-20")
+      div(v-for="img in targetImgs" :key="img.assetId" class="relative")
+        img(class="w-60 h-60 object-cover" :src="imageUtils.getSrc(img)")
+        cm-svg-icon(
+          class="absolute -right-12 -top-12"
+          iconName="close-btn"
+          @click="pull(targetImgs, img)")
 </template>
 
 <script lang="ts" setup>
@@ -129,6 +147,8 @@ import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import { find, pull } from 'lodash'
 
 const router = useRouter()
 
@@ -143,7 +163,18 @@ const props = defineProps({
 const tabIndex = ref(0)
 const inPhoto = computed(() => tabIndex.value === 0)
 const inStock = computed(() => tabIndex.value === 1)
-const targetImgs = reactive([] as (SrcObj & { ratio: number })[])
+let targetImgs = reactive([] as (SrcObj & { ratio: number })[])
+const demoImgs = [{
+    type: 'local-img',
+    assetId: require('@img/jpg/cm demo img1.jpg'),
+    userId: '',
+    ratio: 320 / 480
+  }, {
+    type: 'local-img',
+    assetId: require('@img/jpg/cm demo img2.jpg'),
+    userId: '',
+    ratio: 384 / 480
+  }]
 // #endregion
 
 // #region album datas
@@ -262,7 +293,29 @@ vuex.dispatch('unsplash/init')
 // #endregion
 
 // #region common method
+const selected = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
+  return find(
+    targetImgs,
+    ['assetId', (type === 'ios' ? 'cameraroll/' : '') + img.id]
+  )
+}
+
+const sendDemo = (i: number) => {
+  targetImgs = []
+  if (props.requireNum === 2) {
+    targetImgs = demoImgs
+  } else {
+    targetImgs.push(demoImgs[i])
+  }
+  sendToEditor()
+}
+
 const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
+  if (props.requireNum === targetImgs.length) {
+    // Alert
+    return
+  }
+
   targetImgs.push({
     type,
     assetId: (type === 'ios' ? 'cameraroll/' : '') + img.id,
