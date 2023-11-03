@@ -14,8 +14,8 @@ import useStateInfo from '@/composable/useStateInfo';
 import { useEditorStore } from '@/stores/editor';
 import { useImgSelectorStore } from '@/stores/imgSelector';
 import { useModalStore } from '@/stores/modal';
+import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import { storeToRefs } from 'pinia';
-import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 /**
  * @Note - how to use this component?
@@ -32,7 +32,7 @@ const { toTarget, customCallback } = withDefaults(
     toTarget: '/',
   },
 )
-const { isEditing, atSettings } = useStateInfo()
+const { isEditing, atSettings, showAssetPanel, setAssetPanelType } = useStateInfo()
 
 // #region modal
 const modalStore = useModalStore()
@@ -64,6 +64,11 @@ const handleBackAction = (navagate: () => void) => {
 
   if (showImgSelector.value) {
     setShowImgSelector(false)
+    return
+  }
+
+  if (showAssetPanel.value) {
+    setAssetPanelType('none')
     return
   }
 

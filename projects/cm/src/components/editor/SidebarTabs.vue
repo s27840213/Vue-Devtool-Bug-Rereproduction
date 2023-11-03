@@ -20,11 +20,13 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
         :class="tab.disabled ? 'text-app-icon-dark' : 'text-app-btn-primary-text'") {{ tab.text }}
     div(
       v-if="tab.icon === currActiveFeature && tab.subTabs"
-      class="flex flex-col items-center justify-center gap-2 bg-app-tab-disable rounded-full")
+      class="flex flex-col items-center justify-center gap-2 bg-neutral-light-active/50 rounded-full")
       div(
         v-for="(subTab, index) in tab.subTabs"
         :key="`${subTab.icon}-${index}`"
-        class="flex flex-col items-center justify-center gap-2 p-4 box-border")
+        class="flex flex-col items-center justify-center gap-2 p-4 box-border"
+        @click.stop="handleTabAction(subTab)"
+        @pointerdown.stop)
         cm-svg-icon(
           :style="subTab.styles"
           :iconName="subTab.icon"
@@ -36,6 +38,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
+import { useAssetPanelStore } from '@/stores/assetPanel';
 import { useEditorStore } from '@/stores/editor';
 import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import groupUtils from '@nu/vivi-lib/utils/groupUtils';
@@ -92,7 +95,6 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0048'),
       panelType: '',
       hidden: false,
-      disabled: true,
       subTabs: addSubTabs.value,
       styles: {
         transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
@@ -145,6 +147,8 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
 
 const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
 
+const { setAssetPanelType } = useAssetPanelStore()
+
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
     case 'selection':
@@ -172,6 +176,15 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
+      break
+    }
+    case 'objects': {
+      setAssetPanelType('panel-object')
+      break
+    }
+    case 'text': {
+      setAssetPanelType('panel-text')
+      break
     }
   }
 }

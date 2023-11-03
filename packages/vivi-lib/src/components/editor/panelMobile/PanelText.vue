@@ -57,12 +57,12 @@ div(class="overflow-container full-size rwd-container")
 </template>
 
 <script lang="ts">
-import BtnAdd from '@/components/global/BtnAdd.vue'
 import listApi from '@/apis/list'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
+import BtnAdd from '@/components/global/BtnAdd.vue'
 import Tags, { ITag } from '@/components/global/Tags.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
@@ -70,6 +70,7 @@ import AssetUtils from '@/utils/assetUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -110,6 +111,17 @@ export default defineComponent({
       editorBg: 'vivisticker/getEditorBg',
       pending: 'textStock/pending',
       tagsBar: 'textStock/tagsBar'
+    }),
+    ...vuexUtils.mapGetters('stk', {
+      isInEditor: false,
+      isTabInCategory: (tab: string) => false as boolean,
+      isTabShowAllRecently: (tab: string) => false as boolean,
+      editorBg: '#F4F5F7',
+    }, {
+      isInEditor: 'vivisticker/getIsInEditor',
+      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      editorBg: 'vivisticker/getEditorBg',
     }),
     ...mapState({
       isTablet: 'isTablet'
@@ -231,7 +243,7 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getRecAndCate({ reset, key: 'textStock' })
+        await this.getRecAndCate({ reset, key: this.$isStk ? 'textStock' : undefined })
       })
     this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
   },
