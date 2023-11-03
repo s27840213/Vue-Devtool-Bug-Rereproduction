@@ -51,7 +51,7 @@ div(class="overflow-container full-size rwd-container")
                 iconWidth="24px")
               div(class="overline-SM") RECENTLY USED
             CategoryTextPreview(v-else :item="item" @click="addText(item)")
-            pro-item(v-if="item.plan && $isStk" draggable="false" :style="{top: '1px', left: '4px'}")
+            pro-item(v-if="item.plan" draggable="false" :style="{top: '1px', left: '4px'}")
     btn-add(class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
 

@@ -344,6 +344,7 @@ export default defineComponent({
     outline: none;
     padding: 0;
     position: relative;
+    box-sizing: initial; // overwrite tailwind default
   }
   &__p {
     margin: 0;

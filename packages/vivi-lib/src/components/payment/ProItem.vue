@@ -33,7 +33,7 @@ export default defineComponent({
       }
     },
     inReviewMode(): boolean {
-      return picWVUtils.inReviewMode
+      return picWVUtils.inReviewMode || this.$isCm
     },
   },
 })

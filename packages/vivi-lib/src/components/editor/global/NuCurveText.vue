@@ -17,7 +17,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -204,6 +204,7 @@ export default defineComponent({
     line-height: 1;
     position: absolute;
     display: inline-block;
+    box-sizing: initial; // overwrite tailwind default
   }
 }
 </style>

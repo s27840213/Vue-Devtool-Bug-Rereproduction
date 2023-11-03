@@ -6,7 +6,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     template(
       v-if="isEditing"
       #middle)
-      span(v-if="showAssetPanel" class="text-white typo-h5") {{ panelTitle }}
+      div(class="text-white typo-h5 whitespace-nowrap")
+        link-or-text(v-if="showAssetPanel" :title="centerTitle" :url="centerUrl")
       //- cm-svg-icon(
       //-   iconName="undo"
       //-   :iconColor="'app-btn-primary-text'"
@@ -75,12 +76,14 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import useAssetPanelUtils from '@/composable/useAssetPanelUtils'
 import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useWebViewStore } from '@/stores/webView'
 import tutorialUtils from '@/utils/tutorialUtils'
+import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
@@ -95,6 +98,7 @@ import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
 
+const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
 const sidebarTabsRef = ref<HTMLElement | null>(null)
@@ -117,6 +121,7 @@ onBeforeRouteLeave((to, from) => {
 })
 
 const store = useStore()
+const i18n = useI18n()
 const pageState = computed(() => store.getters.getPagesState)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 
@@ -232,10 +237,9 @@ const { isDuringCopy } = storeToRefs(webViewStore)
 // #endregion
 
 // #region asset panel
-const i18n = useI18n()
-const headerbarRef = ref<typeof Headerbar | null>(null)
 const assetPanelTop = ref(0)
 let topSetterTimer = -1
+const { isInCategory, showAllRecently } = useAssetPanelUtils()
 
 const setAssetPanelTop = () => {
   if (!headerbarRef.value) {
@@ -275,12 +279,42 @@ const assetPanelComponent = computed(() => {
   }
 })
 
-const panelTitle = computed(() => {
+const titleInfo = computed(() => {
+  const staticHeaderTab = store.getters['objects/headerTab']
+  const giphyKeyword = store.getters['giphy/keyword']
+  const textHeaderTab = store.getters['textStock/headerTab']
+  switch (assetPanelType.value) {
+    case 'object':
+      return {
+        title: staticHeaderTab.title || giphyKeyword,
+        url: staticHeaderTab.bulbUrl || ''
+      }
+    case 'text':
+      return {
+        title: textHeaderTab.title,
+        url: textHeaderTab.bulbUrl
+      }
+  }
+  return { title: '', url: '' }
+})
+
+const centerUrl = computed(() => {
+  return isInCategory.value ? titleInfo.value.url : ''
+})
+
+const centerTitle = computed(() => {
+  if (isInCategory.value) {
+    if (showAllRecently.value) {
+      return `${i18n.t('NN0024')}`
+    } else {
+      return titleInfo.value.title
+    }
+  }
   switch (assetPanelType.value) {
     case 'text':
-      return 'Add text'
+      return i18n.t('CM0063')
     case 'object':
-      return 'Choose 1 sticker'
+      return i18n.t('CM0064')
     default:
       return ''
   }

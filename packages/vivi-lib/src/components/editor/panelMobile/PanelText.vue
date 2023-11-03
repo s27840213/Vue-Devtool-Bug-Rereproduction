@@ -323,7 +323,7 @@ export default defineComponent({
     async addStandardText() {
       listApi.addDesign('add_text', 'text')
       let recentFont
-      if (stkWVUtils.checkVersion('1.5')) {
+      if (this.$isStk && stkWVUtils.checkVersion('1.5')) {
         recentFont = await stkWVUtils.getState('recentFont')
       }
       const color = stkWVUtils.getContrastColor(this.editorBg)
