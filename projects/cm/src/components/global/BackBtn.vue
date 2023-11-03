@@ -73,12 +73,11 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  const currActiveTab = store.getters['assetPanel/getCurrActiveTab']
-  if (store.getters['assetPanel/getShowActiveTab']) {
+  if (assetPanelUtils.currActiveTab !== 'none') {
     if (assetPanelUtils.currIsInCategory) {
       assetPanelUtils.setCurrIsInCategory(false)
       assetPanelUtils.setCurrShowAllRecently(false)
-      switch (currActiveTab) {
+      switch (assetPanelUtils.currActiveTab) {
         case 'object':
           store.dispatch('objects/resetSearch', { resetCategoryInfo: true })
           store.dispatch('objects/resetFavoritesSearch')
