@@ -30,9 +30,6 @@ const routes = [{
   meta: {
     transition: 'fade-bottom-in',
   },
-  // route level code-splitting
-  // this generates a separate chunk (About.[hash].js) for this route
-  // which is lazy-loaded when the route is visited.
   component: () => import('@/views/EditorView.vue'),
 }, {
   path: '/settings',
@@ -40,9 +37,6 @@ const routes = [{
   meta: {
     transition: 'fade-bottom-in',
   },
-  // route level code-splitting
-  // this generates a separate chunk (About.[hash].js) for this route
-  // which is lazy-loaded when the route is visited.
   component: () => import('@/views/SettingsView.vue'),
 }, {
   path: '/test',
@@ -50,10 +44,14 @@ const routes = [{
   meta: {
     transition: 'fade-bottom-in',
   },
-  // route level code-splitting
-  // this generates a separate chunk (About.[hash].js) for this route
-  // which is lazy-loaded when the route is visited.
   component: () => import('@/views/TestResult.vue'),
+}, {
+  path: '/nubtnlist',
+  name: 'NubtnList',
+  meta: {
+    transition: 'fade-bottom-in',
+  },
+  component: () => import('@nu/vivi-lib/views/NubtnList.vue'),
 }]
 
 router.addRoute({

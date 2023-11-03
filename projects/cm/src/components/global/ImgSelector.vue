@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="image-selector bg-app-bg text-app-tab-default \
-  h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr)] grid-cols-1")
+  h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
   div(class="px-24 py-8 flex justify-between items-center")
     back-btn
@@ -34,7 +34,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
       img(
         class="w-44 h-44 object-cover rounded-[10px]"
         :src="require(`@img/jpg/cm demo img${i}.jpg`)")
-  //- 4. Photo
+  //- 4-1. Photo
   div(
     v-if="inPhoto"
     class="bg-app-tab-bg w-full h-full box-border grid \
@@ -82,7 +82,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
           div(class="flex flex-col items-start justify-center gap-4")
             span {{ album.title }}
             span {{ album.albumSize }}
-  //- 5. Stock
+  //- 4-2. Stock
   div(v-else-if="inStock" class="grid grid-cols-2 gap-16 mx-10 my-16 overflow-scroll")
     //- Stock selector
     div(
@@ -105,8 +105,14 @@ div(class="image-selector bg-app-bg text-app-tab-default \
         class="mb-10"
         :iconName="'loading'"
         iconColor="app-text-secondary")
-  //- 6. Multi-select candidate UI
-
+  //- 5. Multi-select candidate UI
+  div(
+    v-if="requireNum > 1"
+    class="mx-16 mt-10 mb-20 gird grid-rows-2")
+    div(class="flex justify-between")
+      span {{ $t('CM0062', { num: requireNum }) }}
+      nubtn {{ $t('NN0744') }}
+    div
 </template>
 
 <script lang="ts" setup>
@@ -263,7 +269,7 @@ const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') 
     userId: '',
     ratio: img.width / img.height,
   })
-  if (targetImgs.length === props.requireNum) sendToEditor()
+  if (props.requireNum === 1) sendToEditor()
 }
 
 const sendToEditor = async () => {

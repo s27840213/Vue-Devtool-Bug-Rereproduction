@@ -250,6 +250,7 @@
   "NN0738": "Endpoints",
   "NN0739": "Front border color",
   "NN0740": "Behind border color",
+  "NN0744": "Next",
   "NN0746": "Copy, Paste, Voilà!",
   "NN0747": "Keep your stories poppin’ with texts",
   "NN0748": "Endless options of chic stickers",
@@ -413,5 +414,6 @@
   "CM0057": "Okay, get it!",
   "CM0058": "Select {num} photo|Select {num} photos",
   "CM0059": "My albums",
-  "CM0060": "Camera"
+  "CM0060": "Camera",
+  "CM0062": "Please select {num} photos."
 }
