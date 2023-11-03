@@ -83,7 +83,7 @@ export default defineComponent({
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'assetPanel/getIsInCategory',
       isCurrentShowAllRecently: 'assetPanel/getShowAllRecently',
-      currActiveTab: 'vivisticker/getCurrActiveTab',
+      currActiveTab: 'assetPanel/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       isInMultiPageShare: 'vivisticker/getIsInMultiPageShare',

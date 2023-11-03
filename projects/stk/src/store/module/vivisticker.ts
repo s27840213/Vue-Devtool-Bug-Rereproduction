@@ -10,8 +10,6 @@ interface IViviStickerState {
   appLoadedTimeout: number,
   userInfo: IUserInfo,
   userSettings: IUserSettings,
-  currActiveTab: string,
-  currActiveObjectFavTab: string,
   currActiveBackgroundTab: string,
   isInBgShare: boolean,
   isInMultiPageShare: boolean,
@@ -57,8 +55,6 @@ const getDefaultState = (): IViviStickerState => ({
   appLoadedTimeout: -1,
   userInfo: stkWVUtils.getDefaultUserInfo(),
   userSettings: stkWVUtils.getDefaultUserSettings(),
-  currActiveTab: 'object',
-  currActiveObjectFavTab: '',
   currActiveBackgroundTab: '',
   isInBgShare: false,
   isInMultiPageShare: false,
@@ -141,12 +137,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getUserSettings(state: IViviStickerState): IUserSettings {
     return state.userSettings
-  },
-  getCurrActiveTab(state: IViviStickerState): string {
-    return state.currActiveTab
-  },
-  getCurrActiveObjectFavTab(state: IViviStickerState): string {
-    return state.currActiveObjectFavTab
   },
   getCurrActiveBackgroundTab(state: IViviStickerState): string {
     return state.currActiveBackgroundTab
@@ -296,12 +286,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
     state.userInfo = userInfo
-  },
-  SET_currActiveTab(state: IViviStickerState, panel: string) {
-    state.currActiveTab = panel
-  },
-  SET_currActiveObjectFavTab(state: IViviStickerState, tab: string) {
-    state.currActiveObjectFavTab = tab
   },
   SET_currActiveBackgroundTab(state: IViviStickerState, tab: string) {
     state.currActiveBackgroundTab = tab

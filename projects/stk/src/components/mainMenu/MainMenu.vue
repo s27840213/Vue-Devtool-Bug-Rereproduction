@@ -39,7 +39,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      currActiveTab: 'vivisticker/getCurrActiveTab'
+      currActiveTab: 'assetPanel/getCurrActiveTab'
     }),
     currTab(): string {
       if (!this.$options.components) return ''

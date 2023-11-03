@@ -128,7 +128,7 @@ export default defineComponent({
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
-      currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
+      currActiveObjectFavTab: 'assetPanel/getCurrActiveObjectFavTab',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
     isUs(): boolean {

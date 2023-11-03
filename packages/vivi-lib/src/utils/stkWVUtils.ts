@@ -305,10 +305,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return this.everEntersDebugMode || window.location.hostname !== 'sticker.vivipic.com'
   }
 
-  setCurrActiveTab(tab: string) {
-    store.commit('vivisticker/SET_currActiveTab', tab)
-  }
-
   // filterLog(messageType: string, message: any) {
   //   switch (messageType) {
   //     case 'SET_STATE':

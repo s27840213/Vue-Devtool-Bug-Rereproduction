@@ -6,6 +6,7 @@ import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
 import router from '@nu/vivi-lib/router'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
@@ -52,7 +53,7 @@ const routes: Array<RouteRecordRaw> = [
           const hasCopied = await stkWVUtils.getState('hasCopied')
           stkWVUtils.hasCopied = hasCopied?.data ?? false
           stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
-          stkWVUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+          assetPanelUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
         }
         next()
       } catch (error) {
