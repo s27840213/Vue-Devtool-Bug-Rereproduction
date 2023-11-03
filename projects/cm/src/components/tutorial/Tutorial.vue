@@ -4,7 +4,9 @@ div(v-if="step > 0" class="z-tutorial-overlay absolute w-screen h-screen " ref="
 </template>
 
 <script setup lang="ts">
-// bg-neutral-dark bg-opacity-70
+/**
+ * Document: https://www.notion.so/vivipic/Charmix-027345160b3d48b7a8fce1584f8d7380?pvs=4
+ */
 import { useTutorialStore } from '@/stores/tutorial';
 import cmWVUtils from '@/utils/cmWVUtils'
 import { storeToRefs } from 'pinia';
@@ -12,6 +14,7 @@ import PowerfulFillTutorial from './PowerfulFillTutorial.vue';
 
 const DEV = false // set to visualize clickable area
 const tutorialComponent = computed(() => {
+  // add new tutorial components here
   const tutorials = [
     PowerfulFillTutorial
   ]
