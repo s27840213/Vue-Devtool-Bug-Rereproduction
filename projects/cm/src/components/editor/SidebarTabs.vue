@@ -38,9 +38,9 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
-import { useAssetPanelStore } from '@/stores/assetPanel';
 import { useEditorStore } from '@/stores/editor';
 import useI18n from '@nu/vivi-lib/i18n/useI18n';
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils';
 import groupUtils from '@nu/vivi-lib/utils/groupUtils';
 import { storeToRefs } from 'pinia';
 const emits = defineEmits(['downloadMask'])
@@ -147,8 +147,6 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
 
 const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
 
-const { setAssetPanelType } = useAssetPanelStore()
-
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
     case 'selection':
@@ -179,11 +177,11 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'objects': {
-      setAssetPanelType('object')
+      assetPanelUtils.setCurrActiveTab('object')
       break
     }
     case 'text': {
-      setAssetPanelType('text')
+      assetPanelUtils.setCurrActiveTab('text')
       break
     }
   }

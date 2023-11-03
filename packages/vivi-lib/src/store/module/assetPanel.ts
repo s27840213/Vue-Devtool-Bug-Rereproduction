@@ -21,7 +21,7 @@ function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
 } // T will be auto inferred from defaultValue without specifying in <T> when calling
 
 const getDefaultState = (): IAssetPanelState => ({
-  currActiveTab: 'object',
+  currActiveTab: generalUtils.isStk ? 'object' : 'none',
   currActiveObjectFavTab: '',
   isInCategoryDict: getDefaultDict(false),
   showAllRecentlyDict: getDefaultDict(false),
@@ -31,6 +31,9 @@ const state = getDefaultState()
 const getters: GetterTree<IAssetPanelState, unknown> = {
   getCurrActiveTab(state: IAssetPanelState): string {
     return state.currActiveTab
+  },
+  getShowActiveTab(state: IAssetPanelState): boolean {
+    return state.currActiveTab !== 'none'
   },
   getCurrActiveObjectFavTab(state: IAssetPanelState): string {
     return state.currActiveObjectFavTab

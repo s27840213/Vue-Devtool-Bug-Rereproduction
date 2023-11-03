@@ -1,4 +1,3 @@
-import { useAssetPanelStore } from '@/stores/assetPanel'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { storeToRefs } from 'pinia'
@@ -32,12 +31,6 @@ const useStateInfo = () => {
   const { showImgSelector } = storeToRefs(imgSelectorStore)
   // #endregion
 
-  // #region asset panel state
-  const assetPanelStore = useAssetPanelStore()
-  const { setAssetPanelType } = assetPanelStore
-  const { assetPanelType, showAssetPanel } = storeToRefs(assetPanelStore)
-  // #endregion
-
   return {
     atHome,
     atMyDesign,
@@ -50,9 +43,6 @@ const useStateInfo = () => {
     showBrushOptions,
     showSelectionOptions,
     showImgSelector,
-    assetPanelType,
-    setAssetPanelType,
-    showAssetPanel,
   }
 }
 

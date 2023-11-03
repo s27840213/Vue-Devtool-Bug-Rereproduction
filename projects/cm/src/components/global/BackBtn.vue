@@ -10,12 +10,12 @@ router-link(
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
-import useAssetPanelUtils from '@/composable/useAssetPanelUtils';
 import useStateInfo from '@/composable/useStateInfo';
 import { useEditorStore } from '@/stores/editor';
 import { useImgSelectorStore } from '@/stores/imgSelector';
 import { useModalStore } from '@/stores/modal';
 import useI18n from '@nu/vivi-lib/i18n/useI18n';
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils';
 import { storeToRefs } from 'pinia';
 import { useStore } from 'vuex';
 
@@ -34,7 +34,7 @@ const { toTarget, customCallback } = withDefaults(
     toTarget: '/',
   },
 )
-const { isEditing, atSettings, showAssetPanel, setAssetPanelType, assetPanelType } = useStateInfo()
+const { isEditing, atSettings } = useStateInfo()
 
 // #region modal
 const modalStore = useModalStore()
@@ -52,8 +52,6 @@ const editorStore = useEditorStore()
 const {setShowGenResult} = editorStore
 const { showGenResult } = storeToRefs(editorStore)
 // #endregion
-
-const { isInCategory } = useAssetPanelUtils()
 
 const store = useStore()
 
@@ -75,17 +73,18 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (showAssetPanel.value) {
-    if (isInCategory.value) {
-      store.commit('assetPanel/SET_isInCategory', { tab: assetPanelType.value, bool: false })
-      store.commit('assetPanel/SET_showAllRecently', { tab: assetPanelType.value, bool: false })
-      switch (assetPanelType.value) {
+  const currActiveTab = store.getters['assetPanel/getCurrActiveTab']
+  if (store.getters['assetPanel/getShowActiveTab']) {
+    if (assetPanelUtils.currIsInCategory) {
+      assetPanelUtils.setCurrIsInCategory(false)
+      assetPanelUtils.setCurrShowAllRecently(false)
+      switch (currActiveTab) {
         case 'object':
           store.dispatch('objects/resetSearch', { resetCategoryInfo: true })
           store.dispatch('objects/resetFavoritesSearch')
           store.dispatch('giphy/resetCategoryContent')
           store.dispatch('giphy/resetTagContent')
-          store.commit('assetPanel/SET_showAllRecently', { tab: 'giphy', bool: false })
+          assetPanelUtils.setShowAllRecently('giphy', false)
           break
         case 'text':
           store.dispatch('textStock/resetSearch', { resetCategoryInfo: true })
@@ -93,7 +92,7 @@ const handleBackAction = (navagate: () => void) => {
       }
       return
     }
-    setAssetPanelType('none')
+    assetPanelUtils.setCurrActiveTab('none')
     return
   }
 

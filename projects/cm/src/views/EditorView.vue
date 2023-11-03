@@ -76,7 +76,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
-import useAssetPanelUtils from '@/composable/useAssetPanelUtils'
 import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
@@ -90,6 +89,7 @@ import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelObjectUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelObject.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
@@ -126,7 +126,7 @@ const pageState = computed(() => store.getters.getPagesState)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 
 // #region Stores
-const { isEditing, atEditor, showAspectRatioSelector, assetPanelType, showAssetPanel, setAssetPanelType } = useStateInfo()
+const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const { pageSize, editorState, currActiveFeature, generatedResult, showGenResult } =
@@ -237,9 +237,9 @@ const { isDuringCopy } = storeToRefs(webViewStore)
 // #endregion
 
 // #region asset panel
+const showAssetPanel = computed(() => store.getters['assetPanel/getShowActiveTab'])
 const assetPanelTop = ref(0)
 let topSetterTimer = -1
-const { isInCategory, showAllRecently } = useAssetPanelUtils()
 
 const setAssetPanelTop = () => {
   if (!headerbarRef.value) {
@@ -252,12 +252,12 @@ const setAssetPanelTop = () => {
 setAssetPanelTop()
 
 const handleAssetAdded = () => {
-  setAssetPanelType('none')
+  assetPanelUtils.setCurrActiveTab('none')
 }
 
 textUtils.loadDefaultFonts()
 
-watch(assetPanelType, (newVal) => {
+watch(() => assetPanelUtils.currActiveTab, () => {
   setAssetPanelTop()
 })
 
@@ -269,7 +269,7 @@ const assetPanelStyles = computed(() => {
 })
 
 const assetPanelComponent = computed(() => {
-  switch (assetPanelType.value) {
+  switch (assetPanelUtils.currActiveTab) {
     case 'text':
       return i18n.locale === 'us' ? PanelTextUs : PanelText
     case 'object':
@@ -283,7 +283,7 @@ const titleInfo = computed(() => {
   const staticHeaderTab = store.getters['objects/headerTab']
   const giphyKeyword = store.getters['giphy/keyword']
   const textHeaderTab = store.getters['textStock/headerTab']
-  switch (assetPanelType.value) {
+  switch (assetPanelUtils.currActiveTab) {
     case 'object':
       return {
         title: staticHeaderTab.title || giphyKeyword,
@@ -299,18 +299,18 @@ const titleInfo = computed(() => {
 })
 
 const centerUrl = computed(() => {
-  return isInCategory.value ? titleInfo.value.url : ''
+  return assetPanelUtils.currIsInCategory ? titleInfo.value.url : ''
 })
 
 const centerTitle = computed(() => {
-  if (isInCategory.value) {
-    if (showAllRecently.value) {
+  if (assetPanelUtils.currIsInCategory) {
+    if (assetPanelUtils.currShowAllRecently) {
       return `${i18n.t('NN0024')}`
     } else {
       return titleInfo.value.title
     }
   }
-  switch (assetPanelType.value) {
+  switch (assetPanelUtils.currActiveTab) {
     case 'text':
       return i18n.t('CM0063')
     case 'object':
