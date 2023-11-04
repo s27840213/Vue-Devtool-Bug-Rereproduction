@@ -1,23 +1,19 @@
-import { WebViewUtils, dummyWVUtils } from '@/utils/webViewUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
+import generalUtils, { appType } from '@/utils/generalUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
-import generalUtils from '@/utils/generalUtils'
-
-export enum appType {
-  Vivipic,
-  Vivisticker,
-  Charmix
-}
-
-export const app = (generalUtils.isPic ? appType.Vivipic : (generalUtils.isStk ? appType.Vivisticker : appType.Charmix)) as appType
+import { WebViewUtils, dummyWVUtils } from '@/utils/webViewUtils'
 
 let WVUtils = dummyWVUtils as WebViewUtils<{[key: string]: any}>
-switch (app) {
+switch (generalUtils.app) {
   case appType.Vivipic:
     WVUtils = picWVUtils
     break
   case appType.Vivisticker:
     WVUtils = stkWVUtils
+    break
+  case appType.Charmix:
+    WVUtils = cmWVUtils
     break
 }
 

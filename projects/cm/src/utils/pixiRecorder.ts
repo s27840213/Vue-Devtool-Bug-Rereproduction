@@ -1,5 +1,5 @@
+import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import * as PIXI from 'pixi.js'
-import cmWVUtils, { ISaveAssetFromUrlResponse } from './cmWVUtils'
 const ENABLE_RECORDING = true
 const RECORD_START_DELAY = 2000
 const IMG2_EXAMPLE =

@@ -72,8 +72,8 @@ div(class="image-selector bg-app-bg text-app-tab-default h-full w-full grid grid
 <script lang="ts" setup>
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
-import type { IAlbum } from '@/utils/cmWVUtils'
-import cmWVUtils from '@/utils/cmWVUtils'
+import type { IAlbum } from '@nu/vivi-lib/utils/cmWVUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'

@@ -79,7 +79,6 @@ import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
-import { useWebViewStore } from '@/stores/webView'
 import tutorialUtils from '@/utils/tutorialUtils'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -122,6 +121,7 @@ const store = useStore()
 const i18n = useI18n()
 const pageState = computed(() => store.getters.getPagesState)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
+const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 
 // #region Stores
 const { isEditing, atEditor, showAspectRatioSelector } = useStateInfo()
@@ -228,11 +228,6 @@ watch(
   //   setPageScaleRatio(newVal)
   // }, 300),
 )
-
-// #region WebView feature section
-const webViewStore = useWebViewStore()
-const { isDuringCopy } = storeToRefs(webViewStore)
-// #endregion
 
 // #region asset panel
 const currActiveTab = computed(() => assetPanelUtils.currActiveTab)

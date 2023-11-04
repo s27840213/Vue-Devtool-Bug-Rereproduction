@@ -6,7 +6,7 @@ div(v-if="step > 0" class="z-tutorial-overlay absolute w-screen h-screen " ref="
 <script setup lang="ts">
 // bg-neutral-dark bg-opacity-70
 import { useTutorialStore } from '@/stores/tutorial';
-import cmWVUtils from '@/utils/cmWVUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { storeToRefs } from 'pinia';
 import PowerfulFillTutorial from './PowerfulFillTutorial.vue';
 

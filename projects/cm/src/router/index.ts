@@ -1,6 +1,6 @@
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useUserStore } from '@/stores/user'
-import cmWVUtils from '@/utils/cmWVUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import HomeView from '@/views/HomeView.vue'
 import store from '@/vuex'
 import { generalUtils } from '@nu/shared-lib'

@@ -18,6 +18,7 @@ import assetPanel from '@/store/module/assetPanel'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
 import color from '@/store/module/color'
+import cmWV from '@/store/module/cmWV'
 import font from '@/store/module/font'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
@@ -1603,6 +1604,7 @@ const store = createStore({
     text,
     font,
     color,
+    cmWV,
     objects,
     templates,
     textStock,
