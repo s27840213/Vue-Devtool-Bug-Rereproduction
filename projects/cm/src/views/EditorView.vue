@@ -86,7 +86,6 @@ import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
-import PanelObjectUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelObject.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
@@ -276,7 +275,7 @@ const assetPanelComponent = computed(() => {
     case 'text':
       return i18n.locale === 'us' ? PanelTextUs : PanelText
     case 'object':
-      return i18n.locale === 'us' ? PanelObjectUs : PanelObject
+      return PanelObject
     default:
       return PanelText
   }
