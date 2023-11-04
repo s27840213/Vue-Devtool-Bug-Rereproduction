@@ -26,7 +26,7 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: ['addText'],
+  emits: [],
   components: {
     ProItem
   },
@@ -84,7 +84,6 @@ export default defineComponent({
       if (this.$isPic && !paymentUtils.checkPro(this.item, 'pro-text')) return
       if (this.$isStk && !stkWVUtils.checkPro(this.item, 'text')) return
       if (this.isInEditor) {
-        this.$emit('addText')
         AssetUtils.addAsset(this.item)
           .then(() => {
             textPropUtils.updateTextPropsState()

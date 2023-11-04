@@ -192,7 +192,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get isStandaloneMode(): boolean {
-    return store.getters['vivisticker/getIsStandaloneMode']
+    return !generalUtils.isStk || store.getters['vivisticker/getIsStandaloneMode']
   }
 
   get userSettings(): IUserSettings {

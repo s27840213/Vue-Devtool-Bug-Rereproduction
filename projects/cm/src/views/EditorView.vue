@@ -71,8 +71,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     component(v-if="showActiveTab && isEditing"
               :is="assetPanelComponent"
               class="bg-app-bg absolute left-0 w-full z-asset-panel"
-              :style="assetPanelStyles"
-              @addText="handleAssetAdded")
+              :style="assetPanelStyles")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
@@ -253,10 +252,6 @@ const setAssetPanelTop = () => {
 }
 setAssetPanelTop()
 
-const handleAssetAdded = () => {
-  assetPanelUtils.setCurrActiveTab('none')
-}
-
 textUtils.loadDefaultFonts()
 
 watch(currActiveTab, () => {
@@ -283,12 +278,11 @@ const assetPanelComponent = computed(() => {
 
 const titleInfo = computed(() => {
   const staticHeaderTab = store.getters['objects/headerTab']
-  const giphyKeyword = store.getters['giphy/keyword']
   const textHeaderTab = store.getters['textStock/headerTab']
   switch (currActiveTab.value) {
     case 'object':
       return {
-        title: staticHeaderTab.title || giphyKeyword,
+        title: staticHeaderTab.title,
         url: staticHeaderTab.bulbUrl || ''
       }
     case 'text':

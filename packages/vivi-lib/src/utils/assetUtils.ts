@@ -2,14 +2,14 @@ import listApi from '@/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-  IGroup,
-  IImage,
-  IImageStyle,
-  IShape,
-  ISpanStyle,
-  IStyle,
-  IText,
-  ITmp,
+IGroup,
+IImage,
+IImageStyle,
+IShape,
+ISpanStyle,
+IStyle,
+IText,
+ITmp,
 } from '@/interfaces/layer'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
@@ -21,6 +21,7 @@ import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { get, round } from 'lodash'
 import { nextTick } from 'vue'
+import assetPanelUtils from './assetPanelUtils'
 import backgroundUtils from './backgroundUtils'
 import ControlUtils from './controlUtils'
 import editorUtils from './editorUtils'
@@ -60,21 +61,27 @@ class AssetUtils {
   get getAsset() {
     return store.getters.getAsset
   }
+
   get getPage() {
     return store.getters.getPage
   }
+
   get pageSize() {
     return store.getters.getPageSize(pageUtils.currFocusPageIndex)
   }
+
   get getLayer() {
     return store.getters.getLayer
   }
+
   get layerIndex() {
     return store.getters.getCurrSelectedIndex
   }
+
   get getLayers() {
     return store.getters.getLayers
   }
+
   get getPages() {
     return store.getters.getPages
   }
@@ -761,6 +768,7 @@ class AssetUtils {
         ),
       ])
       editorUtils.setCloseMobilePanelFlag(true)
+      assetPanelUtils.setCurrActiveTab('none')
       if (!generalUtils.isPic) {
         setTimeout(() => {
           tiptapUtils.agent((editor) => editor.commands.selectAll())
@@ -1100,6 +1108,7 @@ class AssetUtils {
           // Close MobilePanel and fit in
           if (generalUtils.isTouchDevice()) {
             editorUtils.setCloseMobilePanelFlag(true)
+            assetPanelUtils.setCurrActiveTab('none')
           }
         })
       })
@@ -1192,7 +1201,10 @@ class AssetUtils {
       }
       key = moduleKey ?? key
       // Prevent close panel only for panelBG
-      if (asset.type !== 1) editorUtils.setCloseMobilePanelFlag(true)
+      if (asset.type !== 1) {
+        editorUtils.setCloseMobilePanelFlag(true)
+        assetPanelUtils.setCurrActiveTab('none')
+      }
       this.addAssetToRecentlyUsed(asset, generalUtils.isStk ? key : undefined)
       return asset.jsonData
     } catch (error) {

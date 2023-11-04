@@ -178,7 +178,6 @@ export default defineComponent({
     addText(item: any) {
       if (this.$isStk && !stkWVUtils.checkPro(item, 'text')) return
       if (this.isInEditor) {
-        this.$emit('addText')
         AssetUtils.addAsset(item).then(() => {
           textPropUtils.updateTextPropsState()
         })

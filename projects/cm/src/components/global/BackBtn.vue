@@ -81,9 +81,6 @@ const handleBackAction = (navagate: () => void) => {
         case 'object':
           store.dispatch('objects/resetSearch', { resetCategoryInfo: true })
           store.dispatch('objects/resetFavoritesSearch')
-          store.dispatch('giphy/resetCategoryContent')
-          store.dispatch('giphy/resetTagContent')
-          assetPanelUtils.setShowAllRecently('giphy', false)
           break
         case 'text':
           store.dispatch('textStock/resetSearch', { resetCategoryInfo: true })

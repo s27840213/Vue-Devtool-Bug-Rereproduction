@@ -22,8 +22,9 @@ import assetUtils from '@/utils/assetUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: ['dbclick4in1', 'click4in1', 'dbclick'],
@@ -40,8 +41,10 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      isInEditor: 'vivisticker/getIsInEditor'
+    ...vuexUtils.mapGetters('stk', {
+      isInEditor: true,
+    },{
+      isInEditor: 'vivisticker/getIsInEditor',
     }),
     showEditor(): boolean {
       return !this.isInEditor && ![8, 16].includes(this.item.type) && !this.item.has_frame
@@ -58,7 +61,7 @@ export default defineComponent({
       // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
       // console.log(generalUtils.deepCopy(this.item))
       if (this.item.type === 8 || this.item.has_frame) {
-        if (!stkWVUtils.checkPro(this.item, 'frame')) return
+        if (this.$isStk && !stkWVUtils.checkPro(this.item, 'frame')) return
         this.handleEditObject()
         return
       }
@@ -71,11 +74,14 @@ export default defineComponent({
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
         stkWVUtils.handleIos16Video()
       } else if (!this.isInEditor) {
-        if (!stkWVUtils.checkPro(this.item, 'object')) return
+        if (this.$isStk && !stkWVUtils.checkPro(this.item, 'object')) return
         stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
         stkWVUtils.handleIos16Video()
-      } else stkWVUtils.checkPro(this.item, 'object') && this.handleEditObject()
+      } else {
+        if (this.$isStk && !stkWVUtils.checkPro(this.item, 'object')) return
+        this.handleEditObject()
+      }
     },
     click4in1(event: Event) {
       doubleTapUtils.click(event, {
@@ -90,7 +96,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
-      if (!stkWVUtils.checkPro(this.item, 'object')) return
+      if (this.$isStk && !stkWVUtils.checkPro(this.item, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
         if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects')
         stkWVUtils.startEditing('objectGroup', {

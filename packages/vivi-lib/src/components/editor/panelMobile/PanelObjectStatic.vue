@@ -296,7 +296,7 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getRecAndCate({ reset, key: 'objects' })
+        await this.getRecAndCate({ reset, key: this.$isStk ? 'objects' : undefined })
         this.initFavorites()
       }
     )
