@@ -62,16 +62,17 @@ enum mobileOSType {
 
 const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
 
-let callbackGroup = ''
 switch (app) {
   case appType.Vivipic:
-    callbackGroup = 'main'
+    autoWVUtils.registerCallbacks('main')
     break
   case appType.Vivisticker:
-    callbackGroup = 'vvstk'
+    autoWVUtils.registerCallbacks('vvstk')
+    break
+  case appType.Charmix:
+    autoWVUtils.registerCallbacksCore('nativeResponse')
     break
 }
-autoWVUtils.registerCallbacks(callbackGroup)
 
 const store = useStore()
 const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])

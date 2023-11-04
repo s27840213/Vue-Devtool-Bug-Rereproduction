@@ -1,5 +1,5 @@
 import { ILoginResult } from '@/interfaces/api'
-import { IUserInfo } from '@/interfaces/webView'
+import { IUserInfo, WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import generalUtils from './generalUtils'
@@ -149,7 +149,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('setState')
   }
 
-  async getState(key: string): Promise<any> {
+  async getState(key: string): Promise<WEBVIEW_API_RESULT> {
     if (this.checkVersion('1.0.3')) {
       return await this.callIOSAsAPI('GET_STATE', { key }, 'getState', { retry: true })
     } else {

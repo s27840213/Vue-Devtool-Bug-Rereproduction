@@ -1,7 +1,7 @@
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
+import store from '@/store'
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'
-import store from '@/store'
 
 export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract STANDALONE_USER_INFO: T
@@ -205,4 +205,6 @@ export const dummyWVUtils = new (class DummyWVUtils extends WebViewUtils<{ [key:
   STANDALONE_USER_INFO: { [key: string]: any } = {}
   CALLBACK_MAPS: { [key: string]: string[] } = {}
   getUserInfoFromStore(): { [key: string]: any } { return this.STANDALONE_USER_INFO }
+  async getState(key: string): Promise<WEBVIEW_API_RESULT> { return undefined }
+  async setState(key: string, value: any) { console.log('dummy') }
 })

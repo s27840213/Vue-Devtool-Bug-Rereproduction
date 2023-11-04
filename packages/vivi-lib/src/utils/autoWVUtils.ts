@@ -17,4 +17,7 @@ switch (generalUtils.app) {
     break
 }
 
+export const app = generalUtils.app
+export { appType }
+
 export default WVUtils
