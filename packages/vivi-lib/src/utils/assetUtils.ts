@@ -768,7 +768,7 @@ class AssetUtils {
         ),
       ])
       editorUtils.setCloseMobilePanelFlag(true)
-      assetPanelUtils.setCurrActiveTab('none')
+      generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
       if (!generalUtils.isPic) {
         setTimeout(() => {
           tiptapUtils.agent((editor) => editor.commands.selectAll())
@@ -1108,7 +1108,7 @@ class AssetUtils {
           // Close MobilePanel and fit in
           if (generalUtils.isTouchDevice()) {
             editorUtils.setCloseMobilePanelFlag(true)
-            assetPanelUtils.setCurrActiveTab('none')
+            generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
           }
         })
       })
@@ -1203,7 +1203,7 @@ class AssetUtils {
       // Prevent close panel only for panelBG
       if (asset.type !== 1) {
         editorUtils.setCloseMobilePanelFlag(true)
-        assetPanelUtils.setCurrActiveTab('none')
+        generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
       }
       this.addAssetToRecentlyUsed(asset, generalUtils.isStk ? key : undefined)
       return asset.jsonData

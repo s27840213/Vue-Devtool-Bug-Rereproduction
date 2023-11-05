@@ -44,7 +44,11 @@ const routes: Array<RouteRecordRaw> = [
           }
           if (appVer !== lastAppVer) await stkWVUtils.setState('lastAppVer', { value: appVer })
 
-          const recentPanel = await stkWVUtils.getState('recentPanel')
+          const recentPanelRes = await stkWVUtils.getState('recentPanel') as { value: string } | undefined
+          let recentPanel = recentPanelRes?.value ?? 'object'
+          if (recentPanel === 'none') { // prevent panel being 'none' for stk
+            recentPanel = 'object'
+          }
           const userSettings = await stkWVUtils.getState('userSettings')
           if (userSettings) {
             store.commit('vivisticker/UPDATE_userSettings', userSettings)
@@ -53,7 +57,7 @@ const routes: Array<RouteRecordRaw> = [
           const hasCopied = await stkWVUtils.getState('hasCopied')
           stkWVUtils.hasCopied = hasCopied?.data ?? false
           stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
-          assetPanelUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+          assetPanelUtils.setCurrActiveTab(recentPanel)
         }
         next()
       } catch (error) {
