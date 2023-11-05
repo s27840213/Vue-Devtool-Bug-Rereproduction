@@ -121,6 +121,20 @@ const domainOptions = computed((): OptionConfig[] => {
         cmWVUtils.switchDomain('localhost:8080')
       },
     },
+    {
+      title: 'localhost:8081',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8081')
+      },
+    },
+    {
+      title: 'localhost:8082',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8082')
+      },
+    },
     ...Array(6)
       .fill(1)
       .map((_, index) => {
