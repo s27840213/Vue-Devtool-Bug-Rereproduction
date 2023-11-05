@@ -5,12 +5,14 @@ export interface ICmWVState {
   userInfo: IUserInfo,
   inBrowserMode: boolean,
   isDuringCopy: boolean,
+  isNoBg: boolean,
 }
 
 const getDefaultState = (): ICmWVState => ({
   userInfo: cmWVUtils.getDefaultUserInfo(),
   inBrowserMode: false,
   isDuringCopy: false,
+  isNoBg: false,
 })
 
 const state = getDefaultState()
@@ -23,7 +25,10 @@ const getters: GetterTree<ICmWVState, unknown> = {
   },
   getIsDuringCopy(state: ICmWVState): boolean {
     return state.isDuringCopy
-  }
+  },
+  getIsNoBg(state: ICmWVState): boolean {
+    return state.isNoBg
+  },
 }
 
 const mutations: MutationTree<ICmWVState> = {
@@ -35,7 +40,10 @@ const mutations: MutationTree<ICmWVState> = {
   },
   SET_isDuringCopy(state: ICmWVState, isDuringCopy: boolean) {  
     state.isDuringCopy = isDuringCopy
-  }
+  },
+  SET_isNoBg(state: ICmWVState, isNoBg: boolean) {
+    state.isNoBg = isNoBg
+  },
 }
 
 export default {

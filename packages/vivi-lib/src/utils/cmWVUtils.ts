@@ -99,6 +99,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     store.commit('cmWV/SET_isDuringCopy', bool)
   }
 
+  setNoBg(bool: boolean) {
+    store.commit('cmWV/SET_isNoBg', bool)
+  }
+
   detectIfInApp() {
     if (window.webkit?.messageHandlers?.REQUEST === undefined) {
       this.enterBrowserMode()
@@ -140,14 +144,16 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     })
   }
 
-  async copyEditorCore(sender: (pageSize: { width: number, height: number }) => Promise<{flag: string, imageId: string}>, pageSize: { width: number, height: number }) {
+  async copyEditorCore(sender: (...arg: any[]) => Promise<{flag: string, imageId: string}>,
+    { senderArgs = [], preArgs = {}, postArgs = {} }: { senderArgs?: any[], preArgs?: Record<string, unknown>, postArgs?: Record<string, unknown> }
+  ) {
     return new Promise<{flag: string, imageId: string}>(resolve => {
       const executor = () => {
         nextTick(() => {
-          this.preCopyEditor()
+          this.preCopyEditor(preArgs)
           setTimeout(() => {
-            sender(pageSize).then(({ flag, imageId }) => {
-              this.postCopyEditor()
+            sender(...senderArgs).then(({ flag, imageId }) => {
+              this.postCopyEditor(postArgs)
               resolve({ flag, imageId })
             })
           }, 500) // wait for soft keyboard to close
@@ -157,15 +163,21 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     })
   }
 
-  async copyEditor(pageSize: { width: number, height: number }): Promise<{flag: string, imageId: string}> {
-    return await this.copyEditorCore(this.sendCopyEditor.bind(this), pageSize)
+  async copyEditor(pageSize: { width: number, height: number }, noBg = false): Promise<{flag: string, imageId: string}> {
+    return await this.copyEditorCore(this.sendCopyEditor.bind(this), {
+      senderArgs: [pageSize],
+      preArgs: { noBg },
+    })
   }
 
-  preCopyEditor() {
+  preCopyEditor({ noBg = false }: { noBg?: boolean }) {
+    this.setNoBg(noBg)
     this.setDuringCopy(true)
   }
 
-  postCopyEditor() {
+  // eslint-disable-next-line no-empty-pattern
+  postCopyEditor({}: object) { // currently no args, only for type-check of this.copyEditorCore to pass
+    this.setNoBg(false)
     this.setDuringCopy(false)
   }
 

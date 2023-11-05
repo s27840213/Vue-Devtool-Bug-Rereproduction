@@ -1,7 +1,7 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { generalUtils } from '@nu/shared-lib'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -344,7 +344,7 @@ const useCanvasUtils = (
     const { pageSize, pageScaleRatio } = useEditorStore()
     const { width: pageWidth, height: pageHeight } = pageSize
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId } = await cmWVUtils.copyEditor({ width: pageWidth * pageScaleRatio, height: pageHeight * pageScaleRatio })
+    const { flag, imageId } = await cmWVUtils.copyEditor({ width: pageWidth * pageScaleRatio, height: pageHeight * pageScaleRatio }, true)
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')

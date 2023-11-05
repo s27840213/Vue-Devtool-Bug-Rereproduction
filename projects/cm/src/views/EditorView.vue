@@ -46,7 +46,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :pageIndex="0"
           :pageState="pageState[0]"
           :overflowContainer="editorContainerRef"
-          :noBg="isDuringCopy")
+          :noBg="isDuringCopy && isNoBg")
         canvas-section(
           v-if="isEditing"
           class="absolute top-0 left-0 w-full h-full"
@@ -122,6 +122,7 @@ const i18n = useI18n()
 const pageState = computed(() => store.getters.getPagesState)
 const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
+const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
 
 // #region Stores
 const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
