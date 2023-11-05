@@ -79,15 +79,14 @@ export default defineComponent({
       this.fallbackSrc = imagePreview // prevent infinite refetching when network disconneted
     },
     dragStart(e: DragEvent) {
-      if (!paymentUtils.checkPro(this.item, 'pro-text')) return
+      if (!paymentUtils.checkProApp(this.item, 'pro-text')) return
       const img = this.$refs.img as HTMLImageElement
       this.dragUtils.itemDragStart(e, 'group', {
         ...this.item
       }, img.src, { aspectRatio: img.naturalWidth / img.naturalHeight })
     },
     addText() {
-      if (this.$isPic && !paymentUtils.checkPro(this.item, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(this.item, 'text')) return
+      if (!paymentUtils.checkProApp(this.item, 'pro-text', 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(this.item)
           .then(() => {

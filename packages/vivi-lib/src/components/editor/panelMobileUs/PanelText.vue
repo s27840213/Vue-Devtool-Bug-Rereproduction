@@ -63,6 +63,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent } from 'vue'
@@ -176,7 +177,7 @@ export default defineComponent({
       }
     },
     addText(item: any) {
-      if (this.$isStk && !stkWVUtils.checkPro(item, 'text')) return
+      if (!paymentUtils.checkProApp(item, undefined, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(item).then(() => {
           textPropUtils.updateTextPropsState()

@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
 import modalUtils from '@/utils/modalUtils'
-import autoWVUtils from '@/utils/autoWVUtils'
 import _ from 'lodash'
 
 class LocalStorage {
@@ -106,19 +106,19 @@ class LocalStorage {
   }
 
   appReset(category: string) {
-    if (autoWVUtils.inBrowserMode) {
+    if (getAutoWVUtils().inBrowserMode) {
       return this.reset(category)
     }
-    autoWVUtils.setState(category, this.defaultValue[category])
+    getAutoWVUtils().setState(category, this.defaultValue[category])
   }
 
   async appSet(category: string, key: string, value: unknown) {
-    if (autoWVUtils.inBrowserMode) {
+    if (getAutoWVUtils().inBrowserMode) {
       this.set(category, key, value)
       return
     }
 
-    let item = await autoWVUtils.getState(category)
+    let item = await getAutoWVUtils().getState(category)
     if (item === undefined) { // init
       this.appReset(category)
       item = this.defaultValue[category]
@@ -127,15 +127,16 @@ class LocalStorage {
       return
     }
     _.set(item, key, value)
-    autoWVUtils.setState(category, item)
+    getAutoWVUtils().setState(category, item)
   }
 
   async appGet(category: string, key: string): Promise<unknown> {
-    if (autoWVUtils.inBrowserMode) {
+    console.log(getAutoWVUtils())
+    if (getAutoWVUtils().inBrowserMode) {
       return this.get(category, key)
     }
 
-    const item = await autoWVUtils.getState(category)
+    const item = await getAutoWVUtils().getState(category)
     if (item) {
       return _.get(item, key)
     } else if (item === undefined) { // init
@@ -148,7 +149,7 @@ class LocalStorage {
   }
 
   async appUpdate<T>(category: string, key: string, fn: (old: T) => T) {
-    if (autoWVUtils.inBrowserMode) {
+    if (getAutoWVUtils().inBrowserMode) {
       return this.update(category, key, fn)
     }
 

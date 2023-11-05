@@ -77,6 +77,7 @@ import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
@@ -388,7 +389,7 @@ export default defineComponent({
     },
     addGroupTemplate() {
       if (!this.currentGroup) return
-      if (!stkWVUtils.checkPro(this.currentGroup, 'template')) return
+      if (!paymentUtils.checkProApp(this.currentGroup, undefined, 'template')) return
       if (pageUtils.getPages.length + this.currentGroup.content_ids.length > stkWVUtils.MAX_PAGE_NUM) return stkWVUtils.showMaxPageNumModal()
       const cb = async () => {
         await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, stkWVUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)

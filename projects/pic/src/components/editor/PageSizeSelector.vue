@@ -512,7 +512,7 @@ export default defineComponent({
     },
     submit: throttle(function(this: any) {
       // Use throttle to prevent submit multiple times.
-      if (!paymentUtils.checkPro({ plan: 1 }, 'page-resize')) return
+      if (!paymentUtils.checkProApp({ plan: 1 }, 'page-resize')) return
       if (this.copyBeforeApply) {
         this.copyAndApplySelectedFormat()
       } else {

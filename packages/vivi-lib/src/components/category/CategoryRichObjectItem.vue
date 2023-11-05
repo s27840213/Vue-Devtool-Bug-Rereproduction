@@ -21,6 +21,7 @@ import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent, PropType } from 'vue'
@@ -58,10 +59,8 @@ export default defineComponent({
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
     }),
     addSvg() {
-      // if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
-      // console.log(generalUtils.deepCopy(this.item))
       if (this.item.type === 8 || this.item.has_frame) {
-        if (this.$isStk && !stkWVUtils.checkPro(this.item, 'frame')) return
+        if (!paymentUtils.checkProApp(this.item, undefined, 'frame')) return
         this.handleEditObject()
         return
       }
@@ -74,12 +73,12 @@ export default defineComponent({
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
         stkWVUtils.handleIos16Video()
       } else if (!this.isInEditor) {
-        if (this.$isStk && !stkWVUtils.checkPro(this.item, 'object')) return
+        if (!paymentUtils.checkProApp(this.item, undefined, 'object')) return
         stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
         stkWVUtils.handleIos16Video()
       } else {
-        if (this.$isStk && !stkWVUtils.checkPro(this.item, 'object')) return
+        if (!paymentUtils.checkProApp(this.item, undefined, 'object')) return
         this.handleEditObject()
       }
     },
@@ -96,7 +95,7 @@ export default defineComponent({
       })
     },
     handleEditObject() {
-      if (this.$isStk && !stkWVUtils.checkPro(this.item, 'object')) return
+      if (!paymentUtils.checkProApp(this.item, undefined, 'object')) return
       if (this.item.type === 7 || this.item.has_frame) {
         if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects')
         stkWVUtils.startEditing('objectGroup', {

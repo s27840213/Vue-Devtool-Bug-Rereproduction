@@ -166,8 +166,7 @@ export default defineComponent({
       }
     },
     async onEffectClick(category: IEffectCategory, effect: IEffect): Promise<void> {
-      if (this.$isPic && !paymentUtils.checkPro(effect, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(effect, 'text')) return
+      if (!paymentUtils.checkProApp(effect, 'pro-text', 'text')) return
       const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
 
       if (effect.key !== this.currentStyle.name) {

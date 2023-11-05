@@ -20,6 +20,7 @@ import i18n from '@nu/vivi-lib/i18n'
 import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
@@ -59,7 +60,7 @@ export default defineComponent({
       this.fallbackSrc = require('@img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
-      if (!stkWVUtils.checkPro(this.item, 'object')) return
+      if (!paymentUtils.checkProApp(this.item, undefined, 'object')) return
       if (this.isInEditor) {
         if (this.locked) {
           return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
@@ -80,7 +81,7 @@ export default defineComponent({
       assetUtils.addAssetToRecentlyUsed(this.item, 'background')
     },
     handleShare() {
-      if (!stkWVUtils.checkPro(this.item, 'object')) return
+      if (!paymentUtils.checkProApp(this.item, undefined, 'object')) return
       this.$emit('share', this.item)
     }
   }

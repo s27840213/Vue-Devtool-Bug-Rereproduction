@@ -127,7 +127,6 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
 import { ICategoryItem, IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
