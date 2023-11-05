@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="canvas-section absolute top-0 left-0")
+div(class="canvas-section absolute top-0 left-0 z-canvas")
   canvas(
     v-show="!isDuringCopy"
     class="canvas-section w-full h-full opacity-30"

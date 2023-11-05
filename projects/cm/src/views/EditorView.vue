@@ -65,7 +65,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       @downloadMask="downloadCanvas")
     div(
       v-if="showGenResult"
-      class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg")
+      class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg z-modal-mask")
       img(:src="generatedResult" class="w-240")
   transition(name="bottom-up")
     component(v-if="showActiveTab && isEditing"
