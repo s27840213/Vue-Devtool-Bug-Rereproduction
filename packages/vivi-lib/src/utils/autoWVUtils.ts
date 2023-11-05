@@ -1,7 +1,7 @@
 import cmWVUtils from '@/utils/cmWVUtils'
 import picWVUtils from '@/utils/picWVUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
-import { WebViewUtils, dummyWVUtils } from '@/utils/webViewUtils'
+import { WebViewUtils } from '@/utils/webViewUtils'
 
 export enum appType {
   Vivipic,
@@ -22,17 +22,15 @@ export const app = (() => {
   }
 })()
 
-let WVUtils = dummyWVUtils as WebViewUtils<{[key: string]: any}>
-switch (app) {
-  case appType.Vivipic:
-    WVUtils = picWVUtils
-    break
-  case appType.Vivisticker:
-    WVUtils = stkWVUtils
-    break
-  case appType.Charmix:
-    WVUtils = cmWVUtils
-    break
+export const getAutoWVUtils = (): WebViewUtils<{[key: string]: any}> => {
+  switch (app) {
+    case appType.Vivipic:
+      return picWVUtils
+    case appType.Vivisticker:
+      return stkWVUtils
+    case appType.Charmix:
+      return cmWVUtils
+    default:
+      return picWVUtils
+  }
 }
-
-export default WVUtils

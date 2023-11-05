@@ -207,9 +207,3 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   async setState(key: string, value: any) { /* only interface */ }
   //
 }
-
-export const dummyWVUtils = new (class DummyWVUtils extends WebViewUtils<{ [key: string]: any }> {
-  DEFAULT_USER_INFO: { [key: string]: any } = {}
-  CALLBACK_MAPS: { [key: string]: string[] } = {}
-  getUserInfoFromStore(): { [key: string]: any } { return this.DEFAULT_USER_INFO }
-})
