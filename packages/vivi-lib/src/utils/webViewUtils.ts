@@ -199,12 +199,17 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
       })
     }
   }
+  // common interfaces
+
+  get inBrowserMode(): boolean { return false }
+
+  async getState(key: string): Promise<WEBVIEW_API_RESULT> { return undefined }
+  async setState(key: string, value: any) { /* only interface */ }
+  //
 }
 
 export const dummyWVUtils = new (class DummyWVUtils extends WebViewUtils<{ [key: string]: any }> {
   DEFAULT_USER_INFO: { [key: string]: any } = {}
   CALLBACK_MAPS: { [key: string]: string[] } = {}
   getUserInfoFromStore(): { [key: string]: any } { return this.DEFAULT_USER_INFO }
-  async getState(key: string): Promise<WEBVIEW_API_RESULT> { return undefined }
-  async setState(key: string, value: any) { console.log('dummy') }
 })

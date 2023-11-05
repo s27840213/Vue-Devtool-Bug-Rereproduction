@@ -224,9 +224,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return { x, y, width, height }
   }
 
-  async getState(key: string): Promise<IGetStateResponse | undefined> {
+  async getState(key: string): Promise<any | undefined> {
     if (this.inBrowserMode) return
-    return await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
+    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
+    return data.value ? JSON.parse(data.value) : undefined
   }
 
   async setState(key: string, value: any) {
@@ -236,7 +237,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async fetchTutorialFlags() {
     const res = await this.getState('tutorialFlags')
-    this.tutorialFlags = res && res.value ? JSON.parse(res.value) : {}
+    this.tutorialFlags = res ?? {}
   }
 
   async updateTutorialFlags(updateItem: { [key: string]: boolean }) {

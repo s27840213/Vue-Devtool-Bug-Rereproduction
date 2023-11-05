@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
 import modalUtils from '@/utils/modalUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
+import autoWVUtils from '@/utils/autoWVUtils'
 import _ from 'lodash'
 
 class LocalStorage {
@@ -106,19 +106,19 @@ class LocalStorage {
   }
 
   appReset(category: string) {
-    if (stkWVUtils.inBrowserMode) {
+    if (autoWVUtils.inBrowserMode) {
       return this.reset(category)
     }
-    stkWVUtils.setState(category, this.defaultValue[category])
+    autoWVUtils.setState(category, this.defaultValue[category])
   }
 
   async appSet(category: string, key: string, value: unknown) {
-    if (stkWVUtils.inBrowserMode) {
+    if (autoWVUtils.inBrowserMode) {
       this.set(category, key, value)
       return
     }
 
-    let item = await stkWVUtils.getState(category)
+    let item = await autoWVUtils.getState(category)
     if (item === undefined) { // init
       this.appReset(category)
       item = this.defaultValue[category]
@@ -127,15 +127,15 @@ class LocalStorage {
       return
     }
     _.set(item, key, value)
-    stkWVUtils.setState(category, item)
+    autoWVUtils.setState(category, item)
   }
 
   async appGet(category: string, key: string): Promise<unknown> {
-    if (stkWVUtils.inBrowserMode) {
+    if (autoWVUtils.inBrowserMode) {
       return this.get(category, key)
     }
 
-    const item = await stkWVUtils.getState(category)
+    const item = await autoWVUtils.getState(category)
     if (item) {
       return _.get(item, key)
     } else if (item === undefined) { // init
@@ -148,7 +148,7 @@ class LocalStorage {
   }
 
   async appUpdate<T>(category: string, key: string, fn: (old: T) => T) {
-    if (stkWVUtils.inBrowserMode) {
+    if (autoWVUtils.inBrowserMode) {
       return this.update(category, key, fn)
     }
 
