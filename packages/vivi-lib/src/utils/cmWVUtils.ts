@@ -67,7 +67,7 @@ export interface ISaveAssetFromUrlResponse {
 }
 
 class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
-  STANDALONE_USER_INFO: IUserInfo = {
+  DEFAULT_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
     osVer: '100.0',
@@ -82,8 +82,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   tutorialFlags = {} as { [key: string]: boolean }
 
-  get isStandaloneMode() {
-    return store.getters['cmWV/getIsStandaloneMode']
+  get inBrowserMode() {
+    return store.getters['cmWV/getInBrowserMode']
   }
 
   get isDuringCopy() {
@@ -100,16 +100,16 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   detectIfInApp() {
     if (window.webkit?.messageHandlers?.REQUEST === undefined) {
-      this.enterStandaloneMode()
+      this.enterBrowserMode()
     }
   }
 
-  enterStandaloneMode() {
-    store.commit('cmWV/SET_isStandaloneMode', true)
+  enterBrowserMode() {
+    store.commit('cmWV/SET_inBrowserMode', true)
   }
 
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.isStandaloneMode) return this.STANDALONE_USER_INFO
+    if (this.inBrowserMode) return this.DEFAULT_USER_INFO
     const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH', this.getEmptyMessage())
     return userInfo as IUserInfo
   }
@@ -179,7 +179,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string): Promise<string>
   async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<string>
   async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string): Promise<string> {
-    if (this.isStandaloneMode) {
+    if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return '0'
     }
@@ -224,12 +224,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async getState(key: string): Promise<IGetStateResponse | undefined> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
   }
 
   async setState(key: string, value: any) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     await this.callIOSAsHTTPAPI('SET_STATE', { key, value })
   }
 

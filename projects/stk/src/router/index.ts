@@ -131,7 +131,7 @@ router.addRoute({
     const urlParams = new URLSearchParams(window.location.search)
     const standalone = urlParams.get('standalone')
     if (standalone) {
-      stkWVUtils.enterStandaloneMode()
+      stkWVUtils.enterBrowserMode()
       stkWVUtils.setDefaultLocale()
     } else {
       stkWVUtils.detectIfInApp()

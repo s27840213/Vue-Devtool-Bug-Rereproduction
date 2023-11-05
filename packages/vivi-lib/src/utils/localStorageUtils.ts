@@ -1,7 +1,7 @@
 import i18n from '@/i18n'
 import modalUtils from '@/utils/modalUtils'
-import _ from 'lodash'
 import stkWVUtils from '@/utils/stkWVUtils'
+import _ from 'lodash'
 
 class LocalStorage {
   defaultValue = {
@@ -106,14 +106,14 @@ class LocalStorage {
   }
 
   appReset(category: string) {
-    if (stkWVUtils.isStandaloneMode) {
+    if (stkWVUtils.inBrowserMode) {
       return this.reset(category)
     }
     stkWVUtils.setState(category, this.defaultValue[category])
   }
 
   async appSet(category: string, key: string, value: unknown) {
-    if (stkWVUtils.isStandaloneMode) {
+    if (stkWVUtils.inBrowserMode) {
       this.set(category, key, value)
       return
     }
@@ -131,7 +131,7 @@ class LocalStorage {
   }
 
   async appGet(category: string, key: string): Promise<unknown> {
-    if (stkWVUtils.isStandaloneMode) {
+    if (stkWVUtils.inBrowserMode) {
       return this.get(category, key)
     }
 
@@ -148,7 +148,7 @@ class LocalStorage {
   }
 
   async appUpdate<T>(category: string, key: string, fn: (old: T) => T) {
-    if (stkWVUtils.isStandaloneMode) {
+    if (stkWVUtils.inBrowserMode) {
       return this.update(category, key, fn)
     }
 

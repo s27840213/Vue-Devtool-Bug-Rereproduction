@@ -4,7 +4,7 @@ import generalUtils from './generalUtils'
 import logUtils from './logUtils'
 
 export abstract class WebViewUtils<T extends { [key: string]: any }> {
-  abstract STANDALONE_USER_INFO: T
+  abstract DEFAULT_USER_INFO: T
   abstract CALLBACK_MAPS: { [key: string]: string[] }
 
   eventTestMode = false
@@ -60,7 +60,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   }
 
   getDefaultUserInfo(): T {
-    return this.STANDALONE_USER_INFO
+    return this.DEFAULT_USER_INFO
   }
 
   getEmptyMessage(): { [key: string]: string } {
@@ -202,9 +202,9 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 }
 
 export const dummyWVUtils = new (class DummyWVUtils extends WebViewUtils<{ [key: string]: any }> {
-  STANDALONE_USER_INFO: { [key: string]: any } = {}
+  DEFAULT_USER_INFO: { [key: string]: any } = {}
   CALLBACK_MAPS: { [key: string]: string[] } = {}
-  getUserInfoFromStore(): { [key: string]: any } { return this.STANDALONE_USER_INFO }
+  getUserInfoFromStore(): { [key: string]: any } { return this.DEFAULT_USER_INFO }
   async getState(key: string): Promise<WEBVIEW_API_RESULT> { return undefined }
   async setState(key: string, value: any) { console.log('dummy') }
 })

@@ -21,7 +21,7 @@ interface IViviStickerState {
   editorBgIndex: number,
   editorType: string,
   controllerHidden: boolean,
-  isStandaloneMode: boolean,
+  inBrowserMode: boolean,
   showTutorial: boolean,
   fullPageConfig: IFullPageConfig,
   recentlyBgColors: string[],
@@ -66,7 +66,7 @@ const getDefaultState = (): IViviStickerState => ({
   editorBgIndex: 0,
   editorType: 'none',
   controllerHidden: false,
-  isStandaloneMode: false,
+  inBrowserMode: false,
   showTutorial: false,
   fullPageConfig: {
     type: 'none',
@@ -183,8 +183,8 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getControllerHidden(state: IViviStickerState): boolean {
     return state.controllerHidden
   },
-  getIsStandaloneMode(state: IViviStickerState): boolean {
-    return state.isStandaloneMode
+  getInBrowserMode(state: IViviStickerState): boolean {
+    return state.inBrowserMode
   },
   getIsInBgRemoveSection(state: IViviStickerState): boolean {
     return state.isInBgRemoveSection
@@ -323,8 +323,8 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_controllerHidden(state: IViviStickerState, controllerHidden: boolean) {
     state.controllerHidden = controllerHidden
   },
-  SET_isStandaloneMode(state: IViviStickerState, isStandaloneMode: boolean) {
-    state.isStandaloneMode = isStandaloneMode
+  SET_inBrowserMode(state: IViviStickerState, inBrowserMode: boolean) {
+    state.inBrowserMode = inBrowserMode
   },
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial
