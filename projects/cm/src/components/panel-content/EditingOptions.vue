@@ -27,7 +27,6 @@ div(class="editing-options w-full")
 <script setup lang="ts">
 import useTapTransition from '@/composable/useTapTransition'
 import { useCanvasStore } from '@/stores/canvas'
-import { useEditorStore } from '@/stores/editor'
 import type { ColorSlip } from '@/types/color'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { storeToRefs } from 'pinia'
@@ -42,13 +41,9 @@ interface IFeatureTab {
   disabled?: boolean
   forPro?: boolean
 }
-const editorStore = useEditorStore()
-const { setCanvasMode } = editorStore
-const { canvasMode } = storeToRefs(editorStore)
-
 const canvasStore = useCanvasStore()
 const { setCanvasStoreState } = canvasStore
-const { brushSize } = storeToRefs(canvasStore)
+const { brushSize , canvasMode} = storeToRefs(canvasStore)
 const setBrushSize = (value: number) => {
   setCanvasStoreState({ brushSize: value })
 }
@@ -107,8 +102,10 @@ const handleTabAction = (tab: IFeatureTab) => {
     case 'brush':
     case 'erase':
     case 'move': {
-      setCanvasMode(tab.icon)
-      return
+      setCanvasStoreState({
+        canvasMode: tab.icon
+      })
+      break
     }
     default:
       break

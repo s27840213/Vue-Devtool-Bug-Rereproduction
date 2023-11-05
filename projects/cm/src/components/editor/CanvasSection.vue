@@ -11,7 +11,6 @@ div(class="canvas-section absolute top-0 left-0")
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
-import { useEditorStore } from '@/stores/editor'
 import { useWebViewStore } from '@/stores/webView'
 import { generalUtils } from '@nu/shared-lib'
 import { storeToRefs } from 'pinia'
@@ -22,9 +21,6 @@ const props = defineProps<{
 }>()
 
 const { containerDOM, wrapperDOM } = toRefs(props)
-const editorStore = useEditorStore()
-const { setMaskCanvas } = editorStore
-const { pageSize } = storeToRefs(editorStore)
 // #endregion
 
 // #region Canvas feature section

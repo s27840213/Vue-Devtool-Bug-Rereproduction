@@ -6,14 +6,16 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     template(
       v-if="isEditing"
       #middle)
-      //- cm-svg-icon(
-      //-   iconName="undo"
-      //-   :iconColor="'app-btn-primary-text'"
-      //-   iconWidth="20px")
-      //- cm-svg-icon(
-      //-   iconName="redo"
-      //-   :iconColor="'app-btn-primary-text'"
-      //-   iconWidth="20px")
+      cm-svg-icon(
+        iconName="undo"
+        :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
+        iconWidth="20px"
+        @click="undo")
+      cm-svg-icon(
+        iconName="redo"
+        :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
+        iconWidth="20px"
+        @click="redo")
     template(#right)
       //- cm-btn(
       //-   v-if="isEditing"
@@ -67,8 +69,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       img(:src="generatedResult" class="w-240")
 </template>
 <script setup lang="ts">
-import useImageUtils from '@/composable/useImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
+import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useWebViewStore } from '@/stores/webView'
@@ -81,6 +83,12 @@ import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
 
+// #region Webview related
+const webViewStore = useWebViewStore()
+const { isDuringCopy } = storeToRefs(webViewStore)
+// #endregion
+
+// #region refs related
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
 const sidebarTabsRef = ref<HTMLElement | null>(null)
@@ -88,25 +96,24 @@ const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
+// #endregion
 
-const { imgLoadHandler } = useImageUtils()
-
+// #region hooks related
 onBeforeRouteLeave((to, from) => {
   if (from.name === 'Editor') {
     setTimeout(() => {
       /**
        * @NOTE - if we reset immediately, will see the editor from editing state to initial state bcz transition time
        */
+      editorStore.stepsReset()
       editorStore.$reset()
+      canvasStore.$reset()
     }, 1000)
   }
 })
+// #endregion
 
-const store = useStore()
-const pageState = computed(() => store.getters.getPagesState)
-const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
-
-// #region Stores
+// #region editor state related
 const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
@@ -122,9 +129,16 @@ const handleNextAction = function () {
     setEditorState('prompt')
   }
 }
+
+const useStep = useSteps()
+const { undo, redo, isInFirstStep, isInLastStep } = useStep
 // #endregion
 
 // #region page related
+const store = useStore()
+const pageState = computed(() => store.getters.getPagesState)
+const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
+
 const fitScaleRatio = computed(() => {
   if (
     editorContainerWidth.value === 0 ||
@@ -156,6 +170,23 @@ const wrapperStyles = computed(() => {
 const handleOuterClick = () => {
   groupUtils.deselect()
 }
+
+/**
+ * fitPage
+ */
+
+watch(
+  () => fitScaleRatio.value,
+  (newVal, oldVal) => {
+    if (newVal === oldVal || !atEditor.value) return
+    pageUtils.setScaleRatio(newVal)
+  },
+  // useDebounceFn((newVal, oldVal) => {
+  //   if (newVal === oldVal || !atEditor.value) return
+  //   setPageScaleRatio(newVal)
+  //   setPageScaleRatio(newVal)
+  // }, 300),
+)
 
 // #endregion
 
@@ -194,27 +225,6 @@ const getCanvasDataUrl = () => {
 
   return canvasRef.value.getCanvasDataUrl()
 }
-// #endregion
-/**
- * fitPage
- */
-
-watch(
-  () => fitScaleRatio.value,
-  (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value) return
-    pageUtils.setScaleRatio(newVal)
-  },
-  // useDebounceFn((newVal, oldVal) => {
-  //   if (newVal === oldVal || !atEditor.value) return
-  //   setPageScaleRatio(newVal)
-  //   setPageScaleRatio(newVal)
-  // }, 300),
-)
-
-// #region WebView feature section
-const webViewStore = useWebViewStore()
-const { isDuringCopy } = storeToRefs(webViewStore)
 // #endregion
 </script>
 <style lang="scss">

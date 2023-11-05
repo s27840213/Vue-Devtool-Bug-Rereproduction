@@ -4,7 +4,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
     v-for="(tab, index) in defaultEditorTabs"
     :key="`${tab.icon}-${index}`"
     class="w-44"
-    :class="{'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052')}")
+    :class="{ 'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052') }")
     div(
       class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
       @click.stop="handleTabAction(tab)"
@@ -35,11 +35,11 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
           :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
-import { useEditorStore } from '@/stores/editor';
-import useI18n from '@nu/vivi-lib/i18n/useI18n';
-import groupUtils from '@nu/vivi-lib/utils/groupUtils';
-import { storeToRefs } from 'pinia';
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import { useEditorStore } from '@/stores/editor'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import { storeToRefs } from 'pinia'
 const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
@@ -103,7 +103,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'selection',
       text: t('CM0051'),
       panelType: '',
-      hidden: false
+      hidden: false,
     },
     {
       icon: 'brush',
@@ -171,8 +171,8 @@ const handleTabAction = (tab: ISidebarTab) => {
       clearCtx()
       break
     }
-    case 'canvas': {
-    }
+    // case 'canvas': {
+    // }
   }
 }
 </script>
