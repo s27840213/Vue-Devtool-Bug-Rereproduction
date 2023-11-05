@@ -1,6 +1,7 @@
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
+import { nextTick } from 'vue'
 
 export interface IGeneralSuccessResponse {
   flag: '0'
