@@ -50,7 +50,7 @@ export default defineComponent({
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
-      controllerHidden: 'vivisticker/getControllerHidden',
+      controllerHidden: 'webView/getControllerHidden',
       debugMode: 'vivisticker/getDebugMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       isProcessing: 'bgRemove/getIsProcessing',

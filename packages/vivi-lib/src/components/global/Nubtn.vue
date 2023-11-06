@@ -5,7 +5,7 @@ div(:class="`nubtn ${proj} ${theme} ${sizeClass} ${status} ${device}`"
     @click="click")
   svg-icon(v-if="theme.includes('icon') && iconName"
           :iconName="iconName" :iconWidth="iconSize" :iconColor="iconColor")
-  span(v-if="!theme.includes('icon') || theme === 'icon_text'")
+  span(v-if="!theme.includes('icon') || theme.includes('icon_')")
     slot
 </template>
 
@@ -20,7 +20,7 @@ declare module '@vue/runtime-core' {
 }
 
 export type INubtnThemes = 'primary' | 'outline' | 'text' | 'icon_text' | 'icon' | 'icon2' |
-  'ghost' | 'ghost_outline' | 'danger' | 'secondary' | 'edit'
+  'ghost' | 'ghost_outline' | 'danger' | 'secondary' | 'edit' | 'icon_pill'
 export type INubtnSize = 'sm' | 'sm-full' | 'sm-center' | 'mid' | 'mid-full' | 'mid-center'
 
 const component = defineComponent({
@@ -85,7 +85,7 @@ const component = defineComponent({
       return Array.isArray(this.icon) ? this.icon[0] : this.icon
     },
     iconSize(): string {
-      return '24px'
+      return this.theme === 'icon_pill' && this.size === 'sm' ? '20px' : '24px'
     },
     iconColor(): string {
       if (Array.isArray(this.icon) && this.icon[1]) { // Case 2
@@ -361,6 +361,26 @@ export default component
     color: setColor(white);
     background-color: setColor(gray-4);
     border: none;
+  }
+}
+
+.nubtn.icon_pill {
+  border-radius: 100px;
+  &.sm {
+    @include body-XS;
+    color: setColor(white);
+    padding: 4px 8px;
+    @include setColors(blue-1, black-3) using ($color) {
+      background-color: $color;
+    }
+    > .svg-icon {
+      margin-right: 4px;
+    }
+    &:active {
+      @include setColors(blue-hover, black-5) using ($color) {
+        background-color: $color;
+      }
+    }
   }
 }
 .nubtn.secondary.cm {

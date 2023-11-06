@@ -332,12 +332,11 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inScreenshotPreview: 'getInScreenshotPreview',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
     hasDecor(): boolean {

@@ -10,10 +10,11 @@ div(class="panel-text-effect")
         :key="`${currCategoryName}-${effect.key}`"
         :class="{ 'selected': currEffect?.key === effect.key }"
         @click="onEffectClick(currCategory, effect)")
-      svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
+      div(class="panel-text-effect__effects__icon-bg")
+      svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
               :iconName="effectIcon(currCategory, effect).name"
               :iconWidth="effectIcon(currCategory, effect).size"
-              class="panel-text-effect__effects--icon" iconColor="gray-5")
+              class="panel-text-effect__effects--icon" :iconColor="theme === 'dark' ? 'white' : 'black-2'")
       img(v-else :src="effectIcon(currCategory, effect).name"
           class="panel-text-effect__effects--icon"
           :width="effectIcon(currCategory, effect).size"
@@ -77,8 +78,11 @@ div(class="panel-text-effect")
         img(:src="getStyleImg")
         div
         svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
-    span(class="panel-text-effect__reset"
-        @click="resetTextEffect()") {{$t('NN0754')}}
+    nubtn(class="panel-text-effect__reset"
+          theme="icon_pill"
+          :icon="['reset', 'white']"
+          size="sm"
+          @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -149,6 +153,12 @@ export default defineComponent({
         this.currEffect?.options.some(op => op.type === 'img') &&
         !this.currentStyle.customImg) return 'effects' // No customImg, no options.
       return this.panelHistory.length === 0 ? 'effects' : 'options'
+    },
+    iconBgColor(): string {
+      return (this.theme === 'dark' ? colorUtils.colorMap.get('black-3') : colorUtils.colorMap.get('gray-5')) ?? 'white'
+    },
+    moreBgColor(): string {
+      return this.theme === 'dark' ? 'rgba(20, 20, 20, 0.5)' : 'rgba(71, 74, 87, 0.6)'
     }
   },
   mounted() { /**/ },
@@ -248,24 +258,32 @@ export default defineComponent({
         @include setColors(blue-1, white) using ($color) {
           border: 2px solid $color;
         }
-        & > img, & > svg {
+        > img, > svg {
           transform: scale(0.85);
         }
-        & > div {
+        > div {
+          border-radius: 3px;
           width: 47.6px;
           height: 47.6px;
         }
       }
       .panel-text-effect__effects--icon {
-        background-color: setColor(gray-5);
         border-radius: 5px;
         object-fit: cover;
         pointer-events: none;
-        transition: transform 0.3s;
-        &.svg-icon {
-          padding: 16px;
-        }
       }
+    }
+    &__icon-bg {
+      z-index: -1;
+      border-radius: 5px;
+      background-color: v-bind(iconBgColor);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      transition: width 0.3s, height 0.3s;
     }
     &--more {
       display: flex;
@@ -278,7 +296,7 @@ export default defineComponent({
       width: 56px;
       height: 56px;
       border-radius: 3px;
-      background: rgba(71, 74, 87, 0.6);
+      background: v-bind(moreBgColor);
       backdrop-filter: blur(2px);
       transition: width 0.3s, height 0.3s;
     }
@@ -400,11 +418,7 @@ export default defineComponent({
   }
 
   &__reset {
-    @include btn-SM;
-    @include setColors(blue-1, white) using ($color) {
-      color: $color;
-    }
-    text-align: center;
+    margin: 6px auto 0;
   }
 }
 </style>

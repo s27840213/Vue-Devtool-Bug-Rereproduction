@@ -11,12 +11,12 @@ div(class="bottom-panel tutorial-powerful-fill-4--highlight" ref="bottomPanelRef
  * Here pass setSlotRef to the parent
  * and parent use setSlotRef to pass the ref here
  */
-import { useElementSize } from '@vueuse/core';
+import { useElementBounding } from '@vueuse/core';
 
 const bottomPanelRef = ref<HTMLElement | null>(null)
 const slotRef = ref<HTMLElement | null>(null)
 
-const { height } = useElementSize(slotRef)
+const { height } = useElementBounding(slotRef)
 const setSlotRef = (ref: HTMLElement) => {
   slotRef.value = ref
 }

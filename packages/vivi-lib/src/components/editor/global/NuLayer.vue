@@ -265,12 +265,11 @@ export default defineComponent({
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       isDuringCopy: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
     }),
     inAllPagesMode(): boolean {

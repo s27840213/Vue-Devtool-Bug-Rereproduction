@@ -348,13 +348,12 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTextLike: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),

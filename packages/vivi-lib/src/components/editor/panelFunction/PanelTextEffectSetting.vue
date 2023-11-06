@@ -17,10 +17,10 @@ div(class="text-effect-setting")
               class="text-effect-setting__effect pointer"
               :class="{'selected': getStyle(category).name === effect.key }"
               @click="onEffectClick(effect)")
-            svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
+            svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
               :iconName="effectIcon(category, effect).name"
               :iconWidth="effectIcon(category, effect).size"
-              iconColor="white"
+              iconColor="gray-2"
               v-hint="effect.label")
             img(v-else :src="effectIcon(category, effect).name"
               :width="effectIcon(category, effect).size"
@@ -128,6 +128,7 @@ export default defineComponent({
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as string,
       textEffects: constantData.textEffects(),
       colorTarget: '',
+      theme: this.$isStk ? 'dark' : 'light',
     }
   },
   computed: {
@@ -184,10 +185,16 @@ export default defineComponent({
           size: '56',
         }
       }
+      if (effect.key === 'none') {
+        return {
+          name: 'no-effect',
+          size: '24px',
+        }
+      }
       switch (effect.key) {
         case 'text-book':
           return {
-            name: require(`@img/text-effect/icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
+            name: require(`@img/text-effect/${this.theme}_icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
             size: '56',
           }
         case 'custom-fill-img': // svg-icon
@@ -197,7 +204,7 @@ export default defineComponent({
           }
         default:
           return {
-            name: require(`@img/text-effect/icon/${category.name}-${effect.key}.png`),
+            name: require(`@img/text-effect/${this.theme}_icon/${category.name}-${effect.key}.png`),
             size: '56',
           }
       }
@@ -350,6 +357,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .text-effect-setting {
   text-align: left;
+
   &__title {
     @include text-H6;
     color: setColor(blue-1);
