@@ -70,7 +70,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   transition(name="bottom-up")
     component(v-if="showActiveTab && isEditing"
               :is="assetPanelComponent"
-              class="bg-app-bg absolute left-0 w-full z-asset-panel"
+              class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
               :style="assetPanelStyles")
 </template>
 <script setup lang="ts">
