@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 
 export const useImgSelectorStore = defineStore('imgSelector', () => {
-  const showImgSelector = ref(false)
+  const showImgSelector = ref(0)
 
-  const setShowImgSelector = (value: boolean) => {
+  const setShowImgSelector = (value: number) => {
     showImgSelector.value = value
   }
 

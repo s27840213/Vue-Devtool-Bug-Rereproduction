@@ -1,5 +1,5 @@
 import giphyApi from '@/apis/giphy'
-import store from '@/store/index'
+import store from '@/store'
 import i18n from '@nu/vivi-lib/i18n'
 import {
   ICategoryContentApiParams, IGif, IGifCategory, IGifCategoryContent, IGifCategoryExtend,

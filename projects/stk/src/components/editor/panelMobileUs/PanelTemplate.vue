@@ -37,7 +37,7 @@ import PanelTemplate from '@/components/editor/panelMobile/PanelTemplate.vue'
 import PanelTemplateContentUs from '@/components/editor/panelMobileUs/PanelTemplateContent.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -59,7 +59,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabInCategory: 'assetPanel/getIsInCategory',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
     igLayout () {
@@ -97,8 +97,8 @@ export default defineComponent({
       this.handleSearch('')
     },
     handleRecent() {
-      stkWVUtils.setShowAllRecently('template', true)
-      stkWVUtils.setIsInCategory('template', true)
+      assetPanelUtils.setShowAllRecently('template', true)
+      assetPanelUtils.setIsInCategory('template', true)
     },
     showSearchBar() {
       if (!this.isInCategory) {

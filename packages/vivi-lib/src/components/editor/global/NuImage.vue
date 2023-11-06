@@ -23,6 +23,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     div(class='nu-image__picture'
       :style="imgStyles()")
       img(v-if="finalSrc" ref="img"
+        :data-nu-image="`nu-image-${config.id}`"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
@@ -237,8 +238,8 @@ export default defineComponent({
           .then((img) => {
             const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
             const isTransparent = this.handleIsTransparent(img)
-            const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-            const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
+            const redrawImmediately = ![ShadowEffectType.none, ShadowEffectType.floating].includes(this.currentShadowEffect()) &&
+              (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
             if (redrawImmediately) {
               this.redrawShadow()
             }

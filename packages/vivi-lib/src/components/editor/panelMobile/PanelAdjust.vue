@@ -50,11 +50,7 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
-    }),
-    ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false
-    }, {
-      controllerHidden: 'vivisticker/getControllerHidden'
+      controllerHidden: 'webView/getControllerHidden'
     }),
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]

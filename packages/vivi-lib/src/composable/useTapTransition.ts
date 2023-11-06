@@ -1,5 +1,5 @@
 import { useEventListener } from '@vueuse/core'
-import { ref } from 'vue'
+import { ref, Ref, onMounted, isRef } from 'vue'
 
 const useTapTransition = (
   el: HTMLElement | null | Ref<HTMLElement | null> | Array<Ref<HTMLElement | null>>,

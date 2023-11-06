@@ -2,14 +2,14 @@ import listApi from '@/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-  IGroup,
-  IImage,
-  IImageStyle,
-  IShape,
-  ISpanStyle,
-  IStyle,
-  IText,
-  ITmp,
+IGroup,
+IImage,
+IImageStyle,
+IShape,
+ISpanStyle,
+IStyle,
+IText,
+ITmp,
 } from '@/interfaces/layer'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
@@ -21,6 +21,7 @@ import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
 import { get, round } from 'lodash'
 import { nextTick } from 'vue'
+import assetPanelUtils from './assetPanelUtils'
 import backgroundUtils from './backgroundUtils'
 import ControlUtils from './controlUtils'
 import editorUtils from './editorUtils'
@@ -60,21 +61,27 @@ class AssetUtils {
   get getAsset() {
     return store.getters.getAsset
   }
+
   get getPage() {
     return store.getters.getPage
   }
+
   get pageSize() {
     return store.getters.getPageSize(pageUtils.currFocusPageIndex)
   }
+
   get getLayer() {
     return store.getters.getLayer
   }
+
   get layerIndex() {
     return store.getters.getCurrSelectedIndex
   }
+
   get getLayers() {
     return store.getters.getLayers
   }
+
   get getPages() {
     return store.getters.getPages
   }
@@ -761,6 +768,7 @@ class AssetUtils {
         ),
       ])
       editorUtils.setCloseMobilePanelFlag(true)
+      generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
       if (!generalUtils.isPic) {
         setTimeout(() => {
           tiptapUtils.agent((editor) => editor.commands.selectAll())
@@ -778,8 +786,9 @@ class AssetUtils {
     attrs: IAssetProps = {},
     categoryType = -1,
   ) {
+
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const resizeRatio =
       attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_IMAGE
@@ -790,7 +799,7 @@ class AssetUtils {
       initWidth: 0,
       initHeight: 0,
       imgWidth: 0,
-      imgHeight: 0,
+      imgHeight: 0
     } as {
       width: number
       height: number
@@ -823,7 +832,7 @@ class AssetUtils {
         imgWidth = photoWidth,
         imgHeight = photoHeight,
         imgX = 0,
-        imgY = 0,
+        imgY = 0
       } = styles as IImageStyle
 
       const scaleRatio = photoWidth / boundingWidth
@@ -836,7 +845,7 @@ class AssetUtils {
         imgWidth: imgWidth * scaleRatio,
         imgHeight: imgHeight * scaleRatio,
         imgX: imgX * scaleRatio,
-        imgY: imgY * scaleRatio,
+        imgY: imgY * scaleRatio
       }
     } else {
       const photoWidth =
@@ -863,7 +872,9 @@ class AssetUtils {
     let srcObj
     let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
+      console.log(url)
       const type = ImageUtils.getSrcType(url)
+      console.log(type)
       assetId = ['logo-private', 'private'].includes(type)
         ? assetIndex
         : isPreview
@@ -901,6 +912,8 @@ class AssetUtils {
       ...((categoryType === 14 || categoryType === 15) && { categoryType }),
       srcObj,
       previewSrc,
+      ...(hideResizer && { hideResizer}),
+      ...(ctrlUnmountCb && { ctrlUnmountCb}),
       styles: {
         ...styles,
         x,
@@ -908,6 +921,7 @@ class AssetUtils {
         ...newStyles,
       },
     }
+
     const index =
       layerUtils.getObjectInsertionLayerIndex(this.getPage(targetPageIndex).layers, config) + 1
     GroupUtils.deselect()
@@ -1096,6 +1110,7 @@ class AssetUtils {
           // Close MobilePanel and fit in
           if (generalUtils.isTouchDevice()) {
             editorUtils.setCloseMobilePanelFlag(true)
+            generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
           }
         })
       })
@@ -1188,7 +1203,10 @@ class AssetUtils {
       }
       key = moduleKey ?? key
       // Prevent close panel only for panelBG
-      if (asset.type !== 1) editorUtils.setCloseMobilePanelFlag(true)
+      if (asset.type !== 1) {
+        editorUtils.setCloseMobilePanelFlag(true)
+        generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
+      }
       this.addAssetToRecentlyUsed(asset, generalUtils.isStk ? key : undefined)
       return asset.jsonData
     } catch (error) {

@@ -63,6 +63,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent } from 'vue'
@@ -80,8 +81,8 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getCategories({ writeBack: false, key: 'textStock' })
-        await this.getRecently({ writeBack: true, key: 'textStock' })
+        await this.getCategories({ writeBack: false, key: this.$isStk ? 'textStock' : undefined })
+        await this.getRecently({ writeBack: true, key: this.$isStk ? 'textStock' : undefined })
         await this.getContent()
       })
     this.toggleTransitions(false)
@@ -176,7 +177,7 @@ export default defineComponent({
       }
     },
     addText(item: any) {
-      if (!stkWVUtils.checkPro(item, 'text')) return
+      if (!paymentUtils.checkProApp(item, undefined, 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(item).then(() => {
           textPropUtils.updateTextPropsState()

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="editing-options w-full")
-  div(class="mb-16 px-24") 
+  div(class="mb-16 box-border px-24") 
     props-slider(
       :title="`${$t('CM0001')}`"
       :borderTouchArea="true"
@@ -11,7 +11,7 @@ div(class="editing-options w-full")
       @update="setBrushSize"
       @pointer-down="setIsChangingBrushSize(true)"
       @pointer-up="setIsChangingBrushSize(false)")
-  div(class="w-full flex justify-between items-center px-24" ref="editorContainerRef")
+  div(class="w-full flex justify-between items-center box-border px-24" ref="editorContainerRef")
     div(
       v-for="tab in featureTabs"
       :key="tab.icon"
@@ -25,13 +25,11 @@ div(class="editing-options w-full")
       span(class="typo-body-sm transition-colors duration-300" :class="`text-${tabColor(tab)}`") {{ tab.text }}
 </template>
 <script setup lang="ts">
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
-import useTapTransition from '@/composable/useTapTransition'
 import { useCanvasStore } from '@/stores/canvas'
-import { useEditorStore } from '@/stores/editor'
 import type { ColorSlip } from '@/types/color'
+import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
 /**
  * @TODO - tidy up the codes
  */
@@ -43,14 +41,9 @@ interface IFeatureTab {
   disabled?: boolean
   forPro?: boolean
 }
-const editorStore = useEditorStore()
-const { setCanvasMode } = editorStore
-const { canvasMode } = storeToRefs(editorStore)
-
-const { reverseSelection } = useCanvasUtilsCm()
 const canvasStore = useCanvasStore()
 const { setCanvasStoreState } = canvasStore
-const { brushSize } = storeToRefs(canvasStore)
+const { brushSize, canvasMode } = storeToRefs(canvasStore)
 const setBrushSize = (value: number) => {
   setCanvasStoreState({ brushSize: value })
 }
@@ -109,12 +102,11 @@ const handleTabAction = (tab: IFeatureTab) => {
     case 'brush':
     case 'erase':
     case 'move': {
-      setCanvasMode(tab.icon)
-      return
-    }
-    case 'reverse':
-      reverseSelection()
+      setCanvasStoreState({
+        canvasMode: tab.icon,
+      })
       break
+    }
     default:
       break
   }

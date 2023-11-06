@@ -82,8 +82,8 @@ import SearchBar from '@/components/SearchBar.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IGif, IGifCategory, IGifCategoryExtend, isIGifCategory, isITag, ITagExtend } from '@/interfaces/giphy'
+import assetPanelUtils from '@/utils/assetPanelUtils'
 import generalUtils from '@/utils/generalUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -118,8 +118,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently'
+      isTabInCategory: 'assetPanel/getIsInCategory',
+      isTabShowAllRecently: 'assetPanel/getShowAllRecently'
     }),
     ...mapState({
       isTablet: 'isTablet'
@@ -370,15 +370,15 @@ export default defineComponent({
         this.resetCategoryContent()
         this.resetTagContent()
         if (!categoryName) {
-          stkWVUtils.setShowAllRecently('object', false)
+          assetPanelUtils.setShowAllRecently('object', false)
           return
         }
 
         const isRecent = categoryName === this.$t('NN0024')
         if (!isRecent) this.getCategoryContent(categoryName)
-        stkWVUtils.setShowAllRecently('object', isRecent)
+        assetPanelUtils.setShowAllRecently('object', isRecent)
       }
-      stkWVUtils.setIsInCategory('object', true)
+      assetPanelUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
       if (this.isSearchingTag) {
@@ -391,7 +391,7 @@ export default defineComponent({
     },
     click4in1(target: unknown) {
       this.searchFavorites(target)
-      stkWVUtils.setIsInCategory('object', true)
+      assetPanelUtils.setIsInCategory('object', true)
     },
     toggleFavorites4in1(target: ITagExtend | IGifCategoryExtend) {
       if (isITag(target)) {

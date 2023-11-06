@@ -124,7 +124,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   timeoutCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
 
-  STANDALONE_USER_INFO: IUserInfo = {
+  DEFAULT_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
     locale: 'us',
@@ -188,11 +188,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get controllerHidden(): boolean {
-    return store.getters['vivisticker/getControllerHidden']
+    return store.getters['webView/getControllerHidden']
   }
 
-  get isStandaloneMode(): boolean {
-    return store.getters['vivisticker/getIsStandaloneMode']
+  get inBrowserMode(): boolean {
+    return store.getters['vivisticker/getInBrowserMode']
   }
 
   get userSettings(): IUserSettings {
@@ -289,7 +289,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (locale === '' || !locale) {
       locale = localeUtils.getBrowserLang()
     }
-    this.STANDALONE_USER_INFO.locale = locale
+    this.DEFAULT_USER_INFO.locale = locale
   }
 
   async setDefaultPrices() {
@@ -303,10 +303,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   addDesignDisabled() {
     return this.everEntersDebugMode || window.location.hostname !== 'sticker.vivipic.com'
-  }
-
-  setCurrActiveTab(tab: string) {
-    store.commit('vivisticker/SET_currActiveTab', tab)
   }
 
   // filterLog(messageType: string, message: any) {
@@ -327,7 +323,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   sendScreenshotUrl(query: string, action = 'copy') {
     this.sendToIOS('SCREENSHOT', { params: query, action })
-    if (this.isStandaloneMode) {
+    if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
     }
@@ -347,7 +343,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const _action = isLast && action === 'IGPost' ? 'IGPost' : 'download'
       const toast = action === 'download' ? isLast : false
       const query = this.createUrlForJSON({ page: pageUtils.getPage(pageIndex[idx]), noBg: false, toast })
-      if (this.isStandaloneMode) {
+      if (this.inBrowserMode) {
         const url = `${window.location.origin}/screenshot/?${query}`
         window.open(url, '_blank')
         cbProgress(idx + 1)
@@ -426,14 +422,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       res += `&toast=${toast}`
     }
     return res
-  }
-
-  setIsInCategory(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_isInCategory', { tab, bool })
-  }
-
-  setShowAllRecently(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_showAllRecently', { tab, bool })
   }
 
   getAssetInitiator(asset: IAsset, ...args: any[]): () => Promise<any> {
@@ -637,22 +625,22 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   hideController() {
-    store.commit('vivisticker/SET_controllerHidden', true)
+    store.commit('webView/SET_controllerHidden', true)
   }
 
   showController() {
-    store.commit('vivisticker/SET_controllerHidden', false)
+    store.commit('webView/SET_controllerHidden', false)
   }
 
   detectIfInApp() {
     if (window.webkit?.messageHandlers?.APP_LOADED === undefined) {
-      this.enterStandaloneMode()
+      this.enterBrowserMode()
       this.setDefaultLocale()
     }
   }
 
-  enterStandaloneMode() {
-    store.commit('vivisticker/SET_isStandaloneMode', true)
+  enterBrowserMode() {
+    store.commit('vivisticker/SET_inBrowserMode', true)
   }
 
   deselect() {
@@ -787,7 +775,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.isStandaloneMode) return this.getUserInfoFromStore()
+    if (this.inBrowserMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('LOGIN', this.getEmptyMessage(), 'login')
     return this.getUserInfoFromStore()
   }
@@ -809,8 +797,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateLocale(locale: string): Promise<boolean> {
-    localStorage.setItem('locale', locale) // set locale to localStorage whether standalone mode or not
-    if (this.isStandaloneMode) {
+    localStorage.setItem('locale', locale) // set locale to localStorage whether browser mode or not
+    if (this.inBrowserMode) {
       return true
     }
     const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
@@ -828,12 +816,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async listAsset(key: string): Promise<void> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     await this.callIOSAsAPI('LIST_ASSET', { key }, `list-asset-${key}`)
   }
 
   async listMoreAsset(key: string, nextPage: number): Promise<void> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (nextPage < 0) return
     await this.callIOSAsAPI('LIST_ASSET', { key, pageIndex: nextPage }, `list-asset-${key}`)
   }
@@ -904,7 +892,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async addAsset(key: string, asset: any, limit = 100, files: { [key: string]: any } = {}) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (this.checkVersion('1.27')) {
       await this.callIOSAsAPI('ADD_ASSET', { key, asset, limit, files }, `addAsset-${key}-${asset.id}`)
     } else if (this.checkVersion('1.9')) {
@@ -923,7 +911,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async setState(key: string, value: any) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (key === 'tempDesign') {
       // console.trace()
     }
@@ -945,7 +933,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getState(key: string): Promise<WEBVIEW_API_RESULT> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     return await this.callIOSAsAPI('GET_STATE', { key }, `getState-${key}`, { retry: true })
   }
 
@@ -985,7 +973,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async sendCopyEditorCore(action: string): Promise<string> {
-    if (this.isStandaloneMode) {
+    if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return '0'
     }
@@ -1015,7 +1003,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   saveDesign(pages_?: IPage[]) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     const useArgPages = pages_ !== undefined
     const pages = useArgPages ? pages_ : pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
@@ -1146,7 +1134,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async genThumbnail(id: string): Promise<string> {
-    if (this.isStandaloneMode) return '0'
+    if (this.inBrowserMode) return '0'
     return await new Promise<string>((resolve, reject) => {
       try {
         nextTick(() => {
@@ -1215,7 +1203,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     await Promise.race([
       imageShadowUtils.iosImgDelHandler(),
       new Promise((resolve) => setTimeout(resolve, 3000))

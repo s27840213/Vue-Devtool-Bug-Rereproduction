@@ -81,9 +81,9 @@ export default defineComponent({
       backgroundHeaderTab: 'background/headerTab',
       textHeaderTab: 'textStock/headerTab',
       isInEditor: 'vivisticker/getIsInEditor',
-      isCurrentInCategory: 'vivisticker/getIsInCategory',
-      isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
-      currActiveTab: 'vivisticker/getCurrActiveTab',
+      isCurrentInCategory: 'assetPanel/getIsInCategory',
+      isCurrentShowAllRecently: 'assetPanel/getShowAllRecently',
+      currActiveTab: 'assetPanel/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       isInMultiPageShare: 'vivisticker/getIsInMultiPageShare',
@@ -356,8 +356,8 @@ export default defineComponent({
       updateUserSettings: 'vivisticker/updateUserSettings'
     }),
     ...mapMutations({
-      setIsInCategory: 'vivisticker/SET_isInCategory',
-      setShowAllRecently: 'vivisticker/SET_showAllRecently',
+      setIsInCategory: 'assetPanel/SET_isInCategory',
+      setShowAllRecently: 'assetPanel/SET_showAllRecently',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
       setIsInMultiPageShare: 'vivisticker/SET_isInMultiPageShare',
       setTemplateShareType: 'vivisticker/SET_templateShareType',

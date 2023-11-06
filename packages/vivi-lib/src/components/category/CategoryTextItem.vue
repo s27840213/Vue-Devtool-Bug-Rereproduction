@@ -6,7 +6,8 @@ div(class="panel-text__item"
     @click.right.prevent="$isPic ? openUpdateDesignPopup() : null")
   img(class="panel-text__img"
     ref="img"
-    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+    crossorigin="anonymous"
+    :src="finalSrc"
     :style="itemStyle"
     @error="handleNotFound")
   pro-item(v-if="item.plan")
@@ -17,6 +18,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import store from '@/store'
 import AssetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
+import imageUtils from '@/utils/imageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import textPropUtils from '@/utils/textPropUtils'
@@ -58,6 +60,9 @@ export default defineComponent({
     }, {
       isInEditor: 'vivisticker/getIsInEditor'
     }),
+    finalSrc(): string {
+      return imageUtils.appendRefreshAppver(this.src || this.fallbackSrc || `https://template.vivipic.com/text/${this.item.id}/prev?ver=${this.item.ver}`)
+    },
     itemStyle(): any {
       const { width } = this.item.preview || {
         width: !isNaN(this.itemWidth) ? this.itemWidth
@@ -74,15 +79,14 @@ export default defineComponent({
       this.fallbackSrc = imagePreview // prevent infinite refetching when network disconneted
     },
     dragStart(e: DragEvent) {
-      if (!paymentUtils.checkPro(this.item, 'pro-text')) return
+      if (!paymentUtils.checkProApp(this.item, 'pro-text')) return
       const img = this.$refs.img as HTMLImageElement
       this.dragUtils.itemDragStart(e, 'group', {
         ...this.item
       }, img.src, { aspectRatio: img.naturalWidth / img.naturalHeight })
     },
     addText() {
-      if (this.$isPic && !paymentUtils.checkPro(this.item, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(this.item, 'text')) return
+      if (!paymentUtils.checkProApp(this.item, 'pro-text', 'text')) return
       if (this.isInEditor) {
         AssetUtils.addAsset(this.item)
           .then(() => {
