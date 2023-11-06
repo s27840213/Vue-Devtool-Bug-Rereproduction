@@ -11,9 +11,7 @@ div(class="canvas-section absolute top-0 left-0 z-canvas")
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
-import { useEditorStore } from '@/stores/editor'
 import { generalUtils } from '@nu/shared-lib'
-import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
 // #region data section
 const props = defineProps<{
@@ -22,9 +20,6 @@ const props = defineProps<{
 }>()
 
 const { containerDOM, wrapperDOM } = toRefs(props)
-const editorStore = useEditorStore()
-const { setMaskCanvas } = editorStore
-const { pageSize } = storeToRefs(editorStore)
 // #endregion
 
 // #region Canvas feature section

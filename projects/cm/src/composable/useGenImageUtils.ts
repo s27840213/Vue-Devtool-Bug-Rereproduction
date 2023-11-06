@@ -8,43 +8,62 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { useEventBus } from '@vueuse/core'
 
 const useGenImageUtils = () => {
-  const { userId } = storeToRefs(useUserStore())
+  const userStore = useUserStore()
+  const { setPrevGenParams } = userStore
+  const { userId, prevGenParams } = storeToRefs(useUserStore())
+  const editorStore = useEditorStore()
+  const { setInitImgSrc } = editorStore
   const { editorType, pageSize, pageScaleRatio } = storeToRefs(useEditorStore())
 
   const { uploadImage, polling } = useUploadUtils()
 
-  const genImage = async (prompt: string): Promise<string> => {
-    const requestId = generalUtils.generateAssetId()
-    try {
-      await Promise.all([
-        uploadEditorAsImage(userId.value, requestId),
-        uploadMaskAsImage(userId.value, requestId)
-      ])
-    } catch (error) {
-      logUtils.setLogForError(error as Error)
-      throw new Error('Upload Images For /gen-image Failed')
+  const genImage = async (prompt: string, showMore = false): Promise<string> => {
+    const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
+
+    if (!showMore) {
+      try {
+        await Promise.all([
+          uploadEditorAsImage(userId.value, requestId),
+          uploadMaskAsImage(userId.value, requestId),
+        ])
+      } catch (error) {
+        logUtils.setLogForError(error as Error)
+        throw new Error('Upload Images For /gen-image Failed')
+      }
+    } else {
+      prompt = prevGenParams.value.prompt
     }
-    const res = (await genImageApis.genImage(userId.value, requestId, prompt, editorType.value)).data
+    const res = (await genImageApis.genImage(userId.value, requestId, prompt, editorType.value))
+      .data
+
     if (res.flag !== 0) {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
-    const json = await polling<GenImageResult>(`https://template.vivipic.com/charmix/${userId.value}/result/${requestId}.json`)
+    const json = await polling<GenImageResult>(
+      `https://template.vivipic.com/charmix/${userId.value}/result/${requestId}.json`,
+    )
     if (json.flag !== 0) {
       throw new Error('Run /gen-image Failed,' + json.msg ?? '')
     }
+
+    setPrevGenParams({ requestId, prompt })
     return json.url
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId } = await cmWVUtils.copyEditor({ width: pageWidth * pageScaleRatio.value, height: pageHeight * pageScaleRatio.value })
+    const { flag, imageId } = await cmWVUtils.copyEditor({
+      width: pageWidth * pageScaleRatio.value,
+      height: pageHeight * pageScaleRatio.value,
+    })
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
       generalUtils.toDataURL(`chmix://screenshot/${imageId}?lsize=${size}`, (dataUrl) => {
+        setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
           .then(resolve)
@@ -68,7 +87,7 @@ const useGenImageUtils = () => {
             logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
             reject(error)
           }
-        }
+        },
       })
     })
   }

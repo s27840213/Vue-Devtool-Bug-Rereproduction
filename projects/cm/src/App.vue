@@ -29,7 +29,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(v-if="!showGenResult" class="z-bottom-panel")
+  bottom-panel(class="z-bottom-panel")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
@@ -69,12 +69,12 @@ import { storeToRefs } from 'pinia'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import EditingOptions from './components/panel-content/EditingOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
+import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useStateInfo from './composable/useStateInfo'
-import { useEditorStore } from './stores/editor'
 import { useModalStore } from './stores/modal'
 
 // #region route info
@@ -89,6 +89,7 @@ const {
   atSettings,
   atMainPage,
   showImgSelector,
+  showGenResult,
 } = stateInfo
 // #endregion
 
@@ -114,6 +115,8 @@ const bottomPanelComponent = computed(() => {
       return SelectionOptions
     case layerIndex.value !== -1:
       return FooterTabs
+    case showGenResult.value:
+      return GenResult
     case isEditing.value:
       return PromptArea
     default:
@@ -132,9 +135,6 @@ const headerbarStyles = computed(() => {
     opacity: atMainPage.value ? 1 : 0,
   }
 })
-
-const editorStore = useEditorStore()
-const {showGenResult } = storeToRefs(editorStore)
 </script>
 
 <style lang="scss">

@@ -64,6 +64,7 @@
   "NN0116": "Double Shadow",
   "NN0117": "None",
   "NN0118": "Curve",
+  "NN0133": "Save",
   "NN0134": "Page {num}",
   "NN0135": "Upload completed",
   "NN0136": "Uploading",
@@ -439,5 +440,8 @@
   "CM0062": "Please select {num} photos.",
   "CM0063": "Add text",
   "CM0064": "Choose 1 sticker",
-  "CM0065": "Demo"
+  "CM0065": "Demo",
+  "CM0066": "Free images left for today",
+  "CM0067": "Keep editing",
+  "CM0068": "Show more"
 }

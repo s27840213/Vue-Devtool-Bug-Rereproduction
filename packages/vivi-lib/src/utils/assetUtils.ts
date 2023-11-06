@@ -872,7 +872,9 @@ class AssetUtils {
     let srcObj
     let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
+      console.log(url)
       const type = ImageUtils.getSrcType(url)
+      console.log(type)
       assetId = ['logo-private', 'private'].includes(type)
         ? assetIndex
         : isPreview
