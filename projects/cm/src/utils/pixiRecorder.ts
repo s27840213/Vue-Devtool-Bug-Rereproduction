@@ -7,7 +7,7 @@ const IMG2_EXAMPLE =
 const IMG1_EXAMPLE =
   'https://images.unsplash.com/photo-1547327132-5d20850c62b5?cs=tinysrgb&q=80&w=766&origin=true&appver=v7576'
 
-const fragment_opacity = `
+export const fragment_opacity = `
   varying vec2 vTextureCoord;
   uniform sampler2D uSampler;
   uniform sampler2D nextImage;
@@ -19,7 +19,7 @@ const fragment_opacity = `
     gl_FragColor = mix(image1, image2, opacity);
   }
 `
-const fragment1 = `
+export const fragment1 = `
   precision mediump float;
 
   varying vec2 vTextureCoord;
@@ -58,7 +58,7 @@ const fragment1 = `
 // _currentImage = texture2D(uSampler, vec2(uv.x - dispFactor * intensity * orig2.r * orig2.g * orig2.b, uv.y));
 // _nextImage = texture2D(nextImage, vec2(coord.x - (1.0 - dispFactor) * intensity * orig1.r * orig1.g * orig1.b, coord.y));
 
-const fragment_slide = `
+export const fragment_slide = `
   varying vec2 vTextureCoord;
   uniform sampler2D uSampler;
   uniform highp vec4 inputSize;
@@ -86,7 +86,7 @@ const fragment_slide = `
     }
   }
 `
-const fragment3 = `
+export const fragment3 = `
   varying vec2 vTextureCoord;
   uniform sampler2D uSampler;
   void main() {
@@ -99,57 +99,61 @@ const fragment3 = `
   }
 `
 
-const fragment = fragment1
-
 export default class PixiRecorder {
   pixi = new PIXI.Application()
-  texture1 = null as null | PIXI.Texture
-  sprite1 = null as null | PIXI.Sprite
-  texture2 = null as null | PIXI.Texture
-  sprite2 = null as null | PIXI.Sprite
+  texture_src = null as null | PIXI.Texture
+  sprite_src = null as null | PIXI.Sprite
+  texture_res = null as null | PIXI.Texture
+  sprite_res = null as null | PIXI.Sprite
   filter = null as null | PIXI.Filter
   uniforms = {} as { [key: string]: any }
   time = 0
   canvasRecorder = null as null | CanvasRecorder
   _animate = null as null | ((delta: number) => void)
 
-  constructor() {
+  constructor(src = IMG1_EXAMPLE, res = IMG2_EXAMPLE, fragment = fragment1) {
     document.body.appendChild(this.pixi.view as HTMLCanvasElement)
-    this.addImage(IMG1_EXAMPLE, IMG2_EXAMPLE).then(() => {
-      if (!this.sprite1 || !this.sprite2) return console.warn('no sprite')
+    this.addImage(src, res)
+      .then(() => {
+        if (!this.sprite_src || !this.sprite_res) return console.warn('no sprite')
 
-      this.pixi.view.width = this.sprite1.width
-      this.pixi.view.height = this.sprite1.height
-      this.pixi.stage.addChild(this.sprite1)
-      this.addFilter(fragment)
+        this.pixi.view.width = this.sprite_src.width
+        this.pixi.view.height = this.sprite_src.height
+        this.pixi.stage.addChild(this.sprite_src)
+        this.addFilter(fragment)
+      }).catch(() => {
+        throw new Error('pixi-recorder: can not load image!')
+      })
+  }
 
-      this.time = 0
-      if (RECORD_START_DELAY) {
-        setTimeout(() => {
-          if (this._animate) {
-            this.pixi.ticker.add(this._animate)
-          }
-        }, RECORD_START_DELAY)
-      } else {
+  genVideo() {
+    this.time = 0
+    if (RECORD_START_DELAY) {
+      setTimeout(() => {
         if (this._animate) {
           this.pixi.ticker.add(this._animate)
         }
+      }, RECORD_START_DELAY)
+    } else {
+      if (this._animate) {
+        this.pixi.ticker.add(this._animate)
       }
+    }
 
-      if (ENABLE_RECORDING) {
-        this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement)
-        this.canvasRecorder.start(1000)
-      }
+    return new Promise<ISaveAssetFromUrlResponse | 'error'>((resolve) => {
+      this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, resolve)
+      this.canvasRecorder.start(1000)
     })
   }
 
+
   addOpacityFilter() {
-    if (!this.sprite1) return
+    if (!this.sprite_src) return
 
     this.uniforms.opacity = 0
-    this.uniforms.nextImage = this.texture2
+    this.uniforms.nextImage = this.texture_src
     this.filter = new PIXI.Filter(undefined, fragment_opacity, this.uniforms)
-    this.sprite1.filters = [this.filter]
+    this.sprite_src.filters = [this.filter]
     this._animate = (delta) => {
       if (this.uniforms.opacity >= 1) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
@@ -163,11 +167,11 @@ export default class PixiRecorder {
   }
 
   addFragment1Filter() {
-    if (!this.sprite1) return
+    if (!this.sprite_src) return
     this.uniforms.dispFactor = 0
-    this.uniforms.nextImage = this.texture2
+    this.uniforms.nextImage = this.texture_src
     this.filter = new PIXI.Filter(undefined, fragment1, this.uniforms)
-    this.sprite1.filters = [this.filter]
+    this.sprite_src.filters = [this.filter]
     console.log(this.filter)
     this._animate = (delta) => {
       if (this.uniforms.dispFactor >= 1) {
@@ -182,10 +186,10 @@ export default class PixiRecorder {
   }
 
   addFragment3Filter() {
-    if (!this.sprite1) return
+    if (!this.sprite_src) return
 
     this.filter = new PIXI.Filter(undefined, fragment3, this.uniforms)
-    this.sprite1.filters = [this.filter]
+    this.sprite_src.filters = [this.filter]
     this._animate = (delta) => {
       if (this.time / 300 >= Math.PI * 0.5) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
@@ -198,12 +202,12 @@ export default class PixiRecorder {
   }
 
   addSlideFilter() {
-    if (!this.sprite1) return
+    if (!this.sprite_src) return
 
     this.uniforms.dispFactor = 0
-    this.uniforms.nextImage = this.texture2
+    this.uniforms.nextImage = this.texture_src
     this.filter = new PIXI.Filter(undefined, fragment_slide, this.uniforms)
-    this.sprite1.filters = [this.filter]
+    this.sprite_src.filters = [this.filter]
     this._animate = (delta) => {
       if (this.time >= 200) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
@@ -232,18 +236,18 @@ export default class PixiRecorder {
   addImage(img1: string, img2: string) {
     const p1 = new Promise<void>((resolve) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
-        this.texture1 = texture
-        this.sprite1 = new PIXI.Sprite(texture)
-        this.sprite1.width = texture.width
-        this.sprite1.height = texture.height
+        this.texture_src = texture
+        this.sprite_src = new PIXI.Sprite(texture)
+        this.sprite_src.width = texture.width
+        this.sprite_src.height = texture.height
         console.log('img1 done')
         resolve()
       })
     })
     const p2 = new Promise<void>((resolve) => {
       PIXI.Texture.fromURL(img2).then((texture) => {
-        this.texture2 = texture
-        this.sprite2 = new PIXI.Sprite(texture)
+        this.texture_src = texture
+        this.sprite_res = new PIXI.Sprite(texture)
         console.log('img2 done')
         resolve()
       })
@@ -257,13 +261,17 @@ class CanvasRecorder {
   stream: MediaStream
   recorder: MediaRecorder
   chunks = [] as Array<any>
+  private _resolver = null as null | ((value: ISaveAssetFromUrlResponse | PromiseLike<ISaveAssetFromUrlResponse> | 'error') => void)
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, resolver?: ((value: ISaveAssetFromUrlResponse | PromiseLike<ISaveAssetFromUrlResponse> | 'error') => void)) {
     this.canvas = canvas
     this.stream = this.canvas.captureStream()
     this.recorder = new MediaRecorder(this.stream, this.getMimeTypeSupportOptions())
     this.recorder.ondataavailable = (e) => this.onDataAvailable(e)
     this.recorder.onstop = () => this.onRecordStop()
+    if (resolver) {
+      this._resolver = resolver
+    }
   }
 
   start(time: number) {
@@ -311,10 +319,6 @@ class CanvasRecorder {
   onRecordStop() {
     console.warn('recorder stopped', this.chunks.length)
     const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
-    // webViewUtils.saveAssetFromUrl('mp4', url)
-    //   .then((data: ISaveAssetFromUrlResponse) => {
-    //     console.log('isave asset from url', data)
-    //   })
     const video = document.createElement('video')
     document.body.appendChild(video)
     video.addEventListener('ended', () => {
@@ -332,12 +336,19 @@ class CanvasRecorder {
     video.src = url
 
     this.blobToBase64(new Blob(this.chunks, { type: 'video/mp4' })).then((base64: string) => {
-      // cmWVUtils.saveAssetFromUrl('png', 'https://template.vivipic.com/template/WZ3xxkwKHSnwOUcHhDsJ/prev_4x?ver=8')
-      // webViewUtils.saveAssetFromUrl('mp4', 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4')
       cmWVUtils.saveAssetFromUrl('mp4', base64)
         .then((data: ISaveAssetFromUrlResponse) => {
-          console.log('save asset from url', data)
+          if (this._resolver) {
+            this._resolver(data)
+          }
+          console.log('save asset from url done', data)
+        }).catch((error) => {
+          console.error('save asset from url failed', error)
+          if (this._resolver) {
+            this._resolver('error')
+          }
         })
     })
+    return url
   }
 }
