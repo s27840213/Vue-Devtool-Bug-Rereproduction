@@ -69,7 +69,7 @@ const handleBackAction = (navagate: () => void) => {
   }
 
   if (showImgSelector.value) {
-    setShowImgSelector(false)
+    setShowImgSelector(0)
     return
   }
 

@@ -13,7 +13,7 @@ import vuex from './vuex'
 // import '@nu/vivi-lib/css' // Import all CSS rules from vivi-lib
 
 const svgs = import.meta.glob('./assets/icon/**/*.svg', { eager: true })
-const viviSvgs = import.meta.glob('../../../packages/vivi-lib/dist/src/assets/icon/**/*.svg', { eager: true })
+const viviSvgs = import.meta.glob('../../../packages/vivi-lib/src/assets/icon/**/*.svg', { eager: true })
 
 const app = initApp(createApp(App))
 

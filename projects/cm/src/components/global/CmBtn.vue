@@ -17,10 +17,10 @@ div(
 
 <script setup lang="ts">
 // https://www.figma.com/file/nO7n8qAcowXguD9znn1JGt/AI-PhotoEditor?node-id=378%3A168384&mode=dev
-import useTapTransition from '@/composable/useTapTransition';
-import { useColorStore } from '@/stores/color';
-import type { INubtnSize, INubtnState, INubtnThemes } from '@/types/btn';
-import { computed } from 'vue';
+import { useColorStore } from '@/stores/color'
+import type { INubtnSize, INubtnState, INubtnThemes } from '@/types/btn'
+import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
+import { computed } from 'vue'
 
 // #region static
 const props = withDefaults(
