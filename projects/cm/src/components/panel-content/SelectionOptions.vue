@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="editing-options w-full")
   div(
-    class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 pl-24 pr-8")
+    class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 box-border pl-24 pr-8")
     span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
     scrollable-container(:gap="20")
       cm-svg-icon(
@@ -12,7 +12,7 @@ div(class="editing-options w-full")
         icon-height="32px"
         :same-size="false"
         @click="chooseSelectionOption(shape)")
-  div(class="flex justify-between items-center px-24")
+  div(class="flex justify-between items-center box-border px-24")
     cm-btn(theme="secondary" size="sm" @click="cancel") {{ $t('NN0203') }}
     span(class="typo-h6 text-app-text-secondary") {{ $t('CM0051') }}
     cm-btn(theme="primary" size="sm" @click="apply") {{ $t('CM0061') }}

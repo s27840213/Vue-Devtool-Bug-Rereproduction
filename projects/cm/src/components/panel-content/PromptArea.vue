@@ -1,11 +1,11 @@
 <template lang="pug">
-div(class="flex flex-col justify-center items-center w-full px-24 gap-16")
+div(class="flex flex-col justify-center items-center w-full box-border px-24 gap-16")
   div(class="relative w-full")
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
     cm-svg-icon(v-if="false" iconName="settings" class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
-      class="w-full p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable"
+      class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable"
       :placeholder="$t('CM0024')"
       :autofocus="!isDuringTutorial"
       v-model="promptText")

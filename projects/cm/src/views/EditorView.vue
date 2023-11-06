@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
-  headerbar(class="px-24" :middGap="32" ref="headerbarRef")
+  headerbar(class="box-border px-24" :middGap="32" ref="headerbarRef")
     template(#left)
       back-btn
     template(

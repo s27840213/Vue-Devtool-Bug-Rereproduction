@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="editing-options w-full")
-  div(class="mb-16 px-24") 
+  div(class="mb-16 box-border px-24") 
     props-slider(
       :title="`${$t('CM0001')}`"
       :borderTouchArea="true"
@@ -11,7 +11,7 @@ div(class="editing-options w-full")
       @update="setBrushSize"
       @pointer-down="setIsChangingBrushSize(true)"
       @pointer-up="setIsChangingBrushSize(false)")
-  div(class="w-full flex justify-between items-center px-24" ref="editorContainerRef")
+  div(class="w-full flex justify-between items-center box-border px-24" ref="editorContainerRef")
     div(
       v-for="tab in featureTabs"
       :key="tab.icon"

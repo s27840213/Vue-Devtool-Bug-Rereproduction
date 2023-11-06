@@ -204,7 +204,6 @@ export default defineComponent({
     line-height: 1;
     position: absolute;
     display: inline-block;
-    box-sizing: initial; // overwrite tailwind default
   }
 }
 </style>
