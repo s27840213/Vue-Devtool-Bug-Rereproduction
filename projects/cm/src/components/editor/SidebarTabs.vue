@@ -6,7 +6,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
     class="w-44"
     :class="{ 'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052') }")
     div(
-      class="sidebar__tab flex flex-col items-center justify-center gap-2 p-4"
+      class="sidebar__tab flex flex-col items-center justify-center gap-2 box-border p-4"
       @click.stop="handleTabAction(tab)"
       @pointerdown.stop)
       cm-svg-icon(
@@ -24,7 +24,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
       div(
         v-for="(subTab, index) in tab.subTabs"
         :key="`${subTab.icon}-${index}`"
-        class="flex flex-col items-center justify-center gap-2 p-4 box-border"
+        class="flex flex-col items-center justify-center gap-2 box-border p-4"
         @click.stop="handleTabAction(subTab)"
         @pointerdown.stop)
         cm-svg-icon(
@@ -90,7 +90,6 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'add',
       text: t('CM0048'),
       panelType: '',
-      disabled: true,
       subTabs: addSubTabs.value,
       styles: {
         transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',

@@ -2,7 +2,7 @@
 div(class="image-selector bg-app-bg text-app-tab-default \
   h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
-  div(class="px-24 py-8 flex justify-between items-center")
+  div(class="box-border px-24 py-8 flex justify-between items-center")
     back-btn
     span(class="text-app-btn-primary-text") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
     div(class="w-24")
@@ -12,7 +12,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
     :tabs="[$t('STK0067'), $t('STK0069')]"
     v-model="tabIndex")
   //- 3. (Album bar or search bar) + demo img
-  div(class="bg-app-tab-bg px-12 py-8 h-60 \
+  div(class="bg-app-tab-bg box-border px-12 py-8 h-60 \
     grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
     div(
       v-if="inPhoto"
@@ -66,7 +66,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
           iconName="item-check"
           iconColor="app-tab-active")
       observer-sentinel(
-        class="flex justify-center py-12"
+        class="flex justify-center box-border py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
         :target="'.img-selector__img-grid'"
         :rootMargin="'1000px 0px 1000px 0px'"
@@ -108,7 +108,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
           iconName="item-check"
           iconColor="app-tab-active")
     observer-sentinel(
-      class="flex justify-center py-12 col-span-2"
+      class="flex justify-center box-border py-12 col-span-2"
       :target="'.img-selector__img-grid'"
       :rootMargin="'1000px 0px 1000px 0px'"
       @callback="unsplashLoadmore")

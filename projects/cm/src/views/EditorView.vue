@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(
-    class="px-24"
+    class="box-border px-24"
     :middGap="32"
     ref="headerbarRef")
     template(#left)
@@ -93,7 +93,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     component(
       v-if="showActiveTab && isEditing"
       :is="assetPanelComponent"
-      class="bg-app-bg absolute left-0 w-full z-asset-panel"
+      class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles")
 </template>
 <script setup lang="ts">

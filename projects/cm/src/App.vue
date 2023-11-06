@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative")
   tutorial
-  div(class="main-page-headerbar w-full flex justify-between items-center px-16"
+  div(class="main-page-headerbar w-full flex justify-between items-center box-border px-16"
       ref="headerbarRef"
       :style="headerbarStyles")
     router-link(
@@ -24,7 +24,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         :theme="'primary'"
         :hasIcon="true"
         iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
-  router-view(class="pb-12" v-slot="{ Component, route }")
+  router-view(class="box-border pb-12" v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
       mode="out-in")

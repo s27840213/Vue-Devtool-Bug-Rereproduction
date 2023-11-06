@@ -61,10 +61,10 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import { useImgSelectorStore } from '@/stores/imgSelector';
-import PixiRecorder from '@/utils/pixiRecorder';
-import vuex from '@/vuex';
-import { useRouter } from 'vue-router';
+import { useImgSelectorStore } from '@/stores/imgSelector'
+import PixiRecorder from '@/utils/pixiRecorder'
+import vuex from '@/vuex'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
@@ -73,7 +73,7 @@ const goToEditor = () => {
   router.push('/editor')
 }
 
-const openImgSelecotr = () => { 
+const openImgSelecotr = () => {
 
   setShowImgSelector(2)
   /**
@@ -93,6 +93,10 @@ const openImgSelecotr = () => {
 }
 const exportVedio = () => {
   const pixiRecorder = new PixiRecorder()
+  pixiRecorder.genVideo()
+    .then(res => {
+      console.log('gen vedio', res)
+    })
 }
 </script>
 <style scoped lang="scss">
