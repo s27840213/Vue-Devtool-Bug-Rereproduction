@@ -1,8 +1,7 @@
-import { useEditorStore } from '@/stores/editor'
-import { useGlobalStore } from '@/stores/global'
-import { useWebViewStore } from '@/stores/webView'
-import { generalUtils, nativeAPIUtils } from '@nu/shared-lib'
-import { storeToRefs } from 'pinia'
+import store from '@/store'
+import generalUtils from '@/utils/generalUtils'
+import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
+import { nextTick } from 'vue'
 
 export interface IGeneralSuccessResponse {
   flag: '0'
@@ -40,10 +39,16 @@ export interface IAlbumListResponse {
   myAlbum: IAlbum[]
 }
 
+export interface IAlbumContent {
+  id: string
+  width: number
+  height: number
+}
+
 export interface IAlbumContentResponse {
   flag: number
   msg?: string
-  content: string[]
+  content: IAlbumContent[]
   pageIndex: number
   nextPage?: number
 }
@@ -68,8 +73,8 @@ export interface ISaveAssetFromUrlResponse {
   imageId?: string
 }
 
-class WebViewUtils extends nativeAPIUtils<IUserInfo> {
-  STANDALONE_USER_INFO: IUserInfo = {
+class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
+  DEFAULT_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
     osVer: '100.0',
@@ -84,59 +89,50 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
 
   tutorialFlags = {} as { [key: string]: boolean }
 
-  getUserInfoFromStore(): IUserInfo {
-    return this.STANDALONE_USER_INFO
-  }
-
-  get globalStore() {
-    return storeToRefs(useGlobalStore())
-  }
-
-  get webViewStore() {
-    return storeToRefs(useWebViewStore())
-  }
-
-  get isStandaloneMode() {
-    const { standaloneMode } = this.globalStore
-    return standaloneMode.value
+  get inBrowserMode() {
+    return store.getters['cmWV/getInBrowserMode']
   }
 
   get isDuringCopy() {
-    const { isDuringCopy } = this.webViewStore
-    return isDuringCopy.value
+    return store.getters['cmWV/getIsDuringCopy']
+  }
+
+  getUserInfoFromStore(): IUserInfo {
+    return store.getters['cmWV/getUserInfo']
   }
 
   setDuringCopy(bool: boolean) {
-    const { setDuringCopy } = useWebViewStore()
-    setDuringCopy(bool)
+    store.commit('cmWV/SET_isDuringCopy', bool)
+  }
+
+  setNoBg(bool: boolean) {
+    store.commit('cmWV/SET_isNoBg', bool)
   }
 
   detectIfInApp() {
     if (window.webkit?.messageHandlers?.REQUEST === undefined) {
-      this.enterStandaloneMode()
+      this.enterBrowserMode()
     }
   }
 
-  enterStandaloneMode() {
-    const globalStore = useGlobalStore()
-    const { setStandaloneMode } = globalStore
-    setStandaloneMode(true)
+  enterBrowserMode() {
+    store.commit('cmWV/SET_inBrowserMode', true)
   }
 
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.isStandaloneMode) return this.STANDALONE_USER_INFO
-    const userInfo = await this.callIOSAsAPI('APP_LAUNCH', this.getEmptyMessage())
+    if (this.inBrowserMode) return this.DEFAULT_USER_INFO
+    const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH', this.getEmptyMessage())
     return userInfo as IUserInfo
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {
-    const albumList = await this.callIOSAsAPI('GET_ALBUM_LIST', this.getEmptyMessage())
+    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST', this.getEmptyMessage())
 
     return albumList as IAlbumListResponse
   }
 
   async getAlbumContent(albumId: string, pageIndex: number): Promise<IAlbumContentResponse> {
-    const albumList = await this.callIOSAsAPI('GET_ALBUM_CONTENT', {
+    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_CONTENT', {
       albumId,
       pageIndex,
     })
@@ -145,23 +141,25 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   }
 
   async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string, options?: { key?: string, subPath?: string, name?: string }): Promise<ISaveAssetFromUrlResponse> {
-    return this.callIOSAsAPI('SAVE_FILE_FROM_URL', { type, url, ...options }) as Promise<ISaveAssetFromUrlResponse>
+    return this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { type, url, ...options }) as Promise<ISaveAssetFromUrlResponse>
   }
 
   async switchDomain(url: string): Promise<void> {
-    await this.callIOSAsAPI('SWITCH_DOMAIN', {
+    await this.callIOSAsHTTPAPI('SWITCH_DOMAIN', {
       url,
     })
   }
 
-  async copyEditorCore(sender: () => Promise<{flag: string, imageId: string}>) {
+  async copyEditorCore(sender: (...arg: any[]) => Promise<{flag: string, imageId: string}>,
+    { senderArgs = [], preArgs = {}, postArgs = {} }: { senderArgs?: any[], preArgs?: Record<string, unknown>, postArgs?: Record<string, unknown> }
+  ) {
     return new Promise<{flag: string, imageId: string}>(resolve => {
       const executor = () => {
         nextTick(() => {
-          this.preCopyEditor()
+          this.preCopyEditor(preArgs)
           setTimeout(() => {
-            sender().then(({ flag, imageId }) => {
-              this.postCopyEditor()
+            sender(...senderArgs).then(({ flag, imageId }) => {
+              this.postCopyEditor(postArgs)
               resolve({ flag, imageId })
             })
           }, 500) // wait for soft keyboard to close
@@ -171,35 +169,41 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     })
   }
 
-  async copyEditor(): Promise<{flag: string, imageId: string}> {
-    return await this.copyEditorCore(this.sendCopyEditor.bind(this))
+  async copyEditor(pageSize: { width: number, height: number }, noBg = false): Promise<{flag: string, imageId: string}> {
+    return await this.copyEditorCore(this.sendCopyEditor.bind(this), {
+      senderArgs: [pageSize],
+      preArgs: { noBg },
+    })
   }
 
-  preCopyEditor() {
+  preCopyEditor({ noBg = false }: { noBg?: boolean }) {
+    this.setNoBg(noBg)
     this.setDuringCopy(true)
   }
 
-  postCopyEditor() {
+  // eslint-disable-next-line no-empty-pattern
+  postCopyEditor({}: object) { // currently no args, only for type-check of this.copyEditorCore to pass
+    this.setNoBg(false)
     this.setDuringCopy(false)
   }
 
-  async sendCopyEditor(): Promise<{flag: string, imageId: string}> {
+  async sendCopyEditor(pageSize: { width: number, height: number }): Promise<{flag: string, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
     return {
-      flag: await this.sendCopyEditorCore('editorSave', imageId),
+      flag: await this.sendCopyEditorCore('editorSave', pageSize, imageId),
       imageId
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', imageId: string, imagePath?: string): Promise<string>
-  async sendCopyEditorCore(action: 'editorDownload'): Promise<string>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', imageId?: string, imagePath?: string): Promise<string> {
-    if (this.isStandaloneMode) {
+  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string): Promise<string>
+  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<string>
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string): Promise<string> {
+    if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return '0'
     }
-    const { x, y, width, height } = this.getEditorDimensions()
-    const data = await this.callIOSAsAPI('SCREENSHOT', {
+    const { x, y, width, height } = this.getEditorDimensions(pageSize)
+    const data = await this.callIOSAsHTTPAPI('SCREENSHOT', {
       action,
       width,
       height,
@@ -211,16 +215,13 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     return (data?.flag as string) ?? '0'
   }
 
-  getEditorDimensions(): { x: number; y: number; width: number; height: number } {
-    const store = useEditorStore()
-    const {pageScaleRatio, pageSize} = storeToRefs(store)
-    const { width: pageWidth, height: pageHeight } = pageSize.value
+  getEditorDimensions(pageSize: { width: number, height: number }): { x: number; y: number; width: number; height: number } {
     const editorEle = document.getElementById('screenshot-target') as HTMLElement
     const defaultDimensions = {
       x: 0,
       y: 0,
-      width: pageWidth * pageScaleRatio.value,
-      height: pageHeight * pageScaleRatio.value,
+      width: pageSize.width,
+      height: pageSize.height
     }
     if (!editorEle) {
       return defaultDimensions
@@ -241,19 +242,20 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
     return { x, y, width, height }
   }
 
-  async getState(key: string): Promise<IGetStateResponse | undefined> {
-    if (this.isStandaloneMode) return
-    return await this.callIOSAsAPI('GET_STATE', { key }) as IGetStateResponse
+  async getState(key: string): Promise<any | undefined> {
+    if (this.inBrowserMode) return
+    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
+    return data.value ? JSON.parse(data.value) : undefined
   }
 
   async setState(key: string, value: any) {
-    if (this.isStandaloneMode) return
-    await this.callIOSAsAPI('SET_STATE', { key, value })
+    if (this.inBrowserMode) return
+    await this.callIOSAsHTTPAPI('SET_STATE', { key, value })
   }
 
   async fetchTutorialFlags() {
     const res = await this.getState('tutorialFlags')
-    this.tutorialFlags = res && res.value ? JSON.parse(res.value) : {}
+    this.tutorialFlags = res ?? {}
   }
 
   async updateTutorialFlags(updateItem: { [key: string]: boolean }) {
@@ -262,4 +264,4 @@ class WebViewUtils extends nativeAPIUtils<IUserInfo> {
   }
 }
 
-export default new WebViewUtils()
+export default new CmWVUtils()

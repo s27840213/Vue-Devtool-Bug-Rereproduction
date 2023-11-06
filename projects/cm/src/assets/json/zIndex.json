@@ -1,8 +1,10 @@
-[  
+[
+  "page",
+  "canvas",
   "modal-mask",
   "bottom-panel",
   "img-selector",
-  "page",
+  "asset-panel",
   "tutorial-highlight",
   "tutorial-overlay"
 ]

@@ -50,6 +50,7 @@ div(class="search-bar" :class="{vivisticker: vivisticker !== 'none'}")
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -58,7 +59,7 @@ export default defineComponent({
   props: {
     placeholder: {
       type: String,
-      required: true
+      default: () => i18n.global.t('NN0037'),
     },
     clear: {
       type: Boolean

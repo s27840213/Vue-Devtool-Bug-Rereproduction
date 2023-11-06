@@ -1,10 +1,10 @@
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
+import store from '@/store'
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'
-import store from '@/store'
 
 export abstract class WebViewUtils<T extends { [key: string]: any }> {
-  abstract STANDALONE_USER_INFO: T
+  abstract DEFAULT_USER_INFO: T
   abstract CALLBACK_MAPS: { [key: string]: string[] }
 
   eventTestMode = false
@@ -44,19 +44,23 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 
   registerCallbacks(type: string) {
     for (const callbackName of this.CALLBACK_MAPS[type]) {
-      (window as any)[callbackName] = (...args: any[]) => {
-        if (!this.filterCallbackLog(callbackName)) {
-          logUtils.setLogAndConsoleLog(callbackName, ...args)
-        }
-        this.eventTestMode && this.callbackRecordHook(callbackName, ...args)
-        const self = this as any
-        self[callbackName].bind(this)(...args)
+      this.registerCallbacksCore(callbackName)
+    }
+  }
+
+  registerCallbacksCore(callbackName: string) {
+    (window as any)[callbackName] = (...args: any[]) => {
+      if (!this.filterCallbackLog(callbackName)) {
+        logUtils.setLogAndConsoleLog(callbackName, ...args)
       }
+      this.eventTestMode && this.callbackRecordHook(callbackName, ...args)
+      const self = this as any
+      self[callbackName].bind(this)(...args)
     }
   }
 
   getDefaultUserInfo(): T {
-    return this.STANDALONE_USER_INFO
+    return this.DEFAULT_USER_INFO
   }
 
   getEmptyMessage(): { [key: string]: string } {
@@ -195,10 +199,11 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
       })
     }
   }
-}
+  // common interfaces
 
-export const dummyWVUtils = new (class DummyWVUtils extends WebViewUtils<{ [key: string]: any }> {
-  STANDALONE_USER_INFO: { [key: string]: any } = {}
-  CALLBACK_MAPS: { [key: string]: string[] } = {}
-  getUserInfoFromStore(): { [key: string]: any } { return this.STANDALONE_USER_INFO }
-})
+  get inBrowserMode(): boolean { return false }
+
+  async getState(key: string): Promise<WEBVIEW_API_RESULT> { return undefined }
+  async setState(key: string, value: any) { /* only interface */ }
+  //
+}

@@ -1,7 +1,7 @@
-import generalUtils from './generalUtils'
-import logUtils from './logUtils'
-
-export type WEBVIEW_API_RESULT = unknown | null | undefined // 'null' is for timeouted or error occurred, while 'undefined' means no result.
+import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
+import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
+import { WebViewUtils } from './webViewUtils'
 
 export interface IRequest {
   eventId: string
@@ -9,50 +9,7 @@ export interface IRequest {
   message: any
 }
 
-export default abstract class WebViewUtils<T extends { [key: string]: any }> {
-  abstract STANDALONE_USER_INFO: T
-  abstract CALLBACK_MAPS: { [key: string]: string[] }
-
-  callbackMap = {} as {
-    [key: string]: (res: { data: WEBVIEW_API_RESULT; isTimeouted: boolean }) => void
-  }
-
-  abstract getUserInfoFromStore(): T
-
-  filterLog(messageType: string, message: any): boolean {
-    // implementation classes can filter out logs for certain messageType with certain messages
-    return false
-  }
-
-  filterCallbackLog(callbackName: string) {
-    // implementation classes can filter out logs for certain callback
-    return false
-  }
-
-  registerCallbacks(type: string) {
-    for (const callbackName of this.CALLBACK_MAPS[type]) {
-      this.registerCallbacksCore(callbackName)
-    }
-  }
-
-  registerCallbacksCore(callbackName: string) {
-    ;(window as any)[callbackName] = (...args: any[]) => {
-      if (!this.filterCallbackLog(callbackName)) {
-        logUtils.setLogAndConsoleLog(callbackName, ...args)
-      }
-      const self = this as any
-      self[callbackName].bind(this)(...args)
-    }
-  }
-
-  getDefaultUserInfo(): T {
-    return this.STANDALONE_USER_INFO
-  }
-
-  getEmptyMessage(): { [key: string]: string } {
-    return { empty: '' }
-  }
-
+export abstract class HTTPLikeWebViewUtils<T extends { [key: string]: any }> extends WebViewUtils<T> {
   makeAPIRequest(event: string, message: any): IRequest {
     const eventId = generalUtils.generateAssetId()
     return {
@@ -60,37 +17,6 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
       message,
       eventId,
     }
-  }
-
-  sendToIOS(messageType: string, message: any, throwsError = false) {
-    if (!this.filterLog(messageType, message)) {
-      logUtils.setLogAndConsoleLog(messageType, message)
-    }
-    try {
-      const webkit = window.webkit
-      if (!webkit) return
-      const messageHandler = webkit.messageHandlers[messageType]
-      if (!messageHandler) {
-        throw new Error(`message type: ${messageType} does not exist!`)
-      }
-      messageHandler.postMessage(generalUtils.unproxify(message))
-    } catch (error) {
-      if (throwsError) {
-        throw error
-      } else {
-        logUtils.setLogForError(error as Error)
-      }
-    }
-  }
-
-  checkVersion(targetVersion: string) {
-    const currVer = this.getUserInfoFromStore().appVer ?? '0.0'
-    return generalUtils.versionCheck({ greaterThan: targetVersion, version: currVer })
-  }
-
-  checkOSVersion(targetVersion: string) {
-    const currVer = this.getUserInfoFromStore().osVer ?? '0.0'
-    return generalUtils.versionCheck({ greaterThan: targetVersion, version: currVer })
   }
 
   async sendRequest(
@@ -103,7 +29,7 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
     })
   }
 
-  async callIOSAsAPI(
+  async callIOSAsHTTPAPI(
     type: string,
     message: any,
     { timeout = 5000, retry = false, retryTimes = 0 } = {},
@@ -137,7 +63,7 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
           if (retry && retryTimes < 2) {
             logUtils.setLogAndConsoleLog(`retry: ${retryTimes + 1}`)
             await generalUtils.sleep(1000)
-            result = await this.callIOSAsAPI(type, message, {
+            result = await this.callIOSAsHTTPAPI(type, message, {
               timeout,
               retry,
               retryTimes: retryTimes + 1,
@@ -166,7 +92,7 @@ export default abstract class WebViewUtils<T extends { [key: string]: any }> {
     errorMsg,
   }: {
     eventId: string
-    output: unknown
+    output: any
     hasInternalError: string
     errorMsg: string
   }) {

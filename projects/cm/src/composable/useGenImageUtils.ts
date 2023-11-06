@@ -3,8 +3,8 @@ import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import type { GenImageResult } from '@/types/api'
-import cmWVUtils from '@/utils/cmWVUtils'
 import { generalUtils, logUtils } from '@nu/shared-lib'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { useEventBus } from '@vueuse/core'
 
 const useGenImageUtils = () => {
@@ -13,7 +13,7 @@ const useGenImageUtils = () => {
   const { userId, prevGenParams } = storeToRefs(useUserStore())
   const editorStore = useEditorStore()
   const { setInitImgSrc } = editorStore
-  const { editorType, pageSize } = storeToRefs(editorStore)
+  const { editorType, pageSize, pageScaleRatio } = storeToRefs(useEditorStore())
 
   const { uploadImage, polling } = useUploadUtils()
 
@@ -51,13 +51,16 @@ const useGenImageUtils = () => {
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
-    const { flag, imageId } = await cmWVUtils.copyEditor()
+    const { width: pageWidth, height: pageHeight } = pageSize.value
+    const size = Math.max(pageWidth, pageHeight)
+    const { flag, imageId } = await cmWVUtils.copyEditor({
+      width: pageWidth * pageScaleRatio.value,
+      height: pageHeight * pageScaleRatio.value,
+    })
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
-    const { width: pageWidth, height: pageHeight } = pageSize.value
-    const size = Math.max(pageWidth, pageHeight)
     return new Promise<void>((resolve) => {
       generalUtils.toDataURL(`chmix://screenshot/${imageId}?lsize=${size}`, (dataUrl) => {
         setInitImgSrc(dataUrl)

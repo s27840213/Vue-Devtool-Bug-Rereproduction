@@ -292,8 +292,7 @@ export default defineComponent({
       }
     },
     async onEffectClick(effect: IEffect): Promise<void> {
-      if (this.$isPic && !paymentUtils.checkPro(effect, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(effect, 'text')) return
+      if (!paymentUtils.checkProApp(effect, 'pro-text', 'text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
 
@@ -303,8 +302,7 @@ export default defineComponent({
       }
     },
     async handleSelectInput(attrs: IEffectOptionSelect['select'][number]) {
-      if (this.$isPic && !paymentUtils.checkPro(attrs, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(attrs, 'text')) return
+      if (!paymentUtils.checkProApp(attrs, 'pro-text', 'text')) return
       await this.setEffect({ effect: attrs.preset })
       this.recordChange()
     },

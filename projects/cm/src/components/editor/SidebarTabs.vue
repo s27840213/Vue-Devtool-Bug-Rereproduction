@@ -20,11 +20,13 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
         :class="tab.disabled ? 'text-app-icon-dark' : 'text-app-btn-primary-text'") {{ tab.text }}
     div(
       v-if="tab.icon === currActiveFeature && tab.subTabs"
-      class="flex flex-col items-center justify-center gap-2 bg-app-tab-disable rounded-full")
+      class="flex flex-col items-center justify-center gap-2 bg-neutral-light-active/50 rounded-full")
       div(
         v-for="(subTab, index) in tab.subTabs"
         :key="`${subTab.icon}-${index}`"
-        class="flex flex-col items-center justify-center gap-2 p-4 box-border")
+        class="flex flex-col items-center justify-center gap-2 p-4 box-border"
+        @click.stop="handleTabAction(subTab)"
+        @pointerdown.stop)
         cm-svg-icon(
           :style="subTab.styles"
           :iconName="subTab.icon"
@@ -37,15 +39,17 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
+import { useImgSelectorStore } from '@/stores/imgSelector'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import { storeToRefs } from 'pinia'
 const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
   icon: string
-  text?: string
-  panelType?: string
+  text: string
+  panelType: string
   hidden?: boolean
   disabled?: boolean
   forPro?: boolean
@@ -59,29 +63,24 @@ const { t } = useI18n()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
 const { currActiveFeature } = storeToRefs(editorStore)
+const { setShowImgSelector } = useImgSelectorStore()
 
 const addSubTabs = computed(() => {
   return [
     {
       icon: 'photo-rect',
       text: t('CM0050'),
-      panelType: '',
-      hidden: false,
-      disabled: false,
+      panelType: 'img',
     },
     {
       icon: 'objects',
       text: t('CM0049'),
       panelType: '',
-      hidden: false,
-      disabled: false,
     },
     {
       icon: 'text',
       text: t('NN0494'),
       panelType: '',
-      hidden: false,
-      disabled: false,
     },
   ]
 })
@@ -91,7 +90,6 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'add',
       text: t('CM0048'),
       panelType: '',
-      hidden: false,
       disabled: true,
       subTabs: addSubTabs.value,
       styles: {
@@ -103,41 +101,31 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'selection',
       text: t('CM0051'),
       panelType: '',
-      hidden: false,
     },
     {
       icon: 'brush',
       text: t('CM0017'),
       panelType: '',
-      hidden: false,
-      disabled: false,
     },
     {
       icon: 'auto-fill',
       text: t('CM0052'),
       panelType: '',
-      hidden: false,
-      disabled: false,
     },
     {
       icon: 'reverse',
       text: t('CM0019'),
       panelType: '',
-      hidden: false,
-      disabled: false,
     },
     {
       icon: 'ban',
       text: t('CM0029'),
       panelType: '',
-      hidden: false,
-      disabled: false,
     },
     {
       icon: 'canvas',
       text: t('CM0053'),
       panelType: '',
-      hidden: false,
       disabled: true,
     },
   ]
@@ -171,8 +159,20 @@ const handleTabAction = (tab: ISidebarTab) => {
       clearCtx()
       break
     }
-    // case 'canvas': {
-    // }
+    case 'canvas': {
+      break
+    }
+    case 'photo-rect':
+      setShowImgSelector(1)
+      break
+    case 'objects': {
+      assetPanelUtils.setCurrActiveTab('object')
+      break
+    }
+    case 'text': {
+      assetPanelUtils.setCurrActiveTab('text')
+      break
+    }
   }
 }
 </script>

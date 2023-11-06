@@ -75,7 +75,7 @@ const goToEditor = () => {
 
 const openImgSelecotr = () => { 
 
-  setShowImgSelector(true)
+  setShowImgSelector(2)
   /**
    * @Note below codes is used to test in the browser
    */

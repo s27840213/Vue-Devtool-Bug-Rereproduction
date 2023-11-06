@@ -121,14 +121,14 @@ export default defineComponent({
       templatesIgLayout: 'igLayout'
     }),
     ...mapGetters({
-      isInCategory: 'vivisticker/getIsInCategory',
-      isShowAllRecently: 'vivisticker/getShowAllRecently',
+      isInCategory: 'assetPanel/getIsInCategory',
+      isShowAllRecently: 'assetPanel/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isProcessing: 'bgRemove/getIsProcessing',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
-      currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
+      currActiveObjectFavTab: 'assetPanel/getCurrActiveObjectFavTab',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
     isUs(): boolean {
@@ -449,8 +449,8 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
-      setIsInCategory: 'vivisticker/SET_isInCategory',
-      setShowAllRecently: 'vivisticker/SET_showAllRecently',
+      setIsInCategory: 'assetPanel/SET_isInCategory',
+      setShowAllRecently: 'assetPanel/SET_showAllRecently',
       setBgImageControl: 'SET_backgroundImageControl',
       setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
     }),

@@ -1,6 +1,7 @@
 <template lang="pug">
-div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'desktop'}`"
+div(:class="`nubtn ${proj} ${theme} ${sizeClass} ${status} ${device}`"
     v-hint="hint"
+    ref="root"
     @click="click")
   svg-icon(v-if="theme.includes('icon') && iconName"
           :iconName="iconName" :iconWidth="iconSize" :iconColor="iconColor")
@@ -9,7 +10,8 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, ref } from 'vue'
+import useTapTransition from '@/composable/useTapTransition'
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
@@ -55,10 +57,26 @@ const component = defineComponent({
       default: ''
     },
   },
+  setup() {
+    const root = ref(null)
+    const pressed = ref(false)
+    useTapTransition(root, pressed)
+    return {
+      root,
+      pressed,
+    }
+  },
   computed: {
-    status(): 'default' | 'active' | 'disabled' {
+    proj() {
+      return process.env.VUE_APP_APP_NAME as 'pic' | 'stk' | 'cm'
+    },
+    device() {
+      return this.$isTouchDevice() ? 'mobile' : 'desktop'
+    },
+    status(): 'default' | 'active' | 'disabled' | 'pressed' {
       return this.disabled ? 'disabled'
-        : this.active ? 'active' : 'default'
+        : this.pressed ? 'pressed'
+          : this.active ? 'active' : 'default'
     },
     sizeClass(): string {
       return this.size.replace('-', ' ')
@@ -133,6 +151,24 @@ export default component
   }
 }
 
+@mixin default-size-cm {
+  &.sm {
+    font-size: 12px;
+    line-height: 16px;
+    height: 32px;
+  }
+  &.mid {
+    font-size: 14px;
+    line-height: 20px;
+    height: 40px;
+  }
+  &:not(.full) {
+    padding: 0 16px;
+  }
+  font-weight: 700;
+  border-radius: 50px;
+}
+
 // Common blue color
 // Color rule priority: disabled > hover > active > default
 .default {
@@ -141,7 +177,7 @@ export default component
 .active {
   --blue: #{setColor(blue-active)};
 }
-.desktop:hover, .hover { // In this way, .desktop:hover can overwrite default and active but not disabled.
+.desktop:hover, .hover, .pressed { // In this way, .desktop:hover can overwrite default and active but not disabled.
   --blue: #{setColor(blue-hover)};
 }
 .desktop.disabled, .mobile.disabled { // Add .desktop can make .disabled css weight > .desktop:hover
@@ -149,10 +185,23 @@ export default component
 }
 
 // Themes rules
-.nubtn.primary {
+.nubtn.primary.pic {
   @include default-size;
   color: setColor(white);
   background-color: var(--blue);
+}
+.nubtn.primary.cm {
+  @include default-size-cm;
+  color: #323232;
+  &.default {
+    background-color: #FDD248;
+  }
+  &.desktop:hover, &.hover, &.pressed ,&.active {
+    background-color: #E4BD41;
+  }
+  &.disabled {
+    background-color: #A3A3A3;
+  }
 }
 .nubtn.outline {
   @include default-size;
@@ -171,7 +220,7 @@ export default component
     color: setColor(blue-1);
     border: 2px solid setColor(blue-1);
   }
-  &.desktop:hover, &.hover {
+  &.desktop:hover, &.hover, &.pressed {
     color: setColor(blue-hover);
   }
   &.desktop.disabled, &.mobile.disabled {
@@ -207,7 +256,7 @@ export default component
   &.active {
     background-color: setColor(blue-3);
   }
-  &.desktop:hover, &.hover {
+  &.desktop:hover, &.hover, &.pressed {
     background-color: setColor(blue-3, 0.5);
   }
   &.desktop.disabled, &.mobile.disabled {
@@ -228,7 +277,7 @@ export default component
   &.active {
     background-color: setColor(blue-3);
   }
-  &.desktop:hover, &.hover {
+  &.desktop:hover, &.hover, &.pressed {
     background-color: setColor(blue-4);
   }
   &.desktop.disabled, &.mobile.disabled {
@@ -247,7 +296,7 @@ export default component
     color: setColor(blue-1);
     background-color: setColor(blue-4);
   }
-  &.desktop:hover, &.hover {
+  &.desktop:hover, &.hover, &.pressed {
     color: setColor(blue-1);
     background-color: setColor(white);
   }
@@ -268,7 +317,7 @@ export default component
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);
   }
-  &.desktop:hover, &.hover {
+  &.desktop:hover, &.hover, &.pressed {
     color: setColor(white);
     border: 1px solid setColor(white);
   }
@@ -286,14 +335,14 @@ export default component
   &.active {
     background-color: #D9624E;
   }
-  &.desktop:hover, &.hover {
+  &.desktop:hover, &.hover, &.pressed {
     background-color: #FC5757;
   }
   &.desktop.disabled, &.mobile.disabled {
     background-color: setColor(gray-4);
   }
 }
-.nubtn.secondary {
+.nubtn.secondary.pic {
   @include default-size;
   &.default {
     color: setColor(gray-2);
@@ -303,7 +352,7 @@ export default component
     color: setColor(gray-2);
     border: 1px solid setColor(gray-2);
   }
-  &.desktop:hover, &.hover {
+  &.desktop:hover, &.hover, &.pressed {
     color: setColor(gray-2);
     background-color: setColor(gray-4);
     border: 1px solid setColor(gray-3);
@@ -314,4 +363,18 @@ export default component
     border: none;
   }
 }
+.nubtn.secondary.cm {
+  @include default-size-cm;
+  color: #323232;
+  &.default {
+    background-color: #FEF1C6;
+  }
+  &.active {
+    background-color: #CAA83A;
+  }
+  &.disabled {
+    background-color: #A3A3A3;
+  }
+}
+
 </style>

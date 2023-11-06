@@ -22,6 +22,7 @@ import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -60,7 +61,7 @@ export default defineComponent({
         return
       }
       if (this.item.assetInfo.isFrame) {
-        if (!stkWVUtils.checkPro(this.item.assetInfo, 'frame')) return
+        if (!paymentUtils.checkProApp(this.item.assetInfo, undefined, 'frame')) return
         stkWVUtils.fetchMyDesign(this.item).then(data => {
           if (stkWVUtils.checkForEmptyFrame(data.pages)) {
             // handle Dialog and File-selector
@@ -82,7 +83,7 @@ export default defineComponent({
           }
         })
       } else {
-        if (!stkWVUtils.checkPro(this.item.assetInfo, 'object')) return
+        if (!paymentUtils.checkProApp(this.item.assetInfo, undefined, 'object')) return
         stkWVUtils.fetchMyDesign(this.item).then(data => {
           const pages = generalUtils.deepCopy(data.pages)
           stkWVUtils.sendScreenshotUrl(stkWVUtils.createUrlForJSON({ page: pages[0], source: 'mydesign' }))

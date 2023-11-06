@@ -25,9 +25,9 @@ div(class="editing-options w-full")
       span(class="typo-body-sm transition-colors duration-300" :class="`text-${tabColor(tab)}`") {{ tab.text }}
 </template>
 <script setup lang="ts">
-import useTapTransition from '@/composable/useTapTransition'
 import { useCanvasStore } from '@/stores/canvas'
 import type { ColorSlip } from '@/types/color'
+import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { storeToRefs } from 'pinia'
 /**
@@ -43,7 +43,7 @@ interface IFeatureTab {
 }
 const canvasStore = useCanvasStore()
 const { setCanvasStoreState } = canvasStore
-const { brushSize , canvasMode} = storeToRefs(canvasStore)
+const { brushSize, canvasMode } = storeToRefs(canvasStore)
 const setBrushSize = (value: number) => {
   setCanvasStoreState({ brushSize: value })
 }
@@ -103,7 +103,7 @@ const handleTabAction = (tab: IFeatureTab) => {
     case 'erase':
     case 'move': {
       setCanvasStoreState({
-        canvasMode: tab.icon
+        canvasMode: tab.icon,
       })
       break
     }
@@ -122,6 +122,5 @@ watchEffect(() => {
   })
 })
 // #endregion
-
 </script>
 <style lang="scss"></style>

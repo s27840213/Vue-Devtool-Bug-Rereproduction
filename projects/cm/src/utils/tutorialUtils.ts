@@ -1,5 +1,5 @@
 import { useTutorialStore } from '@/stores/tutorial'
-import cmWVUtils from '@/utils/cmWVUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 
 type ITutorialName = 'powerful-fill'
 

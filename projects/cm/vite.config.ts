@@ -1,12 +1,12 @@
 import vuei18n from '@intlify/unplugin-vue-i18n/vite'; // https://vue-i18n.intlify.dev/guide/advanced/optimization.html
-import vue from '@vitejs/plugin-vue'
-import fs from 'fs'
-import path from 'path'
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { defineConfig, loadEnv } from 'vite'
-import svgSpritePlugin from 'vite-plugin-svg-sprite'
-import transformPlugin from 'vite-plugin-transform'
+import vue from '@vitejs/plugin-vue';
+import fs from 'fs';
+import path from 'path';
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
+import { defineConfig, loadEnv } from 'vite';
+import svgSpritePlugin from 'vite-plugin-svg-sprite';
+import transformPlugin from 'vite-plugin-transform';
 
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
@@ -82,6 +82,9 @@ export default defineConfig({
           }
         }
       },
+    }, {
+      find: '~',
+      replacement: resolve('node_modules/'),
     }]
   },
   css: {

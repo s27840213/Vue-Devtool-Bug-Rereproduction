@@ -120,6 +120,7 @@ import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -166,8 +167,8 @@ export default defineComponent({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultViviStickerBgColors',
       getBackgroundColor: 'getBackgroundColor',
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      isTabInCategory: 'assetPanel/getIsInCategory',
+      isTabShowAllRecently: 'assetPanel/getShowAllRecently',
       isInBgShare: 'vivisticker/getIsInBgShare',
       shareItem: 'vivisticker/getShareItem',
       shareColor: 'vivisticker/getShareColor',
@@ -455,13 +456,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          stkWVUtils.setShowAllRecently('background', true)
+          assetPanelUtils.setShowAllRecently('background', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        stkWVUtils.setIsInCategory('background', true)
+        assetPanelUtils.setIsInCategory('background', true)
       } else {
-        stkWVUtils.setShowAllRecently('background', false)
+        assetPanelUtils.setShowAllRecently('background', false)
       }
     },
     handleLoadMore() {

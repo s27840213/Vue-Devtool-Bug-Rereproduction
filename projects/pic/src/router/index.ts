@@ -234,7 +234,7 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: () => import('@/views/NubtnList.vue')
+    component: () => import('@nu/vivi-lib/views/NubtnList.vue')
   })
   routes.push({
     path: 'nativeevttest',
