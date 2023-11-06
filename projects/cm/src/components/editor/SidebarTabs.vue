@@ -90,7 +90,6 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'add',
       text: t('CM0048'),
       panelType: '',
-      disabled: true,
       subTabs: addSubTabs.value,
       styles: {
         transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
