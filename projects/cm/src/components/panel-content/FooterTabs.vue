@@ -1,7 +1,8 @@
 <template lang="pug">
 div(class="flex gap-24 pt-8 pl-24 pr-24 pb-8")
   div(class="flex items-center justify-center h-44")
-    div(class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22")
+    div(class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22"
+        @click="handleBack")
       svg-icon(iconName="chevron-down" iconWidth="14px" iconColor="app-tab-bg")
   div(class="flex gap-24 overflow-scroll no-scrollbar")
     template(v-for="tab in settingTabs")
@@ -31,6 +32,7 @@ import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { mapGetters } from 'vuex'
 
@@ -393,6 +395,9 @@ export default defineComponent({
     settingTabColor(tab: IFooterTab): string {
       return (tab.disabled || this.isLocked) ? 'app-tab-disable' : this.tabActive(tab) ? 'app-tab-active' : 'app-tab-default'
     },
+    handleBack() {
+      groupUtils.deselect()
+    }
   }
 })
 </script>
