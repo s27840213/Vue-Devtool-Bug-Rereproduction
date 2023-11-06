@@ -1,13 +1,16 @@
+import useSteps from '@/composable/useSteps'
 import type { EditorFeature, EditorType, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
 import { useCanvasStore } from './canvas'
-export interface IPage {
-  width: number
-  height: number
-  backgroundColor: string
+
+export interface IGenResult {
+  id: string
+  url: string
 }
 
 interface IEditorStore {
@@ -17,10 +20,12 @@ interface IEditorStore {
   editorType: EditorType
   maskDataUrl: string
   isGenerating: boolean
-  generatedResult: string
+  generatedResults: Array<IGenResult>
   showGenResult: boolean
+  currGenResultIndex: number
   stepsTypesArr: Array<'canvas' | 'editor'>
   currStepTypeIndex: number
+  initImgSrc: string
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -31,10 +36,12 @@ export const useEditorStore = defineStore('editor', {
     editorType: 'powerful-fill',
     maskDataUrl: '',
     isGenerating: false,
-    generatedResult: '',
+    generatedResults: [],
     showGenResult: false,
+    currGenResultIndex: 0,
     stepsTypesArr: [],
     currStepTypeIndex: -1,
+    initImgSrc: '',
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -98,11 +105,24 @@ export const useEditorStore = defineStore('editor', {
     setIsGenerating(isGenerating: boolean) {
       this.isGenerating = isGenerating
     },
-    setGeneratedResult(result: string) {
-      this.generatedResult = result
+    unshiftGenResults(url: string, id: string) {
+      this.generatedResults.unshift({
+        url,
+        id,
+      })
+    },
+    updateGenResult(url: string, id: string) {
+      const index = this.generatedResults.findIndex((item) => item.id === id)
+      Object.assign(this.generatedResults[index], { url })
+    },
+    clearGeneratedResults() {
+      this.generatedResults = []
     },
     setShowGenResult(show: boolean) {
       this.showGenResult = show
+    },
+    setGenResultIndex(index: number) {
+      this.currGenResultIndex = index
     },
     undo() {
       stepsUtils.undo()
@@ -120,9 +140,32 @@ export const useEditorStore = defineStore('editor', {
       this.stepsTypesArr.push(type)
     },
     setCurrStepTypeIndex(index: number) {
-      console.log(index, this.stepsTypesArr.length)
       if (index < 0 || index >= this.stepsTypesArr.length) return
       this.currStepTypeIndex = index
+    },
+    resetStepsTypesArr() {
+      this.stepsTypesArr = []
+      this.currGenResultIndex = -1
+    },
+    setInitImgSrc(src: string) {
+      this.initImgSrc = src
+    },
+    keepEditingInit() {
+      this.setShowGenResult(false)
+      this.createNewPage(this.pageSize.width, this.pageSize.height)
+
+      assetUtils.addImage(
+        this.currGenResultIndex === -1
+          ? this.initImgSrc
+          : this.generatedResults[this.currGenResultIndex].url,
+        this.pageAspectRatio,
+        {
+          fit: 1,
+        },
+      )
+      groupUtils.deselect()
+
+      useSteps().reset()
     },
   },
 })

@@ -34,7 +34,7 @@ const useCanvasUtils = (
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
-  const { setCurrStep, pushStep } = canvasStore
+  const { setCurrStep, pushStep, clearStep } = canvasStore
   const {
     brushSize,
     resultCanvas,
@@ -470,6 +470,10 @@ const useCanvasUtils = (
     }
   }
 
+  const reset = () => {
+    clearStep()
+  }
+
   return {
     setCanvasStoreState,
     reverseSelection,
@@ -480,6 +484,7 @@ const useCanvasUtils = (
     getCanvasBlob,
     undo,
     redo,
+    reset,
     drawImageToCtx,
     isInCanvasFirstStep,
     isInCanvasLastStep,

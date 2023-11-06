@@ -60,21 +60,27 @@ class AssetUtils {
   get getAsset() {
     return store.getters.getAsset
   }
+
   get getPage() {
     return store.getters.getPage
   }
+
   get pageSize() {
     return store.getters.getPageSize(pageUtils.currFocusPageIndex)
   }
+
   get getLayer() {
     return store.getters.getLayer
   }
+
   get layerIndex() {
     return store.getters.getCurrSelectedIndex
   }
+
   get getLayers() {
     return store.getters.getLayers
   }
+
   get getPages() {
     return store.getters.getPages
   }
@@ -864,7 +870,9 @@ class AssetUtils {
     let srcObj
     let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
+      console.log(url)
       const type = ImageUtils.getSrcType(url)
+      console.log(type)
       assetId = ['logo-private', 'private'].includes(type)
         ? assetIndex
         : isPreview

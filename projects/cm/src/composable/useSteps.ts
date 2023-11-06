@@ -4,7 +4,14 @@ import useCanvasUtils from './useCanvasUtilsCm'
 
 const useSteps = () => {
   const editorStore = useEditorStore()
-  const { undo: editorUndo, redo: editorRedo, setCurrStepTypeIndex, pushStepType } = editorStore
+  const {
+    undo: editorUndo,
+    redo: editorRedo,
+    setCurrStepTypeIndex,
+    pushStepType,
+    stepsReset,
+    resetStepsTypesArr,
+  } = editorStore
   const {
     editorCurrStep,
     editorSteps,
@@ -17,6 +24,7 @@ const useSteps = () => {
   const {
     undo: canvasUndo,
     redo: canvasRedo,
+    reset: canvasReset,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     steps: canvasSteps,
@@ -32,6 +40,9 @@ const useSteps = () => {
   const isInLastStep = computed(() => isInEditorLastStep.value && isInCanvasLastStep.value)
 
   const undo = () => {
+    /**
+     * @Note don't remove, still have tiny errors
+     */
     console.log(stepsTypesArr.value)
     console.log(
       currStepTypeIndex.value,
@@ -78,6 +89,12 @@ const useSteps = () => {
     setCurrStepTypeIndex(currStepTypeIndex.value + 1)
   }
 
+  const reset = () => {
+    stepsReset()
+    canvasReset()
+    resetStepsTypesArr()
+  }
+
   watch(editorStepsNum, () => {
     stepsTypesArr.value.length = currStepTypeIndex.value + 1
     pushStepType('editor')
@@ -95,6 +112,7 @@ const useSteps = () => {
   return {
     undo,
     redo,
+    reset,
     isInFirstStep,
     isInLastStep,
   }
