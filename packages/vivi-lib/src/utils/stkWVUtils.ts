@@ -188,7 +188,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get controllerHidden(): boolean {
-    return store.getters['vivisticker/getControllerHidden']
+    return store.getters['webView/getControllerHidden']
   }
 
   get inBrowserMode(): boolean {
@@ -625,11 +625,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   hideController() {
-    store.commit('vivisticker/SET_controllerHidden', true)
+    store.commit('webView/SET_controllerHidden', true)
   }
 
   showController() {
-    store.commit('vivisticker/SET_controllerHidden', false)
+    store.commit('webView/SET_controllerHidden', false)
   }
 
   detectIfInApp() {

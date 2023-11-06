@@ -64,9 +64,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 </template>
 
 <script setup lang="ts">
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { storeToRefs } from 'pinia'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import EditingOptions from './components/panel-content/EditingOptions.vue'
+import FooterTabs from './components/panel-content/FooterTabs.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
@@ -90,6 +92,10 @@ const {
 } = stateInfo
 // #endregion
 
+// #region function panel
+const layerIndex = computed(() => layerUtils.layerIndex)
+// #endregion
+
 const modalStore = useModalStore()
 const { isModalOpen } = storeToRefs(modalStore)
 
@@ -106,6 +112,8 @@ const bottomPanelComponent = computed(() => {
       return EditingOptions
     case showSelectionOptions.value:
       return SelectionOptions
+    case layerIndex.value !== -1:
+      return FooterTabs
     case isEditing.value:
       return PromptArea
     default:

@@ -20,7 +20,6 @@ interface IViviStickerState {
   shareColor: string,
   editorBgIndex: number,
   editorType: string,
-  controllerHidden: boolean,
   inBrowserMode: boolean,
   showTutorial: boolean,
   fullPageConfig: IFullPageConfig,
@@ -65,7 +64,6 @@ const getDefaultState = (): IViviStickerState => ({
   shareColor: '',
   editorBgIndex: 0,
   editorType: 'none',
-  controllerHidden: false,
   inBrowserMode: false,
   showTutorial: false,
   fullPageConfig: {
@@ -179,9 +177,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getEditorType(state: IViviStickerState): string {
     return state.editorType
-  },
-  getControllerHidden(state: IViviStickerState): boolean {
-    return state.controllerHidden
   },
   getInBrowserMode(state: IViviStickerState): boolean {
     return state.inBrowserMode
@@ -319,9 +314,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_editorType(state: IViviStickerState, editorType: string) {
     state.editorType = editorType
-  },
-  SET_controllerHidden(state: IViviStickerState, controllerHidden: boolean) {
-    state.controllerHidden = controllerHidden
   },
   SET_inBrowserMode(state: IViviStickerState, inBrowserMode: boolean) {
     state.inBrowserMode = inBrowserMode
