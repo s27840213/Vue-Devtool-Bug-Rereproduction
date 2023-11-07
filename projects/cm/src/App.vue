@@ -34,7 +34,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       transition(
         name="bottom-panel-transition"
         mode="out-in")
-        component(:is="bottomPanelComponent" :ref="(el: any) => setSlotRef(el)")
+        component(:is="bottomPanelComponent"
+                  :ref="(el: any) => setSlotRef(el)"
+                  :currActivePanel="currActivePanel"
+                  :currPage="currPage"
+                  :currTab="currActivePanel"
+                  @switchTab="switchTab")
   div(
     v-if="isModalOpen"
     class="mask"
@@ -64,8 +69,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 </template>
 
 <script setup lang="ts">
+import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
+import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import EditingOptions from './components/panel-content/EditingOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
@@ -135,6 +144,37 @@ const headerbarStyles = computed(() => {
     opacity: atMainPage.value ? 1 : 0,
   }
 })
+
+// #region mobile panel
+const store = useStore()
+const currColorEvent = ref('')
+const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+
+const currPage = computed(() => {
+  return pageUtils.getPage(pageUtils.currFocusPageIndex)
+})
+
+const switchTab = (panelType: string, props?: IFooterTabProps) => {
+  if (!inBgRemoveMode && panelType === 'remove-bg') {
+    return
+  }
+  // Switch between color and text-color panel without close panel
+  if (currActivePanel.value === panelType && panelType === 'color' &&
+    props?.currColorEvent && currColorEvent.value !== props.currColorEvent) {
+    currColorEvent.value = props.currColorEvent
+  // Close panel if re-click
+  } else if (currActivePanel.value === panelType || panelType === 'none') {
+    editorUtils.setShowMobilePanel(false)
+    editorUtils.setInMultiSelectionMode(false)
+  } else {
+    editorUtils.setCurrActivePanel(panelType)
+    if (panelType === 'color' && props?.currColorEvent) {
+      currColorEvent.value = props.currColorEvent
+    }
+  }
+}
+// #endregion
 </script>
 
 <style lang="scss">

@@ -1,49 +1,81 @@
 <template lang="pug">
-div(class="flex gap-24 pt-8 pl-24 pr-24 pb-8")
-  div(class="flex items-center justify-center h-44")
-    div(class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22"
-        @click="handleBack")
-      svg-icon(iconName="chevron-down" iconWidth="14px" iconColor="app-tab-bg")
-  div(class="flex gap-24 overflow-scroll no-scrollbar")
-    template(v-for="tab in settingTabs")
-      div(v-if="!tab.hidden" :key="tab.icon"
-          class="flex flex-col items-center justify-center h-44 gap-4 px-4"
-          :class="{'click-disabled': (tab.disabled || isLocked || extraDisableCondition(tab))}"
-          @click="handleTabAction(tab)")
-        color-btn(v-if="tab.icon === 'color'" size="22px"
-                  class="click-disabled"
-                  :color="globalSelectedColor")
-        svg-icon(
-          :iconName="tab.icon"
-          :iconColor="settingTabColor(tab)"
-          :iconWidth="'24px'"
-          :style="textIconStyle")
-        //- v-else class="click-disabled"
-        span(class="no-wrap click-disabled transition ease-linear delay-200 typo-body-sm"
-          :class="`text-${settingTabColor(tab)}`") {{tab.text}}
-        //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
+div(class="flex flex-col gap-16 pt-8 pl-24 pr-24 pb-8")
+  div(v-if="currActivePanel !== 'none'")
+    mobile-panel(:currPage="currPage" :currActivePanel="currActivePanel")
+  div(v-if="!hideTabs" class="flex gap-24")
+    div(class="flex items-center justify-center h-44")
+      div(class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22"
+          @click="handleBack")
+        svg-icon(iconName="chevron-down" iconWidth="14px" iconColor="app-tab-bg")
+    div(class="flex gap-24 overflow-scroll no-scrollbar")
+      template(v-for="tab in settingTabs")
+        div(v-if="!tab.hidden" :key="tab.icon"
+            class="flex flex-col items-center justify-center h-44 gap-4 px-4"
+            :class="{'click-disabled': (tab.disabled || isLocked || extraDisableCondition(tab))}"
+            @click="handleTabAction(tab)")
+          color-btn(v-if="tab.icon === 'color'" size="22px"
+                    class="click-disabled"
+                    :color="globalSelectedColor")
+          svg-icon(v-else class="click-disabled"
+            :iconName="tab.icon"
+            :iconColor="settingTabColor(tab)"
+            :iconWidth="'24px'"
+            :style="textIconStyle")
+          span(class="no-wrap click-disabled transition ease-linear delay-200 typo-body-sm"
+            :class="`text-${settingTabColor(tab)}`") {{tab.text}}
+          //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
 </template>
 
 <script lang="ts">
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import type { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import type { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
+import type { IPage } from '@nu/vivi-lib/interfaces/page'
 import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
+import assetUtils, { RESIZE_RATIO_IMAGE } from '@nu/vivi-lib/utils/assetUtils'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerFactary from '@nu/vivi-lib/utils/layerFactary'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
+import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
   extends: FooterTabs,
+  data() {
+    return {
+      hideTabsPanels: [] as string[],
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    currActivePanel: {
+      type: String,
+      required: true
+    }
+  },
   computed: {
     ...mapGetters({
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       isProcessing: 'bgRemove/getIsProcessing',
-      controllerHidden: 'webView/getControllerHidden'
+      controllerHidden: 'webView/getControllerHidden',
     }),
     groupTab(): IFooterTab {
       return {
@@ -261,7 +293,6 @@ export default defineComponent({
     //     { icon: 'paste', text: `${this.$t('NN0230')}` }
     //   ] : []
     // },
-    // eslint-disable-next-line vue/no-unused-properties
     settingTabs(): Array<IFooterTab> {
       return this.tabs
     },
@@ -390,6 +421,9 @@ export default defineComponent({
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
     },
+    hideTabs(): boolean {
+      return this.hideTabsPanels.includes(this.currActivePanel)
+    }
   },
   methods: {
     settingTabColor(tab: IFooterTab): string {
@@ -397,7 +431,308 @@ export default defineComponent({
     },
     handleBack() {
       groupUtils.deselect()
-    }
+      this.$emit('switchTab', 'none')
+      if (this.inBgSettingMode) editorUtils.setInBgSettingMode(false)
+      if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
+    },
+    handleTabAction(tab: IFooterTab) {
+      // if (!paymentUtils.checkProApp({ plan: tab.forPro ? 1 : 0 }, undefined, tab.plan)) return
+      if (!paymentUtils.checkProApp({ plan: 0 }, undefined, tab.plan)) return // cm currently disables all pro-items
+      if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
+        editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      }
+      // If current state is in cropping, the layerIndex sould be stored
+      // bcz after we disable the cropping, the current active index would be lost
+      const { pageIndex, layerIndex, subLayerIdx } = layerUtils
+      if (tab.icon !== 'crop' && this.isCropping) {
+        imageUtils.setImgControlDefault()
+      }
+
+      switch (tab.icon) {
+        case 'crop': {
+          if (this.selectedLayerNum > 0) {
+            if (this.isCropping) {
+              imageUtils.setImgControlDefault()
+            } else {
+              let index
+              switch (layerUtils.getCurrLayer.type) {
+                case 'image':
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                  break
+                case 'frame':
+                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active)
+                  if (index >= 0) {
+                    frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                  }
+                  break
+                case 'group':
+                  if (layerUtils.getCurrConfig.type === LayerType.image) {
+                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                  }
+                  break
+              }
+            }
+          } else if (this.inBgSettingMode) {
+            if (this.backgroundLocked) return this.handleLockedNotify()
+            this.setBgImageControl({
+              pageIndex: pageUtils.currFocusPageIndex,
+              imgControl: !this.backgroundImgControl
+            })
+          }
+          break
+        }
+        case 'set-as-frame': {
+          if (layerUtils.getCurrLayer.type === LayerType.frame) {
+            frameUtils.detachImage(layerUtils.layerIndex)
+          } else {
+            frameUtils.updateImgToFrame()
+          }
+          break
+        }
+        case 'main-menu': {
+          groupUtils.deselect()
+          this.$emit('switchTab', 'none')
+          break
+        }
+        case 'text-format': {
+          if (!this.selectMultiple && !this.isGroup) {
+            tiptapUtils.agent(editor => editor.commands.selectAll())
+          }
+          break
+        }
+        case 'edit': {
+          const { index, pageIndex } = layerUtils.currSelectedInfo
+          const { getCurrLayer: currLayer } = layerUtils
+
+          if (!this.hasSubSelectedLayer) {
+            if (currLayer.type === 'text') {
+              layerUtils.updateLayerProps(pageIndex, index, {
+                contentEditable: true
+              })
+            }
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
+            })
+          } else {
+            const { subLayerIdx } = layerUtils
+            const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+            if (subLayer.type === 'text') {
+              layerUtils.updateLayerProps(pageIndex, index, {
+                contentEditable: true
+              }, subLayerIdx)
+            }
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            })
+          }
+          break
+        }
+        case 'group':
+        case 'ungroup': {
+          this.disableTabScroll = true
+          mappingUtils.mappingIconAction(tab.icon)
+          break
+        }
+        case 'multiple-select': {
+          editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+          break
+        }
+        case 'bg-separate': {
+          if (this.inBgSettingMode) {
+            backgroundUtils.detachBgImage()
+          } else {
+            backgroundUtils.setBgImageSrc()
+          }
+          break
+        }
+        case 'copy': {
+          shortcutUtils.copy()
+          break
+        }
+        case 'paste': {
+          shortcutUtils.paste()
+          break
+        }
+        case 'vivisticker_duplicate': {
+          shortcutUtils.copy().then(() => {
+            shortcutUtils.paste()
+          })
+          break
+        }
+        case 'brush': {
+          if (this.hasCopiedFormat) {
+            formatUtils.clearCopiedFormat()
+          } else {
+            this.handleCopyFormat()
+          }
+          break
+        }
+        case 'remove-bg': {
+          if (this.isInEditor) {
+            // TODO: need cm version of beRemoveSection
+            // this.setIsInBgRemoveSection(!this.isInBgRemoveSection)
+            this.$emit('switchTab', 'none')
+            return
+          }
+          // if (!this.inBgRemoveMode && !this.isProcessing) {
+          //   this.setIsProcessing(true)
+
+          //   // first step: get the image src
+
+          //   // second step: upload the src to backend, and then call the bg remove API
+
+          //   // after finish bg removing, update the srcObj
+          //   const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
+          //   const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+
+          //   generalUtils.toDataURL(src, (dataUrl: string) => {
+          //     uploadUtils.uploadAsset('stk-bg-remove', [dataUrl])
+          //   })
+
+          //   return
+          // }
+          break
+        }
+        case 'photo':
+        case 'replace': {
+          if (tab.panelType !== undefined) break
+          const { getCurrLayer: layer } = layerUtils
+          stkWVUtils.getIosImg()
+            .then(async (images: Array<string>) => {
+              if (images.length) {
+                const srcObj = {
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                }
+                const src = imageUtils.getSrc(srcObj)
+                await imageUtils.imgLoadHandler(src, async (img: HTMLImageElement) => {
+                  const { naturalWidth, naturalHeight } = img
+                  if (this.inBgSettingMode) {
+                    // replace background
+                    backgroundUtils.setBgImage({
+                      pageIndex: pageUtils.currFocusPageIndex,
+                      config: layerFactary.newImage({
+                        srcObj,
+                        styles: {
+                          width: naturalWidth,
+                          height: naturalHeight
+                        }
+                      })
+                    })
+                    backgroundUtils.fitPageBackground(pageUtils.currFocusPageIndex)
+                  } else {
+                    switch (layer.type) {
+                      case 'image': {
+                        // replace image
+                        const resizeRatio = RESIZE_RATIO_IMAGE
+                        const pageSize = pageUtils.getPageSize(pageIndex)
+                        const pageAspectRatio = pageSize.width / pageSize.height
+                        const photoAspectRatio = naturalWidth / naturalHeight
+                        const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+                        const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+                        const config = layerUtils.getCurrConfig as IImage
+                        const { imgWidth, imgHeight } = config.styles
+                        const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+                        const styles = {
+                          ...config.styles,
+                          ...mouseUtils.clipperHandler({
+                            styles: {
+                              width: photoWidth,
+                              height: photoHeight
+                            }
+                          } as unknown as IImage, path, config.styles).styles,
+                          ...{
+                            initWidth: config.styles.initWidth,
+                            initHeight: config.styles.initHeight
+                          }
+                        }
+                        layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+                        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+                        break
+                      }
+                      case 'frame': {
+                        // replace frame
+                        const clipIndex = Math.max(subLayerIdx, 0)
+                        const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                          .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[clipIndex], src)
+                        frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIndex, {
+                          imgX, imgY, imgWidth, imgHeight
+                        })
+                        frameUtils.updateFrameClipSrc(pageIndex, layerIndex, clipIndex, srcObj)
+                        break
+                      }
+                      case 'group': {
+                        const target = layerUtils.getCurrConfig
+                        if (target.type === LayerType.image) {
+                          const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                            .getClipImgDimension(target, src)
+                          layerUtils.updateLayerStyles(pageIndex, layerIndex, { imgX, imgY, imgWidth, imgHeight }, subLayerIdx)
+                          layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+                        } else if (target.type === LayerType.frame && target.clips.length === 1) {
+                          const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                            .getClipImgDimension(target.clips[0], src)
+                          frameUtils.updateFrameLayerProps(pageIndex, subLayerIdx, 0, { srcObj }, layerIndex)
+                          frameUtils.updateSubFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, 0, { imgX, imgY, imgWidth, imgHeight })
+                        }
+                      }
+                    }
+                  }
+                })
+                stepsUtils.record()
+              }
+            })
+          break
+        }
+        case 'color':
+        case 'text-color-mobile':
+          colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
+          break
+        case 'camera': {
+          stkWVUtils.getIosImg()
+            .then(async (images: Array<string>) => {
+              if (images.length) {
+                const src = imageUtils.getSrc({
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                })
+                imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+                  const { naturalWidth, naturalHeight } = img
+                  const photoAspectRatio = naturalWidth / naturalHeight
+                  assetUtils.addImage(
+                    src,
+                    photoAspectRatio
+                  )
+                })
+              }
+              this.$emit('switchTab', 'none')
+            })
+          break
+        }
+        default: {
+          break
+        }
+      }
+
+      if (tab.icon !== 'crop') {
+        if (this.isCropping) {
+          imageUtils.setImgControlDefault()
+        }
+      }
+
+      if (tab.panelType !== undefined) {
+        this.$emit('switchTab', tab.panelType, tab.props)
+      }
+
+      // if (['copy', 'paste'].includes(tab.icon)) {
+      //   this.clickedTab = tab.icon
+      //   notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
+      //   this.clickedTabTimer = window.setTimeout(() => {
+      //     this.clickedTab = ''
+      //   }, 800)
+      // }
+    },
   }
 })
 </script>
