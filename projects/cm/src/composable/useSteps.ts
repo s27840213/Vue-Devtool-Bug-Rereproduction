@@ -40,16 +40,6 @@ const useSteps = () => {
   const isInLastStep = computed(() => isInEditorLastStep.value && isInCanvasLastStep.value)
 
   const undo = () => {
-    /**
-     * @Note don't remove, still have tiny errors
-     */
-    console.log(stepsTypesArr.value)
-    console.log(
-      currStepTypeIndex.value,
-      isInEditorFirstStep.value,
-      isInCanvasFirstStep.value,
-      stepsTypesArr.value[currStepTypeIndex.value],
-    )
     if (isInFirstStep.value || isProcessingCanvas.value || isProcessingStepsQueue.value) return
     if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorFirstStep.value) {

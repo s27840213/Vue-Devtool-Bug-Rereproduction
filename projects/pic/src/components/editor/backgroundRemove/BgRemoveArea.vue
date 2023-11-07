@@ -1,29 +1,41 @@
 <template lang="pug">
-div(class="bg-remove-area"
-      :style="wrapperStyles"
-      ref="bgRemoveArea")
-  div(v-show="showInitImage"
+div(
+  class="bg-remove-area"
+  :style="wrapperStyles"
+  ref="bgRemoveArea")
+  div(
+    v-show="showInitImage"
     class="bg-remove-area__initPhoto"
     :style="initPhotoStyles")
-  div(class="bg-remove-area__scale-area"
-      :style="areaStyles"
-      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
-    canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
-    div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
+  div(
+    class="bg-remove-area__scale-area"
+    :style="areaStyles"
+    :class="{ 'bg-remove-area__scale-area--hideBg': !showInitImage }")
+    canvas(
+      class="bg-remove-area"
+      ref="canvas"
+      :cy-ready="cyReady")
+    div(
+      v-if="showBrush"
+      class="bg-remove-area__brush"
+      :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
-    svg-icon(class="spiner"
+    svg-icon(
+      class="spiner"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-teleport(v-if="useMobileEditor" to=".header-bar")
+teleport(
+  v-if="useMobileEditor"
+  to=".header-bar")
   div(class="magnify-area" :style="magnifyAreaStyle")
-    canvas(class="magnify-area__canvas"  ref="magnify")
-    div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
+    canvas(class="magnify-area__canvas" ref="magnify")
+    div(class="magnify-area__brush" :style="{ backgroundColor: brushColor }")
 </template>
 
 <script lang="ts">
-import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
 import MagnifyUtils from '@/utils/magnifyUtils'
+import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
 import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
@@ -35,8 +47,8 @@ export default defineComponent({
   props: {
     editorViewCanvas: {
       type: HTMLElement,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -61,7 +73,7 @@ export default defineComponent({
         backgroundColor: '#fcaea9',
         width: '16px',
         height: '16px',
-        transform: 'translate(0,0)'
+        transform: 'translate(0,0)',
       },
       initImgSrc: '',
       imgSrc: '',
@@ -72,13 +84,23 @@ export default defineComponent({
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
       magnifyUtils: null as unknown as MagnifyUtils,
       showMagnifyAtRight: false,
-      clearModeShift: 4
+      clearModeShift: 4,
     }
   },
   created() {
-    const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
+    const { width, height } = this.autoRemoveResult as IBgRemoveInfo
     const aspectRatio = width / height
-    this.canvasHeight = 1600 / aspectRatio
+    const longerSize = Math.max(width, height)
+    if (longerSize <= 1600) {
+      this.canvasWidth = width
+      this.canvasHeight = height
+    } else if (aspectRatio > 1 && longerSize > 1600) {
+      this.canvasWidth = 1600
+      this.canvasHeight = 1600 / aspectRatio
+    } else if (aspectRatio < 1 && longerSize > 1600) {
+      this.canvasWidth = 1600 * aspectRatio
+      this.canvasHeight = 1600
+    }
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
   },
@@ -146,12 +168,12 @@ export default defineComponent({
       loading: 'bgRemove/getLoading',
       inGestureMode: 'getInGestureToolMode',
       contentScaleRatio: 'getContentScaleRatio',
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
     }),
-    size(): { width: number, height: number } {
+    size(): { width: number; height: number } {
       return {
         width: this.canvasWidth,
-        height: this.canvasHeight
+        height: this.canvasHeight,
       }
     },
     areaStyles(): { [index: string]: string } {
@@ -160,38 +182,40 @@ export default defineComponent({
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.scaleRatio * this.contentScaleRatio / 100})`
+        transform: `scale(${(this.scaleRatio * this.contentScaleRatio) / 100})`,
       }
     },
     wrapperStyles(): { [index: string]: string } {
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`
+        width: `${this.size.width * ((this.scaleRatio * this.contentScaleRatio) / 100)}px`,
+        height: `${this.size.height * ((this.scaleRatio * this.contentScaleRatio) / 100)}px`,
       }
     },
     initPhotoStyles(): { [index: string]: string } {
       const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
-        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
+        width: `${this.size.width * ((this.scaleRatio * this.contentScaleRatio) / 100)}px`,
+        height: `${this.size.height * ((this.scaleRatio * this.contentScaleRatio) / 100)}px`,
         backgroundImage,
-        backgroundSize
+        backgroundSize,
       }
     },
     brushColor(): string {
       return this.clearMode ? '#fcaea9' : '#fdd033'
     },
     magnifyAreaStyle(): { [index: string]: string } {
-      return !this.$isTouchDevice() ? {
-        bottom: '10px',
-        left: '80px'
-      } : {
-        bottom: '-70px',
-        ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
-        visibility: this.showBrush ? 'visible' : 'hidden'
-      }
-    }
+      return !this.$isTouchDevice()
+        ? {
+            bottom: '10px',
+            left: '80px',
+          }
+        : {
+            bottom: '-70px',
+            ...(this.showMagnifyAtRight ? { right: '10px' } : { left: '10px' }),
+            visibility: this.showBrush ? 'visible' : 'hidden',
+          }
+    },
   },
   watch: {
     brushSize(newVal: number) {
@@ -255,8 +279,8 @@ export default defineComponent({
 
         this.isProcessingStepsQueue = false
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   methods: {
     ...mapMutations({
@@ -266,7 +290,7 @@ export default defineComponent({
       addStep: 'bgRemove/ADD_step',
       setCurrStep: 'bgRemove/SET_currStep',
       setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio',
-      clearSteps: 'bgRemove/CLEAR_steps'
+      clearSteps: 'bgRemove/CLEAR_steps',
     }),
     initCanvas() {
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
@@ -315,7 +339,12 @@ export default defineComponent({
 
       this.magnifyCtx = ctx
 
-      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
+      this.magnifyUtils = new MagnifyUtils(
+        this.magnifyCanvas,
+        this.magnifyCtx,
+        this.contentCanvas,
+        this.root,
+      )
     },
     createInitImageCtx() {
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
@@ -340,7 +369,7 @@ export default defineComponent({
       ctx.stroke()
       Object.assign(this.initPos, {
         x,
-        y
+        y,
       })
 
       this.setModifiedFlag(true)
@@ -350,7 +379,7 @@ export default defineComponent({
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
         Object.assign(this.initPos, {
           x,
-          y
+          y,
         })
         if (this.clearMode) {
           this.drawInClearMode(e)
@@ -384,7 +413,9 @@ export default defineComponent({
     },
     setBrushPos(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
-      this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
+      this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${
+        y - (this.brushSize + this.blurPx) / 2
+      }px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')
@@ -401,13 +432,25 @@ export default defineComponent({
       this.setCompositeOperationMode('source-over', this.contentCtx)
       this.contentCtx.filter = 'none'
       this.clearCtx(this.contentCtx)
-      this.contentCtx.drawImage(this.currCanvasImageElement ?? this.imageElement, 0, 0, this.size.width, this.size.height)
+      this.contentCtx.drawImage(
+        this.currCanvasImageElement ?? this.imageElement,
+        0,
+        0,
+        this.size.width,
+        this.size.height,
+      )
       // this.ctx.drawImage(this.imageElement, 0, 0, this.size.width, this.size.height)
 
       this.drawLine(e, this.clearModeCtx)
       this.setCompositeOperationMode('destination-out')
       this.contentCtx.filter = `blur(${this.blurPx}px)`
-      this.contentCtx.drawImage(this.clearModeCanvas, 0 - this.clearModeShift, 0 - this.clearModeShift, this.size.width + 2 * this.clearModeShift, this.size.height + 2 * this.clearModeShift)
+      this.contentCtx.drawImage(
+        this.clearModeCanvas,
+        0 - this.clearModeShift,
+        0 - this.clearModeShift,
+        this.size.width + 2 * this.clearModeShift,
+        this.size.height + 2 * this.clearModeShift,
+      )
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
@@ -427,7 +470,13 @@ export default defineComponent({
       targetCtx.clearRect(0, 0, this.size.width, this.size.height)
     },
     drawImageToInitImgCanvas() {
-      this.initImgCtx.drawImage(this.initImageElement as HTMLImageElement, 0, 0, this.size.width, this.size.height)
+      this.initImgCtx.drawImage(
+        this.initImageElement as HTMLImageElement,
+        0,
+        0,
+        this.size.width,
+        this.size.height,
+      )
       this.setCompositeOperationMode('destination-in', this.initImgCtx)
     },
     setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
@@ -459,13 +508,13 @@ export default defineComponent({
     },
     handleKeydown(e: KeyboardEvent) {
       if (!e.repeat) {
-        if ((e.ctrlKey || e.metaKey)) {
+        if (e.ctrlKey || e.metaKey) {
           if (e.shiftKey) {
-            if ((e.key === 'z' || e.key === 'Z')) {
+            if (e.key === 'z' || e.key === 'Z') {
               e.preventDefault()
               this.redo()
             }
-          } else if ((e.key === 'z' || e.key === 'Z')) {
+          } else if (e.key === 'z' || e.key === 'Z') {
             e.preventDefault()
             this.undo()
           } else if (e.key === '=') {
@@ -528,8 +577,8 @@ export default defineComponent({
     disableTouchEvent(e: TouchEvent) {
       e.preventDefault()
       e.stopPropagation()
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -568,7 +617,9 @@ export default defineComponent({
           setColor(gray-5)
         );
       background-color: rgb(255, 255, 255);
-      background-position: 0px 0px, 40px 40px;
+      background-position:
+        0px 0px,
+        40px 40px;
       background-size: 80px 80px;
     }
   }
@@ -600,7 +651,7 @@ export default defineComponent({
   position: absolute;
   width: 60px;
   height: 60px;
-  overflow:hidden;
+  overflow: hidden;
   transform-origin: top left;
   border: 1px solid setColor(gray-2);
   border-radius: 8px;
@@ -610,11 +661,11 @@ export default defineComponent({
 
   &__brush {
     position: absolute;
-    width: calc(100% *  (2/3) + 3px);
-    height: calc(100% *  (2/3) + 3px);
+    width: calc(100% * (2 / 3) + 3px);
+    height: calc(100% * (2 / 3) + 3px);
     top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     opacity: 0.7;
     box-sizing: border-box;
     border-radius: 50%;

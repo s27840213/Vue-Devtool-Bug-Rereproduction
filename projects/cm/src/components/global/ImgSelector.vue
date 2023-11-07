@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="image-selector bg-app-bg text-app-tab-default \
-  h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
+div(
+  class="image-selector bg-app-bg text-app-tab-default \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
   div(class="box-border px-24 py-8 flex justify-between items-center")
     back-btn
@@ -12,8 +12,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
     :tabs="[$t('STK0067'), $t('STK0069')]"
     v-model="tabIndex")
   //- 3. (Album bar or search bar) + demo img
-  div(class="bg-app-tab-bg box-border px-12 py-8 h-60 \
-    grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
+  div(class="bg-app-tab-bg box-border px-12 py-8 h-60 \ grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
     div(
       v-if="inPhoto"
       class="flex items-center gap-10"
@@ -31,7 +30,7 @@ div(class="image-selector bg-app-bg text-app-tab-default \
       @search="searchUnsplash")
     //- Demo img
     div(
-      v-for="img, i in demoImgs"
+      v-for="(img, i) in demoImgs"
       :key="img.assetId"
       class="relative flex justify-center"
       @click="selectDemo(i)")
@@ -40,13 +39,11 @@ div(class="image-selector bg-app-bg text-app-tab-default \
   //- 4-1. Photo
   div(
     v-if="inPhoto"
-    class="bg-app-tab-bg w-full h-full box-border grid \
-      grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
+    class="bg-app-tab-bg w-full h-full box-border grid \ grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
     //- Photo selector
     div(
       v-if="isAlbumOpened"
-      class="img-selector__img-grid bg-app-bg overflow-scroll grid \
-        grid-cols-3 grid-flow-row gap-2")
+      class="img-selector__img-grid bg-app-bg overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
       div(class="aspect-square flex flex-col items-center justify-center")
         cm-svg-icon(class="mb-10" iconName="camera")
         span {{ $t('CM0060') }}
@@ -94,10 +91,13 @@ div(class="image-selector bg-app-bg text-app-tab-default \
   div(v-else-if="inStock" class="grid grid-cols-2 gap-16 mx-10 my-16 overflow-scroll")
     //- Stock selector
     div(
-      v-for="col, i in unsplashCols"
+      v-for="(col, i) in unsplashCols"
       :key="i"
       class="grid gap-16 h-fit")
-      div(v-for="img in col" :key="img.id" class="relative")
+      div(
+        v-for="img in col"
+        :key="img.id"
+        class="relative")
         img(
           class="w-full"
           :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
@@ -118,14 +118,15 @@ div(class="image-selector bg-app-bg text-app-tab-default \
         :iconName="'loading'"
         iconColor="app-text-secondary")
   //- 5. Multi-select candidate UI
-  div(
-    v-if="requireNum > 1 && targetImgs.length"
-    class="mx-16 mt-10 mb-20 grid gap-20")
+  div(v-if="requireNum > 1 && targetImgs.length" class="mx-16 mt-10 mb-20 grid gap-20")
     div(class="flex justify-between items-center h-32")
       span {{ $t('CM0062', { num: requireNum }) }}
       nubtn(@click="sendToEditor") {{ $t('NN0744') }}
     div(class="flex flex-row gap-20")
-      div(v-for="img in targetImgs" :key="img.assetId" class="relative")
+      div(
+        v-for="img in targetImgs"
+        :key="img.assetId"
+        class="relative")
         img(class="w-60 h-60 object-cover" :src="imageUtils.getSrc(img, 'tiny')")
         cm-svg-icon(
           class="absolute -right-12 -top-12"
@@ -155,7 +156,7 @@ const router = useRouter()
 const props = defineProps({
   requireNum: {
     type: Number,
-    required: true
+    required: true,
   },
 })
 
@@ -164,17 +165,20 @@ const tabIndex = ref(0)
 const inPhoto = computed(() => tabIndex.value === 0)
 const inStock = computed(() => tabIndex.value === 1)
 let targetImgs = reactive([] as (SrcObj & { ratio: number })[])
-const demoImgs = [{
+const demoImgs = [
+  {
     type: 'local-img',
     assetId: require('@img/jpg/cm demo img1.jpg'),
     userId: '',
-    ratio: 320 / 480
-  }, {
+    ratio: 320 / 480,
+  },
+  {
     type: 'local-img',
     assetId: require('@img/jpg/cm demo img2.jpg'),
     userId: '',
-    ratio: 384 / 480
-  }]
+    ratio: 384 / 480,
+  },
+]
 // #endregion
 
 // #region album datas
@@ -182,12 +186,17 @@ const smartAlbum = reactive<IAlbum[]>([])
 const myAlbum = reactive<IAlbum[]>([])
 const albums = computed(() => [
   ...smartAlbum,
-  ...myAlbum.length > 0 ? [{ // 'My album' text
-    albumId: 'myAlbum',
-    albumSize: 0,
-    title: 'myAlbum',
-    thumbId: 'myAlbum',
-  }] : [],
+  ...(myAlbum.length > 0
+    ? [
+        {
+          // 'My album' text
+          albumId: 'myAlbum',
+          albumSize: 0,
+          title: 'myAlbum',
+          thumbId: 'myAlbum',
+        },
+      ]
+    : []),
   ...myAlbum,
 ])
 const currAlbumContent = reactive<IAlbumContent[]>([])
@@ -211,7 +220,7 @@ const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
 const { setPageSize, setImgAspectRatio } = editorStore
-const { setShowImgSelector } = useImgSelectorStore()
+const { setRequireImgNum } = useImgSelectorStore()
 
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
@@ -261,21 +270,24 @@ const unsplashRaw = computed(() => {
   return unsplash.content
 })
 const unsplashLoading = computed(() => {
-  if ((unsplash.keyword && unsplash.nextSearch === -1) ||
-    (!unsplash.keyword && unsplash.nextPage === -1)) return false
+  if (
+    (unsplash.keyword && unsplash.nextSearch === -1) ||
+    (!unsplash.keyword && unsplash.nextPage === -1)
+  )
+    return false
   return unsplash.pending
 })
 const unsplashCols = computed(() => {
   const arr = [
-    {content: [] as IPhotoItem[], height: 0},
-    {content: [] as IPhotoItem[], height: 0},
+    { content: [] as IPhotoItem[], height: 0 },
+    { content: [] as IPhotoItem[], height: 0 },
   ]
-  unsplashRaw.value.forEach(unsplash => {
+  unsplashRaw.value.forEach((unsplash) => {
     const next = arr[0].height <= arr[1].height ? 0 : 1
     arr[next].content.push(unsplash)
     arr[next].height += unsplash.height / (unsplash.width / 100)
   })
-  return arr.map(a => a.content)
+  return arr.map((a) => a.content)
 })
 
 // Method
@@ -294,10 +306,7 @@ vuex.dispatch('unsplash/init')
 
 // #region common method
 const selected = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
-  return find(
-    targetImgs,
-    ['assetId', (type === 'ios' ? 'cameraroll/' : '') + img.id]
-  )
+  return find(targetImgs, ['assetId', (type === 'ios' ? 'cameraroll/' : '') + img.id])
 }
 
 const selectDemo = (i: number) => {
@@ -327,7 +336,7 @@ const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') 
 
 const sendToEditor = async () => {
   setImgAspectRatio(targetImgs[0].ratio)
-  setShowImgSelector(0)
+  setRequireImgNum(0)
   await router.push({ name: 'Editor' })
   setPageSize(900, 1600)
   nextTick(() => {

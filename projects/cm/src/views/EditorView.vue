@@ -109,6 +109,7 @@ import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
 
+// #region refs & vars
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
@@ -117,6 +118,10 @@ const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
+
+const i18n = useI18n()
+const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
+const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
 // #endregion
 
 // #region hooks related
@@ -127,6 +132,7 @@ onBeforeRouteLeave((to, from) => {
        * @NOTE - if we reset immediately, will see the editor from editing state to initial state bcz transition time
        */
       editorStore.stepsReset()
+      editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
     }, 1000)
@@ -134,11 +140,7 @@ onBeforeRouteLeave((to, from) => {
 })
 // #endregion
 
-const i18n = useI18n()
-const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
-const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
-
-// #region Stores
+// #region edtior state related
 const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
@@ -258,22 +260,6 @@ const getCanvasDataUrl = () => {
   return canvasRef.value.getCanvasDataUrl()
 }
 // #endregion
-/**
- * fitPage
- */
-
-watch(
-  () => fitScaleRatio.value,
-  (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value) return
-    pageUtils.setScaleRatio(newVal)
-  },
-  // useDebounceFn((newVal, oldVal) => {
-  //   if (newVal === oldVal || !atEditor.value) return
-  //   setPageScaleRatio(newVal)
-  //   setPageScaleRatio(newVal)
-  // }, 300),
-)
 
 // #region asset panel
 const currActiveTab = computed(() => assetPanelUtils.currActiveTab)

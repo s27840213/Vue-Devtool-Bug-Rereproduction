@@ -198,116 +198,95 @@ class BgRemoveUtils {
     const { index, pageIndex } = pageUtils.currSelectedInfo as ICurrSelectedInfo
     imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
     imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
-    if (!this.modifiedFlag) {
-      layerUtils.updateLayerProps(pageIndex, index, {
-        srcObj: {
-          type: this.isAdmin ? 'public' : 'private',
-          userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
-          assetId: this.isAdmin ? (this.autoRemoveResult as IBgRemoveInfo).id : (this.autoRemoveResult as IBgRemoveInfo).assetIndex
-        },
-        previewSrc: (this.autoRemoveResult as IBgRemoveInfo).urls.larg,
-        trace: 1
-      })
-      const image = layerUtils.getLayer(pageIndex, index) as IImage
-      if (image.type === LayerType.image) {
-        if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
-          const layerInfo = { pageIndex, layerIndex: index }
-          const layerData = {
-            config: image,
-            layerInfo
-          }
-          imageShadowPanelUtils.handleShadowUpload(layerData, true)
-          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-        }
-      }
-      store.commit('file/UPDATE_IMAGE_URLS', Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
-      this.setInBgRemoveMode(false)
-      this.setIsProcessing(false)
-      pageUtils.setScaleRatio(this.prevPageScaleRatio)
-      stepsUtils.record()
-    } else {
-      const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
-      const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
-      const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles
-      const { width, height } = targetLayerStyle
-      const { trimCanvas } = useCanvasUtils(targetLayerStyle)
-      const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimCanvas(this.canvas)
-      const previewSrc = trimedCanvas.toDataURL('image/png;base64')
 
-      const { pageId, layerId } = this.bgRemoveIdInfo
-      layerUtils.updateLayerProps(pageIndex, index, {
-        previewSrc,
-        trace: 1
-      })
-      const newImageWidth = width * remainingWidthPercentage
-      const newImageHeight = height * remainingHeightPercentage
-      layerUtils.updateLayerStyles(pageIndex, index, {
-        x: targetLayerStyle.x + xShift,
-        y: targetLayerStyle.y + yShift,
-        width: newImageWidth,
-        height: newImageHeight,
-        imgWidth: newImageWidth,
-        imgHeight: newImageHeight,
-        imgX: 0,
-        imgY: 0
-      })
-      this.setInBgRemoveMode(false)
-      pageUtils.setScaleRatio(this.prevPageScaleRatio)
-      // If the result image is still uploading, we need to prevent the bg-remove btn from being clicked.
-      // The reason is if the image is still uploading, then the image in the page is dataUrl.
-      // So we need to set isProcessing to true
-      this.setIsProcessing(true)
-      store.commit('SET_currSidebarPanelType', SidebarPanelType.file)
-      const targetPageIndex = pageUtils.getPageIndexById(pageId)
-      const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-      layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-        tmpId: id,
-        srcObj: {
-          type: '',
-          userId: '',
-          assetId: ''
-        }
-      })
-      uploadUtils.uploadAsset('image', [previewSrc], {
-        addToPage: false,
-        pollingCallback: (json: IUploadAssetResponse) => {
-          const targetPageIndex = pageUtils.getPageIndexById(pageId)
-          const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-          const srcObj = {
-            type: this.isAdmin ? 'public' : 'private',
-            userId: teamId,
-            assetId: this.isAdmin ? json.data.id : json.data.asset_index
-          }
-          layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-            srcObj,
-            trace: 1
-          })
-          store.commit('DELETE_previewSrc', {
-            type: this.isAdmin ? 'public' : 'private',
-            userId: teamId,
-            assetId: this.isAdmin ? json.data.id : json.data.asset_index,
-            assetIndex: json.data.asset_index
-          })
-          const image = layerUtils.getLayer(pageIndex, index) as IImage
-          if (image.type === LayerType.image) {
-            if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
-              const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
-              const layerData = {
-                config: image,
-                layerInfo
-              }
-              imageShadowPanelUtils.handleShadowUpload(layerData, true)
-              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+    const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
+    const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
+    const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles
+    const { width, height } = targetLayerStyle
+    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON } = trimCanvas(this.canvas)
+    const previewSrc = trimedCanvas.toDataURL('image/png;base64')
+
+    const { pageId, layerId } = this.bgRemoveIdInfo
+    layerUtils.updateLayerProps(pageIndex, index, {
+      previewSrc,
+      trace: 1
+    })
+    const newImageWidth = width * remainingWidthPercentage
+    const newImageHeight = height * remainingHeightPercentage
+    layerUtils.updateLayerStyles(pageIndex, index, {
+      x: targetLayerStyle.x + xShift,
+      y: targetLayerStyle.y + yShift,
+      width: newImageWidth,
+      height: newImageHeight,
+      imgWidth: newImageWidth,
+      imgHeight: newImageHeight,
+      imgX: 0,
+      imgY: 0
+    })
+    this.setInBgRemoveMode(false)
+    pageUtils.setScaleRatio(this.prevPageScaleRatio)
+    // If the result image is still uploading, we need to prevent the bg-remove btn from being clicked.
+    // The reason is if the image is still uploading, then the image in the page is dataUrl.
+    // So we need to set isProcessing to true
+    this.setIsProcessing(true)
+    store.commit('SET_currSidebarPanelType', SidebarPanelType.file)
+    const targetPageIndex = pageUtils.getPageIndexById(pageId)
+    const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+    layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+      tmpId: id,
+      srcObj: {
+        type: '',
+        userId: '',
+        assetId: ''
+      }
+    })
+    console.log(cropJSON)
+    try{
+      uploadUtils.uploadCropJSON(cropJSON, id ?? privateId).then(() => {
+        uploadUtils.uploadAsset('image', [previewSrc], {
+          addToPage: false,
+          pollingCallback: (json: IUploadAssetResponse) => {
+            const targetPageIndex = pageUtils.getPageIndexById(pageId)
+            const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+            const srcObj = {
+              type: this.isAdmin ? 'public' : 'private',
+              userId: teamId,
+              assetId: this.isAdmin ? json.data.id : json.data.asset_index
             }
-          }
-          stepsUtils.record()
-          this.setLoading(false)
-          this.setIsProcessing(false)
-        },
-        id: id ?? privateId,
-        needCompressed: false,
-        pollingJsonName: 'result2.json'
+            layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+              srcObj,
+              trace: 1
+            })
+            store.commit('DELETE_previewSrc', {
+              type: this.isAdmin ? 'public' : 'private',
+              userId: teamId,
+              assetId: this.isAdmin ? json.data.id : json.data.asset_index,
+              assetIndex: json.data.asset_index
+            })
+            const image = layerUtils.getLayer(pageIndex, index) as IImage
+            if (image.type === LayerType.image) {
+              if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
+                const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
+                const layerData = {
+                  config: image,
+                  layerInfo
+                }
+                imageShadowPanelUtils.handleShadowUpload(layerData, true)
+                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              }
+            }
+            stepsUtils.record()
+            this.setLoading(false)
+            this.setIsProcessing(false)
+          },
+          id: id ?? privateId,
+          needCompressed: false,
+          pollingJsonName: 'result2.json'
+        })
       })
+    } catch (error) {
+      console.log(error)
     }
   }
 
