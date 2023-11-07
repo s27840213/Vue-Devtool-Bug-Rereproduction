@@ -21,7 +21,6 @@ interface IEditorStore {
   maskDataUrl: string
   isGenerating: boolean
   generatedResults: Array<IGenResult>
-  showGenResult: boolean
   currGenResultIndex: number
   stepsTypesArr: Array<'canvas' | 'editor'>
   currStepTypeIndex: number
@@ -37,7 +36,6 @@ export const useEditorStore = defineStore('editor', {
     maskDataUrl: '',
     isGenerating: false,
     generatedResults: [],
-    showGenResult: false,
     currGenResultIndex: 0,
     stepsTypesArr: [],
     currStepTypeIndex: -1,
@@ -59,8 +57,17 @@ export const useEditorStore = defineStore('editor', {
     showSelectionOptions(): boolean {
       return this.currActiveFeature === 'selection'
     },
-    isEditing(): boolean {
+    inAspectRatioState(): boolean {
+      return this.editorState === 'aspectRatio'
+    },
+    inEditingState(): boolean {
       return this.editorState === 'editing'
+    },
+    inGenResultState(): boolean {
+      return this.editorState === 'genResult'
+    },
+    inSavingState(): boolean {
+      return this.editorState === 'saving'
     },
     editorSteps(): Array<IStep> {
       return stepsUtils.steps
@@ -115,9 +122,6 @@ export const useEditorStore = defineStore('editor', {
     clearGeneratedResults() {
       this.generatedResults = []
     },
-    setShowGenResult(show: boolean) {
-      this.showGenResult = show
-    },
     setGenResultIndex(index: number) {
       this.currGenResultIndex = index
     },
@@ -151,7 +155,7 @@ export const useEditorStore = defineStore('editor', {
       this.initImgSrc = src
     },
     keepEditingInit() {
-      this.setShowGenResult(false)
+      this.setEditorState('genResult')
       this.createNewPage(this.pageSize.width, this.pageSize.height)
 
       assetUtils.addImage(

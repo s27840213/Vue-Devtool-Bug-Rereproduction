@@ -29,7 +29,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-bottom-panel")
+  bottom-panel(class="z-bottom-panel max-h-full overflow-scroll")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
@@ -67,12 +67,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { storeToRefs } from 'pinia'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
-import EditingOptions from './components/panel-content/EditingOptions.vue'
+import BrushOptions from './components/panel-content/BrushOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
+import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useStateInfo from './composable/useStateInfo'
 import { useImgSelectorStore } from './stores/imgSelector'
@@ -83,16 +84,17 @@ const { requireImgNum } = storeToRefs(useImgSelectorStore())
 // #region state info
 const stateInfo = useStateInfo()
 const {
-  showAspectRatioSelector,
+  inAspectRatioState,
   showHomeTabs,
-  isEditing,
+  inEditingState,
   showBrushOptions,
   showSelectionOptions,
   atMyDesign,
   atSettings,
   atMainPage,
   showImgSelector,
-  showGenResult,
+  inGenResultState,
+  inSavingState,
 } = stateInfo
 // #endregion
 
@@ -100,8 +102,10 @@ const {
 const layerIndex = computed(() => layerUtils.layerIndex)
 // #endregion
 
+// #region bottom panel warning modal
 const modalStore = useModalStore()
 const { isModalOpen } = storeToRefs(modalStore)
+// #endregion
 
 const bottomPanelComponent = computed(() => {
   switch (true) {
@@ -110,18 +114,20 @@ const bottomPanelComponent = computed(() => {
     case showHomeTabs.value:
     case atSettings.value:
       return HomeTab
-    case showAspectRatioSelector.value:
+    case inAspectRatioState.value:
       return AspectRatioSelector
     case showBrushOptions.value:
-      return EditingOptions
+      return BrushOptions
     case showSelectionOptions.value:
       return SelectionOptions
     case layerIndex.value !== -1:
       return FooterTabs
-    case showGenResult.value:
+    case inGenResultState.value:
       return GenResult
-    case isEditing.value:
+    case inEditingState.value:
       return PromptArea
+    case inSavingState.value:
+      return SavingTab
     default:
       return ModalTemplate
   }

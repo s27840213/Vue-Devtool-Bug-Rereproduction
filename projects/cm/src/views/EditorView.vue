@@ -7,7 +7,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     template(#left)
       back-btn
     template(
-      v-if="isEditing && !showGenResult"
+      v-if="inEditingState && !inGenResultState"
       #middle)
       cm-svg-icon(
         v-if="!showActiveTab"
@@ -25,30 +25,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
-      //- cm-svg-icon(
-      //-   iconName="undo"
-      //-   :iconColor="'app-btn-primary-text'"
-      //-   iconWidth="20px")
-      //- cm-svg-icon(
-      //-   iconName="redo"
-      //-   :iconColor="'app-btn-primary-text'"
-      //-   iconWidth="20px")
     template(#right)
-      //- cm-btn(
-      //-   v-if="isEditing"
-      //-   theme="primary"
-      //-   size="md"
-      //-   @click="downloadCanvas") 下載 Mask
       cm-btn(
-        v-if="showAspectRatioSelector"
+        v-if="inAspectRatioState || inGenResultState"
         theme="primary"
         size="md"
-        @click="handleNextAction") {{ $t('CM0012') }}
-      cm-btn(
-        v-if="showGenResult"
-        theme="primary"
-        size="md"
-        @click="handleNextAction") {{ $t('NN0133') }}
+        @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
     div(
       class="w-full h-full box-border overflow-scroll flex justify-center items-center"
@@ -59,19 +41,19 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :style="wrapperStyles"
         ref="editorWrapperRef")
         img(
-          v-if="showGenResult"
+          v-if="inGenResultState"
           class="h-full object-cover"
           :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
         template(v-else)
           nu-page(
             class="z-page"
-            v-show="!showGenResult"
+            v-show="!inGenResultState"
             :pageIndex="0"
             :pageState="pageState[0]"
             :overflowContainer="editorContainerRef"
             :noBg="isDuringCopy && isNoBg")
           canvas-section(
-            v-if="isEditing"
+            v-if="inEditingState"
             class="absolute top-0 left-0 w-full h-full"
             :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
             :containerDOM="editorContainerRef"
@@ -82,17 +64,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="isEditing && !showGenResult && !showSelectionOptions"
+      v-if="inEditingState && !inGenResultState && !showSelectionOptions"
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
     //- div(
-    //-   v-if="showGenResult"
+    //-   v-if="inGenResultState"
     //-   class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg")
       img(:src="generatedResults" class="w-240")
   transition(name="bottom-up")
     component(
-      v-if="showActiveTab && isEditing"
+      v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
       class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles")
@@ -151,7 +133,7 @@ onBeforeRouteLeave((to, from) => {
 // #endregion
 
 // #region edtior state related
-const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
+const { inEditingState, atEditor, inAspectRatioState, showSelectionOptions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const {
@@ -159,7 +141,7 @@ const {
   editorState,
   currActiveFeature,
   generatedResults,
-  showGenResult,
+  inGenResultState,
   currGenResultIndex,
   initImgSrc,
 } = storeToRefs(editorStore)
@@ -169,8 +151,8 @@ const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
     tutorialUtils.runTutorial('powerful-fill')
-  } else if (editorState.value === 'editing') {
-    setEditorState('prompt')
+  } else if (editorState.value === 'genResult') {
+    // setEditorState('saving')
   }
 }
 
@@ -354,10 +336,10 @@ const centerTitle = computed(() => {
 })
 // #endregion
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .demo-brush {
   @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
-  @apply pointer-events-none rounded-full outline-4 outline-primary-white;
+  @apply pointer-events-none rounded-full outline-4 outline-primary-white z-highest;
   outline-style: solid;
 }
 </style>
