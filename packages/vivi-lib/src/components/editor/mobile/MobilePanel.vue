@@ -93,8 +93,7 @@ export default defineComponent({
   }
   @include cm {
     position: static;
-    z-index: unset;
-    transform: translateZ(-1px); // hide it behind footerTabs
+    z-index: -1; // hide it behind footerTabs
   }
   display: grid;
   grid-template-columns: 1fr;
