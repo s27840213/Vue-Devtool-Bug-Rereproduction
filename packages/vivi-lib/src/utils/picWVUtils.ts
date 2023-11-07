@@ -40,7 +40,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   get nativeEventDisabled() {
-    return generalUtils.isStk
+    return !generalUtils.isPic
   }
 
   get inBrowserMode(): boolean {

@@ -34,7 +34,7 @@ const { toTarget, customCallback } = withDefaults(
     toTarget: '/',
   },
 )
-const { isEditing, atSettings } = useStateInfo()
+const { inEditingState, atSettings } = useStateInfo()
 
 // #region modal
 const modalStore = useModalStore()
@@ -43,14 +43,14 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 
 // #region img selector
 const imgSelectorStore = useImgSelectorStore()
-const { setShowImgSelector } = imgSelectorStore
+const { setRequireImgNum } = imgSelectorStore
 const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
 // #region editor
 const editorStore = useEditorStore()
-const { setShowGenResult } = editorStore
-const { showGenResult } = storeToRefs(editorStore)
+const { setEditorState } = editorStore
+const { inGenResultState } = storeToRefs(editorStore)
 // #endregion
 
 const store = useStore()
@@ -63,13 +63,13 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (showGenResult.value) {
-    setShowGenResult(false)
+  if (inGenResultState.value) {
+    setEditorState('genResult')
     return
   }
 
   if (showImgSelector.value) {
-    setShowImgSelector(0)
+    setRequireImgNum(0)
     return
   }
 
@@ -92,7 +92,7 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (isEditing.value) {
+  if (inEditingState.value) {
     setNormalModalInfo({
       title: t('CM0025'),
       content: t('CM0026'),

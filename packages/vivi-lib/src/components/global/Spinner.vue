@@ -1,31 +1,25 @@
 <template lang="pug">
 div(class="spinner popup-window")
   div
-    img(:src="rocketLoading")
-    span {{loadingText}}...
+    img(v-if="$isPic" :src="require('@img/gif/rocket-loading.gif')")
+    cube-loading(v-if="$isCm")
+    span {{textContent}}...
 </template>
 
 <script lang="ts">
-
 import i18n from '@/i18n'
 import { defineComponent } from 'vue'
-import rocketLoading from '@img/gif/rocket-loading.gif'
+import CubeLoading from '@/components/global/CubeLoading.vue'
 
 export default defineComponent({
   emits: [],
+  components: {
+    CubeLoading,
+  },
   props: {
     textContent: {
       type: String,
-    }
-  },
-  data() {
-    return {
-      rocketLoading
-    }
-  },
-  computed: {
-    loadingText() {
-      return this.textContent || i18n.global.t('NN0454')
+      default: () => i18n.global.t('NN0454')
     }
   },
 })
@@ -41,7 +35,7 @@ export default defineComponent({
     width: 20vh;
     height: 23vh;
 
-    img {
+    img, .cube-loading {
       width: 15vh;
       height: 15vh;
       padding: 0px 10px;

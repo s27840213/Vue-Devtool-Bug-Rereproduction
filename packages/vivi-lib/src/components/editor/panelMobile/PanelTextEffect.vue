@@ -3,7 +3,7 @@ div(class="panel-text-effect")
   //- To choose effect category and effect.
   tabs(v-if="state === 'effects'"
       :tabs="textEffects.map(t => t.label)"
-      v-model="currTabIndex" :theme="$isStk ? 'dark-stk' : 'light'")
+      v-model="currTabIndex" :theme="$isStk || $isCm ? 'dark-stk' : 'light'")
   div(v-if="state === 'effects'"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"

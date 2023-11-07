@@ -6,7 +6,7 @@ div(class="font-size-selector relative")
       :style="numberButtonStyles"
       @pointerdown="fontSizeStepping(-1)"
       @contextmenu.prevent)
-      svg-icon(iconName="minus-small" :iconWidth="iconSize" :iconColor="$isStk ? 'black-5' : 'gray-2'")
+      svg-icon(iconName="minus-small" :iconWidth="iconSize" :iconColor="$isStk || $isCm ? 'black-5' : 'gray-2'")
     button(class="font-size-selector__range-input-button"
           :style="inputButtonStyles"
           @click="handleValueModal")
@@ -17,7 +17,7 @@ div(class="font-size-selector relative")
       :style="numberButtonStyles"
       @pointerdown="fontSizeStepping(1)"
       @contextmenu.prevent)
-      svg-icon(iconName="plus-small" :iconWidth="iconSize" :iconColor="$isStk ? 'black-5' : 'gray-2'")
+      svg-icon(iconName="plus-small" :iconWidth="iconSize" :iconColor="$isStk || $isCm ? 'black-5' : 'gray-2'")
   value-selector(v-if="openValueSelector"
               v-click-outside="handleValueModal"
               :valueArray="fontSelectValue"

@@ -8,7 +8,7 @@ div(class="panel-order")
       class="pointer"
       :iconName="data.icon"
       :iconWidth="'16px'"
-      :iconColor="$isStk ? 'white' : 'gray-1'")
+      :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
     span(class="ml-5 body-2") {{data.text}}
 </template>
 

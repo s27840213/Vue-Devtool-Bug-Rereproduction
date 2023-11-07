@@ -205,5 +205,11 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 
   async getState(key: string): Promise<WEBVIEW_API_RESULT> { return undefined }
   async setState(key: string, value: any) { /* only interface */ }
+
+  async fetchLoadedFonts(): Promise<void> { /* only interface */ }
+
+  async recordLoadedFont(face: string): Promise<void> { /* only interface */ }
+
+  async checkFontLoaded(face: string): Promise<boolean> { return false /* only interface */ }
   //
 }

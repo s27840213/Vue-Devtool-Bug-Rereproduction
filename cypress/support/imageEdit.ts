@@ -217,6 +217,8 @@ Cypress.Commands.add('imageAutoBgRemove', { prevSubject: 'element' }, (subject) 
     .get('.nu-layer .nu-layer__inProcess', { timeout: 20000 }).should('not.exist')
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .togglePanel('完成')
+    // Wait for image polling
+    .get(subject.selector).invoke('attr', 'cy-ready').should('eq', 'true')
   return cy.get(subject.selector)
 })
 
@@ -226,7 +228,7 @@ Cypress.Commands.add('imageManuallyBgRemove', { prevSubject: 'element' }, (subje
     .get('.nu-layer .nu-layer__inProcess', { timeout: 20000 }).should('not.exist')
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .get('.panel-background-remove input[type="range"]')
-    .invoke('val', 300).trigger('input')
+    .invoke('val', 225).trigger('input')
     .get('canvas.bg-remove-area').realClick({ x: 225, y: 225 })
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .togglePanel('完成')

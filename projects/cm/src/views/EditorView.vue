@@ -1,53 +1,35 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(
-    class="box-border px-24"
+    class="editor-header box-border px-24"
     :middGap="32"
     ref="headerbarRef")
     template(#left)
       back-btn
     template(
-      v-if="isEditing && !showGenResult"
+      v-if="inEditingState && !inGenResultState"
       #middle)
-      cm-svg-icon(
-        iconName="undo"
-        :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-        iconWidth="20px"
-        @click="undo")
-      cm-svg-icon(
-        iconName="redo"
-        :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-        iconWidth="20px"
-        @click="redo")
-      div(class="text-white typo-h5 whitespace-nowrap")
+      div(v-if="showActiveTab" class="text-white typo-h5 whitespace-nowrap")
         link-or-text(
-          v-if="showActiveTab"
           :title="centerTitle"
           :url="centerUrl")
-      //- cm-svg-icon(
-      //-   iconName="undo"
-      //-   :iconColor="'app-btn-primary-text'"
-      //-   iconWidth="20px")
-      //- cm-svg-icon(
-      //-   iconName="redo"
-      //-   :iconColor="'app-btn-primary-text'"
-      //-   iconWidth="20px")
+      template(v-else)
+        cm-svg-icon(
+          iconName="undo"
+          :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
+          iconWidth="20px"
+          @click="undo")
+        cm-svg-icon(
+          iconName="redo"
+          :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
+          iconWidth="20px"
+          @click="redo")
     template(#right)
-      //- cm-btn(
-      //-   v-if="isEditing"
-      //-   theme="primary"
-      //-   size="md"
-      //-   @click="downloadCanvas") 下載 Mask
       cm-btn(
-        v-if="showAspectRatioSelector"
+        v-if="inAspectRatioState || inGenResultState"
         theme="primary"
         size="md"
-        @click="handleNextAction") {{ $t('CM0012') }}
-      cm-btn(
-        v-if="showGenResult"
-        theme="primary"
-        size="md"
-        @click="handleNextAction") {{ $t('NN0133') }}
+        @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
     div(
       class="w-full h-full box-border overflow-scroll flex justify-center items-center"
@@ -58,19 +40,19 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :style="wrapperStyles"
         ref="editorWrapperRef")
         img(
-          v-if="showGenResult"
+          v-if="inGenResultState"
           class="h-full object-cover"
           :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
         template(v-else)
           nu-page(
             class="z-page"
-            v-show="!showGenResult"
+            v-show="!inGenResultState"
             :pageIndex="0"
             :pageState="pageState[0]"
             :overflowContainer="editorContainerRef"
             :noBg="isDuringCopy && isNoBg")
           canvas-section(
-            v-if="isEditing"
+            v-if="inEditingState"
             class="absolute top-0 left-0 w-full h-full"
             :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
             :containerDOM="editorContainerRef"
@@ -81,17 +63,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="isEditing && !showGenResult && !showSelectionOptions"
+      v-if="inEditingState && !inGenResultState && !showSelectionOptions"
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
     //- div(
-    //-   v-if="showGenResult"
+    //-   v-if="inGenResultState"
     //-   class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg")
       img(:src="generatedResults" class="w-240")
   transition(name="bottom-up")
     component(
-      v-if="showActiveTab && isEditing"
+      v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
       class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles")
@@ -120,6 +102,7 @@ import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
 
+// #region refs & vars
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
@@ -128,6 +111,10 @@ const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
+
+const i18n = useI18n()
+const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
+const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
 // #endregion
 
 // #region hooks related
@@ -138,6 +125,7 @@ onBeforeRouteLeave((to, from) => {
        * @NOTE - if we reset immediately, will see the editor from editing state to initial state bcz transition time
        */
       editorStore.stepsReset()
+      editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
     }, 1000)
@@ -145,12 +133,8 @@ onBeforeRouteLeave((to, from) => {
 })
 // #endregion
 
-const i18n = useI18n()
-const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
-const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
-
-// #region Stores
-const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
+// #region edtior state related
+const { inEditingState, atEditor, inAspectRatioState, showSelectionOptions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const {
@@ -158,7 +142,7 @@ const {
   editorState,
   currActiveFeature,
   generatedResults,
-  showGenResult,
+  inGenResultState,
   currGenResultIndex,
   initImgSrc,
 } = storeToRefs(editorStore)
@@ -168,8 +152,8 @@ const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
     tutorialUtils.runTutorial('powerful-fill')
-  } else if (editorState.value === 'editing') {
-    setEditorState('prompt')
+  } else if (editorState.value === 'genResult') {
+    // setEditorState('saving')
   }
 
   // @test pixi record gen-vedio
@@ -276,22 +260,6 @@ const getCanvasDataUrl = () => {
   return canvasRef.value.getCanvasDataUrl()
 }
 // #endregion
-/**
- * fitPage
- */
-
-watch(
-  () => fitScaleRatio.value,
-  (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value) return
-    pageUtils.setScaleRatio(newVal)
-  },
-  // useDebounceFn((newVal, oldVal) => {
-  //   if (newVal === oldVal || !atEditor.value) return
-  //   setPageScaleRatio(newVal)
-  //   setPageScaleRatio(newVal)
-  // }, 300),
-)
 
 // #region asset panel
 const currActiveTab = computed(() => assetPanelUtils.currActiveTab)
@@ -376,10 +344,10 @@ const centerTitle = computed(() => {
 })
 // #endregion
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .demo-brush {
   @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
-  @apply pointer-events-none rounded-full outline-4 outline-primary-white;
+  @apply pointer-events-none rounded-full outline-4 outline-primary-white z-highest;
   outline-style: solid;
 }
 </style>

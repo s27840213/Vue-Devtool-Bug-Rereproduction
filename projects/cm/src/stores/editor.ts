@@ -21,7 +21,6 @@ interface IEditorStore {
   maskDataUrl: string
   isGenerating: boolean
   generatedResults: Array<IGenResult>
-  showGenResult: boolean
   currGenResultIndex: number
   stepsTypesArr: Array<'canvas' | 'editor'>
   currStepTypeIndex: number
@@ -37,7 +36,6 @@ export const useEditorStore = defineStore('editor', {
     maskDataUrl: '',
     isGenerating: false,
     generatedResults: [],
-    showGenResult: false,
     currGenResultIndex: 0,
     stepsTypesArr: [],
     currStepTypeIndex: -1,
@@ -59,8 +57,17 @@ export const useEditorStore = defineStore('editor', {
     showSelectionOptions(): boolean {
       return this.currActiveFeature === 'selection'
     },
-    isEditing(): boolean {
+    inAspectRatioState(): boolean {
+      return this.editorState === 'aspectRatio'
+    },
+    inEditingState(): boolean {
       return this.editorState === 'editing'
+    },
+    inGenResultState(): boolean {
+      return this.editorState === 'genResult'
+    },
+    inSavingState(): boolean {
+      return this.editorState === 'saving'
     },
     editorSteps(): Array<IStep> {
       return stepsUtils.steps
@@ -85,10 +92,7 @@ export const useEditorStore = defineStore('editor', {
       pageUtils.setPageSize(0, width, height)
     },
     createNewPage(width: number, height: number) {
-      pageUtils.setPages([
-        pageUtils.newPage({ width, height }),
-        pageUtils.newPage({ width, height }),
-      ])
+      pageUtils.setPages([pageUtils.newPage({ width, height })])
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
@@ -118,9 +122,6 @@ export const useEditorStore = defineStore('editor', {
     clearGeneratedResults() {
       this.generatedResults = []
     },
-    setShowGenResult(show: boolean) {
-      this.showGenResult = show
-    },
     setGenResultIndex(index: number) {
       this.currGenResultIndex = index
     },
@@ -135,6 +136,9 @@ export const useEditorStore = defineStore('editor', {
     },
     stepsReset() {
       stepsUtils.reset()
+    },
+    pageReset(width = 900, height = 1600) {
+      this.createNewPage(width, height)
     },
     pushStepType(type: 'canvas' | 'editor') {
       this.stepsTypesArr.push(type)
@@ -151,7 +155,7 @@ export const useEditorStore = defineStore('editor', {
       this.initImgSrc = src
     },
     keepEditingInit() {
-      this.setShowGenResult(false)
+      this.setEditorState('genResult')
       this.createNewPage(this.pageSize.width, this.pageSize.height)
 
       assetUtils.addImage(

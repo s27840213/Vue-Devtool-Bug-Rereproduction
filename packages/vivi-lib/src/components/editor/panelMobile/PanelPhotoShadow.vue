@@ -63,14 +63,14 @@ export default defineComponent({
       shadowPropI18nMap,
       fieldRange,
       handleColor: false,
-      theme: this.$isStk ? 'dark' : 'light'
+      theme: this.$isStk || this.$isCm ? 'dark' : 'light',
     }
   },
   mounted() {
     imageShadowPanelUtils.mount()
   },
   beforeUnmount() {
-    if (this.$isStk && colorUtils.currEvent !== ColorEventType.photoShadow) {
+    if ((this.$isStk || this.$isCm) && colorUtils.currEvent !== ColorEventType.photoShadow) {
       imageShadowPanelUtils.handleShadowUpload()
       setTimeout(() => {
         const cb = (this.$store.getters['shadow/uploadingCallback'] as Map<string, () => void>).get(layerUtils.getCurrConfig.id)

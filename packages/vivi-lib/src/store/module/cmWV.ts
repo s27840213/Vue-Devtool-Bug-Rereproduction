@@ -6,6 +6,7 @@ export interface ICmWVState {
   inBrowserMode: boolean,
   isDuringCopy: boolean,
   isNoBg: boolean,
+  loadedFonts: { [key: string]: true },
 }
 
 const getDefaultState = (): ICmWVState => ({
@@ -13,6 +14,7 @@ const getDefaultState = (): ICmWVState => ({
   inBrowserMode: false,
   isDuringCopy: false,
   isNoBg: false,
+  loadedFonts: {},
 })
 
 const state = getDefaultState()
@@ -29,6 +31,9 @@ const getters: GetterTree<ICmWVState, unknown> = {
   getIsNoBg(state: ICmWVState): boolean {
     return state.isNoBg
   },
+  getLoadedFonts(state: ICmWVState): { [key: string]: true } {
+    return state.loadedFonts
+  },
 }
 
 const mutations: MutationTree<ICmWVState> = {
@@ -43,6 +48,12 @@ const mutations: MutationTree<ICmWVState> = {
   },
   SET_isNoBg(state: ICmWVState, isNoBg: boolean) {
     state.isNoBg = isNoBg
+  },
+  SET_loadedFonts(state: ICmWVState, loadedFonts: { [key: string]: true }) {
+    state.loadedFonts = loadedFonts
+  },
+  UPDATE_addLoadedFont(state: ICmWVState, font: string) {
+    state.loadedFonts[font] = true
   },
 }
 

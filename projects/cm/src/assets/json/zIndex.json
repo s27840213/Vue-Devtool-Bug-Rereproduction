@@ -1,4 +1,5 @@
 [
+  "lowest",
   "page",
   "canvas",
   "modal-mask",
@@ -6,5 +7,6 @@
   "img-selector",
   "asset-panel",
   "tutorial-highlight",
-  "tutorial-overlay"
+  "tutorial-overlay",
+  "highest"
 ]
