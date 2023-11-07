@@ -91,6 +91,10 @@ export default defineComponent({
   @include stk {
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.3);
   }
+  @include cm {
+    position: static;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.3);
+  }
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto minmax(0, 1fr);

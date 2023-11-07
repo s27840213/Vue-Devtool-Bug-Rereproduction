@@ -1,62 +1,7 @@
-<template lang="pug">
-div(class="mobile-panel"
-    :class="{'panel-padding': !noPaddingTheme, 'not-rounded': noRoundTheme}"
-    :style="panelStyle"
-    v-click-outside="vcoConfig()"
-    ref="panel")
-  div(v-if="!hideTopSection" class="mobile-panel__top-section"
-    :class="{'self-padding': noPaddingTheme}")
-    div(class="mobile-panel__drag-bar"
-      :class="{'visible-hidden': hideDragBar}"
-      @pointerdown.stop="dragPanelStart"
-      @touchstart.stop="disableTouchEvent")
-        div
-    div(v-if="showLeftBtn || showRightBtn || panelTitle")
-      div(class="mobile-panel__btn mobile-panel__left-btn"
-          :class="[{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn}, $i18n.locale]")
-        svg-icon(
-          class="click-disabled"
-          :iconName="leftBtnName"
-          :iconColor="whiteTheme ? 'gray-2' : 'white'"
-          :iconWidth="'20px'")
-        div(class="mobile-panel__btn-click-zone"
-          @pointerdown.stop="leftButtonAction"
-          @touchstart.stop="disableTouchEvent")
-      div(class="mobile-panel__title")
-        span(class="mobile-panel__title-text body-1 mr-10"
-          :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-        div(v-if="currActivePanel === 'multiple-select'" class="mobile-panel__layer-num")
-          span(class="label-sm text-white") {{selectedLayerNum}}
-      div(class="mobile-panel__btn mobile-panel__right-btn"
-          :class="[{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}, $i18n.locale]")
-        svg-icon(
-          class="click-disabled"
-          :iconName="rightBtnName"
-          :iconColor="whiteTheme ? 'gray-2' : 'white'"
-          :iconWidth="'20px'")
-        div(class="mobile-panel__btn-click-zone"
-          @pointerdown.stop="rightButtonAction"
-          @touchstart.stop="disableTouchEvent")
-  div(class="mobile-panel__bottom-section")
-    //- tabs(v-if="innerTabs.label" theme="light"
-    //-   :tabs="innerTabs.label" v-model="innerTabIndex")
-    keep-alive(:include="keepAlivePanels")
-      //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-      component(v-if="dynamicBindIs && !isShowPagePreview && !hideDynamicComp"
-        class="border-box"
-        :class="{'p-2': $isPic}"
-        :is="dynamicBindIs"
-        :key="dynamicBindIs"
-        :currPage="currPage"
-        v-bind="dynamicBindProps"
-        v-on="dynamicBindMethod"
-        @close="closeMobilePanel")
-</template>
-
 <script lang="ts">
 // import ColorPanel from '@/components/editor/ColorSlips.vue'
 // import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
-// import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
+import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
 import PanelFlip from '@nu/vivi-lib/components/editor/panelMobile/PanelFlip.vue'
@@ -71,6 +16,7 @@ import PanelPhotoShadow from '@nu/vivi-lib/components/editor/panelMobile/PanelPh
 import PanelPosition from '@nu/vivi-lib/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import mobilePanelMixin from '@nu/vivi-lib/mixin/mobilePanel'
@@ -86,6 +32,7 @@ import { computed, defineComponent, provide } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
+  extends: MobilePanel,
   mixins: [mobilePanelMixin],
   components: {
     PanelPosition,
@@ -102,6 +49,7 @@ export default defineComponent({
     PanelPhotoShadow,
     PanelObjectAdjust,
     PanelRemoveBg,
+    Tabs,
   },
   data() {
     return {
@@ -360,111 +308,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.mobile-panel {
-  width: 100%;
-  box-sizing: border-box;
-  border-radius: 10px 10px 0 0;
-  @include cm {
-    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.3);
-  }
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto minmax(0, 1fr);
-  justify-items: center;
-
-  &.not-rounded {
-    border-radius: 0;
-  }
-
-  &.panel-padding {
-    padding: 16px;
-  }
-
-  &__top-section {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    &.self-padding {
-      padding: 15px;
-      padding-bottom: 0;
-      box-sizing: border-box;
-    }
-    > div:nth-child(2) {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  }
-
-  .tabs {
-    margin-bottom: 14px;
-  }
-
-  &__btn {
-    display: grid; // To fix div height != child height issue. https://stackoverflow.com/questions/5804256
-    position: relative;
-  }
-
-  &__btn-click-zone {
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    top: 0;
-    left: 0;
-    transform: translate(-4px, -4px);
-    border-radius: 50%;
-    touch-action: manipulation;
-  }
-
-  &__bottom-section {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-    grid-auto-columns: minmax(0, 1fr);
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    @include no-scrollbar;
-    > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.
-      grid-row: 2 / 3;
-    }
-  }
-
-  &__title {
-    @include flexCenter();
-    font-weight: bold;
-  }
-
-  &__layer-num {
-    @include size(20px);
-    @include flexCenter();
-    @include setColors(blue-1, black-5) using ($color) {
-      background-color: $color;
-    }
-    border-radius: 50%;
-  }
-
-  &__drag-bar {
-    position: absolute;
-    touch-action: manipulation;
-    top: 2px;
-    // 47 = 15 (MobilePanel margin)
-    //    + 12 (half of gray-4 div width)
-    //    + 20 (left/right btn)
-    padding: 10px calc(50% - 47px);
-    border-radius: 5px;
-    > div {
-      @include setColors(gray-4, black-4, black-4) using ($color) {
-        background-color: $color;
-      }
-      height: 3px;
-      width: 24px;
-    }
-  }
-}
-</style>
