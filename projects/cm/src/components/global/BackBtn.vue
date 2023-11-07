@@ -43,7 +43,7 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 
 // #region img selector
 const imgSelectorStore = useImgSelectorStore()
-const { setShowImgSelector } = imgSelectorStore
+const { setRequireImgNum } = imgSelectorStore
 const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
@@ -69,7 +69,7 @@ const handleBackAction = (navagate: () => void) => {
   }
 
   if (showImgSelector.value) {
-    setShowImgSelector(0)
+    setRequireImgNum(0)
     return
   }
 

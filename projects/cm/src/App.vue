@@ -42,9 +42,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     @click.stop="closeModal")
   transition(name="bottom-up")
     img-selector(
-      v-if="showImgSelector > 0"
+      v-if="showImgSelector"
       class="absolute top-0 left-0 w-full h-full z-img-selector"
-      :requireNum="showImgSelector")
+      :requireNum="requireImgNum")
   notifications(
     group="copy"
     position="top center"
@@ -75,9 +75,12 @@ import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useStateInfo from './composable/useStateInfo'
+import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
 
-// #region route info
+const { requireImgNum } = storeToRefs(useImgSelectorStore())
+
+// #region state info
 const stateInfo = useStateInfo()
 const {
   showAspectRatioSelector,

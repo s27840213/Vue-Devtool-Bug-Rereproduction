@@ -85,10 +85,7 @@ export const useEditorStore = defineStore('editor', {
       pageUtils.setPageSize(0, width, height)
     },
     createNewPage(width: number, height: number) {
-      pageUtils.setPages([
-        pageUtils.newPage({ width, height }),
-        pageUtils.newPage({ width, height }),
-      ])
+      pageUtils.setPages([pageUtils.newPage({ width, height })])
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
@@ -135,6 +132,9 @@ export const useEditorStore = defineStore('editor', {
     },
     stepsReset() {
       stepsUtils.reset()
+    },
+    pageReset(width = 900, height = 1600) {
+      this.createNewPage(width, height)
     },
     pushStepType(type: 'canvas' | 'editor') {
       this.stepsTypesArr.push(type)
