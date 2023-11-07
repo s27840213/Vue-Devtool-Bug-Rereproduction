@@ -310,6 +310,12 @@
   }
 }
 
+@mixin webApp {
+  *:where(.app-stk, .app-cm) & {
+    @content;
+  }
+}
+
 @mixin setColors($picColor,
   $stkColor: $picColor,
   $cmColor: $stkColor,

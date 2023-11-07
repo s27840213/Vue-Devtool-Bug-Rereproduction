@@ -316,7 +316,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = attrs.fit === 1 && generalUtils.isStk ? 1 : RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? (vSize as number[])[0] / (vSize as number[])[1] : 1
     const svgWidth =
@@ -367,7 +367,7 @@ class AssetUtils {
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = attrs.fit === 1 && generalUtils.isStk ? 1 : RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = width / height
     const svgWidth =
@@ -430,7 +430,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = attrs.fit === 1 && generalUtils.isStk ? 1 : RESIZE_RATIO_SVG
+    const resizeRatio = attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize[0] / vSize[1]
     const svgWidth =
@@ -483,7 +483,7 @@ class AssetUtils {
     const currentPage = this.getPage(targetPageIndex)
     const svgRatio = json.width / json.height
     const pageRatio = currentPage.width / currentPage.height
-    const resizeRatio = generalUtils.isStk
+    const resizeRatio = (generalUtils.isStk || generalUtils.isCm)
       ? attrs.fit === 1
         ? Math.min(currentPage.width / json.width, currentPage.height / json.height)
         : 300 / Math.max(json.width, json.height)
@@ -607,7 +607,7 @@ class AssetUtils {
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = attrs.fit === 1 && generalUtils.isStk ? 1 : RESIZE_RATIO_TEXT
+    const resizeRatio = attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_TEXT
     const pageAspectRatio = currentPage.width / currentPage.height
     const textAspectRatio = width / height
     const textWidth =
@@ -631,7 +631,7 @@ class AssetUtils {
       has_frame,
     }
 
-    if (generalUtils.isStk) {
+    if (generalUtils.isStk || generalUtils.isCm) {
       let isCenter = false
 
       if (typeof y === 'undefined' || typeof x === 'undefined') {
@@ -763,7 +763,7 @@ class AssetUtils {
             editing: false,
             contentEditable: !generalUtils.isPic || !generalUtils.isTouchDevice(),
             isCompensated: true,
-            inAutoRescaleMode: generalUtils.isStk,
+            inAutoRescaleMode: generalUtils.isStk || generalUtils.isCm,
           }),
         ),
       ])

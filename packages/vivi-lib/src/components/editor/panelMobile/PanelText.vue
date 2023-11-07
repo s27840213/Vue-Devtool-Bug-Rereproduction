@@ -68,6 +68,7 @@ import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import assetPanelUtils from '@/utils/assetPanelUtils'
 import AssetUtils from '@/utils/assetUtils'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
@@ -321,8 +322,8 @@ export default defineComponent({
     async addStandardText() {
       listApi.addDesign('add_text', 'text')
       let recentFont
-      if (this.$isStk && stkWVUtils.checkVersion('1.5')) {
-        recentFont = await stkWVUtils.getState('recentFont')
+      if ((this.$isStk && stkWVUtils.checkVersion('1.5')) || this.$isCm) {
+        recentFont = await getAutoWVUtils().getState('recentFont')
       }
       const color = stkWVUtils.getContrastColor(this.editorBg)
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {

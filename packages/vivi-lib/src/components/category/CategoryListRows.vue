@@ -59,7 +59,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .category-list-rows {
   &__header {
-    @include stk {
+    @include webApp {
       @include body-MD;
     }
     line-height: 26px;
@@ -72,7 +72,7 @@ export default defineComponent({
         color: setColor(blue-1);
       }
     }
-    @include stk {
+    @include webApp {
       @include body-SM;
       &:active {
         color: setColor(black-5);

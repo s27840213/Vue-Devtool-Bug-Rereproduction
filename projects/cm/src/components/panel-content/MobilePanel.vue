@@ -80,7 +80,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isDuringCopy: 'webView/getIsDuringCopy',
+      isDuringCopy: 'cmWV/getIsDuringCopy',
       isProcessing: 'bgRemove/getIsProcessing',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',

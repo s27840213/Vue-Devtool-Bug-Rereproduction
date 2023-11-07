@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="feature-button category-fonts pointer"
-  :class="{ active: !$isStk && props.font === item.id }"
+  :class="{ active: $isPic && props.font === item.id }"
   draggable="false"
   @click="setFont()")
   div(class="category-fonts__item-wrapper")
@@ -14,7 +14,7 @@ div(class="feature-button category-fonts pointer"
   div(class="category-fonts__icon")
     svg-icon(v-if="props.font === item.id"
       iconName="panel-done"
-      :iconColor="$isStk ? 'white' : 'gray-2'"
+      :iconColor="!$isPic ? 'white' : 'gray-2'"
       iconWidth="20px")
     svg-icon(v-else-if="pending && pending === item.id"
       iconName="loading"
@@ -26,10 +26,10 @@ div(class="feature-button category-fonts pointer"
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -184,8 +184,8 @@ export default defineComponent({
           ver: this.item.ver
         })
 
-        if (this.$isStk) {
-          stkWVUtils.setState('recentFont', updateItem)
+        if (this.$isStk || this.$isCm) {
+          getAutoWVUtils().setState('recentFont', updateItem)
         }
 
         const currLayerIndex = layerUtils.getCurrPage.layers
@@ -347,7 +347,7 @@ export default defineComponent({
   grid-template-columns: 7fr 4fr 1fr;
   grid-gap: 10px;
   border-radius: 10px;
-  @include stk {
+  @include webApp {
     &:active {
       background-color: setColor(black-3-5);
     }
@@ -360,7 +360,7 @@ export default defineComponent({
   &__item {
     height: 25px;
     object-fit: contain;
-    @include stk {
+    @include webApp {
       filter: brightness(0) invert(1);
     }
   }

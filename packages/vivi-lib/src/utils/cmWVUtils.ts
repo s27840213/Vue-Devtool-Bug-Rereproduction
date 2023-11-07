@@ -262,6 +262,22 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     Object.assign(this.tutorialFlags, updateItem)
     await this.setState('tutorialFlags', this.tutorialFlags)
   }
+
+  async fetchLoadedFonts(): Promise<void> {
+    const loadedFonts = (await this.getState('loadedFonts')) ?? {}
+    store.commit('cmWV/SET_loadedFonts', loadedFonts)
+  }
+
+  async recordLoadedFont(face: string): Promise<void> {
+    store.commit('cmWV/UPDATE_addLoadedFont', face)
+    const loadedFonts = store.getters['cmWV/getLoadedFonts'] as { [key: string]: true }
+    await this.setState('loadedFonts', { ...loadedFonts })
+  }
+
+  async checkFontLoaded(face: string): Promise<boolean> {
+    const loadedFonts = store.getters['cmWV/getLoadedFonts'] as { [key: string]: true }
+    return loadedFonts[face] ?? false
+  }
 }
 
 export default new CmWVUtils()

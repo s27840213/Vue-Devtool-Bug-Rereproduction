@@ -154,7 +154,7 @@ export default defineComponent({
   },
   data() {
     const { min: lineWidthMin, max: lineWidthMax } = mappingUtils.mappingMinMax('lineWidth')
-    const themeStyles: IThemeStyles = this.$isStk ? {
+    const themeStyles: IThemeStyles = this.$isStk || this.$isCm ? {
       bgActiveColor: 'bg-black-6',
       bgInactiveColor: 'bg-black-3',
       bgDisabledColor: 'bg-black-3',

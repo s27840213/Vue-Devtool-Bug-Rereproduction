@@ -299,7 +299,7 @@ export default defineComponent({
         setTimeout(async () => {
           await this.resizeCallback()
           await this.drawTextBg() // Redraw TextBg after resize.
-          if (this.$isStk && this.$route.name === 'Screenshot') {
+          if ((this.$isStk || this.$isCm) && this.$route.name === 'Screenshot') {
             stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           }
           if (!this.isCurveText) {

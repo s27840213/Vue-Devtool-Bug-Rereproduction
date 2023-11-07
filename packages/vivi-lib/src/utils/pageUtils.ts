@@ -892,8 +892,8 @@ class PageUtils {
    ** unit: unit of physical size for page and bleeds
    */
   removeBleedsFromPageSize(pageSize: IPageSizeWithBleeds): IPageSizeWithBleeds {
-    if (generalUtils.isStk) {
-      return pageSize // bleeds are disabled in vivisticker
+    if (generalUtils.isStk || generalUtils.isCm) {
+      return pageSize // bleeds are disabled in vivisticker and charmix
     } else {
       const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } =
         pageSize

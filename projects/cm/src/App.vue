@@ -29,11 +29,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-bottom-panel")
+  bottom-panel(class="z-bottom-panel" :style="disableBtmPanelTransition ? 'transition: none' : ''")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
-        mode="out-in")
+        mode="out-in"
+        @afterEnter="afterEnter"
+        @beforeLeave="beforeLeave")
         component(:is="bottomPanelComponent"
                   :ref="(el: any) => setSlotRef(el)"
                   :currActivePanel="currActivePanel"
@@ -71,6 +73,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 <script setup lang="ts">
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
@@ -148,6 +151,7 @@ const headerbarStyles = computed(() => {
 // #region mobile panel
 const store = useStore()
 const currColorEvent = ref('')
+const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
 
@@ -174,6 +178,32 @@ const switchTab = (panelType: string, props?: IFooterTabProps) => {
     }
   }
 }
+
+watch(computed(() => store.getters['mobileEditor/getCloseMobilePanelFlag']), (newVal) => {
+  if (newVal) {
+    editorUtils.setCurrActivePanel('none')
+    store.commit('SET_closeMobilePanelFlag', false)
+    editorUtils.setShowMobilePanel(false)
+  }
+})
+
+const afterEnter = () => {
+  if (layerIndex.value !== -1) {
+    disableBtmPanelTransition.value = true
+  }
+}
+
+const beforeLeave = () => {
+  if (layerIndex.value === -1) {
+    disableBtmPanelTransition.value = false
+  }
+}
+
+eventUtils.on(PanelEvent.switchTab, switchTab)
+
+onBeforeUnmount(() => {
+  eventUtils.off(PanelEvent.switchTab)
+})
 // #endregion
 </script>
 

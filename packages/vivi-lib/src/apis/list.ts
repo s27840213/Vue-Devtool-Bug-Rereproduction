@@ -69,32 +69,32 @@ class ListService {
   // For list factories
   getSvg(params: IListServiceParams) {
     params.type = 'svg'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getTemplate(params: IListServiceParams) {
     params.type = 'template'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getText(params: IListServiceParams) {
     params.type = 'text'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getBackground(params: IListServiceParams) {
     params.type = 'background'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getFont(params: IListServiceParams) {
     params.type = 'font'
     params.fontList = 2
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
