@@ -70,6 +70,29 @@ class PageUtils {
     return store.getters['bgRemove/getAutoRemoveResult']
   }
 
+  get targetCanvasSize(): {width: number, height: number} {
+    let width = 1600
+    let height = 1600
+    const { width: autoRemoveWidth, height: autoRemoveHeight } = this.autoRemoveResult
+    const aspectRatio = autoRemoveWidth / autoRemoveHeight
+    const longerSize = Math.max(autoRemoveWidth, autoRemoveHeight)
+    if (longerSize <= 1600) {
+      width = autoRemoveWidth
+      height = autoRemoveHeight
+    } else if (aspectRatio > 1 && longerSize > 1600) {
+      width = 1600
+      height = 1600 / aspectRatio
+    } else if (aspectRatio < 1 && longerSize > 1600) {
+      width = 1600 * aspectRatio
+      height = 1600
+    }
+
+    return {
+      width,
+      height
+    }
+  }
+
   get getPage(): (pageIndex: number) => IPage {
     return store.getters.getPage
   }
@@ -676,9 +699,10 @@ class PageUtils {
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
     if (!editorViewBox) return
     let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
+    
     const { width: targetWidth, height: targetHeight }: { width: number; height: number } = this
       .inBgRemoveMode
-      ? { width: 1600, height: this.autoRemoveResult.height * (1600 / this.autoRemoveResult.width) }
+      ? this.targetCanvasSize
       : this.hasBleed
       ? this.currFocusPageSizeWithBleeds
       : this.currFocusPageSize
