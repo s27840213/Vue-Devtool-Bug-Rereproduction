@@ -157,11 +157,13 @@ const handleNextAction = function () {
   }
 
   // @test pixi record gen-vedio
-  const src = imageUtils.appendRandomQuery(initImgSrc.value)
-  const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
-  const pixiRecorder = new PixiRecorder(src, res)
-  pixiRecorder.genVideo()
-    .then(data => console.log('gen video', data))
+  if (inGenResultState) {
+    const src = imageUtils.appendRandomQuery(initImgSrc.value)
+    const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
+    const pixiRecorder = new PixiRecorder(src, res)
+    pixiRecorder.genVideo()
+      .then(data => console.log('gen video', data))
+  }
 }
 
 const useStep = useSteps()
