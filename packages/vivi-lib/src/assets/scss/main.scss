@@ -18,7 +18,7 @@ body {
   overflow: hidden; // Fallback for older version browser that doesn't support clip.
   overflow: clip;
 
-  @include webApp {
+  @include app(stk, cm) {
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
