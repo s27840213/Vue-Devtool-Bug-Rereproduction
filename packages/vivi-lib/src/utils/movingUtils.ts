@@ -368,6 +368,14 @@ export class MovingUtils {
 
         break
       }
+      case 'group': {
+        if (this.subLayerIdx !== -1 && layerUtils.getCurrConfig.contentEditable) {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isDraggingCursor: true })
+          this._cursorDragEnd = this.onCursorDragEnd.bind(this)
+          eventUtils.addPointerEvent('pointerup', this._cursorDragEnd)
+          return
+        }
+      }
     }
 
     /**
