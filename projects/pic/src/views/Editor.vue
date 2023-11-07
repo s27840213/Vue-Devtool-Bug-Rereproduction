@@ -2,7 +2,7 @@
 div(class="editor")
   desktop-editor(v-if="!useMobileEditor" :currPage="currPage" @setIsLoading="setIsLoading")
   mobile-editor(v-else :currPage="currPage")
-  spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
+  spinner(v-if="true" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
 </template>
 
 <script lang="ts">
