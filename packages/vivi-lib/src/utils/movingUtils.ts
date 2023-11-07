@@ -1,7 +1,7 @@
 import { ICoordinate } from '@/interfaces/frame'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
-import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
+import { FunctionPanelType, ILayerInfo } from '@/store/types'
 import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import { nextTick } from 'vue'
 import controlUtils from './controlUtils'
@@ -19,7 +19,6 @@ import stepsUtils from './stepsUtils'
 import tiptapUtils from './tiptapUtils'
 
 export class MovingUtils {
-  isControlling = false
   // private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
   private _config = { config: null as unknown as ILayer }
@@ -347,7 +346,6 @@ export class MovingUtils {
             groupUtils.select(this.pageIndex, [targetIndex])
           }
           if (!this.config.locked) {
-            this.isControlling = true
             this.initMousePos = mouseUtils.getMouseAbsPoint(event)
             this._moving = this.moving.bind(this)
             this._moveEnd = this.moveEnd.bind(this)
@@ -416,33 +414,21 @@ export class MovingUtils {
     }
   }
 
-  moving(e: MouseEvent | PointerEvent) {
-    const isPointer = eventUtils.getEventType(e) === 'pointer'
-    const isStartedPointer = isPointer && this.pointerId === (e as PointerEvent).pointerId
+  moving(e: PointerEvent) {
+    const isStartedPointer = this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
     if (layerUtils.getCurrLayer.locked) return
-    if ((!isPointer || !isStartedPointer) || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch' || this.initMousePos === null) {
+    if (!isStartedPointer || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch' || this.initMousePos === null) {
       if (store.getters.getControlState.type === 'pinch') {
         // if the pinch is started, the moving logic should be turn off
         this.removeListener()
-        if (store.getters.getControlState.id === this.id) {
-          store.commit('SET_STATE', { controlState: { type: '' } })
-        }
       }
       return
-    }
-    this.isControlling = true
-    switch (this.config.type) {
-      case LayerType.group:
-        if ((this.config as IGroup).layers.some(l => l.active && l.type === LayerType.text && l.contentEditable && l.isTyping)) {
-          return
-        }
     }
 
     const updateConfigData = {} as Partial<IText | IImage | IShape>
     if (!this.isDragging) {
       updateConfigData.dragging = true
-      // this.component && this.component.$emit('isDragging', this.layerIndex)
     }
     if (this.isControllerShown) {
       if (generalUtils.getEventType(e) !== 'touch') {
@@ -510,10 +496,9 @@ export class MovingUtils {
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
     if (this.initMousePos === null) return
+    if (generalUtils.isPic && this.layerIndex !== layerUtils.layerIndex) return
 
-    // target overlay means the current layer is overlaying above the target layer.
-    const isTargetOverlay = this.layerIndex === layerUtils.layerIndex
-    const config = isTargetOverlay ? this.config : layerUtils.getCurrLayer
+    const config = layerUtils.getCurrLayer
     const targetLayerIdx = layerUtils.layerIndex
     if (Object.values(config).length === 0) {
       /**
@@ -625,11 +610,9 @@ export class MovingUtils {
     const isLayerExist = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id === this.config.id
     if (pointerEvtUtils.pointerIds.length > 1 || !isLayerExist ||
       eventUtils.checkIsMultiTouch(e) || this.initMousePos === null) {
-      this.isControlling = false
       return this.removeListener()
     }
 
-    this.isControlling = false
     this.removeListener()
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
@@ -740,7 +723,6 @@ export class MovingUtils {
           }
         }
       }
-      this.isControlling = false
       this.setCursorStyle(e, '')
     } else {
       if (hasActualPageMove || hasActualMouseMove) {
@@ -779,7 +761,6 @@ export class MovingUtils {
   }
 
   removeListener() {
-    this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
     eventUtils.removePointerEvent('pointerup', this._cursorDragEnd)

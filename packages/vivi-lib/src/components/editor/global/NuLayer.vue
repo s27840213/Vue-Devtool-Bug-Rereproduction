@@ -364,10 +364,9 @@ export default defineComponent({
       }
     },
     getPointerEvents(): string {
-      const { isControlling } = this.movingUtils ?? {}
       switch (this.config.type) {
         case LayerType.image:
-          return isControlling ? 'none' : ''
+          return this.$store.state.controlState.type === 'move' ? 'none' : ''
         case LayerType.shape: {
           if (this.primaryLayer && this.primaryLayer.type === LayerType.frame) {
             return 'none'

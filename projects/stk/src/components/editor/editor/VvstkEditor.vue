@@ -42,7 +42,7 @@ import ShareTemplate from '@/components/editor/mobile/ShareTemplate.vue'
 import PagePreview from '@/components/editor/pagePreview/PagePreview.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
-import { ILayer, IText } from '@nu/vivi-lib/interfaces/layer'
+import { ILayer } from '@nu/vivi-lib/interfaces/layer'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
@@ -324,7 +324,7 @@ export default defineComponent({
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
 
       if (_config.config.locked) return
-      if (_config.config.type === 'text' && (_config.config as IText).contentEditable) return
+      if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
 
       const  layerInfo = new Proxy({
         pageIndex: layerUtils.pageIndex,
