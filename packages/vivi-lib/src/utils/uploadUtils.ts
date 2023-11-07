@@ -789,7 +789,7 @@ class UploadUtils {
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
     formData.append('key', `${this.loginOutput.upload_log_map.path}${generalUtils.isStk ? this.hostId : this.userId}/${logName}`)
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
-    formData.append('x-amz-meta-tn', generalUtils.isStk ? this.hostId : this.userId)
+    formData.append('x-amz-meta-tn', generalUtils.isStk || generalUtils.isCm ? this.hostId : this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' })

@@ -128,7 +128,7 @@ export default defineComponent({
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as string,
       textEffects: constantData.textEffects(),
       colorTarget: '',
-      theme: this.$isStk ? 'dark' : 'light',
+      theme: this.$isStk || this.$isCm ? 'dark' : 'light',
     }
   },
   computed: {

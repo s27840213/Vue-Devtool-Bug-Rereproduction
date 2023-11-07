@@ -107,7 +107,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     noPaddingTheme(): boolean {
-      return this.extraPanel === '' && this.noPaddingPanels.includes(this.currActivePanel)
+      return (this.extraPanel === '' && this.noPaddingPanels.includes(this.currActivePanel)) || this.$isCm
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideDragBar(): boolean {

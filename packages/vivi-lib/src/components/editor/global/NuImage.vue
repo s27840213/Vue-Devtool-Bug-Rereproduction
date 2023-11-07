@@ -524,7 +524,7 @@ export default defineComponent({
       const { width, height } = this.scaledConfig()
       const styles = {
         // in vivisticker the following code would lead the non-fluent UX
-        ...(!this.$isStk && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(!(this.$isStk || this.$isCm) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -689,7 +689,7 @@ export default defineComponent({
       }
     },
     onAdjustImgLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main') {
+      if ((this.$isStk || this.$isCm) && type === 'main') {
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
@@ -713,7 +713,7 @@ export default defineComponent({
       }, { crossOrigin: true })
     },
     onLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main' && !this.isAdjustImage) {
+      if ((this.$isStk || this.$isCm) && type === 'main' && !this.isAdjustImage) {
         if (this.prePrimaryLayerIndex !== -1) {
           stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {

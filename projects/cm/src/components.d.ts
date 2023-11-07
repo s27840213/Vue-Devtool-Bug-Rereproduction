@@ -24,6 +24,7 @@ declare module 'vue' {
     HighlightSection: typeof import('./components/home/HighlightSection.vue')['default']
     HomeTab: typeof import('./components/panel-content/HomeTab.vue')['default']
     ImgSelector: typeof import('./components/global/ImgSelector.vue')['default']
+    MobilePanel: typeof import('./components/panel-content/MobilePanel.vue')['default']
     ModalTemplate: typeof import('./components/panel-content/ModalTemplate.vue')['default']
     PowerfulFillTutorial: typeof import('./components/tutorial/PowerfulFillTutorial.vue')['default']
     PromptArea: typeof import('./components/panel-content/PromptArea.vue')['default']

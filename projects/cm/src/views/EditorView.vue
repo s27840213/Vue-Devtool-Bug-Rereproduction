@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(
-    class="box-border px-24"
+    class="editor-header box-border px-24"
     :middGap="32"
     ref="headerbarRef")
     template(#left)
@@ -9,22 +9,21 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     template(
       v-if="inEditingState && !inGenResultState"
       #middle)
-      cm-svg-icon(
-        v-if="!showActiveTab"
-        iconName="undo"
-        :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-        iconWidth="20px"
-        @click="undo")
-      cm-svg-icon(
-        v-if="!showActiveTab"
-        iconName="redo"
-        :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-        iconWidth="20px"
-        @click="redo")
       div(v-if="showActiveTab" class="text-white typo-h5 whitespace-nowrap")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      template(v-else)
+        cm-svg-icon(
+          iconName="undo"
+          :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
+          iconWidth="20px"
+          @click="undo")
+        cm-svg-icon(
+          iconName="redo"
+          :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
+          iconWidth="20px"
+          @click="redo")
     template(#right)
       cm-btn(
         v-if="inAspectRatioState || inGenResultState"

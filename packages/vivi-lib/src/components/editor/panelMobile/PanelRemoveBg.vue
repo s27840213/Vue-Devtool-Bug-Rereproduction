@@ -7,10 +7,10 @@ div(class="panel-remove-bg")
       svg-icon(:iconName="showInitImage ? 'eye-slash' : 'eye'" iconWidth="24px" :iconColor="activeColor")
     slide-toggle(:options="modes"
       v-model="currMode"
-      :bgColor="$isStk ? 'black-3-5' : 'gray-6'"
+      :bgColor="$isStk || $isCm ? 'black-3-5' : 'gray-6'"
       :switchColor="'white'"
-      :activeColor="$isStk ? 'black-2' : 'blue-1'"
-      :inActiveColor="$isStk ? 'white' : 'gray-2'"
+      :activeColor="$isStk || $isCm ? 'black-2' : 'blue-1'"
+      :inActiveColor="$isStk || $isCm ? 'white' : 'gray-2'"
       :optionWidth="'80px'"
       :optionHeight="'32px'"
       textSize="caption-SM")
@@ -57,13 +57,13 @@ export default defineComponent({
       }, {
         label: this.$t('NN0386'),
         value: ControlMode.Restore as string
-      }, ...(this.$isStk ? [{
+      }, ...(this.$isStk || this.$isCm ? [{
         label: this.$t('NN0872'),
         value: ControlMode.Move as string
       }] : [])],
       currMode: ControlMode.Clear as string,
-      activeColor: this.$isStk ? 'white' : 'gray-2',
-      disabledColor: this.$isStk ? 'black-3-5' : 'gray-4',
+      activeColor: this.$isStk || this.$isCm ? 'white' : 'gray-2',
+      disabledColor: this.$isStk || this.$isCm ? 'black-3-5' : 'gray-4',
     }
   },
   components: {
