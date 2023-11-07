@@ -136,15 +136,11 @@ const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
 
 // #region hooks related
 onBeforeRouteLeave((to, from) => {
-  console.log(to, from)
-  console.log('before route leave')
   if (from.name === 'Editor') {
-    console.log('from editor')
     setTimeout(() => {
       /**
        * @NOTE - if we reset immediately, will see the editor from editing state to initial state bcz transition time
        */
-      console.log('in set timeout')
       editorStore.stepsReset()
       editorStore.pageReset()
       editorStore.$reset()
