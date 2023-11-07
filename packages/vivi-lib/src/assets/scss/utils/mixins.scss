@@ -310,9 +310,22 @@
   }
 }
 
-@mixin webApp {
-  *:where(.app-stk, .app-cm) & {
-    @content;
+@mixin app($appNames...) {
+  @for $i from 1 through length($appNames) {
+    *:where(.app-#{nth($appNames, $i)}) & {
+      @content;
+    }
+  }
+}
+
+@mixin not($notAppName) {
+  $appNames : pic, stk, cm;
+  @for $i from 1 through length($appNames) {
+    @if (nth($appNames, $i) != $notAppName) {
+      *:where(.app-#{nth($appNames, $i)}) & {
+        @content;
+      }
+    }
   }
 }
 

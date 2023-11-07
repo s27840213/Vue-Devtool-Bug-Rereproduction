@@ -300,7 +300,7 @@ export default defineComponent({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
-  @include webApp {
+  @include app(stk, cm) {
     padding: 0 8px;
   }
   &__title {

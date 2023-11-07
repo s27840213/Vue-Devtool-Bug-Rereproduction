@@ -48,7 +48,7 @@ export type CCategoryList = InstanceType<typeof component>
       @include push-scrollbar10;
       @include hover-scrollbar(dark);
     }
-    @include webApp {
+    @include app(stk, cm) {
       @include no-scrollbar;
     }
     &__header {
