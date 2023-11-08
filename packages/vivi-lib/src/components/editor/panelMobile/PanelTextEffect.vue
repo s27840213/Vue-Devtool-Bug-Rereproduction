@@ -96,7 +96,6 @@ import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
@@ -306,7 +305,9 @@ export default defineComponent({
     @include no-scrollbar;
     display: grid;
     gap: 10px;
-    margin: 0 15px 15px 15px;
+    @include not(cm) {
+      margin: 0 15px 15px 15px;
+    }
     overflow-y: scroll;
   }
 
