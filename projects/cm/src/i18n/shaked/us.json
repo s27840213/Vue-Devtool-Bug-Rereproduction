@@ -51,6 +51,8 @@
   "NN0086": "Round Corners",
   "NN0087": "Solid",
   "NN0088": "Hollow",
+  "NN0089": "Presets",
+  "NN0091": "Colors Used",
   "NN0092": "Search from our {target}",
   "NN0095": "Text Effects",
   "NN0098": "Detach it",
@@ -236,6 +238,7 @@
   "NN0676": "Design",
   "NN0677": "Digital Marketing",
   "NN0678": "Trend",
+  "NN0679": "Recent colors",
   "NN0680": "Select designs",
   "NN0681": "Line width ",
   "NN0688": "Copied to clipboard",
@@ -446,5 +449,7 @@
   "CM0065": "Demo",
   "CM0066": "Free images left for today",
   "CM0067": "Keep editing",
-  "CM0068": "Show more"
+  "CM0068": "Show more",
+  "CM0069": "Max {num} photos",
+  "CM0070": "Maximum {num} photos can be selected."
 }
