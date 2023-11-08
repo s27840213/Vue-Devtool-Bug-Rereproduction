@@ -64,7 +64,7 @@ const handleBackAction = (navagate: () => void) => {
   }
 
   if (inGenResultState.value) {
-    setEditorState('genResult')
+    setEditorState('editing')
     return
   }
 

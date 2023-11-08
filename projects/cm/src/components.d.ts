@@ -14,8 +14,6 @@ declare module 'vue' {
     CanvasSection: typeof import('./components/editor/CanvasSection.vue')['default']
     CmBtn: typeof import('./components/global/CmBtn.vue')['default']
     CmSvgIcon: typeof import('./components/global/CmSvgIcon.vue')['default']
-    copy: typeof import('./components/panel-content/HomeTab copy.vue')['default']
-    EditingOptions: typeof import('./components/panel-content/EditingOptions.vue')['default']
     FeatureCard: typeof import('./components/home/FeatureCard.vue')['default']
     FooterTabs: typeof import('./components/panel-content/FooterTabs.vue')['default']
     FunctionBar: typeof import('./components/global/FunctionBar.vue')['default']
