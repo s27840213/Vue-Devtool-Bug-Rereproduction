@@ -288,40 +288,40 @@ export default defineComponent({
           this.setImgConfig(this.layerInfo())
         }
       } else {
-        groupUtils.deselect()
+        // groupUtils.deselect()
         this.setImgConfig(undefined)
-        this.$nextTick(() => {
-          const reSelecting = () => {
-            const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
-            const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
-            groupUtils.deselect()
-            groupUtils.select(this.pageIndex, [targetIdx])
-            if (isSubLayer) {
-              const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
-              if (this.primaryLayerType() === LayerType.group) {
-                layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
-              } else if (this.primaryLayerType() === LayerType.frame) {
-                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
-              }
-            }
-          }
-          if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
-            reSelecting()
-          }
-          if (this.isDuringCopy) {
-            const start = Date.now()
-            const timer = setInterval(() => {
-              if (Date.now() - start > 10000) {
-                clearInterval(timer)
-              }
-              if (!this.isDuringCopy) {
-                reSelecting()
-                clearInterval(timer)
-              }
-            }, 300)
-          }
-        })
-        this.handleDimensionUpdate()
+        // this.$nextTick(() => {
+        //   const reSelecting = () => {
+        //     const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
+        //     const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
+        //     groupUtils.deselect()
+        //     groupUtils.select(this.pageIndex, [targetIdx])
+        //     if (isSubLayer) {
+        //       const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        //       if (this.primaryLayerType() === LayerType.group) {
+        //         layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
+        //       } else if (this.primaryLayerType() === LayerType.frame) {
+        //         frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
+        //       }
+        //     }
+        //   }
+        //   if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
+        //     reSelecting()
+        //   }
+        //   if (this.isDuringCopy) {
+        //     const start = Date.now()
+        //     const timer = setInterval(() => {
+        //       if (Date.now() - start > 10000) {
+        //         clearInterval(timer)
+        //       }
+        //       if (!this.isDuringCopy) {
+        //         reSelecting()
+        //         clearInterval(timer)
+        //       }
+        //     }, 300)
+        //   }
+        // })
+        // this.handleDimensionUpdate()
       }
       if (this.forRender) {
         return

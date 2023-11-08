@@ -9,7 +9,6 @@ import formatUtils from './formatUtils'
 import frameUtils from './frameUtils'
 import generalUtils from './generalUtils'
 import groupUtils from './groupUtils'
-import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
 
@@ -70,9 +69,6 @@ export default class SubControllerUtils {
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
     if (e.button !== 0) return
 
-    if (imageUtils.isImgControl()) {
-      imageUtils.setImgControlDefault()
-    }
     if (generalUtils.isTouchDevice()) {
       if (!this.dblTapFlag && this.config.active && this.config.type === 'image') {
         const touchtime = Date.now()

@@ -12,7 +12,7 @@ div(class="nu-layer flex-center"
   div(class="full-size pos-left"
       :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
-      @pointerdown="onPointerDown($event)"
+      @pointerdown="onPointerdown"
       @tap="dblTap"
       @contextmenu.prevent
       @click.right.stop="onRightClick($event)"
@@ -430,6 +430,11 @@ export default defineComponent({
         }
       }
     },
+    onPointerdown() {
+      if (this.subLayerIndex !== -1 && this.isImgCtrl) {
+        imageUtils.setImgControlDefault()
+      }
+    },
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
       const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.$isTouchDevice(), this.config.size?.[0])
@@ -534,16 +539,6 @@ export default defineComponent({
           }
         }
       })
-    },
-    onPointerDown(e: PointerEvent) {
-      if (this.isPinchingEditor) return
-      const target = e.target as HTMLElement
-      /**
-       * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
-       */
-      if (this.isImgCtrl && !['IMG', 'path', 'image'].includes(target.tagName)) {
-        imageUtils.setImgControlDefault()
-      }
     },
     dblClick(e: MouseEvent) {
       e.stopPropagation()

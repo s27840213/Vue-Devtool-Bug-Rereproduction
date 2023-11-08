@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo } from '@/store/types'
 import pointerEvtUtils from '@/utils/pointerEvtUtils'
@@ -31,7 +31,6 @@ export class MovingUtils {
   private initLayerPos = { x: 0, y: 0 }
   // private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
-  private isDoingGestureAction = false
   private isHandleMovingHandler = false
   private snapUtils = null as any
   private body = undefined as unknown as HTMLElement
@@ -61,24 +60,6 @@ export class MovingUtils {
   private get contentEditable(): boolean { return (this.config as any).contentEditable || false }
   private get getLayerPos(): ICoordinate { return { x: this.config.styles.x, y: this.config.styles.y } }
   private get isDragging(): boolean { return this.config.dragging }
-  private get isImgControl(): boolean {
-    switch (this.getLayerType) {
-      case 'image':
-        return (this.config as IImage).imgControl
-      case 'group':
-        return (this.config as IGroup).layers
-          .some(layer => {
-            return layer.type === 'image' && layer.imgControl
-          })
-      case 'frame':
-        return (this.config as IFrame).clips
-          .some(layer => {
-            return layer.imgControl
-          })
-    }
-    return false
-  }
-
   private initPageTranslate = { x: 0, y: 0 }
   private id = ''
 
@@ -225,7 +206,7 @@ export class MovingUtils {
     if (eventType === 'pointer') {
       pointerEvtUtils.addPointer(event as PointerEvent)
     }
-    if (this.isImgControl) return
+    if (store.getters['imgControl/isImgCtrl']) return
     if (eventUtils.checkIsMultiTouch(event)) return
     if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type) return
 
@@ -256,7 +237,9 @@ export class MovingUtils {
 
 
     // the currLayer active target is not exactly the same fire event layer
-    if (generalUtils.isTouchDevice() && (layerUtils.layerIndex !== this.layerIndex && this.config.locked)) return this.lockedLayerMoveStart(event as PointerEvent)
+    if (generalUtils.isStk && generalUtils.isTouchDevice() && (layerUtils.layerIndex !== this.layerIndex && this.config.locked)) {
+      return this.lockedLayerMoveStart(event as PointerEvent)
+    }
 
     if (currLayerIndex !== this.layerIndex) {
       const layer = layerUtils.getLayer(this.pageIndex, currLayerIndex)
@@ -482,7 +465,6 @@ export class MovingUtils {
       }
       if (this.isTouchDevice && !this.isLocked) {
         if (posDiff.x > 1 || posDiff.y > 1) {
-          this.isDoingGestureAction = true
           window.requestAnimationFrame(() => {
             this.movingHandler(e)
             this.isHandleMovingHandler = false
@@ -511,9 +493,9 @@ export class MovingUtils {
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, updateConfigData)
   }
 
-  movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+  movingHandler(e: MouseEvent | PointerEvent) {
     if (this.initMousePos === null) return
-    if (generalUtils.isPic && this.layerIndex !== layerUtils.layerIndex) return
+    if (generalUtils.isPic && this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
 
     const config = layerUtils.getCurrLayer
     const targetLayerIdx = layerUtils.layerIndex
@@ -744,7 +726,7 @@ export class MovingUtils {
     } else {
       if (hasActualPageMove || hasActualMouseMove) {
         return
-      } else if (!this.isDoingGestureAction  && !hasActualLayerMove) {
+      } else if (!hasActualMouseMove) {
         this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
         if (!this.inMultiSelectionMode) {
           groupUtils.deselect()
@@ -756,7 +738,6 @@ export class MovingUtils {
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           dragging: false
         })
-        this.isDoingGestureAction = false
         this.snapUtils.event.emit('clearSnapLines')
         return
       }
@@ -768,7 +749,6 @@ export class MovingUtils {
       })
     }
 
-    this.isDoingGestureAction = false
     this.snapUtils.event.emit('clearSnapLines')
   }
 
