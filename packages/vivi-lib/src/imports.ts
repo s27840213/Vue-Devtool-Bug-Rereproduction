@@ -72,7 +72,6 @@ import {
 import {
   isV1_42,
 } from '@/interfaces/vivisticker'
-import mobilePanel from '@/mixin/mobilePanel'
 import router from '@/router'
 import store from '@/store'
 import {
