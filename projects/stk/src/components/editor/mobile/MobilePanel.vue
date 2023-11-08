@@ -1,5 +1,4 @@
 <script lang="ts">
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelAddTemplate from '@/components/editor/panelMobile/PanelAddTemplate.vue'
 import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
@@ -55,7 +54,6 @@ export default defineComponent({
     PanelBackground,
     PanelText,
     PanelTextUs,
-    ColorPanel,
     PanelPosition,
     PanelFlip,
     PanelOpacity,

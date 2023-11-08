@@ -24,6 +24,7 @@ declare module 'vue' {
     ImgSelector: typeof import('./components/global/ImgSelector.vue')['default']
     MobilePanel: typeof import('./components/panel-content/MobilePanel.vue')['default']
     ModalTemplate: typeof import('./components/panel-content/ModalTemplate.vue')['default']
+    PanelColor: typeof import('./components/editor/panelMobile/PanelColor.vue')['default']
     PowerfulFillTutorial: typeof import('./components/tutorial/PowerfulFillTutorial.vue')['default']
     PromptArea: typeof import('./components/panel-content/PromptArea.vue')['default']
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']

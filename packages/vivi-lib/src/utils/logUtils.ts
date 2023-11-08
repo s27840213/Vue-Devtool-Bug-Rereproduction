@@ -8,6 +8,10 @@ class LogUtils {
   setLogCount = 0
   async uploadLog() {
     if (generalUtils.isPic && !uploadUtils.isLogin) return
+    if (generalUtils.isCm) {
+      this.clearLog()
+      return
+    }
     const log = this.getLog()
     this.isUploadingLog = true
     try {

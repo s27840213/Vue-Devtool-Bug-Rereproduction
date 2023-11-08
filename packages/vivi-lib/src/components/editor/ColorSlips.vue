@@ -56,14 +56,15 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import ColorPicker from '@nu/vivi-lib/components/ColorPicker.vue'
-import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
-import { IPage } from '@nu/vivi-lib/interfaces/page'
-import { ColorEventType } from '@nu/vivi-lib/store/types'
-import colorUtils from '@nu/vivi-lib/utils/colorUtils'
-import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import layerUtils from '@nu/vivi-lib/utils/layerUtils'
-import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
+import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import layerUtils from '@/utils/layerUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -132,10 +133,14 @@ export default defineComponent({
       _defaultColors: 'color/getDefaultColors',
       defaultBgColor: 'color/getDefaultBgColors',
       _recentlyColors: 'color/getRecentlyColors',
-      stkRecentlyBgColors: 'vivisticker/getRecentlyBgColors',
       currSelectedInfo: 'getCurrSelectedInfo',
       currPanel: 'getCurrSidebarPanelType',
       getBackgroundColor: 'getBackgroundColor'
+    }),
+    ...vuexUtils.mapGetters('stk', {
+      stkRecentlyBgColors: [] as string[],
+    }, {
+      stkRecentlyBgColors: 'vivisticker/getRecentlyBgColors',
     }),
     bgStyle(): Record<string, string> {
       return this.mode === 'FunctionPanel' ? {

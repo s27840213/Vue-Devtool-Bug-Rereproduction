@@ -92,8 +92,8 @@ export default defineComponent({
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.3);
   }
   @include cm {
-    position: static;
-    z-index: -1; // hide it behind footerTabs
+    position: relative;
+    z-index: unset;
   }
   display: grid;
   grid-template-columns: 1fr;

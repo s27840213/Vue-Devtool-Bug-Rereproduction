@@ -1,6 +1,5 @@
 <script lang="ts">
-// import ColorPanel from '@/components/editor/ColorSlips.vue'
-// import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
+import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
@@ -35,6 +34,7 @@ export default defineComponent({
   extends: MobilePanel,
   mixins: [mobilePanelMixin],
   components: {
+    PanelColor,
     PanelPosition,
     PanelFlip,
     PanelOpacity,
