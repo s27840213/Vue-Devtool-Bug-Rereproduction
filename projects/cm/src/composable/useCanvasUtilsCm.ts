@@ -29,7 +29,7 @@ const useCanvasUtils = (
 
   // #region Vuex
   const store = useStore()
-  const pageScaleRatio = computed(() => store.getters.getPageScaleRatio / 100)
+  const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
   // #endregion
 
   // #region canvasStore
@@ -107,8 +107,8 @@ const useCanvasUtils = (
   })
 
   watch(brushSize, (newVal) => {
-    brushStyle.width = `${newVal * pageScaleRatio.value}px`
-    brushStyle.height = `${newVal * pageScaleRatio.value}px`
+    brushStyle.width = `${newVal * contentScaleRatio.value}px`
+    brushStyle.height = `${newVal * contentScaleRatio.value}px`
 
     if (canvasCtx && canvasCtx.value) {
       canvasCtx.value.lineWidth = newVal
@@ -174,8 +174,8 @@ const useCanvasUtils = (
     if (wrapperRef && wrapperRef.value) {
       const { x, y } = getMousePosInTarget(e, wrapperRef.value)
       brushStyle.transform = `translate(${
-        x * pageScaleRatio.value - (brushSize.value * pageScaleRatio.value) / 2
-      }px, ${y * pageScaleRatio.value - (brushSize.value * pageScaleRatio.value) / 2}px)`
+        x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
+      }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
     }
   }
 
@@ -398,10 +398,10 @@ const useCanvasUtils = (
   }
 
   const mapEditorToCanvas = async (cb?: () => void) => {
-    const { pageSize, pageScaleRatio } = useEditorStore()
+    const { pageSize, contentScaleRatio } = useEditorStore()
     const { width: pageWidth, height: pageHeight } = pageSize
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId } = await cmWVUtils.copyEditor({ width: pageWidth * pageScaleRatio, height: pageHeight * pageScaleRatio }, true)
+    const { flag, imageId } = await cmWVUtils.copyEditor({ width: pageWidth * contentScaleRatio, height: pageHeight * contentScaleRatio }, true)
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')

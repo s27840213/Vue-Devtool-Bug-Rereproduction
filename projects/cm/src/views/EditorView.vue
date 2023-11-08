@@ -93,9 +93,9 @@ import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -173,7 +173,7 @@ const { undo, redo, isInFirstStep, isInLastStep } = useStep
 // #region page related
 const store = useStore()
 const pageState = computed(() => store.getters.getPagesState)
-const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
+const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 
 const fitScaleRatio = computed(() => {
   if (
@@ -188,18 +188,19 @@ const fitScaleRatio = computed(() => {
   const newWidth = pageAspectRatio > 1 ? 1600 : 1600 * pageAspectRatio
   const newHeight = pageAspectRatio > 1 ? 1600 / pageAspectRatio : 1600
 
-  const widhtRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
+  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
 
-  const ratio = Math.min(widhtRatio, heightRatio) * 0.9
+  const ratio = Math.min(widthRatio, heightRatio) * 0.9
 
-  return ratio * 100
+  return ratio
 })
+
 
 const wrapperStyles = computed(() => {
   return {
-    width: `${(pageSize.value.width * pageScaleRatio.value) / 100}px`,
-    height: `${(pageSize.value.height * pageScaleRatio.value) / 100}px`,
+    width: `${pageSize.value.width * contentScaleRatio.value}px`,
+    height: `${pageSize.value.height * contentScaleRatio.value}px`,
   }
 })
 
@@ -215,7 +216,7 @@ watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value) return
-    pageUtils.setScaleRatio(newVal)
+    store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: newVal})
   },
   // useDebounceFn((newVal, oldVal) => {
   //   if (newVal === oldVal || !atEditor.value) return
@@ -223,7 +224,23 @@ watch(
   //   setPageScaleRatio(newVal)
   // }, 300),
 )
-
+onMounted(() => {
+  const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
+  editorUtils.setMobilePhysicalData({
+    size: {
+      width: rect.width,
+      height: rect.height,
+    },
+    centerPos: {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    },
+    pos: {
+      x: rect.left,
+      y: rect.top
+    }
+  })
+})
 // #endregion
 
 // #region demo brush size section
@@ -232,8 +249,8 @@ const { brushSize, isChangingBrushSize } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {
-    width: `${(brushSize.value * pageScaleRatio.value) / 100}px`,
-    height: `${(brushSize.value * pageScaleRatio.value) / 100}px`,
+    width: `${brushSize.value * contentScaleRatio.value}px`,
+    height: `${brushSize.value * contentScaleRatio.value}px`,
   }
 })
 // #endregion

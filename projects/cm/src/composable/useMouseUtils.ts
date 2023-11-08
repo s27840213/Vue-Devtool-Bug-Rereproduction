@@ -2,7 +2,7 @@ import { useStore } from 'vuex'
 
 const useMouseUtils = () => {
   const store = useStore()
-  const pageScaleRatio = computed(() => store.getters.getPageScaleRatio / 100)
+  const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 
   const getEventType = (e: MouseEvent | TouchEvent | PointerEvent) => {
     if (e.type.includes('pointer')) {
@@ -74,8 +74,8 @@ const useMouseUtils = () => {
     const mouseRelPos = getMouseRelPoint(e, target)
     
     return {
-      x: mouseRelPos.x / pageScaleRatio.value,
-      y: mouseRelPos.y / pageScaleRatio.value,
+      x: mouseRelPos.x / contentScaleRatio.value,
+      y: mouseRelPos.y / contentScaleRatio.value,
       xPercentage: mouseRelPos.x / target.clientWidth,
       yPercentage: mouseRelPos.y / target.clientHeight,
     }
