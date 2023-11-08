@@ -365,8 +365,10 @@ export default defineComponent({
     },
     getPointerEvents(): string {
       switch (this.config.type) {
-        case LayerType.image:
-          return this.$store.state.controlState.type === 'move' ? 'none' : ''
+        case LayerType.image: {
+          const controlState = this.$store.state.controlState
+          return controlState.type === 'move' && controlState.layerInfo.layerIndex === this.layerIndex ? 'none' : ''
+        }
         case LayerType.shape: {
           if (this.primaryLayer && this.primaryLayer.type === LayerType.frame) {
             return 'none'
