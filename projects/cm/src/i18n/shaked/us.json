@@ -446,5 +446,7 @@
   "CM0065": "Demo",
   "CM0066": "Free images left for today",
   "CM0067": "Keep editing",
-  "CM0068": "Show more"
+  "CM0068": "Show more",
+  "CM0069": "Max {num} photos",
+  "CM0070": "Maximum {num} photos can be selected."
 }
