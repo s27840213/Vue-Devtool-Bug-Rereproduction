@@ -157,7 +157,7 @@ const handleNextAction = function () {
   }
 
   // @test pixi record gen-vedio
-  if (inGenResultState) {
+  if (inGenResultState.value) {
     const src = imageUtils.appendRandomQuery(initImgSrc.value)
     const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
     const pixiRecorder = new PixiRecorder(src, res)
