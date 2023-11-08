@@ -1,22 +1,21 @@
 <template lang="pug">
-div(class="flex flex-col gap-16 pt-8 pl-24 pr-24 pb-8")
+div(class="cm-footer-tabs flex flex-col gap-16 pt-8 pl-24 pr-24 pb-8")
   transition(name="panel-up"
             @after-leave="afterLeave")
     mobile-panel(v-show="showMobilePanel"
                 :currPage="currPage"
                 :currActivePanel="currActivePanel")
-  div(v-if="!hideTabs" class="flex gap-24 bg-app-tab-bg shadow-[0_100px_0_100px_black] shadow-app-tab-bg")
-    div(class="flex items-center justify-center h-44")
+  div(v-if="!hideTabs" class="footer-tabs-row flex gap-24 bg-app-tab-bg shadow-[0_100px_0_100px_black] shadow-app-tab-bg z-[1]")
+    div(class="cm-footer-tabs flex items-center justify-center h-44")
       div(class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22"
           @click="handleBack")
         svg-icon(iconName="chevron-down" iconWidth="14px" iconColor="app-tab-bg")
-    div(class="flex gap-24 overflow-scroll no-scrollbar")
+    div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar")
       template(v-for="tab in settingTabs")
         div(v-if="!tab.hidden" :key="tab.icon"
             class="cm-footer-tabs flex flex-col items-center justify-center h-44 gap-4 px-4"
             :class="{'click-disabled': (tab.disabled || isLocked || extraDisableCondition(tab))}"
             @click="handleTabAction(tab)")
-          //- className footer-tabs is for v-click-outside middleware
           color-btn(v-if="tab.icon === 'color'" size="22px"
                     class="click-disabled"
                     :color="globalSelectedColor")
@@ -28,6 +27,7 @@ div(class="flex flex-col gap-16 pt-8 pl-24 pr-24 pb-8")
           span(class="no-wrap click-disabled transition ease-linear delay-200 typo-body-sm"
             :class="`text-${settingTabColor(tab)}`") {{tab.text}}
           //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
+//- className cm-footer-tabs is for v-click-outside middleware
 </template>
 
 <script lang="ts">

@@ -142,6 +142,7 @@ import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
@@ -149,6 +150,7 @@ import type { IAlbum, IAlbumContent } from '@nu/vivi-lib/utils/cmWVUtils'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
 
 const router = useRouter()
@@ -164,6 +166,7 @@ const props = defineProps({
 const tabIndex = ref(0)
 const inPhoto = computed(() => tabIndex.value === 0)
 const inStock = computed(() => tabIndex.value === 1)
+const { tc } = useI18n()
 let targetImgs = reactive([] as (SrcObj & { ratio: number })[])
 const demoImgs = [
   {
@@ -321,7 +324,11 @@ const selectDemo = (i: number) => {
 
 const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
   if (props.requireNum === targetImgs.length) {
-    // Alert
+    modalUtils.setModalInfo(
+      tc('CM0069', { num: props.requireNum }),
+      tc('CM0070', { num: props.requireNum }),
+      { msg: tc('STK0023') },
+    )
     return
   }
 
