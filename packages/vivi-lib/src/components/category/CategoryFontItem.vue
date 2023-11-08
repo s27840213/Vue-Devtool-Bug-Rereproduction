@@ -347,7 +347,7 @@ export default defineComponent({
   grid-template-columns: 7fr 4fr 1fr;
   grid-gap: 10px;
   border-radius: 10px;
-  @include webApp {
+  @include app(stk, cm) {
     &:active {
       background-color: setColor(black-3-5);
     }
@@ -360,7 +360,7 @@ export default defineComponent({
   &__item {
     height: 25px;
     object-fit: contain;
-    @include webApp {
+    @include app(stk, cm) {
       filter: brightness(0) invert(1);
     }
   }

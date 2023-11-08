@@ -7,10 +7,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     template(#left)
       back-btn
     template(
-      v-if="isEditing && !showGenResult"
+      v-if="inEditingState && !inGenResultState"
       #middle)
       div(v-if="showActiveTab" class="text-white typo-h5 whitespace-nowrap")
-        link-or-text(:title="centerTitle"
+        link-or-text(
+          :title="centerTitle"
           :url="centerUrl")
       template(v-else)
         cm-svg-icon(
@@ -24,21 +25,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           iconWidth="20px"
           @click="redo")
     template(#right)
-      //- cm-btn(
-      //-   v-if="isEditing"
-      //-   theme="primary"
-      //-   size="md"
-      //-   @click="downloadCanvas") 下載 Mask
       cm-btn(
-        v-if="showAspectRatioSelector"
+        v-if="inAspectRatioState || inGenResultState"
         theme="primary"
         size="md"
-        @click="handleNextAction") {{ $t('CM0012') }}
-      cm-btn(
-        v-if="showGenResult"
-        theme="primary"
-        size="md"
-        @click="handleNextAction") {{ $t('NN0133') }}
+        @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
     div(
       class="w-full h-full box-border overflow-scroll flex justify-center items-center"
@@ -49,19 +40,19 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :style="wrapperStyles"
         ref="editorWrapperRef")
         img(
-          v-if="showGenResult"
+          v-if="inGenResultState"
           class="h-full object-cover"
           :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
         template(v-else)
           nu-page(
             class="z-page"
-            v-show="!showGenResult"
+            v-show="!inGenResultState"
             :pageIndex="0"
             :pageState="pageState[0]"
             :overflowContainer="editorContainerRef"
             :noBg="isDuringCopy && isNoBg")
           canvas-section(
-            v-if="isEditing"
+            v-if="inEditingState"
             class="absolute top-0 left-0 w-full h-full"
             :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
             :containerDOM="editorContainerRef"
@@ -72,17 +63,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="isEditing && !showGenResult && !showSelectionOptions"
+      v-if="inEditingState && !inGenResultState && !showSelectionOptions"
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
     //- div(
-    //-   v-if="showGenResult"
+    //-   v-if="inGenResultState"
     //-   class="absolute top-0 left-0 flex justify-center items-center w-full h-full bg-app-bg")
       img(:src="generatedResults" class="w-240")
   transition(name="bottom-up")
     component(
-      v-if="showActiveTab && isEditing"
+      v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
       class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles")
@@ -93,6 +84,7 @@ import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import PixiRecorder from '@/utils/pixiRecorder'
 import tutorialUtils from '@/utils/tutorialUtils'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -102,6 +94,7 @@ import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
@@ -141,7 +134,7 @@ onBeforeRouteLeave((to, from) => {
 // #endregion
 
 // #region edtior state related
-const { isEditing, atEditor, showAspectRatioSelector, showSelectionOptions } = useStateInfo()
+const { inEditingState, atEditor, inAspectRatioState, showSelectionOptions } = useStateInfo()
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
 const {
@@ -149,7 +142,7 @@ const {
   editorState,
   currActiveFeature,
   generatedResults,
-  showGenResult,
+  inGenResultState,
   currGenResultIndex,
   initImgSrc,
 } = storeToRefs(editorStore)
@@ -159,8 +152,17 @@ const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
     tutorialUtils.runTutorial('powerful-fill')
-  } else if (editorState.value === 'editing') {
-    setEditorState('prompt')
+  } else if (editorState.value === 'genResult') {
+    // setEditorState('saving')
+  }
+
+  // @test pixi record gen-vedio
+  if (inGenResultState) {
+    const src = imageUtils.appendRandomQuery(initImgSrc.value)
+    const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
+    const pixiRecorder = new PixiRecorder(src, res)
+    pixiRecorder.genVideo()
+      .then(data => console.log('gen video', data))
   }
 }
 
@@ -344,10 +346,10 @@ const centerTitle = computed(() => {
 })
 // #endregion
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .demo-brush {
   @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
-  @apply pointer-events-none rounded-full outline-4 outline-primary-white;
+  @apply pointer-events-none rounded-full outline-4 outline-primary-white z-highest;
   outline-style: solid;
 }
 </style>
