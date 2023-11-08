@@ -79,6 +79,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 </template>
 
 <script setup lang="ts">
+import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
 import vuex from '@/vuex'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
@@ -136,6 +137,8 @@ const bottomPanelComponent = computed(() => {
   switch (true) {
     case wantToQuit.value:
       return ModalTemplate
+    case vuex.state.user.showForceLogin:
+      return PanelLogin
     case showHomeTabs.value:
     case atSettings.value:
       return HomeTab
