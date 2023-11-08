@@ -131,7 +131,6 @@ class LocalStorage {
   }
 
   async appGet(category: string, key: string): Promise<unknown> {
-    console.log(getAutoWVUtils())
     if (getAutoWVUtils().inBrowserMode) {
       return this.get(category, key)
     }
