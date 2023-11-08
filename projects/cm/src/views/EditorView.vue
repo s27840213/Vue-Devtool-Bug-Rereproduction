@@ -84,6 +84,7 @@ import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import PixiRecorder from '@/utils/pixiRecorder'
 import tutorialUtils from '@/utils/tutorialUtils'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -93,6 +94,7 @@ import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
@@ -152,6 +154,15 @@ const handleNextAction = function () {
     tutorialUtils.runTutorial('powerful-fill')
   } else if (editorState.value === 'genResult') {
     // setEditorState('saving')
+  }
+
+  // @test pixi record gen-vedio
+  if (inGenResultState) {
+    const src = imageUtils.appendRandomQuery(initImgSrc.value)
+    const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
+    const pixiRecorder = new PixiRecorder(src, res)
+    pixiRecorder.genVideo()
+      .then(data => console.log('gen video', data))
   }
 }
 
