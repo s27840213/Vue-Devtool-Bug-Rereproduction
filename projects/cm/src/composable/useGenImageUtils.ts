@@ -13,7 +13,7 @@ const useGenImageUtils = () => {
   const { userId, prevGenParams } = storeToRefs(useUserStore())
   const editorStore = useEditorStore()
   const { setInitImgSrc } = editorStore
-  const { editorType, pageSize, pageScaleRatio } = storeToRefs(useEditorStore())
+  const { editorType, pageSize, contentScaleRatio } = storeToRefs(useEditorStore())
 
   const { uploadImage, polling } = useUploadUtils()
 
@@ -54,8 +54,8 @@ const useGenImageUtils = () => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId } = await cmWVUtils.copyEditor({
-      width: pageWidth * pageScaleRatio.value,
-      height: pageHeight * pageScaleRatio.value,
+      width: pageWidth * contentScaleRatio.value,
+      height: pageHeight * contentScaleRatio.value,
     })
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
