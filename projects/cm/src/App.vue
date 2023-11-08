@@ -43,7 +43,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
                   :currTab="currActivePanel"
                   @switchTab="switchTab")
   div(
-    v-if="isModalOpen"
+    v-if="wantToQuit || isModalOpen"
     class="mask"
     ref="maskRef"
     @click.stop="closeModal")
@@ -52,6 +52,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       v-if="showImgSelector"
       class="absolute top-0 left-0 w-full h-full z-img-selector"
       :requireNum="requireImgNum")
+  div(class="modal-container" v-if="isModalOpen")
+    modal-card
   notifications(
     group="copy"
     position="top center"
@@ -67,10 +69,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     :max="1"
     :duration="5000")
     template(v-slot:body="{ item }")
-      div(class="notification error" v-html="item.text")
+      div(class="notification error " v-html="item.text")
 </template>
 
 <script setup lang="ts">
+import vuex from '@/vuex'
+import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
@@ -117,12 +121,13 @@ const layerIndex = computed(() => layerUtils.layerIndex)
 
 // #region bottom panel warning modal
 const modalStore = useModalStore()
-const { isModalOpen } = storeToRefs(modalStore)
+const { isModalOpen: wantToQuit } = storeToRefs(modalStore)
+const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean)
 // #endregion
 
 const bottomPanelComponent = computed(() => {
   switch (true) {
-    case isModalOpen.value:
+    case wantToQuit.value:
       return ModalTemplate
     case showHomeTabs.value:
     case atSettings.value:
@@ -241,6 +246,19 @@ vConsole.setSwitchPosition(25, 80)
   transition:
     height 0.25s,
     opacity 0.25s;
+}
+
+.modal-container {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: setColor(gray-1, 0.3);
+  z-index: 999;
 }
 
 .notification {
