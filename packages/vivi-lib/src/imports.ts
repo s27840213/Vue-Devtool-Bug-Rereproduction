@@ -240,7 +240,6 @@ import SvgIconView from '@/views/SvgIconView.vue'
   ShadowEffectType,
   _IPaymentWarningView,
   isV1_42,
-  mobilePanel,
   router,
   store,
   bgRemoveMoveHandler,
