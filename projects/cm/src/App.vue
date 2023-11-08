@@ -77,6 +77,7 @@ import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
+import VConsole from 'vconsole'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -221,6 +222,9 @@ onBeforeUnmount(() => {
   eventUtils.off(PanelEvent.switchTab)
 })
 // #endregion
+
+const vConsole = new VConsole({ theme: 'dark' })
+vConsole.setSwitchPosition(25, 80)
 </script>
 
 <style lang="scss">
