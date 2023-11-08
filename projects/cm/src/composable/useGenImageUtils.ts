@@ -53,7 +53,7 @@ const useGenImageUtils = () => {
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId } = await cmWVUtils.copyEditor({
+    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor({
       width: pageWidth * contentScaleRatio.value,
       height: pageHeight * contentScaleRatio.value,
     })
@@ -66,7 +66,10 @@ const useGenImageUtils = () => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
-          .then(resolve)
+          .then(() => {
+            cleanup()
+            resolve()
+          })
           .catch((error) => {
             logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
             throw error
