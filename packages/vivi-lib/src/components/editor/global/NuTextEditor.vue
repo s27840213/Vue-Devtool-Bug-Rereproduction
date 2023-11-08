@@ -110,7 +110,7 @@ export default defineComponent({
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord, keepCenter })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      if (this.config?.contentEditable && (!this.$isTouchDevice() || this.$isStk)) {
+      if (this.config?.contentEditable && (!this.$isTouchDevice() || this.$isStk || this.$isCm)) {
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement

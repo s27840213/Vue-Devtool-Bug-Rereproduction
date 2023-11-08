@@ -49,7 +49,7 @@ div(class="native-event-tester")
 <script setup lang="ts">
 import Checkbox from '@/components/global/Checkbox.vue'
 import { ICallbackRecord } from '@/interfaces/webView'
-import autoWVUtils, { app, appType } from '@/utils/autoWVUtils'
+import { app, appType, getAutoWVUtils } from '@/utils/autoWVUtils'
 import generalUtils from '@/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
@@ -62,22 +62,23 @@ enum mobileOSType {
 
 const mobileOS = ref(mobileOSType.IOS) // TODO: auto-detect OS type
 
-let callbackGroup = ''
 switch (app) {
   case appType.Vivipic:
-    callbackGroup = 'main'
+    getAutoWVUtils().registerCallbacks('main')
     break
   case appType.Vivisticker:
-    callbackGroup = 'vvstk'
+    getAutoWVUtils().registerCallbacks('vvstk')
+    break
+  case appType.Charmix:
+    getAutoWVUtils().registerCallbacksCore('nativeResponse')
     break
 }
-autoWVUtils.registerCallbacks(callbackGroup)
 
 const store = useStore()
 const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])
 
 const leaveStyles = computed(() => {
-  const userInfo = autoWVUtils.getUserInfoFromStore() as { statusBarHeight?: number }
+  const userInfo = getAutoWVUtils().getUserInfoFromStore() as { statusBarHeight?: number }
   return { top: `${userInfo.statusBarHeight ?? 0}px` }
 })
 
@@ -149,7 +150,7 @@ const submitEvent = () => {
   try {
     switch (mobileOS.value) {
       case mobileOSType.IOS:
-        autoWVUtils.sendToIOS(eventName.value, eventParams, true)
+        getAutoWVUtils().sendToIOS(eventName.value, eventParams, true)
         break
       case mobileOSType.Android:
         // TODO: implement Android event sender

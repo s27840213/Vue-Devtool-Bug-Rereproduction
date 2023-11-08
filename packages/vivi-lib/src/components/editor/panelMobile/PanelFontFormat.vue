@@ -31,9 +31,9 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      activeColor: this.$isStk ? 'white' : 'blue-1',
-      inactiveColor: this.$isStk ? 'black-5' : 'gray-2',
-      disabledColor: this.$isStk ? 'black-3-5' : 'gray-4',
+      activeColor: this.$isStk || this.$isCm ? 'white' : 'blue-1',
+      inactiveColor: this.$isStk || this.$isCm ? 'black-5' : 'gray-2',
+      disabledColor: this.$isStk || this.$isCm ? 'black-3-5' : 'gray-4',
     }
   },
   computed: {

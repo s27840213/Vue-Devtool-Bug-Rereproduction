@@ -1,5 +1,4 @@
 
-import type { emit } from 'process';
 <template lang="pug">
 div(class="w-screen h-screen")
   div(class="w-full h-full grid")
@@ -31,17 +30,22 @@ div(class="w-screen h-screen")
 </template>
 
 <script setup lang="ts">
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
+
 defineOptions({ name: 'powerful-fill-tutorial' })
 const emit = defineEmits(['nextStep'])
 const props = defineProps({
+  // current step
   step: {
     type: Number,
     required: true
   },
+  // current highlight elements
   elHighlight: {
     type: Array<HTMLElement>,
     required: true
   },
+  // current tracking frame, watch this value to update component during animation
   trackingFrame: {
     type: Number,
     required: true
@@ -137,7 +141,7 @@ watch(() => step.value, (newVal) => nextTick(() => {
   if (newVal === 3) window.setTimeout(() => {
     if (newVal !== 3) return
     emit('nextStep')
-  }, 1000)
+  }, 1500)
 }), { immediate: true })
 watch(() => trackingFrame.value, updateStyles)
 

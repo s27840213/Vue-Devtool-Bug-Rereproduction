@@ -13,7 +13,7 @@ div(class="category-template-item")
 
 <script lang="ts">
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
-import { IAsset } from '@/interfaces/module'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import DragUtils from '@nu/vivi-lib/utils/dragUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -74,8 +74,8 @@ export default defineComponent({
       })
     },
     addTemplate() {
-      if (this.groupItem && !stkWVUtils.checkPro(this.groupItem, 'template')) return
-      else if (!this.groupItem && !stkWVUtils.checkPro(this.item, 'template')) return
+      if (this.groupItem && !paymentUtils.checkProApp(this.groupItem, undefined, 'template')) return
+      else if (!this.groupItem && !paymentUtils.checkProApp(this.item, undefined, 'template')) return
       if (pageUtils.getPages.length + (this.groupItem ? this.groupItem.content_ids.length : 1) > stkWVUtils.MAX_PAGE_NUM) return stkWVUtils.showMaxPageNumModal()
       const currPageIndex = pageUtils.currFocusPageIndex
       const attrs = { pageIndex: this.isInEditor ? currPageIndex + 1 : currPageIndex, ...stkWVUtils.getPageSize(this.igLayout) }

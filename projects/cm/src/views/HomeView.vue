@@ -6,7 +6,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     :btnText="$t('CM0003')"
     :theme="'powerful-fill'"
     iconName="brush"
-    @clickBtn="openImgSelecotr")
+    @clickBtn="openImgSelecotr(1)")
   //- cm-btn(
   //-   class="my-10"
   //-   :theme="'primary'"
@@ -61,20 +61,20 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import { useImgSelectorStore } from '@/stores/imgSelector';
-import PixiRecorder from '@/utils/pixiRecorder';
-import vuex from '@/vuex';
-import { useRouter } from 'vue-router';
+import { useImgSelectorStore } from '@/stores/imgSelector'
+import PixiRecorder from '@/utils/pixiRecorder'
+import vuex from '@/vuex'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
-const { setShowImgSelector } = useImgSelectorStore()
+const { setRequireImgNum } = useImgSelectorStore()
 const goToEditor = () => {
   router.push('/editor')
 }
 
-const openImgSelecotr = () => {
-  setShowImgSelector(true)
+const openImgSelecotr = (requireImgNum: number) => {
+  setRequireImgNum(requireImgNum)
   /**
    * @Note below codes is used to test in the browser
    */
@@ -92,6 +92,9 @@ const openImgSelecotr = () => {
 }
 const exportVedio = () => {
   const pixiRecorder = new PixiRecorder()
+  pixiRecorder.genVideo().then((res) => {
+    console.log('gen vedio', res)
+  })
 }
 </script>
 <style scoped lang="scss">

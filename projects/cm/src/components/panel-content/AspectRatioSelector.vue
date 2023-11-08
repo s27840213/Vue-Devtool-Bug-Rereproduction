@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full pl-24")
+div(class="w-full box-border pl-24")
   div(class="typo-btn-lg text-app-text-secondary") {{ $t('CM0013') }}
   scrollable-container(:px="0")
     div(
@@ -70,7 +70,6 @@ const selectAspectRatio = (type: string) => {
 }
 
 const updateLayerStyleToFitPage = () => {
-  console.log(imgAspectRatio.value, pageAspectRatio.value)
   if(imgAspectRatio.value > pageAspectRatio.value) {
     layerUtils.updateLayerStyles(0,0, {
       width: pageSize.value.width,

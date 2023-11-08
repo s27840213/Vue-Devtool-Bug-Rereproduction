@@ -119,10 +119,10 @@ div(ref="page-wrapper" :id="`nu-page-wrapper_${pageIndex}`"
           div(:style="sizeStyles" class="click-enable")
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
-              page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+              page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils" :noBg="noBg")
               div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
               dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
-            div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="styles('control')")
+            div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="controlStyles()")
               nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
                 :layerIndex="currSelectedIndex"
@@ -176,7 +176,6 @@ import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -241,7 +240,11 @@ export default defineComponent({
     isAnyBackgroundImageControl: {
       type: Boolean,
       default: false
-    }
+    },
+    noBg: {
+      type: Boolean,
+      default: false
+    },
   },
   emits: ['stepChange'],
   mounted() {
@@ -451,17 +454,9 @@ export default defineComponent({
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex',
       updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
-    styles(type: string): Record<string, string> {
+    controlStyles(): Record<string, string> {
       const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
-      return type === 'content' ? {
-        width: `${this.config.width * _f}px`,
-        height: `${this.config.height * _f}px`,
-        backgroundColor: this.config.backgroundColor,
-        backgroundImage: `url(${ImageUtils.getSrc(this.config.backgroundImage.config)})`,
-        backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
-          : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
-        backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
-      } : {
+      return {
         ...this.sizeStyles,
         overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden',
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'

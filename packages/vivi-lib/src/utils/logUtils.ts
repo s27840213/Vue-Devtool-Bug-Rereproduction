@@ -7,7 +7,7 @@ class LogUtils {
   isUploadingLog = false
   setLogCount = 0
   async uploadLog() {
-    if (!generalUtils.isStk && !uploadUtils.isLogin) return
+    if (generalUtils.isPic && !uploadUtils.isLogin) return
     const log = this.getLog()
     this.isUploadingLog = true
     try {

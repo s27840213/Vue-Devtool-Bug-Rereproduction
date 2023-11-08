@@ -6,7 +6,7 @@ div(class="editor-view" v-touch
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
-    @pinch="pinchHandler"
+    @pinch="!inBgRemoveMode ? pinchHandler($event) : null"
     ref="editorView")
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
@@ -35,10 +35,10 @@ div(class="editor-view" v-touch
 import PageNumber from '@/components/editor/PageNumber.vue'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
+import store from '@/store'
 import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
 import { ILayer } from '@nu/vivi-lib/interfaces/layer'
 import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
-import store from '@/store'
 import { ILayerInfo } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
@@ -328,6 +328,7 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       if (!e.isPrimary) return
+      if (this.inBgRemoveMode) return
       e.stopPropagation()
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()

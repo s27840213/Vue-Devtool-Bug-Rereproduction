@@ -5,7 +5,6 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
   const trimCanvas = (canvas: HTMLCanvasElement) => {
     // Get the 2D rendering context of the input canvas.
     const ctx = canvas.getContext('2d')!
-
     // Create a new canvas and get its 2D rendering context to hold the trimmed content.
     const copy = document.createElement('canvas').getContext('2d')!
 
@@ -67,7 +66,6 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
     const trimHeight = bound.bottom - bound.top + 1
     const trimWidth = bound.right - bound.left + 1
 
-    console.log(canvas.width, canvas.height, bound, trimHeight, trimWidth)
     // Get the trimmed image data based on the boundaries found above.
     const trimmed = ctx.getImageData(bound.left, bound.top, trimWidth, trimHeight)
 
@@ -90,7 +88,13 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
       remainingWidthPercentage,
       remainingHeightPercentage,
       xShift: bound.left * imgScaleRatio, // The x-coordinate shift applied during trimming.
-      yShift: bound.top * imgScaleRatio // The y-coordinate shift applied during trimming.
+      yShift: bound.top * imgScaleRatio, // The y-coordinate shift applied during trimming.
+      cropJSON: {
+        t: bound.top,
+        l: bound.left,
+        r: trimWidth - bound.right,
+        b: trimHeight - bound.bottom
+      }
     }
   }
 
