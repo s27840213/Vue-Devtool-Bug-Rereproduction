@@ -57,7 +57,6 @@ div(
           target=".img-selector__img-grid"
           :rootMargin="'1000px 0px 1000px 0px'")
           img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${img.id}?ssize=200`")
-        span(class="typo-body-sm") {{ img.id }}
         svg-icon(
           v-if="selected(img, 'ios')"
           class="absolute right-0 top-0"
