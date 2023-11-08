@@ -152,7 +152,6 @@ export default defineComponent({
   },
   data() {
     return {
-      initPos: { x: 0, y: 0 },
       dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id),
       movingUtils: null as unknown as MovingUtils,
       imgBuff: {} as {
@@ -367,7 +366,9 @@ export default defineComponent({
       switch (this.config.type) {
         case LayerType.image: {
           const controlState = this.$store.state.controlState
-          return controlState.type === 'move' && controlState.layerInfo.layerIndex === this.layerIndex ? 'none' : ''
+          if (controlState.type === 'move' && controlState.phase === 'moving' && controlState.layerInfo.layerIndex === this.layerIndex) {
+            return 'none'
+          } else return ''
         }
         case LayerType.shape: {
           if (this.primaryLayer && this.primaryLayer.type === LayerType.frame) {
@@ -543,8 +544,6 @@ export default defineComponent({
       if (this.isImgCtrl && !['IMG', 'path', 'image'].includes(target.tagName)) {
         imageUtils.setImgControlDefault()
       }
-      this.initPos.x = this.config.styles.x
-      this.initPos.y = this.config.styles.y
     },
     dblClick(e: MouseEvent) {
       e.stopPropagation()

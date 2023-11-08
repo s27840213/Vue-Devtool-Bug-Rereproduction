@@ -434,6 +434,15 @@ export class MovingUtils {
       return
     }
 
+    if (store.state.controlState.phase !== 'moving') {
+      store.commit('SET_STATE', {
+        controlState: {
+          ...store.state.controlState,
+          phase: 'moving'
+        }
+      })
+    }
+
     const updateConfigData = {} as Partial<IText | IImage | IShape>
     if (!this.isDragging) {
       updateConfigData.dragging = true
