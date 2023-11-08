@@ -30,10 +30,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         theme="primary"
         size="md"
         @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
-  div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
+  div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef"
+      @pointerdown="selectStart")
     div(
       class="w-full h-full box-border overflow-scroll flex justify-center items-center"
-      @click.self="handleOuterClick")
+      @click.self="outerClick")
       div(
         id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
@@ -92,10 +93,16 @@ import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -204,10 +211,6 @@ const wrapperStyles = computed(() => {
   }
 })
 
-const handleOuterClick = () => {
-  groupUtils.deselect()
-}
-
 /**
  * fitPage
  */
@@ -241,6 +244,47 @@ onMounted(() => {
     }
   })
 })
+
+const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
+
+const outerClick = () => {
+  editorUtils.setInBgSettingMode(false)
+  pageUtils.setBackgroundImageControlDefault()
+}
+
+const selectStart = (e: PointerEvent) => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return
+  const isClickOnController = controlUtils.isClickOnController(e)
+  if (isImgCtrl.value && !isClickOnController) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+    switch (currLayer.type) {
+      case LayerType.image:
+      case LayerType.group:
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+        break
+      case LayerType.frame:
+        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+        break
+    }
+    return
+  }
+  if (layerUtils.layerIndex !== -1) {
+    /**
+     * when the user click the control-region outsize the page,
+     * the moving logic should be applied to the EditorView.
+     */
+    if (isClickOnController) {
+      const movingUtils = new MovingUtils({
+        _config: { config: layerUtils.getCurrLayer },
+        snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+      })
+      movingUtils.moveStart(e)
+    } else {
+      groupUtils.deselect()
+    }
+  }
+}
 // #endregion
 
 // #region demo brush size section
