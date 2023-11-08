@@ -16,7 +16,7 @@ import stkWVUtils from './stkWVUtils'
 import uploadUtils from './uploadUtils'
 
 export default new class ImageShadowPanelUtils {
-  private get fieldRange() {
+  get fieldRange() {
     return fieldRange
   }
 

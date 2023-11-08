@@ -9,11 +9,7 @@ interface IViviStickerState {
   appLoadedTimeout: number,
   userInfo: IUserInfo,
   userSettings: IUserSettings,
-  currActiveTab: string,
-  currActiveObjectFavTab: string,
   currActiveBackgroundTab: string,
-  isInCategoryDict: { [key: string]: boolean },
-  showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
   isInMultiPageShare: boolean,
   isInGroupTemplate: boolean,
@@ -23,8 +19,7 @@ interface IViviStickerState {
   shareColor: string,
   editorBgIndex: number,
   editorType: string,
-  controllerHidden: boolean,
-  isStandaloneMode: boolean,
+  inBrowserMode: boolean,
   showTutorial: boolean,
   recentlyBgColors: string[],
   hasNewBgColor: boolean,
@@ -52,25 +47,11 @@ const EDITOR_BGS = [
   '#F4F5F7'
 ]
 
-const tabs = ['object', 'background', 'text', 'template']
-
-function getDefaultDict<T>(defaultValue: T): { [key: string]: T } {
-  const res = {} as { [key: string]: T }
-  for (const tab of tabs) {
-    res[tab] = defaultValue
-  }
-  return res
-} // T will be auto inferred from defaultValue without specifying in <T> when calling
-
 const getDefaultState = (): IViviStickerState => ({
   appLoadedTimeout: -1,
   userInfo: stkWVUtils.getDefaultUserInfo(),
   userSettings: stkWVUtils.getDefaultUserSettings(),
-  currActiveTab: 'object',
-  currActiveObjectFavTab: '',
   currActiveBackgroundTab: '',
-  isInCategoryDict: getDefaultDict(false),
-  showAllRecentlyDict: getDefaultDict(false),
   isInBgShare: false,
   isInMultiPageShare: false,
   isInGroupTemplate: false,
@@ -80,8 +61,7 @@ const getDefaultState = (): IViviStickerState => ({
   shareColor: '',
   editorBgIndex: 0,
   editorType: 'none',
-  controllerHidden: false,
-  isStandaloneMode: false,
+  inBrowserMode: false,
   showTutorial: false,
   recentlyBgColors: [],
   hasNewBgColor: false,
@@ -118,12 +98,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getUserSettings(state: IViviStickerState): IUserSettings {
     return state.userSettings
   },
-  getCurrActiveTab(state: IViviStickerState): string {
-    return state.currActiveTab
-  },
-  getCurrActiveObjectFavTab(state: IViviStickerState): string {
-    return state.currActiveObjectFavTab
-  },
   getCurrActiveBackgroundTab(state: IViviStickerState): string {
     return state.currActiveBackgroundTab
   },
@@ -135,12 +109,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getEditorTypeTemplate(state: IViviStickerState): boolean {
     return ['story', 'post'].includes(state.editorType)
-  },
-  getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
-    return (tab: string): boolean => state.isInCategoryDict[tab] ?? false
-  },
-  getShowAllRecently(state: IViviStickerState): (tab: string) => boolean {
-    return (tab: string): boolean => state.showAllRecentlyDict[tab] ?? false
   },
   getIsInBgShare(state: IViviStickerState): boolean {
     return state.isInBgShare
@@ -172,11 +140,8 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getEditorType(state: IViviStickerState): string {
     return state.editorType
   },
-  getControllerHidden(state: IViviStickerState): boolean {
-    return state.controllerHidden
-  },
-  getIsStandaloneMode(state: IViviStickerState): boolean {
-    return state.isStandaloneMode
+  getInBrowserMode(state: IViviStickerState): boolean {
+    return state.inBrowserMode
   },
   getIsInBgRemoveSection(state: IViviStickerState): boolean {
     return state.isInBgRemoveSection
@@ -264,20 +229,8 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
     state.userInfo = userInfo
   },
-  SET_currActiveTab(state: IViviStickerState, panel: string) {
-    state.currActiveTab = panel
-  },
-  SET_currActiveObjectFavTab(state: IViviStickerState, tab: string) {
-    state.currActiveObjectFavTab = tab
-  },
   SET_currActiveBackgroundTab(state: IViviStickerState, tab: string) {
     state.currActiveBackgroundTab = tab
-  },
-  SET_isInCategory(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
-    state.isInCategoryDict[updateInfo.tab] = updateInfo.bool
-  },
-  SET_showAllRecently(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
-    state.showAllRecentlyDict[updateInfo.tab] = updateInfo.bool
   },
   SET_isInBgShare(state: IViviStickerState, bool: boolean) {
     state.isInBgShare = bool
@@ -309,11 +262,8 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_editorType(state: IViviStickerState, editorType: string) {
     state.editorType = editorType
   },
-  SET_controllerHidden(state: IViviStickerState, controllerHidden: boolean) {
-    state.controllerHidden = controllerHidden
-  },
-  SET_isStandaloneMode(state: IViviStickerState, isStandaloneMode: boolean) {
-    state.isStandaloneMode = isStandaloneMode
+  SET_inBrowserMode(state: IViviStickerState, inBrowserMode: boolean) {
+    state.inBrowserMode = inBrowserMode
   },
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial

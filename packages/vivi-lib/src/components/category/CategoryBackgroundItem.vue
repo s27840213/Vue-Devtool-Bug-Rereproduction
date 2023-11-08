@@ -58,7 +58,7 @@ export default defineComponent({
       this.fallbackSrc = imagePreview // prevent infinite refetching when network disconneted
     },
     addBackground() {
-      if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-bg')) return
+      if (!paymentUtils.checkProApp(this.item as {plan: number}, 'pro-bg')) return
       if (this.locked) {
         return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }

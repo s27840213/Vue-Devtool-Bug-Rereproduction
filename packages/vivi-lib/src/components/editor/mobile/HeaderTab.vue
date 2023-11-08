@@ -69,7 +69,7 @@ export default defineComponent({
     @include pic {
       padding: 2px;
     }
-    @include stk {
+    @include app(stk, cm) {
       padding: 4px;
     }
     border-radius: 3px;

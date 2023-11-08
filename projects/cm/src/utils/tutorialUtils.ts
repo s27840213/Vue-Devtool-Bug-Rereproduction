@@ -1,5 +1,5 @@
-import { useTutorialStore } from "@/stores/tutorial";
-import cmWVUtils from '@/utils/cmWVUtils'
+import { useTutorialStore } from '@/stores/tutorial'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 
 type ITutorialName = 'powerful-fill'
 
@@ -17,4 +17,4 @@ export default new (class TutorialUtils {
   nextStep(tutorialName: ITutorialName) {
     useTutorialStore().tutorialNextStep(tutorialName)
   }
-})
+})()

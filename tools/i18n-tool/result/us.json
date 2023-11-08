@@ -1103,5 +1103,15 @@
   "CM0057": "Okay, get it!",
   "CM0058": "Select {num} photo|Select {num} photos",
   "CM0059": "My albums",
-  "CM0060": "Camera"
+  "CM0060": "Camera",
+  "CM0061": "Apply",
+  "CM0062": "Please select {num} photos.",
+  "CM0063": "Add text",
+  "CM0064": "Choose 1 sticker",
+  "CM0065": "Demo",
+  "CM0066": "Free images left for today",
+  "CM0067": "Keep editing",
+  "CM0068": "Show more",
+  "CM0069": "Max {num} photos",
+  "CM0070": "Maximum {num} photos can be selected."
 }

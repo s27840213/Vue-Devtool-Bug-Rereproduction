@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
+div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] box-border px-24")
   headerbar
     template(#left)
       back-btn(:customCallback="handleBackAction")
@@ -8,7 +8,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
     template(#right)
   div(
     v-if="showInitOptions"
-    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] pt-10 overflow-scroll scrollbar-hide"
+    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] box-border pt-10 overflow-scroll scrollbar-hide"
     ref="scrollContainer")
     div(
       class="w-full box-border p-24 rounded-[20px] flex flex-col items-center justify-between gap-16 gradient--yellow")
@@ -27,7 +27,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         @clickBtn="handleProBtnClick") {{ $t('CM0032') }}
     div(class="flex flex-col")
       div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
+        div(class="w-full box-border py-4 border-b-[1px] border-primary-white")
           span(class="typo-h6") {{ $t('CM0036') }}
         function-bar(
           v-for="(data, index) in supportOptions"
@@ -35,7 +35,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
           :title="data.title"
           :iconName="data.iconName")
       div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
+        div(class="w-full box-border py-4 border-b-[1px] border-primary-white")
           span(class="typo-h6") {{ $t('CM0040') }}
         function-bar(
           v-for="(data, index) in mediaOptions"
@@ -44,7 +44,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
           :iconName="data.iconName"
           @click="data.callback")
       div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
+        div(class="w-full box-border py-4 border-b-[1px] border-primary-white")
           span(class="typo-h6") {{ $t('CM0043') }}
         function-bar(
           v-for="(data, index) in aboutOptions"
@@ -72,10 +72,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         @click="data.action")
 </template>
 <script setup lang="ts">
-import { useGlobalStore } from '@/stores/global'
-import cmWVUtils from '@/utils/cmWVUtils'
-import useI18n from '@nu/vivi-lib/i18n/useI18n'
-import { storeToRefs } from 'pinia'
+import { useGlobalStore } from '@/stores/global';
+import useI18n from '@nu/vivi-lib/i18n/useI18n';
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils';
+import { storeToRefs } from 'pinia';
 
 const scrollContainer = ref<HTMLElement | null>(null)
 
@@ -120,6 +120,20 @@ const domainOptions = computed((): OptionConfig[] => {
       iconName: 'global',
       action: () => {
         cmWVUtils.switchDomain('localhost:8080')
+      },
+    },
+    {
+      title: 'localhost:8081',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8081')
+      },
+    },
+    {
+      title: 'localhost:8082',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8082')
       },
     },
     ...Array(6)

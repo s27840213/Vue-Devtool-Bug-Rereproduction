@@ -37,7 +37,7 @@ div(class="field")
 </template>
 
 <script lang="ts">
-import Options from '@/components/global/Options.vue'
+import Options from '@nu/vivi-lib/components/global/Options.vue'
 import paymentData from '@nu/vivi-lib/utils/constantData'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { notify } from '@kyvg/vue3-notification'

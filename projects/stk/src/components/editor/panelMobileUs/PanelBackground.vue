@@ -126,7 +126,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 <script lang="ts">
 import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
 import { ICategoryItem, IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -171,8 +171,8 @@ export default defineComponent({
       this.handleSearch('')
     },
     handleRecent() {
-      stkWVUtils.setShowAllRecently('background', true)
-      stkWVUtils.setIsInCategory('background', true)
+      assetPanelUtils.setShowAllRecently('background', true)
+      assetPanelUtils.setIsInCategory('background', true)
     },
     showSearchBar() {
       this.isShowSearchBar = true

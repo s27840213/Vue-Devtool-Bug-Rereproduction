@@ -2,7 +2,7 @@ export interface IModalButton {
   msg: string,
   action?: () => void,
   style?: { [key: string]: number | string },
-  class?: string | string[]
+  class?: string
 }
 export interface IModalInfo {
   [key: string]: string | boolean | Array<string> | IModalButton | { [key: string]: number | string } | undefined | ((checked: boolean) => void)

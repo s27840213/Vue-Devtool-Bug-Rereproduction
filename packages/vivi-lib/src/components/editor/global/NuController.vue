@@ -316,7 +316,7 @@ export default defineComponent({
       eventTarget: null as unknown as HTMLElement,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any,
-      actionColor: (this.$isStk || this.$isCm )? 'black-1' : 'blue-2',
+      actionColor: (this.$isStk || this.$isCm ) ? 'black-1' : 'blue-2',
     }
   },
   mounted() {
@@ -348,13 +348,12 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTextLike: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
@@ -396,21 +395,24 @@ export default defineComponent({
     },
     sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.$isTouchDevice(), this.config.size?.[0])
+      const { ctrlrPadding = 0 } = this.config.styles
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      const finalWidth = width * _f
-      const finalHeight = height * _f
-      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
-      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY}px)`
+      const scaledWidth = width * _f
+      const scaledHeight = height * _f
+      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(scaledWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
+      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(scaledHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX - ctrlrPadding}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY - ctrlrPadding}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
+      const finalWidth = (this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, scaledWidth) : scaledWidth) + 2 * ctrlrPadding
+      const finalHeight = (this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, scaledHeight) : scaledHeight) + 2 * ctrlrPadding
       return {
         transform,
-        width: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalWidth) : finalWidth}px`,
-        height: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalHeight) : finalHeight}px`
+        width: `${finalWidth}px`,
+        height: `${finalHeight}px`
       }
     },
     subContentStyles(): any {

@@ -135,7 +135,7 @@ export default defineComponent({
       refreshFontAsset: 'refreshFontAsset'
     }),
     handleUploadFont() {
-      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
+      if (!paymentUtils.checkProApp({ plan: 1 }, 'brandkit')) return
       uploadUtils.chooseAssets('font')
     },
     handleDeleteFont(font: IBrandFont) {

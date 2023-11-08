@@ -6,6 +6,7 @@ import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/payment'
 import router from '@nu/vivi-lib/router'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
@@ -43,7 +44,11 @@ const routes: Array<RouteRecordRaw> = [
           }
           if (appVer !== lastAppVer) await stkWVUtils.setState('lastAppVer', { value: appVer })
 
-          const recentPanel = await stkWVUtils.getState('recentPanel')
+          const recentPanelRes = await stkWVUtils.getState('recentPanel') as { value: string } | undefined
+          let recentPanel = recentPanelRes?.value ?? 'object'
+          if (recentPanel === 'none') { // prevent panel being 'none' for stk
+            recentPanel = 'object'
+          }
           const userSettings = await stkWVUtils.getState('userSettings')
           if (userSettings) {
             store.commit('vivisticker/UPDATE_userSettings', userSettings)
@@ -52,7 +57,7 @@ const routes: Array<RouteRecordRaw> = [
           const hasCopied = await stkWVUtils.getState('hasCopied')
           stkWVUtils.hasCopied = hasCopied?.data ?? false
           stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
-          stkWVUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+          assetPanelUtils.setCurrActiveTab(recentPanel)
         }
         next()
       } catch (error) {
@@ -130,7 +135,7 @@ router.addRoute({
     const urlParams = new URLSearchParams(window.location.search)
     const standalone = urlParams.get('standalone')
     if (standalone) {
-      stkWVUtils.enterStandaloneMode()
+      stkWVUtils.enterBrowserMode()
       stkWVUtils.setDefaultLocale()
     } else {
       stkWVUtils.detectIfInApp()

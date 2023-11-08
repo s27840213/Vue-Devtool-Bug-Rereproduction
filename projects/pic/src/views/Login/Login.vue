@@ -600,7 +600,7 @@ export default defineComponent({
       }
     },
     popPayment() {
-      if (this.type === 'payment') paymentUtils.checkPro({ plan: 1 }, 'pro-template')
+      if (this.type === 'payment') paymentUtils.checkProApp({ plan: 1 }, 'pro-template')
     }
   }
 })

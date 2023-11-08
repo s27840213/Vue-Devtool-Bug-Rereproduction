@@ -4,7 +4,11 @@
 window.require = ((src: string) => {
   if (src.startsWith('@img/')) {
     src = src.replace('@img/', '')
-    return new URL(`../../../packages/vivi-lib/dist/src/assets/img/${src}`, import.meta.url).href
+    return new URL(`../../../packages/vivi-lib/src/assets/img/${src}`, import.meta.url).href
+  }
+  if (src.startsWith('@json/')) {
+    src = src.replace('@json/', '')
+    return new URL(`../../../packages/vivi-lib/src/assets/json/${src}`, import.meta.url).href
   }
   return new URL(`./assets/img/${src}`, import.meta.url).href
 }) as unknown as NodeRequire
