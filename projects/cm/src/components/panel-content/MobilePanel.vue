@@ -299,7 +299,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     headerbarHeight() {
-      return document.querySelector('.editor-header')?.clientHeight ?? 0
+      return (document.querySelector('.editor-header')?.clientHeight ?? 0) + (document.querySelector('.footer-tabs-row')?.clientHeight ?? 0) + 40
     },
     // eslint-disable-next-line vue/no-unused-properties
     _panelParentHeight() {
