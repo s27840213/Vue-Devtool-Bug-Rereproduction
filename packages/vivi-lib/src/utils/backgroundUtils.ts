@@ -163,12 +163,15 @@ class BackgroundUtils {
   setBgImageSrc() {
     const pageIndex = layerUtils.pageIndex
     const image = layerUtils.getCurrConfig as IImage
+    const _image = generalUtils.deepCopy(image)
+    if (!_image.srcObj.type && _image.previewSrc) {
+      _image.srcObj.type = 'preview'
+    }
     store.commit('SET_backgroundImageSrc', {
       pageIndex: pageIndex,
-      srcObj: image.srcObj,
-      previewSrc: image.previewSrc ?? ''
+      srcObj: _image.srcObj,
+      previewSrc: _image.previewSrc ?? ''
     })
-    const _image = generalUtils.deepCopy(image)
     _image.styles.width = _image.styles.imgWidth
     _image.styles.height = _image.styles.imgHeight
     _image.styles.initWidth = _image.styles.imgWidth

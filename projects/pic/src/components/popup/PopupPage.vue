@@ -40,7 +40,7 @@ div(class="popup-page bg-gray-6"
 import { IBackgroundImage, IPage } from '@nu/vivi-lib/interfaces/page'
 import { IPopupOptions } from '@nu/vivi-lib/interfaces/popup'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
-import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerFactary from '@nu/vivi-lib/utils/layerFactary'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -123,7 +123,7 @@ export default defineComponent({
         //   text: 'update test',
         //   shortcutText: '',
         //   action: () => {
-        //     const page = GeneralUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex))
+        //     const page = generalUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex))
         //     page.width = parseInt(page.width)
         //     page.height = parseInt(page.height)
         //     page.layers
@@ -142,29 +142,24 @@ export default defineComponent({
       })
     },
     detachBackgroundImage() {
-      const detachedBackgroundImage = GeneralUtils.deepCopy(this.currBackgroundImage)
-      if (detachedBackgroundImage.config.srcObj.assetId) {
+      const detachedBackgroundImage = generalUtils.deepCopy(this.currBackgroundImage)
+      if (detachedBackgroundImage.config.srcObj.type) {
         /** get a tiny photo in order to get the aspectRatio of the image */
         const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj, 50))
-        const img = new Image()
-        img.onload = () => {
+        imageUtils.imgLoadHandler(src || detachedBackgroundImage.config.previewSrc || '', (img) => {
           const ratio = img.naturalWidth / img.naturalHeight
           assetUtils.addImage(src, ratio, {
             pageIndex: layerUtils.pageIndex,
             ...detachedBackgroundImage.config.srcObj,
-            styles: detachedBackgroundImage.config.styles
+            styles: detachedBackgroundImage.config.styles,
+            previewSrc: detachedBackgroundImage.config.previewSrc
           })
           this._setBackgroundImage({
             pageIndex: pageUtils.currFocusPageIndex,
             config: this.baseBgImgConfig
           })
-        }
-        img.src = src
+        })
       }
-      // this._setBackgroundColor({
-      //   pageIndex: pageUtils.currFocusPageIndex,
-      //   color: '#ffffff'
-      // })
     },
     closePopup() {
       popupUtils.closePopup()

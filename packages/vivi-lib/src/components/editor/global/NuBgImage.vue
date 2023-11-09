@@ -151,7 +151,7 @@ export default defineComponent({
   },
   async created() {
     const { srcObj } = this
-    if (!srcObj || !srcObj.type) return
+    // if (!srcObj || !srcObj.type) return
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
@@ -205,7 +205,7 @@ export default defineComponent({
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
-      return !srcObj || srcObj.assetId === ''
+      return !srcObj || srcObj.type === ''
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
