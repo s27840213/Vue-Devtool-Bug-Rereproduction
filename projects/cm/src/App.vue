@@ -5,9 +5,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       rel="stylesheet"
       type="text/css")
   tutorial
-  div(class="main-page-headerbar w-full flex justify-between items-center box-border px-16"
-      ref="headerbarRef"
-      :style="headerbarStyles")
+  div(class="w-full justify-between items-center box-border px-16 h-72"
+      :class="atMainPage ? 'flex' : 'hidden'")
     router-link(
       custom
       :to="'/'"
@@ -28,12 +27,15 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         :theme="'primary'"
         :hasIcon="true"
         iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
-  router-view(class="box-border pb-12 min-h-full" v-slot="{ Component, route }")
+  router-view(
+    class="box-border pb-12 min-h-full row-start-2 row-end-3"
+    v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-bottom-panel"
+  bottom-panel(
+    class="z-bottom-panel row-start-3 row-end-4"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
     :style="disableBtmPanelTransition ? 'transition: none' : ''")
     template(#content="{setSlotRef}")
@@ -173,14 +175,6 @@ const closeModal = () => {
   modalStore.closeModal()
 }
 
-const headerbarRef = ref<HTMLElement | null>(null)
-const headerbarStyles = computed(() => {
-  return {
-    height: atMainPage.value ? '72px' : '0px',
-    opacity: atMainPage.value ? 1 : 0,
-  }
-})
-
 // #region mobile panel
 const store = useStore()
 const currColorEvent = ref('')
@@ -262,12 +256,6 @@ const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm
   @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
-}
-
-.main-page-headerbar {
-  transition:
-    height 0.25s,
-    opacity 0.25s;
 }
 
 .popup-area {
