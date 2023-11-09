@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    ActionSheet: typeof import('./components/global/ActionSheet.vue')['default']
     AspectRatioSelector: typeof import('./components/panel-content/AspectRatioSelector.vue')['default']
     BackBtn: typeof import('./components/global/BackBtn.vue')['default']
     BottomPanel: typeof import('./components/BottomPanel.vue')['default']
