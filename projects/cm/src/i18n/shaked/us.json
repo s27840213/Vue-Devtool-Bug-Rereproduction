@@ -131,6 +131,7 @@
   "NN0405": "Untitled palette",
   "NN0406": "To use the Eyedropper tool, please switch to a supported browser (Edge, Google Chrome, Opera) on Desktop and upgrade to the latest version of it.",
   "NN0407": "Eyedropper",
+  "NN0416": "Photo",
   "NN0418": "Glow",
   "NN0419": "Color-matched Shadow",
   "NN0420": "Contact Shadow",
@@ -348,6 +349,7 @@
   "NN0886": "Tail shift",
   "NN0887": "Tail position",
   "NN0888": "Moving distance",
+  "NN0889": "Save to Camera Roll",
   "NN0890": "Inside color",
   "NN0891": "Outside color",
   "NN0892": "Inside stroke",
@@ -453,5 +455,8 @@
   "CM0069": "Max {num} photos",
   "CM0070": "Maximum {num} photos can be selected.",
   "CM0071": "Remove watermark",
-  "CM0072": "High resolution photo"
+  "CM0072": "High resolution photo",
+  "CM0075": "Saving as",
+  "CM0076": "Select format to keep your creations.",
+  "CM0077": "Video"
 }
