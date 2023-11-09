@@ -1,6 +1,8 @@
+import i18n from '@/i18n'
 import { ICmProFeatures } from '@/interfaces/payment'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
+import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { nextTick } from 'vue'
 
@@ -297,7 +299,55 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   openPayment(target?: ICmProFeatures) {
-    store.commit('SET_fullPageConfig', { type: 'payment', params: { target } })
+    const params = {
+      target,
+      theme: 'cm',
+      carouselItems: [
+        {
+          key: 'powerful-fill',
+          title: 'Powerful Fill',
+          img: require('@img/png/pricing/cm-pro.png')
+        },
+      ],
+      cards: [
+        {
+          iconName: 'unlimited',
+          title: 'Unlimited creation'
+        },
+        {
+          iconName: 'watermark',
+          title: 'Watermark free'
+        },
+        {
+          iconName: 'backward',
+          title: 'Fast image processing'
+        }
+      ],
+      btnPlans: [
+        {
+          key: 'annually',
+          title: i18n.global.t('NN0515'),
+          subTitle: '',
+          price: store.getters['payment/getPayment'].prices.annually.text
+        },
+        {
+          key: 'monthly',
+          title: i18n.global.t('NN0514'),
+          subTitle: '',
+          price: store.getters['payment/getPayment'].prices.monthly.text
+        }
+      ],
+      comparisons: [],
+      termsOfServiceUrl: '',
+      privacyPolicyUrl: '',
+      defaultTrialToggled: false
+    } as IFullPagePaymentConfigParams
+    store.commit('SET_fullPageConfig', { type: 'payment', params })
+  }
+
+  async setDefaultPrices() {
+    // TODO: update prices
+    store.commit('payment/SET_paymentPending', { info: false })
   }
 }
 

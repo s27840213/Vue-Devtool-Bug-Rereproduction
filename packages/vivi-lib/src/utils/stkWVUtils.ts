@@ -3,7 +3,7 @@ import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { IFullPageVideoConfigParams } from '@/interfaces/fullPage'
+import { IFullPagePaymentConfigParams, IFullPageVideoConfigParams } from '@/interfaces/fullPage'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
@@ -201,10 +201,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isPaymentDisabled(): boolean {
     return !this.checkVersion('1.26')
-  }
-
-  get isOldPrice(): boolean {
-    return !this.checkVersion('1.42')
   }
 
   get isGetProductsSupported(): boolean {
@@ -1440,7 +1436,63 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.showUpdateModal()
       return
     }
-    store.commit('SET_fullPageConfig', { type: 'payment', params: { target } })
+    const params = {
+      target: target ?? 'frame',
+      theme: 'stk',
+      carouselItems: [
+        {
+          key: 'template',
+          title: i18n.global.t('STK0071'),
+          img: require(`@img/png/pricing/${i18n.global.locale}/vivisticker_pro-template.png`)
+        },
+        {
+          key: 'frame',
+          title: i18n.global.t('STK0049'),
+          img: require('@img/png/pricing/vivisticker_frame.png')
+        },
+        {
+          key: 'object',
+          title: i18n.global.t('STK0051'),
+          img: require('@img/png/pricing/vivisticker_pro-object.png')
+        },
+        {
+          key: 'text',
+          title: i18n.global.t('STK0050'),
+          img: require(`@img/png/pricing/${i18n.global.locale}/vivisticker_pro-text.png`)
+        },
+        {
+          key: 'bg-remove',
+          title: i18n.global.t('STK0083'),
+          img: require(`@img/png/pricing/${i18n.global.locale}/vivisticker_pro-bg-remove.png`)
+        }
+      ],
+      cards: [],
+      btnPlans: [
+        {
+          key: 'monthly',
+          title: i18n.global.t('NN0514'),
+          subTitle: '',
+          price: store.getters['payment/getPayment'].prices.monthly.text
+        },
+        {
+          key: 'annually',
+          title: i18n.global.t('NN0515'),
+          subTitle: '',
+          price: store.getters['payment/getPayment'].prices.annually.text
+        }
+      ],
+      comparisons: [
+        { feature: i18n.global.t('STK0037'), free: true, pro: true },
+        { feature: i18n.global.t('STK0038'), free: false, pro: true },
+        { feature: i18n.global.t('STK0039'), free: false, pro: true },
+        { feature: i18n.global.t('STK0040'), free: false, pro: true },
+        { feature: i18n.global.t('STK0041'), free: false, pro: true }
+      ],
+      termsOfServiceUrl: i18n.global.t('STK0053'),
+      privacyPolicyUrl: i18n.global.t('STK0052'),
+      defaultTrialToggled: store.getters['payment/getPayment'].trialCountry.includes(this.getUserInfoFromStore().storeCountry)
+    } as IFullPagePaymentConfigParams
+    store.commit('SET_fullPageConfig', { type: 'payment', params })
   }
 
   checkPro(item: { plan?: number }, target?: IStkProFeatures) {

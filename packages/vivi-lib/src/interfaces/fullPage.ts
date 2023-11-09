@@ -1,4 +1,4 @@
-import { IStkProFeatures } from "./payment"
+import { ICmProFeatures, IStkProFeatures } from "./payment"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IFullPageNoneConfigParams { }
@@ -21,7 +21,31 @@ export interface IFullPageVideoConfig {
 }
 
 export interface IFullPagePaymentConfigParams {
-  target?: IStkProFeatures
+  target?: IStkProFeatures,
+  theme: string,
+  carouselItems: {
+    key: IStkProFeatures | ICmProFeatures
+    title: string
+    img: string
+  }[],
+  cards: {
+    iconName: string
+    title: string
+  }[],
+  btnPlans: {
+    key: 'monthly' | 'annually',
+    title: string
+    subTitle: string
+    price: string
+  }[],
+  comparisons: {
+    feature: string,
+    free: boolean,
+    pro: boolean
+  }[],
+  termsOfServiceUrl: string,
+  privacyPolicyUrl: string,
+  defaultTrialToggled: boolean
 }
 
 export interface IFullPagePaymentConfig {

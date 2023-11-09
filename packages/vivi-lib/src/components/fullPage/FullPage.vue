@@ -9,7 +9,15 @@ div(ref="main" class="full-page relative")
         @ended="handleEnded"
         @canplay="sendAppLoaded")
   payment(v-if="fullPageConfig.type === 'payment'"
-          :target="fullPageConfig.params.target"
+          :target="fullPageConfig.params.target",
+          :theme="fullPageConfig.params.theme",
+          :defaultTrialToggled="fullPageConfig.params.defaultTrialToggled",
+          :carouselItems="fullPageConfig.params.carouselItems",
+          :cards="fullPageConfig.params.cards",
+          :btnPlans="fullPageConfig.params.btnPlans",
+          :comparisons="fullPageConfig.params.comparisons"
+          :termsOfServiceUrl="fullPageConfig.params.termsOfServiceUrl"
+          :privacyPolicyUrl="fullPageConfig.params.privacyPolicyUrl"
           @canShow="sendAppLoaded")
   welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"

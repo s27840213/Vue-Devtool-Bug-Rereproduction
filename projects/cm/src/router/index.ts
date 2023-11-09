@@ -82,6 +82,7 @@ router.addRoute({
     cmWVUtils.detectIfInApp()
     cmWVUtils.getUserInfo()
     cmWVUtils.fetchTutorialFlags()
+    cmWVUtils.setDefaultPrices()
     let argoError = false
     try {
       const status = (

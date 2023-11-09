@@ -1,9 +1,9 @@
 <template lang="pug">
-div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
+div(class="payment" :class="theme" v-touch @swipe.stop)
   carousel(
     :items="carouselItems"
     :itemWidth="containerWidth"
-    :initIndex="carouselItems.findIndex(item => item.key === target)"
+    :initIndex="carouselItems.findIndex(item => item.key === (target ?? carouselItems[0].key))"
     enableSwipe
     @change="handleImageChange")
     template(v-slot="{ item }")
@@ -20,22 +20,28 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
         :key="idx"
         class="payment__content__indicator__item"
         :class="{ 'payment__content__indicator__item--active': idx === idxCurrImg }")
+    div(v-if="cards.length" class="payment__content__cards")
+      div(v-for="card in cards" :key="card.iconName" class="payment__content__cards__card")
+        svg-icon(class="payment__content__cards__card__icon" :iconName="card.iconName" iconWidth="24px" iconColor="black-3")
+        span(class="payment__content__cards__card__title") {{ card.title }}
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
         :key="btnPlan.key"
         :class="{selected: btnPlan.key === planSelected, disabled: pending.purchase}"
         @tap="handleBtnPlanClick(btnPlan.key)")
-        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker_check" iconWidth="20px" iconColor="black-3")
-        div(v-else class="payment__btn-plan__radio")
+        template(v-if="$isStk")
+          svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker_check" iconWidth="20px" iconColor="black-3")
+          div(v-else class="payment__btn-plan__radio")
+        svg-icon(v-else class="payment__btn-plan__radio" :class="{selected: btnPlan.key === planSelected}" :iconName="btnPlan.key === planSelected ? 'radio-checked' : 'radio'" iconWidth="20px")
         div(class="payment__btn-plan__content")
           div(class="payment__btn-plan__content__title")
             div(class="payment__btn-plan__content__title__main caption-LG") {{ btnPlan.title }}
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub")
               span {{ btnPlan.subTitle }}
           div(class="payment__btn-plan__content__price text-H6") {{ btnPlan.price }}
-        div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__tag")
-          span(class="caption-SM") {{ btnPlan.tag }}
-    div(v-if="!isOldPrice" class="payment__trial")
+        div(v-if="btnPlan.key === planSelected && btnPlan.key === 'annually'" class="payment__btn-plan__content__tag")
+          span(class="caption-SM") {{ localizedTag }}
+    div(class="payment__trial")
       span(class="payment__trial__text caption-LG") {{ strTrial }}
       toggle-btn(class="payment__trial__toggle" v-model="isTrialToggled" :width="42" :height="24" :colorActive="isTrialDisabled ? 'black-3' : 'alarm'" :colorInactive="isTrialDisabled ? 'black-3' : 'black-4'")
     div(class="payment__btn-subscribe" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
@@ -47,7 +53,7 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
       template(v-for="(footerLink, idx) in footerLinks" :key="footerLink.key")
         span(v-if="idx > 0" class="payment__footer__splitter")
         span(class="body-XXS" @tap="footerLink.action") {{ footerLink.title }}
-  div(class="payment__panel" :class="{close: !isPanelUp, disabled: pending.purchase}" ref="panel")
+  div(v-if="comparisons.length" class="payment__panel" :class="{close: !isPanelUp, disabled: pending.purchase}" ref="panel")
     div(class="payment__panel__chevron" ref="chevron" @swipeup.stop="togglePanel(true)" @swipedown.stop="togglePanel(false)" @panstart.stop="dragPanelStart" @panmove.stop="dragingPanel" @panend.stop="dragPanelEnd" @pointerdown.stop="panelAniProgress = 0")
       svg-icon(iconName="chevron-up" iconWidth="14px")
       div(class="payment__panel__chevron__title") {{ $t('STK0042') }}
@@ -72,9 +78,7 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
 import ToggleBtn from '@/components/global/ToggleBtn.vue'
-import { IPaymentPending, IPrices, IStkProFeatures } from '@/interfaces/payment'
-import { isV1_42 } from '@/interfaces/vivisticker'
-import constantData from '@/utils/constantData'
+import { IPaymentPending, IPrices, IStkProFeatures, ICmProFeatures } from '@/interfaces/payment'
 import networkUtils from '@/utils/networkUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
@@ -82,13 +86,25 @@ import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
-interface CarouselItem {
-  key: IStkProFeatures
+type ICarouselItem = {
+  key: IStkProFeatures | ICmProFeatures,
   title: string
   img: string
 }
 
-interface IComparison {
+type ICard = {
+  iconName: string,
+  title: string
+}
+
+type IBtnPlan = {
+  key: 'monthly' | 'annually',
+  title: string
+  subTitle: string
+  price: string
+}
+
+type IComparison = {
   feature: string,
   free: boolean,
   pro: boolean
@@ -102,8 +118,39 @@ export default defineComponent({
   },
   props: {
     target: {
-      type: String as PropType<IStkProFeatures>,
-      default: 'frame'
+      type: String as PropType<IStkProFeatures | ICmProFeatures>
+    },
+    theme: {
+      type: String,
+      default: 'stk'
+    },
+    defaultTrialToggled: {
+      type: Boolean,
+      default: false
+    },
+    carouselItems: {
+      type: Array as PropType<ICarouselItem[]>,
+      default: () => []
+    },
+    cards: {
+      type: Array as PropType<ICard[]>,
+      default: () => []
+    },
+    btnPlans: {
+      type: Array as PropType<IBtnPlan[]>,
+      default: () => []
+    },
+    comparisons: {
+      type: Array as PropType<IComparison[]>,
+      default: () => []
+    },
+    termsOfServiceUrl: {
+      type: String,
+      default: ''
+    },
+    privacyPolicyUrl: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -111,7 +158,6 @@ export default defineComponent({
       idxCurrImg: 0,
       planSelected: 'annually',
       isTrialToggled: false,
-      defaultTrialToggled: false,
       isPanelUp: false,
       canShow: false,
       initPanelUp: false,
@@ -119,70 +165,12 @@ export default defineComponent({
       panelDragHeight: 0,
       panelAniProgress: 1,
       lastPointerY: 0,
-      carouselItems: [
-        {
-          key: 'template',
-          title: this.$t('STK0071'),
-          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-template.png`)
-        },
-        {
-          key: 'frame',
-          title: this.$t('STK0049'),
-          img: require('@img/png/pricing/vivisticker_frame.png')
-        },
-        {
-          key: 'object',
-          title: this.$t('STK0051'),
-          img: require('@img/png/pricing/vivisticker_pro-object.png')
-        },
-        {
-          key: 'text',
-          title: this.$t('STK0050'),
-          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-text.png`)
-        },
-        {
-          key: 'bg-remove',
-          title: this.$t('STK0083'),
-          img: require(`@img/png/pricing/${this.$i18n.locale}/vivisticker_pro-bg-remove.png`)
-        }
-      ] as CarouselItem[],
-      footerLinks: [
-        {
-          key: 'restorePurchase',
-          title: this.$t('STK0045'),
-          action: () => this.handleSubscribe('restore', 30000)
-        },
-        {
-          key: 'termsOfService',
-          title: this.$t('NN0160'),
-          action: () => window.open(this.$t('STK0053'), '_blank')
-        },
-        {
-          key: 'privacyPolicy',
-          title: this.$t('NN0161'),
-          action: () => window.open(this.$t('STK0052'), '_blank')
-        }
-      ],
-      comparisons: [
-        { feature: this.$t('STK0037'), free: true, pro: true },
-        { feature: this.$t('STK0038'), free: false, pro: true },
-        { feature: this.$t('STK0039'), free: false, pro: true },
-        { feature: this.$t('STK0040'), free: false, pro: true },
-        { feature: this.$t('STK0041'), free: false, pro: true }
-      ] as IComparison[]
     }
   },
   created() {
-    console.log('created', this.isOldPrice);
-    if(!this.$isStk) return
-    
-    const userInfo = stkWVUtils.getUserInfoFromStore()
-    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(this.$i18n.locale)
-    this.defaultTrialToggled = this.payment.trialCountry.includes(locale) || this.isOldPrice
     this.isTrialToggled = this.defaultTrialToggled
   },
   mounted() {
-    console.log('mounted');
     const at = new AnyTouch((this.$refs.chevron as HTMLElement))
     at.on('tap', () => this.togglePanel())
     at.get('tap').maxDistance = 2
@@ -207,7 +195,7 @@ export default defineComponent({
     }),
     ...mapGetters({
       payment: 'payment/getPayment',
-      isPaymentPending: 'payment/getIsPaymentPending',
+      isPaymentPending: 'payment/getIsPaymentPending'
     }),
     txtBtnSubscribe() {
       return this.isTrialToggled ? this.$t('STK0046') : this.$t('STK0047')
@@ -227,21 +215,22 @@ export default defineComponent({
           return `$${price} / Mo`
       }
     },
-    btnPlans() {
+    footerLinks() {
       return [
         {
-          key: 'monthly',
-          title: this.$t('NN0514'),
-          subTitle: '',
-          price: this.payment.prices.monthly.text,
-          tag: ''
+          key: 'restorePurchase',
+          title: this.$t('STK0045'),
+          action: () => this.handleSubscribe('restore', 30000)
         },
         {
-          key: 'annually',
-          title: this.$t('NN0515'),
-          subTitle: this.isOldPrice ? this.$t('STK0048', { day: 3 }) : '',
-          price: (!this.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0.text : this.payment.prices.annually.text,
-          tag: this.localizedTag
+          key: 'termsOfService',
+          title: this.$t('NN0160'),
+          action: () => window.open(this.termsOfServiceUrl, '_blank')
+        },
+        {
+          key: 'privacyPolicy',
+          title: this.$t('NN0161'),
+          action: () => window.open(this.privacyPolicyUrl, '_blank')
         }
       ]
     },
@@ -269,9 +258,6 @@ export default defineComponent({
     isTrialDisabled() {
       return this.planSelected === 'monthly' || this.isPaymentPending
     },
-    isOldPrice() {
-      return this.$isStk ? stkWVUtils.isOldPrice : false
-    }
   },
   methods: {
     ...mapMutations({
@@ -291,10 +277,8 @@ export default defineComponent({
         return
       }
       if (this.isPaymentPending) return
-      if (!this.isOldPrice) {
-        if (option === 'monthly') option = this.payment.planId.monthly
-        else if (option === 'annually') option = (this.isTrialDisabled || !this.isTrialToggled) ? this.payment.planId.annuallyFree0 : this.payment.planId.annually
-      }
+      if (option === 'monthly') option = this.payment.planId.monthly
+      else if (option === 'annually') option = (this.isTrialDisabled || !this.isTrialToggled) ? this.payment.planId.annuallyFree0 : this.payment.planId.annually
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       stkWVUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {
@@ -393,6 +377,10 @@ export default defineComponent({
   overflow-x: hidden;
   width: v-bind("containerWidth + 'px'");
   margin: 0 auto;
+  @include app(cm) {
+    background-color: #050505;
+    font-family: Lato !important;
+  }
   &__carousel-item {
     display: flex;
     justify-content: center;
@@ -410,6 +398,9 @@ export default defineComponent({
       width: 100%;
       height: calc(100% + 1px); // prevent subpixel problem
       background: linear-gradient(0deg, rgba(setColor(black-1),1) 0%, rgba(setColor(black-1),0) 25%);
+      @include app(cm) {
+        background: linear-gradient(0deg, #050505 0%, transparent 25%);
+      }
     }
     &__title {
       position: absolute;
@@ -440,8 +431,36 @@ export default defineComponent({
         }
       }
     }
+    &__cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin: 6px 0 27px;
+      gap: 16px;
+      &__card {
+        width: 86px;
+        height: 80px;
+        justify-self: center;
+        display: flex;
+        flex-direction: column;
+        background-color: #A3A3A333;
+        border-radius: 16px;
+        gap: 4px;
+        padding: 8px;
+        color: #FFFBED;
+        text-align: left;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 16px;
+        &__icon {
+          margin-top: 10px;
+          color: #FDD248;
+        }
+      }
+    }
     &__plans {
       display: flex;
+      flex-direction: row;
       flex-direction: column;
       row-gap: 12px;
     }
@@ -457,11 +476,18 @@ export default defineComponent({
     color: setColor(black-5);
     border: 2px solid transparent;
     position: relative;
+      @include app(cm) {
+        color: #FFFBED;
+      }
     &.disabled {
       pointer-events: none;
       color: setColor(black-3);
       .payment__btn-plan__radio {
         border-color: rgba(setColor(black-5), 0.3);
+        @include app(cm) {
+          color: #A3A3A3;
+          border: none;
+        }
       }
     }
     &.selected {
@@ -469,17 +495,33 @@ export default defineComponent({
       border: 2px solid rgba(white, 0.8);
       border-radius: 10px;
       color: rgba(white, 0.8);
+      @include app(cm) {
+        color: #FFFBED;
+        background: transparent;
+        border: 2px solid #FDD248;
+      }
       &.disabled {
         background: rgba(white, 0.06);
         border: 2px solid rgba(white, 0.3);
+        @include app(cm) {
+          background: transparent;
+        }
         .payment__btn-plan__content__title,
         .payment__btn-plan__content__title__sub,
         .payment__btn-plan__content__price {
           color: rgba(white, 0.3);
+          @include app(cm) {
+            color: #A3A3A3;
+          }
         }
         .payment__btn-plan__radio{
           background-color: rgba(white, 0.3);
           border-color: rgba(setColor(black-5), 0.3);
+          @include app(cm) {
+            background: transparent;
+            border: none;
+            color: #A3A3A3;
+          }
         }
       }
     }
@@ -488,9 +530,17 @@ export default defineComponent({
       box-sizing: border-box;
       border: 2px solid setColor(black-5);
       border-radius: 100px;
+      @include app(cm) {
+        border: none;
+        color: #FFFBED;
+      }
       &.selected {
         background-color: rgba(white, 0.8);
-        border: none
+        border: none;
+        @include app(cm) {
+          background-color: transparent;
+          color: #FDD248;
+        }
       }
     }
     &__content {
@@ -551,6 +601,9 @@ export default defineComponent({
     margin: 12px 16px 0px;
     &__text {
       color: v-bind("isTrialDisabled ? '#474747' : 'white'");
+      @include app(cm) {
+        color: v-bind("isTrialDisabled ? '#A3A3A3' : '#FDD248'");
+      }
       transition: color 0.3s ease-in-out;
     }
     &__toggle {
@@ -571,6 +624,9 @@ export default defineComponent({
     align-items: center;
     text-align: center;
     color: setColor(black-3);
+    @include app(cm) {
+      background: #FDD248;
+    }
     &__text {
       width: 100%;
     }
@@ -590,6 +646,9 @@ export default defineComponent({
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
+      @include app(cm) {
+        color: #050505;
+      }
     }
   }
   &__notice {
@@ -616,9 +675,15 @@ export default defineComponent({
     color: setColor(black-5);
     column-gap: 10px;
     white-space: nowrap;
+    @include app(cm) {
+      color: #FFFBED;
+    }
     &.disabled {
       color: setColor(black-3);
       pointer-events: none;
+      @include app(cm) {
+        color: #A3A3A3;
+      }
     }
     &__splitter {
       @include size(0px, 12px);
@@ -732,26 +797,6 @@ export default defineComponent({
       color: #D9D9D9;
       animation: rotate 0.5s infinite linear;
     }
-  }
-}
-
-.old-price .payment {
-  &__content{
-    &__indicator {
-      top: -24px;
-    }
-    &__plans {
-      margin-top: 6px;
-    }
-  }
-  &__btn-plan {
-    height: 60px;
-  }
-  &__btn-subscribe {
-    margin: 16px auto 0 auto;
-  }
-  &__footer {
-    margin: 16px auto 0 auto;
   }
 }
 

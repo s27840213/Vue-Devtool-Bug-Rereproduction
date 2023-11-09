@@ -179,7 +179,7 @@ export type IPaymentView = IPaymentWarningView | IPaymentPayingView
 
 // for vivisticker & charmix
 export type IStkProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
-export type ICmProFeatures = ''
+export type ICmProFeatures = 'powerful-fill'
 export interface IPrice {
   value: number,
   text: string
