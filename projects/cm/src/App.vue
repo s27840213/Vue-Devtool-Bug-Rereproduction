@@ -33,7 +33,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-bottom-panel" :style="disableBtmPanelTransition ? 'transition: none' : ''")
+  bottom-panel(v-if="!atEventTester && !isDuringCopy" class="z-bottom-panel" :style="disableBtmPanelTransition ? 'transition: none' : ''")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
@@ -117,6 +117,7 @@ const {
   atMyDesign,
   atSettings,
   atMainPage,
+  atEventTester,
   showImgSelector,
   inGenResultState,
   inSavingState,
@@ -175,6 +176,7 @@ const headerbarStyles = computed(() => {
 
 // #region mobile panel
 const store = useStore()
+const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const currColorEvent = ref('')
 const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
@@ -240,6 +242,14 @@ onBeforeUnmount(() => {
 
 const vConsole = new VConsole({ theme: 'dark' })
 vConsole.setSwitchPosition(25, 80)
+
+watch(isDuringCopy, (newVal) => {
+  if (newVal) {
+    vConsole.hideSwitch()
+  } else {
+    vConsole.showSwitch()
+  }
+})
 </script>
 
 <style lang="scss">

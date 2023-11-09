@@ -65,7 +65,25 @@ const routes = [
     },
     component: () => import('@nu/vivi-lib/views/NubtnList.vue'),
   },
-]
+] as any[]
+
+if (window.location.host !== 'cm.vivipic.com') {
+  routes.push({
+    path: 'svgicon',
+    name: 'SvgIconView',
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
+  })
+  routes.push({
+    path: 'nativeevttest',
+    name: 'NativeEventTester',
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
+  })
+  routes.push({
+    path: 'emoji',
+    name: 'EmojiTest',
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
+  })
+}
 
 router.addRoute({
   // Include the locales you support between ()

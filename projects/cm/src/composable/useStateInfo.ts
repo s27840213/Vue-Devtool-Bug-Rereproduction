@@ -12,6 +12,7 @@ const useStateInfo = () => {
   const atSettings = computed(() => path.value === '/settings')
   const atMainPage = computed(() => atHome.value || atMyDesign.value)
   const atEditor = computed(() => path.value === '/editor')
+  const atEventTester = computed(() => path.value === '/nativeevttest')
   // #endregion
 
   // #region editor state
@@ -37,6 +38,7 @@ const useStateInfo = () => {
     atEditor,
     atSettings,
     atMainPage,
+    atEventTester,
     showHomeTabs,
     inGenResultState,
     inAspectRatioState,
