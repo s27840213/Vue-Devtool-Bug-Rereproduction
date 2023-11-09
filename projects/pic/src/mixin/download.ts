@@ -303,7 +303,7 @@ export default defineComponent({
       this.saveSubmission = checked
     },
     handleSubmit(useDev = false, downloadMode = 'default' as 'default' | 'current' | 'all') {
-      if (this.selectedTypeVal === 'pdf_print' && !paymentUtils.checkPro({ plan: 1 }, 'export-pdf-print')) {
+      if (this.selectedTypeVal === 'pdf_print' && !paymentUtils.checkProApp({ plan: 1 }, 'export-pdf-print')) {
         this.$emit('close')
         return
       }

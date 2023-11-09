@@ -103,7 +103,6 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
-import { IAsset } from '@/interfaces/module'
 import { notify } from '@kyvg/vue3-notification'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
@@ -112,6 +111,7 @@ import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.
 import MobileSlider from '@nu/vivi-lib/components/editor/mobile/MobileSlider.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
+import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
@@ -120,6 +120,7 @@ import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -166,8 +167,8 @@ export default defineComponent({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultViviStickerBgColors',
       getBackgroundColor: 'getBackgroundColor',
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      isTabInCategory: 'assetPanel/getIsInCategory',
+      isTabShowAllRecently: 'assetPanel/getShowAllRecently',
       isInBgShare: 'vivisticker/getIsInBgShare',
       shareItem: 'vivisticker/getShareItem',
       shareColor: 'vivisticker/getShareColor',
@@ -455,13 +456,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          stkWVUtils.setShowAllRecently('background', true)
+          assetPanelUtils.setShowAllRecently('background', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        stkWVUtils.setIsInCategory('background', true)
+        assetPanelUtils.setIsInCategory('background', true)
       } else {
-        stkWVUtils.setShowAllRecently('background', false)
+        assetPanelUtils.setShowAllRecently('background', false)
       }
     },
     handleLoadMore() {

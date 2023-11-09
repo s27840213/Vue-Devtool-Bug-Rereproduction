@@ -20,6 +20,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
@@ -49,7 +50,7 @@ export default defineComponent({
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
-      controllerHidden: 'vivisticker/getControllerHidden',
+      controllerHidden: 'webView/getControllerHidden',
       debugMode: 'vivisticker/getDebugMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       isProcessing: 'bgRemove/getIsProcessing',
@@ -442,7 +443,7 @@ export default defineComponent({
     }),
     // eslint-disable-next-line vue/no-unused-properties
     handleTabAction(tab: IFooterTab) {
-      if (!stkWVUtils.checkPro({ plan: tab.forPro ? 1 : 0 }, tab.plan)) return
+      if (!paymentUtils.checkProApp({ plan: tab.forPro ? 1 : 0 }, undefined, tab.plan)) return
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       }

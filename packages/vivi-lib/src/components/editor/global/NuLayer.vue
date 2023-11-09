@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-layer flex-center"
-    :class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '', primaryLayer?.type === 'frame' ? 'transform-origin-0' : '']"
+:class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '', primaryLayer?.type === 'frame' && !forRender ? 'transform-origin-0' : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
@@ -265,12 +265,11 @@ export default defineComponent({
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       isDuringCopy: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
     }),
     inAllPagesMode(): boolean {

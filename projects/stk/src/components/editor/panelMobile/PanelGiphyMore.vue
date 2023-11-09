@@ -15,7 +15,7 @@ div(class="p-giphy" v-click-outside="vcoConfig")
 </template>
 
 <script lang="ts">
-import { IGif } from '@/interfaces/giphy'
+import { IGif } from '@nu/vivi-lib/interfaces/giphy'
 import giphyLogo from '@img/png/giphy-logo.png'
 import i18n from '@nu/vivi-lib/i18n'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'

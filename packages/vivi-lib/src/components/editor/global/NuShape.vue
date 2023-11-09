@@ -443,7 +443,7 @@ export default defineComponent({
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
-      if (this.$isStk) {
+      if (this.$isStk || this.$isCm) {
         let primaryLayer
         if (this.prePrimaryLayerIndex !== -1) {
           primaryLayer = (layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex) as IGroup).layers[this.layerIndex] as IFrame

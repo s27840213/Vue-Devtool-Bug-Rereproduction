@@ -333,7 +333,7 @@ class StepsUtils {
     }
   }
 
-  delayedRecord(key: string, interval = 300) {
+  delayedRecord(key = generalUtils.generateRandomString(4), interval = 300) {
     if (this.timers[key]) {
       clearTimeout(this.timers[key])
       delete this.timers[key]

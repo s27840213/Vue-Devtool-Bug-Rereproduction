@@ -21,6 +21,9 @@ for (let i = 0; i <= 360; i++) {
 }
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  corePlugins: {
+    preflight: false
+  },
   content: ['./src/**/*.{vue,js,ts,jsx,tsx}', '../../packages/ui-component/src/**/*.vue'],
   // purge: ['./src/**/*.html', './src/**/*.vue', './src/**/*.ts'],
   theme: {

@@ -1,11 +1,11 @@
 import axios from '@/apis'
 import { IListServiceParams, IListServiceResponse } from '@/interfaces/api'
 import store from '@/store'
-import localeUtils from '@/utils/localeUtils'
-import authToken from './auth-token'
-import uploadUtils from '@/utils/uploadUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import generalUtils from '@/utils/generalUtils'
+import localeUtils from '@/utils/localeUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import authToken from './auth-token'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -30,7 +30,7 @@ class ListService {
       ...(params.shuffle === 1 && { shuffle: params.shuffle }),
       // app: 0: vivipic (default), 1: vivisticker
       // If admin and url have 'app=1', bring app:1 to api.
-      ...generalUtils.isStk || 
+      ...generalUtils.isStk || generalUtils.isCm || 
         (store.getters['user/isAdmin'] && /app=1/.test(window.location.href))
         ? { app: 1 } : {},
       // for vivisticker text panel of US version
@@ -69,32 +69,32 @@ class ListService {
   // For list factories
   getSvg(params: IListServiceParams) {
     params.type = 'svg'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getTemplate(params: IListServiceParams) {
     params.type = 'template'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getText(params: IListServiceParams) {
     params.type = 'text'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getBackground(params: IListServiceParams) {
     params.type = 'background'
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 
   getFont(params: IListServiceParams) {
     params.type = 'font'
     params.fontList = 2
-    params.cache = generalUtils.isStk // vivisticker doesn't fetch recently-used with API, so cache can be used here.
+    params.cache = generalUtils.isStk || generalUtils.isCm // vivisticker and charmix doesn't fetch recently-used with API, so cache can be used here.
     return this.getList(params)
   }
 

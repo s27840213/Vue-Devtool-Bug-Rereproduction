@@ -14,7 +14,6 @@ declare module 'vue' {
     Dropdown: typeof import('./components/Dropdown.vue')['default']
     ImageCarousel: typeof import('./components/ImageCarousel.vue')['default']
     MarkerIcon: typeof import('./components/MarkerIcon.vue')['default']
-    NSvgIcon: typeof import('./components/NSvgIcon.vue')['default']
     PropertyBar: typeof import('./components/PropertyBar.vue')['default']
     RadioBtn: typeof import('./components/RadioBtn.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

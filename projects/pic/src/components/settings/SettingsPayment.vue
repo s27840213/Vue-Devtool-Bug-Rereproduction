@@ -73,7 +73,7 @@ div(class="sp")
 </template>
 
 <script lang="ts">
-import Options from '@/components/global/Options.vue'
+import Options from '@nu/vivi-lib/components/global/Options.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import paymentData from '@nu/vivi-lib/utils/constantData'
