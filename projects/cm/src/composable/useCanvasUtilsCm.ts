@@ -401,7 +401,7 @@ const useCanvasUtils = (
     const { pageSize, contentScaleRatio } = useEditorStore()
     const { width: pageWidth, height: pageHeight } = pageSize
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId } = await cmWVUtils.copyEditor({ width: pageWidth * contentScaleRatio, height: pageHeight * contentScaleRatio }, true)
+    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor({ width: pageWidth * contentScaleRatio, height: pageHeight * contentScaleRatio }, true)
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
@@ -410,6 +410,7 @@ const useCanvasUtils = (
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.drawImage(img, 0, 0, pageWidth, pageHeight)
         cb && cb()
+        cleanup()
       }
     })
   }
