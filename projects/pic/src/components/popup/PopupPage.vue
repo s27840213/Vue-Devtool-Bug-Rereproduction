@@ -148,15 +148,15 @@ export default defineComponent({
         const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj, 50))
         imageUtils.imgLoadHandler(src || detachedBackgroundImage.config.previewSrc || '', (img) => {
           const ratio = img.naturalWidth / img.naturalHeight
+          this._setBackgroundImage({
+            pageIndex: pageUtils.currFocusPageIndex,
+            config: this.baseBgImgConfig
+          })
           assetUtils.addImage(src, ratio, {
             pageIndex: layerUtils.pageIndex,
             ...detachedBackgroundImage.config.srcObj,
             styles: detachedBackgroundImage.config.styles,
             previewSrc: detachedBackgroundImage.config.previewSrc
-          })
-          this._setBackgroundImage({
-            pageIndex: pageUtils.currFocusPageIndex,
-            config: this.baseBgImgConfig
           })
         })
       }
