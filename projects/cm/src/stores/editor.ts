@@ -51,6 +51,9 @@ export const useEditorStore = defineStore('editor', {
     pageScaleRatio(): number {
       return pageUtils.scaleRatio / 100
     },
+    contentScaleRatio(): number {
+      return pageUtils.contentScaleRatio
+    },
     showBrushOptions(): boolean {
       return this.currActiveFeature === 'brush'
     },

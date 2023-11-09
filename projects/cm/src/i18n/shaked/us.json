@@ -77,6 +77,8 @@
   "NN0141": "Delete",
   "NN0145": "Template Center",
   "NN0147": "FAQ",
+  "NN0161": "Privacy Policy",
+  "NN0162": "Terms of Use",
   "NN0165": "Account settings",
   "NN0166": "Login & Security",
   "NN0172": "Name",
@@ -456,6 +458,8 @@
   "CM0070": "Maximum {num} photos can be selected.",
   "CM0071": "Remove watermark",
   "CM0072": "High resolution photo",
+  "CM0073": "Sign in to Charmix",
+  "CM0074": "By using Charmix, you agree to our {use}, {privacy} and to receive offers and updates.",
   "CM0075": "Saving as",
   "CM0076": "Select format to keep your creations.",
   "CM0077": "Video"

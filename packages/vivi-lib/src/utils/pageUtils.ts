@@ -135,6 +135,10 @@ class PageUtils {
     return store.getters.getPageScaleRatio
   }
 
+  get contentScaleRatio() {
+    return store.getters.getContentScaleRatio
+  }
+
   get currFocusPageSize(): {
     width: number
     height: number
