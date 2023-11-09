@@ -30,10 +30,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         theme="primary"
         size="md"
         @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
-  div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef")
+  div(class="editor-container flex justify-center items-center relative" ref="editorContainerRef"
+      @pointerdown="selectStart")
     div(
       class="w-full h-full box-border overflow-scroll flex justify-center items-center"
-      @click.self="handleOuterClick")
+      @click.self="outerClick")
       div(
         id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
@@ -92,9 +93,15 @@ import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import { LayerType } from '@nu/vivi-lib/store/types'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import controlUtils from '@nu/vivi-lib/utils/controlUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useElementSize, useEventBus } from '@vueuse/core'
@@ -157,7 +164,7 @@ const handleNextAction = function () {
   }
 
   // @test pixi record gen-vedio
-  if (inGenResultState) {
+  if (inGenResultState.value) {
     const src = imageUtils.appendRandomQuery(initImgSrc.value)
     const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
     const pixiRecorder = new PixiRecorder(src, res)
@@ -173,7 +180,7 @@ const { undo, redo, isInFirstStep, isInLastStep } = useStep
 // #region page related
 const store = useStore()
 const pageState = computed(() => store.getters.getPagesState)
-const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
+const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 
 const fitScaleRatio = computed(() => {
   if (
@@ -188,24 +195,21 @@ const fitScaleRatio = computed(() => {
   const newWidth = pageAspectRatio > 1 ? 1600 : 1600 * pageAspectRatio
   const newHeight = pageAspectRatio > 1 ? 1600 / pageAspectRatio : 1600
 
-  const widhtRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
+  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
 
-  const ratio = Math.min(widhtRatio, heightRatio) * 0.9
+  const ratio = Math.min(widthRatio, heightRatio) * 0.9
 
-  return ratio * 100
+  return ratio
 })
+
 
 const wrapperStyles = computed(() => {
   return {
-    width: `${(pageSize.value.width * pageScaleRatio.value) / 100}px`,
-    height: `${(pageSize.value.height * pageScaleRatio.value) / 100}px`,
+    width: `${pageSize.value.width * contentScaleRatio.value}px`,
+    height: `${pageSize.value.height * contentScaleRatio.value}px`,
   }
 })
-
-const handleOuterClick = () => {
-  groupUtils.deselect()
-}
 
 /**
  * fitPage
@@ -215,7 +219,7 @@ watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value) return
-    pageUtils.setScaleRatio(newVal)
+    store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: newVal})
   },
   // useDebounceFn((newVal, oldVal) => {
   //   if (newVal === oldVal || !atEditor.value) return
@@ -223,7 +227,64 @@ watch(
   //   setPageScaleRatio(newVal)
   // }, 300),
 )
+onMounted(() => {
+  const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
+  editorUtils.setMobilePhysicalData({
+    size: {
+      width: rect.width,
+      height: rect.height,
+    },
+    centerPos: {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    },
+    pos: {
+      x: rect.left,
+      y: rect.top
+    }
+  })
+})
 
+const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
+
+const outerClick = () => {
+  editorUtils.setInBgSettingMode(false)
+  pageUtils.setBackgroundImageControlDefault()
+}
+
+const selectStart = (e: PointerEvent) => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return
+  const isClickOnController = controlUtils.isClickOnController(e)
+  if (isImgCtrl.value && !isClickOnController) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+    switch (currLayer.type) {
+      case LayerType.image:
+      case LayerType.group:
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+        break
+      case LayerType.frame:
+        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+        break
+    }
+    return
+  }
+  if (layerUtils.layerIndex !== -1) {
+    /**
+     * when the user click the control-region outsize the page,
+     * the moving logic should be applied to the EditorView.
+     */
+    if (isClickOnController) {
+      const movingUtils = new MovingUtils({
+        _config: { config: layerUtils.getCurrLayer },
+        snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+      })
+      movingUtils.moveStart(e)
+    } else {
+      groupUtils.deselect()
+    }
+  }
+}
 // #endregion
 
 // #region demo brush size section
@@ -232,8 +293,8 @@ const { brushSize, isChangingBrushSize } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {
-    width: `${(brushSize.value * pageScaleRatio.value) / 100}px`,
-    height: `${(brushSize.value * pageScaleRatio.value) / 100}px`,
+    width: `${brushSize.value * contentScaleRatio.value}px`,
+    height: `${brushSize.value * contentScaleRatio.value}px`,
   }
 })
 // #endregion

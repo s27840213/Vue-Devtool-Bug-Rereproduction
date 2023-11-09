@@ -13,7 +13,7 @@ const useGenImageUtils = () => {
   const { userId, prevGenParams } = storeToRefs(useUserStore())
   const editorStore = useEditorStore()
   const { setInitImgSrc } = editorStore
-  const { editorType, pageSize, pageScaleRatio } = storeToRefs(useEditorStore())
+  const { editorType, pageSize, contentScaleRatio } = storeToRefs(useEditorStore())
 
   const { uploadImage, polling } = useUploadUtils()
 
@@ -53,9 +53,9 @@ const useGenImageUtils = () => {
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId } = await cmWVUtils.copyEditor({
-      width: pageWidth * pageScaleRatio.value,
-      height: pageHeight * pageScaleRatio.value,
+    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor({
+      width: pageWidth * contentScaleRatio.value,
+      height: pageHeight * contentScaleRatio.value,
     })
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
@@ -66,7 +66,10 @@ const useGenImageUtils = () => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
-          .then(resolve)
+          .then(() => {
+            cleanup()
+            resolve()
+          })
           .catch((error) => {
             logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
             throw error

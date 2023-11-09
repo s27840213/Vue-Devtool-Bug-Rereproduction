@@ -1,5 +1,9 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative")
+div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato]")
+  link(
+      href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
+      rel="stylesheet"
+      type="text/css")
   tutorial
   div(class="main-page-headerbar w-full flex justify-between items-center box-border px-16"
       ref="headerbarRef"
@@ -52,6 +56,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       v-if="showImgSelector"
       class="absolute top-0 left-0 w-full h-full z-img-selector"
       :requireNum="requireImgNum")
+  div(class="popup-area")
+    popup
   div(class="modal-container" v-if="isModalOpen")
     modal-card
   notifications(
@@ -73,6 +79,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 </template>
 
 <script setup lang="ts">
+import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
 import vuex from '@/vuex'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
@@ -92,6 +99,7 @@ import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
+import Popup from './components/popup/Popup.vue'
 import useStateInfo from './composable/useStateInfo'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
@@ -129,6 +137,8 @@ const bottomPanelComponent = computed(() => {
   switch (true) {
     case wantToQuit.value:
       return ModalTemplate
+    case vuex.state.user.showForceLogin:
+      return PanelLogin
     case showHomeTabs.value:
     case atSettings.value:
       return HomeTab
@@ -246,6 +256,19 @@ vConsole.setSwitchPosition(25, 80)
   transition:
     height 0.25s,
     opacity 0.25s;
+}
+
+.popup-area {
+  @apply z-popup;
+  @include size(100%, 100%);
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  pointer-events: none;
+  > div {
+    pointer-events: initial;
+  }
 }
 
 .modal-container {
