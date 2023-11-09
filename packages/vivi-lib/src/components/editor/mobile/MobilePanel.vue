@@ -39,7 +39,7 @@ div(class="mobile-panel"
           :class="{'insert-right': insertTheme}"
           @pointerdown.stop="rightButtonAction"
           @touchstart.stop="disableTouchEvent")
-  div(class="mobile-panel__bottom-section")
+  div(class="mobile-panel__bottom-section" :style="`overflow-y: ${overflowY}`")
     tabs(v-if="innerTabs.label" theme="light"
       :tabs="innerTabs.label" v-model="innerTabIndex")
     keep-alive(:include="keepAlivePanels")
@@ -293,7 +293,10 @@ export default defineComponent({
     rightButtonAction(): () => void {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {}
-    }
+    },
+    overflowY(): string {
+      return this.insertTheme || this.fixSize || this.extraFixSizeCondition ? 'hidden' : 'scroll'
+    },
   },
   watch: {
     selectedLayerNum(newVal: number) {
@@ -584,7 +587,6 @@ export default defineComponent({
     grid-auto-columns: minmax(0, 1fr);
     width: 100%;
     height: 100%;
-    overflow-y: v-bind("insertTheme ? 'hidden' : 'scroll'");
     overflow-x: hidden;
     @include no-scrollbar;
     > *:last-child { // panel-* always take minmax(0, 1fr) grid layout.
