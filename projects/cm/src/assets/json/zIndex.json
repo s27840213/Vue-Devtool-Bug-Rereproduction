@@ -4,8 +4,9 @@
   "canvas",
   "modal-mask",
   "bottom-panel",
-  "img-selector",
   "asset-panel",
+  "popup",
+  "img-selector",
   "tutorial-highlight",
   "tutorial-overlay",
   "highest"

@@ -46,9 +46,9 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'select' && option.key !== 'endpoint'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select" :key="sel.key"
+            :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }"
             @click="handleSelectInput(sel)")
-          img(:src="sel.img"
-              :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }")
+          img(:src="sel.img")
           pro-item(v-if="sel.plan" theme="roundedRect")
       //- Option type range
       mobile-slider(v-if="option.type === 'range'"
@@ -96,7 +96,6 @@ import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
@@ -306,7 +305,9 @@ export default defineComponent({
     @include no-scrollbar;
     display: grid;
     gap: 10px;
-    margin: 0 15px 15px 15px;
+    @include not(cm) {
+      margin: 0 15px 15px 15px;
+    }
     overflow-y: scroll;
   }
 
@@ -345,10 +346,17 @@ export default defineComponent({
       box-sizing: border-box;
       height: 42px;
       border-radius: 5px;
-      background-color: setColor(gray-5);
+      @include setColors(gray-5, black-3) using ($color) {
+        background-color: $color;
+      }
       &.selected {
         @include setColors(blue-1, white) using ($color) {
-          @include selection-border(2px, $color);
+          background-color: $color;
+        } 
+        & > span {
+          @include setColors(white, black-1) using ($color) {
+            color: $color;
+          }
         }
       }
       > img {
@@ -368,21 +376,23 @@ export default defineComponent({
       width: 100%;
       height: 0;
       padding-top: 100%;
+      border-radius: 4px;
+      transition: all 0.3s;
+      @include setColors(gray-5, black-3) using ($color) {
+        background-color: $color;
+      }
+      &.selected {
+        @include setColors(blue-1, white) using ($color) {
+          @include selection-border(2px, $color);
+        }
+      }
       > img:not(.pro) {
-        @include selection-border(1px, gray-5);
         position: absolute;
         width: 100%;
         height: 100%;
         object-fit: cover;
         top: 0;
-        border-radius: 4px;
-        transition: all 0.3s;
         pointer-events: none;
-        &.selected {
-          @include setColors(blue-1, white) using ($color) {
-            @include selection-border(2px, $color);
-          }
-        }
       }
       .pro {
         top: 2px;

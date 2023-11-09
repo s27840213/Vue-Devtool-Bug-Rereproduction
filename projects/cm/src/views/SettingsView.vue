@@ -33,7 +33,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] box-bor
           v-for="(data, index) in supportOptions"
           :key="index"
           :title="data.title"
-          :iconName="data.iconName")
+          :iconName="data.iconName"
+          @click="data.callback")
       div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
         div(class="w-full box-border py-4 border-b-[1px] border-primary-white")
           span(class="typo-h6") {{ $t('CM0040') }}
@@ -73,6 +74,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] box-bor
 </template>
 <script setup lang="ts">
 import { useGlobalStore } from '@/stores/global';
+import vuex from '@/vuex';
 import useI18n from '@nu/vivi-lib/i18n/useI18n';
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils';
 import { storeToRefs } from 'pinia';
@@ -199,7 +201,9 @@ const supportOptions: Array<IFunctionBarData> = [
     title: t('CM0037'),
     iconName: 'user-cycle',
     callback: () => {
-      setCurrState('account')
+      // if not login
+      vuex.commit('user/setShowForceLogin', true)
+      // setCurrState('account')
     },
   },
   {
