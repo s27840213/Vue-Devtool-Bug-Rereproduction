@@ -1,4 +1,4 @@
-import { ColorSlip } from '@/types/color'
+import type { ColorSlip } from '@/types/color'
 import { defineStore } from 'pinia'
 
 export interface IActionSheetBtn {
