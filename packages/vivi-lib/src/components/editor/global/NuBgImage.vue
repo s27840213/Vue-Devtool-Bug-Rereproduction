@@ -467,8 +467,9 @@ export default defineComponent({
     },
     stylesConverter(): { [key: string]: string } {
       return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
+        // use Math.ceil fro solving sub-pixel-rendering error
+        width: `${Math.ceil(this.imageSize.width)}px`,
+        height: `${Math.ceil(this.imageSize.height)}px`,
         transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${this.flipStyles.transform}`
       }
     },
