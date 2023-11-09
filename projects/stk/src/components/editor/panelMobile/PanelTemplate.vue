@@ -42,7 +42,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabInCategory: 'assetPanel/getIsInCategory',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
 

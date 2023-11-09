@@ -177,7 +177,7 @@ export default defineComponent({
       }
     },
     handleToggleConfig() {
-      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
+      if (!paymentUtils.checkProApp({ plan: 1 }, 'brandkit')) return
       if (!this.isConfigOpen) {
         this.isConfigOpen = true
         this.refreshFontSizeBuffer()

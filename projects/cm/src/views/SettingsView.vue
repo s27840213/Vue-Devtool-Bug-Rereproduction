@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
+div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] box-border px-24")
   headerbar
     template(#left)
       back-btn(:customCallback="handleBackAction")
@@ -7,8 +7,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
       span(class="typo-h5 text-app-text-secondary") {{ headerbarTitle }}
     template(#right)
   div(
-    v-if="showInitOptions"
-    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] pt-10 overflow-scroll scrollbar-hide"
+    v-show="showInitOptions"
+    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] gap-16 pt-10 overflow-scroll scrollbar-hide"
     ref="scrollContainer")
     div(
       class="w-full box-border p-24 rounded-[20px] flex flex-col items-center justify-between gap-16 gradient--yellow")
@@ -24,43 +24,15 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         :hasIcon="true"
         iconName="crown"
         :full="true") {{ $t('CM0032') }}
-    div(class="flex flex-col")
-      div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
-          span(class="typo-h6") {{ $t('CM0036') }}
+    div(class="flex flex-col gap-16 text-app-btn-primary-text text-left typo-h6")
+      template(v-for="op in initOptions" :key="op.title")
         function-bar(
-          v-for="(data, index) in supportOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName")
-      div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
-          span(class="typo-h6") {{ $t('CM0040') }}
-        function-bar(
-          v-for="(data, index) in mediaOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName"
-          @click="data.callback")
-      div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
-          span(class="typo-h6") {{ $t('CM0043') }}
-        function-bar(
-          v-for="(data, index) in aboutOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName"
-          @click="data.callback")
-        span(class="text-primary-lighter typo-body-sm text-center" @click="handleDebugMode") {{ `1.0/1.0/ v.${buildNumber} ${domain}` }}
-      div(v-if="debugMode" class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        function-bar(
-          v-for="(data, index) in debugOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName"
-          @click="data.callback")
-        //- span(class="panel-vvstk-more__option-title version") {{ `${userInfo.appVer}/${userInfo.osVer}/${userInfo.modelName} ${buildNumber}${domain} ${hostId}` }}
-  div(v-else-if="showDomainOptions")
+          v-if="op.iconName"
+          :title="op.title"
+          :iconName="op.iconName"
+          @click="op.callback")
+        span(v-else :class="op.class") {{ op.title }}
+  div(v-if="showDomainOptions")
     div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
       function-bar(
         v-for="(data, index) in domainOptions"
@@ -71,9 +43,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         @click="data.action")
 </template>
 <script setup lang="ts">
-import { useGlobalStore } from '@/stores/global'
-import cmWVUtils from '@/utils/cmWVUtils'
-import { storeToRefs } from 'pinia'
+import { useGlobalStore } from '@/stores/global';
+import vuex from '@/vuex';
+import useI18n from '@nu/vivi-lib/i18n/useI18n';
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils';
+import { storeToRefs } from 'pinia';
 
 const scrollContainer = ref<HTMLElement | null>(null)
 
@@ -120,6 +94,20 @@ const domainOptions = computed((): OptionConfig[] => {
         cmWVUtils.switchDomain('localhost:8080')
       },
     },
+    {
+      title: 'localhost:8081',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8081')
+      },
+    },
+    {
+      title: 'localhost:8082',
+      iconName: 'global',
+      action: () => {
+        cmWVUtils.switchDomain('localhost:8082')
+      },
+    },
     ...Array(6)
       .fill(1)
       .map((_, index) => {
@@ -163,19 +151,44 @@ const headerbarTitle = computed(() => {
 const handleBackAction = () => {
   if (showInitOptions.value) {
     router.push({ name: 'MyDesign' })
-  } else if (showLanguageOptions.value) {
-    setCurrState('')
-  } else if (showDomainOptions.value) {
+  } else if (currState.value) {
     setCurrState('')
   }
+}
+// #endregion
+
+// #region debugMode section
+const globalStore = useGlobalStore()
+const { setDebugMode } = globalStore
+const { debugMode } = storeToRefs(globalStore)
+
+const debugModeTimer = ref(-1)
+const debugModeCounter = ref(0)
+
+const handleDebugMode = () => {
+  if (debugModeTimer.value) {
+    clearTimeout(debugModeTimer.value)
+  }
+  debugModeCounter.value++
+  if (debugModeCounter.value === 7) {
+    setDebugMode(!debugMode.value)
+    nextTick(() => {
+      scrollContainer.value?.scrollTo(0, scrollContainer.value.scrollHeight)
+    })
+  }
+  debugModeTimer.value = window.setTimeout(() => {
+    debugModeCounter.value = 0
+    debugModeTimer.value = -1
+  }, 1000)
 }
 // #endregion
 
 // #region init options
 interface IFunctionBarData {
   title: string
-  iconName: string
-  callback: () => void
+  class?: string
+  iconName?: string
+  callback?: () => void
 }
 
 const supportOptions: Array<IFunctionBarData> = [
@@ -183,7 +196,9 @@ const supportOptions: Array<IFunctionBarData> = [
     title: t('CM0037'),
     iconName: 'user-cycle',
     callback: () => {
-      setCurrState('account')
+      // if not login
+      vuex.commit('user/setShowForceLogin', true)
+      // setCurrState('account')
     },
   },
   {
@@ -259,32 +274,20 @@ const debugOptions: Array<IFunctionBarData> = [
     },
   },
 ]
-// #endregion
 
-// #region debugMode section
-const globalStore = useGlobalStore()
-const { setDebugMode } = globalStore
-const { debugMode } = storeToRefs(globalStore)
-
-const debugModeTimer = ref(-1)
-const debugModeCounter = ref(0)
-
-const handleDebugMode = () => {
-  if (debugModeTimer.value) {
-    clearTimeout(debugModeTimer.value)
-  }
-  debugModeCounter.value++
-  if (debugModeCounter.value === 7) {
-    setDebugMode(!debugMode.value)
-    nextTick(() => {
-      scrollContainer.value?.scrollTo(0, scrollContainer.value.scrollHeight)
-    })
-  }
-  debugModeTimer.value = window.setTimeout(() => {
-    debugModeCounter.value = 0
-    debugModeTimer.value = -1
-  }, 1000)
-}
+const segmentTitleStyle = 'py-4 border-0 border-b-[1px] border-solid border-app-slider-bg'
+const initOptions: Array<IFunctionBarData> = [
+  { title: t('CM0036'), class: segmentTitleStyle },
+  ...supportOptions,
+  { title: t('CM0040'), class: segmentTitleStyle },
+  ...mediaOptions,
+  { title: t('CM0043'), class: segmentTitleStyle },
+  ...aboutOptions, {
+    title: `1.0/1.0/ v.${buildNumber.value} ${domain}`, // Debug info
+    class: 'typo-body-sm text-center text-primary-lighter py-10',
+    callback: handleDebugMode
+  }, ...debugOptions,
+]
 // #endregion
 </script>
 <style scoped lang="scss">

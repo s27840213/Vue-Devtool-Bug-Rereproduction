@@ -4,8 +4,8 @@ div(class="panel-photo")
     :style="searchBarStyle()"
     :placeholder="$t('NN0092', {target: $tc('NN0002',1)})"
     clear
-    :vivisticker="$isStk ? 'dark' : undefined"
-    :color="$isStk ? {close: 'black-5', search: 'black-5'} : undefined"
+    :vivisticker="$isStk || $isCm ? 'dark' : undefined"
+    :color="$isStk || $isCm ? {close: 'black-5', search: 'black-5'} : undefined"
     :defaultKeyword="keyword"
     @search="handleSearch")
   div(v-if="keyword && !pending && !searchResult.length"

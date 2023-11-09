@@ -1,4 +1,4 @@
-import vuex from '@nu/vivi-lib/store/index'
+import vuex from '@nu/vivi-lib/store'
 
 // store.registerModule('homeTemplate', homeTemplate)
 // store.registerModule('design', design)

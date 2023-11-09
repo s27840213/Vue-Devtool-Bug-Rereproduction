@@ -30,7 +30,6 @@ import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemov
 import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.vue'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
-import mobilePanelMixin from '@nu/vivi-lib/mixin/mobilePanel'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import formatUtils from '@nu/vivi-lib/utils/formatUtils'
@@ -44,7 +43,6 @@ import { mapMutations } from 'vuex'
 
 export default defineComponent({
   extends: MobilePanel,
-  mixins: [mobilePanelMixin],
   components: {
     PanelTemplate,
     PanelPhoto,

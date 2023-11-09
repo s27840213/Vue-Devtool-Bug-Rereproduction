@@ -1,8 +1,13 @@
-[  
+[
+  "lowest",
+  "page",
+  "canvas",
   "modal-mask",
   "bottom-panel",
+  "asset-panel",
+  "popup",
   "img-selector",
-  "page",
   "tutorial-highlight",
-  "tutorial-overlay"
+  "tutorial-overlay",
+  "highest"
 ]

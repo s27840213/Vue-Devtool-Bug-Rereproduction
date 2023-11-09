@@ -1,4 +1,6 @@
 {
+  // For organizeImports without adding comma.
+  "typescript.format.semicolons": "remove",
   // For formatter.
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {

@@ -310,9 +310,28 @@
   }
 }
 
+@mixin app($appNames...) {
+  @for $i from 1 through length($appNames) {
+    *:where(.app-#{nth($appNames, $i)}) & {
+      @content;
+    }
+  }
+}
+
+@mixin not($notAppName) {
+  $appNames : pic, stk, cm;
+  @for $i from 1 through length($appNames) {
+    @if (nth($appNames, $i) != $notAppName) {
+      *:where(.app-#{nth($appNames, $i)}) & {
+        @content;
+      }
+    }
+  }
+}
+
 @mixin setColors($picColor,
   $stkColor: $picColor,
-  $cmColor: $picColor,
+  $cmColor: $stkColor,
   $opacity: 1,
   $picOpacity: $opacity,
   $stkOpacity: $opacity,

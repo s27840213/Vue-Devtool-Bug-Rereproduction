@@ -2,51 +2,51 @@
 div(class="panel-nudge text-left")
   div(class="panel-nudge__top-section")
     span(class="body-XS"
-      :class="$isStk ? 'text-white' : ''") {{ $t('NN0888') }}
+      :class="$isStk || $isCm ? 'text-white' : ''") {{ $t('NN0888') }}
     slide-toggle(:options="options"
       v-model="currOption"
-      :bgColor="$isStk ? 'black-3-5' : 'gray-6'"
+      :bgColor="$isStk || $isCm ? 'black-3-5' : 'gray-6'"
       :switchColor="'white'"
-      :activeColor="$isStk ? 'black-2' : 'blue-1'"
-      :inActiveColor="$isStk ? 'white' : 'gray-2'"
+      :activeColor="$isStk || $isCm ? 'black-2' : 'blue-1'"
+      :inActiveColor="$isStk || $isCm ? 'white' : 'gray-2'"
       :optionWidth="'50px'"
       :optionHeight="'30px'"
       textSize="caption-MD")
   div(class="panel-nudge__content")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk || $isCm ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('left')"
         @contextmenu.prevent)
       svg-icon(
         :iconName="'left-arrow'"
-        :iconColor="$isStk ? 'white' : 'gray-2'"
+        :iconColor="$isStk || $isCm ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk || $isCm ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('up')"
         @contextmenu.prevent)
       svg-icon(
         :style="{transform: 'rotate(90deg)'}"
         :iconName="'left-arrow'"
-        :iconColor="$isStk ? 'white' : 'gray-2'"
+        :iconColor="$isStk || $isCm ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk || $isCm ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('down')"
         @contextmenu.prevent)
       svg-icon(
         :style="{transform: 'rotate(-90deg)'}"
         :iconName="'left-arrow'"
-        :iconColor="$isStk ? 'white' : 'gray-2'"
+        :iconColor="$isStk || $isCm ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
     div(class="panel-nudge__btn"
-        v-tap-animation="{'bgColor': $isStk ? 'black-5' : 'blue-3'}"
+        v-tap-animation="{'bgColor': $isStk || $isCm ? 'black-5' : 'blue-3'}"
         @pointerdown="moveStepping('right')"
         @contextmenu.prevent)
       svg-icon(
         :style="{transform: 'rotate(180deg)'}"
         :iconName="'left-arrow'"
-        :iconColor="$isStk ? 'white' : 'gray-2'"
+        :iconColor="$isStk || $isCm ? 'white' : 'gray-2'"
         :iconWidth="'24px'")
 </template>
 

@@ -25,8 +25,10 @@
     "rootDir": "../../",
     "baseUrl": ".",
     "paths": {
-      "@i18n/*": [
-        "./src/i18n/shaked/*"
+      "//": ["Write @nu/vivi-lib/ paths before @/ for import auto complete."],
+      "@nu/vivi-lib/*": [
+        "../../packages/vivi-lib/src/*",
+        "../../packages/vivi-lib/src/index"
       ],
       "@/*": [
         "./src/*",
@@ -38,9 +40,14 @@
       "@nu/shared-lib": [
         "../../packages/shared-lib/src/index"
       ],
-      "@nu/vivi-lib/*": [
-        "../../packages/vivi-lib/src/*",
-        "../../packages/vivi-lib/src/index"
+      "@i18n/*": [
+        "./src/i18n/shaked/*"
+      ],
+      "@img/*": [
+        "../../packages/vivi-lib/src/assets/img/*"
+      ],
+      "@json/*": [
+        "../../packages/vivi-lib/src/assets/json/*"
       ]
     },
     "types": [
