@@ -4,7 +4,8 @@
     "src/**/*.vue",
     "src/**/*.json",
     "../shared-lib/src/**/*.vue",
-    "../shared-lib/src/**/*.ts"
+    "../shared-lib/src/**/*.ts",
+    "../../projects/cm/src/stores/actionSheet.ts"
   ],
   "exclude": [
     "src/**/__tests__/*"
@@ -32,8 +33,12 @@
       "@nu/shared-lib": [
         "../shared-lib/src/index"
       ],
-      "@img/*": ["./src/assets/img/*"],
-      "@json/*": ["./src/assets/json/*"]
+      "@img/*": [
+        "./src/assets/img/*"
+      ],
+      "@json/*": [
+        "./src/assets/json/*"
+      ]
     },
     "types": [
       "vite/client"

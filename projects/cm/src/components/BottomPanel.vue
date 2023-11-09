@@ -11,7 +11,7 @@ div(class="bottom-panel tutorial-powerful-fill-4--highlight" ref="bottomPanelRef
  * Here pass setSlotRef to the parent
  * and parent use setSlotRef to pass the ref here
  */
-import { useElementBounding } from '@vueuse/core';
+import { useElementBounding } from '@vueuse/core'
 
 const bottomPanelRef = ref<HTMLElement | null>(null)
 const slotRef = ref<HTMLElement | null>(null)
@@ -34,6 +34,6 @@ watch(
 <style lang="scss">
 .bottom-panel {
   @apply bg-app-tab-bg w-full rounded-t-[24px] box-border py-16;
-  transition: height 0.3s;
+  transition: all 0.3s;
 }
 </style>

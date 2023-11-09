@@ -81,6 +81,9 @@ export const useEditorStore = defineStore('editor', {
     isInEditorLastStep(): boolean {
       return stepsUtils.isInLastStep
     },
+    currGeneratedResults(): { id: string; url: string } {
+      return this.generatedResults[this.currGenResultIndex]
+    },
   },
   actions: {
     setPageSize(width: number, height: number) {

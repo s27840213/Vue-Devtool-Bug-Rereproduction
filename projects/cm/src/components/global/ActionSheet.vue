@@ -1,0 +1,43 @@
+<template lang="pug">
+div(class="action-sheet")
+  div(class="bg-app-tab-bg flex flex-col rounded-lg")
+    div(
+      v-for="(action, index) in primaryActions"
+      :key="index"
+      class="flex flex-col justify-center items-center p-16 box-border border-style gap-8"
+      @click="action.cb")
+      span(
+        v-for="(label, index) in action.labels"
+        :key="index"
+        :class="`text-${label.labelColor} ${label.labelSize}`") {{ label.label }}
+  div(class="bg-app-tab-bg flex flex-col rounded-lg")
+    div(
+      v-for="(action, index) in secondaryActions"
+      :key="index"
+      class="flex flex-col justify-center items-center p-16 box-border"
+      @click="action.cb")
+      span(
+        v-for="(label, index) in action.labels"
+        :key="index"
+        :class="`text-${label.labelColor} ${label.labelSize}`") {{ label.label }}
+</template>
+<script setup lang="ts">
+import type { IActionSheetBtn } from '@/stores/actionSheet'
+
+const props = defineProps<{
+  primaryActions: Array<IActionSheetBtn>
+  secondaryActions: Array<IActionSheetBtn>
+}>()
+</script>
+<style lang="scss" scoped>
+.action-sheet {
+  @apply w-full flex flex-col gap-20 overflow-hidden box-border;
+  // border: 1px solid red;
+  // border-radius: 8px;;;
+}
+
+.border-style {
+  @apply border-b-app-tab-disable border-solid border-0 border-b-[0.5px] border-opacity-50;
+  @apply last:border-b-0;
+}
+</style>
