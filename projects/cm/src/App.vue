@@ -34,7 +34,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(
+  bottom-panel(v-if="!atEventTester && !isDuringCopy"
     class="z-bottom-panel row-start-3 row-end-4"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
     :style="disableBtmPanelTransition ? 'transition: none' : ''")
@@ -127,6 +127,7 @@ const {
   atMyDesign,
   atSettings,
   atMainPage,
+  atEventTester,
   showImgSelector,
   inGenResultState,
   inSavingState,
@@ -177,6 +178,7 @@ const closeModal = () => {
 
 // #region mobile panel
 const store = useStore()
+const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const currColorEvent = ref('')
 const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
@@ -242,6 +244,14 @@ onBeforeUnmount(() => {
 
 // const vConsole = new VConsole({ theme: 'dark' })
 // vConsole.setSwitchPosition(25, 80)
+
+// watch(isDuringCopy, (newVal) => {
+//   if (newVal) {
+//     vConsole.hideSwitch()
+//   } else {
+//     vConsole.showSwitch()
+//   }
+// })
 
 // #region action sheet
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()

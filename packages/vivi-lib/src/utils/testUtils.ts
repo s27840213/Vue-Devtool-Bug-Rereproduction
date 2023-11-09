@@ -1,16 +1,20 @@
-import { IText } from '@nu/vivi-lib/interfaces/layer'
-import { IPage } from '@nu/vivi-lib/interfaces/page'
 import store from '@/store'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import groupUtils from '@nu/vivi-lib/utils/groupUtils'
-import layerUtils from '@nu/vivi-lib/utils/layerUtils'
-import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import textPropUtils from '@nu/vivi-lib/utils/textPropUtils'
-import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { notify } from '@kyvg/vue3-notification'
+import { IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textUtils from '@/utils/textUtils'
 import { cloneDeep } from 'lodash'
 import { nextTick } from 'vue'
+
+window.testEvent = () => {
+  window.location.pathname = 'nativeevttest'
+}
 
 class TestUtils {
   toShowTouchPoint: boolean
