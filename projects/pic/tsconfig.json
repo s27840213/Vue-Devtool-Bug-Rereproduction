@@ -58,8 +58,10 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "../../packages/vivi-lib/src/**/*.vue",
+    "../../packages/vivi-lib/src/**/*.ts",
+    "../../packages/shared-lib/src/**/*.vue",
+    "../../packages/shared-lib/src/**/*.ts"
   ],
   "exclude": [
     "node_modules"

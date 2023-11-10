@@ -1,6 +1,11 @@
 <template lang="pug">
-div(v-show="modalInfo.imgSrc ? isImgLoaded : show" class="modal-card" :style="modalInfo.cardStyle")
-  div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
+div(v-show="modalInfo.imgSrc ? isImgLoaded : show"
+  class="modal-card"
+  :class="classes.bg"
+  :style="modalInfo.cardStyle")
+  div(v-if="modalInfo.title"
+    class="modal-card__row modal-card__title"
+    :class="classes.title")
     span {{modalInfo.title}}
   div(v-if="modalInfo.imgSrc" class="modal-card__image")
     div(v-if="modalInfo.imgSrc" class="modal-card__image__container")
@@ -9,7 +14,7 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : show" class="modal-card" :style="mo
         :iconName="'photo'"
         :iconColor="'white'"
         :iconWidth="'48px'")
-  div(v-if="modalInfo.content" class="modal-card__text body-SM text-gray-2")
+  div(v-if="modalInfo.content" class="modal-card__text" :class="classes.desc")
     template(v-if="!pending")
       span(v-for="text in modalInfo.content"
       :key="text"
@@ -28,16 +33,16 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : show" class="modal-card" :style="mo
       :iconWidth="'60px'")
   template(v-if='!pending')
     div(class="modal-card__row modal-card__button")
-      button(class="btn-primary-mid full-width"
-        :class="modalInfo.confirmButton.class"
+      button(class="full-width"
+        :class="`${classes.btn} ${modalInfo.confirmButton.class ?? ''}`"
         :style="modalInfo.confirmButton.style"
         @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
       button(v-if="modalInfo.cancelButton.msg"
-        class="btn-primary-mid full-width"
-        :class="modalInfo.cancelButton.class"
+        class="full-width"
+        :class="`${classes.btn} ${modalInfo.cancelButton.class ?? ''}`"
         :style="modalInfo.cancelButton.style"
         @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
-    div(v-if="!modalInfo.noClose && !modalInfo.noCloseIcon" class="modal-card__close")
+    div(v-if="!$isCm && !modalInfo.noClose && !modalInfo.noCloseIcon" class="modal-card__close")
       svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
               :iconColor="$isPic ? 'gray-2' : 'gray-3'" @click="closePopup()")
 </template>
@@ -62,7 +67,7 @@ export default defineComponent({
   },
   data: () => {
     return {
-      isImgLoaded: false
+      isImgLoaded: false,
     }
   },
   computed: {
@@ -70,6 +75,21 @@ export default defineComponent({
       _modalInfo: 'modal/getModalInfo',
       pending: 'modal/getIsPending'
     }),
+    classes() {
+      if (this.$isCm) return {
+        bg: 'bg-app-tab-bg',
+        title: 'text-H4 text-app-tab-active',
+        desc: 'body-MD text-app-text-secondary',
+        btn: 'bg-app-btn-primary-bg text-app-text-primary rounded-[50px]',
+      }
+
+      return {
+        bg: 'bg-white',
+        title: 'text-H6 text-gray-2 text-app-tab-active',
+        desc: 'body-SM text-gray-2',
+        btn: 'btn-primary-mid',
+      }
+    },
     modalInfo(): IModalInfo {
       return this.initModalInfo || this._modalInfo
     }
@@ -105,17 +125,23 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .modal-card {
+  @include not(cm) {
+    padding: 16px 30px;
+    border-radius: 10px;
+  }
+  @include cm {
+    padding: 24px;
+    border-radius: 20px;
+  }
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 24px;
   align-items: center;
-  background-color: white;
   width: 100%;
+  box-sizing: border-box;
   max-width: min(calc(100% - 80px), 500px);
   max-height: calc(100% - 80px);
-  padding-bottom: 16px;
-  border-radius: 10px;
   overflow-y: auto;
   &__close {
     position: absolute;
@@ -129,11 +155,6 @@ export default defineComponent({
   &__row {
     box-sizing: border-box;
     width: 100%;
-    padding: 0px 30px;
-  }
-
-  &__title {
-    margin-top: 16px;
   }
 
   &__image {
@@ -162,7 +183,6 @@ export default defineComponent({
   }
 
   &__text {
-    padding: 0px 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -205,9 +225,14 @@ export default defineComponent({
     justify-content: center;
     > button {
       @include btn-LG;
+      @include not(cm) {
+        border-radius: 10px;
+        max-width: 200px;
+      }
+      @include app(cm) {
+        border-radius: 50px;
+      }
       transition: background-color 0.3s;
-      border-radius: 10px;
-      max-width: 200px;
     }
     > button + button {
       margin-left: 20px;

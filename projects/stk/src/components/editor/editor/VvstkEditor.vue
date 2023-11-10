@@ -1,4 +1,5 @@
 <template lang="pug">
+<<<<<<< HEAD
 div(class="vvstk-editor" ref="editorView" :style="copyingStyles()"
   @pointerdown="selectStart"
   @pointerup="selectEnd"
@@ -6,6 +7,10 @@ div(class="vvstk-editor" ref="editorView" :style="copyingStyles()"
   @pointerleave="removePointer"
   v-touch)
   div(class="vvstk-editor__pages-container" :style="containerStyles()")
+=======
+div(class="vvstk-editor" ref="editorView" :style="copyingStyles()" @pointerdown="selectStart" v-touch)
+  div(v-show="!isInBgRemoveSection" class="vvstk-editor__pages-container" :style="containerStyles()")
+>>>>>>> 023d79b922f10ac1a9620a53b271e5388c41c518
     transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" @before-leave="handleBeforePageLeave" :css="animated")
       page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
                 :class="{'no-transition': currActivePageIndex < 0}"

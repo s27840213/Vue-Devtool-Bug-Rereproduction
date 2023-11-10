@@ -24,7 +24,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./src/*",
+        "./src/*"
       ],
       "@nu/shared-lib/*": [
         "../shared-lib/src/*"
@@ -32,8 +32,12 @@
       "@nu/shared-lib": [
         "../shared-lib/src/index"
       ],
-      "@img/*": ["./src/assets/img/*"],
-      "@json/*": ["./src/assets/json/*"]
+      "@img/*": [
+        "./src/assets/img/*"
+      ],
+      "@json/*": [
+        "./src/assets/json/*"
+      ]
     },
     "types": [
       "vite/client"

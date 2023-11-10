@@ -30,7 +30,7 @@ div(class="w-screen h-screen")
 </template>
 
 <script setup lang="ts">
-import useI18n from '@nu/vivi-lib/i18n/useI18n';
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 defineOptions({ name: 'powerful-fill-tutorial' })
 const emit = defineEmits(['nextStep'])

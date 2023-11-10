@@ -24,7 +24,7 @@ export default class SubControllerUtils {
   private _cursorDragEnd = null as unknown
   private initTranslate = { x: 0, y: 0 }
 
-  private get isControllerShown(): boolean { return this.primaryLayer.active && (!generalUtils.isStk || !store.getters['vivisticker/getControllerHidden']) }
+  private get isControllerShown(): boolean { return this.primaryLayer.active && (!generalUtils.isStk || !store.getters['webView/getControllerHidden']) }
   private get config(): ILayer { return this._config.config }
   private get primaryLayer(): IGroup | ITmp | IFrame { return this._config.primaryLayer }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
@@ -161,7 +161,7 @@ export default class SubControllerUtils {
     }
     if (generalUtils.isStk) {
       const isEmptClipInFrame = this.primaryLayer.type === LayerType.frame && (this.config as IImage).srcObj.type === 'frame' &&
-        !hasActualMove && !store.getters['vivisticker/getControllerHidden']
+        !hasActualMove && !store.getters['webView/getControllerHidden']
       const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image && this.primaryLayer.layers[this.subLayerIdx].type === 'frame' &&
         this.primaryLayer.active && (this.primaryLayer.layers[this.subLayerIdx] as IFrame).clips.length === 1 && (this.config as IImage).srcObj.type === 'frame'
       if (!hasActualMove && (isEmptClipInFrame || isEmptClipInGroup)) {

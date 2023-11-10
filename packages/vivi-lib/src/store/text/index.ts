@@ -2,11 +2,11 @@ import { IParagraph } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import router from '@/router'
 import store from '@/store'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -230,7 +230,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   const routeName = router.currentRoute.value.name
   const isInPreview = routeName === 'Preview'
   const isInScreenshot = routeName === 'Screenshot'
-  const isFonLoaded = generalUtils.isStk ? await stkWVUtils.checkFontLoaded(face) : false
+  const isFonLoaded = (generalUtils.isStk || generalUtils.isCm) ? await getAutoWVUtils().checkFontLoaded(face) : false
   const noArgo = 'https://template.vivipic.com/'
   const argo = 'https://media.vivipic.cc/'
   const isArgoAvailable = store.getters['text/getIsArgoAvailable']
@@ -241,8 +241,8 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) {
-          if (generalUtils.isStk) {
-            await stkWVUtils.recordLoadedFont(face)
+          if (generalUtils.isStk || generalUtils.isCm) {
+            await getAutoWVUtils().recordLoadedFont(face)
           }
           return cssUrl
         }
@@ -260,8 +260,8 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) {
-          if (generalUtils.isStk) {
-            await stkWVUtils.recordLoadedFont(face)
+          if (generalUtils.isStk || generalUtils.isCm) {
+            await getAutoWVUtils().recordLoadedFont(face)
           }
           return cssUrl
         }

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(
-  class="transition-colors duration-300 flex items-center justify-center px-16 py-8 rounded-[50px]"
+  class="transition-colors duration-300 flex items-center justify-center box-border px-16 py-8 rounded-[50px]"
   :class="`${btnColor} cm-btn__${theme} ${size ? `--${size}` : ''} ${full ? 'w-full' : 'w-fit'}`"
   ref="btnRef"
   @click="handleClick"
@@ -17,9 +17,9 @@ div(
 
 <script setup lang="ts">
 // https://www.figma.com/file/nO7n8qAcowXguD9znn1JGt/AI-PhotoEditor?node-id=378%3A168384&mode=dev
-import useTapTransition from '@/composable/useTapTransition';
 import { useColorStore } from '@/stores/color';
 import type { INubtnSize, INubtnState, INubtnThemes } from '@/types/btn';
+import useTapTransition from '@nu/vivi-lib/composable/useTapTransition';
 import { computed } from 'vue';
 
 // #region static

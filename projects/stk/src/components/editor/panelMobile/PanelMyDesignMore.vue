@@ -43,7 +43,9 @@ import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign, ITempDesign } from '@nu/vivi-lib/interfaces/vivisticker'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineComponent } from 'vue'
@@ -76,7 +78,7 @@ export default defineComponent({
       addDesign: 'vivisticker/UPDATE_addDesign'
     }),
     handleEdit() {
-      if (this.myDesignBuffer.type === 'object' && !stkWVUtils.checkPro(this.myDesignBuffer.assetInfo, this.myDesignBuffer.assetInfo.isFrame ? 'frame' : 'object')) return
+      if (this.myDesignBuffer.type === 'object' && !paymentUtils.checkProApp(this.myDesignBuffer.assetInfo, undefined, this.myDesignBuffer.assetInfo.isFrame ? 'frame' : 'object')) return
       const mydesign = generalUtils.deepCopy(this.myDesignBuffer)
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {
@@ -87,7 +89,7 @@ export default defineComponent({
               page.layers.forEach(l => {
                 l.initFromMydesign = true
               })
-              stkWVUtils.initLoadingFlags(page, () => {
+              layerUtils.initLoadingFlags(page, () => {
                 stkWVUtils.handleFrameClipError(page, true)
               })
             }
@@ -126,7 +128,7 @@ export default defineComponent({
               page.layers.forEach(l => {
                 l.initFromMydesign = true
               })
-              stkWVUtils.initLoadingFlags(page, () => {
+              layerUtils.initLoadingFlags(page, () => {
                 stkWVUtils.handleFrameClipError(page, true)
               })
             },

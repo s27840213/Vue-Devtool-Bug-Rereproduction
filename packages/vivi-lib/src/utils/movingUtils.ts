@@ -51,7 +51,7 @@ export class MovingUtils {
   private get scaleRatio(): number { return store.getters.getPageScaleRatio }
   private get currHoveredPageIndex(): number { return store.getters.getCurrHoveredPageIndex }
   private get isActive(): boolean { return this.config.active }
-  private get isControllerShown(): boolean { return this.isActive && (!generalUtils.isStk || !store.getters['vivisticker/getControllerHidden']) }
+  private get isControllerShown(): boolean { return this.isActive && (!generalUtils.isStk || !store.getters['webView/getControllerHidden']) }
   private get getLayerType(): string { return this.config.type }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }

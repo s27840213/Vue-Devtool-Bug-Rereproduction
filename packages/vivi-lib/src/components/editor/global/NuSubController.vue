@@ -198,11 +198,7 @@ export default defineComponent({
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
-    }),
-    ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false
-    }, {
-      controllerHidden: 'vivisticker/getControllerHidden'
+      controllerHidden: 'webView/getControllerHidden'
     }),
     isControllerShown(): boolean {
       return this.config?.active && !this.controllerHidden

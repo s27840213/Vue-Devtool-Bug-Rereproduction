@@ -22,13 +22,14 @@ div(class="panel-objects rwd-container")
 </template>
 
 <script lang="ts">
-import PanelObjectGifs from '@/components/editor/panelMobile/PanelObjectGifs.vue'
-import PanelObjectStatic from '@/components/editor/panelMobile/PanelObjectStatic.vue'
 import Tabs from '@/components/Tabs.vue'
 import { CCategoryList } from '@/components/category/CategoryList.vue'
+import PanelObjectGifs from '@/components/editor/panelMobile/PanelObjectGifs.vue'
+import PanelObjectStatic from '@/components/editor/panelMobile/PanelObjectStatic.vue'
 import i18n from '@/i18n'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import modalUtils from '@/utils/modalUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -65,9 +66,13 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabInCategory: 'assetPanel/getIsInCategory',
+      currActiveObjectFavTab: 'assetPanel/getCurrActiveObjectFavTab',
+    }),
+    ...vuexUtils.mapGetters('stk', {
+      isInEditor: true,
+    }, {
       isInEditor: 'vivisticker/getIsInEditor',
-      currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
     }),
     tabs() {
       return this.isInEditor ? [this.$t('NN0758'), this.$t('NN0759')] : [this.$t('NN0758'), 'GIFs', this.$t('NN0759')]
@@ -86,7 +91,7 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setCurrActiveObjectFavTab: 'vivisticker/SET_currActiveObjectFavTab'
+      setCurrActiveObjectFavTab: 'assetPanel/SET_currActiveObjectFavTab'
     }),
     scrollToTop() {
       if (this.isStatic || this.isFavoritesStatic) {

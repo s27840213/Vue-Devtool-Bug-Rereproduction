@@ -1,16 +1,19 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
+div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] box-border px-24")
   headerbar
     template(#left)
       back-btn(:customCallback="handleBackAction")
     template(#middle)
       span(class="typo-h5 text-app-text-secondary") {{ headerbarTitle }}
     template(#right)
+  //- Use v-for and v-show to keep scroll position when state switch.
   div(
-    v-if="showInitOptions"
-    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] pt-10 overflow-scroll scrollbar-hide"
-    ref="scrollContainer")
+    v-for="[cKey, config] in Object.entries(configs)"
+    v-show="cKey === currState"
+    :key="cKey"
+    class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] gap-16 py-10 overflow-scroll scrollbar-hide")
     div(
+      v-show="showInitOptions"
       class="w-full box-border p-24 rounded-[20px] flex flex-col items-center justify-between gap-16 gradient--yellow")
       div(class="w-full h-full flex items-center justify-between")
         div(class="flex flex-col items-start justify-between gap-12")
@@ -24,131 +27,75 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] px-24")
         :hasIcon="true"
         iconName="crown"
         :full="true") {{ $t('CM0032') }}
-    div(class="flex flex-col")
-      div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
-          span(class="typo-h6") {{ $t('CM0036') }}
+    div(class="flex flex-col gap-16 text-app-btn-primary-text text-left typo-h6")
+      template(v-for="op in config" :key="op.title")
         function-bar(
-          v-for="(data, index) in supportOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName")
-      div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
-          span(class="typo-h6") {{ $t('CM0040') }}
-        function-bar(
-          v-for="(data, index) in mediaOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName"
-          @click="data.callback")
-      div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        div(class="w-full py-4 border-b-[1px] border-primary-white")
-          span(class="typo-h6") {{ $t('CM0043') }}
-        function-bar(
-          v-for="(data, index) in aboutOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName"
-          @click="data.callback")
-        span(class="text-primary-lighter typo-body-sm text-center" @click="handleDebugMode") {{ `1.0/1.0/ v.${buildNumber} ${domain}` }}
-      div(v-if="debugMode" class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-        function-bar(
-          v-for="(data, index) in debugOptions"
-          :key="index"
-          :title="data.title"
-          :iconName="data.iconName"
-          @click="data.callback")
-        //- span(class="panel-vvstk-more__option-title version") {{ `${userInfo.appVer}/${userInfo.osVer}/${userInfo.modelName} ${buildNumber}${domain} ${hostId}` }}
-  div(v-else-if="showDomainOptions")
-    div(class="text-app-btn-primary-text text-left flex flex-col gap-16 mt-20")
-      function-bar(
-        v-for="(data, index) in domainOptions"
-        :key="index"
-        :title="data.title"
-        :iconName="data.iconName"
-        :active="data.title.includes(hostname)"
-        @click="data.action")
+          v-if="op.iconName"
+          :title="op.title"
+          :iconName="op.iconName"
+          :active="op.selected"
+          :class="op.class"
+          @click="op.callback")
+        span(v-else :class="op.class" @click="op.callback") {{ op.title }}
 </template>
+
 <script setup lang="ts">
-import { useGlobalStore } from '@/stores/global';
-import cmWVUtils from '@/utils/cmWVUtils';
-import useI18n from '@nu/vivi-lib/i18n/useI18n';
-import { storeToRefs } from 'pinia';
+import { useGlobalStore } from '@/stores/global'
+import vuex from '@/vuex'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import { storeToRefs } from 'pinia'
 
-const scrollContainer = ref<HTMLElement | null>(null)
+interface IOptionConfig {
+  title: string
+  class?: string
+  iconName?: string // Feature-bar has an iconName, while span does not.
+  selected?: boolean
+  callback?: () => void
+}
 
-const { t } = useI18n()
+const { t, tc } = useI18n()
 const router = useRouter()
 const hostname = window.location.hostname
 // #region userInfo
-const domain = `${window.location.hostname.replace('.vivipic.com', '')}`
+const domain = `${hostname.replace('.vivipic.com', '')}`
 const buildNumber = computed(() => {
   const { VUE_APP_BUILD_NUMBER: buildNumber } = import.meta.env
   return buildNumber ? `v.${buildNumber}` : 'local'
 })
 
-type OptionConfig = {
-  title: string
-  iconName: string
-  action?: () => void
-  selected?: () => boolean
-}
-
-const domainOptions = computed((): OptionConfig[] => {
-  return [
-    // {
-    //   title: 'production',
-    //   iconName: 'global',
-    //   selected: () => {
-    //     return window.location.hostname === 'sticker.vivipic.com'
-    //   },
-    //   action: () => {
-    //     // this.switchDomain('sticker')
-    //   },
-    // },
-    {
-      title: 'rd',
-      iconName: 'global',
-      action: () => {
-        cmWVUtils.switchDomain('https://cmrd.vivipic.com')
-      },
+const domainOptions = computed((): IOptionConfig[] => ([{
+  //   title: 'production',
+  //   iconName: 'global',
+  //   selected: () => {
+  //     return hostname === 'sticker.vivipic.com'
+  //   },
+  //   action: () => {
+  //     // this.switchDomain('sticker')
+  //   },
+  // }, {
+    title: 'rd',
+    iconName: 'global',
+    selected: hostname.includes('cmrd'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cmrd.vivipic.com')
     },
-    {
-      title: 'localhost:8080',
-      iconName: 'global',
-      action: () => {
-        cmWVUtils.switchDomain('localhost:8080')
-      },
+  }, ...Array(3).fill(1).map((_, index) => ({
+    title: `localhost:808${index}`,
+    iconName: 'global',
+    selected: hostname.includes(`localhost:808${index}`),
+    callback: () => {
+      cmWVUtils.switchDomain(`localhost:808${index}`)
     },
-    {
-      title: 'localhost:8081',
-      iconName: 'global',
-      action: () => {
-        cmWVUtils.switchDomain('localhost:8081')
-      },
+  })), ...Array(6).fill(1).map((_, index) => ({
+    title: `dev${index}`,
+    iconName: 'global',
+    selected: hostname.includes(`dev${index}`),
+    callback: () => {
+      cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
     },
-    {
-      title: 'localhost:8082',
-      iconName: 'global',
-      action: () => {
-        cmWVUtils.switchDomain('localhost:8082')
-      },
-    },
-    ...Array(6)
-      .fill(1)
-      .map((_, index) => {
-        const host = `dev${index}`
-        return {
-          title: host,
-          iconName: 'global',
-          action: () => {
-            cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
-          },
-        }
-      }),
-  ]
-})
+  })),
+]))
 // #endregion
 
 // #region settings state
@@ -178,26 +125,47 @@ const headerbarTitle = computed(() => {
 const handleBackAction = () => {
   if (showInitOptions.value) {
     router.push({ name: 'MyDesign' })
-  } else if (showLanguageOptions.value) {
-    setCurrState('')
-  } else if (showDomainOptions.value) {
+  } else if (currState.value) {
     setCurrState('')
   }
 }
 // #endregion
 
-// #region init options
-interface IFunctionBarData {
-  title: string
-  iconName: string
-  callback: () => void
-}
+// #region debugMode section
+const globalStore = useGlobalStore()
+const { setDebugMode } = globalStore
+const { debugMode } = storeToRefs(globalStore)
 
-const supportOptions: Array<IFunctionBarData> = [
+const debugModeTimer = ref(-1)
+const debugModeCounter = ref(0)
+
+const handleDebugMode = () => {
+  if (debugModeTimer.value) {
+    clearTimeout(debugModeTimer.value)
+  }
+  debugModeCounter.value++
+  if (debugModeCounter.value === 7) {
+    setDebugMode(!debugMode.value)
+    // Scroll debug options into view to ensure users are aware of it.
+    nextTick(() => {
+      document.querySelector('.debug-option')?.scrollIntoView({ behavior: 'smooth' })
+    })
+  }
+  debugModeTimer.value = window.setTimeout(() => {
+    debugModeCounter.value = 0
+    debugModeTimer.value = -1
+  }, 1000)
+}
+// #endregion
+
+// #region init options
+const supportOptions: Array<IOptionConfig> = [
   {
     title: t('CM0037'),
     iconName: 'user-cycle',
     callback: () => {
+      // if not login
+      vuex.commit('user/setShowForceLogin', true)
       setCurrState('account')
     },
   },
@@ -217,7 +185,7 @@ const supportOptions: Array<IFunctionBarData> = [
   },
 ]
 
-const mediaOptions: Array<IFunctionBarData> = [
+const mediaOptions: Array<IOptionConfig> = [
   {
     title: t('CM0041'),
     iconName: 'instagram',
@@ -234,7 +202,7 @@ const mediaOptions: Array<IFunctionBarData> = [
   },
 ]
 
-const aboutOptions: Array<IFunctionBarData> = [
+const aboutOptions: Array<IOptionConfig> = [
   {
     title: t('CM0044'),
     iconName: 'star',
@@ -258,9 +226,10 @@ const aboutOptions: Array<IFunctionBarData> = [
   },
 ]
 
-const debugOptions: Array<IFunctionBarData> = [
+const debugOptions: Array<IOptionConfig> = [
   {
     title: 'Domain選單',
+    class: 'debug-option',
     iconName: 'code-bracket-square',
     callback: () => {
       setCurrState('domain')
@@ -268,39 +237,51 @@ const debugOptions: Array<IFunctionBarData> = [
   },
   {
     title: 'App事件測試',
+    class: 'debug-option',
     iconName: 'code-bracket-square',
     callback: () => {
       console.log('callback')
     },
   },
 ]
+
+const segmentTitleStyle = 'py-4 border-0 border-b-[1px] border-solid border-app-slider-bg'
+const initOptions = computed(() => ([
+  { title: t('CM0036'), class: segmentTitleStyle },
+  ...supportOptions,
+  { title: t('CM0040'), class: segmentTitleStyle },
+  ...mediaOptions,
+  { title: t('CM0043'), class: segmentTitleStyle },
+  ...aboutOptions, {
+    title: `1.0/1.0/ v.${buildNumber.value} ${domain}`, // Debug info
+    class: 'typo-body-sm text-center text-primary-lighter py-10',
+    callback: handleDebugMode
+  }, ...(debugMode.value ? debugOptions : []),
+] as IOptionConfig[]))
 // #endregion
 
-// #region debugMode section
-const globalStore = useGlobalStore()
-const { setDebugMode } = globalStore
-const { debugMode } = storeToRefs(globalStore)
-
-const debugModeTimer = ref(-1)
-const debugModeCounter = ref(0)
-
-const handleDebugMode = () => {
-  if (debugModeTimer.value) {
-    clearTimeout(debugModeTimer.value)
+// #region account options
+const accountOptions = computed(() => ([{
+  title: tc('NN0167', 1),
+  iconName: 'logout2',
+  callback: () => {
+    //
   }
-  debugModeCounter.value++
-  if (debugModeCounter.value === 7) {
-    setDebugMode(!debugMode.value)
-    nextTick(() => {
-      scrollContainer.value?.scrollTo(0, scrollContainer.value.scrollHeight)
-    })
+}, {
+  title: tc('NN0317', 1),
+  iconName: 'info-warning',
+  callback: () => {
+    //
   }
-  debugModeTimer.value = window.setTimeout(() => {
-    debugModeCounter.value = 0
-    debugModeTimer.value = -1
-  }, 1000)
-}
+}] as IOptionConfig[]))
 // #endregion
+
+const configs = computed(() => ({
+  domain: domainOptions.value,
+  account: accountOptions.value,
+  '': initOptions.value,
+}) as Record<string, IOptionConfig[]>)
+
 </script>
 <style scoped lang="scss">
 .gradient--yellow {

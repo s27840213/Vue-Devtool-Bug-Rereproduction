@@ -74,8 +74,8 @@ export default defineComponent({
       })
     },
     addTemplate() {
-      if (this.groupItem && !stkWVUtils.checkPro(this.groupItem, 'template')) return
-      else if (!this.groupItem && !stkWVUtils.checkPro(this.item, 'template')) return
+      if (this.groupItem && !paymentUtils.checkProApp(this.groupItem, undefined, 'template')) return
+      else if (!this.groupItem && !paymentUtils.checkProApp(this.item, undefined, 'template')) return
       if (pageUtils.getPages.length + (this.groupItem ? this.groupItem.content_ids.length : 1) > stkWVUtils.MAX_PAGE_NUM) return stkWVUtils.showMaxPageNumModal()
       const currPageIndex = pageUtils.currFocusPageIndex
       const attrs = { pageIndex: this.isInEditor ? currPageIndex + 1 : currPageIndex, ...stkWVUtils.getPageSize(this.igLayout) }

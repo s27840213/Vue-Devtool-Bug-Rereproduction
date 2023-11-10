@@ -180,7 +180,7 @@ export default defineComponent({
     handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
-      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
+      if (!paymentUtils.checkProApp({ plan: 1 }, 'brandkit')) return
       const files = e.dataTransfer?.files
       if (this.selectedTab === 'text') {
         if (!files) return

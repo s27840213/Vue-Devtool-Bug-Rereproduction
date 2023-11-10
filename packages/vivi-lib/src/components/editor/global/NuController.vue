@@ -319,7 +319,7 @@ export default defineComponent({
       eventTarget: null as unknown as HTMLElement,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any,
-      actionColor: (this.$isStk || this.$isCm )? 'black-1' : 'blue-2',
+      actionColor: (this.$isStk || this.$isCm ) ? 'black-1' : 'blue-2',
     }
   },
   mounted() {
@@ -352,13 +352,12 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTextLike: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),

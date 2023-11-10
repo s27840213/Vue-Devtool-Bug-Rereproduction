@@ -117,14 +117,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
-  loadingTimeout = 0
   tutorialFlags = {} as { [key: string]: boolean }
-  loadingFlags = {} as { [key: string]: boolean }
-  loadingCallback = undefined as (() => void) | undefined
-  timeoutCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
 
-  STANDALONE_USER_INFO: IUserInfo = {
+  DEFAULT_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
     locale: 'us',
@@ -188,11 +184,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get controllerHidden(): boolean {
-    return store.getters['vivisticker/getControllerHidden']
+    return store.getters['webView/getControllerHidden']
   }
 
-  get isStandaloneMode(): boolean {
-    return store.getters['vivisticker/getIsStandaloneMode']
+  get inBrowserMode(): boolean {
+    return store.getters['vivisticker/getInBrowserMode']
   }
 
   get userSettings(): IUserSettings {
@@ -289,7 +285,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (locale === '' || !locale) {
       locale = localeUtils.getBrowserLang()
     }
-    this.STANDALONE_USER_INFO.locale = locale
+    this.DEFAULT_USER_INFO.locale = locale
   }
 
   async setDefaultPrices() {
@@ -303,10 +299,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   addDesignDisabled() {
     return this.everEntersDebugMode || window.location.hostname !== 'sticker.vivipic.com'
-  }
-
-  setCurrActiveTab(tab: string) {
-    store.commit('vivisticker/SET_currActiveTab', tab)
   }
 
   // filterLog(messageType: string, message: any) {
@@ -327,7 +319,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   sendScreenshotUrl(query: string, action = 'copy') {
     this.sendToIOS('SCREENSHOT', { params: query, action })
-    if (this.isStandaloneMode) {
+    if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
     }
@@ -347,7 +339,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const _action = isLast && action === 'IGPost' ? 'IGPost' : 'download'
       const toast = action === 'download' ? isLast : false
       const query = this.createUrlForJSON({ page: pageUtils.getPage(pageIndex[idx]), noBg: false, toast })
-      if (this.isStandaloneMode) {
+      if (this.inBrowserMode) {
         const url = `${window.location.origin}/screenshot/?${query}`
         window.open(url, '_blank')
         cbProgress(idx + 1)
@@ -426,14 +418,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       res += `&toast=${toast}`
     }
     return res
-  }
-
-  setIsInCategory(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_isInCategory', { tab, bool })
-  }
-
-  setShowAllRecently(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_showAllRecently', { tab, bool })
   }
 
   getAssetInitiator(asset: IAsset, ...args: any[]): () => Promise<any> {
@@ -546,113 +530,23 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('vivisticker/SET_templateShareType', 'none')
   }
 
-  initLoadingFlags(page: IPage | { layers: ILayer[] }, cbLoad?: () => void, cbTimeout?: () => void, noBg = true, timeout = 60000) {
-    window.clearTimeout(this.loadingTimeout)
-    this.loadingFlags = {}
-    this.loadingCallback = cbLoad
-    this.timeoutCallback = cbTimeout
-    if (this.timeoutCallback) {
-      this.loadingTimeout = window.setTimeout(() => {
-        this.loadingCallback = undefined
-        this.timeoutCallback && this.timeoutCallback()
-        this.timeoutCallback = undefined
-      }, timeout)
-    }
-    for (const [index, layer] of page.layers.entries()) {
-      this.initLoadingFlagsForLayer(layer, index)
-    }
-    if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
-      this.loadingFlags[this.makeFlagKey(-1)] = false
-    }
-    logUtils.setLogAndConsoleLog('ScreenShot::Init:', generalUtils.deepCopy(this.loadingFlags))
-  }
-
-  makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    if (layerIndex === -1) return 'bg'
-    const res = subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}`)
-    // additionKey now used in frame's decoration-related-layers
-    const additionKey = addition ? `_${addition.k}${addition.v ?? ''}` : ''
-    return res + additionKey
-  }
-
-  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    switch (layer.type) {
-      case LayerType.group:
-        for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
-          // this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
-        }
-        break
-      case LayerType.frame: {
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
-        const frame = layer as IFrame
-        const clips = [...frame.clips] as Array<IImage | IShape>
-        if (frame.decoration) {
-          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'd' })] = false
-        }
-        if (frame.decorationTop) {
-          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'dt' })] = false
-        }
-        if (frame.blendLayers?.length) {
-          frame.blendLayers.forEach((_, i) => {
-            this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'b', v: i })] = false
-          })
-        }
-        if (subLayerIndex === -1) {
-          for (const [_clipIndex, subLayer] of clips.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex)
-          }
-        } else {
-          for (const [_clipIndex, subLayer] of clips.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, { k: 'c', v: _clipIndex })
-          }
-        }
-      }
-        break
-      default:
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, addition)] = false
-    }
-  }
-
-  initLoadingFlagsForOneLayer(callback?: () => void) {
-    this.loadingFlags = {}
-    this.loadingCallback = callback
-    this.loadingFlags[this.makeFlagKey(0, -1)] = false
-  }
-
-  setLoadingFlag(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    const key = this.makeFlagKey(layerIndex, subLayerIndex, addition)
-    if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
-      this.loadingFlags[key] = true
-      logUtils.setLogAndConsoleLog('ScreenShot::Set:', generalUtils.deepCopy(this.loadingFlags), key)
-    }
-    if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
-      window.clearTimeout(this.loadingTimeout)
-      this.loadingCallback()
-      this.loadingFlags = {}
-      this.loadingTimeout = 0
-      this.loadingCallback = undefined
-      this.timeoutCallback = undefined
-    }
-  }
-
   hideController() {
-    store.commit('vivisticker/SET_controllerHidden', true)
+    store.commit('webView/SET_controllerHidden', true)
   }
 
   showController() {
-    store.commit('vivisticker/SET_controllerHidden', false)
+    store.commit('webView/SET_controllerHidden', false)
   }
 
   detectIfInApp() {
     if (window.webkit?.messageHandlers?.APP_LOADED === undefined) {
-      this.enterStandaloneMode()
+      this.enterBrowserMode()
       this.setDefaultLocale()
     }
   }
 
-  enterStandaloneMode() {
-    store.commit('vivisticker/SET_isStandaloneMode', true)
+  enterBrowserMode() {
+    store.commit('vivisticker/SET_inBrowserMode', true)
   }
 
   deselect() {
@@ -787,7 +681,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.isStandaloneMode) return this.getUserInfoFromStore()
+    if (this.inBrowserMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('LOGIN', this.getEmptyMessage(), 'login')
     return this.getUserInfoFromStore()
   }
@@ -809,8 +703,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateLocale(locale: string): Promise<boolean> {
-    localStorage.setItem('locale', locale) // set locale to localStorage whether standalone mode or not
-    if (this.isStandaloneMode) {
+    localStorage.setItem('locale', locale) // set locale to localStorage whether browser mode or not
+    if (this.inBrowserMode) {
       return true
     }
     const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
@@ -828,12 +722,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async listAsset(key: string): Promise<void> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     await this.callIOSAsAPI('LIST_ASSET', { key }, `list-asset-${key}`)
   }
 
   async listMoreAsset(key: string, nextPage: number): Promise<void> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (nextPage < 0) return
     await this.callIOSAsAPI('LIST_ASSET', { key, pageIndex: nextPage }, `list-asset-${key}`)
   }
@@ -904,7 +798,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async addAsset(key: string, asset: any, limit = 100, files: { [key: string]: any } = {}) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (this.checkVersion('1.27')) {
       await this.callIOSAsAPI('ADD_ASSET', { key, asset, limit, files }, `addAsset-${key}-${asset.id}`)
     } else if (this.checkVersion('1.9')) {
@@ -923,7 +817,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async setState(key: string, value: any) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (key === 'tempDesign') {
       // console.trace()
     }
@@ -945,7 +839,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getState(key: string): Promise<WEBVIEW_API_RESULT> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     return await this.callIOSAsAPI('GET_STATE', { key }, `getState-${key}`, { retry: true })
   }
 
@@ -985,7 +879,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async sendCopyEditorCore(action: string): Promise<string> {
-    if (this.isStandaloneMode) {
+    if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return '0'
     }
@@ -1015,7 +909,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   saveDesign(pages_?: IPage[]) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     const useArgPages = pages_ !== undefined
     const pages = useArgPages ? pages_ : pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
@@ -1146,7 +1040,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async genThumbnail(id: string): Promise<string> {
-    if (this.isStandaloneMode) return '0'
+    if (this.inBrowserMode) return '0'
     return await new Promise<string>((resolve, reject) => {
       try {
         nextTick(() => {
@@ -1215,7 +1109,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     await Promise.race([
       imageShadowUtils.iosImgDelHandler(),
       new Promise((resolve) => setTimeout(resolve, 3000))
@@ -1330,7 +1224,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         this.initWithMyDesign(design, {
           callback: (pages: Array<IPage>) => {
             const page = pages[0]
-            this.initLoadingFlags(page, () => {
+            layerUtils.initLoadingFlags(page, () => {
               this.handleFrameClipError(page)
             })
           },

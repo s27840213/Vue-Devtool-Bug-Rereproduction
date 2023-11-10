@@ -79,12 +79,10 @@ class EditorUtils {
     const { hasBleed } = pageUtils
     let { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
     const aspectRatio = width / height
-
     if (pageUtils.inBgRemoveMode) {
-      width = 1600
-      height = width / aspectRatio
+      width = pageUtils.targetCanvasSize.width
+      height = pageUtils.targetCanvasSize.height
     }
-
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
 
     if (!this.mobileSize.height || !this.mobileSize.width) {

@@ -531,7 +531,7 @@ export default defineComponent({
       const { width, height } = this.scaledConfig()
       const styles = {
         // in vivisticker the following code would lead the non-fluent UX
-        ...(!this.$isStk && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(!(this.$isStk || this.$isCm) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -640,9 +640,9 @@ export default defineComponent({
             window.requestAnimationFrame(() => {
               stkWVUtils.isAnyIOSImgOnError = true
               if (this.prePrimaryLayerIndex !== -1) {
-                stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+                layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {
-                stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+                layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
               }
             })
           } else {
@@ -696,15 +696,15 @@ export default defineComponent({
       }
     },
     onAdjustImgLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main') {
+      if ((this.$isStk || this.$isCm) && type === 'main') {
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.prePrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
-            else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            if (this.prePrimaryLayerIndex !== -1) layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            else layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -720,11 +720,11 @@ export default defineComponent({
       }, { crossOrigin: true })
     },
     onLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main' && !this.isAdjustImage) {
+      if ((this.$isStk || this.$isCm) && type === 'main' && !this.isAdjustImage) {
         if (this.prePrimaryLayerIndex !== -1) {
-          stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+          layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {
-          stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         }
       }
       this.isOnError = false
