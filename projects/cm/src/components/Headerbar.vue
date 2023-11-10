@@ -1,7 +1,7 @@
 <template lang="pug">
 div(v-if="$slots.left"
     ref="headerbarRef"
-    class="bg-app-bg box-border py-12 grid grid-rows-1 grid-flow-col auto-cols-fr min-h-[56px] w-full"
+    class="bg-app-bg box-border pt-10 pb-8 grid grid-rows-1 grid-flow-col auto-cols-fr min-h-[56px] w-full"
     :class="hide ? 'invisible pointer-events-none' : ''")
   div(class="flex justify-start items-center"
     :style="{gap: `${leftGap}px`}")
