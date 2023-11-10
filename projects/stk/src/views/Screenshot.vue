@@ -168,7 +168,7 @@ export default defineComponent({
               assetId: id
             }
 
-            stkWVUtils.initLoadingFlagsForOneLayer(() => {
+            layerUtils.initLoadingFlagsForOneLayer(() => {
               this.onload()
             })
 
@@ -206,7 +206,7 @@ export default defineComponent({
 
             const scaleRatio = photoWidth / boundingWidth
 
-            stkWVUtils.initLoadingFlagsForOneLayer(() => {
+            layerUtils.initLoadingFlagsForOneLayer(() => {
               this.onload()
             })
 
@@ -235,7 +235,7 @@ export default defineComponent({
           //   const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
           //   layerUtils.setAutoResizeNeededForLayersInPage(page, true)
           //   pageUtils.setPages([page])
-          //   stkWVUtils.initLoadingFlags({ layers: [json] }, () => {
+          //   layerUtils.initLoadingFlags({ layers: [json] }, () => {
           //     this.onload()
           //   })
 
@@ -312,7 +312,7 @@ export default defineComponent({
               return
             }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            stkWVUtils.initLoadingFlags(page, () => {
+            layerUtils.initLoadingFlags(page, () => {
               this.onload()
             }, () => this.onTimeout(`screenshot-${query}`), noBg)
             renderPage()
@@ -356,7 +356,7 @@ export default defineComponent({
               return
             }
             layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            stkWVUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
+            layerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
             pageUtils.setPages([page])
             this.usingJSON = true
             break
