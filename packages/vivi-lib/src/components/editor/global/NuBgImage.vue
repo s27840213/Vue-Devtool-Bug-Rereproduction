@@ -151,7 +151,7 @@ export default defineComponent({
   },
   async created() {
     const { srcObj } = this
-    if (!srcObj || !srcObj.type) return
+    // if (!srcObj || !srcObj.type) return
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
@@ -205,7 +205,7 @@ export default defineComponent({
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
-      return !srcObj || srcObj.assetId === ''
+      return !srcObj || srcObj.type === ''
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
@@ -467,8 +467,9 @@ export default defineComponent({
     },
     stylesConverter(): { [key: string]: string } {
       return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
+        // use Math.ceil fro solving sub-pixel-rendering error
+        width: `${Math.ceil(this.imageSize.width)}px`,
+        height: `${Math.ceil(this.imageSize.height)}px`,
         transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${this.flipStyles.transform}`
       }
     },
