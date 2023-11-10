@@ -1,4 +1,5 @@
 import { useEditorStore } from '@/stores/editor'
+import { saveToCameraRoll } from '@/utils/pixiRecorder'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
@@ -18,6 +19,17 @@ const useActionSheetCm = () => {
 
   const editorStore = useEditorStore()
   const { currGeneratedResults } = storeToRefs(editorStore)
+
+  const savePhotoCb = () => {
+    return cmWVUtils.saveAssetFromUrl('png', currGeneratedResults.value.url)
+  }
+  const saveVideoCb = () => {
+    if (currGeneratedResults.value.video) {
+      return saveToCameraRoll(currGeneratedResults.value.video)
+    } else {
+      throw new Error('video not generated yet')
+    }
+  }
 
   const setSavingActions = () => {
     setPrimaryActions([
@@ -47,13 +59,21 @@ const useActionSheetCm = () => {
           },
         ],
         cb: () => {
-          console.log('save ')
-          cmWVUtils.saveAssetFromUrl('png', currGeneratedResults.value.url)
-          notify({
-            group: 'success',
-            text: `${t('NN0889')}`,
-          })
-        },
+          savePhotoCb()
+            .then(() => {
+              notify({
+                group: 'success',
+                text: `${t('NN0889')}`,
+              })
+            }).catch((e) => {
+              console.log(e)
+              // @TODO
+              notify({
+                group: 'error',
+                text: 'gen photo error',
+              })
+            })
+        }
       },
       {
         labels: [
@@ -64,8 +84,21 @@ const useActionSheetCm = () => {
           },
         ],
         cb: () => {
-          //
-        },
+          saveVideoCb()
+            .then(() => {
+              notify({
+                group: 'success',
+                text: `${t('NN0889')}`,
+              })
+            }).catch((e) => {
+              console.log(e)
+              // @TODO
+              notify({
+                group: 'error',
+                text: 'gen vedio error',
+              })
+            })
+        }
       },
       {
         labels: [
@@ -76,7 +109,18 @@ const useActionSheetCm = () => {
           },
         ],
         cb: () => {
-          //
+          Promise.all([savePhotoCb(), saveVideoCb()])
+            .then(() => {
+              notify({
+                group: 'success',
+                text: `${t('NN0889')}`,
+              })
+            }).catch(() => {
+              notify({
+                group: 'error',
+                text: 'error',
+              })
+            })
         },
       },
     ])

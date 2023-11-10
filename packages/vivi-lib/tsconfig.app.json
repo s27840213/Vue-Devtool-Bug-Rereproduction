@@ -4,8 +4,7 @@
     "src/**/*.vue",
     "src/**/*.json",
     "../shared-lib/src/**/*.vue",
-    "../shared-lib/src/**/*.ts",
-    "../../projects/cm/src/stores/actionSheet.ts"
+    "../shared-lib/src/**/*.ts"
   ],
   "exclude": [
     "src/**/__tests__/*"
