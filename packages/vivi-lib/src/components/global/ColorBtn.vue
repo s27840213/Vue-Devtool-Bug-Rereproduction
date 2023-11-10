@@ -7,7 +7,7 @@ div(class="color-btn" :style="wrapperStyle")
     div(v-else :style="{backgroundColor: color}"
         :class="`color-btn__color color-${color.replace('#', '')}`")
     svg-icon(v-if="focus"
-        :iconName="`check-mobile-circle${$isStk ? '-black' : ''}`"
+        :iconName="`check-mobile-circle${$isStk || $isCm ? '-black' : ''}`"
         iconWidth="50%")
 </template>
 
@@ -75,11 +75,11 @@ export default defineComponent({
     border-radius: 4px;
   }
   &__add-color {
-    background-image: url("~@img/svg/addColor.svg");
+    background-image: url("@img/svg/addColor.svg");
     background-size: cover;
   }
   &__multi-color {
-    background-image: url("~@img/jpg/multi-color.jpg");
+    background-image: url("@img/jpg/multi-color.jpg");
     background-size: cover;
   }
   &__color {

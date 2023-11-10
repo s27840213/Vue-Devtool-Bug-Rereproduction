@@ -1,19 +1,15 @@
 <script lang="ts">
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelAddTemplate from '@/components/editor/panelMobile/PanelAddTemplate.vue'
 import PanelBackground from '@/components/editor/panelMobile/PanelBackground.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import PanelGiphyMore from '@/components/editor/panelMobile/PanelGiphyMore.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
-import PanelObject from '@/components/editor/panelMobile/PanelObject.vue'
 import PanelPageManagement from '@/components/editor/panelMobile/PanelPageManagement.vue'
 import PanelReplace from '@/components/editor/panelMobile/PanelReplace.vue'
 import PanelTemplateContent from '@/components/editor/panelMobile/PanelTemplateContent.vue'
-import PanelText from '@/components/editor/panelMobile/PanelText.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
 import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
-import PanelTextUs from '@/components/us/PanelText.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
@@ -22,17 +18,19 @@ import PanelFontFormat from '@nu/vivi-lib/components/editor/panelMobile/PanelFon
 import PanelFontSize from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontSpacing from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSpacing.vue'
 import PanelNudge from '@nu/vivi-lib/components/editor/panelMobile/PanelNudge.vue'
+import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelObjectAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@nu/vivi-lib/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@nu/vivi-lib/components/editor/panelMobile/PanelOrder.vue'
 import PanelPhotoShadow from '@nu/vivi-lib/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelPosition from '@nu/vivi-lib/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemoveBg.vue'
+import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
+import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.vue'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
-import mobilePanelMixin from '@nu/vivi-lib/mixin/mobilePanel'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import formatUtils from '@nu/vivi-lib/utils/formatUtils'
@@ -47,7 +45,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   extends: MobilePanel,
-  mixins: [mobilePanelMixin],
   emits: ['bottomThemeChange'],
   components: {
     PanelPhoto,
@@ -55,7 +52,6 @@ export default defineComponent({
     PanelBackground,
     PanelText,
     PanelTextUs,
-    ColorPanel,
     PanelPosition,
     PanelFlip,
     PanelOpacity,
@@ -121,14 +117,14 @@ export default defineComponent({
       templatesIgLayout: 'igLayout'
     }),
     ...mapGetters({
-      isInCategory: 'vivisticker/getIsInCategory',
-      isShowAllRecently: 'vivisticker/getShowAllRecently',
+      isInCategory: 'assetPanel/getIsInCategory',
+      isShowAllRecently: 'assetPanel/getShowAllRecently',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isProcessing: 'bgRemove/getIsProcessing',
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
-      currActiveObjectFavTab: 'vivisticker/getCurrActiveObjectFavTab',
+      currActiveObjectFavTab: 'assetPanel/getCurrActiveObjectFavTab',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
     isUs(): boolean {
@@ -449,8 +445,8 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
-      setIsInCategory: 'vivisticker/SET_isInCategory',
-      setShowAllRecently: 'vivisticker/SET_showAllRecently',
+      setIsInCategory: 'assetPanel/SET_isInCategory',
+      setShowAllRecently: 'assetPanel/SET_showAllRecently',
       setBgImageControl: 'SET_backgroundImageControl',
       setIsInGroupTemplate: 'vivisticker/SET_isInGroupTemplate',
     }),

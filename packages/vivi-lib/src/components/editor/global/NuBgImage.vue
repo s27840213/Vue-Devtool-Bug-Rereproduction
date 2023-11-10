@@ -151,7 +151,7 @@ export default defineComponent({
   },
   async created() {
     const { srcObj } = this
-    if (!srcObj || !srcObj.type) return
+    // if (!srcObj || !srcObj.type) return
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
@@ -205,7 +205,7 @@ export default defineComponent({
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
-      return !srcObj || srcObj.assetId === ''
+      return !srcObj || srcObj.type === ''
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
@@ -228,7 +228,7 @@ export default defineComponent({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
-      const offset = this.$isStk ? 0 : 1 // no need to scale bg image in vivisticker
+      const offset = this.$isStk || this.$isCm ? 0 : 1 // no need to scale bg image in vivisticker
       const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
       const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
@@ -552,7 +552,7 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
         }
       }, { crossOrigin: true })
-      if (this.$isStk) {
+      if (this.$isStk || this.$isCm) {
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
@@ -574,7 +574,7 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
-      if (this.$isStk) {
+      if (this.$isStk || this.$isCm) {
         stkWVUtils.setLoadingFlag(-1)
       }
     }

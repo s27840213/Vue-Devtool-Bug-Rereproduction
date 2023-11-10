@@ -141,7 +141,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
     .togglePanel('陰影')
     .then(() => {
       for (const shadow of shadowsOptions) {
-        cy.get(`.svg-photo-shadow-${shadow.name}, .svg-mobile-photo-shadow-${shadow.name}`).click()
+        cy.get(`.photo-shadow-${shadow.name}`).click()
           .get('.nu-layer .nu-layer__inProcess').should('not.exist')
         cy.contains('重置效果').click()
           // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
@@ -152,7 +152,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
           .togglePanel('陰影')
         for (const option of shadow.options) {
           if (option.name === 'color') {
-            cy.get('div.photo-effect-setting__value-input, .photo-shadow__color').click()
+            cy.get('.photo-effect-setting__color, .photo-shadow__color').click()
               .get(`.color-btn .color-${option.val}`).eq(0).click()
               .get('.color-panel__btn, .mobile-panel__left-btn').click()
           } else {
@@ -173,7 +173,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
       }
     })
     // Restore image to original state
-    .get('.svg-photo-shadow-none, .svg-mobile-photo-shadow-none').click()
+    .get('.photo-shadow-none').click()
     .isMobile(() => { cy.togglePanel('陰影') })
   return cy.wrap(subject)
 })
@@ -217,6 +217,8 @@ Cypress.Commands.add('imageAutoBgRemove', { prevSubject: 'element' }, (subject) 
     .get('.nu-layer .nu-layer__inProcess', { timeout: 20000 }).should('not.exist')
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .togglePanel('完成')
+    // Wait for image polling
+    .get(subject.selector).invoke('attr', 'cy-ready').should('eq', 'true')
   return cy.get(subject.selector)
 })
 
@@ -226,7 +228,7 @@ Cypress.Commands.add('imageManuallyBgRemove', { prevSubject: 'element' }, (subje
     .get('.nu-layer .nu-layer__inProcess', { timeout: 20000 }).should('not.exist')
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .get('.panel-background-remove input[type="range"]')
-    .invoke('val', 300).trigger('input')
+    .invoke('val', 225).trigger('input')
     .get('canvas.bg-remove-area').realClick({ x: 225, y: 225 })
     .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
     .togglePanel('完成')

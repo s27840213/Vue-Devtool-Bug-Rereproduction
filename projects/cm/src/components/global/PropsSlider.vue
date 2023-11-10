@@ -1,8 +1,8 @@
 <template lang="pug">
 div(class="mobile-slider grid grid-cols-[auto,1fr] grid-rows-1 gap-12")
   div(class="flex gap-4 text-app-text-secondary typo-btn-sm")
-    span(class="") {{ `${$t('CM0021')}` }}
-    span(class="w-[3ch]") {{ propsVal }}
+    span(class="") {{ title }}
+    span(v-if="showSizeNum" class="w-[3ch]") {{ propsVal }}
   input(
     class="accent-app-btn-primary-bg"
     v-model.number="propsVal"
@@ -51,6 +51,10 @@ export default defineComponent({
     disabled: {
       type: Boolean,
       default: false,
+    },
+    showSizeNum: {
+      type: Boolean,
+      default: true,
     },
   },
   computed: {

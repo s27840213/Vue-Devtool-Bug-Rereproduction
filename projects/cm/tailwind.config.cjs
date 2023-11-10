@@ -1,4 +1,5 @@
 const colors = require('./src/assets/json/colors.json')
+const zIndex = require('./src/assets/json/zIndex.json')
 const plugin = require('tailwindcss/plugin')
 const joinedColor = Object.keys(colors).join('|')
 const bgPattern = new RegExp(`bg-(${joinedColor})`)
@@ -20,12 +21,16 @@ for (let i = 0; i <= 360; i++) {
 }
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  corePlugins: {
+    preflight: false
+  },
   content: ['./src/**/*.{vue,js,ts,jsx,tsx}', '../../packages/ui-component/src/**/*.vue'],
   // purge: ['./src/**/*.html', './src/**/*.vue', './src/**/*.ts'],
   theme: {
     extend: {},
 
     colors: { transparent: 'transparent', ...colors },
+    zIndex: zIndex.reduce((prevVal, currVal, idx) => ({ ...prevVal, [currVal]: (idx + 1).toString()}), {}) ,
     // this project only for mobile, no need to add to much spacing
     spacing: spacingMap,
   },

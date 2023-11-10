@@ -7,7 +7,7 @@ const i18n = createI18n({
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'us',
   messages: {} as Record<LocaleName, Record<string, string>>,
   globalInjection: true,
-  legacy: process.env.VUE_APP_APP_NAME !== 'cm',
+  legacy: true,
   postTranslation: (translated: unknown) => {
     if (typeof translated === 'string') {
       return translated

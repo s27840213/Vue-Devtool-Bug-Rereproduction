@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full flex justify-between items-center py-10" :class="{ 'bg-app-icon-dark': active }")
+div(class="w-full flex justify-between items-center box-border py-10" :class="{ 'bg-app-icon-dark': active }")
   div(class="flex items-center gap-10" :class="`${textColor} ${textSize}`")
     cm-svg-icon(
       :iconName="iconName"
@@ -13,7 +13,7 @@ div(class="w-full flex justify-between items-center py-10" :class="{ 'bg-app-ico
 </template>
 
 <script lang="ts" setup>
-import type { ColorSlip } from '@/types/color'
+import type { ColorSlip } from '@/types/color';
 
 withDefaults(
   defineProps<{

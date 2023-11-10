@@ -12,6 +12,10 @@ import { notify } from '@kyvg/vue3-notification'
 import { cloneDeep } from 'lodash'
 import { nextTick } from 'vue'
 
+window.testEvent = () => {
+  window.location.pathname = 'nativeevttest'
+}
+
 class TestUtils {
   toShowTouchPoint: boolean
   timer: Record<string, {

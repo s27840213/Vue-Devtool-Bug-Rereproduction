@@ -1,7 +1,10 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { generalUtils } from '@nu/shared-lib'
-import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
@@ -12,7 +15,7 @@ export interface ICanvasParams {
   height: number
 }
 const useCanvasUtils = (
-  targetCanvas?: Ref<HTMLCanvasElement | null>,
+  _targetCanvas?: Ref<HTMLCanvasElement | null>,
   wrapperRef?: Ref<HTMLElement | null>,
   editorContainerRef?: Ref<HTMLElement | null>,
 ) => {
@@ -20,31 +23,66 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { canvasMode, maskCanvas, maskDataUrl, currActiveFeature } = storeToRefs(editorStore)
+  const { currActiveFeature } = storeToRefs(editorStore)
+
   // #endregion
 
+  // #region Vuex
   const store = useStore()
-  const pageScaleRatio = computed(() => store.getters.getPageScaleRatio / 100)
+  const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
+  // #endregion
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
+  const { setCurrStep, pushStep, clearStep } = canvasStore
   const {
     brushSize,
     resultCanvas,
-    currStep,
     inCanvasMode,
-    isProcessing,
+    canvasMode,
+    isProcessingCanvas,
+    isProcessingStepsQueue,
     loading,
-    steps,
     isChangingBrushSize,
     canvasWidth,
     canvasHeight,
     isDrawing,
+    maskCanvas,
+    canvas,
     canvasCtx,
+    currCanvasImageElement,
+    steps,
+    currStep,
+    stepsQueue,
+    isInCanvasFirstStep,
+    isInCanvasLastStep,
   } = storeToRefs(canvasStore)
+
+  const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
 
   const { setCanvasStoreState } = canvasStore
   // #endregion
+
+  watch(
+    stepsQueue,
+    async () => {
+      if (isProcessingStepsQueue.value) {
+        return
+      }
+      while (stepsQueue.value.length !== 0) {
+        isProcessingStepsQueue.value = true
+        const blob = await stepsQueue.value.shift()
+        if (blob) {
+          pushStep(blob)
+        }
+      }
+
+      isProcessingStepsQueue.value = false
+    },
+    {
+      deep: true,
+    },
+  )
 
   const disableTouchEvent = (e: TouchEvent) => {
     const enableTouchEventFlag = (e.target as HTMLElement).classList.contains('sidebar__tab')
@@ -54,7 +92,7 @@ const useCanvasUtils = (
     }
   }
 
-  // #region Canvas States
+  // #region Canvas Mouse States
   const pointerStartPos = reactive({ x: 0, y: 0 })
   const initPos = reactive({ x: 0, y: 0 })
   // #endregion
@@ -69,8 +107,8 @@ const useCanvasUtils = (
   })
 
   watch(brushSize, (newVal) => {
-    brushStyle.width = `${newVal * pageScaleRatio.value}px`
-    brushStyle.height = `${newVal * pageScaleRatio.value}px`
+    brushStyle.width = `${newVal * contentScaleRatio.value}px`
+    brushStyle.height = `${newVal * contentScaleRatio.value}px`
 
     if (canvasCtx && canvasCtx.value) {
       canvasCtx.value.lineWidth = newVal
@@ -101,7 +139,10 @@ const useCanvasUtils = (
     if (targetCanvas && targetCanvas.value) {
       targetCanvas.value.width = width
       targetCanvas.value.height = height
-      canvasCtx.value = targetCanvas.value.getContext('2d')
+      setCanvasStoreState({
+        canvas: targetCanvas.value,
+        canvasCtx: targetCanvas.value.getContext('2d'),
+      })
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.strokeStyle = '#FF7262'
         canvasCtx.value.lineWidth = brushSize.value
@@ -113,6 +154,7 @@ const useCanvasUtils = (
     return canvasCtx
   }
 
+  // #region Drawing methods
   const drawLine = (e: PointerEvent) => {
     if (canvasCtx && canvasCtx.value && wrapperRef && wrapperRef.value) {
       canvasCtx.value.beginPath()
@@ -132,9 +174,19 @@ const useCanvasUtils = (
     if (wrapperRef && wrapperRef.value) {
       const { x, y } = getMousePosInTarget(e, wrapperRef.value)
       brushStyle.transform = `translate(${
-        x * pageScaleRatio.value - (brushSize.value * pageScaleRatio.value) / 2
-      }px, ${y * pageScaleRatio.value - (brushSize.value * pageScaleRatio.value) / 2}px)`
+        x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
+      }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
     }
+  }
+
+  let clearDrawStart = () => {
+    console.log('init callback')
+  }
+  let clearDrawing = () => {
+    console.log('init callback')
+  }
+  let clearDrawEnd = () => {
+    console.log('init callback')
   }
 
   const drawStart = (e: PointerEvent) => {
@@ -156,8 +208,8 @@ const useCanvasUtils = (
       showBrush.value = true
       setBrushPos(e)
 
-      useEventListener(editorContainerRef, 'pointermove', drawing)
-      useEventListener(editorContainerRef, 'pointerup', drawEnd)
+      clearDrawing = useEventListener(editorContainerRef, 'pointermove', drawing)
+      clearDrawEnd = useEventListener(editorContainerRef, 'pointerup', drawEnd)
     }
   }
   const drawing = (e: PointerEvent) => {
@@ -184,7 +236,10 @@ const useCanvasUtils = (
     }
   }
   const drawEnd = () => {
-    // pushStep()
+    clearDrawing()
+    clearDrawEnd()
+
+    record()
     isDrawing.value = false
     showBrush.value = false
   }
@@ -195,7 +250,11 @@ const useCanvasUtils = (
     }
   }
 
-  const clearCtx = () => {
+  const clearCtx = (ctx?: CanvasRenderingContext2D) => {
+    if (ctx) {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+      return
+    }
     if (canvasCtx && canvasCtx.value) {
       canvasCtx.value.clearRect(0, 0, canvasWidth.value, canvasHeight.value)
     }
@@ -213,27 +272,52 @@ const useCanvasUtils = (
     drawLine(e)
   }
 
+  const drawImageToCtx = (
+    img: HTMLImageElement,
+    options: {
+      x?: number
+      y?: number
+      width?: number
+      height?: number
+      rotate?: number
+    } = {},
+  ) => {
+    if (canvasCtx && canvasCtx.value && img) {
+      setCompositeOperationMode('source-over')
+      const {
+        x = 0,
+        y = 0,
+        width = canvasWidth.value,
+        height = canvasHeight.value,
+        rotate = 0,
+      } = options
+
+      canvasCtx.value.save()
+      canvasCtx.value.translate(x + width / 2, y + height / 2)
+      canvasCtx.value.rotate((rotate * Math.PI) / 180)
+      canvasCtx.value.translate(-(x + width / 2), -(y + height / 2))
+      canvasCtx.value.drawImage(img, x, y, width, height)
+      canvasCtx.value.restore()
+      // canvasCtx.value.rotate(-rotate * Math.PI / 180)
+      if (isEraseMode.value) {
+        setCompositeOperationMode('destination-out')
+      } else {
+        setCompositeOperationMode('source-over')
+      }
+    }
+  }
+  // #endregion
+
   onMounted(() => {
-    /**
-     * if we didnt pass argument, means we just want to use some utility like reverseSelection
-     */
-    if (
-      targetCanvas &&
-      targetCanvas.value &&
-      wrapperRef &&
-      wrapperRef.value &&
-      editorContainerRef &&
-      editorContainerRef.value
-    ) {
+    if (wrapperRef && wrapperRef.value && editorContainerRef && editorContainerRef.value) {
       createInitCanvas(canvasWidth.value, canvasHeight.value)
-      useEventListener(editorContainerRef, 'pointerdown', drawStart)
+      clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.fillStyle = '#ff7262'
+        record()
       }
-
-      // reverseSelection()
     }
   })
 
@@ -258,24 +342,47 @@ const useCanvasUtils = (
       }
 
       canvasCtx.value.putImageData(pixels, 0, 0)
+      record()
     }
   }
 
   const autoFill = () => {
-    if (canvasCtx && canvasCtx.value) {
-      clearCtx()
-      const currLayer = layerUtils.getLayer(0,0)
-      const {x,y,width,height} = currLayer.styles 
-      console.log(currLayer.styles)
+    groupUtils.deselect()
+    clearCtx()
+    mapEditorToCanvas(() => {
+      if (canvasCtx && canvasCtx.value) {
+        const pixels = canvasCtx.value.getImageData(0, 0, canvasWidth.value, canvasHeight.value)
+        // The total number of pixels (RGBA values).
+        const bufferSize = pixels.data.length
 
-      const preserveArea = canvasCtx.value.getImageData(x,y,width,height)
+        // Iterate over every pixel to find the boundaries of the non-transparent content.
+        for (let i = 0; i < bufferSize; i += 4) {
+          // Check the alpha (transparency) value of each pixel.
+          if (
+            pixels.data[i + 3] !== 0 &&
+            pixels.data[i] !== 14 &&
+            pixels.data[i + 1] !== 14 &&
+            pixels.data[i + 2] !== 14 &&
+            pixels.data[i] !== 5 &&
+            pixels.data[i + 1] !== 5 &&
+            pixels.data[i + 2] !== 5
+          ) {
+            // If the pixel is not transparent, set it to transparent.
+            pixels.data[i + 3] = 0
+          } else {
+            // If the pixel is transparent, set it to opaque.
+            pixels.data[i] = 255
+            pixels.data[i + 1] = 114
+            pixels.data[i + 2] = 98
+            pixels.data[i + 3] = 255
+          }
+        }
 
-      canvasCtx.value.fillRect(0,0, canvasWidth.value, canvasHeight.value)
-      canvasCtx.value.putImageData(preserveArea, x, y)
-    }
+        canvasCtx.value.putImageData(pixels, 0, 0)
+        record()
+      }
+    })
   }
-
-
 
   const downloadMaskCanvas = () => {
     if (maskCanvas && maskCanvas.value) {
@@ -290,6 +397,84 @@ const useCanvasUtils = (
     }
   }
 
+  const mapEditorToCanvas = async (cb?: () => void) => {
+    const { pageSize, contentScaleRatio } = useEditorStore()
+    const { width: pageWidth, height: pageHeight } = pageSize
+    const size = Math.max(pageWidth, pageHeight)
+    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor({ width: pageWidth * contentScaleRatio, height: pageHeight * contentScaleRatio }, true)
+    if (flag !== '0') {
+      logUtils.setLogAndConsoleLog('Screenshot Failed')
+      throw new Error('Screenshot Failed')
+    }
+    imageUtils.imgLoadHandler(`chmix://screenshot/${imageId}?lsize=${size}`, (img) => {
+      if (canvasCtx && canvasCtx.value) {
+        canvasCtx.value.drawImage(img, 0, 0, pageWidth, pageHeight)
+        cb && cb()
+        cleanup()
+      }
+    })
+  }
+
+  const getCanvasBlob: (mycanvas: HTMLCanvasElement) => Promise<Blob | null> = (
+    mycanvas: HTMLCanvasElement,
+  ) => {
+    return new Promise((resolve, reject) => {
+      mycanvas.toBlob((blob) => {
+        resolve(blob)
+      }, 'image/png')
+    })
+  }
+
+  const updateCurrCanvasImageElement = (blob?: Blob) => {
+    const url = URL.createObjectURL(blob ?? steps.value[currStep.value])
+
+    currCanvasImageElement.value.src = url
+    return url
+  }
+
+  const record = () => {
+    /**
+     * DataUrl for png is TOO slow for the project, so I change to use the toBlob method
+     */
+    // const base64 = this.canvas.toDataURL('image/png', 0.3)
+    if (canvas.value) {
+      const blobPromise = getCanvasBlob(canvas.value)
+      if (blobPromise !== null) {
+        stepsQueue.value.push(blobPromise)
+      }
+    }
+  }
+
+  const undo = () => {
+    if (!isProcessingStepsQueue.value && !isInCanvasFirstStep.value) {
+      setCurrStep(currStep.value - 1)
+      const url = updateCurrCanvasImageElement()
+
+      currCanvasImageElement.value.onload = () => {
+        clearCtx()
+        drawImageToCtx(currCanvasImageElement.value)
+
+        URL.revokeObjectURL(url)
+      }
+    }
+  }
+
+  const redo = () => {
+    if (!isProcessingStepsQueue.value && !isInCanvasLastStep.value) {
+      setCurrStep(currStep.value + 1)
+      updateCurrCanvasImageElement()
+
+      currCanvasImageElement.value.onload = () => {
+        clearCtx()
+        drawImageToCtx(currCanvasImageElement.value)
+      }
+    }
+  }
+
+  const reset = () => {
+    clearStep()
+  }
+
   return {
     setCanvasStoreState,
     reverseSelection,
@@ -297,6 +482,13 @@ const useCanvasUtils = (
     getMaskDaraUrl,
     clearCtx,
     autoFill,
+    getCanvasBlob,
+    undo,
+    redo,
+    reset,
+    drawImageToCtx,
+    isInCanvasFirstStep,
+    isInCanvasLastStep,
     brushSize,
     brushColor,
     brushStyle,
@@ -305,7 +497,8 @@ const useCanvasUtils = (
     resultCanvas,
     currStep,
     inCanvasMode,
-    isProcessing,
+    isProcessingCanvas,
+    isProcessingStepsQueue,
     loading,
     steps,
     isChangingBrushSize,
