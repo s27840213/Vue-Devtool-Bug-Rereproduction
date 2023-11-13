@@ -633,9 +633,9 @@ export default defineComponent({
             window.requestAnimationFrame(() => {
               stkWVUtils.isAnyIOSImgOnError = true
               if (this.prePrimaryLayerIndex !== -1) {
-                stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+                layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {
-                stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+                layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
               }
             })
           } else {
@@ -696,8 +696,8 @@ export default defineComponent({
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.prePrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
-            else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            if (this.prePrimaryLayerIndex !== -1) layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            else layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -715,9 +715,9 @@ export default defineComponent({
     onLoad(e: Event, type?: string) {
       if ((this.$isStk || this.$isCm) && type === 'main' && !this.isAdjustImage) {
         if (this.prePrimaryLayerIndex !== -1) {
-          stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+          layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {
-          stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         }
       }
       this.isOnError = false

@@ -54,10 +54,10 @@ import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -345,7 +345,7 @@ export default defineComponent({
             previewSrc: ''
           })
           this.src = ''
-          stkWVUtils.setLoadingFlag(-1)
+          layerUtils.setLoadingFlag(-1)
           const modalBtn = {
             msg: i18n.global.t('STK0023') as string,
           }
@@ -560,7 +560,7 @@ export default defineComponent({
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            stkWVUtils.setLoadingFlag(-1)
+            layerUtils.setLoadingFlag(-1)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -576,7 +576,7 @@ export default defineComponent({
         this.imgNaturalSize.height = img.height
       }
       if (this.$isStk || this.$isCm) {
-        stkWVUtils.setLoadingFlag(-1)
+        layerUtils.setLoadingFlag(-1)
       }
     }
   }

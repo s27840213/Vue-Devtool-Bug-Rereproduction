@@ -2,14 +2,14 @@ import listApi from '@/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-IGroup,
-IImage,
-IImageStyle,
-IShape,
-ISpanStyle,
-IStyle,
-IText,
-ITmp,
+  IGroup,
+  IImage,
+  IImageStyle,
+  IShape,
+  ISpanStyle,
+  IStyle,
+  IText,
+  ITmp,
 } from '@/interfaces/layer'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
@@ -872,9 +872,7 @@ class AssetUtils {
     let srcObj
     let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
-      console.log(url)
       const type = ImageUtils.getSrcType(url)
-      console.log(type)
       assetId = ['logo-private', 'private'].includes(type)
         ? assetIndex
         : isPreview

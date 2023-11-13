@@ -17,7 +17,6 @@ import { LayerType } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { PropType, defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -455,32 +454,32 @@ export default defineComponent({
             if (this.prePrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
               switch ((this.config as IShape).frameDecType) {
                 case 'decoration':
-                  stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'd' })
+                  layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'd' })
                   break
                 case 'decorationTop':
-                  stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'dt' })
+                  layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'dt' })
                   break
                 case 'blend':
-                  stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+                  layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
                   break
               }
             } else {
               switch ((this.config as IShape).frameDecType) {
                 case 'decoration':
-                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
+                  layerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
                   break
                 case 'decorationTop':
-                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
+                  layerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
                   break
                 case 'blend':
-                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
+                  layerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
                   break
               }
             }
           })
         } else {
           this.$nextTick(() => {
-            stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           })
         }
       }
