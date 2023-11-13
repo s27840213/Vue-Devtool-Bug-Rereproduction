@@ -158,7 +158,7 @@ const props = defineProps({
 })
 
 // #region var declare
-const tabIndex = ref(0)
+const { tabIndex } = storeToRefs(useImgSelectorStore())
 const inPhoto = computed(() => tabIndex.value === 0)
 const inStock = computed(() => tabIndex.value === 1)
 const { tc } = useI18n()
@@ -218,7 +218,7 @@ const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
 const { setPageSize, setImgAspectRatio } = editorStore
-const { setRequireImgNum } = useImgSelectorStore()
+const { setRequireImgNum, replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
@@ -326,18 +326,24 @@ const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') 
 }
 
 const sendToEditor = async () => {
-  setImgAspectRatio(targetImgs[0].ratio)
-  setRequireImgNum(0)
-  await router.push({ name: 'Editor' })
-  setPageSize(900, 1600)
-  nextTick(() => {
-    targetImgs.forEach((img) => {
-      assetUtils.addImage(img, img.ratio, {
-        fit: 1,
+  if (replaceImgFlag) {
+    imageUtils.replaceImg(
+      targetImgs[0],
+      imageUtils.getSrc(targetImgs[0], 'prev'),
+      targetImgs[0].ratio
+    )
+  } else {
+    setImgAspectRatio(targetImgs[0].ratio)
+    await router.push({ name: 'Editor' })
+    setPageSize(900, 1600)
+    nextTick(() => {
+      targetImgs.forEach((img) => {
+        assetUtils.addImage(img, img.ratio, { fit: 1 })
       })
+      groupUtils.deselect()
     })
-    groupUtils.deselect()
-  })
+  }
+  setRequireImgNum(0)
 }
 // #endregion
 
