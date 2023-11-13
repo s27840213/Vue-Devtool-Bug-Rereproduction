@@ -90,14 +90,8 @@ div(
   //- 4-2. Stock
   div(v-else-if="inStock" class="grid grid-cols-2 gap-16 mx-10 my-16 overflow-scroll")
     //- Stock selector
-    div(
-      v-for="(col, i) in unsplashCols"
-      :key="i"
-      class="grid gap-16 h-fit")
-      div(
-        v-for="img in col"
-        :key="img.id"
-        class="relative")
+    div(v-for="(col, i) in unsplashCols" :key="i" class="grid gap-16 h-fit")
+      div(v-for="img in col" :key="img.id" class="relative")
         img(
           class="w-full"
           :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"

@@ -9,6 +9,7 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { h, resolveComponent } from 'vue'
+import { RouteRecordRaw } from 'vue-router'
 
 const routes = [
   {
@@ -65,7 +66,7 @@ const routes = [
     },
     component: () => import('@nu/vivi-lib/views/NubtnList.vue'),
   },
-] as any[]
+] as RouteRecordRaw[]
 
 if (window.location.host !== 'cm.vivipic.com') {
   routes.push({

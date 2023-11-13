@@ -41,7 +41,6 @@ import { IBackgroundImage, IPage } from '@nu/vivi-lib/interfaces/page'
 import { IPopupOptions } from '@nu/vivi-lib/interfaces/popup'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerFactary from '@nu/vivi-lib/utils/layerFactary'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -143,21 +142,18 @@ export default defineComponent({
     },
     detachBackgroundImage() {
       const detachedBackgroundImage = generalUtils.deepCopy(this.currBackgroundImage)
-      if (detachedBackgroundImage.config.srcObj.type) {
-        /** get a tiny photo in order to get the aspectRatio of the image */
-        const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj, 50))
-        imageUtils.imgLoadHandler(src || detachedBackgroundImage.config.previewSrc || '', (img) => {
-          const ratio = img.naturalWidth / img.naturalHeight
-          this._setBackgroundImage({
-            pageIndex: pageUtils.currFocusPageIndex,
-            config: this.baseBgImgConfig
-          })
-          assetUtils.addImage(src, ratio, {
-            pageIndex: layerUtils.pageIndex,
-            ...detachedBackgroundImage.config.srcObj,
-            styles: detachedBackgroundImage.config.styles,
-            previewSrc: detachedBackgroundImage.config.previewSrc
-          })
+      // bg-removed img has assetId no type
+      if (detachedBackgroundImage.config.srcObj.type || detachedBackgroundImage.config.srcObj.assetId) {
+        const ratio = detachedBackgroundImage.config.styles.imgWidth / detachedBackgroundImage.config.styles.height
+        this._setBackgroundImage({
+          pageIndex: pageUtils.currFocusPageIndex,
+          config: this.baseBgImgConfig
+        })
+        assetUtils.addImage(detachedBackgroundImage.config.srcObj, ratio, {
+          pageIndex: layerUtils.pageIndex,
+          ...detachedBackgroundImage.config.srcObj,
+          styles: detachedBackgroundImage.config.styles,
+          previewSrc: detachedBackgroundImage.config.previewSrc
         })
       }
     },
