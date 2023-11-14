@@ -703,7 +703,7 @@ class PageUtils {
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
     if (!editorViewBox) return
     let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
-    
+
     const { width: targetWidth, height: targetHeight }: { width: number; height: number } = this
       .inBgRemoveMode
       ? this.targetCanvasSize
@@ -973,6 +973,7 @@ class PageUtils {
       ) as IBleed) // convert bleed to px size
     const newPhysicalBleeds = physicalBleeds
     store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
+    editorUtils.handleContentScaleRatio(pageIndex)
   }
 
   resetBleeds(page: IPage, pageIndex = -1) {
