@@ -97,7 +97,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     const appCaps = await fetch(`https://template.vivipic.com/static/appCaps.json?ver=${generalUtils.generateRandomString(6)}`)
     const jsonCaps = await appCaps.json() as { review_ver: string }
     store.commit('webView/UPDATE_detectIfInReviewMode', jsonCaps.review_ver)
-    this.sendStatistics(true, userInfo.country)
+    this.sendStatistics()
     return userInfo
   }
 
@@ -170,23 +170,30 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     this.sendToIOS('SWITCH_DOMAIN', { domain })
   }
 
-  async sendStatistics(countryReady = false, country?: string): Promise<void> {
-    if (this.inBrowserMode || countryReady) {
+  async sendStatistics(): Promise<void> {
+    logUtils.setLogAndConsoleLog('sendStatistics')
+    const country = this.getUserInfoFromStore().country
+    const gotUserInfo = this.getUserInfoFromStore().hostId !== ''
+    if (this.inBrowserMode || gotUserInfo) {
+      // if APP_LAUNCH is behind loginSetup (i.e. APP login),
+      // don't send /update-user if complete is 1.
       const complete = store.getters['user/getComplete'] as number
       if (complete === 1) return
       const data = {
         token: store.getters['user/getToken'] as string,
         device: store.getters['user/getDevice'] as number,
       }
+      // if APP_LAUNCH is ahead of loginSetup (token is empty) (i.e. APP register),
+      // don't send /update-user when APP_LAUNCH done.
       if (!data.token || data.token === '') return
       await store.dispatch('user/updateUser', {
         ...data,
         app: this.inBrowserMode ? 0 : 1,
         country
         // If inBrowserMode, country = undefined,
-        // otherwise country will be provided in arguments when called from getUserInfo
+        // otherwise country will be provided from userInfo.
         // (if app doesn't provide it (in older versions), it will be undefined)
-      }) // If country is not provided, back-end will use the information provided by CloudFlare.
+      }) // If country is undefined in /update-user, back-end will use the information provided by CloudFlare.
     }
   }
 

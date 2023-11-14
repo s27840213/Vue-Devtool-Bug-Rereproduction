@@ -67,7 +67,6 @@ import generalUtils from '@/utils/generalUtils'
 import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -153,7 +152,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration }, this.subLayerIndex)
         }
       } else if (!json.decoration && config.decoration) {
-        if (this.$isStk || this.$isCm) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
+        if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: undefined }, this.subLayerIndex)
       }
 
@@ -177,7 +176,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop }, this.subLayerIndex)
         }
       } else if (!json.decorationTop && config.decorationTop) {
-        if (this.$isStk || this.$isCm) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
+        if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: undefined }, this.subLayerIndex)
       }
 
@@ -237,9 +236,9 @@ export default defineComponent({
         })
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
-      if (this.$isStk || this.$isCm) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     } else {
-      if (this.$isStk || this.$isCm) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     }
   },
   mounted() {

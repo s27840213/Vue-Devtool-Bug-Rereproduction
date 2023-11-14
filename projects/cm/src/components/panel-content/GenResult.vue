@@ -70,7 +70,7 @@ const showMoreRes = () => {
   unshiftGenResults('', id)
   genImage('', true)
     .then((url) => {
-      updateGenResult(url, id)
+      updateGenResult(id,  { url })
     })
     .catch((error) => {
       logUtils.setLogForError(error as Error)

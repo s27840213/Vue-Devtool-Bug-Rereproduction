@@ -78,11 +78,22 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         img(
           class="result-showcase__card result-showcase__card--front"
           :class="{ 'is-flipped': !showVideo }"
-          :src="initImgSrc")
-        img(
-          class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
-          :class="{ 'is-flipped': showVideo }"
           :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+        div(
+          class="result-showcase__card result-showcase__card--back"
+          :class="{ 'is-flipped': showVideo }")
+          img(v-if="!isVideoGened"
+            class="w-full h-full absolute top-0 left-0 object-cover"
+            :src="initImgSrc")
+          video(v-else
+            class="w-full h-full absolute top-0 left-0 object-cover"
+            ref="video"
+            webkit-playsinline
+            playsinline
+            loop
+            autoplay
+            mutes
+            :src="generatedResults[currGenResultIndex].video")
       div(class="flex justify-between items-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
@@ -139,6 +150,7 @@ import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import PixiRecorder from '@/utils/pixiRecorder'
 import tutorialUtils from '@/utils/tutorialUtils'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -154,6 +166,7 @@ import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -168,6 +181,7 @@ const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
 const sidebarTabsRef = ref<HTMLElement | null>(null)
+const video = ref<HTMLVideoElement | null>(null)
 
 const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 
@@ -202,7 +216,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { setEditorState } = editorStore
+const { setEditorState, updateGenResult } = editorStore
 const {
   pageSize,
   editorState,
@@ -215,22 +229,34 @@ const {
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
 
+const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (editorState.value === 'aspectRatio') {
     setEditorState('editing')
     tutorialUtils.runTutorial('powerful-fill')
   } else if (editorState.value === 'genResult') {
     setEditorState('saving')
+    isVideoGened.value = false
   }
-  // if (inGenResultState) {
-  //   const src = imageUtils.appendRandomQuery(initImgSrc.value)
-  //   const currGenResult = generatedResults.value[currGenResultIndex.value]
-  //   if (currGenResult) {
-  //     const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
-  //     const pixiRecorder = new PixiRecorder(src, res)
-  //     pixiRecorder.genVideo().then((data) => console.log('gen video', data))
-  //   }
-  // }
+  if (inGenResultState) {
+    const currGenResult = generatedResults.value[currGenResultIndex.value]
+    if (currGenResult) {
+      if (!currGenResult.video) {
+        const src = imageUtils.appendRandomQuery(initImgSrc.value)
+        const res = imageUtils.appendRandomQuery(generatedResults.value[currGenResultIndex.value].url)
+        const pixiRecorder = new PixiRecorder(src, res)
+        pixiRecorder.genVideo().then((data) => {
+          console.log('gen video', data)
+          if (data) {
+            isVideoGened.value = true
+            updateGenResult(currGenResult.id, { video: data })
+          }
+        })
+      } else {
+        isVideoGened.value = true
+      }
+    }
+  }
 }
 
 const useStep = useSteps()
@@ -471,6 +497,13 @@ const centerTitle = computed(() => {
 // #region result showcase
 const resultShowcase = ref<HTMLElement | null>(null)
 const showVideo = ref(true)
+watch(showVideo, (newVal) => {
+  if (video.value) {
+    if (!newVal) {
+      video.value.currentTime = 0
+    }
+  }
+})
 let swipeDetector: SwipeDetector = null as unknown as SwipeDetector
 
 // onMounted(() => {
@@ -521,11 +554,12 @@ const handleSwipe = (dir: string) => {
     @apply grid grid-rows-[minmax(0,1fr),auto,auto] grid-cols-1 justify-items-center items-center h-full w-full gap-16;
   }
 }
-
+// @TODO discuss with allen
+//@apply max-w-full max-h-full object-contain;
 .result-showcase {
   transform-style: preserve-3d;
   &__card {
-    @apply max-w-full max-h-full object-contain;
+    @apply max-h-full object-contain;
     backface-visibility: hidden;
     transition: transform 0.6s;
     &--back {

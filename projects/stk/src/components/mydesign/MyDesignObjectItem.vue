@@ -22,6 +22,7 @@ import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent, PropType } from 'vue'
@@ -71,7 +72,7 @@ export default defineComponent({
                 page.layers.forEach(l => {
                   l.initFromMydesign = true
                 })
-                stkWVUtils.initLoadingFlags(page, () => {
+                layerUtils.initLoadingFlags(page, () => {
                   stkWVUtils.handleFrameClipError(page, true)
                 })
               },

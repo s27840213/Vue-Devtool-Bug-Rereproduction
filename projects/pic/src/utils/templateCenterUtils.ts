@@ -1,24 +1,13 @@
+import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 import { IAssetTemplate } from '@nu/vivi-lib/interfaces/api'
 import { ITemplate } from '@nu/vivi-lib/interfaces/template'
 
 class TemplateCenterUtils {
-  generateWaterfall(templates: any, columns: number, scale = 4): ITemplate[][] {
-    const res = [] as ITemplate[][]
-    const ratios = [] as number[]
-    for (let i = 0; i < columns; i++) {
-      res.push([])
-      ratios.push(0)
-    }
-    const list = templates.list ?? []
-    for (const template of list) {
-      const cover = template.match_cover
-      const { width, height } = cover
-      const ratio = height / width
-      const index = this.lowestColumn(ratios)
-      ratios[index] += ratio
-      res[index].push(this.iAssetTemplate2Template(template, scale))
-    }
-    return res
+  generateWaterfall(templates: { list: IAssetTemplate[] }, columns: number, scale = 4): ITemplate[][] {
+    const list = (templates.list ?? []).map(
+      (t) => this.iAssetTemplate2Template(t, scale)
+    )
+    return useWaterfall(list, columns)
   }
 
   iAssetTemplate2Template(template: IAssetTemplate, scale: number): ITemplate {
@@ -45,19 +34,6 @@ class TemplateCenterUtils {
   getPrevUrl(item: { id: string, ver: number }, scale = 4): string {
     const postfix = scale === 1 ? 'prev' : `prev_${scale}x`
     return `https://template.vivipic.com/template/${item.id}/${postfix}?ver=${item.ver}`
-  }
-
-  lowestColumn(ratios: number[]): number {
-    let index = 0
-    let lowest = ratios[0]
-    for (const i in ratios) {
-      const ratio = ratios[i]
-      if (ratio < lowest) {
-        index = parseInt(i)
-        lowest = ratio
-      }
-    }
-    return index
   }
 }
 

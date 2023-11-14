@@ -40,8 +40,7 @@ div(class="popup-page bg-gray-6"
 import { IBackgroundImage, IPage } from '@nu/vivi-lib/interfaces/page'
 import { IPopupOptions } from '@nu/vivi-lib/interfaces/popup'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
-import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import layerFactary from '@nu/vivi-lib/utils/layerFactary'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -123,7 +122,7 @@ export default defineComponent({
         //   text: 'update test',
         //   shortcutText: '',
         //   action: () => {
-        //     const page = GeneralUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex))
+        //     const page = generalUtils.deepCopy(layerUtils.getPage(layerUtils.pageIndex))
         //     page.width = parseInt(page.width)
         //     page.height = parseInt(page.height)
         //     page.layers
@@ -142,29 +141,21 @@ export default defineComponent({
       })
     },
     detachBackgroundImage() {
-      const detachedBackgroundImage = GeneralUtils.deepCopy(this.currBackgroundImage)
-      if (detachedBackgroundImage.config.srcObj.assetId) {
-        /** get a tiny photo in order to get the aspectRatio of the image */
-        const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj, 50))
-        const img = new Image()
-        img.onload = () => {
-          const ratio = img.naturalWidth / img.naturalHeight
-          assetUtils.addImage(src, ratio, {
-            pageIndex: layerUtils.pageIndex,
-            ...detachedBackgroundImage.config.srcObj,
-            styles: detachedBackgroundImage.config.styles
-          })
-          this._setBackgroundImage({
-            pageIndex: pageUtils.currFocusPageIndex,
-            config: this.baseBgImgConfig
-          })
-        }
-        img.src = src
+      const detachedBackgroundImage = generalUtils.deepCopy(this.currBackgroundImage)
+      // bg-removed img has assetId no type
+      if (detachedBackgroundImage.config.srcObj.type || detachedBackgroundImage.config.srcObj.assetId) {
+        const ratio = detachedBackgroundImage.config.styles.imgWidth / detachedBackgroundImage.config.styles.height
+        this._setBackgroundImage({
+          pageIndex: pageUtils.currFocusPageIndex,
+          config: this.baseBgImgConfig
+        })
+        assetUtils.addImage(detachedBackgroundImage.config.srcObj, ratio, {
+          pageIndex: layerUtils.pageIndex,
+          ...detachedBackgroundImage.config.srcObj,
+          styles: detachedBackgroundImage.config.styles,
+          previewSrc: detachedBackgroundImage.config.previewSrc
+        })
       }
-      // this._setBackgroundColor({
-      //   pageIndex: pageUtils.currFocusPageIndex,
-      //   color: '#ffffff'
-      // })
     },
     closePopup() {
       popupUtils.closePopup()
