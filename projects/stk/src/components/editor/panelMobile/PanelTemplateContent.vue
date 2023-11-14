@@ -65,17 +65,19 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
 <script lang="ts">
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import BtnAdd from '@/components/mainMenu/BtnAdd.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
+import BtnAdd from '@nu/vivi-lib/components/global/BtnAdd.vue'
 import Tags, { ITag } from '@nu/vivi-lib/components/global/Tags.vue'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import { IContentTemplate } from '@nu/vivi-lib/interfaces/template'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
@@ -170,9 +172,9 @@ export default defineComponent({
     ...mapState('user', ['userId']),
     ...mapGetters({
       editorThemes: 'getEditThemes',
-      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabInCategory: 'assetPanel/getIsInCategory',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      isTabShowAllRecently: 'assetPanel/getShowAllRecently',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
@@ -345,13 +347,13 @@ export default defineComponent({
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          stkWVUtils.setShowAllRecently('template', true)
+          assetPanelUtils.setShowAllRecently('template', true)
         } else {
           this.getContent({ keyword, locale })
         }
-        stkWVUtils.setIsInCategory('template', true)
+        assetPanelUtils.setIsInCategory('template', true)
       } else {
-        stkWVUtils.setShowAllRecently('template', false)
+        assetPanelUtils.setShowAllRecently('template', false)
       }
     },
     handleLoadMore() {
@@ -387,7 +389,7 @@ export default defineComponent({
     },
     addGroupTemplate() {
       if (!this.currentGroup) return
-      if (!stkWVUtils.checkPro(this.currentGroup, 'template')) return
+      if (!paymentUtils.checkProApp(this.currentGroup, undefined, 'template')) return
       if (pageUtils.getPages.length + this.currentGroup.content_ids.length > stkWVUtils.MAX_PAGE_NUM) return stkWVUtils.showMaxPageNumModal()
       const cb = async () => {
         await assetUtils.addGroupTemplate(this.currentGroup as any, undefined, stkWVUtils.getPageSize(this.igLayout), `templates/${this.igLayout}`, !this.isInEditor)
@@ -466,15 +468,15 @@ export default defineComponent({
         transform: translateY(-49px) translateZ(0);
       }
     }
-    &::v-deep .vue-recycle-scroller__item-wrapper {
+    &:deep(.vue-recycle-scroller__item-wrapper) {
       margin-bottom: 49px;
     }
-    &::v-deep .tags__flex-container-mobile {
+    &:deep(.tags__flex-container-mobile) {
       width: max-content;
       padding-right: 42px;
     }
   }
-  &.in-category, &.in-group-template::v-deep .vue-recycle-scroller__item-wrapper {
+  &.in-category, &.in-group-template:deep(.vue-recycle-scroller__item-wrapper) {
     margin-top: 24px;
   }
   &__header {

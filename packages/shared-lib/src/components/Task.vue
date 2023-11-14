@@ -2,7 +2,7 @@
 div(class="bg-app-btn-primary-bg") Task
 </template>
 
-<script>
+<script lang="ts">
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Task',

@@ -1,14 +1,14 @@
 import glob
 
 def processPath(path: str):
-  return path.replace('projects/pic/', '') \
+  return path.replace('projects/cm/', '') \
     .replace('packages/vivi-lib/', '') \
 
 libPaths = glob.glob('packages/vivi-lib/**/*.vue', recursive=True) \
   + glob.glob('packages/vivi-lib/**/*.ts', recursive=True)
 
-picPaths = glob.glob('projects/pic/**/*.vue', recursive=True) \
-  + glob.glob('projects/pic/**/*.ts', recursive=True)
+picPaths = glob.glob('projects/cm/**/*.vue', recursive=True) \
+  + glob.glob('projects/cm/**/*.ts', recursive=True)
 
 libPaths = map(processPath, libPaths)
 picPaths = map(processPath, picPaths)

@@ -8,7 +8,7 @@ svg-icon(
   :same-size="sameSize")
 </template>
 <script setup lang="ts">
-import type { ColorSlip } from '@/types/color'
+import type { ColorSlip } from '@/types/color';
 withDefaults(
   defineProps<{
     iconName: string

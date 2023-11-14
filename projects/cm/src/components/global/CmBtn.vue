@@ -1,7 +1,7 @@
 <template lang="pug">
 div(
-  class="transition-colors duration-300 flex items-center justify-center"
-  :class="`${btnColor} nu-btn__${theme}${size ? `--${size}` : ''} ${full ? 'w-full' : 'w-fit'}`"
+  class="transition-colors duration-300 flex items-center justify-center box-border px-16 py-8 rounded-[50px]"
+  :class="`${btnColor} cm-btn__${theme} ${size ? `--${size}` : ''} ${full ? 'w-full' : 'w-fit'}`"
   ref="btnRef"
   @click="handleClick"
   @contextmenu.prevent)
@@ -17,10 +17,10 @@ div(
 
 <script setup lang="ts">
 // https://www.figma.com/file/nO7n8qAcowXguD9znn1JGt/AI-PhotoEditor?node-id=378%3A168384&mode=dev
-import useTapTransition from '@/composable/useTapTransition'
-import { useColorStore } from '@/stores/color'
-import type { INubtnSize, INubtnState, INubtnThemes } from '@/types/btn'
-import { computed } from 'vue'
+import { useColorStore } from '@/stores/color';
+import type { INubtnSize, INubtnState, INubtnThemes } from '@/types/btn';
+import useTapTransition from '@nu/vivi-lib/composable/useTapTransition';
+import { computed } from 'vue';
 
 // #region static
 const props = withDefaults(
@@ -77,17 +77,15 @@ const handleClick = (e: MouseEvent) => {
 }
 </script>
 
-<style lang="scss">
-.nu-btn {
+<style lang="scss" scoped>
+.cm-btn {
   &__primary,
   &__secondary {
-    @apply py-10 px-16 rounded-[50px];
     > span {
       @apply typo-btn-lg;
     }
 
     &--md {
-      @apply px-16 py-8 rounded-[50px];
       > span {
         @apply typo-btn-md;
       }

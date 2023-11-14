@@ -62,7 +62,7 @@ export default defineComponent({
     padding-left: 16px;
     padding-right: 16px;
   }
-  @include stk {
+  @include app(stk, cm) {
     height: 44px;
     box-sizing: border-box;
     padding-left: 24px;

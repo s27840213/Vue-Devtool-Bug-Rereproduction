@@ -5,6 +5,14 @@ import design from '@/apis/design'
 import designInfo from '@/apis/design-info'
 import list from '@/apis/list'
 import userApis from '@/apis/user'
+import ColorPicker from '@/components/ColorPicker.vue'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
+import LinkOrText from '@/components/LinkOrText.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import Tabs from '@/components/Tabs.vue'
+import ValueSelector from '@/components/ValueSelector.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -12,14 +20,15 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import ColorPicker from '@/components/ColorPicker.vue'
 import DebugTool from '@/components/componentLog/DebugTool.vue'
+import NuPage from '@/components/editor/global/NuPage.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
+import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -37,7 +46,6 @@ import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import Checkbox from '@/components/global/Checkbox.vue'
 import CollapseTitle from '@/components/global/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
@@ -47,16 +55,10 @@ import SlideToggle from '@/components/global/SlideToggle.vue'
 import Tags from '@/components/global/Tags.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
-import LinkOrText from '@/components/LinkOrText.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import Popup from '@/components/popup/Popup.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import Tabs from '@/components/Tabs.vue'
-import ValueSelector from '@/components/ValueSelector.vue'
 import i18n from '@/i18n'
 import {
   isIAssetPhoto,
@@ -70,7 +72,6 @@ import {
 import {
   isV1_42,
 } from '@/interfaces/vivisticker'
-import mobilePanel from '@/mixin/mobilePanel'
 import router from '@/router'
 import store from '@/store'
 import {
@@ -86,6 +87,7 @@ import {
   PopupSliderEventType,
   SidebarPanelType,
 } from '@/store/types'
+import swipeDetector from '@/utils/SwipeDetector'
 import apiUtils from '@/utils/apiUtils'
 import assetUtils, {
   RESIZE_RATIO_IMAGE,
@@ -127,8 +129,8 @@ import imageShadowUtils, {
 import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import localeUtils from '@/utils/localeUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import mathUtils from '@/utils/mathUtils'
@@ -154,7 +156,6 @@ import snapUtils from '@/utils/snapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
-import swipeDetector from '@/utils/SwipeDetector'
 import textFillUtils, {
   replaceImgInject,
 } from '@/utils/textFillUtils'
@@ -196,6 +197,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   MobileSlider,
   DimBackground,
   PageContent,
+  SnapLineArea,
   PanelFonts,
   PanelTextEffectSetting,
   PanelAdjust,
@@ -238,7 +240,6 @@ import SvgIconView from '@/views/SvgIconView.vue'
   ShadowEffectType,
   _IPaymentWarningView,
   isV1_42,
-  mobilePanel,
   router,
   store,
   bgRemoveMoveHandler,
@@ -325,4 +326,5 @@ import SvgIconView from '@/views/SvgIconView.vue'
   EmojiTest,
   NativeEventTester,
   SvgIconView,
+  NuPage
 )

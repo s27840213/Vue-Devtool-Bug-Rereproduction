@@ -168,6 +168,13 @@ export default defineComponent({
         },
         action: () => { this.switchDomain('stkrd') }
       }, {
+        text: 'qa',
+        icon: 'vivisticker_global',
+        selected: () => {
+          return window.location.hostname === 'stickertest.vivipic.com'
+        },
+        action: () => { this.switchDomain('stickertest') }
+      }, {
         text: 'localhost',
         icon: 'vivisticker_global',
         selected: () => {

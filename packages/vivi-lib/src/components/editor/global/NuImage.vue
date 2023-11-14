@@ -23,6 +23,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     div(class='nu-image__picture'
       :style="imgStyles()")
       img(v-if="finalSrc" ref="img"
+        :data-nu-image="`nu-image-${config.id}`"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
@@ -237,8 +238,8 @@ export default defineComponent({
           .then((img) => {
             const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
             const isTransparent = this.handleIsTransparent(img)
-            const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-            const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
+            const redrawImmediately = ![ShadowEffectType.none, ShadowEffectType.floating].includes(this.currentShadowEffect()) &&
+              (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
             if (redrawImmediately) {
               this.redrawShadow()
             }
@@ -523,7 +524,7 @@ export default defineComponent({
       const { width, height } = this.scaledConfig()
       const styles = {
         // in vivisticker the following code would lead the non-fluent UX
-        ...(!this.$isStk && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(!(this.$isStk || this.$isCm) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -632,9 +633,9 @@ export default defineComponent({
             window.requestAnimationFrame(() => {
               stkWVUtils.isAnyIOSImgOnError = true
               if (this.prePrimaryLayerIndex !== -1) {
-                stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+                layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {
-                stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+                layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
               }
             })
           } else {
@@ -688,15 +689,15 @@ export default defineComponent({
       }
     },
     onAdjustImgLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main') {
+      if ((this.$isStk || this.$isCm) && type === 'main') {
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.prePrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
-            else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            if (this.prePrimaryLayerIndex !== -1) layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            else layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -712,11 +713,11 @@ export default defineComponent({
       }, { crossOrigin: true })
     },
     onLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main' && !this.isAdjustImage) {
+      if ((this.$isStk || this.$isCm) && type === 'main' && !this.isAdjustImage) {
         if (this.prePrimaryLayerIndex !== -1) {
-          stkWVUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+          layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {
-          stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         }
       }
       this.isOnError = false
@@ -725,24 +726,23 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
-      // const physicalRatio = img.naturalWidth / img.naturalHeight
-      // const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
-      // if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
-      //   const newW = this.config.styles.imgHeight * physicalRatio
-      //   const offsetW = this.config.styles.imgWidth - newW
-      //   if (this.primaryLayerType() === 'frame') {
-      //     console.log(this.pageIndex, this.layerIndex, this.subLayerIndex, generalUtils.deepCopy(this.config))
-      //     frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-      //       imgWidth: newW,
-      //       imgX: this.config.styles.imgX + offsetW / 2
-      //     })
-      //   } else {
-      //     layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-      //       imgWidth: newW,
-      //       imgX: this.config.styles.imgX + offsetW / 2
-      //     }, this.subLayerIndex)
-      //   }
-      // }
+      const physicalRatio = img.naturalWidth / img.naturalHeight
+      const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
+      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
+        const newW = this.config.styles.imgHeight * physicalRatio
+        const offsetW = this.config.styles.imgWidth - newW
+        if (this.primaryLayerType() === 'frame') {
+          frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          }, this.prePrimaryLayerIndex)
+        } else {
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          }, this.subLayerIndex)
+        }
+      }
       this.$emit('onload')
     },
     onLoadShadowImg(e: Event) {
@@ -888,8 +888,10 @@ export default defineComponent({
     },
     handleIsTransparent(_img?: HTMLImageElement) {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
-      if (!this.$refs.img) return
+
       const img = _img ?? this.$refs.img as HTMLImageElement
+      if (!img) return
+
       const isTransparent = imageShadowUtils.isTransparentBg(img)
       imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
       return isTransparent

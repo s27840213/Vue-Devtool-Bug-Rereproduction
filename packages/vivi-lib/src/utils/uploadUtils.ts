@@ -14,6 +14,7 @@ import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import imageUtils from '@/utils/imageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { PRECISION } from '@/utils/unitUtils'
+import imagePreview from '@img/svg/image-preview.svg'
 import { notify } from '@kyvg/vue3-notification'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
@@ -31,7 +32,6 @@ import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import themeUtils from './themeUtils'
-import imagePreview from '@img/svg/image-preview.svg'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -788,9 +788,8 @@ class UploadUtils {
 
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
     formData.append('key', `${this.loginOutput.upload_log_map.path}${generalUtils.isStk ? this.hostId : this.userId}/${logName}`)
-    console.log(formData.get('key'))
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
-    formData.append('x-amz-meta-tn', generalUtils.isStk ? this.hostId : this.userId)
+    formData.append('x-amz-meta-tn', generalUtils.isStk || generalUtils.isCm ? this.hostId : this.userId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' })
@@ -822,7 +821,6 @@ class UploadUtils {
       'key',
       `${this.loginOutput.upload_log_map.path}${this.hostId}/${designName}`
     )
-    console.log(formData.get('key'))
     formData.append(
       'Content-Disposition',
       `attachment; filename*=UTF-8''${encodeURIComponent(designName)}`
@@ -1009,6 +1007,25 @@ class UploadUtils {
         networkUtils.notifyNetworkError()
         await store.dispatch('user/login', { token: this.token })
       })
+  }
+
+  async uploadCropJSON(cropJSON: {t: number, l: number, r: number, b: number}, assetId: string) {
+    const formData = new FormData()
+    Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
+      formData.append(key, this.loginOutput.upload_map.fields[key])
+    })
+    formData.append('key', `${this.loginOutput.upload_map.path}asset/image/${assetId}/crop.json`)
+    // only for template
+    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('crop.json')}`)
+    formData.append('x-amz-meta-tn', this.userId)
+    const blob = new Blob([JSON.stringify(cropJSON)], { type: 'application/json' })
+    if (formData.has('file')) {
+      formData.set('file', blob)
+    } else {
+      formData.append('file', blob)
+    }
+
+    return this.makeXhrRequest('POST', this.loginOutput.upload_map.url, formData)
   }
 
   uploadTmpJSON() {

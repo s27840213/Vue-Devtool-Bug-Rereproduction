@@ -1,64 +1,92 @@
-import { AppColors } from '@/types/color'
-import type { EditorFeature, EditorState, EditorType, PowerfulFillCanvasMode } from '@/types/editor'
+import useSteps from '@/composable/useSteps'
+import type { EditorFeature, EditorType, PowerfulfillStates } from '@/types/editor'
+import type { IStep } from '@nu/vivi-lib/interfaces/steps'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
 import { useCanvasStore } from './canvas'
-export interface IPage {
-  width: number
-  height: number
-  backgroundColor: string
-}
 
-export class Page implements IPage {
-  width: number
-  height: number
-  backgroundColor: string
-  constructor(width: number, height: number) {
-    this.width = width
-    this.height = height
-    this.backgroundColor = AppColors['primary-white']
-  }
+export interface IGenResult {
+  id: string
+  url: string,
+  video?: string
 }
 
 interface IEditorStore {
   imgAspectRatio: number
-  editingPage: Page
-  pageScaleRatio: number
-  editorState: EditorState
+  editorState: PowerfulfillStates
   currActiveFeature: EditorFeature
   editorType: EditorType
-  canvasMode: PowerfulFillCanvasMode
-  isAdjustingBottomPanel: boolean
-  firstPaintArea: {
-    width: number
-    height: number
-  }
-  maskCanvas: HTMLCanvasElement
   maskDataUrl: string
+  isGenerating: boolean
+  generatedResults: Array<IGenResult>
+  currGenResultIndex: number
+  stepsTypesArr: Array<'canvas' | 'editor'>
+  currStepTypeIndex: number
+  initImgSrc: string,
 }
 
 export const useEditorStore = defineStore('editor', {
   state: (): IEditorStore => ({
     imgAspectRatio: 9 / 16,
-    editingPage: new Page(900, 1600),
-    pageScaleRatio: 0.1,
     editorState: 'aspectRatio',
     currActiveFeature: 'none',
     editorType: 'powerful-fill',
-    canvasMode: 'brush',
-    isAdjustingBottomPanel: true,
-    firstPaintArea: {
-      width: 0,
-      height: 0,
-    },
-    maskCanvas: document.createElement('canvas'),
     maskDataUrl: '',
+    isGenerating: false,
+    generatedResults: [],
+    currGenResultIndex: 0,
+    stepsTypesArr: [],
+    currStepTypeIndex: -1,
+    initImgSrc: '',
   }),
   getters: {
     pageSize(): { width: number; height: number } {
-      return {
-        width: this.editingPage.width,
-        height: this.editingPage.height,
-      }
+      return pageUtils.getPageSize(0)
+    },
+    pageAspectRatio(): number {
+      return this.pageSize.width / this.pageSize.height
+    },
+    pageScaleRatio(): number {
+      return pageUtils.scaleRatio / 100
+    },
+    contentScaleRatio(): number {
+      return pageUtils.contentScaleRatio
+    },
+    showBrushOptions(): boolean {
+      return this.currActiveFeature === 'brush'
+    },
+    showSelectionOptions(): boolean {
+      return this.currActiveFeature === 'selection'
+    },
+    inAspectRatioState(): boolean {
+      return this.editorState === 'aspectRatio'
+    },
+    inEditingState(): boolean {
+      return this.editorState === 'editing'
+    },
+    inGenResultState(): boolean {
+      return this.editorState === 'genResult'
+    },
+    inSavingState(): boolean {
+      return this.editorState === 'saving'
+    },
+    editorSteps(): Array<IStep> {
+      return stepsUtils.steps
+    },
+    editorCurrStep(): number {
+      return stepsUtils.currStep
+    },
+    isInEditorFirstStep(): boolean {
+      return stepsUtils.isInFirstStep
+    },
+    isInEditorLastStep(): boolean {
+      return stepsUtils.isInLastStep
+    },
+    currGeneratedResults(): { id: string; url: string, video?: string } {
+      return this.generatedResults[this.currGenResultIndex]
     },
   },
   actions: {
@@ -68,41 +96,93 @@ export const useEditorStore = defineStore('editor', {
         canvasHeight: height,
       })
 
-      this.editingPage.width = width
-      this.editingPage.height = height
+      pageUtils.setPageSize(0, width, height)
     },
-
     createNewPage(width: number, height: number) {
-      this.editingPage = new Page(width, height)
-    },
-
-    setPageScaleRatio(ratio: number) {
-      this.pageScaleRatio = ratio
+      pageUtils.setPages([pageUtils.newPage({ width, height })])
     },
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
     },
-    setEditorState(state: EditorState) {
+    setEditorState(state: PowerfulfillStates) {
       this.editorState = state
     },
     setCurrActiveFeature(feature: EditorFeature) {
       this.currActiveFeature = feature
     },
-    setEditorType(state: EditorState) {
+    setEditorType(state: PowerfulfillStates) {
       this.editorState = state
     },
-    setCanvasMode(mode: PowerfulFillCanvasMode) {
-      this.canvasMode = mode
+    setIsGenerating(isGenerating: boolean) {
+      this.isGenerating = isGenerating
     },
-    setFirstPaintArea(width: number, height: number) {
-      Object.assign(this.firstPaintArea, { width, height })
-      console.log(this.firstPaintArea)
+    unshiftGenResults(url: string, id: string) {
+      this.generatedResults.unshift({
+        url,
+        id,
+      })
     },
-    setMaskCanvas(canvas: HTMLCanvasElement) {
-      this.maskCanvas = canvas
+    updateGenResult(id: string, data: { url?: string, video?: string }) {
+      const index = this.generatedResults.findIndex((item) => item.id === id)
+      const { url, video } = data
+      if (url) {
+        this.generatedResults[index].url = url
+      }
+      if (video) {
+        this.generatedResults[index].video = video
+      }
     },
-    setMaskCanvasDataUrl(dataUrl: string) {
-      this.maskDataUrl = dataUrl
+    clearGeneratedResults() {
+      this.generatedResults = []
+    },
+    setGenResultIndex(index: number) {
+      this.currGenResultIndex = index
+    },
+    undo() {
+      stepsUtils.undo()
+    },
+    redo() {
+      stepsUtils.redo()
+    },
+    delayedRecord() {
+      stepsUtils.delayedRecord()
+    },
+    stepsReset() {
+      stepsUtils.reset()
+    },
+    pageReset(width = 900, height = 1600) {
+      this.createNewPage(width, height)
+    },
+    pushStepType(type: 'canvas' | 'editor') {
+      this.stepsTypesArr.push(type)
+    },
+    setCurrStepTypeIndex(index: number) {
+      if (index < 0 || index >= this.stepsTypesArr.length) return
+      this.currStepTypeIndex = index
+    },
+    resetStepsTypesArr() {
+      this.stepsTypesArr = []
+      this.currGenResultIndex = -1
+    },
+    setInitImgSrc(src: string) {
+      this.initImgSrc = src
+    },
+    keepEditingInit() {
+      this.setEditorState('genResult')
+      this.createNewPage(this.pageSize.width, this.pageSize.height)
+
+      assetUtils.addImage(
+        this.currGenResultIndex === -1
+          ? this.initImgSrc
+          : this.generatedResults[this.currGenResultIndex].url,
+        this.pageAspectRatio,
+        {
+          fit: 1,
+        },
+      )
+      groupUtils.deselect()
+
+      useSteps().reset()
     },
   },
 })

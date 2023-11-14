@@ -100,7 +100,7 @@ export default defineComponent({
       return typeof this.photo.progress !== 'undefined' && this.photo.progress !== 100
     },
     hasCheckedAssets(): boolean {
-      if (this.$isStk) return false
+      if (this.$isStk || this.$isCm) return false
       return this.checkedAssets.length !== 0
     },
     previewSrc(): string {
@@ -210,7 +210,11 @@ export default defineComponent({
       if (this.replaceImgInject) {
         this.replaceImgInject(photo)
       } else if (this.$isTouchDevice() && this.mobilePanel === 'replace') { // Replace frame and img frame.
-        imageUtils.replaceImg(photo, this.previewSrc)
+        imageUtils.replaceImg(
+          imageUtils.toSrcObj(photo),
+          this.previewSrc,
+          photo.width / photo.height,
+        )
       } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)
       } else {

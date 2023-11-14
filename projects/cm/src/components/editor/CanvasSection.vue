@@ -1,17 +1,18 @@
 <template lang="pug">
-div(class="absolute top-0 left-0")
-  canvas(v-show="!isDuringCopy" class="canvas-section w-full h-full opacity-30" ref="canvasRef")
+div(class="canvas-section absolute top-0 left-0 z-canvas")
+  canvas(
+    v-show="!isDuringCopy"
+    class="canvas-section w-full h-full opacity-30"
+    ref="canvasRef")
   div(
     v-if="showBrush"
     class="absolute top-0 left-0 pointer-events-none rounded-full opacity-60"
     :style="brushStyle")
 </template>
 <script setup lang="ts">
-import useCanvasUtils from '@/composable/useCanvasUtils';
-import { useEditorStore } from '@/stores/editor';
-import { useWebViewStore } from '@/stores/webView';
-import { generalUtils } from '@nu/shared-lib';
-import { storeToRefs } from 'pinia';
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import { generalUtils } from '@nu/shared-lib'
+import { useStore } from 'vuex'
 // #region data section
 const props = defineProps<{
   containerDOM: HTMLElement | null
@@ -19,19 +20,16 @@ const props = defineProps<{
 }>()
 
 const { containerDOM, wrapperDOM } = toRefs(props)
-const editorStore = useEditorStore()
-const { setMaskCanvas } = editorStore
-const { pageSize } = storeToRefs(editorStore)
 // #endregion
 
 // #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const { brushStyle, showBrush } = useCanvasUtils(canvasRef, wrapperDOM, containerDOM)
+const { brushStyle, showBrush } = useCanvasUtilsCm(canvasRef, wrapperDOM, containerDOM)
 // #endregion
 
 // #region WebView feature section
-const webViewStore = useWebViewStore()
-const { isDuringCopy } = storeToRefs(webViewStore)
+const store = useStore()
+const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 // #endregion
 
 const getCanvasDataUrl = () => {

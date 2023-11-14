@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-layer flex-center"
-    :class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '', primaryLayer?.type === 'frame' ? 'transform-origin-0' : '']"
+:class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '', primaryLayer?.type === 'frame' && !forRender ? 'transform-origin-0' : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
@@ -265,12 +265,11 @@ export default defineComponent({
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       isDuringCopy: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
     }),
     inAllPagesMode(): boolean {
@@ -310,6 +309,7 @@ export default defineComponent({
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
+          ...(this.getLayerType === 'shape' && this.$route.name !== 'Preview' && { overflow: 'hidden' }), // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
           ...this.transformStyle
         }
       )
@@ -417,7 +417,6 @@ export default defineComponent({
         case LayerType.shape: {
           return {
             // 'mix-blend-mode': this.config.styles.blendMode,
-            overflow: 'hidden', // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
             ...shapeUtils.isLine(this.config as AllLayerTypes) ? { pointerEvents: 'none' } : {}
           }
         }

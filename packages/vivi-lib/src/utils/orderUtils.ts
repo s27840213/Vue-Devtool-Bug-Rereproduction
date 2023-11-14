@@ -1,5 +1,6 @@
 
 import store from '@/store'
+import groupUtils from './groupUtils'
 import stepsUtils from './stepsUtils'
 class OrderUtils {
   bringToFront() {
@@ -27,6 +28,7 @@ class OrderUtils {
     store.commit('UPDATE_layerOrder', {
       type: 'back'
     })
+    groupUtils.deselect()
     stepsUtils.record()
   }
 }

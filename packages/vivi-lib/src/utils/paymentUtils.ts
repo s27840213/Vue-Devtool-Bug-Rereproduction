@@ -4,9 +4,11 @@ import { IPaymentView, IPaymentWarningView } from '@/interfaces/payment'
 import router from '@/router'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
+import generalUtils from './generalUtils'
 import modalUtils from './modalUtils'
 import picWVUtils from './picWVUtils'
 import popupUtils from './popupUtils'
+import stkWVUtils, { IViviStickerProFeatures } from './stkWVUtils'
 
 class PaymentUtils {
   get status(): string { return store.getters['payment/getStatus'] }
@@ -20,6 +22,20 @@ class PaymentUtils {
     store.commit('payment/SET_initView', initView)
     store.commit('payment/SET_templateImg', templateImg)
     popupUtils.openPopup('payment')
+  }
+
+  checkProApp(item: { plan?: number }, targetPic?: IPaymentWarningView, targetStk?: IViviStickerProFeatures): boolean {
+    if (generalUtils.isPic) {
+      if (!targetPic) return true // vivipic requires target, if not provided, treat as a no-check-needed situation
+      return this.checkPro({ ...item, plan: item.plan ?? 0 }, targetPic)
+    }
+    if (generalUtils.isStk) {
+      return stkWVUtils.checkPro(item, targetStk) // vivisticker allows undefined target
+    }
+    if (generalUtils.isCm) {
+      return true // TODO: charmix checkPro function
+    }
+    return true
   }
 
   checkPro(item: { plan: number }, target: IPaymentWarningView) {

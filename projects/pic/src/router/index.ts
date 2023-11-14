@@ -1,6 +1,9 @@
+import store from '@/store'
+import Editor from '@/views/Editor.vue'
+import Home from '@/views/Home.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n from '@nu/vivi-lib/i18n'
-import store from '@/store'
+import router from '@nu/vivi-lib/router'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
@@ -10,12 +13,9 @@ import logUtils from '@nu/vivi-lib/utils/logUtils'
 import overlayUtils from '@nu/vivi-lib/utils/overlayUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
-import Editor from '@/views/Editor.vue'
-import Home from '@/views/Home.vue'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
-import router from '@nu/vivi-lib/router'
 
 const MOBILE_ROUTES = [
   'Home',
@@ -234,7 +234,7 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: () => import('@/views/NubtnList.vue')
+    component: () => import('@nu/vivi-lib/views/NubtnList.vue')
   })
   routes.push({
     path: 'nativeevttest',
@@ -266,6 +266,15 @@ router.addRoute({
       picWVUtils.registerCallbacks('router')
     }
     await picWVUtils.getUserInfo()
+    const appLoadedTimeout = store.getters['webView/getAppLoadedTimeout']
+    if (appLoadedTimeout > 0) {
+      window.setTimeout(() => {
+        if (!picWVUtils.appLoadedSent) {
+          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`)
+        }
+        picWVUtils.sendAppLoaded()
+      }, appLoadedTimeout)
+    }
     let argoError = false
     try {
       const status = (await fetch(`https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`)).status
@@ -358,6 +367,8 @@ router.beforeEach(async (to, from, next) => {
     // const json = appJson as any
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    store.commit('webView/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
 
     store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 

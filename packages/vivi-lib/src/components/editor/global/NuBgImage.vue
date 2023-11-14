@@ -54,10 +54,10 @@ import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -151,7 +151,7 @@ export default defineComponent({
   },
   async created() {
     const { srcObj } = this
-    if (!srcObj || !srcObj.type) return
+    // if (!srcObj || !srcObj.type) return
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
@@ -205,7 +205,7 @@ export default defineComponent({
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
-      return !srcObj || srcObj.assetId === ''
+      return !srcObj || srcObj.type === ''
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
@@ -228,7 +228,7 @@ export default defineComponent({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
-      const offset = this.$isStk ? 0 : 1 // no need to scale bg image in vivisticker
+      const offset = this.$isStk || this.$isCm ? 0 : 1 // no need to scale bg image in vivisticker
       const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
       const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
@@ -345,7 +345,7 @@ export default defineComponent({
             previewSrc: ''
           })
           this.src = ''
-          stkWVUtils.setLoadingFlag(-1)
+          layerUtils.setLoadingFlag(-1)
           const modalBtn = {
             msg: i18n.global.t('STK0023') as string,
           }
@@ -392,7 +392,7 @@ export default defineComponent({
       })
     },
     handleIsTransparent(img? : HTMLImageElement) {
-      if (!this.$refs.img) return
+      if (!img && !this.$refs.img) return
 
       this.$store.commit('SET_backgroundImageStyles', {
         pageIndex: this.pageIndex,
@@ -467,8 +467,9 @@ export default defineComponent({
     },
     stylesConverter(): { [key: string]: string } {
       return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
+        // use Math.ceil fro solving sub-pixel-rendering error
+        width: `${Math.ceil(this.imageSize.width)}px`,
+        height: `${Math.ceil(this.imageSize.height)}px`,
         transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${this.flipStyles.transform}`
       }
     },
@@ -552,14 +553,14 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
         }
       }, { crossOrigin: true })
-      if (this.$isStk) {
+      if (this.$isStk || this.$isCm) {
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            stkWVUtils.setLoadingFlag(-1)
+            layerUtils.setLoadingFlag(-1)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -574,8 +575,8 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
-      if (this.$isStk) {
-        stkWVUtils.setLoadingFlag(-1)
+      if (this.$isStk || this.$isCm) {
+        layerUtils.setLoadingFlag(-1)
       }
     }
   }

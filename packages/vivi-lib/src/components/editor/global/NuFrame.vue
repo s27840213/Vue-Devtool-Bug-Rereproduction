@@ -67,7 +67,6 @@ import generalUtils from '@/utils/generalUtils'
 import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -153,7 +152,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration }, this.subLayerIndex)
         }
       } else if (!json.decoration && config.decoration) {
-        if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
+        if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: undefined }, this.subLayerIndex)
       }
 
@@ -177,7 +176,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop }, this.subLayerIndex)
         }
       } else if (!json.decorationTop && config.decorationTop) {
-        if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
+        if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: undefined }, this.subLayerIndex)
       }
 
@@ -237,13 +236,13 @@ export default defineComponent({
         })
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
-      if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     } else {
-      if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     }
   },
   mounted() {
-    if (!this.$isStk) return
+    if (!this.$isStk || this.$isCm) return
     if (this.config.clips.length === 1) {
       if (!this.editorTypeTemplate && this.$route.name !== 'Screenshot') frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
       if (this.config.clips[0].srcObj.type === 'frame') {
@@ -332,12 +331,11 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inScreenshotPreview: 'getInScreenshotPreview',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
     hasDecor(): boolean {

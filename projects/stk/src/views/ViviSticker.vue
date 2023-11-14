@@ -177,7 +177,7 @@ export default defineComponent({
       getPage: 'getPage',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
-      currActiveTab: 'vivisticker/getCurrActiveTab',
+      currActiveTab: 'assetPanel/getCurrActiveTab',
       isInEditor: 'vivisticker/getIsInEditor',
       isInBgShare: 'vivisticker/getIsInBgShare',
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
@@ -198,7 +198,7 @@ export default defineComponent({
       return this.getPage(pageUtils.currFocusPageIndex)
     },
     showFooterTabs(): boolean {
-      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing || this.isInBgRemoveSection)
+      return !(this.isInBgShare || this.isInTemplateShare || this.isInPagePreview || this.isProcessing || this.inBgRemoveMode)
     },
     showVConsole(): boolean {
       return false
@@ -233,7 +233,7 @@ export default defineComponent({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
-      setCurrActiveTab: 'vivisticker/SET_currActiveTab',
+      setCurrActiveTab: 'assetPanel/SET_currActiveTab',
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',

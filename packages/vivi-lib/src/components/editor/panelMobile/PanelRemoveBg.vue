@@ -1,63 +1,49 @@
 <template lang="pug">
 div(class="panel-remove-bg")
   div(class="panel-remove-bg__btns")
-    btn(class="full-width"
-      :type="clearMode && !movingMode ? activeBtnType : inactiveBtnType"
-      :hasIcon="true"
-      :iconName="'clear'"
-      :iconMargin="4"
-      :flexDir="'column'"
-      @click="setClearMode(true)") {{ $t('NN0385') }}
-    btn(class="full-width"
-      :type="clearMode || movingMode ? inactiveBtnType : activeBtnType"
-      :hasIcon="true"
-      :iconName="'preserve'"
-      :iconMargin="4"
-      :flexDir="'column'"
-      @click="setClearMode(false)") {{ $t('NN0386') }}
-    btn(v-if="supportMovingMode" class="full-width"
-      :type="movingMode ? activeBtnType : inactiveBtnType"
-      :hasIcon="true"
-      :iconName="'move-cross'"
-      :iconMargin="4"
-      :flexDir="'column'"
-      @click="setMovingMode(true)") {{ $t('NN0872') }}
-    btn(v-else class="btn-recover full-width"
-      :type="inactiveBtnType"
-      :hasIcon="true"
-      :iconName="'reset'"
-      :iconMargin="4"
-      :flexDir="'column'"
-      @click="restoreInitState()") {{$t('NN0389')}}
-  btn(v-if="supportMovingMode" class="btn-recover full-width my-10"
-    :type="inactiveBtnType"
-    :hasIcon="true"
-    :iconName="'reset'"
-    :iconMargin="4"
-    :flexDir="'column'"
-    @click="restoreInitState()") {{$t('NN0389')}}
-  div(class="panel-remove-bg__slider full my-10")
-    mobile-slider(
-      :title="`${$t('NN0387')}`"
-      :borderTouchArea="true"
-      :name="'brushSize'"
-      :value="_brushSize"
-      :min="minBrushSize"
-      :max="maxBrushSize"
-      @update="setBrushSize")
-  div(class="panel-remove-bg__original full flex items-center")
-    svg-icon(class="mr-5"
-      :iconColor="showInitImage ? showInitColor : hideInitColor"
-      :iconName="showInitImage ? 'checkbox-checked' : 'checkbox'"
-      :iconWidth="'16px'"
-      @click="toggleShowInitImage(showInitImage)")
-    span(class="label-mid") {{$t('NN0388')}}
+    div(class="panel-remove-bg__btns__icon"
+        :class="{ active: showInitImage }"
+        @click="toggleShowInitImage(showInitImage)")
+      svg-icon(:iconName="showInitImage ? 'eye-slash' : 'eye'" iconWidth="24px" :iconColor="activeColor")
+    slide-toggle(:options="modes"
+      v-model="currMode"
+      :bgColor="$isStk || $isCm ? 'black-3-5' : 'gray-6'"
+      :switchColor="'white'"
+      :activeColor="$isStk || $isCm ? 'black-2' : 'blue-1'"
+      :inActiveColor="$isStk || $isCm ? 'white' : 'gray-2'"
+      :optionWidth="'80px'"
+      :optionHeight="'32px'"
+      textSize="caption-SM")
+    div(class="panel-remove-bg__btns__icon"
+        @click="restoreInitState")
+      svg-icon(iconName="reset"
+              iconWidth="24px" 
+              :iconColor="modifiedFlag ? activeColor : disabledColor"
+              style="transform: rotate(90deg);")
+  transition(name="height")
+    div(v-if="currMode !== 'move'" class="panel-remove-bg__slider full")
+      div(class="panel-remove-bg__slider__margin")
+      mobile-slider(
+        :title="`${$t('NN0387')}`"
+        :borderTouchArea="true"
+        :name="'brushSize'"
+        :value="_brushSize"
+        :min="minBrushSize"
+        :max="maxBrushSize"
+        @update="setBrushSize")
 </template>
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import SlideToggle from '@/components/global/SlideToggle.vue'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+
+enum ControlMode {
+  Clear = 'clear',
+  Restore = 'restore',
+  Move = 'move',
+}
 
 export default defineComponent({
   emits: [],
@@ -65,15 +51,24 @@ export default defineComponent({
     return {
       minBrushSize: 1,
       maxBrushSize: 300,
-      activeBtnType: this.$isStk ? 'stk-active-sm' : 'gray-active-sm',
-      inactiveBtnType: this.$isStk ? 'stk-inactive-sm' : 'gray-sm',
-      showInitColor: this.$isStk ? 'black-3' : 'blue-1',
-      hideInitColor: this.$isStk ? 'white' : 'light-gray',
-      supportMovingMode: this.$isStk,
+      modes: [{
+        label: this.$t('NN0385'),
+        value: ControlMode.Clear as string
+      }, {
+        label: this.$t('NN0386'),
+        value: ControlMode.Restore as string
+      }, ...(this.$isStk || this.$isCm ? [{
+        label: this.$t('NN0872'),
+        value: ControlMode.Move as string
+      }] : [])],
+      currMode: ControlMode.Clear as string,
+      activeColor: this.$isStk || this.$isCm ? 'white' : 'gray-2',
+      disabledColor: this.$isStk || this.$isCm ? 'black-3-5' : 'gray-4',
     }
   },
   components: {
-    MobileSlider
+    MobileSlider,
+    SlideToggle,
   },
   computed: {
     ...mapGetters({
@@ -88,12 +83,28 @@ export default defineComponent({
       prevPageScaleRatio: 'bgRemove/getPrevPageScaleRatio',
       bgRemoveIdInfo: 'bgRemove/getIdInfo',
       isProcessing: 'bgRemove/getIsProcessing',
-      _brushSize: 'bgRemove/getBrushSize'
+      _brushSize: 'bgRemove/getBrushSize',
+      steps: 'bgRemove/getSteps'
     }),
   },
   unmounted() {
     this.setMovingMode(false)
     this.updatePinchState({ initPos: { x: -1, y: -1 }, x: 0, y: 0 })
+  },
+  watch: {
+    currMode(newVal) {
+      switch(newVal) {
+        case ControlMode.Clear:
+          this.setClearMode(true)
+          break
+        case ControlMode.Restore:
+          this.setClearMode(false)
+          break
+        case ControlMode.Move:
+          this.setMovingMode(true)
+          break
+      }
+    }
   },
   methods: {
     ...mapMutations({
@@ -126,28 +137,27 @@ export default defineComponent({
     @include pic {
       margin-top: 15px;
     }
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-auto-rows: 1fr;
-    row-gap: 10px;
-    column-gap: 20px;
-    > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    &__icon {
+      @include size(32px);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       &.active {
-        border: 2px solid setColor(blue-1);
-        color: setColor(blue-1);
-        padding: 8px 20px;
+        @include setColors(gray-3, white) using ($color) {
+          background-color: rgba($color, 0.2);
+        }
       }
     }
   }
 
   &__slider {
-    font-size: 14px;
-    font-weight: bold;
-    > div:nth-child(2) {
-      display: grid;
-      grid-template-rows: 1fr;
-      grid-template-columns: 0.75fr 0.25fr;
-      column-gap: 25px;
+    &__margin {
+      @include size(100%, 16px);
     }
   }
 
@@ -155,6 +165,24 @@ export default defineComponent({
     @include setColors(gray-2, white) using ($color) {
       color: $color;
     }
+  }
+}
+
+.height {
+  &-leave-active,
+  &-enter-active {
+    transition: max-height 0.3s;
+  }
+
+  &-leave-from,
+  &-enter-to {
+    max-height: 67px; // This is a magic number since mobile-slider height is fixed. (51px + margin: 16px)
+    // should use automatic way instead in the future (currently no such tech, transition on grid-template-rows is not working)
+  }
+
+  &-leave-to,
+  &-enter-from {
+    max-height: 0;
   }
 }
 

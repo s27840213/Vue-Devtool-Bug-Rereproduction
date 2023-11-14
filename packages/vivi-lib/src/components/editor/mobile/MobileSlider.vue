@@ -73,7 +73,7 @@ export default defineComponent({
     },
     theme: {
       type: String,
-      default: generalUtils.isStk ? 'light' : 'dark'
+      default: (generalUtils.isStk || generalUtils.isCm) ? 'light' : 'dark'
     },
     autoRecord: {
       type: Boolean,

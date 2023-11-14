@@ -4,7 +4,7 @@
 @function setColor($color, $opacity: 1) {
   // Because rgba don't accept transparent.
   @if $color == transparent {
-    @return transparent
+    @return transparent;
   }
 
   @if map-has-key($map: $colors, $key: $color) {
@@ -41,5 +41,18 @@
 }
 
 @function setLinearGradient($gradient) {
-  @return map-get($linear-gradient, $gradient)
+  @return map-get($linear-gradient, $gradient);
+}
+
+// Insert $rule after *:where(.app-*) if exist.
+@function insertRuleAfterApp($rule) {
+  $parent: #{&};
+  
+  @if str-index($parent, '*:where(.app-') {
+    $appRule: nth(nth(&, 1), 1);
+    @return str-insert($parent, ' ' + $rule, str-length($appRule) + 1);
+  }
+  @else {
+    @return '#{$rule} #{$parent}';
+  }
 }

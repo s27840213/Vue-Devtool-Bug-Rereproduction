@@ -1,18 +1,12 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Node",
     "strict": true,
-    "jsx": "preserve",
-    "importHelpers": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "noEmit": true,
     "baseUrl": ".",
     "types": [
@@ -22,6 +16,11 @@
       "vite/client"
     ],
     "paths": {
+      "//": ["Write @nu/vivi-lib/ paths before @/ for import auto complete."],
+      "@nu/vivi-lib/*": [
+        "../../packages/vivi-lib/src/*",
+        "../../packages/vivi-lib/src/index"
+      ],
       "@/*": [
         "./src/*",
         "../../packages/vivi-lib/src/*"
@@ -29,9 +28,17 @@
       "@i18n/*": [
         "./src/i18n/shaked/*"
       ],
-      "@nu/vivi-lib/*": [
-        "../../packages/vivi-lib/src/*",
-        "../../packages/vivi-lib/src/index"
+      "@nu/shared-lib/*": [
+        "../../packages/shared-lib/src/*"
+      ],
+      "@nu/shared-lib": [
+        "../../packages/shared-lib/src/index"
+      ],
+      "@img/*": [
+        "../../packages/vivi-lib/src/assets/img/*"
+      ],
+      "@json/*": [
+        "../../packages/vivi-lib/src/assets/json/*"
       ]
     },
     "lib": [
@@ -51,8 +58,10 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "../../packages/vivi-lib/src/**/*.vue",
+    "../../packages/vivi-lib/src/**/*.ts",
+    "../../packages/shared-lib/src/**/*.vue",
+    "../../packages/shared-lib/src/**/*.ts"
   ],
   "exclude": [
     "node_modules"

@@ -3,17 +3,18 @@ div(class="panel-text-effect")
   //- To choose effect category and effect.
   tabs(v-if="state === 'effects'"
       :tabs="textEffects.map(t => t.label)"
-      v-model="currTabIndex" :theme="$isStk ? 'dark-stk' : 'light'")
+      v-model="currTabIndex" :theme="$isStk || $isCm ? 'dark-stk' : 'light'")
   div(v-if="state === 'effects'"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
         :key="`${currCategoryName}-${effect.key}`"
         :class="{ 'selected': currEffect?.key === effect.key }"
         @click="onEffectClick(currCategory, effect)")
-      svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
+      div(class="panel-text-effect__effects__icon-bg")
+      svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
               :iconName="effectIcon(currCategory, effect).name"
               :iconWidth="effectIcon(currCategory, effect).size"
-              class="panel-text-effect__effects--icon" iconColor="gray-5")
+              class="panel-text-effect__effects--icon" :iconColor="theme === 'dark' ? 'white' : 'black-2'")
       img(v-else :src="effectIcon(currCategory, effect).name"
           class="panel-text-effect__effects--icon"
           :width="effectIcon(currCategory, effect).size"
@@ -45,9 +46,9 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'select' && option.key !== 'endpoint'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select" :key="sel.key"
+            :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }"
             @click="handleSelectInput(sel)")
-          img(:src="sel.img"
-              :class="{'selected': ((currentStyle[option.key] as Record<'key', string>).key ?? currentStyle[option.key]) === sel.key }")
+          img(:src="sel.img")
           pro-item(v-if="sel.plan" theme="roundedRect")
       //- Option type range
       mobile-slider(v-if="option.type === 'range'"
@@ -77,8 +78,11 @@ div(class="panel-text-effect")
         img(:src="getStyleImg")
         div
         svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
-    span(class="panel-text-effect__reset"
-        @click="resetTextEffect()") {{$t('NN0754')}}
+    nubtn(class="panel-text-effect__reset"
+          theme="icon_pill"
+          :icon="['reset', 'white']"
+          size="sm"
+          @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -92,7 +96,6 @@ import colorUtils from '@/utils/colorUtils'
 import { IEffect, IEffectCategory } from '@/utils/constantData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
@@ -149,6 +152,12 @@ export default defineComponent({
         this.currEffect?.options.some(op => op.type === 'img') &&
         !this.currentStyle.customImg) return 'effects' // No customImg, no options.
       return this.panelHistory.length === 0 ? 'effects' : 'options'
+    },
+    iconBgColor(): string {
+      return (this.theme === 'dark' ? colorUtils.colorMap.get('black-3') : colorUtils.colorMap.get('gray-5')) ?? 'white'
+    },
+    moreBgColor(): string {
+      return this.theme === 'dark' ? 'rgba(20, 20, 20, 0.5)' : 'rgba(71, 74, 87, 0.6)'
     }
   },
   mounted() { /**/ },
@@ -166,8 +175,7 @@ export default defineComponent({
       }
     },
     async onEffectClick(category: IEffectCategory, effect: IEffect): Promise<void> {
-      if (this.$isPic && !paymentUtils.checkPro(effect, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(effect, 'text')) return
+      if (!paymentUtils.checkProApp(effect, 'pro-text', 'text')) return
       const chooseImgkey = effect.options.find(op => op.type === 'img')?.key ?? ''
 
       if (effect.key !== this.currentStyle.name) {
@@ -249,24 +257,32 @@ export default defineComponent({
         @include setColors(blue-1, white) using ($color) {
           border: 2px solid $color;
         }
-        & > img, & > svg {
+        > img, > svg {
           transform: scale(0.85);
         }
-        & > div {
+        > div {
+          border-radius: 3px;
           width: 47.6px;
           height: 47.6px;
         }
       }
       .panel-text-effect__effects--icon {
-        background-color: setColor(gray-5);
         border-radius: 5px;
         object-fit: cover;
         pointer-events: none;
-        transition: transform 0.3s;
-        &.svg-icon {
-          padding: 16px;
-        }
       }
+    }
+    &__icon-bg {
+      z-index: -1;
+      border-radius: 5px;
+      background-color: v-bind(iconBgColor);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      transition: width 0.3s, height 0.3s;
     }
     &--more {
       display: flex;
@@ -279,7 +295,7 @@ export default defineComponent({
       width: 56px;
       height: 56px;
       border-radius: 3px;
-      background: rgba(71, 74, 87, 0.6);
+      background: v-bind(moreBgColor);
       backdrop-filter: blur(2px);
       transition: width 0.3s, height 0.3s;
     }
@@ -289,7 +305,9 @@ export default defineComponent({
     @include no-scrollbar;
     display: grid;
     gap: 10px;
-    margin: 0 15px 15px 15px;
+    @include not(cm) {
+      margin: 0 15px 15px 15px;
+    }
     overflow-y: scroll;
   }
 
@@ -328,10 +346,17 @@ export default defineComponent({
       box-sizing: border-box;
       height: 42px;
       border-radius: 5px;
-      background-color: setColor(gray-5);
+      @include setColors(gray-5, black-3) using ($color) {
+        background-color: $color;
+      }
       &.selected {
         @include setColors(blue-1, white) using ($color) {
-          @include selection-border(2px, $color);
+          background-color: $color;
+        } 
+        & > span {
+          @include setColors(white, black-1) using ($color) {
+            color: $color;
+          }
         }
       }
       > img {
@@ -351,21 +376,23 @@ export default defineComponent({
       width: 100%;
       height: 0;
       padding-top: 100%;
+      border-radius: 4px;
+      transition: all 0.3s;
+      @include setColors(gray-5, black-3) using ($color) {
+        background-color: $color;
+      }
+      &.selected {
+        @include setColors(blue-1, white) using ($color) {
+          @include selection-border(2px, $color);
+        }
+      }
       > img:not(.pro) {
-        @include selection-border(1px, gray-5);
         position: absolute;
         width: 100%;
         height: 100%;
         object-fit: cover;
         top: 0;
-        border-radius: 4px;
-        transition: all 0.3s;
         pointer-events: none;
-        &.selected {
-          @include setColors(blue-1, white) using ($color) {
-            @include selection-border(2px, $color);
-          }
-        }
       }
       .pro {
         top: 2px;
@@ -401,11 +428,7 @@ export default defineComponent({
   }
 
   &__reset {
-    @include btn-SM;
-    @include setColors(blue-1, white) using ($color) {
-      color: $color;
-    }
-    text-align: center;
+    margin: 6px auto 0;
   }
 }
 </style>

@@ -1,49 +1,13 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "strict": true,
-    "jsx": "preserve",
-    "importHelpers": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "baseUrl": ".",
-    "types": [
-      "webpack-env",
-      "resize-observer-browser",
-      "tpdirect",
-      "vite/client"
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
+  "//1": "https://juejin.cn/post/7126043888573218823",
+  "//2": "https://juejin.cn/post/7257517788205367351",
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
-  },
-  "vueCompilerOptions": {
-    "plugins": [
-      "@vue/language-plugin-pug"
-    ]
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue"
-  ],
-  "exclude": [
-    "node_modules"
+    {
+      "path": "./tsconfig.app.json"
+    }
   ]
 }

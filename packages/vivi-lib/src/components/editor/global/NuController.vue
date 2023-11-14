@@ -91,19 +91,20 @@ div(:layer-index="`${layerIndex}`"
                 :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
                 @pointerdown.stop="lineEndMoveStart"
                 @touchstart="disableTouchEvent")
-        div(v-for="(resizer, index) in getResizer(controlPoints)"
-            v-show="!isMoving"
-            :key="index"
-            class="control-point__resize-bar-wrapper")
-          div(class="control-point"
-              :key="`resizer-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-          div(class="control-point"
-              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+        template(v-if="!config.hideResizer")
+          div(v-for="(resizer, index) in getResizer(controlPoints)"
+              v-show="!isMoving"
+              :key="index"
+              class="control-point__resize-bar-wrapper")
+            div(class="control-point"
+                :key="`resizer-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+            div(class="control-point"
+                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()" )
           div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
               v-show="!isMoving"
@@ -315,7 +316,7 @@ export default defineComponent({
       eventTarget: null as unknown as HTMLElement,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any,
-      actionColor: this.$isStk ? 'black-1' : 'blue-2',
+      actionColor: (this.$isStk || this.$isCm ) ? 'black-1' : 'blue-2',
     }
   },
   mounted() {
@@ -347,13 +348,12 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTextLike: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
@@ -395,21 +395,24 @@ export default defineComponent({
     },
     sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.$isTouchDevice(), this.config.size?.[0])
+      const { ctrlrPadding = 0 } = this.config.styles
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      const finalWidth = width * _f
-      const finalHeight = height * _f
-      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
-      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY}px)`
+      const scaledWidth = width * _f
+      const scaledHeight = height * _f
+      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(scaledWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
+      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(scaledHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX - ctrlrPadding}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY - ctrlrPadding}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
+      const finalWidth = (this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, scaledWidth) : scaledWidth) + 2 * ctrlrPadding
+      const finalHeight = (this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, scaledHeight) : scaledHeight) + 2 * ctrlrPadding
       return {
         transform,
-        width: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalWidth) : finalWidth}px`,
-        height: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalHeight) : finalHeight}px`
+        width: `${finalWidth}px`,
+        height: `${finalHeight}px`
       }
     },
     subContentStyles(): any {
@@ -534,6 +537,10 @@ export default defineComponent({
     this.setMoving(false)
 
     popupUtils.closePopup()
+
+    if (this.config && this.config.ctrlUnmountCb) {
+      this.config.ctrlUnmountCb(this.pageIndex, this.layerIndex,this.config);
+    }
   },
   methods: {
     ...mapMutations({
@@ -1068,7 +1075,7 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     resizeStart(event: MouseEvent, type: string) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.config.hideResizer) {
         return
       }
       if (eventUtils.checkIsMultiTouch(event)) {
