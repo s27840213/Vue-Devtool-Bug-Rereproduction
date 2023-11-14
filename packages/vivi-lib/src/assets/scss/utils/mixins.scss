@@ -87,7 +87,7 @@
   margin-right: -10px;
 
   // Firefox & Safari mobile never display scrollbar, cancel minus margin.
-  .mobile-panel & {
+  @at-root #{insertRuleAfterApp('.mobile-panel')} {
     @include firefoxOnly {
       margin-right: 0;
     }

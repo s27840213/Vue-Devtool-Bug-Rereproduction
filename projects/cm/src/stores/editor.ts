@@ -10,7 +10,8 @@ import { useCanvasStore } from './canvas'
 
 export interface IGenResult {
   id: string
-  url: string
+  url: string,
+  video?: string
 }
 
 interface IEditorStore {
@@ -24,7 +25,7 @@ interface IEditorStore {
   currGenResultIndex: number
   stepsTypesArr: Array<'canvas' | 'editor'>
   currStepTypeIndex: number
-  initImgSrc: string
+  initImgSrc: string,
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -84,6 +85,9 @@ export const useEditorStore = defineStore('editor', {
     isInEditorLastStep(): boolean {
       return stepsUtils.isInLastStep
     },
+    currGeneratedResults(): { id: string; url: string, video?: string } {
+      return this.generatedResults[this.currGenResultIndex]
+    },
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -118,9 +122,15 @@ export const useEditorStore = defineStore('editor', {
         id,
       })
     },
-    updateGenResult(url: string, id: string) {
+    updateGenResult(id: string, data: { url?: string, video?: string }) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
-      Object.assign(this.generatedResults[index], { url })
+      const { url, video } = data
+      if (url) {
+        this.generatedResults[index].url = url
+      }
+      if (video) {
+        this.generatedResults[index].video = video
+      }
     },
     clearGeneratedResults() {
       this.generatedResults = []

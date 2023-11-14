@@ -54,10 +54,10 @@ import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -151,7 +151,7 @@ export default defineComponent({
   },
   async created() {
     const { srcObj } = this
-    if (!srcObj || !srcObj.type) return
+    // if (!srcObj || !srcObj.type) return
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
@@ -205,7 +205,7 @@ export default defineComponent({
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
-      return !srcObj || srcObj.assetId === ''
+      return !srcObj || srcObj.type === ''
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
@@ -345,7 +345,7 @@ export default defineComponent({
             previewSrc: ''
           })
           this.src = ''
-          stkWVUtils.setLoadingFlag(-1)
+          layerUtils.setLoadingFlag(-1)
           const modalBtn = {
             msg: i18n.global.t('STK0023') as string,
           }
@@ -467,8 +467,9 @@ export default defineComponent({
     },
     stylesConverter(): { [key: string]: string } {
       return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
+        // use Math.ceil fro solving sub-pixel-rendering error
+        width: `${Math.ceil(this.imageSize.width)}px`,
+        height: `${Math.ceil(this.imageSize.height)}px`,
         transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${this.flipStyles.transform}`
       }
     },
@@ -559,7 +560,7 @@ export default defineComponent({
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            stkWVUtils.setLoadingFlag(-1)
+            layerUtils.setLoadingFlag(-1)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -575,7 +576,7 @@ export default defineComponent({
         this.imgNaturalSize.height = img.height
       }
       if (this.$isStk || this.$isCm) {
-        stkWVUtils.setLoadingFlag(-1)
+        layerUtils.setLoadingFlag(-1)
       }
     }
   }

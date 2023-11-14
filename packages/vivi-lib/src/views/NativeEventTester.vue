@@ -17,7 +17,7 @@ div(class="native-event-tester")
                 v-model="eventParamsStr"
                 @keydown.tab.prevent="insertAtCursor")
     div(class="native-event-tester__row horizontal flex-between")
-      div(class="native-event-tester__option")
+      div(v-if="!useHTTPLike" class="native-event-tester__option")
         checkbox(v-model="doAlertOnTimeout")
         div(class="native-event-tester__label-inverted") alert on timeout (5s)
       nubtn(class="native-event-tester__submit"
@@ -33,7 +33,7 @@ div(class="native-event-tester")
             v-for="record in callbackRecords" :key="record.id"
             @click="selectRecord(record)")
           div(class="native-event-tester__label") {{ record.name }}
-    div(class="native-event-tester__row horizontal flex-between")
+    div(v-if="!useHTTPLike" class="native-event-tester__row horizontal flex-between")
       div(class="native-event-tester__option")
         checkbox(v-model="doClearOnSubmet")
         div(class="native-event-tester__label-inverted") clear on submit
@@ -48,9 +48,10 @@ div(class="native-event-tester")
 
 <script setup lang="ts">
 import Checkbox from '@/components/global/Checkbox.vue'
-import { ICallbackRecord } from '@/interfaces/webView'
+import type { ICallbackRecord } from '@/interfaces/webView'
 import { app, appType, getAutoWVUtils } from '@/utils/autoWVUtils'
 import generalUtils from '@/utils/generalUtils'
+import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
@@ -74,8 +75,19 @@ switch (app) {
     break
 }
 
+const useHTTPLike = computed(() => [appType.Charmix].includes(app))
+
+// #region http-like API
+const HTTPLikeResponse = ref<ICallbackRecord | undefined>(undefined)
+const eventId = ref('')
+// #endregion
+
 const store = useStore()
-const callbackRecords = computed(() => store.getters['webView/getCallbackRecords'])
+const callbackRecords = computed((): ICallbackRecord[] => {
+  return useHTTPLike.value
+    ? (HTTPLikeResponse.value === undefined ? [] : [HTTPLikeResponse.value])
+    : (store.getters['webView/getCallbackRecords'] as ICallbackRecord[]) // for two-way API
+})
 
 const leaveStyles = computed(() => {
   const userInfo = getAutoWVUtils().getUserInfoFromStore() as { statusBarHeight?: number }
@@ -137,12 +149,12 @@ watch(() => callbackRecords, (val) => {
   }
 }, { deep: true })
 
-const submitEvent = () => {
-  if (doClearOnSubmet.value) {
+const submitEvent = async () => {
+  if (doClearOnSubmet.value || useHTTPLike.value) {
     clearCallbacks()
   }
   resetEventTimeout()
-  if (doAlertOnTimeout.value) {
+  if (doAlertOnTimeout.value && !useHTTPLike.value) {
     eventTimeout = window.setTimeout(() => {
       notify({ group: 'error', text: 'no reply in 5 seconds' })
     }, 5000)
@@ -150,7 +162,22 @@ const submitEvent = () => {
   try {
     switch (mobileOS.value) {
       case mobileOSType.IOS:
-        getAutoWVUtils().sendToIOS(eventName.value, eventParams, true)
+        if (useHTTPLike.value) {
+          eventId.value = generalUtils.generateAssetId()
+          const httpLikeWVUtils = getAutoWVUtils() as HTTPLikeWebViewUtils<{[key: string]: any}>
+          const response = await httpLikeWVUtils.callIOSAsHTTPAPI(eventName.value, eventParams, { retry: false })
+          if (response === null) {
+            notify({ group: 'error', text: 'request timeouted' })
+          } else {
+            HTTPLikeResponse.value = {
+              name: `Response::${eventName.value}`,
+              id: eventId.value,
+              args: [response]
+            }
+          }
+        } else {
+          getAutoWVUtils().sendToIOS(eventName.value, eventParams, true)
+        }
         break
       case mobileOSType.Android:
         // TODO: implement Android event sender
@@ -165,6 +192,7 @@ const submitEvent = () => {
 const clearCallbacks = () => {
   store.commit('webView/UPDATE_clearCallbackRecords')
   selectedRecord.value = null
+  HTTPLikeResponse.value = undefined
 }
 
 const selectedRecord = ref(null as ICallbackRecord | null)

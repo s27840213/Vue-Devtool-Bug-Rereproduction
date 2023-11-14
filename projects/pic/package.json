@@ -4,12 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "lint": "vue-cli-service lint",
     "build": "vue-cli-service build",
-    "build-only": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
     "build:dev": "vue-cli-service build --mode development",
-    "serve-vite": "vite",
-    "build-vite": "vue-tsc && vite build",
     "preview-cy": "vite preview --port 8080 --outDir dist-cy"
   },
   "main": "./dist/nueditor.common.js",
