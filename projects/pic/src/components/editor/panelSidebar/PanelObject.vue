@@ -50,7 +50,7 @@ div(class="panel-objects")
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@nu/vivi-lib/components/category/CategoryObjectItem.vue'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'

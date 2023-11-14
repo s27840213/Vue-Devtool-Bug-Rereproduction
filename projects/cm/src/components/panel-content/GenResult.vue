@@ -55,7 +55,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { notify } from '@kyvg/vue3-notification'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 

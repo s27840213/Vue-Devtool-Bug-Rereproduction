@@ -128,7 +128,7 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
 import Avatar from '@/components/Avatar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import MobileJumpBtn from '@/components/editor/mobile/MobileJumpBtn.vue'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'

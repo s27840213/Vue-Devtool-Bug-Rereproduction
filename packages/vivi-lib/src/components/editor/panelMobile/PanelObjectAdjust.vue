@@ -116,7 +116,7 @@ div(class="panel-object-adjust")
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import MarkerIcon from '@/components/global/MarkerIcon.vue'
+import MarkerIcon from '@nu/shared-lib/components/MarkerIcon.vue'
 import { IListServiceContentData } from '@/interfaces/api'
 import { AllLayerTypes, IShape } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'

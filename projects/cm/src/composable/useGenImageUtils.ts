@@ -3,8 +3,9 @@ import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import type { GenImageResult } from '@/types/api'
-import { generalUtils, logUtils } from '@nu/shared-lib'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { useEventBus } from '@vueuse/core'
 
 const useGenImageUtils = () => {

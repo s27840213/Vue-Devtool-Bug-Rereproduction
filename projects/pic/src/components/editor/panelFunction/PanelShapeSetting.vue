@@ -206,7 +206,7 @@ div(class="shape-setting")
 import designApis from '@nu/vivi-lib/apis/design-info'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
-import MarkerIcon from '@nu/vivi-lib/components/global/MarkerIcon.vue'
+import MarkerIcon from '@nu/shared-lib/components/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
 import { IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import { AllLayerTypes, IFrame, IShape } from '@nu/vivi-lib/interfaces/layer'

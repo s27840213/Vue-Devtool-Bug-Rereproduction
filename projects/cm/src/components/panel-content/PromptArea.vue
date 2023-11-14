@@ -30,7 +30,7 @@ import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import tutorialUtils from '@/utils/tutorialUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 const editorStore = useEditorStore()
 const { setIsGenerating, unshiftGenResults, setEditorState } = editorStore

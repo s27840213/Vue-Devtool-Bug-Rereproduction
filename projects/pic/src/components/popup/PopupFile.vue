@@ -73,7 +73,7 @@ div(class="popup-file")
 
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 import loginUtils from '@/utils/loginUtils'
 import fileUtils from '@nu/vivi-lib/utils/fileUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
