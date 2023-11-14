@@ -169,7 +169,6 @@ class BgRemoveUtils {
   }
 
   async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {
-    console.time('removeBg total time')
     console.time('send API ~ get response time')
 
     this.setIsProcessing(true)
@@ -195,7 +194,13 @@ class BgRemoveUtils {
     }
     console.timeEnd('generate frontend data time')
     console.timeEnd('removeBg total time')
-    console.log(`backend process time: ${data.duration}ms`)
+    // duration_db => 確認使用者身份的資料庫查詢
+    // duration_download => 從s3下載使用者要去背的圖到lambda
+    // duration_process => 將圖片送給第三方去背api並接收結果
+    // duration_upload => 將去背結果寫回s3，並產生前端可以下載的signed url
+    const { duration_db, duration_download, duration_process, duration_upload } = data
+
+    console.log(`total backend process time: ${duration_db + duration_download + duration_process + duration_upload}ms`)
     console.log(data)
 
     // return data
