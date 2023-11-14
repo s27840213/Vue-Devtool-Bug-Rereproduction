@@ -293,7 +293,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
     const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
-    store.commit('vivisticker/UPDATE_payment', { prices: localPrices ?? defaultPrices[locale] })
+    store.commit('vivisticker/UPDATE_payment', { prices: Object.assign(defaultPrices[locale], localPrices) })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -1414,6 +1414,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
               text: p.priceText
             }
           })
+        })
+        const annuallyPriceOriginal = planInfo.find(p => p.planId === constantData.planId.annually)
+        const annuallyFree0PriceOriginal = planInfo.find(p => p.planId === constantData.planId.annuallyFree0)
+        Object.assign(prices, {
+          ...(annuallyPriceOriginal && { annuallyOriginal: {
+            value: parseFloat(annuallyPriceOriginal.priceValue),
+            text: annuallyPriceOriginal.priceText
+          }}),
+          ...(annuallyFree0PriceOriginal && { annuallyFree0Original: {
+            value: parseFloat(annuallyFree0PriceOriginal.priceValue),
+            text: annuallyFree0PriceOriginal.priceText
+          }})
         })
         store.commit('vivisticker/UPDATE_payment', { prices })
         this.setState('prices', prices)
