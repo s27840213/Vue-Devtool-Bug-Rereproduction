@@ -1453,6 +1453,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.getState('subscribeInfo').then(subscribeInfo => {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
+    } else if (data.reason === 'IAP_DISABLED'){
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [i18n.global.t('STK0096')],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
   }
