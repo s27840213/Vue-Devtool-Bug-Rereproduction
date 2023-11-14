@@ -230,13 +230,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    /**
-     * @param minContentScaleRatio - pre-calculated contentScaleRatio to prevent the size switch animation when doing swipe up/down gesture
-     */
-    minContentScaleRatio: {
-      type: Number,
-      default: 0
-    },
     isAnyBackgroundImageControl: {
       type: Boolean,
       default: false
@@ -290,6 +283,7 @@ export default defineComponent({
       currActivePageIndex: 'getCurrActivePageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
+      contentScaleRatio: 'getContentScaleRatio',
       pages: 'getPages',
       getPage: 'getPage',
       currPanel: 'getCurrSidebarPanelType',
@@ -309,13 +303,6 @@ export default defineComponent({
     }),
     forceRender(): boolean {
       return this.$isTouchDevice() && this.pageIndex === layerUtils.pageIndex
-    },
-    contentScaleRatio(): number {
-      if (this.$isTouchDevice()) {
-        return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
-      } else {
-        return 1
-      }
     },
     config(): IPage {
       if (!this.pageState.config.isEnableBleed) return this.pageState.config
@@ -384,7 +371,7 @@ export default defineComponent({
       let margin = ''
       let position = 'relative'
       let transformOrigin = ''
-      
+
       // charmix don't need to use absolute position
       if (generalUtils.isTouchDevice() && !this.$isCm) {
         const { pinchScale, isPinchingEditor } = this.$store.state.mobileEditor
