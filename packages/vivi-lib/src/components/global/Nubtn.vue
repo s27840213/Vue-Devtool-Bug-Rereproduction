@@ -129,6 +129,9 @@ export default component
     margin-left: auto;
     margin-right: auto;
   }
+  > .svg-icon {
+    margin-right: 8px;
+  }
 }
 
 // Common size
@@ -200,9 +203,6 @@ export default component
   &.disabled {
     background-color: #A3A3A3;
   }
-  > svg {
-    margin-right: 8px;
-  }
 }
 .nubtn.outline {
   @include default-size;
@@ -229,9 +229,6 @@ export default component
   }
 }
 .nubtn.icon_text {
-  svg {
-    margin-right: 8px;
-  }
   &.sm {
     @include btn-SM;
     font-weight: 600;
