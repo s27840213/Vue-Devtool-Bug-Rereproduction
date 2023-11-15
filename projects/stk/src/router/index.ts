@@ -49,11 +49,8 @@ const routes: Array<RouteRecordRaw> = [
           if (recentPanel === 'none') { // prevent panel being 'none' for stk
             recentPanel = 'object'
           }
-          const userSettings = await stkWVUtils.getState('userSettings')
-          if (userSettings) {
-            store.commit('vivisticker/UPDATE_userSettings', userSettings)
-            stkWVUtils.addFontForEmoji()
-          }
+          await store.dispatch('vivisticker/fetchUserSettings')
+          stkWVUtils.addFontForEmoji()
           const hasCopied = await stkWVUtils.getState('hasCopied')
           stkWVUtils.hasCopied = hasCopied?.data ?? false
           stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
@@ -72,6 +69,8 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        await store.dispatch('vivisticker/fetchUserSettings')
+        stkWVUtils.addFontForEmojis()
         stkWVUtils.hideController()
         next()
       } catch (error) {
