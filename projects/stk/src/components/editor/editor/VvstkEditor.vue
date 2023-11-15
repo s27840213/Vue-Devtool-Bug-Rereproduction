@@ -72,7 +72,7 @@ import ShareTemplate from '@/components/editor/mobile/ShareTemplate.vue'
 import PagePreview from '@/components/editor/pagePreview/PagePreview.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
-import { ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
@@ -280,21 +280,24 @@ export default defineComponent({
       this.recordPointer(e)
       if (this.inBgRemoveMode || this.isInBgRemoveSection) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
-      const isClickOnController = controlUtils.isClickOnController(e)
-      if (this.isImgCtrl && !isClickOnController) {
-        const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-        switch (currLayer.type) {
-          case LayerType.image:
-          case LayerType.group:
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-            break
-          case LayerType.frame:
-            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
-              imgControl: false,
-            })
-            break
+      if (this.isImgCtrl) {
+        const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
+          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[0] : layerUtils.getCurrLayer
+        if (!controlUtils.isClickOnController(e, layer)) {
+          const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+          switch (currLayer.type) {
+            case LayerType.image:
+            case LayerType.group:
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+              break
+            case LayerType.frame:
+              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+                imgControl: false,
+              })
+              break
+          }
+          return
         }
-        return
       }
       if (layerUtils.layerIndex !== -1) {
         // when there is an layer being active, the moving logic applied to the EditorView

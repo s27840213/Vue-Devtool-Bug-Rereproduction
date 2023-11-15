@@ -39,7 +39,7 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import store from '@/store'
 import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
-import { ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
 import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
 import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
@@ -342,18 +342,22 @@ export default defineComponent({
         formatUtils.clearCopiedFormat()
       }
 
-      if (this.isImgCtrl && !controlUtils.isClickOnController(e)) {
-        const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-        switch (currLayer.type) {
-          case LayerType.image:
-          case LayerType.group:
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-            break
-          case LayerType.frame:
-            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
-            break
+      if (this.isImgCtrl) {
+        const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
+          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[0] : layerUtils.getCurrLayer
+        if (!controlUtils.isClickOnController(e, layer)) {
+          const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+          switch (currLayer.type) {
+            case LayerType.image:
+            case LayerType.group:
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+              break
+            case LayerType.frame:
+              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+              break
+          }
+          return
         }
-        return
       }
 
       if (controlUtils.isClickOnController(e)) {
