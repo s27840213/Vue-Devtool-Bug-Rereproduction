@@ -1,10 +1,10 @@
 import imageApi from '@/apis/image-api'
 import {
-  IAssetPhoto,
-  IImageSize,
-  IPhotoItem,
-  IUserImageContentData,
-  isIAssetPhoto,
+IAssetPhoto,
+IImageSize,
+IPhotoItem,
+IUserImageContentData,
+isIAssetPhoto,
 } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -25,7 +25,7 @@ import frameDefaultImg from '@img/svg/frame.svg'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v665'
+const APP_VER_FOR_REFRESH_CACHE = 'v785'
 
 class ImageUtils {
   get imageSizeMap(): { [key: string]: number } {
@@ -367,7 +367,7 @@ class ImageUtils {
     return tokens[tokens.length - 3]
   }
 
-  toSrcObj(asset: IAssetPhoto | IPhotoItem) {
+  toSrcObj(asset: IAssetPhoto | IPhotoItem): SrcObj {
     if (!isIAssetPhoto(asset)) {
       return { type: 'unsplash', userId: '', assetId: asset.id }
     }
@@ -874,7 +874,7 @@ class ImageUtils {
     return src
   }
 
-  replaceImg(photo: IAssetPhoto | IPhotoItem, previewSrc: string) {
+  replaceImg(photo: SrcObj, previewSrc: string, aspectRatio: number) {
     const {
       getCurrLayer: layer,
       getCurrConfig: _config,
@@ -884,19 +884,16 @@ class ImageUtils {
     } = LayerUtils
     if (_config.type !== LayerType.image && _config.type !== LayerType.frame) return
 
-    const srcObj = this.toSrcObj(photo)
-
     const resizeRatio = RESIZE_RATIO_IMAGE
     const pageSize = pageUtils.currFocusPageSize
     const pageAspectRatio = pageSize.width / pageSize.height
-    const photoAspectRatio = photo.width / photo.height
     const photoWidth =
-      photoAspectRatio > pageAspectRatio
+      aspectRatio > pageAspectRatio
         ? pageSize.width * resizeRatio
-        : pageSize.height * resizeRatio * photoAspectRatio
+        : pageSize.height * resizeRatio * aspectRatio
     const photoHeight =
-      photoAspectRatio > pageAspectRatio
-        ? (pageSize.width * resizeRatio) / photoAspectRatio
+      aspectRatio > pageAspectRatio
+        ? (pageSize.width * resizeRatio) / aspectRatio
         : pageSize.height * resizeRatio
 
     const isPrimaryLayerFrame = layer.type === LayerType.frame
@@ -924,13 +921,13 @@ class ImageUtils {
     }
     if (isPrimaryLayerFrame) {
       FrameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)
-      FrameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), srcObj)
+      FrameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), photo)
       FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), {
         previewSrc,
       })
     } else {
       LayerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-      LayerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, previewSrc }, subLayerIdx)
+      LayerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: photo, previewSrc }, subLayerIdx)
     }
     store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
     stepsUtils.record()

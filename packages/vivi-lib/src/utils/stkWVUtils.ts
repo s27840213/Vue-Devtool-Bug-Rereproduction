@@ -117,11 +117,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
-  loadingTimeout = 0
   tutorialFlags = {} as { [key: string]: boolean }
-  loadingFlags = {} as { [key: string]: boolean }
-  loadingCallback = undefined as (() => void) | undefined
-  timeoutCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
 
   DEFAULT_USER_INFO: IUserInfo = {
@@ -290,10 +286,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   async setDefaultPrices() {
     const userInfo = this.getUserInfoFromStore()
-    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['payment/getPayment'].defaultPrices as { [key: string]: IPrices }
     const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
-    store.commit('payment/UPDATE_payment', { prices: localPrices ?? defaultPrices[locale] })
+    store.commit('payment/UPDATE_payment', { prices: Object.assign(defaultPrices[locale], localPrices) })
     store.commit('payment/SET_paymentPending', { info: false })
   }
 
@@ -528,96 +524,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.setState('tempDesign', { design: 'none' })
     store.commit('vivisticker/SET_editorType', 'none')
     store.commit('vivisticker/SET_templateShareType', 'none')
-  }
-
-  initLoadingFlags(page: IPage | { layers: ILayer[] }, cbLoad?: () => void, cbTimeout?: () => void, noBg = true, timeout = 60000) {
-    window.clearTimeout(this.loadingTimeout)
-    this.loadingFlags = {}
-    this.loadingCallback = cbLoad
-    this.timeoutCallback = cbTimeout
-    if (this.timeoutCallback) {
-      this.loadingTimeout = window.setTimeout(() => {
-        this.loadingCallback = undefined
-        this.timeoutCallback && this.timeoutCallback()
-        this.timeoutCallback = undefined
-      }, timeout)
-    }
-    for (const [index, layer] of page.layers.entries()) {
-      this.initLoadingFlagsForLayer(layer, index)
-    }
-    if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
-      this.loadingFlags[this.makeFlagKey(-1)] = false
-    }
-    logUtils.setLogAndConsoleLog('ScreenShot::Init:', generalUtils.deepCopy(this.loadingFlags))
-  }
-
-  makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    if (layerIndex === -1) return 'bg'
-    const res = subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}`)
-    // additionKey now used in frame's decoration-related-layers
-    const additionKey = addition ? `_${addition.k}${addition.v ?? ''}` : ''
-    return res + additionKey
-  }
-
-  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    switch (layer.type) {
-      case LayerType.group:
-        for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
-          // this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
-        }
-        break
-      case LayerType.frame: {
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
-        const frame = layer as IFrame
-        const clips = [...frame.clips] as Array<IImage | IShape>
-        if (frame.decoration) {
-          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'd' })] = false
-        }
-        if (frame.decorationTop) {
-          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'dt' })] = false
-        }
-        if (frame.blendLayers?.length) {
-          frame.blendLayers.forEach((_, i) => {
-            this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'b', v: i })] = false
-          })
-        }
-        if (subLayerIndex === -1) {
-          for (const [_clipIndex, subLayer] of clips.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex)
-          }
-        } else {
-          for (const [_clipIndex, subLayer] of clips.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, { k: 'c', v: _clipIndex })
-          }
-        }
-      }
-        break
-      default:
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, addition)] = false
-    }
-  }
-
-  initLoadingFlagsForOneLayer(callback?: () => void) {
-    this.loadingFlags = {}
-    this.loadingCallback = callback
-    this.loadingFlags[this.makeFlagKey(0, -1)] = false
-  }
-
-  setLoadingFlag(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    const key = this.makeFlagKey(layerIndex, subLayerIndex, addition)
-    if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
-      this.loadingFlags[key] = true
-      logUtils.setLogAndConsoleLog('ScreenShot::Set:', generalUtils.deepCopy(this.loadingFlags), key)
-    }
-    if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
-      window.clearTimeout(this.loadingTimeout)
-      this.loadingCallback()
-      this.loadingFlags = {}
-      this.loadingTimeout = 0
-      this.loadingCallback = undefined
-      this.timeoutCallback = undefined
-    }
   }
 
   hideController() {
@@ -1314,7 +1220,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         this.initWithMyDesign(design, {
           callback: (pages: Array<IPage>) => {
             const page = pages[0]
-            this.initLoadingFlags(page, () => {
+            layerUtils.initLoadingFlags(page, () => {
               this.handleFrameClipError(page)
             })
           },
@@ -1436,6 +1342,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.showUpdateModal()
       return
     }
+    const userInfo = this.getUserInfoFromStore()
+    const {
+      currency,
+      monthly: monthlyPrice,
+      annually: annuallyPrice,
+      annuallyOriginal: annuallyPriceOriginal
+    } = store.getters['payment/getPayment'].prices
     const params = {
       target: target ?? 'frame',
       theme: 'stk',
@@ -1472,13 +1385,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           key: 'monthly',
           title: i18n.global.t('NN0514'),
           subTitle: '',
-          price: store.getters['payment/getPayment'].prices.monthly.text
+          price: this.formatPrice(monthlyPrice.value, currency, monthlyPrice.text)
         },
         {
           key: 'annually',
           title: i18n.global.t('NN0515'),
           subTitle: '',
-          price: store.getters['payment/getPayment'].prices.annually.text
+          price: this.formatPrice(annuallyPrice.value, currency, annuallyPrice.text),
+          originalPrice: this.formatPrice(annuallyPriceOriginal.value, currency, annuallyPriceOriginal.text, 'original')
         }
       ],
       comparisons: [
@@ -1490,7 +1404,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       ],
       termsOfServiceUrl: i18n.global.t('STK0053'),
       privacyPolicyUrl: i18n.global.t('STK0052'),
-      defaultTrialToggled: store.getters['payment/getPayment'].trialCountry.includes(this.getUserInfoFromStore().storeCountry)
+      defaultTrialToggled: store.getters['payment/getPayment'].trialCountry.includes(userInfo.storeCountry),
+      isPromote: store.getters['payment/getPromote'].includes(userInfo.storeCountry)
     } as IFullPagePaymentConfigParams
     store.commit('SET_fullPageConfig', { type: 'payment', params })
   }
@@ -1520,7 +1435,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       Object.assign(prices, {
         [plan]: {
           value: parseFloat(p.priceValue),
-          text: this.formatPrice(p.priceValue, priceCurrency, p.priceText)
+          text: p.priceText
         }
       })
     })
@@ -1538,9 +1453,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getSubscribeInfo() {
-    const planIds = store.getters['payment/getPayment'].planId
+    const planIds = Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
     this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
-    this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: Object.values(planIds) })
+    this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: planIds })
   }
 
   subscribeResult(data: ISubscribeResult | ISubscribeResultV1_45) {
@@ -1551,17 +1466,27 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (isGetProducts(data)) {
         const { planInfo, priceCurrency } = data
         const planIds = store.getters['payment/getPayment'].planId
-        if (planInfo.length !== Object.keys(planIds).length) return
         const prices = { currency: priceCurrency }
         planInfo.forEach(p => {
           const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
-          if (!plan) return
-          Object.assign(prices, {
+          plan && Object.assign(prices, {
             [plan]: {
               value: parseFloat(p.priceValue),
-              text: this.formatPrice(p.priceValue, priceCurrency, p.priceText)
+              text: p.priceText
             }
           })
+        })
+        const annuallyPriceOriginal = planInfo.find(p => p.planId === constantData.planId.annually)
+        const annuallyFree0PriceOriginal = planInfo.find(p => p.planId === constantData.planId.annuallyFree0)
+        Object.assign(prices, {
+          ...(annuallyPriceOriginal && { annuallyOriginal: {
+            value: parseFloat(annuallyPriceOriginal.priceValue),
+            text: annuallyPriceOriginal.priceText
+          }}),
+          ...(annuallyFree0PriceOriginal && { annuallyFree0Original: {
+            value: parseFloat(annuallyFree0PriceOriginal.priceValue),
+            text: annuallyFree0PriceOriginal.priceText
+          }})
         })
         store.commit('payment/UPDATE_payment', { prices })
         this.setState('prices', prices)
@@ -1589,6 +1514,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.getState('subscribeInfo').then(subscribeInfo => {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
+    } else if (data.reason === 'IAP_DISABLED'){
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [i18n.global.t('STK0096')],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
     }
     store.commit('payment/SET_paymentPending', { purchase: false, restore: false })
   }
@@ -1761,11 +1694,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.setLoadingOverlayShow(true)
   }
 
-  formatPrice(price: number | string, currency: string, fallbackText?: string) {
+  formatPrice(price: number | string, currency: string, fallbackText?: string, theme?: 'modal' | 'original') {
     const currencyFormatters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
-      JPY: (value: string) => `¥${value}円(税込)`
+      JPY: (value: string) => {
+        if (theme === 'modal') return `¥${value}`
+        if (theme === 'original') return `¥${value}円`
+        return `¥${value}円(税込)`
+      }
     } as { [key: string]: (value: string) => string }
     if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
     return currencyFormatters[currency](price.toString())

@@ -2,14 +2,14 @@ import listApi from '@/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-IGroup,
-IImage,
-IImageStyle,
-IShape,
-ISpanStyle,
-IStyle,
-IText,
-ITmp,
+  IGroup,
+  IImage,
+  IImageStyle,
+  IShape,
+  ISpanStyle,
+  IStyle,
+  IText,
+  ITmp,
 } from '@/interfaces/layer'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
@@ -788,7 +788,7 @@ class AssetUtils {
   ) {
 
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb, record = true } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const resizeRatio =
       attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_IMAGE
@@ -872,9 +872,7 @@ class AssetUtils {
     let srcObj
     let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
-      console.log(url)
       const type = ImageUtils.getSrcType(url)
-      console.log(type)
       assetId = ['logo-private', 'private'].includes(type)
         ? assetIndex
         : isPreview
@@ -928,7 +926,10 @@ class AssetUtils {
     layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
     GroupUtils.select(targetPageIndex, [index])
-    stepsUtils.record()
+    console.log(record)
+    if(record) {
+      stepsUtils.record()
+    }
   }
 
   addGroupTemplate(

@@ -9,6 +9,7 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { h, resolveComponent } from 'vue'
+import { RouteRecordRaw } from 'vue-router'
 
 const routes = [
   {
@@ -65,7 +66,25 @@ const routes = [
     },
     component: () => import('@nu/vivi-lib/views/NubtnList.vue'),
   },
-]
+] as RouteRecordRaw[]
+
+if (window.location.host !== 'cm.vivipic.com') {
+  routes.push({
+    path: 'svgicon',
+    name: 'SvgIconView',
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
+  })
+  routes.push({
+    path: 'nativeevttest',
+    name: 'NativeEventTester',
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
+  })
+  routes.push({
+    path: 'emoji',
+    name: 'EmojiTest',
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
+  })
+}
 
 router.addRoute({
   // Include the locales you support between ()

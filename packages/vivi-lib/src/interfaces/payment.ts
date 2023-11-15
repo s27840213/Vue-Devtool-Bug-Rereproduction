@@ -188,10 +188,28 @@ export interface IPrices {
   currency: string,
   monthly: IPrice,
   annually: IPrice,
-  annuallyFree0: IPrice
+  annuallyFree0: IPrice,
+  annuallyOriginal: IPrice,
+  annuallyFree0Original: IPrice
 }
 export interface IPaymentPending {
   info: boolean,
   purchase: boolean,
   restore: boolean
+}
+export interface IPayment {
+  subscribe: boolean,
+  prices: IPrices,
+  defaultPrices: { [key: string]: IPrices },
+  trialDays: number,
+  trialCountry: string[],
+  pending: IPaymentPending,
+  planId: {
+    monthly: string,
+    annually: string,
+    annuallyFree0: string,
+    annuallyOriginal: string,
+    annuallyFree0Original: string
+  },
+  promote: string[]
 }

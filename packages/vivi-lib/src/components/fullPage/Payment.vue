@@ -38,7 +38,12 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
             div(class="payment__btn-plan__content__title__main caption-LG") {{ btnPlan.title }}
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub")
               span {{ btnPlan.subTitle }}
-          div(class="payment__btn-plan__content__price text-H6") {{ btnPlan.price }}
+          div(class="payment__btn-plan__content__price text-H6" :class="{'text-H7': isPromote && btnPlan.originalPrice && (payment.prices.currency === 'JPY')}")
+            div(v-if="isPromote && btnPlan.originalPrice" class="payment__btn-plan__content__price__original")
+              span 
+                del {{ btnPlan.originalPrice }}
+              svg-icon(iconName="vivisticker_arrow" iconWidth="20px")
+            span(:class="{'text-alarm': isPromote && btnPlan.originalPrice}") {{ btnPlan.price }}
         div(v-if="btnPlan.key === planSelected && btnPlan.key === 'annually'" class="payment__btn-plan__content__tag")
           span(class="caption-SM") {{ localizedTag }}
     div(class="payment__trial")
@@ -78,37 +83,15 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
 import ToggleBtn from '@/components/global/ToggleBtn.vue'
-import { IPaymentPending, IPrices, IStkProFeatures, ICmProFeatures } from '@/interfaces/payment'
+import { IPaymentPending, IPrices, IStkProFeatures, ICmProFeatures, IPayment } from '@/interfaces/payment'
 import networkUtils from '@/utils/networkUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
+import constantData from '@/utils/constantData'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-
-type ICarouselItem = {
-  key: IStkProFeatures | ICmProFeatures,
-  title: string
-  img: string
-}
-
-type ICard = {
-  iconName: string,
-  title: string
-}
-
-type IBtnPlan = {
-  key: 'monthly' | 'annually',
-  title: string
-  subTitle: string
-  price: string
-}
-
-type IComparison = {
-  feature: string,
-  free: boolean,
-  pro: boolean
-}
+import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
 
 export default defineComponent({
   emits: ['canShow'],
@@ -129,19 +112,19 @@ export default defineComponent({
       default: false
     },
     carouselItems: {
-      type: Array as PropType<ICarouselItem[]>,
+      type: Array as PropType<IFullPagePaymentConfigParams['carouselItems']>,
       default: () => []
     },
     cards: {
-      type: Array as PropType<ICard[]>,
+      type: Array as PropType<IFullPagePaymentConfigParams['cards']>,
       default: () => []
     },
     btnPlans: {
-      type: Array as PropType<IBtnPlan[]>,
+      type: Array as PropType<IFullPagePaymentConfigParams['btnPlans']>,
       default: () => []
     },
     comparisons: {
-      type: Array as PropType<IComparison[]>,
+      type: Array as PropType<IFullPagePaymentConfigParams['comparisons']>,
       default: () => []
     },
     termsOfServiceUrl: {
@@ -151,6 +134,10 @@ export default defineComponent({
     privacyPolicyUrl: {
       type: String,
       default: ''
+    },
+    isPromote: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -194,9 +181,11 @@ export default defineComponent({
       pending: (state: any) => state.pending as IPaymentPending,
     }),
     ...mapGetters({
-      payment: 'payment/getPayment',
       isPaymentPending: 'payment/getIsPaymentPending'
     }),
+    payment(): IPayment {
+      return this.$store.getters['payment/getPayment'] as IPayment
+    },
     txtBtnSubscribe() {
       return this.isTrialToggled ? this.$t('STK0046') : this.$t('STK0047')
     },
@@ -576,6 +565,17 @@ export default defineComponent({
       &__price {
         position: relative;
         text-align: right;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        &__original{
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          > svg {
+            transform: rotate(180deg);
+          }
+        }
       }
       &__tag {
           align-self: start;

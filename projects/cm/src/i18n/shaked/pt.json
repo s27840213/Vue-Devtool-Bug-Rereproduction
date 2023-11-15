@@ -78,6 +78,7 @@
   "NN0162": "Termos de Uso",
   "NN0165": "Configurações da conta",
   "NN0166": "Login e Segurança",
+  "NN0167": "Sair",
   "NN0172": "Nome",
   "NN0173": "Endereço de email",
   "NN0187": "Todos os meus designs",
@@ -112,6 +113,7 @@
   "NN0386": "Restaurar",
   "NN0387": "Tamanho do pincel",
   "NN0393": "Desculpe, não encontramos nenhum {target} para \"{keyword}\". Por favor, tente um termo de pesquisa diferente.",
+  "NN0416": "Foto",
   "NN0418": "Brilho",
   "NN0419": "Sombras de correspondência de cores",
   "NN0420": "Sombra em contato",
@@ -237,6 +239,7 @@
   "NN0886": "Cauda movimento",
   "NN0887": "Posição da cauda",
   "NN0888": "Distância de movimento",
+  "NN0889": "Salvar no Rolo da Câmera",
   "NN0890": "Cor interna",
   "NN0891": "Cor externa",
   "NN0892": "Traço interno",
@@ -295,5 +298,6 @@
   "STK0092": "Próximo aos Fundos",
   "STK0093": "Vamos explorar",
   "STK0094": "Teste grátis ativado.",
-  "STK0095": "Use {day}-Dia de teste grátis."
+  "STK0095": "Use {day}-Dia de teste grátis.",
+  "STK0096": "Acesse Ajustes  > Tempo de Uso > Conteúdo e privacidade > Compras no iTunes e App Store > Toque em “Compras Dentro de Apps” e selecione a opção Permitir."
 }

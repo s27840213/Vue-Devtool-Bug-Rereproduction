@@ -5,9 +5,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       rel="stylesheet"
       type="text/css")
   tutorial
-  div(class="main-page-headerbar w-full flex justify-between items-center box-border px-16"
-      ref="headerbarRef"
-      :style="headerbarStyles")
+  div(class="w-full justify-between items-center box-border px-16 h-72"
+      :class="atMainPage ? 'flex' : 'hidden'")
     router-link(
       custom
       :to="'/'"
@@ -28,12 +27,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         :theme="'primary'"
         :hasIcon="true"
         iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
-  router-view(class="box-border pb-12" v-slot="{ Component, route }")
+  router-view(
+    class="box-border pb-12 min-h-full row-start-2 row-end-3"
+    v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(class="z-bottom-panel" :style="disableBtmPanelTransition ? 'transition: none' : ''")
+  bottom-panel(v-if="!atEventTester && !isDuringCopy"
+    class="z-bottom-panel row-start-3 row-end-4"
+    :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
+    :style="disableBtmPanelTransition ? 'transition: none' : ''")
     template(#content="{setSlotRef}")
       transition(
         name="bottom-panel-transition"
@@ -62,22 +66,30 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     modal-card
   transition(name="bottom-up")
     full-page(v-if="fullPageType !== 'none'" class="full-page")
+  spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
   notifications(
-    group="copy"
+    class="notification flex justify-center items-center"
     position="top center"
-    width="300px"
+    group="success"
     :max="2"
     :duration="2000")
     template(v-slot:body="{ item }")
-      div(class="notification copy" v-html="item.text")
-  notifications(
-    group="error"
-    position="top center"
-    width="300px"
-    :max="1"
-    :duration="5000")
-    template(v-slot:body="{ item }")
-      div(class="notification error " v-html="item.text")
+      div(class="notification__content")
+        cm-svg-icon(iconName="ok-hand")
+        span( v-html="item.text")
+  //- notifications(
+  //-   group="error"
+  //-   position="top center"
+  //-   width="300px"
+  //-   :max="1"
+  //-   :duration="5000")
+  //-   template(v-slot:body="{ item }")
+  //-     div(class="notification error " v-html="item.text")
+  transition(name="bottom-up")
+    div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
+        action-sheet(
+          :primaryActions="primaryActions"
+          :secondaryActions="secondaryActions")
 </template>
 
 <script setup lang="ts">
@@ -90,7 +102,10 @@ import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-import VConsole from 'vconsole'
+// import VConsole from 'vconsole'
+import { useGlobalStore } from '@/stores/global'
+import Spinner from '@nu/vivi-lib/components/global/Spinner.vue'
+import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
@@ -101,16 +116,15 @@ import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import Popup from './components/popup/Popup.vue'
+import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
-import { useStore } from 'vuex'
 import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
-// #region route info
-const stateInfo = useStateInfo()
+// #region state info
 const {
   inAspectRatioState,
   showHomeTabs,
@@ -120,10 +134,15 @@ const {
   atMyDesign,
   atSettings,
   atMainPage,
+  atEventTester,
   showImgSelector,
   inGenResultState,
   inSavingState,
-} = stateInfo
+} = useStateInfo()
+
+const globalStore = useGlobalStore()
+const { showSpinner, spinnerText } = storeToRefs(globalStore)
+const fullPageType = computed(() => store.getters.getFullPageType)
 // #endregion
 
 // #region function panel
@@ -168,16 +187,9 @@ const closeModal = () => {
   modalStore.closeModal()
 }
 
-const headerbarRef = ref<HTMLElement | null>(null)
-const headerbarStyles = computed(() => {
-  return {
-    height: atMainPage.value ? '72px' : '0px',
-    opacity: atMainPage.value ? 1 : 0,
-  }
-})
-
 // #region mobile panel
 const store = useStore()
+const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const currColorEvent = ref('')
 const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
@@ -241,10 +253,20 @@ onBeforeUnmount(() => {
 })
 // #endregion
 
-const vConsole = new VConsole({ theme: 'dark' })
-vConsole.setSwitchPosition(25, 80)
+// const vConsole = new VConsole({ theme: 'dark' })
+// vConsole.setSwitchPosition(25, 80)
 
-const fullPageType = computed(() => store.getters.getFullPageType)
+// watch(isDuringCopy, (newVal) => {
+//   if (newVal) {
+//     vConsole.hideSwitch()
+//   } else {
+//     vConsole.showSwitch()
+//   }
+// })
+
+// #region action sheet
+const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
+// #endregion
 </script>
 
 <style lang="scss">
@@ -255,12 +277,6 @@ const fullPageType = computed(() => store.getters.getFullPageType)
   @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
-}
-
-.main-page-headerbar {
-  transition:
-    height 0.25s,
-    opacity 0.25s;
 }
 
 .popup-area {
@@ -290,16 +306,10 @@ const fullPageType = computed(() => store.getters.getFullPageType)
 }
 
 .notification {
-  padding: 5px;
-  text-align: center;
-  color: setColor(white);
-  margin: 5px 5px 0 0;
-  border-radius: 5px;
-  &.copy {
-    background-color: setColor(blue-2);
-  }
-  &.error {
-    background-color: setColor(red-2);
+  // to diable vue-notification's default style(display: block)
+  display: flex !important;
+  &__content {
+    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success;
   }
 }
 </style>

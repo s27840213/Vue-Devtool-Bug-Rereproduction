@@ -50,7 +50,7 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #region editor
 const editorStore = useEditorStore()
 const { setEditorState } = editorStore
-const { inGenResultState } = storeToRefs(editorStore)
+const { inGenResultState, inSavingState } = storeToRefs(editorStore)
 // #endregion
 
 const store = useStore()
@@ -60,6 +60,12 @@ const { t } = useI18n()
 const handleBackAction = (navagate: () => void) => {
   if (customCallback) {
     customCallback()
+    return
+  }
+
+  if (inSavingState.value) {
+    setEditorState('genResult')
+
     return
   }
 

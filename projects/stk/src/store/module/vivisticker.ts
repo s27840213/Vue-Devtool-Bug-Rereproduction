@@ -39,7 +39,7 @@ interface IViviStickerState {
   uuid: string,
   loadedFonts: { [key: string]: true },
   templateShareType: 'none' | 'story' | 'post',
-  loadingOverlay: ILoadingOverlay,
+  loadingOverlay: ILoadingOverlay
 }
 
 const EDITOR_BGS = [

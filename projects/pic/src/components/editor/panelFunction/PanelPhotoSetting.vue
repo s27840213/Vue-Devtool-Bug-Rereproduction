@@ -28,10 +28,11 @@ div(class="photo-setting")
 import Overlay from '@/components/editor/overlay/Overlay.vue'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
+import store from '@/store'
+import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@nu/vivi-lib/interfaces/api'
 import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
 import { IFrame, IGroup, IImage } from '@nu/vivi-lib/interfaces/layer'
-import store from '@/store'
 import { FunctionPanelType, LayerType } from '@nu/vivi-lib/store/types'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
@@ -42,10 +43,9 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import popupUtils from '@nu/vivi-lib/utils/popupUtils'
-import { IAssetPhoto, IPhotoItem, isIAssetPhoto } from '@nu/vivi-lib/interfaces/api'
 
 interface IBtn {
   name: string
@@ -268,7 +268,11 @@ export default defineComponent({
             replaceImg: (img: IAssetPhoto | IPhotoItem) => {
               const url = isIAssetPhoto(img) ? img.urls.prev
                 : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 'prev')
-              imageUtils.replaceImg(img, url)
+              imageUtils.replaceImg(
+                imageUtils.toSrcObj(img),
+                url,
+                img.width / img.height,
+              )
             }
           })
           return

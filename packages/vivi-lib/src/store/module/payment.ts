@@ -1,22 +1,9 @@
-import { IPaymentPending, IPrices } from "@/interfaces/payment";
+import { IPayment, IPaymentPending } from "@/interfaces/payment";
 import constantData from "@/utils/constantData";
+import paymentUtils from "@/utils/paymentUtils";
 import { GetterTree, MutationTree } from "vuex";
 
-interface IPaymentState {
-  subscribe: boolean,
-  prices: IPrices,
-  defaultPrices: { [key: string]: IPrices },
-  trialDays: number,
-  trialCountry: string[],
-  pending: IPaymentPending,
-  planId: {
-    monthly: string,
-    annually: string,
-    annuallyFree0: string
-  },
-}
-
-const getDefaultState = (): IPaymentState => ({
+const getDefaultState = (): IPayment => ({
   subscribe: false,
   prices: {
     currency: '',
@@ -29,6 +16,14 @@ const getDefaultState = (): IPaymentState => ({
       text: ''
     },
     annuallyFree0: {
+      value: NaN,
+      text: ''
+    },
+    annuallyOriginal: {
+      value: NaN,
+      text: ''
+    },
+    annuallyFree0Original: {
       value: NaN,
       text: ''
     }
@@ -44,32 +39,44 @@ const getDefaultState = (): IPaymentState => ({
   planId: {
     monthly: constantData.planId.monthly,
     annually: constantData.planId.annually,
-    annuallyFree0: constantData.planId.annuallyFree0
-  }
+    annuallyFree0: constantData.planId.annuallyFree0,
+    annuallyOriginal: constantData.planId.annually,
+    annuallyFree0Original: constantData.planId.annuallyFree0
+  },
+  promote: []
 })
 
 const state = getDefaultState()
 
-const getters: GetterTree<IPaymentState, unknown> = {
-  getPayment(state: IPaymentState): IPaymentState {
+const getters: GetterTree<IPayment, unknown> = {
+  getPayment(state: IPayment): IPayment {
     return state
   },
-  getIsPaymentPending(state) {
+  getPrices(state: IPayment) {
+    return state.prices
+  },
+  getIsPaymentPending(state: IPayment) {
     return Object.entries(state.pending).some(([key, value]) => value)
   },
+  getPromote(state: IPayment): string[] {
+    return state.promote
+  }
 }
 
-const mutations: MutationTree<IPaymentState> = {
-  UPDATE_payment(state: IPaymentState, data: Partial<IPaymentState>) {
+const mutations: MutationTree<IPayment> = {
+  UPDATE_payment(state: IPayment, data: Partial<IPayment>) {
     Object.entries(data).forEach(([key, value]) => {
       (state as any)[key] = value
     })
   },
-  SET_paymentPending(state: IPaymentState, data: Record<keyof IPaymentPending, boolean>) {
+  SET_paymentPending(state: IPayment, data: Record<keyof IPaymentPending, boolean>) {
     for (const item of Object.entries(data)) {
       state.pending[item[0] as keyof IPaymentPending] = item[1]
     }
   },
+  SET_promote(state: IPayment, value: string[]) {
+    state.promote = value
+  }
 }
 
 export default {

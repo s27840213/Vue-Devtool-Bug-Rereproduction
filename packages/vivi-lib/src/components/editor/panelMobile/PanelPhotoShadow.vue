@@ -26,7 +26,7 @@ div(class="panel-shadow")
         @update="handleEffectUpdate")
     div(v-if="!['none', 'imageMatched'].includes(currentEffect)" class="photo-shadow__row-wrapper")
       div(class="photo-shadow__row")
-        div(class="photo-shadow__color-name body-2 no-wrap" :class="$isStk ? 'text-white' : 'text-gray-3'") {{$t('NN0017')}}
+        div(class="photo-shadow__color-name body-2 no-wrap" :class="$isStk ? 'text-white' : 'text-gray-2'") {{$t('NN0017')}}
         color-btn(class="photo-shadow__color"
                   :color="(currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color) || '#000000'"
                   size="30px" @click="handleColorModal")

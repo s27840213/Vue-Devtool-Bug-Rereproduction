@@ -81,6 +81,13 @@ class TiptapUtils {
             }
           }
           return true
+        },
+        handleDOMEvents: {
+          copy: (view: EditorView, event: ClipboardEvent) => {
+            event.preventDefault()
+            shortcutUtils.textCopy()
+            return true
+          }
         }
       },
       parseOptions: {

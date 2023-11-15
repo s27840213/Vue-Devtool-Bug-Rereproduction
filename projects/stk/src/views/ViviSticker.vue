@@ -66,6 +66,7 @@ import { find } from 'lodash'
 import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
+import { IPrices } from '@nu/vivi-lib/interfaces/payment'
 
 declare let window: CustomWindow
 
@@ -193,7 +194,11 @@ export default defineComponent({
       debugMode: 'vivisticker/getDebugMode',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
       modalOpen: 'modal/getModalOpen',
+      promote: 'payment/getPromote'
     }),
+    prices(): IPrices {
+      return this.$store.getters['payment/getPrices'] as IPrices
+    },
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
     },
@@ -202,6 +207,9 @@ export default defineComponent({
     },
     showVConsole(): boolean {
       return false
+    },
+    isPromote(): boolean {
+      return this.promote.includes(this.userInfo.storeCountry)
     }
   },
   watch: {
@@ -364,6 +372,10 @@ export default defineComponent({
       )
 
       // show popup
+      const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
+      const price = stkWVUtils.formatPrice(this.prices.annually.value, this.prices.currency, this.prices.annually.text, 'modal')
+      const priceOriginal = stkWVUtils.formatPrice(this.prices.annuallyOriginal.value, this.prices.currency, this.prices.annuallyOriginal.text, 'modal')
+      const isCloseBtnOnly = this.isPromote && subscribed
       const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
       const btn_txt = modalInfo.btn_txt
@@ -384,19 +396,20 @@ export default defineComponent({
       }
       modalUtils.setModalInfo(
         modalInfo.title,
-        [modalInfo.msg],
+        this.isPromote ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
         {
-          msg: btn_txt,
+          msg: isCloseBtnOnly ? modalInfo.btn2_txt : btn_txt,
           class: 'btn-black-mid',
           style: {
             color: '#F8F8F8'
           },
           action: () => {
+            if(isCloseBtnOnly) return
             const url = modalInfo.btn_url
             if (url) { window.open(url, '_blank') }
           }
         },
-        {
+        isCloseBtnOnly ? undefined : {
           msg: modalInfo.btn2_txt || '',
           class: 'btn-light-mid',
           style: {
@@ -411,18 +424,18 @@ export default defineComponent({
       return true
     },
     async showInitPopups() {
-      const isFirstOpen = this.userInfo.isFirstOpen
+      const showPaymentInfo = await stkWVUtils.getState('showPaymentInfo')
+      const isFirstOpen = this.userInfo.isFirstOpen && showPaymentInfo === undefined
       const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
       const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
       const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
-      const showPaymentInfo = await stkWVUtils.getState('showPaymentInfo')
       const showPaymentTime = showPaymentInfo?.timestamp ?? 0
       const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
       const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
-      const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
+      let isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
         : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
       const isShowTutorial = isFirstOpen && this.$i18n.locale !== 'us'
-      const show = () =>{
+      const show = () => {
         if (isShowPaymentView) {
           stkWVUtils.openPayment()
           stkWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
@@ -434,6 +447,9 @@ export default defineComponent({
       const isPushModalShown = await this.showPushModalInfo()
       if (isPushModalShown) {
         stkWVUtils.sendAppLoaded()
+        if (this.isPromote && !subscribed) {
+          isShowPaymentView = true
+        }
         const unwatch = this.$watch('modalOpen', (newVal) => {
           if(!newVal) show()
           unwatch()

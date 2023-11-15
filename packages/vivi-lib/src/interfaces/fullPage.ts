@@ -36,7 +36,8 @@ export interface IFullPagePaymentConfigParams {
     key: 'monthly' | 'annually',
     title: string
     subTitle: string
-    price: string
+    price: string,
+    originalPrice?: string
   }[],
   comparisons: {
     feature: string,
@@ -45,7 +46,8 @@ export interface IFullPagePaymentConfigParams {
   }[],
   termsOfServiceUrl: string,
   privacyPolicyUrl: string,
-  defaultTrialToggled: boolean
+  defaultTrialToggled: boolean,
+  isPromote: boolean
 }
 
 export interface IFullPagePaymentConfig {

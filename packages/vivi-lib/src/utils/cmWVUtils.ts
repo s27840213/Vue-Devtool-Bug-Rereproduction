@@ -340,7 +340,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       comparisons: [],
       termsOfServiceUrl: '',
       privacyPolicyUrl: '',
-      defaultTrialToggled: false
+      defaultTrialToggled: false,
+      isPromote: false
     } as IFullPagePaymentConfigParams
     store.commit('SET_fullPageConfig', { type: 'payment', params })
   }

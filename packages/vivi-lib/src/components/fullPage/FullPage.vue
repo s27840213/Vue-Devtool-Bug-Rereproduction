@@ -18,6 +18,7 @@ div(ref="main" class="full-page relative")
           :comparisons="fullPageConfig.params.comparisons"
           :termsOfServiceUrl="fullPageConfig.params.termsOfServiceUrl"
           :privacyPolicyUrl="fullPageConfig.params.privacyPolicyUrl"
+          :isPromote="fullPageConfig.params.isPromote"
           @canShow="sendAppLoaded")
   welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"

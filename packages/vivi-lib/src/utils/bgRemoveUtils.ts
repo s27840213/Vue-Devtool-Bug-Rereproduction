@@ -51,7 +51,6 @@ class BgRemoveUtils {
   }
 
   private setAutoRemoveResult(info: IBgRemoveInfo) {
-    console.log(info)
     store.commit('bgRemove/SET_autoRemoveResult', info)
   }
 
@@ -80,6 +79,7 @@ class BgRemoveUtils {
   }
 
   removeBg(): void {
+    console.time('removeBg total time')
     const { layers, pageIndex, index } = pageUtils.currSelectedInfo as ICurrSelectedInfo
 
     this.setIsProcessing(true)
@@ -102,10 +102,12 @@ class BgRemoveUtils {
     const aspect = imgWidth >= imgHeight ? 0 : 1
     const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
     const initSrc = imageUtils.getSrc((pageUtils.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
+    console.time('send API')
     store.dispatch('user/removeBg', { srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
+      console.timeEnd('send API')
       if (data.flag === 0) {
+        console.time('polling')
         uploadUtils.polling(data.url, (json: any) => {
-          console.log(json.flag, json.data)
           if (json.flag === 0 && json.data) {
             this.reduceBgrmRemain()
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
@@ -127,6 +129,10 @@ class BgRemoveUtils {
               this.setInBgRemoveMode(true)
               editorUtils.setCurrActivePanel('remove-bg')
             }
+
+            console.timeEnd('polling')
+            console.timeEnd('removeBg total time')
+            console.log(json.data)
             return true
           }
           if (json.flag === 1) {
@@ -141,6 +147,7 @@ class BgRemoveUtils {
               notify({ group: 'error', text: `${i18n.global.t('NN0349')}` })
             }
 
+            console.timeEnd('polling')
             return true
           }
 
@@ -162,17 +169,21 @@ class BgRemoveUtils {
   }
 
   async removeBgStk(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {
+    console.time('send API ~ get response time')
+
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
     logUtils.setLog('start removing bg')
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
-    logUtils.setLog('finish removing bg')
-    logUtils.setLog(`remove bg result: ${JSON.stringify(data)}`)
+    console.timeEnd('send API ~ get response time')
 
+    logUtils.setLog('finish removing bg')
+
+    console.time('generate frontend data time')
     if (data.flag === 0) {
       editorUtils.setCurrActivePanel('remove-bg')
+      logUtils.setLog('finish removing bg')
       const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
-      logUtils.setLog(`autoRemoveResult: ${JSON.stringify(autoRemoveResult)}`)
       this.setAutoRemoveResult(autoRemoveResult)
       this.setInBgRemoveMode(true)
       this.setIsProcessing(false)
@@ -181,6 +192,16 @@ class BgRemoveUtils {
       this.setIsProcessing(false)
       this.setPreviewImage({ src: '', width: 0, height: 0 })
     }
+    console.timeEnd('generate frontend data time')
+    console.timeEnd('removeBg total time')
+    // duration_db => 確認使用者身份的資料庫查詢
+    // duration_download => 從s3下載使用者要去背的圖到lambda
+    // duration_process => 將圖片送給第三方去背api並接收結果
+    // duration_upload => 將去背結果寫回s3，並產生前端可以下載的signed url
+    const { duration_db, duration_download, duration_process, duration_upload } = data
+
+    console.log(`total backend process time: ${duration_db + duration_download + duration_process + duration_upload}ms`)
+    console.log(data)
 
     // return data
   }
