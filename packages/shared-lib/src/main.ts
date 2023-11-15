@@ -1,6 +1,6 @@
 // import '@/assets/css/main.css'
-import App from '@/App.vue'
 import { createApp } from 'vue'
+import App from './App.vue'; // Use relative path to avoid build alias error
 
 const components = import.meta.glob('./components/*.vue', {
   eager: true,
