@@ -36,7 +36,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     ref="editorContainerRef"
     @pointerdown="selectStart")
     div(
-      class="w-full h-full box-border overflow-scroll flex justify-center items-start"
+      class="w-full h-full box-border overflow-scroll flex justify-center items-center"
       @click.self="outerClick")
       div(
         id="screenshot-target"
