@@ -788,7 +788,7 @@ class AssetUtils {
   ) {
 
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb, record = true } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const resizeRatio =
       attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_IMAGE
@@ -926,7 +926,10 @@ class AssetUtils {
     layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
     GroupUtils.select(targetPageIndex, [index])
-    stepsUtils.record()
+    console.log(record)
+    if(record) {
+      stepsUtils.record()
+    }
   }
 
   addGroupTemplate(

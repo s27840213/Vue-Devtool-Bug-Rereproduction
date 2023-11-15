@@ -1,7 +1,6 @@
 <template lang="pug">
 div(class="editing-options w-full")
-  div(
-    class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 box-border pl-24 pr-8")
+  div(class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 box-border pl-24 pr-8")
     span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
     scrollable-container(:gap="20")
       cm-svg-icon(
@@ -13,19 +12,25 @@ div(class="editing-options w-full")
         :same-size="false"
         @click="chooseSelectionOption(shape)")
   div(class="flex justify-between items-center box-border px-24")
-    cm-btn(theme="secondary" size="sm" @click="cancel") {{ $t('NN0203') }}
+    cm-btn(
+      theme="secondary"
+      size="sm"
+      @click="cancel") {{ $t('NN0203') }}
     span(class="typo-h6 text-app-text-secondary") {{ $t('CM0051') }}
-    cm-btn(theme="primary" size="sm" @click="apply") {{ $t('CM0061') }}
+    cm-btn(
+      theme="primary"
+      size="sm"
+      @click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
-import { useEditorStore } from '@/stores/editor';
-import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery';
-import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer';
-import assetUtils from '@nu/vivi-lib/utils/assetUtils';
-import groupUtils from '@nu/vivi-lib/utils/groupUtils';
-import imageUtils from '@nu/vivi-lib/utils/imageUtils';
-import layerUtils from '@nu/vivi-lib/utils/layerUtils';
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import { useEditorStore } from '@/stores/editor'
+import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 
 const { drawImageToCtx } = useCanvasUtilsCm()
 const editorStore = useEditorStore()
@@ -40,29 +45,32 @@ const chooseSelectionOption = (icon: string) => {
     const { naturalWidth, naturalHeight } = img
     const photoAspectRatio = naturalWidth / naturalHeight
 
-
     nextTick(() => {
       const currLayer = layerUtils.getCurrLayer
-      
-      if(layerUtils.hasSelectedLayer && currLayer.type === 'image' && imageUtils.getSrcType( imageUtils.getSrc(currLayer)) === 'local-img') {
-        const srcObj:SrcObj = {
+
+      if (
+        layerUtils.hasSelectedLayer &&
+        currLayer.type === 'image' &&
+        imageUtils.getSrcType(imageUtils.getSrc(currLayer)) === 'local-img'
+      ) {
+        const srcObj: SrcObj = {
           type: 'local-img',
           assetId: src,
-          userId: ''
-        } 
+          userId: '',
+        }
 
         const srcSize = {
           width: currLayer.styles.width,
-          height: currLayer.styles.height
+          height: currLayer.styles.height,
         }
 
         const targetSize = {
           width: currLayer.styles.width,
-          height: currLayer.styles.width / photoAspectRatio
+          height: currLayer.styles.width / photoAspectRatio,
         }
 
         layerUtils.updateLayerProps(0, layerUtils.currSelectedInfo.index, {
-          srcObj
+          srcObj,
         })
 
         layerUtils.updateLayerStyles(0, layerUtils.currSelectedInfo.index, {
@@ -72,20 +80,21 @@ const chooseSelectionOption = (icon: string) => {
           imgHeight: targetSize.height,
           initWidth: srcSize.width,
           initHeight: targetSize.height,
-          y: currLayer.styles.y + (srcSize.height - targetSize.height) / 2
+          y: currLayer.styles.y + (srcSize.height - targetSize.height) / 2,
         })
-
       } else {
         groupUtils.deselect()
         assetUtils.addImage(src, photoAspectRatio, {
           styles: {
             opacity: 30,
-            ctrlrPadding: 6
+            ctrlrPadding: 6,
           },
           hideResizer: true,
-          ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: AllLayerTypes ) => {
-            if(config) {
-              const target = document.querySelector(`[data-nu-image="nu-image-${config.id}"]`) as HTMLImageElement
+          ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: AllLayerTypes) => {
+            if (config) {
+              const target = document.querySelector(
+                `[data-nu-image="nu-image-${config.id}"]`,
+              ) as HTMLImageElement
               drawImageToCtx(target, {
                 x: config.styles.x,
                 y: config.styles.y,
@@ -93,13 +102,12 @@ const chooseSelectionOption = (icon: string) => {
                 height: config.styles.height,
                 rotate: config.styles.rotate,
               })
-  
+
               layerUtils.deleteLayer(pageIndex, layerIndex)
             }
           },
         })
       }
-      
     })
   })
 }

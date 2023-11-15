@@ -1,34 +1,64 @@
 <template lang="pug">
-div(class="vvstk-editor" ref="editorView" :style="copyingStyles()"
+div(
+  class="vvstk-editor"
+  ref="editorView"
+  :style="copyingStyles()"
   @pointerdown="selectStart"
   @pointerup="selectEnd"
   @pinch="onPinch"
   @pointerleave="removePointer"
   v-touch)
-  div(v-show="!isInBgRemoveSection" class="vvstk-editor__pages-container" :style="containerStyles()")
-    transition-group(name="scale-in-fade-out" tag="div" class="vvstk-editor__pages" @before-leave="handleBeforePageLeave" :css="animated")
-      page-card(v-for="(page, index) in pagesState" :key="`page-${page.config.id}`"
-                :class="{'no-transition': currActivePageIndex < 0}"
-                :pageIndex="index"
-                :pageState="page"
-                :cardWidth="cardWidth"
-                :cardHeight="cardHeight"
-                :marginTop="marginTop"
-                :no-bg="!editorTypeTemplate"
-                @click.self.prevent="outerClick")
-      div(v-if="editorTypeTemplate" class="page-add" :id="`page-card-${pagesState.length}`" key="page-add")
+  div(
+    v-show="!isInBgRemoveSection"
+    class="vvstk-editor__pages-container"
+    :style="containerStyles()")
+    transition-group(
+      name="scale-in-fade-out"
+      tag="div"
+      class="vvstk-editor__pages"
+      @before-leave="handleBeforePageLeave"
+      :css="animated")
+      page-card(
+        v-for="(page, index) in pagesState"
+        :key="`page-${page.config.id}`"
+        :class="{ 'no-transition': currActivePageIndex < 0 }"
+        :pageIndex="index"
+        :pageState="page"
+        :cardWidth="cardWidth"
+        :cardHeight="cardHeight"
+        :marginTop="marginTop"
+        :no-bg="!editorTypeTemplate"
+        @click.self.prevent="outerClick")
+      div(
+        v-if="editorTypeTemplate"
+        class="page-add"
+        :id="`page-card-${pagesState.length}`"
+        key="page-add")
         div(class="page-add__page body-SM flex-column flex-center")
           div(class="page-add__text text-white" v-html="$t('STK0075')")
           div(class="page-add__btn text-black-3 bg-white flex-center" @click="addPage")
-            svg-icon(class="page-add__btn__icon" iconName="add-page" iconWidth="24px" iconColor="gray-2")
+            svg-icon(
+              class="page-add__btn__icon"
+              iconName="add-page"
+              iconWidth="24px"
+              iconColor="gray-2")
             div(class="page-add__btn__text") {{ $t('STK0076') }}
-  div(v-if="editorTypeTemplate && !isDuringCopy" class="page-pill" @click="showPanelPageManagement")
-    svg-icon(iconName="pages" iconWidth="20px" iconColor="black-5")
+  div(
+    v-if="editorTypeTemplate && !isDuringCopy"
+    class="page-pill"
+    @click="showPanelPageManagement")
+    svg-icon(
+      iconName="pages"
+      iconWidth="20px"
+      iconColor="black-5")
     span(class="page-pill__text body-XS text-black-5 no-wrap") {{ strPagePill }}
-  page-preview(v-if="isInPagePreview" :pagesState="pagesState")
-  share-template(v-if="isInTemplateShare" :isMultiPage="pagesState.length > 1")
-  div(v-if="isInBgRemoveSection"
-      class="vvstk-editor__bg-remove-container")
+  page-preview(
+    v-if="isInPagePreview"
+    :pagesState="pagesState")
+  share-template(
+    v-if="isInTemplateShare"
+    :isMultiPage="pagesState.length > 1")
+  div(v-if="isInBgRemoveSection" class="vvstk-editor__bg-remove-container")
     panel-remove-bg(:need-calculate-mobile-panel-height="false")
       //- bg-remove-container(v-if="bgRemoveContainerRef"
       //-   :containerWH="containerWH"
@@ -67,17 +97,17 @@ export default defineComponent({
     PageCard,
     PagePreview,
     ShareTemplate,
-    PanelRemoveBg
+    PanelRemoveBg,
   },
   props: {
     isInEditor: {
       type: Boolean,
-      required: true
+      required: true,
     },
     marginBottom: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   data() {
     return {
@@ -94,13 +124,17 @@ export default defineComponent({
       mobilePanelHeight: 0,
       pointerEvent: {
         initPos: null as null | ICoordinate
-      }
+      },
     }
   },
   mounted() {
     const editorView = this.$refs.editorView as HTMLElement
     this.bgRemoveContainerRef = this.$refs.bgRemoveContainer as HTMLElement
-    this.swipeDetector = new SwipeDetector(editorView, { targetDirection: 'horizontal' }, this.handleSwipe)
+    this.swipeDetector = new SwipeDetector(
+      editorView,
+      { targetDirection: 'horizontal' },
+      this.handleSwipe,
+    )
   },
   beforeUnmount() {
     this.swipeDetector.unbind()
@@ -145,13 +179,16 @@ export default defineComponent({
           this.handleResize()
         })
       },
-      deep: true
+      deep: true,
     },
     currFocusPageIndex() {
       editorUtils.setInBgSettingMode(false)
     },
     currActivePageIndex(newVal) {
-      if (newVal === -1) this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+      if (newVal === -1)
+        this.$nextTick(() => {
+          stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300)
+        })
     },
     showMobilePanel(val) {
       if (val) {
@@ -172,11 +209,11 @@ export default defineComponent({
       } else {
         this.mobilePanelHeight = 0
       }
-    }
+    },
   },
   computed: {
     ...mapState({
-      windowSize: 'windowSize'
+      windowSize: 'windowSize',
     }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -208,12 +245,14 @@ export default defineComponent({
       return pageUtils.currFocusPageIndex
     },
     strPagePill(): string {
-      return this.pagesState.length > 1 ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}` : this.$t('STK0070')
+      return this.pagesState.length > 1
+        ? `${this.currFocusPageIndex + 1} / ${this.pagesState.length}`
+        : this.$t('STK0070')
     },
-    pageSize(): { width: number, height: number } {
+    pageSize(): { width: number; height: number } {
       return {
         width: this.pagesState[this.pagesState.length - 1].config.width,
-        height: this.pagesState[this.pagesState.length - 1].config.height
+        height: this.pagesState[this.pagesState.length - 1].config.height,
       }
     },
     isPageNumMax(): boolean {
@@ -221,7 +260,7 @@ export default defineComponent({
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
-    }
+    },
   },
   methods: {
     ...mapMutations({
@@ -250,7 +289,9 @@ export default defineComponent({
             layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
             break
           case LayerType.frame:
-            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+              imgControl: false,
+            })
             break
         }
         return
@@ -374,22 +415,31 @@ export default defineComponent({
       // reset initial step to prevent wrong size of page when undo
       if (stepsUtils.steps.length === 1) stepsUtils.reset()
 
-      this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0) })
+      this.$nextTick(() => {
+        stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 0)
+      })
     },
     handleSwipe(dir: string) {
-      if (this.hasSelectedLayer || this.isBgImgCtrl || this.isImgCtrl || this.isInTemplateShare) return
+      if (this.hasSelectedLayer || this.isBgImgCtrl || this.isImgCtrl || this.isInTemplateShare)
+        return
       if (dir === 'right') {
         if (!this.isInPageAdd) this.setCurrActivePageIndex(Math.max(0, this.currFocusPageIndex - 1))
         this.isInPageAdd = false
-        this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+        this.$nextTick(() => {
+          stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300)
+        })
       } else if (dir === 'left') {
         if (pageUtils.currFocusPageIndex === this.pagesState.length - 1) {
           if (!this.editorTypeTemplate || this.isPageNumMax) return
           this.isInPageAdd = true
           stkWVUtils.scrollIntoPage(this.pagesState.length, 300)
         } else {
-          this.setCurrActivePageIndex(Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1))
-          this.$nextTick(() => { stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300) })
+          this.setCurrActivePageIndex(
+            Math.min(this.currFocusPageIndex + 1, this.pagesState.length - 1),
+          )
+          this.$nextTick(() => {
+            stkWVUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 300)
+          })
         }
       }
     },
@@ -408,22 +458,27 @@ export default defineComponent({
     },
     addPage() {
       const lastPage = this.pagesState[this.pagesState.length - 1].config
-      pageUtils.addPageToPos(pageUtils.newPage({
-        width: lastPage.width,
-        height: lastPage.height,
-        physicalWidth: lastPage.physicalWidth,
-        backgroundColor: lastPage.backgroundColor,
-        physicalHeight: lastPage.physicalHeight,
-        isEnableBleed: lastPage.isEnableBleed,
-        bleeds: lastPage.bleeds,
-        physicalBleeds: lastPage.physicalBleeds,
-        unit: lastPage.unit
-      }), this.pagesState.length)
+      pageUtils.addPageToPos(
+        pageUtils.newPage({
+          width: lastPage.width,
+          height: lastPage.height,
+          physicalWidth: lastPage.physicalWidth,
+          backgroundColor: lastPage.backgroundColor,
+          physicalHeight: lastPage.physicalHeight,
+          isEnableBleed: lastPage.isEnableBleed,
+          bleeds: lastPage.bleeds,
+          physicalBleeds: lastPage.physicalBleeds,
+          unit: lastPage.unit,
+        }),
+        this.pagesState.length,
+      )
       this.setCurrActivePageIndex(this.pagesState.length - 1)
-      this.$nextTick(() => { stkWVUtils.scrollIntoPage(this.pagesState.length - 1, 500) })
+      this.$nextTick(() => {
+        stkWVUtils.scrollIntoPage(this.pagesState.length - 1, 500)
+      })
       stepsUtils.record()
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -447,7 +502,7 @@ export default defineComponent({
     top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% - v-bind(mobilePanelHeight)* 1px);
+    height: calc(100% - v-bind(mobilePanelHeight) * 1px);
     max-height: 100%;
     display: flex;
     align-items: center;
@@ -464,13 +519,13 @@ export default defineComponent({
 }
 
 .page-add {
-  width: v-bind("`${cardWidth}px`");
-  height: v-bind("`${cardHeight}px`");
+  width: v-bind('`${cardWidth}px`');
+  height: v-bind('`${cardHeight}px`');
   &__page {
     margin: 0 auto;
-    width: v-bind("`${pageSize.width}px`");
-    height: v-bind("`${pageSize.height}px`");
-    margin-top: v-bind("`${marginTop}px`");
+    width: v-bind('`${pageSize.width}px`');
+    height: v-bind('`${pageSize.height}px`');
+    margin-top: v-bind('`${marginTop}px`');
     background-color: setColor(black-3);
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 10px;

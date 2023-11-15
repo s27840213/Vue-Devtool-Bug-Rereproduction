@@ -36,7 +36,6 @@ export default class SwipeDetector {
     this.startTime = performance.now()
     this.touchStartX = event.touches[0].clientX
     this.touchStartY = event.touches[0].clientY
-    console.log(event)
   }
 
   private handleTouchMove(event: TouchEvent) {
