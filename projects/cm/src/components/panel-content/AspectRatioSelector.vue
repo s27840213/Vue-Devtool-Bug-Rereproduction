@@ -18,10 +18,10 @@ div(class="w-full box-border pl-24")
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
 </template>
 <script setup lang="ts">
-import { useEditorStore } from '@/stores/editor';
-import layerUtils from '@nu/vivi-lib/utils/layerUtils';
-import pageUtils from '@nu/vivi-lib/utils/pageUtils';
-import { storeToRefs } from 'pinia';
+import { useEditorStore } from '@/stores/editor'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import { storeToRefs } from 'pinia'
 const editorStore = useEditorStore()
 
 const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
@@ -37,12 +37,11 @@ const selectAspectRatio = (type: string) => {
       pageUtils.setPageSize(0, 1600, 1600 / imgAspectRatio.value)
     } else {
       pageUtils.setPageSize(0, 1600 * imgAspectRatio.value, 1600)
-      layerUtils.updateLayerStyles(0,0, {
+      layerUtils.updateLayerStyles(0, 0, {
         width: 1600 * imgAspectRatio.value,
-        height: 1600 
+        height: 1600,
       })
     }
-
   } else {
     const [w, h] = type.split('_')
     const width = parseInt(w)
@@ -70,8 +69,8 @@ const selectAspectRatio = (type: string) => {
 }
 
 const updateLayerStyleToFitPage = () => {
-  if(imgAspectRatio.value > pageAspectRatio.value) {
-    layerUtils.updateLayerStyles(0,0, {
+  if (imgAspectRatio.value > pageAspectRatio.value) {
+    layerUtils.updateLayerStyles(0, 0, {
       width: pageSize.value.width,
       height: pageSize.value.width / imgAspectRatio.value,
       imgWidth: pageSize.value.width,
@@ -80,31 +79,21 @@ const updateLayerStyleToFitPage = () => {
       initHeight: pageSize.value.width / imgAspectRatio.value,
       // to page center
       x: (pageSize.value.width - pageSize.value.width) / 2,
-      y: (pageSize.value.height - pageSize.value.width / imgAspectRatio.value) / 2
+      y: (pageSize.value.height - pageSize.value.width / imgAspectRatio.value) / 2,
     })
   } else {
-    layerUtils.updateLayerStyles(0,0, {
+    layerUtils.updateLayerStyles(0, 0, {
       width: pageSize.value.height * imgAspectRatio.value,
-      height: pageSize.value.height ,
+      height: pageSize.value.height,
       imgWidth: pageSize.value.height * imgAspectRatio.value,
       imgHeight: pageSize.value.height,
       initWidth: pageSize.value.height * imgAspectRatio.value,
       initHeight: pageSize.value.height,
       // to page center
       x: (pageSize.value.width - pageSize.value.height * imgAspectRatio.value) / 2,
-      y: (pageSize.value.height - pageSize.value.height) / 2
+      y: (pageSize.value.height - pageSize.value.height) / 2,
     })
   }
 }
-
-
-
-/**
- * Once the image was loaded
- * we need to trigger selectAspectRatio to make firstPaintArea work for default aspectRatio
- */
-watch(imgAspectRatio, () => {
-  selectAspectRatio(selectedType.value)
-})
 </script>
 <style lang="scss"></style>
