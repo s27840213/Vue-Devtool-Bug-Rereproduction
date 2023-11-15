@@ -4,7 +4,7 @@ div(class="editing-options w-full")
     class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 box-border pl-24 pr-8")
     span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
     scrollable-container(:gap="20")
-      cm-svg-icon(
+      svg-icon(
         v-for="shape in shapeTypes"
         :key="shape"
         icon-color="primary-light-active"
@@ -18,14 +18,16 @@ div(class="editing-options w-full")
     cm-btn(theme="primary" size="sm" @click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm';
-import { useEditorStore } from '@/stores/editor';
-import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery';
-import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer';
-import assetUtils from '@nu/vivi-lib/utils/assetUtils';
-import groupUtils from '@nu/vivi-lib/utils/groupUtils';
-import imageUtils from '@nu/vivi-lib/utils/imageUtils';
-import layerUtils from '@nu/vivi-lib/utils/layerUtils';
+import CmBtn from '@/components/global/CmBtn.vue'
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import { useEditorStore } from '@/stores/editor'
+import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import ScrollableContainer from '../global/ScrollableContainer.vue'
 
 const { drawImageToCtx } = useCanvasUtilsCm()
 const editorStore = useEditorStore()

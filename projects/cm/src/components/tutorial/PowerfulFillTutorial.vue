@@ -6,7 +6,7 @@ div(class="w-screen h-screen")
       span(class="text-primary-white typo-h6") {{ tutorialDescription }}
       div(:class="`grid grid-flow-col grid-cols-${hasNextBtn ? 3 : 2} w-full`")
         div(class="justify-self-center")
-          cm-svg-icon(
+          svg-icon(
             v-if="leftIconName"
             :iconName="leftIconName"
             :iconWidth="iconSize.width"
@@ -19,7 +19,7 @@ div(class="w-screen h-screen")
           size="md"
           @click="emit('nextStep')") {{ nextBtnText }}
         div(class="justify-self-end")
-          cm-svg-icon(
+          svg-icon(
             v-if="rightIconName"
             :iconName="rightIconName"
             :iconWidth="iconSize.width"
@@ -30,6 +30,7 @@ div(class="w-screen h-screen")
 </template>
 
 <script setup lang="ts">
+import CmBtn from '@/components/global/CmBtn.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 defineOptions({ name: 'powerful-fill-tutorial' })

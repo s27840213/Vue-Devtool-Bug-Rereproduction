@@ -2,7 +2,7 @@
 div(class="flex flex-col justify-center items-center w-full box-border px-24 gap-16")
   div(class="relative w-full")
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
-    cm-svg-icon(
+    svg-icon(
       v-if="false"
       iconName="settings"
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
@@ -26,6 +26,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
+import CmBtn from '@/components/global/CmBtn.vue'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import tutorialUtils from '@/utils/tutorialUtils'

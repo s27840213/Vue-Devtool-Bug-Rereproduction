@@ -21,7 +21,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
             custom
             to="/settings"
             v-slot="{ navigate }")
-            cm-svg-icon(iconName="settings"
+            svg-icon(iconName="settings"
               :iconColor="'app-tab-default'" @click="navigate")
       cm-btn(
         :theme="'primary'"
@@ -70,7 +70,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     :duration="2000")
     template(v-slot:body="{ item }")
       div(class="w-fit top-0 left-1/2 typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success")
-        cm-svg-icon(iconName="ok-hand")
+        svg-icon(iconName="ok-hand")
         span( v-html="item.text")
   notifications(
     group="error"
@@ -88,7 +88,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 </template>
 
 <script setup lang="ts">
+import BottomPanel from '@/components/BottomPanel.vue'
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
+import ActionSheet from '@/components/global/ActionSheet.vue'
+import CmBtn from '@/components/global/CmBtn.vue'
+import ImgSelector from '@/components/global/ImgSelector.vue'
+import Tutorial from '@/components/tutorial/Tutorial.vue'
 import vuex from '@/vuex'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'

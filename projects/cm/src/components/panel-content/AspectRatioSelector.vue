@@ -7,7 +7,7 @@ div(class="w-full box-border pl-24")
       :key="aspectRatio"
       class="w-56 flex flex-col justify-center items-center gap-4"
       @click="selectAspectRatio(aspectRatio)")
-      cm-svg-icon(
+      svg-icon(
         :iconColor="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
         :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
         iconWidth="32px"
@@ -18,10 +18,11 @@ div(class="w-full box-border pl-24")
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
 </template>
 <script setup lang="ts">
-import { useEditorStore } from '@/stores/editor';
-import layerUtils from '@nu/vivi-lib/utils/layerUtils';
-import pageUtils from '@nu/vivi-lib/utils/pageUtils';
-import { storeToRefs } from 'pinia';
+import { useEditorStore } from '@/stores/editor'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import { storeToRefs } from 'pinia'
+import ScrollableContainer from '../global/ScrollableContainer.vue'
 const editorStore = useEditorStore()
 
 const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)

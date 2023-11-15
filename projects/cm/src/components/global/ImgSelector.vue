@@ -21,7 +21,7 @@ div(
       div(
         class="transition-transform duration-300"
         :style="{ transform: isAlbumOpened ? 'rotate(180deg)' : 'rotate(0deg)' }")
-        cm-svg-icon(
+        svg-icon(
           :iconName="'chevron-up'"
           :iconWidth="'12px'")
     search-bar(
@@ -45,7 +45,7 @@ div(
       v-if="isAlbumOpened"
       class="img-selector__img-grid bg-app-bg overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
       div(class="aspect-square flex flex-col items-center justify-center")
-        cm-svg-icon(class="mb-10" iconName="camera")
+        svg-icon(class="mb-10" iconName="camera")
         span {{ $t('CM0060') }}
       div(
         v-for="img in currAlbumContent"
@@ -68,7 +68,7 @@ div(
         :target="'.img-selector__img-grid'"
         :rootMargin="'1000px 0px 1000px 0px'"
         @callback="handleLoadMore")
-        cm-svg-icon(
+        svg-icon(
           class="mb-10"
           :iconName="'loading'"
           iconColor="app-text-secondary")
@@ -106,7 +106,7 @@ div(
       :target="'.img-selector__img-grid'"
       :rootMargin="'1000px 0px 1000px 0px'"
       @callback="unsplashLoadmore")
-      cm-svg-icon(
+      svg-icon(
         v-if="unsplashLoading"
         class="mb-10"
         :iconName="'loading'"
@@ -122,7 +122,7 @@ div(
         :key="img.assetId"
         class="relative")
         img(class="w-60 h-60 object-cover" :src="imageUtils.getSrc(img, 'tiny')")
-        cm-svg-icon(
+        svg-icon(
           class="absolute -right-12 -top-12"
           iconName="close-btn"
           @click="pull(targetImgs, img)")
@@ -147,6 +147,7 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
+import BackBtn from './BackBtn.vue'
 
 const router = useRouter()
 

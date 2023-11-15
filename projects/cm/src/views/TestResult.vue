@@ -11,6 +11,8 @@ div(class="w-full h-full grid-cols-1 grid-rows-[auto,1fr] gap-16]")
     img(:src="generatedResults[currGenResultIndex].url" class="w-240")
 </template>
 <script setup lang="ts">
+import Headerbar from '@/components/Headerbar.vue'
+import BackBtn from '@/components/global/BackBtn.vue'
 import { useEditorStore } from '@/stores/editor'
 
 const editorStore = useEditorStore()
