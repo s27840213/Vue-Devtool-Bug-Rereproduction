@@ -43,6 +43,7 @@ interface IViviStickerState {
   loadedFonts: { [key: string]: true },
   templateShareType: 'none' | 'story' | 'post',
   loadingOverlay: ILoadingOverlay,
+  promote: string[]
 }
 
 const EDITOR_BGS = [
@@ -99,6 +100,14 @@ const getDefaultState = (): IViviStickerState => ({
       annuallyFree0: {
         value: NaN,
         text: ''
+      },
+      annuallyOriginal: {
+        value: NaN,
+        text: ''
+      },
+      annuallyFree0Original: {
+        value: NaN,
+        text: ''
       }
     },
     defaultPrices: {},
@@ -112,7 +121,9 @@ const getDefaultState = (): IViviStickerState => ({
     planId: {
       monthly: constantData.planId.monthly,
       annually: constantData.planId.annually,
-      annuallyFree0: constantData.planId.annuallyFree0
+      annuallyFree0: constantData.planId.annuallyFree0,
+      annuallyOriginal: constantData.planId.annually,
+      annuallyFree0Original: constantData.planId.annuallyFree0
     }
   },
   uuid: '',
@@ -122,7 +133,8 @@ const getDefaultState = (): IViviStickerState => ({
   loadingOverlay: {
     show: false,
     msgs: []
-  }
+  },
+  promote: []
 })
 
 const state = getDefaultState()
@@ -265,6 +277,12 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getLoadingOverlay(state: IViviStickerState): ILoadingOverlay {
     return state.loadingOverlay
+  },
+  getPromote(state: IViviStickerState): string[] {
+    return state.promote
+  },
+  getIsPromote(state: IViviStickerState): boolean {
+    return state.promote.includes(state.userInfo.storeCountry ?? '')
   }
 }
 
@@ -485,6 +503,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_loadingOverlayMsgs(state: IViviStickerState, msgs: string[]) {
     state.loadingOverlay.msgs = msgs
+  },
+  SET_promote(state: IViviStickerState, value: string[]) {
+    state.promote = value
   }
 }
 

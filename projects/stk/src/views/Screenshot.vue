@@ -172,7 +172,7 @@ export default defineComponent({
                 assetId: id
               }
 
-              stkWVUtils.initLoadingFlagsForOneLayer(() => {
+              layerUtils.initLoadingFlagsForOneLayer(() => {
                 this.onload()
               })
 
@@ -210,7 +210,7 @@ export default defineComponent({
 
               const scaleRatio = photoWidth / boundingWidth
 
-              stkWVUtils.initLoadingFlagsForOneLayer(() => {
+              layerUtils.initLoadingFlagsForOneLayer(() => {
                 this.onload()
               })
 
@@ -239,39 +239,39 @@ export default defineComponent({
             //   const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
             //   layerUtils.setAutoResizeNeededForLayersInPage(page, true)
             //   pageUtils.setPages([page])
-            //   stkWVUtils.initLoadingFlags({ layers: [json] }, () => {
+            //   layerUtils.initLoadingFlags({ layers: [json] }, () => {
             //     this.onload()
             //   })
 
-            //   const { width, height, scale } = json.styles
-            //   const pageAspectRatio = window.outerWidth / window.outerHeight
-            //   const textAspectRatio = width / height
-            //   const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
-            //   const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
-            //   const rescaleFactor = textWidth / width
+              //   const { width, height, scale } = json.styles
+              //   const pageAspectRatio = window.outerWidth / window.outerHeight
+              //   const textAspectRatio = width / height
+              //   const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
+              //   const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
+              //   const rescaleFactor = textWidth / width
 
-            //   const config = {
-            //     ...json,
-            //     styles: {
-            //       ...json.styles,
-            //       width: textWidth,
-            //       height: textHeight,
-            //       scale: scale * rescaleFactor,
-            //       x: 0,
-            //       y: 0
-            //     }
-            //   }
+              //   const config = {
+              //     ...json,
+              //     styles: {
+              //       ...json.styles,
+              //       width: textWidth,
+              //       height: textHeight,
+              //       scale: scale * rescaleFactor,
+              //       x: 0,
+              //       y: 0
+              //     }
+              //   }
 
-            //   if (config.type === 'text') {
-            //     Object.assign(config, {
-            //       widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
-            //     })
-            //   }
+              //   if (config.type === 'text') {
+              //     Object.assign(config, {
+              //       widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
+              //     })
+              //   }
 
-            //   const newLayer = config.type === 'group'
-            //     ? layerFactary.newGroup(config, (config as IGroup).layers)
-            //     : layerFactary.newText(config as IText)
-            //   layerUtils.addLayers(0, [newLayer])
+              //   const newLayer = config.type === 'group'
+              //     ? layerFactary.newGroup(config, (config as IGroup).layers)
+              //     : layerFactary.newText(config as IText)
+              //   layerUtils.addLayers(0, [newLayer])
 
             //   this.JSONcontentSize = {
             //     width: page.width,
@@ -316,7 +316,7 @@ export default defineComponent({
                 return
               }
               layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-              stkWVUtils.initLoadingFlags(page, () => {
+              layerUtils.initLoadingFlags(page, () => {
                 this.onload()
               }, () => this.onTimeout(`screenshot-${query}`), noBg)
               renderPage()
@@ -360,7 +360,7 @@ export default defineComponent({
                 return
               }
               layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-              stkWVUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
+              layerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
               pageUtils.setPages([page])
               this.usingJSON = true
               break

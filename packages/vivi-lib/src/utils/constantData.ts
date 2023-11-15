@@ -1256,14 +1256,19 @@ class ConstantData {
     return 250
   }
 
-  // map i18n locale to ISO 3166-1 alpha-3
-  countryMap = new Map(
+  // map i18n locale (alpha-2) to ISO 3166-1 alpha-3
+  countryMap223 = new Map(
     [
       ['us', 'USA'],
       ['jp', 'JPN'],
       ['tw', 'TWN'],
     ]
   )
+
+  // map ISO 3166-1 alpha-3 to i18n locale (alpha-2)
+  countryMap322 = new Map([...this.countryMap223.entries()].map(
+    ([key, value]) => ([value, key]))
+  );
 
   // map country code to currency
   currencyMap = new Map([

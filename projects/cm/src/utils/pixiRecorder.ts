@@ -1,7 +1,8 @@
-import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
 const RECORD_START_DELAY = 2000
+const RECORD_END_DELAY = 100
 const IMG2_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
 const IMG1_EXAMPLE =
@@ -129,18 +130,20 @@ export const fragment3 = `
 `
 
 export default class PixiRecorder {
-  pixi = new PIXI.Application()
-  texture_src = null as null | PIXI.Texture
-  sprite_src = null as null | PIXI.Sprite
-  texture_res = null as null | PIXI.Texture
-  sprite_res = null as null | PIXI.Sprite
-  filter = null as null | PIXI.Filter
-  uniforms = {} as { [key: string]: any }
-  time = 0
-  canvasRecorder = null as null | CanvasRecorder
-  _animate = null as null | ((delta: number) => void)
-  _genVideoResolver = null as null | (() => void)
-  isImgReady = false
+  private pixi = new PIXI.Application()
+  private texture_src = null as null | PIXI.Texture
+  private sprite_src = null as null | PIXI.Sprite
+  private texture_res = null as null | PIXI.Texture
+  private sprite_res = null as null | PIXI.Sprite
+  private filter = null as null | PIXI.Filter
+  private uniforms = {} as { [key: string]: any }
+  private time = 0
+  private dynamicAnimateEndTime = 0
+  private canvasRecorder = null as null | CanvasRecorder
+  private _animate = null as null | ((delta: number) => void)
+  private _genVideoResolver = null as null | (() => void)
+  private isImgReady = false
+  private video = ''
 
   constructor(src = IMG1_EXAMPLE, res = IMG2_EXAMPLE, fragment = fragment_slide) {
     document.body.appendChild(this.pixi.view as HTMLCanvasElement)
@@ -176,7 +179,6 @@ export default class PixiRecorder {
   }
 
   async genVideo() {
-    console.log('gen vedio start')
     if (!this.isImgReady) {
       await Promise.race(
         [
@@ -185,7 +187,6 @@ export default class PixiRecorder {
         ]
       ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
     }
-    console.log('gen vedio start 22')
 
     this.time = 0
     if (RECORD_START_DELAY) {
@@ -200,10 +201,27 @@ export default class PixiRecorder {
       }
     }
 
-    return new Promise<ISaveAssetFromUrlResponse | 'error'>((resolve) => {
+    return new Promise<string | 'error'>((resolve) => {
       this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, resolve)
       this.canvasRecorder.start(1000)
+    }).then((res) => {
+      if (res === 'error') {
+        return null
+      }
+      this.video = res
+      console.log('genVideo', this.video)
+      return res
     })
+  }
+
+  async saveToCameraRoll(url = this.video) {
+    const blob = await getBlobFromUrl(url)
+    const base64 = await blobToBase64(blob)
+    if (url) {
+      return cmWVUtils.saveAssetFromUrl('mp4', base64)
+    } else {
+      throw new Error('video not generated yet')
+    }
   }
 
 
@@ -216,9 +234,16 @@ export default class PixiRecorder {
     this.sprite_src.filters = [this.filter]
     this._animate = (delta) => {
       if (this.uniforms.opacity >= 1) {
-        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
-        if (this.canvasRecorder) {
-          this.canvasRecorder.stop()
+        if (this.dynamicAnimateEndTime === 0) {
+          this.dynamicAnimateEndTime = this.time
+        } else {
+          if (this.time - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
+            this.dynamicAnimateEndTime = 0
+            this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+            if (this.canvasRecorder) {
+              this.canvasRecorder.stop()
+            }
+          }
         }
       }
       this.time += delta
@@ -232,7 +257,6 @@ export default class PixiRecorder {
     this.uniforms.nextImage = this.texture_res
     this.filter = new PIXI.Filter(undefined, fragment1, this.uniforms)
     this.sprite_src.filters = [this.filter]
-    console.log(this.filter)
     this._animate = (delta) => {
       if (this.uniforms.dispFactor >= 1) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
@@ -270,9 +294,16 @@ export default class PixiRecorder {
     this.sprite_src.filters = [this.filter]
     this._animate = (delta) => {
       if (this.time >= 200) {
-        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
-        if (this.canvasRecorder) {
-          this.canvasRecorder.stop()
+        if (this.dynamicAnimateEndTime === 0) {
+          this.dynamicAnimateEndTime = this.time
+        } else {
+          if (this.time - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
+            this.dynamicAnimateEndTime = 0
+            this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+            if (this.canvasRecorder) {
+              this.canvasRecorder.stop()
+            }
+          }
         }
       }
       this.time += delta
@@ -294,6 +325,8 @@ export default class PixiRecorder {
   }
 
   addImage(img1: string, img2: string) {
+    console.log('img1', img1)
+    console.log('img2', img2)
     const p1 = new Promise<PIXI.Texture>((resolve) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
         this.texture_src = texture
@@ -319,13 +352,13 @@ export default class PixiRecorder {
 }
 
 class CanvasRecorder {
-  canvas: HTMLCanvasElement
-  stream: MediaStream
-  recorder: MediaRecorder
-  chunks = [] as Array<any>
-  private _resolver = null as null | ((value: ISaveAssetFromUrlResponse | PromiseLike<ISaveAssetFromUrlResponse> | 'error') => void)
+  private canvas: HTMLCanvasElement
+  private stream: MediaStream
+  private recorder: MediaRecorder
+  private chunks = [] as Array<any>
+  private _resolver = null as null | ((value: string | PromiseLike<string> | 'error') => void)
 
-  constructor(canvas: HTMLCanvasElement, resolver?: ((value: ISaveAssetFromUrlResponse | PromiseLike<ISaveAssetFromUrlResponse> | 'error') => void)) {
+  constructor(canvas: HTMLCanvasElement, resolver?: ((value: string | PromiseLike<string> | 'error') => void)) {
     this.canvas = canvas
     this.stream = this.canvas.captureStream()
     this.recorder = new MediaRecorder(this.stream, this.getMimeTypeSupportOptions())
@@ -365,52 +398,35 @@ class CanvasRecorder {
     }
   }
 
-  blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(
-        (reader.result as string)
-          .replace('data:', '')
-          .replace(/^.+,/, '')
-      )
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-  }
-
   onRecordStop() {
     const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
-    const video = document.createElement('video')
-    document.body.appendChild(video)
-
-    // @test used
-    video.addEventListener('ended', () => {
-      setTimeout(() => {
-        document.body.removeChild(video)
-      }, 2000)
-    })
-    video.setAttribute('controls', 'controls')
-    video.style.position = 'absolute'
-    video.style.top = '0'
-    video.style.left = '0'
-    video.style.width = this.canvas.width.toString()
-    video.style.height = this.canvas.height.toString()
-    video.src = url
-
-    this.blobToBase64(new Blob(this.chunks, { type: 'video/mp4' })).then((base64: string) => {
-      cmWVUtils.saveAssetFromUrl('mp4', base64)
-        .then((data: ISaveAssetFromUrlResponse) => {
-          if (this._resolver) {
-            this._resolver(data)
-          }
-          console.log('save asset from url done', data)
-        }).catch((error) => {
-          console.error('save asset from url failed', error)
-          if (this._resolver) {
-            this._resolver('error')
-          }
-        })
-    })
-    return url
+    if (this._resolver) {
+      this._resolver(url)
+    }
   }
+}
+
+const blobToBase64 = (blob: Blob): Promise<string>  => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(
+      (reader.result as string)
+        .replace('data:', '')
+        .replace(/^.+,/, '')
+    )
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+const getBlobFromUrl = async (url: string) => {
+  return new Promise<Blob>(resolve => {
+    fetch(url).then(r => resolve(r.blob()))
+  })
+}
+
+export const saveToCameraRoll = async (url: string) => {
+  const blob = await getBlobFromUrl(url)
+  const base64 = await blobToBase64(blob)
+  return cmWVUtils.saveAssetFromUrl('mp4', base64)
 }

@@ -31,12 +31,12 @@ div(class="cm-footer-tabs flex flex-col gap-16 pt-8 pl-24 pr-24 pb-8")
 </template>
 
 <script lang="ts">
+import { useImgSelectorStore } from '@/stores/imgSelector'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import type { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import type { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
 import type { IPage } from '@nu/vivi-lib/interfaces/page'
 import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
-import assetUtils, { RESIZE_RATIO_IMAGE } from '@nu/vivi-lib/utils/assetUtils'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
@@ -45,15 +45,11 @@ import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import layerFactary from '@nu/vivi-lib/utils/layerFactary'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
-import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
-import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { mapGetters } from 'vuex'
 
@@ -601,92 +597,8 @@ export default defineComponent({
         case 'photo':
         case 'replace': {
           if (tab.panelType !== undefined) break
-          const { getCurrLayer: layer } = layerUtils
-          stkWVUtils.getIosImg()
-            .then(async (images: Array<string>) => {
-              if (images.length) {
-                const srcObj = {
-                  type: 'ios',
-                  assetId: images[0],
-                  userId: ''
-                }
-                const src = imageUtils.getSrc(srcObj)
-                await imageUtils.imgLoadHandler(src, async (img: HTMLImageElement) => {
-                  const { naturalWidth, naturalHeight } = img
-                  if (this.inBgSettingMode) {
-                    // replace background
-                    backgroundUtils.setBgImage({
-                      pageIndex: pageUtils.currFocusPageIndex,
-                      config: layerFactary.newImage({
-                        srcObj,
-                        styles: {
-                          width: naturalWidth,
-                          height: naturalHeight
-                        }
-                      })
-                    })
-                    backgroundUtils.fitPageBackground(pageUtils.currFocusPageIndex)
-                  } else {
-                    switch (layer.type) {
-                      case 'image': {
-                        // replace image
-                        const resizeRatio = RESIZE_RATIO_IMAGE
-                        const pageSize = pageUtils.getPageSize(pageIndex)
-                        const pageAspectRatio = pageSize.width / pageSize.height
-                        const photoAspectRatio = naturalWidth / naturalHeight
-                        const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
-                        const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
-                        const config = layerUtils.getCurrConfig as IImage
-                        const { imgWidth, imgHeight } = config.styles
-                        const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
-                        const styles = {
-                          ...config.styles,
-                          ...mouseUtils.clipperHandler({
-                            styles: {
-                              width: photoWidth,
-                              height: photoHeight
-                            }
-                          } as unknown as IImage, path, config.styles).styles,
-                          ...{
-                            initWidth: config.styles.initWidth,
-                            initHeight: config.styles.initHeight
-                          }
-                        }
-                        layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-                        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
-                        break
-                      }
-                      case 'frame': {
-                        // replace frame
-                        const clipIndex = Math.max(subLayerIdx, 0)
-                        const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                          .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[clipIndex], src)
-                        frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, clipIndex, {
-                          imgX, imgY, imgWidth, imgHeight
-                        })
-                        frameUtils.updateFrameClipSrc(pageIndex, layerIndex, clipIndex, srcObj)
-                        break
-                      }
-                      case 'group': {
-                        const target = layerUtils.getCurrConfig
-                        if (target.type === LayerType.image) {
-                          const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                            .getClipImgDimension(target, src)
-                          layerUtils.updateLayerStyles(pageIndex, layerIndex, { imgX, imgY, imgWidth, imgHeight }, subLayerIdx)
-                          layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
-                        } else if (target.type === LayerType.frame && target.clips.length === 1) {
-                          const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
-                            .getClipImgDimension(target.clips[0], src)
-                          frameUtils.updateFrameLayerProps(pageIndex, subLayerIdx, 0, { srcObj }, layerIndex)
-                          frameUtils.updateSubFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, 0, { imgX, imgY, imgWidth, imgHeight })
-                        }
-                      }
-                    }
-                  }
-                })
-                stepsUtils.record()
-              }
-            })
+          const { setRequireImgNum } = useImgSelectorStore()
+          setRequireImgNum(1, { replace: true })
           break
         }
         case 'color':
@@ -694,25 +606,7 @@ export default defineComponent({
           colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
           break
         case 'camera': {
-          stkWVUtils.getIosImg()
-            .then(async (images: Array<string>) => {
-              if (images.length) {
-                const src = imageUtils.getSrc({
-                  type: 'ios',
-                  assetId: images[0],
-                  userId: ''
-                })
-                imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
-                  const { naturalWidth, naturalHeight } = img
-                  const photoAspectRatio = naturalWidth / naturalHeight
-                  assetUtils.addImage(
-                    src,
-                    photoAspectRatio
-                  )
-                })
-              }
-              this.$emit('switchTab', 'none')
-            })
+          // Wait for coding
           break
         }
         default: {

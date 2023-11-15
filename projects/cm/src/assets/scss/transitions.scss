@@ -112,8 +112,8 @@
   &-enter-active,
   &-leave-active {
     transition:
-      opacity 0.25s,
-      transform 0.25s;
+      opacity 0.35s,
+      transform 0.35s;
   }
 
   &-enter-from,
@@ -137,4 +137,17 @@
     transform: rotate(45deg);
     opacity: 0;
   }
+}
+
+.slide-in-enter-active,
+.slide-in-leave-active {
+  transition: transform 0.5s;
+}
+
+.slide-in-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-in-leave-to {
+  transform: translateX(-100%);
 }
