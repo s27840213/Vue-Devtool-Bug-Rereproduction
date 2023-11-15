@@ -83,7 +83,7 @@ const iconStyles = computed(() => {
     }
 
     if (props.iconWidth && !props.iconHeight) {
-      height = `${parseInt(props.iconWidth?.split('px')[0]) * iconAspectRatio.value}px`
+      height = `${parseInt(props.iconWidth?.split('px')[0]) / iconAspectRatio.value}px`
     }
   }
   return {
