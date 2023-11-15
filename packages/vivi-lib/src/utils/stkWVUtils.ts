@@ -254,14 +254,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
   }
 
-  addFontForEmoji() {
-    const defaultEmoji = this.userSettings.emojiSetting
-    if (SYSTEM_FONTS.includes(defaultEmoji)) return
+  addFontForEmoji(emoji?: string) {
+    emoji = emoji ?? this.userSettings.emojiSetting
+    if (SYSTEM_FONTS.includes(emoji)) return
     store.dispatch('text/addFont', {
-      face: defaultEmoji,
+      face: emoji,
       type: 'public',
       ver: store.getters['user/getVerUni']
     })
+  }
+
+  addFontForEmojis() {
+    for (const emojiConfig of USER_SETTINGS_LIST_CONFIG.emojiSetting) {
+      this.addFontForEmoji(emojiConfig.val)
+    }
   }
 
   getMyDesignTags(): IMyDesignTag[] {
