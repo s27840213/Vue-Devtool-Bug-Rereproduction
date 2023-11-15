@@ -65,7 +65,9 @@ const useActionSheetCm = () => {
                 group: 'success',
                 text: `${t('NN0889')}`,
               })
-            }).catch((e) => {
+              toggleActionSheet()
+            })
+            .catch((e) => {
               console.log(e)
               // @TODO
               notify({
@@ -73,7 +75,7 @@ const useActionSheetCm = () => {
                 text: 'gen photo error',
               })
             })
-        }
+        },
       },
       {
         labels: [
@@ -90,7 +92,9 @@ const useActionSheetCm = () => {
                 group: 'success',
                 text: `${t('NN0889')}`,
               })
-            }).catch((e) => {
+              toggleActionSheet()
+            })
+            .catch((e) => {
               console.log(e)
               // @TODO
               notify({
@@ -98,7 +102,7 @@ const useActionSheetCm = () => {
                 text: 'gen vedio error',
               })
             })
-        }
+        },
       },
       {
         labels: [
@@ -115,7 +119,9 @@ const useActionSheetCm = () => {
                 group: 'success',
                 text: `${t('NN0889')}`,
               })
-            }).catch(() => {
+              toggleActionSheet()
+            })
+            .catch(() => {
               notify({
                 group: 'error',
                 text: 'error',

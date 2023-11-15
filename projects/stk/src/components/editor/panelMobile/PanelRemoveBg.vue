@@ -1,21 +1,27 @@
 <template lang="pug">
 div(class="panel-remove-bg" ref="panelRemoveBg")
-  bg-remove-container(v-if="inBgRemoveMode || isProcessing"
+  bg-remove-container(
+    v-if="inBgRemoveMode || isProcessing"
     :containerWH="containerWH"
     :containerRef="panelRemoveBg"
     :previewSrc="previewSrc")
   div(v-else class="btn-section")
     transition(name="fade-down-up")
-      div(v-if="mounted" class="btn" @click="removeBg('stk-bg-remove')")
+      div(
+        v-if="mounted"
+        class="btn"
+        @click="removeBg('stk-bg-remove')")
         div(class="btn__content-section")
           img(class="img-object-cutout" :src="require('@img/png/bgRemove/object-cutout.png')")
         div(class="btn__text-section")
           span(class="text-H7") {{ $t('STK0060') }}
           span(class="text-black-5 body-XXS btn__description") {{ $t('STK0061') }}
     transition(name="fade-down-up")
-      div(v-if="mounted" class="btn btn--bgf"
-          :style="{ 'transition-delay': '0.2s' }"
-          @click="removeBg('stk-bg-remove-face')")
+      div(
+        v-if="mounted"
+        class="btn btn--bgf"
+        :style="{ 'transition-delay': '0.2s' }"
+        @click="removeBg('stk-bg-remove-face')")
         div(class="btn__content-section btn__content-section--bgf")
           img(:src="require('@img/png/bgRemove/face-cutout-body.png')")
           img(:src="require('@img/png/bgRemove/face-cutout.png')")
@@ -37,13 +43,13 @@ import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {
-    BgRemoveContainer
+    BgRemoveContainer,
   },
   props: {
     needCalculateMobilePanelHeight: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   data() {
     return {
@@ -52,7 +58,7 @@ export default defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
       previewSrc: '',
-      mounted: false
+      mounted: false,
     }
   },
   mounted() {
@@ -65,7 +71,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
-      isInEditor: 'vivisticker/getIsInEditor'
+      isInEditor: 'vivisticker/getIsInEditor',
     }),
     containerWH() {
       return {
@@ -79,31 +85,32 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setIsProcessing: 'bgRemove/SET_isProcessing'
+      setIsProcessing: 'bgRemove/SET_isProcessing',
     }),
     removeBg(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
+      console.time('removeBg total time')
+      console.time('upload IOS image')
       this.isInEditor ? this.handleCurrSelectedImage(type) : this.handleIOSImage(type)
     },
     handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
-      stkWVUtils.getIosImg()
-        .then(async (images: Array<string>) => {
-          if (images.length) {
-            const src = imageUtils.getSrc({
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            })
+      stkWVUtils.getIosImg().then(async (images: Array<string>) => {
+        if (images.length) {
+          const src = imageUtils.getSrc({
+            type: 'ios',
+            assetId: images[0],
+            userId: '',
+          })
 
-            this.previewSrc = src
+          this.previewSrc = src
 
-            this.toDataURL(src, (dataUrl: string) => {
-              this.setIsProcessing(true)
-              uploadUtils.uploadAsset(type, [dataUrl])
-            })
-          }
-        })
+          this.toDataURL(src, (dataUrl: string) => {
+            this.setIsProcessing(true)
+            uploadUtils.uploadAsset(type, [dataUrl])
+          })
+        }
+      })
     },
-    handleCurrSelectedImage (type: 'stk-bg-remove' | 'stk-bg-remove-face') {
+    handleCurrSelectedImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
       if (!this.inBgRemoveMode && !this.isProcessing) {
         this.setIsProcessing(true)
 
@@ -114,7 +121,7 @@ export default defineComponent({
         })
       }
     },
-    toDataURL(src: string, callback: (dataUrl: string)=> void) {
+    toDataURL(src: string, callback: (dataUrl: string) => void) {
       const image = new Image()
       image.crossOrigin = 'Anonymous'
       image.onload = () => {
@@ -150,8 +157,8 @@ export default defineComponent({
       } else {
         this.mobilePanelHeight = 0
       }
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -159,7 +166,7 @@ export default defineComponent({
 .panel-remove-bg {
   position: relative;
   width: 100%;
-  height: calc(100% - v-bind(mobilePanelHeight)* 1px);
+  height: calc(100% - v-bind(mobilePanelHeight) * 1px);
   max-height: 100%;
   display: flex;
   align-items: center;
@@ -191,13 +198,13 @@ export default defineComponent({
     align-items: center;
     position: relative;
     background-image: linear-gradient(
-      45deg,
-      setColor(black-3) 25%,
-      rgba(0, 0, 0, 0) 25%,
-      rgba(0, 0, 0, 0) 75%,
-      setColor(black-3) 75%,
-      setColor(black-3)
-    ),
+        45deg,
+        setColor(black-3) 25%,
+        rgba(0, 0, 0, 0) 25%,
+        rgba(0, 0, 0, 0) 75%,
+        setColor(black-3) 75%,
+        setColor(black-3)
+      ),
       linear-gradient(
         45deg,
         setColor(black-3) 25%,
@@ -216,9 +223,13 @@ export default defineComponent({
       );
     // background-repeat: no-repeat;
     background-color: #474747;
-    background-position: 0px 0px, 11px 11px;
+    background-position:
+      0px 0px,
+      11px 11px;
     background-size: 22px 22px;
-    background-position: 0px 0px, 10px 10px;
+    background-position:
+      0px 0px,
+      10px 10px;
     background-size: 20px 20px;
     &::before {
       content: '';
@@ -227,7 +238,7 @@ export default defineComponent({
       left: 0;
       width: 50%;
       height: 100%;
-      background-color: #F5D5A0;
+      background-color: #f5d5a0;
     }
     > img {
       width: 110px;

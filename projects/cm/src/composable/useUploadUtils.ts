@@ -54,16 +54,16 @@ const useUploadUtils = () => {
     })
   }
 
-  const polling = async<T> (url: string) => {
+  const polling = async<T> (url: string, { timeInterval = 500, timeout = 180000 } = {}) => {
     return new Promise<T>((resolve, reject) => {
-      let pollingTimes = 0
+      let accPollingTime = 0
       const interval = window.setInterval(async () => {
-        if (pollingTimes >= 60) {
+        if (accPollingTime >= timeout) {
           clearInterval(interval)
           reject(new Error('Polling Timeout'))
           return
         }
-        pollingTimes++
+        accPollingTime+=timeInterval
         const pollingTargetSrc = `${url}?ver=${generalUtils.generateRandomString(6)}`
         const response = await fetch(pollingTargetSrc)
         if (response.status === 200) {
@@ -71,7 +71,7 @@ const useUploadUtils = () => {
           const json: T = await response.json()
           resolve(json)
         }
-      }, 2000)
+      }, timeInterval)
     })
   }
 

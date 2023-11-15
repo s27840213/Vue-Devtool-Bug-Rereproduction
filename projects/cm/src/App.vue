@@ -64,22 +64,25 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     popup
   div(class="modal-container" v-if="isModalOpen")
     modal-card
+  spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
   notifications(
+    class="notification flex justify-center items-center"
+    position="top center"
     group="success"
     :max="2"
     :duration="2000")
     template(v-slot:body="{ item }")
-      div(class="w-fit top-0 left-1/2 typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success")
+      div(class="notification__content")
         cm-svg-icon(iconName="ok-hand")
         span( v-html="item.text")
-  notifications(
-    group="error"
-    position="top center"
-    width="300px"
-    :max="1"
-    :duration="5000")
-    template(v-slot:body="{ item }")
-      div(class="notification error " v-html="item.text")
+  //- notifications(
+  //-   group="error"
+  //-   position="top center"
+  //-   width="300px"
+  //-   :max="1"
+  //-   :duration="5000")
+  //-   template(v-slot:body="{ item }")
+  //-     div(class="notification error " v-html="item.text")
   transition(name="bottom-up")
     div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
         action-sheet(
@@ -98,6 +101,8 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
+import { useGlobalStore } from '@/stores/global'
+import Spinner from '@nu/vivi-lib/components/global/Spinner.vue'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -117,7 +122,6 @@ import { useModalStore } from './stores/modal'
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
 // #region state info
-const stateInfo = useStateInfo()
 const {
   inAspectRatioState,
   showHomeTabs,
@@ -131,7 +135,10 @@ const {
   showImgSelector,
   inGenResultState,
   inSavingState,
-} = stateInfo
+} = useStateInfo()
+
+const globalStore = useGlobalStore()
+const { showSpinner, spinnerText } = storeToRefs(globalStore)
 // #endregion
 
 // #region function panel
@@ -295,6 +302,10 @@ const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm
 }
 
 .notification {
-  @apply w-fit top-0 left-1/2 typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success;
+  // to diable vue-notification's default style(display: block)
+  display: flex !important;
+  &__content {
+    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success;
+  }
 }
 </style>

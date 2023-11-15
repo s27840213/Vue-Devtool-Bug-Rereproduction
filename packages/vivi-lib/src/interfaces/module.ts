@@ -149,6 +149,7 @@ export interface IAssetProps {
   }
   has_frame?: number | boolean
   fit?: number,
+  record?: boolean,
   hideResizer?: boolean,
   ctrlUnmountCb?: (pageIndex: number ,layerIndex:number, config?: AllLayerTypes) => void
 }

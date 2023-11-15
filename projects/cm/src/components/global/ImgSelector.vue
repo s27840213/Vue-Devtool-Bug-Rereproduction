@@ -90,8 +90,14 @@ div(
   //- 4-2. Stock
   div(v-else-if="inStock" class="grid grid-cols-2 gap-16 mx-10 my-16 overflow-scroll")
     //- Stock selector
-    div(v-for="(col, i) in unsplashCols" :key="i" class="grid gap-16 h-fit")
-      div(v-for="img in col" :key="img.id" class="relative")
+    div(
+      v-for="(col, i) in unsplashCols"
+      :key="i"
+      class="grid gap-16 h-fit")
+      div(
+        v-for="img in col"
+        :key="img.id"
+        class="relative")
         img(
           class="w-full"
           :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
@@ -129,6 +135,7 @@ div(
 </template>
 
 <script lang="ts" setup>
+import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import vuex from '@/vuex'
@@ -177,6 +184,8 @@ const demoImgs = [
     ratio: 384 / 480,
   },
 ]
+
+const { atEditor } = useStateInfo()
 // #endregion
 
 // #region album datas
@@ -330,17 +339,21 @@ const sendToEditor = async () => {
     imageUtils.replaceImg(
       targetImgs[0],
       imageUtils.getSrc(targetImgs[0], 'prev'),
-      targetImgs[0].ratio
+      targetImgs[0].ratio,
     )
   } else {
     setImgAspectRatio(targetImgs[0].ratio)
-    await router.push({ name: 'Editor' })
+    const initAtEditor = atEditor.value
+    if (!atEditor.value) await router.push({ name: 'Editor' })
     setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {
-        assetUtils.addImage(img, img.ratio, { fit: 1 })
+        // if we aren't at editor at beginning, we need to fit the image, and don't need to record
+        assetUtils.addImage(img, img.ratio, { fit: initAtEditor ? 0.8 : 1, record: initAtEditor })
       })
-      groupUtils.deselect()
+      if (!initAtEditor) {
+        groupUtils.deselect()
+      }
     })
   }
   setRequireImgNum(0)

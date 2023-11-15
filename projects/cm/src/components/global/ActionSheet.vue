@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="action-sheet")
+div(class="action-sheet" ref="actionSheetRef")
   div(class="bg-app-tab-bg flex flex-col rounded-lg")
     div(
       v-for="(action, index) in primaryActions"
@@ -22,12 +22,18 @@ div(class="action-sheet")
         :class="`text-${label.labelColor} ${label.labelSize}`") {{ label.label }}
 </template>
 <script setup lang="ts">
+import useActionSheetCm from '@/composable/useActionSheetCm'
 import type { IActionSheetBtn } from '@/stores/actionSheet'
-
+import { onClickOutside } from '@vueuse/core'
 const props = defineProps<{
   primaryActions: Array<IActionSheetBtn>
   secondaryActions: Array<IActionSheetBtn>
 }>()
+
+const { toggleActionSheet } = useActionSheetCm()
+
+const actionSheetRef = ref<HTMLElement | null>(null)
+onClickOutside(actionSheetRef, () => toggleActionSheet())
 </script>
 <style lang="scss" scoped>
 .action-sheet {

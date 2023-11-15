@@ -28,10 +28,15 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { generalUtils } from '@nu/shared-lib'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+
+const globalStore = useGlobalStore()
+const { setShowSpinner, setSpinnerText } = globalStore
+
 const editorStore = useEditorStore()
 const { setIsGenerating, unshiftGenResults, setEditorState } = editorStore
 const { isGenerating } = storeToRefs(editorStore)
@@ -50,16 +55,20 @@ const handleGenerate = () => {
     )
     setEditorState('genResult')
   } else {
+    setSpinnerText('Generating...')
+    setShowSpinner(true)
     setIsGenerating(true)
     genImage(promptText.value)
       .then((url) => {
         unshiftGenResults(url, generalUtils.generateRandomString(4))
         setEditorState('genResult')
         setIsGenerating(false)
+        setShowSpinner(false)
       })
       .catch((error) => {
         logUtils.setLogForError(error as Error)
         setIsGenerating(false)
+        setShowSpinner(false)
         notify({
           group: 'error',
           text: `Generate Failed`,
