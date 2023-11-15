@@ -43,7 +43,7 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
@@ -80,6 +80,7 @@ export default defineComponent({
         }
       }, 300)
     }
+    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },
   computed: {
     ...mapGetters({
