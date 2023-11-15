@@ -85,7 +85,7 @@ export default defineComponent({
 
       return {
         bg: 'bg-white',
-        title: 'text-H6 text-gray-2 text-app-tab-active',
+        title: 'text-H6 text-gray-2',
         desc: 'body-SM text-gray-2',
         btn: 'btn-primary-mid',
       }
