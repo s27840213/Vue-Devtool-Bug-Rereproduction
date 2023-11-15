@@ -12,8 +12,6 @@ div(class="w-full box-border p-24 rounded-[20px] flex items-center justify-betwe
   img(:src="imgSrc" class="w-128")
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
-
 const props = defineProps<{
   btnIconName?: string
   btnText: string

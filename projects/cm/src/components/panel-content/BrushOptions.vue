@@ -34,7 +34,6 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
       @click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { PowerfulFillCanvasMode } from '@/types/editor'
@@ -42,7 +41,6 @@ import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import { storeToRefs } from 'pinia'
-import PropsSlider from '../global/PropsSlider.vue'
 
 /**
  * @TODO - tidy up the codes

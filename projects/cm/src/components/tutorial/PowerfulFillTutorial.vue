@@ -30,7 +30,6 @@ div(class="w-screen h-screen")
 </template>
 
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 defineOptions({ name: 'powerful-fill-tutorial' })

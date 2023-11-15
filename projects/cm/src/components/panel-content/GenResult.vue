@@ -52,14 +52,12 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
     span(class="text-app-text-secondary typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { notify } from '@kyvg/vue3-notification'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
-import ScrollableContainer from '../global/ScrollableContainer.vue'
 
 const editorStore = useEditorStore()
 const { setGenResultIndex, unshiftGenResults, updateGenResult, keepEditingInit } = editorStore

@@ -22,7 +22,6 @@ import { useEditorStore } from '@/stores/editor'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-import ScrollableContainer from '../global/ScrollableContainer.vue'
 const editorStore = useEditorStore()
 
 const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)

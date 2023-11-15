@@ -27,7 +27,6 @@ div(
         :iconName="'close-btn'") Button
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
 import type { INubtnSize, INubtnThemes } from '@/types/btn'
 
 const nubtnThemesArray: INubtnThemes[] = ['primary', 'secondary', 'icon_light', 'icon_dark', 'text']

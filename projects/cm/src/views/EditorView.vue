@@ -146,10 +146,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
-import CanvasSection from '@/components/editor/CanvasSection.vue'
-import SidebarTabs from '@/components/editor/SidebarTabs.vue'
-import BackBtn from '@/components/global/BackBtn.vue'
-import CmBtn from '@/components/global/CmBtn.vue'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'

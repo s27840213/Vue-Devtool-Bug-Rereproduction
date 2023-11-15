@@ -18,7 +18,6 @@ div(class="editing-options w-full")
     cm-btn(theme="primary" size="sm" @click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
@@ -27,7 +26,6 @@ import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
-import ScrollableContainer from '../global/ScrollableContainer.vue'
 
 const { drawImageToCtx } = useCanvasUtilsCm()
 const editorStore = useEditorStore()

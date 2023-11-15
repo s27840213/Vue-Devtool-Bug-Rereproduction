@@ -26,7 +26,6 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import tutorialUtils from '@/utils/tutorialUtils'

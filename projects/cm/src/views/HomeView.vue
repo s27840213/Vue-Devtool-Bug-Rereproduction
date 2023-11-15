@@ -61,9 +61,6 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
-import FeatureCard from '@/components/home/FeatureCard.vue'
-import HighlightSection from '@/components/home/HighlightSection.vue'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import PixiRecorder from '@/utils/pixiRecorder'
 import vuex from '@/vuex'

@@ -14,9 +14,7 @@ div(class="flex flex-col items-center justify-center box-border px-24")
       @click="cancel") {{ cancelText }}
 </template>
 <script setup lang="ts">
-import CmBtn from '@/components/global/CmBtn.vue'
 import { useModalStore } from '@/stores/modal'
-
 const modalStore = useModalStore()
 const { cancel, cancelText, confirm, confirmText, content, title } = toRefs(modalStore.modalInfo)
 

@@ -147,7 +147,6 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
-import BackBtn from './BackBtn.vue'
 
 const router = useRouter()
 
