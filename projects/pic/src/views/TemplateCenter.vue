@@ -158,19 +158,18 @@ div(ref="body"
 <script lang="ts">
 import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import TemplateNoResult from '@/components/templates/TemplateNoResult.vue'
 import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
+import templateCenterUtils from '@/utils/templateCenterUtils'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import { IContentTemplate, ITemplate } from '@nu/vivi-lib/interfaces/template'
 import { Itheme } from '@nu/vivi-lib/interfaces/theme'
-import hashtag from '@/store/module/hashtag'
 import designUtils from '@nu/vivi-lib/utils/designUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
-import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@nu/vivi-lib/utils/themeUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
@@ -331,12 +330,6 @@ export default defineComponent({
   },
   unmounted() {
     window.removeEventListener('resize', this.handleResize)
-  },
-  beforeCreate() {
-    this.$store.registerModule('hashtag', hashtag)
-  },
-  beforeUnmount() {
-    this.$store.unregisterModule('hashtag')
   },
   computed: {
     ...mapState('hashtag', {

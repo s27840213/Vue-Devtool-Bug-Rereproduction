@@ -623,7 +623,10 @@ class UploadUtils {
           xhr.send(formData)
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
+            console.timeEnd('upload IOS image')
+            console.time('get image size')
             imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
+              console.timeEnd('get image size')
               bgRemoveUtils.removeBgStk(
                 uuid,
                 assetId,

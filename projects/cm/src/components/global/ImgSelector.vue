@@ -135,6 +135,7 @@ div(
 </template>
 
 <script lang="ts" setup>
+import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import vuex from '@/vuex'
@@ -142,6 +143,7 @@ import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
@@ -163,7 +165,7 @@ const props = defineProps({
 })
 
 // #region var declare
-const tabIndex = ref(0)
+const { tabIndex } = storeToRefs(useImgSelectorStore())
 const inPhoto = computed(() => tabIndex.value === 0)
 const inStock = computed(() => tabIndex.value === 1)
 const { tc } = useI18n()
@@ -182,6 +184,8 @@ const demoImgs = [
     ratio: 384 / 480,
   },
 ]
+
+const { atEditor } = useStateInfo()
 // #endregion
 
 // #region album datas
@@ -223,7 +227,7 @@ const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
 const { setPageSize, setImgAspectRatio } = editorStore
-const { setRequireImgNum } = useImgSelectorStore()
+const { setRequireImgNum, replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
@@ -272,6 +276,7 @@ const unsplashRaw = computed(() => {
   if (unsplash.keyword) return unsplash.searchResult
   return unsplash.content
 })
+const unsplashCols = computed(() => useWaterfall(unsplashRaw.value, 2))
 const unsplashLoading = computed(() => {
   if (
     (unsplash.keyword && unsplash.nextSearch === -1) ||
@@ -279,18 +284,6 @@ const unsplashLoading = computed(() => {
   )
     return false
   return unsplash.pending
-})
-const unsplashCols = computed(() => {
-  const arr = [
-    { content: [] as IPhotoItem[], height: 0 },
-    { content: [] as IPhotoItem[], height: 0 },
-  ]
-  unsplashRaw.value.forEach((unsplash) => {
-    const next = arr[0].height <= arr[1].height ? 0 : 1
-    arr[next].content.push(unsplash)
-    arr[next].height += unsplash.height / (unsplash.width / 100)
-  })
-  return arr.map((a) => a.content)
 })
 
 // Method
@@ -342,18 +335,28 @@ const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') 
 }
 
 const sendToEditor = async () => {
-  setImgAspectRatio(targetImgs[0].ratio)
-  setRequireImgNum(0)
-  await router.push({ name: 'Editor' })
-  setPageSize(900, 1600)
-  nextTick(() => {
-    targetImgs.forEach((img) => {
-      assetUtils.addImage(img, img.ratio, {
-        fit: 1,
+  if (replaceImgFlag) {
+    imageUtils.replaceImg(
+      targetImgs[0],
+      imageUtils.getSrc(targetImgs[0], 'prev'),
+      targetImgs[0].ratio,
+    )
+  } else {
+    setImgAspectRatio(targetImgs[0].ratio)
+    const initAtEditor = atEditor.value
+    if (!atEditor.value) await router.push({ name: 'Editor' })
+    setPageSize(900, 1600)
+    nextTick(() => {
+      targetImgs.forEach((img) => {
+        // if we aren't at editor at beginning, we need to fit the image, and don't need to record
+        assetUtils.addImage(img, img.ratio, { fit: initAtEditor ? 0.8 : 1, record: initAtEditor })
       })
+      if (!initAtEditor) {
+        groupUtils.deselect()
+      }
     })
-    groupUtils.deselect()
-  })
+  }
+  setRequireImgNum(0)
 }
 // #endregion
 

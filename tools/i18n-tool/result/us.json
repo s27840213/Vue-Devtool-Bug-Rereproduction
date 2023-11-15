@@ -303,7 +303,7 @@
   "NN0304": "Already have an account?",
   "NN0305": "Log in here",
   "NN0306": "Create your account",
-  "NN0307": "By signing up to Vivipic, you indicate that you've read and agree to our {use} and {privacy}.",
+  "NN0307": "By registering to {product}, you agree with our {use} and {privacy}.",
   "NN0308": "Password must have at least 8 characters that include at least 1 uppercase, 1 lowercase, and 1 number.",
   "NN0309": "Change profile image",
   "NN0310": "Change password",
@@ -1010,6 +1010,7 @@
   "STK0093": "Let's explore",
   "STK0094": "Free Trial Enabled.",
   "STK0095": "Use {day}-Day Free Trial.",
+  "STK0096": "Go to Settings > Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases > Tap “In-app Purchases” and set to Allow.",
   "SKT0001": "Editing",
   "SKT0002": "Can edit",
   "SKT0003": "Switching editor...",
@@ -1116,6 +1117,9 @@
   "CM0070": "Maximum {num} photos can be selected.",
   "CM0071": "Remove watermark",
   "CM0072": "High resolution photo",
-  "CM0073": "Sign in to Charmix",
-  "CM0074": "By using Charmix, you agree to our {use}, {privacy} and to receive offers and updates."
+  "CM0073": "Sign up / in to Charmix",
+  "CM0074": "By using Charmix, you agree to our {use}, {privacy} and to receive offers and updates.",
+  "CM0075": "Saving as",
+  "CM0076": "Select format to keep your creations.",
+  "CM0077": "Video"
 }

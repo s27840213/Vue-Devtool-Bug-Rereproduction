@@ -243,6 +243,7 @@ export default defineComponent({
 
         case ColorEventType.background: {
           colorUtils.setCurrPageBackgroundColor(newColor)
+          stepsUtils.record()
           break
         }
 

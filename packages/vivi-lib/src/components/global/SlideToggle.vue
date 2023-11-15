@@ -44,13 +44,13 @@ export default defineComponent({
   props: {
     // Only accept {label, value}[]
     options: {
-      type: Array as PropType<{label: string, value: string}[]>,
+      type: Array as PropType<{label: string, value: string | boolean}[]>,
       required: true
     },
     // Use v-model to two way bindings this props, don't use :modelValue.
     // If value cannot found in options, will be set to first option automatically.
     modelValue: {
-      type: String,
+      type: [String, Boolean],
       required: true
     },
     optionWidth: {
@@ -84,6 +84,14 @@ export default defineComponent({
     inActiveColor: {
       type: String,
       default: 'gray-2'
+    },
+    toggleMode: {
+      type: Boolean,
+      default: false
+    },
+    overlapSize: {
+      type: String,
+      default: '8px'
     }
   },
   emits: ['update:modelValue'],
@@ -93,7 +101,7 @@ export default defineComponent({
     },
     outsideStyle():Record<string, string> {
       return {
-        width: `calc(${this.optionWidth} * ${this.options.length})`,
+        width: `calc(${this.optionWidth} * ${this.options.length} - ${this.overlapSize} * ${this.options.length - 1})`,
         height: this.optionHeight
       }
     },
@@ -102,7 +110,7 @@ export default defineComponent({
         width: `calc(${this.optionWidth} - ${this.margin} * 2)`,
         height: `calc(${this.optionHeight} - ${this.margin} * 2)`,
         margin: this.margin,
-        left: `calc(${this.optionWidth} * ${this.insideIndex})`
+        transform: `translateX(calc((${this.optionWidth} - ${this.overlapSize}) * ${this.insideIndex}))`
       }
     },
     textStyle():Record<string, string> {
@@ -118,7 +126,11 @@ export default defineComponent({
   },
   methods: {
     setValue(index: number) {
-      this.$emit('update:modelValue', this.options[index].value)
+      if(this.toggleMode && this.options.length ===  2) {
+        this.$emit('update:modelValue', this.options[(this.insideIndex + 1) % 2].value)
+      } else {
+        this.$emit('update:modelValue', this.options[index].value)
+      }
     },
   }
 })
@@ -129,6 +141,7 @@ export default defineComponent({
   display: flex;
   position: relative;
   border-radius: 100px;
+  transition: background-color 0.3s;
 }
 
 .toggle-inside {
