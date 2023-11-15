@@ -13,6 +13,7 @@ import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { AnyTouchEvent } from 'any-touch'
+import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
 
 export default class PinchControlUtils {
@@ -222,6 +223,8 @@ export default class PinchControlUtils {
       if (isHasOnePtrEvt && isLayerExist) {
         this.movingUtils.moveStart(nativeEvt, { pointerId: pointerEvtUtils.pointerIds[0] ?? 0, isFollowByPinch: true })
       }
+    } else {
+      stepsUtils.record()
     }
   }
 
@@ -246,7 +249,6 @@ export default class PinchControlUtils {
       case 'shape': {
         if (this.config.category === 'E') {
           controlUtils.updateShapeVSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, [this.config.styles.width, this.config.styles.height])
-          console.log('this.init?.shape?.initCorRadPercentage', this.init)
           const corRad = controlUtils.getCorRadValue([this.config.styles.width, this.config.styles.height], this.init?.shape?.initCorRadPercentage as number, this.config.shapeType as string)
           controlUtils.updateShapeCorRad(this.layerInfo.pageIndex, this.layerInfo.layerIndex, (this.config as IShape).size as number[], corRad)
           layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { scale: 1 })

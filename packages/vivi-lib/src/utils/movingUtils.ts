@@ -677,6 +677,9 @@ export class MovingUtils {
           }
         }
       } else {
+        if (this.isFollowByPinch) {
+          stepsUtils.record()
+        }
         if (this.getLayerType === 'text' && controlUtils.isClickOnController(e as PointerEvent, this.config as AllLayerTypes) && !this.isFollowByPinch) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
           if (this.isTouchDevice) {
