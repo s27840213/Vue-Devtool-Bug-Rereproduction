@@ -25,10 +25,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           iconWidth="20px"
           @click="redo")
     template(#right)
-      cm-btn(
+      nubtn(
         v-if="inAspectRatioState || inGenResultState"
-        theme="primary"
-        size="md"
         @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(
     v-if="!inSavingState"

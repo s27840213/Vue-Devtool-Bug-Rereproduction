@@ -43,10 +43,8 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
               class="w-full h-full object-cover"
               :src="apeendRandomQuery(genResult.url)")
   div(class="flex flex-col gap-8 justify-between items-center")
-    cm-btn(
-      theme="primary"
-      size="md"
-      :full="true"
+    nubtn(
+      size="mid-full"
       @clickBtn="handleKeepEditing"
       :disabled="true") {{ $t('CM0067') }}
     span(class="text-app-text-secondary typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}

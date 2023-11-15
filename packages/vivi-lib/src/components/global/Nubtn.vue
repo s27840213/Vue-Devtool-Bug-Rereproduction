@@ -3,15 +3,15 @@ div(:class="`nubtn ${proj} ${theme} ${sizeClass} ${status} ${device}`"
     v-hint="hint"
     ref="root"
     @click="click")
-  svg-icon(v-if="theme.includes('icon') && iconName"
+  svg-icon(v-if="iconName"
           :iconName="iconName" :iconWidth="iconSize" :iconColor="iconColor")
   span(v-if="!theme.includes('icon') || theme.includes('icon_')")
     slot
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue'
 import useTapTransition from '@/composable/useTapTransition'
+import { defineComponent, PropType, ref } from 'vue'
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
@@ -162,9 +162,7 @@ export default component
     line-height: 20px;
     height: 40px;
   }
-  &:not(.full) {
-    padding: 0 16px;
-  }
+  padding: 8px 16px;
   font-weight: 700;
   border-radius: 50px;
 }
@@ -201,6 +199,9 @@ export default component
   }
   &.disabled {
     background-color: #A3A3A3;
+  }
+  > svg {
+    margin-right: 8px;
   }
 }
 .nubtn.outline {

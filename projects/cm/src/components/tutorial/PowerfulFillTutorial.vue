@@ -12,11 +12,10 @@ div(class="w-screen h-screen")
             :iconWidth="iconSize.width"
             :iconHeight="iconSize.height"
           )
-        cm-btn(
+        nubtn(
           v-if="hasNextBtn"
-          class="self-start justify-self-center"
-          theme="primary"
-          size="md"
+          class="self-start justify-self-center max-w-[96px]"
+          size="sm-full"
           @click="emit('nextStep')") {{ nextBtnText }}
         div(class="justify-self-end")
           svg-icon(

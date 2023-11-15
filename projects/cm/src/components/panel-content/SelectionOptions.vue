@@ -13,9 +13,9 @@ div(class="editing-options w-full")
         :same-size="false"
         @click="chooseSelectionOption(shape)")
   div(class="flex justify-between items-center box-border px-24")
-    cm-btn(theme="secondary" size="sm" @click="cancel") {{ $t('NN0203') }}
+    nubtn(theme="secondary" @click="cancel") {{ $t('NN0203') }}
     span(class="typo-h6 text-app-text-secondary") {{ $t('CM0051') }}
-    cm-btn(theme="primary" size="sm" @click="apply") {{ $t('CM0061') }}
+    nubtn(@click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'

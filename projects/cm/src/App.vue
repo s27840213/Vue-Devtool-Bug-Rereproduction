@@ -23,10 +23,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
             v-slot="{ navigate }")
             svg-icon(iconName="settings"
               :iconColor="'app-tab-default'" @click="navigate")
-      cm-btn(
-        :theme="'primary'"
-        :hasIcon="true"
-        iconName="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+      nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="box-border pb-12 min-h-full row-start-2 row-end-3"
     v-slot="{ Component, route }")

@@ -18,10 +18,8 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
         class="absolute bottom-10 right-10 text-app-text-primary typo-body-sm"
         @click="clearPromt")
         span {{ $t('CM0029') }}
-  cm-btn(
-    theme="primary"
-    size="md"
-    :full="true"
+  nubtn(
+    size="mid-full"
     :disabled="isGenerating"
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
