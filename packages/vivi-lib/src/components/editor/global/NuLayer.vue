@@ -532,7 +532,7 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          if (this.getLayerType === LayerType.image) {
+          if (this.getLayerType === LayerType.image && this.prePrimaryLayerIndex === -1) {
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
             eventUtils.emit(PanelEvent.switchTab, 'crop')
           }
