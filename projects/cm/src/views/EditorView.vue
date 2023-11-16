@@ -224,10 +224,9 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { setEditorState, updateGenResult } = editorStore
+const { changeEditorState, updateGenResult } = editorStore
 const {
   pageSize,
-  editorState,
   currActiveFeature,
   generatedResults,
   inGenResultState,
@@ -239,8 +238,8 @@ const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
-  if (editorState.value === 'aspectRatio') {
-    setEditorState('editing')
+  if (inAspectRatioState.value) {
+    changeEditorState('next')
     tutorialUtils.runTutorial('powerful-fill')
     nextTick(() => {
       store.commit('SET_contentScaleRatio4Page', {
@@ -248,11 +247,9 @@ const handleNextAction = function () {
         contentScaleRatio: fitScaleRatio.value,
       })
     })
-  } else if (editorState.value === 'genResult') {
-    setEditorState('saving')
+  } else if (inGenResultState.value) {
+    changeEditorState('next')
     isVideoGened.value = false
-  }
-  if (inGenResultState) {
     const currGenResult = generatedResults.value[currGenResultIndex.value]
     if (currGenResult) {
       if (!currGenResult.video) {
