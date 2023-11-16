@@ -2,6 +2,7 @@ import staticApis from '@/apis/static'
 import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
 import { generalUtils } from '@nu/shared-lib'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const useUploadUtils = () => {
   const { userId } = storeToRefs(useUserStore())
@@ -64,7 +65,7 @@ const useUploadUtils = () => {
           return
         }
         accPollingTime+=timeInterval
-        const pollingTargetSrc = `${url}?ver=${generalUtils.generateRandomString(6)}`
+        const pollingTargetSrc = imageUtils.appendQuery(url, 'ver', generalUtils.generateRandomString(6))
         const response = await fetch(pollingTargetSrc)
         if (response.status === 200) {
           clearInterval(interval)
