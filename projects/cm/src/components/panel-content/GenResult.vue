@@ -14,7 +14,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       div(
         class="gen-result__block rounded-md bg-neutral-dark-active flex flex-col justify-center items-center"
         @click="showMoreRes")
-        cm-svg-icon(
+        svg-icon(
           iconName="crown"
           iconColor="app-tab-active"
           iconWidth="24px")
@@ -43,10 +43,8 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
               class="w-full h-full object-cover"
               :src="apeendRandomQuery(genResult.url)")
   div(class="flex flex-col gap-8 justify-between items-center")
-    cm-btn(
-      theme="primary"
-      size="md"
-      :full="true"
+    nubtn(
+      size="mid-full"
       @clickBtn="handleKeepEditing"
       :disabled="true") {{ $t('CM0067') }}
     span(class="text-app-text-secondary typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}
@@ -55,7 +53,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { notify } from '@kyvg/vue3-notification'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 

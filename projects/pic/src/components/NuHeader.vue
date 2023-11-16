@@ -82,7 +82,7 @@ div(class="nu-header" :style="rootStyles")
 
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import store from '@/store'

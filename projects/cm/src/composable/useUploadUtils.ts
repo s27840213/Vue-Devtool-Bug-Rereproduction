@@ -1,7 +1,7 @@
 import staticApis from '@/apis/static'
 import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const useUploadUtils = () => {

@@ -22,11 +22,9 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           div(class="typo-body-md") {{ $t('CM0034') }}
           div(class="typo-body-md") {{ $t('CM0035') }}
         img(src="@/assets/img/crown-3d.png" class="w-128 h-128")
-      cm-btn(
-        theme="primary"
-        :hasIcon="true"
-        iconName="crown"
-        :full="true") {{ $t('CM0032') }}
+      nubtn(
+        icon="crown"
+        size="mid-full") {{ $t('CM0032') }}
     div(class="flex flex-col gap-16 text-app-btn-primary-text text-left typo-h6")
       template(v-for="op in config" :key="op.title")
         function-bar(

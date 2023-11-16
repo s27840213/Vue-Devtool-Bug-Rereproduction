@@ -5,7 +5,7 @@ div(class="mobile-props-toggle flex flex-between items-center full-width body-MD
 </template>
 
 <script lang="ts">
-import ToggleBtn from '@/components/global/ToggleBtn.vue'
+import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
