@@ -1,19 +1,19 @@
 <template lang="pug">
 div(class="panel-background-remove")
   div(class="panel-background-remove__grid mb-5")
-    btn(class="full-width"
-      :type="clearMode ? 'gray-active-mid' :'gray-mid'"
-      :hasIcon="true"
-      :iconName="'clear'"
-      :iconMargin="8"
+    nubtn(
+      theme="edit"
+      size="mid-full"
+      :icon="['clear', '', '20px']"
+      :active="clearMode"
       @click="setClearMode(true)") {{ $t('NN0385') }}
-    btn(class="full-width"
-      :type="clearMode ? 'gray-mid' :'gray-active-mid'"
-      :hasIcon="true"
-      :iconName="'preserve'"
-      :iconMargin="8"
+    nubtn(
+      theme="edit"
+      size="mid-full"
+      :icon="['preserve', '', '20px']"
+      :active="!clearMode"
       @click="setClearMode(false)") {{ $t('NN0386') }}
-    div(class="panel-background-remove__slider full")
+    div(class="panel-background-remove__slider full-row")
       div(class="text-left")
         span(class="label-mid") {{ $t('NN0387') }}
       div(class="flex")
@@ -26,14 +26,14 @@ div(class="panel-background-remove")
         input(class="input__slider--text body-2 text-gray-2"
           type="number"
           v-model.number="brushSize")
-    div(class="full flex items-center")
+    div(class="full-row flex items-center")
       svg-icon(class="mr-5"
         :iconColor="showInitImage ? 'blue-1' : 'light-gray'"
         :iconName="showInitImage ? 'checkbox-checked' : 'checkbox'"
         :iconWidth="'16px'"
         @click="toggleShowInitImage(showInitImage)")
       span(class="label-mid") {{$t('NN0388')}}
-    nubtn(theme="edit" size="mid-full"
+    nubtn(theme="edit" size="mid-full" class="full-row"
       @click="restoreInitState()") {{$t('NN0389')}}
     //- Cannot use mid-full size here, because class full has grid-column: 1 / 3 CSS.
     nubtn(theme="edit" size="mid" style="width: 100%"
@@ -109,15 +109,8 @@ export default defineComponent({
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-auto-rows: 1fr;
-    row-gap: 10px;
-    column-gap: 20px;
-    > button {
-      &.active {
-        border: 2px solid setColor(blue-1);
-        color: setColor(blue-1);
-        padding: 8px 20px;
-      }
-    }
+    row-gap: 16px;
+    column-gap: 12px;
   }
 
   &__slider {
@@ -132,7 +125,7 @@ export default defineComponent({
   }
 }
 
-.full {
+.full-row {
   grid-column: 1 / 3;
 }
 </style>

@@ -3,6 +3,7 @@ div(class="btnList" :style="BGstyle")
   div(class="btnList-options")
     checkbox(v-model="full") full size
     checkbox(v-model="darkBG") dark BG
+    checkbox(v-model="allIcon") all icon
     div
       span {{'button text: '}}
       input(type="text" v-model="btnText")
@@ -20,7 +21,7 @@ div(class="btnList" :style="BGstyle")
         :size="`${full ? btn.size.replace('center', 'full') as INubtnSize : btn.size}`"
         :active="status==='active'"
         :disabled="status==='disabled'"
-        :icon="btn.hasIcon ? btnIcon : undefined"
+        :icon="(allIcon || btn.hasIcon) ? btnIcon : undefined"
         :hint="btnText") {{btnText}}
   hr(style="width: 50%")
   div(class="btnList-options")
@@ -118,6 +119,7 @@ export default defineComponent({
         'ghost', 'ghost_outline', 'danger', 'secondary'],
       full: false,
       darkBG: true,
+      allIcon: false,
       btnText: 'Button',
       btnIcon: 'download',
       testBtnStatus: 'default',

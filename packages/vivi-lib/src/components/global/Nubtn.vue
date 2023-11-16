@@ -85,13 +85,17 @@ const component = defineComponent({
       return Array.isArray(this.icon) ? this.icon[0] : this.icon
     },
     iconSize(): string {
+      if (Array.isArray(this.icon) && this.icon[2]) { // Case 2
+        return this.icon[2]
+      } 
       return this.theme === 'icon_pill' && this.size === 'sm' ? '20px' : '24px'
     },
     iconColor(): string {
       if (Array.isArray(this.icon) && this.icon[1]) { // Case 2
         return this.icon[1]
-      } else if (this.theme === 'icon_text') return 'white'
-      else return this.status === 'disabled' ? 'gray-4' : 'gray-2'
+      } 
+      // Empty string means the same color with text.
+      return ''
     },
   },
   methods: {
@@ -119,6 +123,10 @@ export default component
   white-space: nowrap;
   user-select: none;
   transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  > span {
+    // The same with svg-icon.
+    transition: background-color 0.4s, color 0.4s;
+  }
 
   &.full {
     width: 100%;
@@ -241,6 +249,7 @@ export default component
 .nubtn.icon {
   width: 32px;
   height: 32px;
+  color: setColor(gray-2);
   &.active {
     background-color: setColor(blue-3);
   }
@@ -248,6 +257,7 @@ export default component
     background-color: setColor(blue-3, 0.5);
   }
   &.desktop.disabled, &.mobile.disabled {
+    color: setColor(gray-4);
     background-color: transparent;
   }
 }
@@ -261,6 +271,7 @@ export default component
     height: 44px;
   }
   border: 1px solid setColor(gray-3);
+  color: setColor(gray-2);
   background-color: white;
   &.active {
     background-color: setColor(blue-3);
@@ -269,6 +280,7 @@ export default component
     background-color: setColor(blue-4);
   }
   &.desktop.disabled, &.mobile.disabled {
+    color: setColor(gray-4);
     background-color: white;
   }
 }

@@ -152,9 +152,7 @@ div(class="shape-setting")
   div(class="shape-setting__info")
     div(v-if="showAdminTool && isObjectElement")
       div(class="shape-setting__info__divider pb-10")
-      btn(:type="'primary-sm'"
-        class="shape-setting__info__button rounded my-5"
-        @click="getDataClicked()") 取 得 元 素 資 料
+      nubtn(size="sm-center" @click="getDataClicked()") 取 得 元 素 資 料
       div(class="shape-setting__info__divider2 pb-10")
       span(class="py-5 text-gray-1 label-lg") 元 素 資 訊
       div(class="shape-setting__info__line" style="background: #eee;")
@@ -196,18 +194,17 @@ div(class="shape-setting")
             input(class="body-2 text-gray-2" min="0"
               v-model="svgInfo.plan")
         div(class="pt-10")
-          btn(:type="'primary-sm'"
-            class="shape-setting__info__button rounded my-5"
-            @click="updateDataClicked()") 更新
+          nubtn(@click="updateDataClicked()") 更新
   spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
-import designApis from '@nu/vivi-lib/apis/design-info'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
-import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
-import MarkerIcon from '@nu/shared-lib/components/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
+import { notify } from '@kyvg/vue3-notification'
+import MarkerIcon from '@nu/shared-lib/components/MarkerIcon.vue'
+import designApis from '@nu/vivi-lib/apis/design-info'
+import ColorBtn from '@nu/vivi-lib/components/global/ColorBtn.vue'
 import { IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import { AllLayerTypes, IFrame, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
@@ -225,10 +222,9 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import shapeUtils from '@nu/vivi-lib/utils/shapeUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { cloneDeep } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -774,11 +770,6 @@ export default defineComponent({
       border-top: 2px dotted #000;
       margin-top: 10px;
       padding-bottom: 5px;
-    }
-    &__button {
-      margin: 0 auto;
-      width: 70%;
-      padding: 8px 0;
     }
     &__line {
       display: flex;
