@@ -362,6 +362,7 @@ class UploadUtils {
       }
     }
 
+
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
@@ -413,6 +414,7 @@ class UploadUtils {
       formData.append('x-amz-meta-tn', needCompressed ? this.userId : (isShadow ? `${this.userId},2` : `${this.userId},1`))
 
       const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
+
       if (formData.has('file')) {
         formData.set('file', file)
       } else {
@@ -619,14 +621,14 @@ class UploadUtils {
             }, 2000)
           }
         } else if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+          console.time('xhr created')
           xhr.open('POST', this.loginOutput.ul_removebg_map.url, true)
           xhr.send(formData)
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
+            console.timeEnd('xhr created')
             console.timeEnd('upload IOS image')
-            console.time('get image size')
             imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
-              console.timeEnd('get image size')
               bgRemoveUtils.removeBgStk(
                 uuid,
                 assetId,
