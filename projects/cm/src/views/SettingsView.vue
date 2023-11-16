@@ -164,9 +164,11 @@ const supportOptions: Array<IOptionConfig> = [
     title: t('CM0037'),
     iconName: 'user-cycle',
     callback: () => {
-      // if not login
-      vuex.commit('user/setShowForceLogin', true)
-      setCurrState('account')
+      if (vuex.state.user.token === '') { // Open PanelLogin
+        vuex.commit('user/setShowForceLogin', true)
+      } else {
+        setCurrState('account')
+      }
     },
   },
   {
