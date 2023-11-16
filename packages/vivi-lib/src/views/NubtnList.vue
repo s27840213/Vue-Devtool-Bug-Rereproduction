@@ -109,6 +109,10 @@ export default defineComponent({
       }, {
         theme: 'secondary',
         size: 'sm-center'
+      }, {
+        theme: 'icon_pill',
+        size: 'sm-center',
+        hasIcon: true,
       }] as {
         theme: INubtnThemes
         size: INubtnSize

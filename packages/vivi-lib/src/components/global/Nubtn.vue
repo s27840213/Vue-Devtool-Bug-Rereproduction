@@ -88,7 +88,7 @@ const component = defineComponent({
       if (Array.isArray(this.icon) && this.icon[2]) { // Case 2
         return this.icon[2]
       } 
-      return this.theme === 'icon_pill' && this.size === 'sm' ? '20px' : '24px'
+      return this.theme === 'icon_pill' && this.size.includes('sm') ? '20px' : '24px'
     },
     iconColor(): string {
       if (Array.isArray(this.icon) && this.icon[1]) { // Case 2
