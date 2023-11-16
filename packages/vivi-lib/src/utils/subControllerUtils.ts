@@ -14,7 +14,6 @@ import tiptapUtils from './tiptapUtils'
 
 export default class SubControllerUtils {
   // private component = undefined as Vue | undefined
-  private component = undefined as any | undefined
   private body = undefined as unknown as HTMLElement
   private _config = { config: null as unknown as ILayer, primaryLayer: null as unknown as IGroup | ITmp | IFrame }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as IExtendLayerInfo
@@ -22,7 +21,8 @@ export default class SubControllerUtils {
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
   private _cursorDragEnd = null as unknown
-  private initTranslate = { x: 0, y: 0 }
+  // this flag used to indicate the real initial position of at the beginning of moveStart
+  private _initMousePos = { x: 0, y: 0 }
 
   private get isControllerShown(): boolean { return this.primaryLayer.active && (!generalUtils.isStk || !store.getters['webView/getControllerHidden']) }
   private get config(): ILayer { return this._config.config }
@@ -53,9 +53,9 @@ export default class SubControllerUtils {
     this._onMouseup = this.onMouseup.bind(this)
 
     pointerEvtUtils.addPointer(e)
-    this.initTranslate = {
-      x: this.primaryLayer.styles?.x || 0,
-      y: this.primaryLayer.styles?.y || 0
+    this._initMousePos = {
+      x: e.x,
+      y: e.y
     }
     if (this.primaryLayer.type === 'tmp') {
       if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
@@ -124,7 +124,9 @@ export default class SubControllerUtils {
         eventUtils.addPointerEvent('pointerup', this._onMouseup)
         return
       }
-      layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: true })
+      if (!generalUtils.isTouchDevice()) {
+        layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: true })
+      }
     }
     eventUtils.addPointerEvent('pointerup', this._onMouseup)
   }
@@ -139,16 +141,26 @@ export default class SubControllerUtils {
     e.stopPropagation()
     if (!this.primaryLayer.active) return
     const posDiff = {
-      x: this.primaryLayer.styles.x - this.initTranslate.x,
-      y: this.primaryLayer.styles.y - this.initTranslate.y
+      x: Math.abs(e.x - this._initMousePos.x),
+      y: Math.abs(e.y - this._initMousePos.y)
     }
-    const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
+    const hasActualMove = posDiff.x > 1 || posDiff.y > 1
     if (this.config.type === 'text') {
       if (hasActualMove) {
         layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: false })
       } else {
-        if (this.config.contentEditable) {
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true }, this.subLayerIdx)
+        // if (this.config.contentEditable) {
+        //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true }, this.subLayerIdx)
+        //   if (generalUtils.isTouchDevice()) {
+        //     nextTick(() => {
+        //       tiptapUtils.focus({ scrollIntoView: false }, 'end')
+        //     })
+        //   } else {
+        //     tiptapUtils.focus({ scrollIntoView: false })
+        //   }
+        // }
+        if (this.config.active) {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true, contentEditable: true }, this.subLayerIdx)
           if (generalUtils.isTouchDevice()) {
             nextTick(() => {
               tiptapUtils.focus({ scrollIntoView: false }, 'end')

@@ -235,7 +235,6 @@ export class MovingUtils {
     formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
     formatUtils.clearCopiedFormat()
 
-
     // the currLayer active target is not exactly the same fire event layer
     if (generalUtils.isStk && generalUtils.isTouchDevice() && (layerUtils.layerIndex !== this.layerIndex && this.config.locked)) {
       return this.lockedLayerMoveStart(event as PointerEvent)
@@ -352,10 +351,18 @@ export class MovingUtils {
         break
       }
       case 'group': {
-        if (this.subLayerIdx !== -1 && layerUtils.getCurrConfig.contentEditable) {
+        // if (this.subLayerIdx !== -1 && layerUtils.getCurrConfig.contentEditable) {
+        if (this.subLayerIdx !== -1 && layerUtils.getCurrConfig.isTyping) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isDraggingCursor: true })
           this._cursorDragEnd = this.onCursorDragEnd.bind(this)
           eventUtils.addPointerEvent('pointerup', this._cursorDragEnd)
+
+          // check if the sub-layer is editing.
+          // if so, check if the pointer is on the sub-layer.
+          const [targetLayerInPage] = groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IText], this.config as IGroup)
+          if (!controlUtils.isClickOnController(event as PointerEvent, targetLayerInPage)) {
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false }, layerUtils.subLayerIdx)
+          }
           return
         }
       }
@@ -453,8 +460,8 @@ export class MovingUtils {
           updateConfigData.moving = true
           this.setMoving(true)
         }
-        if (this.getLayerType === 'text' && this.config.contentEditable) {
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+        if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) {
+          layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { contentEditable: false }, layerUtils.subLayerIdx)
         }
       }
     } else {
@@ -495,7 +502,8 @@ export class MovingUtils {
 
   movingHandler(e: MouseEvent | PointerEvent) {
     if (this.initMousePos === null) return
-    if (generalUtils.isPic && this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
+    if (generalUtils.isPic && generalUtils.isTouchDevice() &&
+      this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
 
     const config = layerUtils.getCurrLayer
     const targetLayerIdx = layerUtils.layerIndex
