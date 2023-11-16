@@ -1,6 +1,19 @@
-import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import store from '@/store'
+import picWVUtils from '@/utils/picWVUtils'
 
 class LoginUtils {
+  async checkToken(redirect = () => { /**/ }) {
+    if (store.getters['user/isLogin']) return
+
+    // If is not login try to fetch token
+    const token = localStorage.getItem('token')
+    if (token) {
+      await store.dispatch('user/login', { token: token })
+    } else {
+      redirect()
+    }
+  }
+
   onFacebookClicked(redirect?: string) {
     let stateStr
     if (redirect) {
