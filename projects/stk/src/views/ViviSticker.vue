@@ -371,7 +371,7 @@ export default defineComponent({
       // show popup
       const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
       const price = stkWVUtils.formatPrice(this.payment.prices.annually.value, this.payment.prices.currency, this.payment.prices.annually.text, 'modal')
-      const priceOriginal = stkWVUtils.formatPrice(this.payment.prices.annuallyOriginal.value, this.payment.prices.currency, this.payment.prices.annuallyOriginal.text, 'modal')
+      const priceOriginal = this.payment.prices.annuallyOriginal ? stkWVUtils.formatPrice(this.payment.prices.annuallyOriginal.value, this.payment.prices.currency, this.payment.prices.annuallyOriginal.text, 'modal') : ''
       const isCloseBtnOnly = this.isPromote && subscribed
       const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
@@ -393,7 +393,7 @@ export default defineComponent({
       }
       modalUtils.setModalInfo(
         modalInfo.title,
-        this.isPromote ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
+        this.isPromote && priceOriginal ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
         {
           msg: isCloseBtnOnly ? modalInfo.btn2_txt : btn_txt,
           class: 'btn-black-mid',

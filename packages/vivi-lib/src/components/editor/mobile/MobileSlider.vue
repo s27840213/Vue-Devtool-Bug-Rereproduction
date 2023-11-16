@@ -10,7 +10,6 @@ div(class="mobile-slider")
       @change="handleChangeStop")
   div(class="mobile-slider__range-input-wrapper")
     input(class="mobile-slider__range-input input__slider--range"
-      :class="theme"
       v-progress
       :style="{ 'pointer-events': 'none' }"
       v-model.number="propsVal"

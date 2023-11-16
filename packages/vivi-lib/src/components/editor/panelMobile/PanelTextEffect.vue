@@ -80,8 +80,7 @@ div(class="panel-text-effect")
         svg-icon(class="absolute" iconName="replace" iconColor="white" iconWidth="32px")
     nubtn(class="panel-text-effect__reset"
           theme="icon_pill"
-          :icon="['reset', 'white']"
-          size="sm"
+          icon="reset"
           @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 

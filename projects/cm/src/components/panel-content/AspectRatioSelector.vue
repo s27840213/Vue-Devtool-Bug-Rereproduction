@@ -7,7 +7,7 @@ div(class="w-full box-border pl-24")
       :key="aspectRatio"
       class="w-56 flex flex-col justify-center items-center gap-4"
       @click="selectAspectRatio(aspectRatio)")
-      cm-svg-icon(
+      svg-icon(
         :iconColor="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
         :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
         iconWidth="32px"

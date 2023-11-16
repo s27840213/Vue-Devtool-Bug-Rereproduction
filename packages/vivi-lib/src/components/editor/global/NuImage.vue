@@ -371,15 +371,8 @@ export default defineComponent({
       }, {
         crossOrigin: true,
         error: () => {
-          if (this.config.srcObj.type === 'private' && newSize === 'xtra') {
-            imageUtils.handlePrivateXtraErr(this.config as IImage)
-              .then((newSrc) => {
-                imageUtils.imgLoadHandler(newSrc, (img) => {
-                  this.imgNaturalSize.width = img.width
-                  this.imgNaturalSize.height = img.height
-                  this.src = newSrc
-                })
-              })
+          if (newSize === 'xtra') {
+            this.handleXtraErr()
           }
         }
       })
@@ -588,6 +581,31 @@ export default defineComponent({
     },
     onError() {
       this._onError()
+    },
+    handleXtraErr() {
+      const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
+      if (this.config.srcObj.type === 'private') {
+        imageUtils.handlePrivateXtraErr(this.config as IImage)
+          .then((newSrc) => {
+            imageUtils.imgLoadHandler(newSrc, (img) => {
+              if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+                this.imgNaturalSize.width = img.width
+                this.imgNaturalSize.height = img.height
+                this.src = newSrc
+              }
+            })
+          })
+      } else if (this.config.srcObj.type === 'public') {
+        imageUtils.imgLoadHandler(imageUtils.getSrc(this.config, 'xtra'),
+          (img) => {
+            if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+              this.imgNaturalSize.width = img.width
+              this.imgNaturalSize.height = img.height
+              this.src = img.src
+            }
+          }
+        )
+      }
     },
     _onError(imgLoadHandlerError = false) {
       if (!this.src && !imgLoadHandlerError && this.userId !== 'backendRendering') return
@@ -812,18 +830,8 @@ export default defineComponent({
           }
         }, {
           error: () => {
-            if (this.config.srcObj.type === 'private' && srcSize === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
-              return
+            if (srcSize === 'xtra') {
+              return this.handleXtraErr()
             }
 
             reject(new Error(`cannot load the current image, src: ${this.src}`))
@@ -857,17 +865,8 @@ export default defineComponent({
         }, {
           crossOrigin: true,
           error: () => {
-            if (this.config.srcObj.type === 'private' && newVal === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
+            if (newVal === 'xtra') {
+              this.handleXtraErr()
             }
           }
         })

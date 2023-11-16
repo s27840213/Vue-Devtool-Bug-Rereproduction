@@ -250,14 +250,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
   }
 
-  addFontForEmoji() {
-    const defaultEmoji = this.userSettings.emojiSetting
-    if (SYSTEM_FONTS.includes(defaultEmoji)) return
+  addFontForEmoji(emoji?: string) {
+    emoji = emoji ?? this.userSettings.emojiSetting
+    if (SYSTEM_FONTS.includes(emoji)) return
     store.dispatch('text/addFont', {
-      face: defaultEmoji,
+      face: emoji,
       type: 'public',
       ver: store.getters['user/getVerUni']
     })
+  }
+
+  addFontForEmojis() {
+    for (const emojiConfig of USER_SETTINGS_LIST_CONFIG.emojiSetting) {
+      this.addFontForEmoji(emojiConfig.val)
+    }
   }
 
   getMyDesignTags(): IMyDesignTag[] {
@@ -293,7 +299,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
     const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
-    store.commit('vivisticker/UPDATE_payment', { prices: Object.assign(defaultPrices[locale], localPrices) })
+    const prices = localPrices ?? defaultPrices[locale]
+    if (!prices) return
+    store.commit('vivisticker/UPDATE_payment', { prices })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -1428,6 +1436,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           }})
         })
         store.commit('vivisticker/UPDATE_payment', { prices })
+        store.commit('vivisticker/SET_paymentPending', { info: false })
         this.setState('prices', prices)
       }
       else if (isCheckState(data)) {

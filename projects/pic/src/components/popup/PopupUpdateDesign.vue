@@ -49,17 +49,18 @@ div(class="popup-updateDesign")
           property-bar
             input(class="body-2 text-gray-2" min="0"
               v-model="objectInfo.plan")
-        btn(:type="'primary-sm'"
-            class="popup-updateDesign__button rounded my-5"
-            @click="updateDataClicked()") 更 新
+        nubtn(
+          size="mid-center"
+          class="mt-15"
+          @click="updateDataClicked()") 更 新
     spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
-import designApis from '@nu/vivi-lib/apis/design-info'
 import store from '@/store'
-import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'
+import designApis from '@nu/vivi-lib/apis/design-info'
+import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -235,13 +236,6 @@ export default defineComponent({
     font-size: 18px;
     border: 1px solid #d9dbe1;
     padding-left: 15px;
-  }
-  &__button {
-    margin: 0 auto;
-    width: 60%;
-    font-size: 14px;
-    margin-top:15px;
-    padding: 12px 0;
   }
 }
 </style>

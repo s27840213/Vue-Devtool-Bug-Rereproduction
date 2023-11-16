@@ -10,8 +10,7 @@ div(class="panel-adjust")
       @update="handleField")
   nubtn(class="panel-adjust__reset"
           theme="icon_pill"
-          :icon="['reset', 'white']"
-          size="sm"
+          icon="reset"
           @click="reset") {{$t('NN0754')}}
 </template>
 
@@ -23,7 +22,6 @@ import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 

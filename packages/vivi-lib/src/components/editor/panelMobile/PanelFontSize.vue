@@ -2,7 +2,6 @@
 div(class="panel-font-size")
   font-size-selector
   input(class="panel-font-size__range-input input__slider--range"
-    :class="{light: $isStk || $isCm}"
     v-progress
     v-model.number="fontSize"
     :max="fieldRange.fontSize.max"

@@ -17,8 +17,8 @@ import { Itheme } from '@/interfaces/theme'
 import assetPanel from '@/store/module/assetPanel'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
-import color from '@/store/module/color'
 import cmWV from '@/store/module/cmWV'
+import color from '@/store/module/color'
 import font from '@/store/module/font'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
@@ -1325,7 +1325,22 @@ const mutations: MutationTree<IEditorState> = {
       }
     }
     state.pages.forEach((page) => {
+      // handle layer
       page.config.layers.forEach((l) => handler(l))
+
+      // handle bg-img
+      const bg = page.config.backgroundImage.config
+      if (((bg as IImage).srcObj.assetId === assetId || forSticker) && bg.previewSrc) {
+        Object.assign((bg as IImage).srcObj, {
+          type,
+          userId,
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex,
+        })
+        Object.assign(bg, { previewSrc: '' })
+        if (!forSticker) {
+          uploadUtils.uploadDesign()
+        }
+      }
     })
   },
   ADD_guideline(

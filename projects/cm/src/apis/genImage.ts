@@ -8,8 +8,8 @@ export default new (class Utils {
     userId: string,
     requestId: string,
     prompt: string,
-    action: string): Promise<AxiosResponse<ApiResponse<Record<string, never>>>> {
-    return apiUtils.requestWithRetry(() => axios.request<ApiResponse<Record<string, never>>>({
+    action: string): Promise<AxiosResponse<ApiResponse<{ url: { expire: string, url: string } }>>> {
+    return apiUtils.requestWithRetry(() => axios.request<ApiResponse<{ url: { expire: string, url: string } }>>({
       url: '/gen-image',
       method: 'POST',
       data: {
