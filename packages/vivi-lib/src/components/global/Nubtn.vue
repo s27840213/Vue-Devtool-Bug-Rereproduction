@@ -112,6 +112,7 @@ export default component
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border-radius: 4px;
   box-sizing: border-box;
   cursor: pointer;
@@ -129,9 +130,6 @@ export default component
     margin-left: auto;
     margin-right: auto;
   }
-  > .svg-icon {
-    margin-right: 8px;
-  }
 }
 
 // Common size
@@ -140,17 +138,13 @@ export default component
     @include btn-SM;
     font-weight: 600;
     height: 32px;
-    &:not(.full) {
-      padding: 4px 16px;
-    }
+    padding: 4px 16px;
   }
   &.mid {
     @include btn-LG;
     font-weight: 600;
     height: 44px;
-    &:not(.full) {
-      padding: 10px 24px;
-    }
+    padding: 10px 24px;
   }
 }
 
@@ -233,17 +227,13 @@ export default component
     @include btn-SM;
     font-weight: 600;
     height: 36px;
-    &:not(.full) {
-      padding: 6px 16px 6px 12px;
-    }
+    padding: 6px 16px 6px 12px;
   }
   &.mid {
     @include btn-LG;
     font-weight: 600;
     height: 44px;
-    &:not(.full) {
-      padding: 10px 20px 10px 12px;
-    }
+    padding: 10px 20px 10px 12px;
   }
   color: setColor(white);
   background-color: var(--blue);
@@ -287,9 +277,7 @@ export default component
   font-weight: 600;
   height: 36px;
   border-radius: 50px;
-  &:not(.full) {
-    padding: 6px 24px;
-  }
+  padding: 6px 24px;
   &.default, &.active {
     color: setColor(blue-1);
     background-color: setColor(blue-4);
@@ -308,9 +296,7 @@ export default component
   font-weight: 600;
   height: 36px;
   border-radius: 50px;
-  &:not(.full) {
-    padding: 6px 24px;
-  }
+  padding: 6px 24px;
   &.default, &.active {
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);
@@ -364,15 +350,13 @@ export default component
 
 .nubtn.icon_pill {
   border-radius: 100px;
+  gap: 4px;
   &.sm {
     @include body-XS;
     color: setColor(white);
     padding: 4px 8px;
     @include setColors(blue-1, black-3) using ($color) {
       background-color: $color;
-    }
-    > .svg-icon {
-      margin-right: 4px;
     }
     &:active {
       @include setColors(blue-hover, black-5) using ($color) {

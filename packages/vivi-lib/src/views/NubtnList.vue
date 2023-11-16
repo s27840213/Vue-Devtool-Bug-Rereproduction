@@ -20,7 +20,7 @@ div(class="btnList" :style="BGstyle")
         :size="`${full ? btn.size.replace('center', 'full') as INubtnSize : btn.size}`"
         :active="status==='active'"
         :disabled="status==='disabled'"
-        :icon="btnIcon"
+        :icon="btn.hasIcon ? btnIcon : undefined"
         :hint="btnText") {{btnText}}
   hr(style="width: 50%")
   div(class="btnList-options")
@@ -35,20 +35,23 @@ div(class="btnList" :style="BGstyle")
     nubtn(:theme="testBtnTheme" size="sm-center"
           v-model:active="testBtnActive"
           :disabled="testBtnDisabled"
-          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕會切換active)
+          :hint="'邏輯測試按鈕'"
+          @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕會切換active)
     nubtn(:theme="testBtnTheme" size="sm-center"
           :active="testBtnActive"
           :disabled="testBtnDisabled"
-          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕不會active)
+          :hint="'邏輯測試按鈕'"
+          @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕不會active)
     nubtn(:theme="testBtnTheme" size="sm-center"
-          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，此按鈕狀態沒有連動，僅hover
+          :hint="'邏輯測試按鈕'"
+          @click="click") 邏輯測試按鈕，此按鈕狀態沒有連動，僅hover
 </template>
 
 <script lang="ts">
-import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
 import { INubtnSize, INubtnThemes } from '@/components/global/Nubtn.vue'
 import Options from '@/components/global/Options.vue'
 import { notify } from '@kyvg/vue3-notification'
+import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -67,10 +70,12 @@ export default defineComponent({
         size: 'mid-center'
       }, {
         theme: 'icon_text',
-        size: 'sm-center'
+        size: 'sm-center',
+        hasIcon: true,
       }, {
         theme: 'icon_text',
-        size: 'mid-center'
+        size: 'mid-center',
+        hasIcon: true,
       }, {
         theme: 'edit',
         size: 'mid-center'
@@ -91,10 +96,12 @@ export default defineComponent({
         size: 'sm-center'
       }, {
         theme: 'icon',
-        size: 'sm-center'
+        size: 'sm-center',
+        hasIcon: true,
       }, {
         theme: 'icon2',
-        size: 'mid-center'
+        size: 'mid-center',
+        hasIcon: true,
       }, {
         theme: 'danger',
         size: 'sm-center'
@@ -104,6 +111,7 @@ export default defineComponent({
       }] as {
         theme: INubtnThemes
         size: INubtnSize
+        hasIcon?: boolean
       }[],
       statuses: ['default', 'disabled', 'active'],
       themes: ['primary', 'outline', 'text', 'icon_text', 'icon', 'icon2',
