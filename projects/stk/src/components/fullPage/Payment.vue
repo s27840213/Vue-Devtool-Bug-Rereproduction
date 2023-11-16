@@ -32,12 +32,12 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
             div(class="payment__btn-plan__content__title__main caption-LG") {{ btnPlan.title }}
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub")
               span {{ btnPlan.subTitle }}
-          div(class="payment__btn-plan__content__price text-H6" :class="{'text-H7': isPromote && (payment.prices.currency === 'JPY')}")
-            div(v-if="btnPlan.key === 'annually' && isPromote" class="payment__btn-plan__content__price__original")
+          div(class="payment__btn-plan__content__price text-H6" :class="{'text-H7': isPromote && originalPrice && (payment.prices.currency === 'JPY')}")
+            div(v-if="btnPlan.key === 'annually' && isPromote && originalPrice" class="payment__btn-plan__content__price__original")
               span 
                 del {{ originalPrice }}
               svg-icon(iconName="vivisticker_arrow" iconWidth="20px")
-            span(:class="{'text-alarm': btnPlan.key === 'annually' && isPromote}") {{ btnPlan.price }}
+            span(:class="{'text-alarm': btnPlan.key === 'annually' && isPromote && originalPrice}") {{ btnPlan.price }}
         div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__tag")
           span(class="caption-SM") {{ btnPlan.tag }}
     div(v-if="!isOldPrice" class="payment__trial")
@@ -251,6 +251,7 @@ export default defineComponent({
     },
     originalPrice() {
       const annuallyPriceOriginal = (!stkWVUtils.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0Original : this.payment.prices.annuallyOriginal
+      if(!annuallyPriceOriginal) return ''
       return stkWVUtils.formatPrice(annuallyPriceOriginal.value, this.payment.prices.currency, annuallyPriceOriginal.text, 'original')
     },
     containerWidth() {
