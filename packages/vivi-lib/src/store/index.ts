@@ -155,6 +155,7 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
+  controlState: { type: '' }
 })
 
 const state = getDefaultState()
@@ -382,6 +383,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getModalInfo(state: IEditorState): { [key: string]: string } {
     return state.modalInfo
   },
+  getControlState(state: IEditorState) {
+    return state.controlState
+  }
 }
 
 const mutations: MutationTree<IEditorState> = {

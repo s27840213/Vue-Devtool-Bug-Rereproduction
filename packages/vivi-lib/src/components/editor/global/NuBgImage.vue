@@ -1,5 +1,8 @@
 <template lang="pug">
-div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
+div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"
+  @tap="dblTap"
+  @pointerdown="bgPointerDown"
+  @pointerup="bgPointerUp")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
     img(v-if="finalSrc" v-show="!isAdjustImage" ref="img"
         :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
@@ -41,6 +44,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
 
 <script lang="ts">
 import i18n from '@/i18n'
+import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -50,7 +54,6 @@ import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
-import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -99,6 +102,9 @@ export default defineComponent({
         height: 0
       },
       errorSrcIdentifier: { identifier: '', retry: 0 },
+      pointerEvent: {
+        initPos: null as null | ICoordinate
+      }
     }
   },
   watch: {
@@ -369,6 +375,19 @@ export default defineComponent({
         }
       }
     },
+    // the reason to use pointerdown/up to detect a tap,
+    // is bcz the moving feature now enable moving the layer without touches direct attached on the target layer
+    bgPointerDown(e: PointerEvent) {
+      this.pointerEvent.initPos = { x: e.x, y: e.y }
+    },
+    bgPointerUp(e: PointerEvent) {
+      if (this.pointerEvent.initPos) {
+        if (Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5 && layerUtils.layerIndex === -1) {
+          this.setInBgSettingMode()
+        }
+        this.pointerEvent.initPos = null
+      }
+    },
     handleXtraErr() {
       const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
       if (this.image.config.srcObj.type === 'private') {
@@ -396,7 +415,6 @@ export default defineComponent({
       }
     },
     dblTap(e: PointerEvent) {
-      this.setInBgSettingMode()
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
@@ -484,7 +502,6 @@ export default defineComponent({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
-      groupUtils.deselect()
     },
     handleDimensionUpdate(newVal: number | string, oldVal: number) {
       if (this.isBlurImg) return

@@ -5,6 +5,8 @@ div(class="editor-view" v-touch
     @wheel="handleWheel"
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
+    @pointerleave="removePointer"
+    @pointerup="selectEnd"
     @mousewheel="handleWheel"
     @pinch="!inBgRemoveMode ? pinchHandler($event) : null"
     ref="editorView")
@@ -37,17 +39,18 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import store from '@/store'
 import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
-import { ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
 import { IPage, IPageState } from '@nu/vivi-lib/interfaces/page'
-import { ILayerInfo } from '@nu/vivi-lib/store/types'
+import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
-import ControlUtils from '@nu/vivi-lib/utils/controlUtils'
+import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils from '@nu/vivi-lib/utils/eventUtils'
 import formatUtils from '@nu/vivi-lib/utils/formatUtils'
-import GroupUtils from '@nu/vivi-lib/utils/groupUtils'
+import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -55,6 +58,7 @@ import mathUtils from '@nu/vivi-lib/utils/mathUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import StepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
@@ -104,7 +108,10 @@ export default defineComponent({
       initPinchPos: null as ICoordinate | null,
       isHandlingEdgeReach: false,
       movingUtils: null as unknown as MovingUtils,
-      translationRatio: null as null | ICoordinate
+      translationRatio: null as null | ICoordinate,
+      pointerEvent: {
+        initPos: null as null | ICoordinate
+      }
     }
   },
   created() {
@@ -314,26 +321,46 @@ export default defineComponent({
       if (eventUtils.checkIsMultiTouch(e)) {
         return
       }
-      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
+      if (!this.inBgRemoveMode && !controlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
-        GroupUtils.deselect()
+        groupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
         editorUtils.setInMultiSelectionMode(false)
         pageUtils.findCentralPageIndexInfo()
-        if (imageUtils.isImgControl()) {
-          ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
-        }
+      }
+      if (imageUtils.isImgControl()) {
+        controlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
     },
     selectStart(e: PointerEvent) {
+      pointerEvtUtils.addPointer(e)
       if (!e.isPrimary) return
       if (this.inBgRemoveMode) return
       e.stopPropagation()
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
-      if (ControlUtils.isClickOnController(e)) {
+
+      if (this.isImgCtrl) {
+        const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
+          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[0] : layerUtils.getCurrLayer
+        if (!controlUtils.isClickOnController(e, layer)) {
+          const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+          switch (currLayer.type) {
+            case LayerType.image:
+            case LayerType.group:
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+              break
+            case LayerType.frame:
+              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+              break
+          }
+          return
+        }
+      }
+
+      if (controlUtils.isClickOnController(e)) {
         this.movingUtils.removeListener()
         this.movingUtils.updateProps({
           _config: { config: layerUtils.getCurrLayer },
@@ -344,6 +371,28 @@ export default defineComponent({
         this.movingUtils.removeListener()
         this.movingUtils.pageMoveStart(e)
       }
+      this.pointerEvent.initPos = { x: e.x, y: e.y }
+    },
+    selectEnd(e: PointerEvent) {
+      if (this.pointerEvent.initPos) {
+        const isSingleTouch = pointerEvtUtils.pointers.length === 1
+        const isConsiderNotMoved = Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5
+        if (isSingleTouch && isConsiderNotMoved && !this.$store.getters['imgControl/isImgCtrl']) {
+          // the moveingEnd would consider the layer to be selected,
+          // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
+          // following code remove the moveEnd event.
+          if (this.$store.getters.getControlState.type === 'move') {
+            this.$store.commit('SET_STATE', { controlState: { type: '' } })
+          }
+          const layer = layerUtils.getCurrLayer
+          if (!controlUtils.isClickOnController(e, layer)) {
+            groupUtils.deselect()
+            this.movingUtils?.removeListener()
+          }
+        }
+        this.pointerEvent.initPos = null
+      }
+      pointerEvtUtils.removePointer(e.pointerId)
     },
     scrollUpdate() {
       /**
@@ -576,13 +625,13 @@ export default defineComponent({
         // e.stopImmediatePropagation()
         if (this.pageNum - 1 !== this.currCardIndex) {
           this.setCurrCardIndex(this.currCardIndex + 1)
-          GroupUtils.deselect()
+          groupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
             pageUtils.fitPage()
           })
         } else {
-          GroupUtils.deselect()
+          groupUtils.deselect()
           const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
           this.addPage(pageUtils.newPage({
             width: lastPage?.width,
@@ -614,7 +663,7 @@ export default defineComponent({
         // e.stopImmediatePropagation()
         if (this.currCardIndex !== 0) {
           this.setCurrCardIndex(this.currCardIndex - 1)
-          GroupUtils.deselect()
+          groupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
             pageUtils.fitPage()
@@ -633,7 +682,10 @@ export default defineComponent({
       } else if (dir === 'down') {
         this.swipeDownHandler()
       }
-    }
+    },
+    removePointer(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
+    },
   }
 })
 </script>
