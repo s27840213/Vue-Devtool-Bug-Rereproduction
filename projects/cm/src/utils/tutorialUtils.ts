@@ -10,7 +10,8 @@ export default new (class TutorialUtils {
   }
 
   runTutorial(tutorialName: ITutorialName) {
-    if (cmWVUtils.tutorialFlags['powerful-fill']) return
+    if (cmWVUtils.inBrowserMode ||
+      cmWVUtils.tutorialFlags['powerful-fill']) return
     useTutorialStore().showTutorial(tutorialName)
   }
 

@@ -1,7 +1,8 @@
 import staticApis from '@/apis/static'
 import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const useUploadUtils = () => {
   const { userId } = storeToRefs(useUserStore())
@@ -54,8 +55,8 @@ const useUploadUtils = () => {
     })
   }
 
-  const polling = async<T> (url: string, { timeInterval = 500, timeout = 180000 } = {}) => {
-    return new Promise<T>((resolve, reject) => {
+  const polling = async<T> (url: string, { timeInterval = 500, timeout = 180000, isJson = true } = {}) => {
+    return new Promise<T | void>((resolve, reject) => {
       let accPollingTime = 0
       const interval = window.setInterval(async () => {
         if (accPollingTime >= timeout) {
@@ -64,12 +65,16 @@ const useUploadUtils = () => {
           return
         }
         accPollingTime+=timeInterval
-        const pollingTargetSrc = `${url}?ver=${generalUtils.generateRandomString(6)}`
+        const pollingTargetSrc = imageUtils.appendQuery(url, 'ver', generalUtils.generateRandomString(6))
         const response = await fetch(pollingTargetSrc)
         if (response.status === 200) {
           clearInterval(interval)
-          const json: T = await response.json()
-          resolve(json)
+          if (isJson) {
+            const json: T = await response.json()
+            resolve(json)
+          } else {
+            resolve()
+          }
         }
       }, timeInterval)
     })

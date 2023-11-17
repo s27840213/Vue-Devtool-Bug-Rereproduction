@@ -1,13 +1,12 @@
-import PropertyBar from '@/components/global/PropertyBar.vue'
 import colorUtils from '@/utils/colorUtils'
 import modalUtils from '@/utils/modalUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
+import PropertyBar from '@nu/shared-lib/components/PropertyBar.vue'
+import SvgIcon from '@nu/shared-lib/components/SvgIcon.vue'
 import '@nu/shared-lib/css'
-import componentPlugin from '@nu/shared-lib/plugin'
-import libType from '@nu/shared-lib/types'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
@@ -102,10 +101,6 @@ app.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
 
-app.use(componentPlugin)
-// eslint-disable-next-line no-unused-expressions
-libType
-
 // app.use(VueGtm, {
 //   id: 'GTM-T7LDWBP',
 //   enabled: true,
@@ -114,9 +109,9 @@ libType
 // })
 
 app.component('RecycleScroller', RecycleScroller)
-
+app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/shared-lib/components/Btn.vue')
 ))
 /**
  * bcz this components use slot, and some components need to get its ref in mounted,
@@ -124,7 +119,7 @@ app.component('btn', defineAsyncComponent(() =>
  */
 app.component('property-bar', PropertyBar)
 app.component('dropdown', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Dropdown.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/shared-lib/components/Dropdown.vue')
 ))
 app.component('nu-image', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImage.vue')

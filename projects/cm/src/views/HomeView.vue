@@ -7,17 +7,13 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     :theme="'powerful-fill'"
     iconName="brush"
     @clickBtn="openImgSelecotr(1)")
-  //- cm-btn(
+  //- nubtn(
   //-   class="my-10"
-  //-   :theme="'primary'"
-  //-   :hasIcon="true"
-  //-   iconName="crown"
+  //-   icon="crown"
   //-   @click="openImgSelecotr") Test Img Selector
-  cm-btn(
+  nubtn(
     class="my-10"
-    :theme="'primary'"
-    :hasIcon="true"
-    iconName="crown"
+    icon="crown"
     @click="exportVedio") Test video Selector
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")

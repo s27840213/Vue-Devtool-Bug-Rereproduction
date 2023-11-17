@@ -10,19 +10,10 @@ import router from './router'
 import vuex from './vuex'
 // import '@nu/vivi-lib/css' // Import all CSS rules from vivi-lib
 
-const svgs = import.meta.glob('./assets/icon/**/*.svg', { eager: true })
-const viviSvgs = import.meta.glob('../../../packages/vivi-lib/src/assets/icon/**/*.svg', { eager: true })
+import.meta.glob('./assets/icon/**/*.svg', { eager: true })
+import.meta.glob('../../../packages/vivi-lib/src/assets/icon/**/*.svg', { eager: true })
 
 const app = initApp(createApp(App))
-
-// Call variable to prevent it be clear, no any other meaning.
-function keepVar(v: unknown) {
-  !true && console.log(v)
-}
-
-// the *.d.ts file for the global components in shared-lib
-keepVar(svgs)
-keepVar(viviSvgs)
 
 app.use(createPinia())
 app.use(vuex)

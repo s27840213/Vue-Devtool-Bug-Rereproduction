@@ -11,7 +11,7 @@ div(class="canvas-section absolute top-0 left-0 z-canvas")
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { useStore } from 'vuex'
 // #region data section
 const props = defineProps<{

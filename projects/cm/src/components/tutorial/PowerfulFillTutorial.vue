@@ -6,20 +6,19 @@ div(class="w-screen h-screen")
       span(class="text-primary-white typo-h6") {{ tutorialDescription }}
       div(:class="`grid grid-flow-col grid-cols-${hasNextBtn ? 3 : 2} w-full`")
         div(class="justify-self-center")
-          cm-svg-icon(
+          svg-icon(
             v-if="leftIconName"
             :iconName="leftIconName"
             :iconWidth="iconSize.width"
             :iconHeight="iconSize.height"
           )
-        cm-btn(
+        nubtn(
           v-if="hasNextBtn"
-          class="self-start justify-self-center"
-          theme="primary"
-          size="md"
+          class="self-start justify-self-center max-w-[96px]"
+          size="sm-full"
           @click="emit('nextStep')") {{ nextBtnText }}
         div(class="justify-self-end")
-          cm-svg-icon(
+          svg-icon(
             v-if="rightIconName"
             :iconName="rightIconName"
             :iconWidth="iconSize.width"

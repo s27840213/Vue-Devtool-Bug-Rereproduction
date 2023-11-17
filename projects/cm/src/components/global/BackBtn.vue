@@ -3,7 +3,7 @@ router-link(
   custom
   :to="toTarget"
   v-slot="{ navigate }")
-  cm-svg-icon(
+  svg-icon(
     icon-color="app-icon-light"
     icon-name="arrow-left"
     icon-width="24px"

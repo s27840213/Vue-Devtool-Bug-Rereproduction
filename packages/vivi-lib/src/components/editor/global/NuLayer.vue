@@ -12,7 +12,7 @@ div(class="nu-layer flex-center"
   div(class="full-size pos-left"
       :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
-      @pointerdown="onPointerDown($event)"
+      @pointerdown="onPointerdown"
       @tap="dblTap"
       @contextmenu.prevent
       @click.right.stop="onRightClick($event)"
@@ -51,8 +51,8 @@ div(class="nu-layer flex-center"
 </template>
 
 <script lang="ts">
-import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
+import SquareLoading from '@/components/global/SqureLoading.vue'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
@@ -72,6 +72,7 @@ import layerUtils from '@/utils/layerUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -80,7 +81,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { notify } from '@kyvg/vue3-notification'
 import Svgpath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -151,7 +152,6 @@ export default defineComponent({
   },
   data() {
     return {
-      initPos: { x: 0, y: 0 },
       dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id),
       movingUtils: null as unknown as MovingUtils,
       imgBuff: {} as {
@@ -210,7 +210,11 @@ export default defineComponent({
 
     if (this.subLayerIndex === -1) {
       this.movingUtils = new MovingUtils(data as any)
-      const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)
+      const moveStart = (e: PointerEvent) => {
+        if (pointerEvtUtils.pointerIds.length <= 1) {
+          this.movingUtils.moveStart(e)
+        }
+      }
       if (this.isLine) {
         lineMover.addEventListener('pointerdown', moveStart)
       } else {
@@ -358,10 +362,13 @@ export default defineComponent({
       }
     },
     getPointerEvents(): string {
-      const { isControlling } = this.movingUtils ?? {}
       switch (this.config.type) {
-        case LayerType.image:
-          return isControlling ? 'none' : ''
+        case LayerType.image: {
+          const controlState = this.$store.state.controlState
+          if (controlState.type === 'move' && controlState.phase === 'moving' && controlState.layerInfo.layerIndex === this.layerIndex) {
+            return 'none'
+          } else return ''
+        }
         case LayerType.shape: {
           if (this.primaryLayer && this.primaryLayer.type === LayerType.frame) {
             return 'none'
@@ -420,6 +427,11 @@ export default defineComponent({
             ...shapeUtils.isLine(this.config as AllLayerTypes) ? { pointerEvents: 'none' } : {}
           }
         }
+      }
+    },
+    onPointerdown() {
+      if (this.subLayerIndex !== -1 && this.isImgCtrl) {
+        imageUtils.setImgControlDefault()
       }
     },
     lineMoverStyles(): { [key: string]: string } {
@@ -520,24 +532,12 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          if (this.getLayerType === LayerType.image) {
+          if (this.getLayerType === LayerType.image && this.prePrimaryLayerIndex === -1) {
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
             eventUtils.emit(PanelEvent.switchTab, 'crop')
           }
         }
       })
-    },
-    onPointerDown(e: PointerEvent) {
-      if (this.isPinchingEditor) return
-      const target = e.target as HTMLElement
-      /**
-       * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
-       */
-      if (this.isImgCtrl && !['IMG', 'path', 'image'].includes(target.tagName)) {
-        imageUtils.setImgControlDefault()
-      }
-      this.initPos.x = this.config.styles.x
-      this.initPos.y = this.config.styles.y
     },
     dblClick(e: MouseEvent) {
       e.stopPropagation()

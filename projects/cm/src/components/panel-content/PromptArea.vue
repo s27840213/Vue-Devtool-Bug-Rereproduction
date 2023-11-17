@@ -2,7 +2,7 @@
 div(class="flex flex-col justify-center items-center w-full box-border px-24 gap-16")
   div(class="relative w-full")
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
-    cm-svg-icon(
+    svg-icon(
       v-if="false"
       iconName="settings"
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
@@ -18,10 +18,8 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
         class="absolute bottom-10 right-10 text-app-text-primary typo-body-sm"
         @click="clearPromt")
         span {{ $t('CM0029') }}
-  cm-btn(
-    theme="primary"
-    size="md"
-    :full="true"
+  nubtn(
+    size="mid-full"
     :disabled="isGenerating"
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
@@ -31,7 +29,7 @@ import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const globalStore = useGlobalStore()

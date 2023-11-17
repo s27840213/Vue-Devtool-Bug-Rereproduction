@@ -2,12 +2,13 @@ import useUploadUtils from '@/composable/useUploadUtils'
 import { useUserStore } from '@/stores/user'
 import HomeView from '@/views/HomeView.vue'
 import store from '@/vuex'
-import { generalUtils } from '@nu/shared-lib'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import router from '@nu/vivi-lib/router'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
 
@@ -132,6 +133,9 @@ router.beforeEach(async (to, from, next) => {
   const { setUserId } = useUserStore()
   setUserId(generalUtils.generateRandomString(20))
   useUploadUtils().getUrlMap()
+
+  loginUtils.checkToken()
+
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-left-in'
   }

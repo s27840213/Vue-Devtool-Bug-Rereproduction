@@ -1,12 +1,12 @@
 <template lang="pug">
 div(class="w-full flex justify-between items-center box-border py-10" :class="{ 'bg-app-icon-dark': active }")
   div(class="flex items-center gap-10" :class="`${textColor} ${textSize}`")
-    cm-svg-icon(
+    svg-icon(
       :iconName="iconName"
       iconWidth="24px"
       iconColor="app-btn-primary-bg")
     span {{ title }}
-  cm-svg-icon(
+  svg-icon(
     :iconName="'chevron-right'"
     iconWidth="24px"
     iconColor="app-btn-primary-text")

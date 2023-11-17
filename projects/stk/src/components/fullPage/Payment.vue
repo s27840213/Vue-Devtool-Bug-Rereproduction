@@ -76,7 +76,7 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
-import ToggleBtn from '@/components/global/ToggleBtn.vue'
+import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
 import { IPayment, IPaymentPending, IPrices, isV1_42 } from '@nu/vivi-lib/interfaces/vivisticker'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import networkUtils from '@nu/vivi-lib/utils/networkUtils'
