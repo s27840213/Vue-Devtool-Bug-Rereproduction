@@ -125,13 +125,20 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .modal-card {
+  // dont't apply left and right padding to img
   @include not(cm) {
-    padding: 16px 30px;
+    padding: 16px 0px;
     border-radius: 10px;
+    &__row, &__text {
+      padding: 0px 30px;
+    }
   }
   @include cm {
-    padding: 24px;
+    padding: 24px 0px;
     border-radius: 20px;
+    &__row, &__text {
+      padding: 0px 24px;
+    }
   }
   position: relative;
   display: flex;
