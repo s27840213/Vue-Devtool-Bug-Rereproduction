@@ -1,6 +1,13 @@
 {
   "recommendations": [
-    "Vue.volar",
-    "esbenp.prettier-vscode"
+    "vue.volar",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
+    "lokalise.i18n-ally",
+    "folke.vscode-monorepo-workspace",
+    "wiensss.region-highlighter",
+    "santacodes.santacodes-region-viewer",
+    "bradlc.vscode-tailwindcss"
   ]
 }
