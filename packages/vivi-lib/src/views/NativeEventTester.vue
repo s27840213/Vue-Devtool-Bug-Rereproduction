@@ -47,7 +47,7 @@ div(class="native-event-tester")
 </template>
 
 <script setup lang="ts">
-import Checkbox from '@/components/global/Checkbox.vue'
+import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
 import type { ICallbackRecord } from '@/interfaces/webView'
 import { app, appType, getAutoWVUtils } from '@/utils/autoWVUtils'
 import generalUtils from '@/utils/generalUtils'

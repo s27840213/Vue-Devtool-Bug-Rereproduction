@@ -14,7 +14,7 @@ div(class="category-template-item" @click="handleClickGroup")
 </template>
 
 <script lang="ts">
-import ImageCarousel from '@nu/vivi-lib/components/global/ImageCarousel.vue'
+import ImageCarousel from '@nu/shared-lib/components/ImageCarousel.vue'
 import ProItem from '@nu/vivi-lib/components/payment/ProItem.vue'
 import { defineComponent } from 'vue'
 

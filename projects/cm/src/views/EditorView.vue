@@ -14,21 +14,19 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :title="centerTitle"
           :url="centerUrl")
       template(v-else)
-        cm-svg-icon(
+        svg-icon(
           iconName="undo"
           :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="undo")
-        cm-svg-icon(
+        svg-icon(
           iconName="redo"
           :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="redo")
     template(#right)
-      cm-btn(
+      nubtn(
         v-if="inAspectRatioState || inGenResultState"
-        theme="primary"
-        size="md"
         @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(
     v-if="!inSavingState"
@@ -115,7 +113,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     div(class="flex justify-between items-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
         div(class="flex justify-center items-center rounded-full bg-primary-normal aspect-square p-4")
-          cm-svg-icon(
+          svg-icon(
             iconName="crown"
             :iconColor="'app-bg'"
             iconWidth="20px")
@@ -132,7 +130,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     div(class="flex justify-between items-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
         div(class="flex justify-center items-center rounded-full bg-primary-normal aspect-square p-4")
-          cm-svg-icon(
+          svg-icon(
             iconName="crown"
             :iconColor="'app-bg'"
             iconWidth="20px")

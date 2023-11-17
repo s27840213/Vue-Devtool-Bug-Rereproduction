@@ -355,7 +355,8 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       if (e.pointerType === 'mouse' && e.button !== 0) return
-      if (this.isImgCtrl || this.getInGestureMode) return
+      if (this.isImgCtrl) return imageUtils.setImgControlDefault()
+      if (this.getInGestureMode) return
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
@@ -373,9 +374,6 @@ export default defineComponent({
       }
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
-      }
-      if (imageUtils.isImgControl()) {
-        ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)

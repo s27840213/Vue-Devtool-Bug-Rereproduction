@@ -1,6 +1,8 @@
+import { ILoginResult } from '@/interfaces/api'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 
 export interface IGeneralSuccessResponse {
@@ -123,6 +125,23 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
     const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH', this.getEmptyMessage())
     return userInfo as IUserInfo
+  }
+
+  // Like picWVUtils, need merge.
+  async login(type: 'Apple' | 'Google' | 'Facebook', locale: string) {
+    const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as 
+      { data: ILoginResult, flag: number, msg?: string }
+    if (!loginResult) {
+      throw new Error('login failed')
+    }
+
+    if (loginResult.flag === 0) {
+      store.dispatch('user/loginSetup', { data: loginResult })
+      close()
+    } else {
+      // logUtils.setLogAndConsoleLog('Apple login failed')
+      notify({ group: 'error', text: loginResult.msg })
+    }
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {

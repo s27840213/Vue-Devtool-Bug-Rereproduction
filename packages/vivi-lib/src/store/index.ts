@@ -155,7 +155,8 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
-  disableLayerAction: false
+  disableLayerAction: false,
+  controlState: { type: '' }
 })
 
 const state = getDefaultState()
@@ -385,6 +386,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getDisableLayerAction(state: IEditorState): boolean {
     return state.disableLayerAction
+  },
+  getControlState(state: IEditorState) {
+    return state.controlState
   }
 }
 
@@ -1325,7 +1329,22 @@ const mutations: MutationTree<IEditorState> = {
       }
     }
     state.pages.forEach((page) => {
+      // handle layer
       page.config.layers.forEach((l) => handler(l))
+
+      // handle bg-img
+      const bg = page.config.backgroundImage.config
+      if (((bg as IImage).srcObj.assetId === assetId || forSticker) && bg.previewSrc) {
+        Object.assign((bg as IImage).srcObj, {
+          type,
+          userId,
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex,
+        })
+        Object.assign(bg, { previewSrc: '' })
+        if (!forSticker) {
+          uploadUtils.uploadDesign()
+        }
+      }
     })
   },
   ADD_guideline(

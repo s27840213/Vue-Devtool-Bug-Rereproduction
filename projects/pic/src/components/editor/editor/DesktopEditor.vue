@@ -1,5 +1,7 @@
 <template lang="pug">
-div(class="desktop-editor")
+div(class="desktop-editor"
+    @pointerdown="addPointer"
+    @pointerup="removePointer")
   sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
     @toggleSidebarPanel="toggleSidebarPanel")
   section
@@ -61,17 +63,18 @@ import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
 import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
 import PopupUpdateDesign from '@/components/popup/PopupUpdateDesign.vue'
+import store from '@/store'
+import { notify } from '@kyvg/vue3-notification'
 import i18n from '@nu/vivi-lib/i18n'
 import { IComponentUpdatedLog } from '@nu/vivi-lib/interfaces/componentUpdateLog'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
-import store from '@/store'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -237,6 +240,12 @@ export default defineComponent({
     networkError(): void {
       notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
       this.$emit('setIsLoading', false)
+    },
+    removePointer(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
+    },
+    addPointer(e: PointerEvent) {
+      pointerEvtUtils.addPointer(e)
     }
   }
 })
