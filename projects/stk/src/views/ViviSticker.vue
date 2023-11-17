@@ -194,7 +194,9 @@ export default defineComponent({
       debugMode: 'vivisticker/getDebugMode',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
       modalOpen: 'modal/getModalOpen',
-      isPromote: 'vivisticker/getIsPromote'
+      isPromote: 'vivisticker/getIsPromote',
+      isPromoteCountry: 'vivisticker/getIsPromoteCountry',
+      isPromoteLanguage: 'vivisticker/getIsPromoteLanguage',
     }),
     payment(): IPayment {
       return this.$store.state.vivisticker.payment as IPayment
@@ -375,8 +377,10 @@ export default defineComponent({
       const isCloseBtnOnly = this.isPromote && subscribed
       const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
+      const isPromoteToBeHide = this.isPromoteLanguage && (!this.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== this.userInfo.locale)
       const btn_txt = modalInfo.btn_txt
       if (!btn_txt || shown) return false
+      if (isPromoteToBeHide) return false
 
       const options = {
         imgSrc: modalInfo.img_url,
