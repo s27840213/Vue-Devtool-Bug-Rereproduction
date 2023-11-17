@@ -198,11 +198,7 @@ export default defineComponent({
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
-    }),
-    ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false
-    }, {
-      controllerHidden: 'vivisticker/getControllerHidden'
+      controllerHidden: 'webView/getControllerHidden'
     }),
     isControllerShown(): boolean {
       return this.config?.active && !this.controllerHidden
@@ -275,7 +271,7 @@ export default defineComponent({
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
-          editor.setEditable(newVal)
+          editor.setEditable(newVal, false)
         })
       }
       !this.$isTouchDevice() && StepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
@@ -409,6 +405,9 @@ export default defineComponent({
       this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
+      if (this.$store.getters.getControlState.type) {
+        return
+      }
       layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.calcSize(this.config as IText)
       if (payload.toRecord) {

@@ -22,7 +22,8 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      img(ref="img"
+      img(v-if="finalSrc" ref="img"
+        :data-nu-image="`nu-image-${config.id}`"
         :style="flipStyles"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
@@ -31,7 +32,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
-      svg(v-if="isAdjustImage"
+      svg(v-if="isAdjustImage && (!forRender || !$isTouchDevice())"
         :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
@@ -39,7 +40,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(:id="filterId"
+          filter(v-if="!isCurrLayerPinched" :id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -49,7 +50,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(ref="adjust-img"
+        image(v-if="finalSrc" ref="adjust-img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
@@ -137,7 +138,7 @@ export default defineComponent({
       type: Object,
       default: () => { return undefined }
     },
-    priPrimaryLayerIndex: {
+    prePrimaryLayerIndex: {
       type: Number,
       default: -1
     },
@@ -237,8 +238,8 @@ export default defineComponent({
           .then((img) => {
             const _oldIsTransparent = (this.config as IImage).styles.shadow.isTransparent
             const isTransparent = this.handleIsTransparent(img)
-            const isFloatingEffect = this.currentShadowEffect() === ShadowEffectType.floating
-            const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
+            const redrawImmediately = ![ShadowEffectType.none, ShadowEffectType.floating].includes(this.currentShadowEffect()) &&
+              (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent || isTransparent || _oldIsTransparent)
             if (redrawImmediately) {
               this.redrawShadow()
             }
@@ -287,40 +288,40 @@ export default defineComponent({
           this.setImgConfig(this.layerInfo())
         }
       } else {
-        groupUtils.deselect()
+        // groupUtils.deselect()
         this.setImgConfig(undefined)
-        this.$nextTick(() => {
-          const reSelecting = () => {
-            const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
-            const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
-            groupUtils.deselect()
-            groupUtils.select(this.pageIndex, [targetIdx])
-            if (isSubLayer) {
-              const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
-              if (this.primaryLayerType() === LayerType.group) {
-                layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
-              } else if (this.primaryLayerType() === LayerType.frame) {
-                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
-              }
-            }
-          }
-          if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
-            reSelecting()
-          }
-          if (this.isDuringCopy) {
-            const start = Date.now()
-            const timer = setInterval(() => {
-              if (Date.now() - start > 10000) {
-                clearInterval(timer)
-              }
-              if (!this.isDuringCopy) {
-                reSelecting()
-                clearInterval(timer)
-              }
-            }, 300)
-          }
-        })
-        this.handleDimensionUpdate()
+        // this.$nextTick(() => {
+        //   const reSelecting = () => {
+        //     const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
+        //     const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
+        //     groupUtils.deselect()
+        //     groupUtils.select(this.pageIndex, [targetIdx])
+        //     if (isSubLayer) {
+        //       const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        //       if (this.primaryLayerType() === LayerType.group) {
+        //         layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
+        //       } else if (this.primaryLayerType() === LayerType.frame) {
+        //         frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
+        //       }
+        //     }
+        //   }
+        //   if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
+        //     reSelecting()
+        //   }
+        //   if (this.isDuringCopy) {
+        //     const start = Date.now()
+        //     const timer = setInterval(() => {
+        //       if (Date.now() - start > 10000) {
+        //         clearInterval(timer)
+        //       }
+        //       if (!this.isDuringCopy) {
+        //         reSelecting()
+        //         clearInterval(timer)
+        //       }
+        //     }, 300)
+        //   }
+        // })
+        // this.handleDimensionUpdate()
       }
       if (this.forRender) {
         return
@@ -370,15 +371,8 @@ export default defineComponent({
       }, {
         crossOrigin: true,
         error: () => {
-          if (this.config.srcObj.type === 'private' && newSize === 'xtra') {
-            imageUtils.handlePrivateXtraErr(this.config as IImage)
-              .then((newSrc) => {
-                imageUtils.imgLoadHandler(newSrc, (img) => {
-                  this.imgNaturalSize.width = img.width
-                  this.imgNaturalSize.height = img.height
-                  this.src = newSrc
-                })
-              })
+          if (newSize === 'xtra') {
+            this.handleXtraErr()
           }
         }
       })
@@ -394,6 +388,7 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing',
       isShowPagePreview: 'page/getIsShowPagePreview',
+      controlState: 'getControlState'
     }),
     ...vuexUtils.mapState('stk', {
       isDuringCopy: false,
@@ -413,6 +408,12 @@ export default defineComponent({
         (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
       ) return false
       return true
+    },
+    isCurrLayerPinched(): boolean {
+      const { controlState } = this
+      if (controlState.layerInfo) {
+        return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+      } else return false
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -523,7 +524,7 @@ export default defineComponent({
       const { width, height } = this.scaledConfig()
       const styles = {
         // in vivisticker the following code would lead the non-fluent UX
-        ...(!this.$isStk && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(!(this.$isStk || this.$isCm) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -581,8 +582,33 @@ export default defineComponent({
     onError() {
       this._onError()
     },
+    handleXtraErr() {
+      const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
+      if (this.config.srcObj.type === 'private') {
+        imageUtils.handlePrivateXtraErr(this.config as IImage)
+          .then((newSrc) => {
+            imageUtils.imgLoadHandler(newSrc, (img) => {
+              if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+                this.imgNaturalSize.width = img.width
+                this.imgNaturalSize.height = img.height
+                this.src = newSrc
+              }
+            })
+          })
+      } else if (this.config.srcObj.type === 'public') {
+        imageUtils.imgLoadHandler(imageUtils.getSrc(this.config, 'xtra'),
+          (img) => {
+            if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+              this.imgNaturalSize.width = img.width
+              this.imgNaturalSize.height = img.height
+              this.src = img.src
+            }
+          }
+        )
+      }
+    },
     _onError(imgLoadHandlerError = false) {
-      if (!this.src && !imgLoadHandlerError) return
+      if (!this.src && !imgLoadHandlerError && this.userId !== 'backendRendering') return
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
         if (this.errorSrcIdentifier.retry === 3) {
           return
@@ -592,7 +618,6 @@ export default defineComponent({
         this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.config as IImage)
         this.errorSrcIdentifier.retry = 1
       }
-
       const { srcObj, styles: { width, height } } = this.config
       this.isOnError = true
       let updater
@@ -632,10 +657,10 @@ export default defineComponent({
             this.src = imageUtils.getSrc(this.config)
             window.requestAnimationFrame(() => {
               stkWVUtils.isAnyIOSImgOnError = true
-              if (this.priPrimaryLayerIndex !== -1) {
-                stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+              if (this.prePrimaryLayerIndex !== -1) {
+                layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {
-                stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+                layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
               }
             })
           } else {
@@ -689,15 +714,15 @@ export default defineComponent({
       }
     },
     onAdjustImgLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main') {
+      if ((this.$isStk || this.$isCm) && type === 'main') {
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            if (this.priPrimaryLayerIndex !== -1) stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
-            else stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            if (this.prePrimaryLayerIndex !== -1) layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+            else layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -713,11 +738,11 @@ export default defineComponent({
       }, { crossOrigin: true })
     },
     onLoad(e: Event, type?: string) {
-      if (this.$isStk && type === 'main' && !this.isAdjustImage) {
-        if (this.priPrimaryLayerIndex !== -1) {
-          stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
+      if ((this.$isStk || this.$isCm) && type === 'main' && !this.isAdjustImage) {
+        if (this.prePrimaryLayerIndex !== -1) {
+          layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
         } else {
-          stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
         }
       }
       this.isOnError = false
@@ -735,7 +760,7 @@ export default defineComponent({
           frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
             imgWidth: newW,
             imgX: this.config.styles.imgX + offsetW / 2
-          })
+          }, this.prePrimaryLayerIndex)
         } else {
           layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
             imgWidth: newW,
@@ -805,18 +830,8 @@ export default defineComponent({
           }
         }, {
           error: () => {
-            if (this.config.srcObj.type === 'private' && srcSize === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
-              return
+            if (srcSize === 'xtra') {
+              return this.handleXtraErr()
             }
 
             reject(new Error(`cannot load the current image, src: ${this.src}`))
@@ -850,17 +865,8 @@ export default defineComponent({
         }, {
           crossOrigin: true,
           error: () => {
-            if (this.config.srcObj.type === 'private' && newVal === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
+            if (newVal === 'xtra') {
+              this.handleXtraErr()
             }
           }
         })
@@ -888,8 +894,10 @@ export default defineComponent({
     },
     handleIsTransparent(_img?: HTMLImageElement) {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
-      if (!this.$refs.img) return
+
       const img = _img ?? this.$refs.img as HTMLImageElement
+      if (!img) return
+
       const isTransparent = imageShadowUtils.isTransparentBg(img)
       imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
       return isTransparent
@@ -915,8 +923,12 @@ export default defineComponent({
         imageUtils.imgLoadHandler(src, (img) => {
           this.imgNaturalSize.width = img.width
           this.imgNaturalSize.height = img.height
-            this.src = src
-        }, { crossOrigin: false })
+          this.src = src
+        }, {
+          crossOrigin: false,
+          error: () => {
+            this._onError()
+        } })
       }
       this.initialized = true
     },
@@ -1030,7 +1042,6 @@ export default defineComponent({
           imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
           imageShadowUtils.setProcessId()
           imageShadowUtils.clearLayerData()
-          console.log('ShadowEffectType.none')
           return
       }
 
@@ -1319,8 +1330,11 @@ export default defineComponent({
       return this.shadow().currentEffect
     },
     primaryLayerType(): string {
-      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      return primaryLayer.type
+      if (this.prePrimaryLayerIndex === -1) {
+        return layerUtils.getLayer(this.pageIndex, this.layerIndex).type
+      } else {
+        return (layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex) as IGroup).layers[this.layerIndex].type
+      }
     },
     id(): ILayerIdentifier {
       return {

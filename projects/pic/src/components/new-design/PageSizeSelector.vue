@@ -105,7 +105,7 @@ div(class="page-size-selector")
 
 <script lang="ts">
 import listApi from '@nu/vivi-lib/apis/list'
-import Checkbox from '@nu/vivi-lib/components/global/Checkbox.vue'
+import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
 import { IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import { ILayout } from '@nu/vivi-lib/interfaces/layout'
 import designUtils from '@nu/vivi-lib/utils/designUtils'
@@ -630,7 +630,7 @@ const component = defineComponent({
     },
     submit: throttle(function(this: any) {
       // Use throttle to prevent submit multiple times.
-      if (!paymentUtils.checkPro({ plan: 1 }, 'page-resize') || !this.isFormatApplicable) return
+      if (!paymentUtils.checkProApp({ plan: 1 }, 'page-resize') || !this.isFormatApplicable) return
       if (this.copyBeforeApply) {
         this.copyAndApplySelectedFormat()
       } else {

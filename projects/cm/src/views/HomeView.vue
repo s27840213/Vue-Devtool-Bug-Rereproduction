@@ -6,13 +6,15 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     :btnText="$t('CM0003')"
     :theme="'powerful-fill'"
     iconName="brush"
-    @clickBtn="goToEditor")
-  cm-btn(
+    @clickBtn="openImgSelecotr(1)")
+  //- nubtn(
+  //-   class="my-10"
+  //-   icon="crown"
+  //-   @click="openImgSelecotr") Test Img Selector
+  nubtn(
     class="my-10"
-    :theme="'primary'"
-    :hasIcon="true"
-    iconName="crown"
-    @click="openImgSelecotr") Test Img Selector
+    icon="crown"
+    @click="exportVedio") Test video Selector
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
@@ -56,16 +58,39 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
 </template>
 <script setup lang="ts">
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import PixiRecorder from '@/utils/pixiRecorder'
+import vuex from '@/vuex'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const { setShowImgSelector } = useImgSelectorStore()
+const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
+const { setRequireImgNum } = useImgSelectorStore()
 const goToEditor = () => {
   router.push('/editor')
 }
 
-const openImgSelecotr = () => {
-  setShowImgSelector(true)
+const openImgSelecotr = (requireImgNum: number) => {
+  setRequireImgNum(requireImgNum)
+  /**
+   * @Note below codes is used to test in the browser
+   */
+  // const src = require('test.jpg')
+  // console.log(src)
+  // goToEditor()
+  // assetUtils.addImage(
+  //   require('test.jpg'),
+  //   1,
+  //   {
+  //     previewSrc: require('test.jpg'),
+  //     isPreview: true,
+  //   }
+  // )
+}
+const exportVedio = () => {
+  const pixiRecorder = new PixiRecorder()
+  pixiRecorder.genVideo().then((res) => {
+    console.log('gen vedio', res)
+  })
 }
 </script>
 <style scoped lang="scss">

@@ -14,6 +14,7 @@ import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import DebugTool from '@/components/componentLog/DebugTool.vue'
+import NuPage from '@/components/editor/global/NuPage.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
@@ -38,11 +39,11 @@ import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
-import Checkbox from '@/components/global/Checkbox.vue'
-import CollapseTitle from '@/components/global/CollapseTitle.vue'
+import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
+import CollapseTitle from '@nu/shared-lib/components/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import MarkerIcon from '@/components/global/MarkerIcon.vue'
+import ImageCarousel from '@nu/shared-lib/components/ImageCarousel.vue'
+import MarkerIcon from '@nu/shared-lib/components/MarkerIcon.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
 import Tags from '@/components/global/Tags.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
@@ -70,7 +71,6 @@ import {
 import {
   isV1_42,
 } from '@/interfaces/vivisticker'
-import mobilePanel from '@/mixin/mobilePanel'
 import router from '@/router'
 import store from '@/store'
 import {
@@ -155,6 +155,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
 import swipeDetector from '@/utils/SwipeDetector'
+import testUtils from '@/utils/testUtils'
 import textFillUtils, {
   replaceImgInject,
 } from '@/utils/textFillUtils'
@@ -190,6 +191,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   CategoryTextItem,
   ColorPicker,
   DebugTool,
+  NuPage,
   FooterTabs,
   HeaderTabs,
   MobilePanel,
@@ -238,7 +240,6 @@ import SvgIconView from '@/views/SvgIconView.vue'
   ShadowEffectType,
   _IPaymentWarningView,
   isV1_42,
-  mobilePanel,
   router,
   store,
   bgRemoveMoveHandler,
@@ -310,6 +311,7 @@ import SvgIconView from '@/views/SvgIconView.vue'
   stkWVUtils,
   svgIconUtils,
   swipeDetector,
+  testUtils,
   textFillUtils,
   replaceImgInject,
   textPropUtils,

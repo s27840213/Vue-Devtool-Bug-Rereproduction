@@ -2,19 +2,22 @@
 div(class="p-giphy" v-click-outside="vcoConfig")
   div(class="p-giphy__actions")
     div(class="p-giphy__action" @pointerdown="toggleFavoritesItem()")
-      svg-icon(:iconName="content.iconName" iconWidth="16px" iconColor="gray-2")
+      svg-icon(:iconName="content.iconName" iconWidth="18px" iconColor="white")
       span(class="p-giphy__action--desc") {{content.desc}}
     div(class="p-giphy__action" @pointerdown="download()")
-      svg-icon(iconName="download_flat" iconWidth="16px" iconColor="gray-2")
+      svg-icon(iconName="download_flat" iconWidth="18px" iconColor="white")
       span(class="p-giphy__action--desc") {{$t('NN0889')}}
   div(class="p-giphy__hr")
-  div(class="p-giphy__tips") {{`${$t('NN0763')} : ${$t('NN0764')}`}}
-  img(class="p-giphy__logo" src="@img/svg/power-by-giphy.svg")
+  div(class="p-giphy__tips")
+    span(class="p-giphy__tips--title") {{$t('NN0763')}}
+    span {{` : ${$t('NN0764')}`}}
+  img(class="p-giphy__logo" :src="giphyLogo")
 </template>
 
 <script lang="ts">
+import { IGif } from '@nu/vivi-lib/interfaces/giphy'
+import giphyLogo from '@img/png/giphy-logo.png'
 import i18n from '@nu/vivi-lib/i18n'
-import { IGif } from '@/interfaces/giphy'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import vClickOutside from 'click-outside-vue3'
@@ -31,7 +34,8 @@ export default defineComponent({
       vcoConfig: {
         handler: () => { editorUtils.setShowMobilePanel(false) },
         events: ['contextmenu', 'touchstart', 'pointerdown']
-      }
+      },
+      giphyLogo
     }
   },
   computed: {
@@ -67,31 +71,39 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .p-giphy {
-  padding: 0 16px 0 16px;
   &__actions {
     display: flex;
     flex-direction: column;
-    padding: 10px 12px 16px 12px;
-    gap: 16px;
+    gap: 10px;
   }
   &__action {
     display: flex;
     align-items: center;
-    color: setColor(gray-2);
+    padding: 8px 26px;
+    color: setColor(white);
     &--desc {
-      padding-left: 20px;
+      padding-left: 12px;
+    }
+    &:active {
+      background: setColor(black-3-5);
     }
   }
   &__hr {
-    border: 0.5px solid setColor(gray-4);
+    border: 0.5px solid setColor(black-3-5);
+    margin: 10px 24px;
   }
   &__tips {
-    padding: 16px 8px;
+    @include body-SM;
     text-align: left;
-    color: setColor(gray-3);
+    padding: 0 24px;
+    color: setColor(black-5);
+    &--title {
+      font-weight: 600;
+    }
   }
   &__logo {
-    padding-top: 34px;
+    padding: 10px 24px;
+    height: 22px;
   }
 }
 </style>

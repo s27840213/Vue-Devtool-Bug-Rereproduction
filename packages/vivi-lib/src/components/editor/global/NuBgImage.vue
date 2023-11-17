@@ -1,7 +1,10 @@
 <template lang="pug">
-div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
+div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"
+  @tap="dblTap"
+  @pointerdown="bgPointerDown"
+  @pointerup="bgPointerUp")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
-    img(v-show="!isAdjustImage" ref="img"
+    img(v-if="finalSrc" v-show="!isAdjustImage" ref="img"
         :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
         draggable="false"
         @error="onError"
@@ -23,7 +26,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-      image(ref="adjust-img"
+      image(v-if="finalSrc" ref="adjust-img"
         :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
@@ -40,28 +43,28 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
+import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IBrowserInfo } from '@/store/module/user'
+import backgroundUtils from '@/utils/backgroundUtils'
 import cssConverter from '@/utils/cssConverter'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
-import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import stkWVUtils from '@/utils/stkWVUtils'
-import i18n from '@/i18n'
-import modalUtils from '@/utils/modalUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
 
 export default defineComponent({
   emits: [],
@@ -99,6 +102,9 @@ export default defineComponent({
         height: 0
       },
       errorSrcIdentifier: { identifier: '', retry: 0 },
+      pointerEvent: {
+        initPos: null as null | ICoordinate
+      }
     }
   },
   watch: {
@@ -135,15 +141,8 @@ export default defineComponent({
       }, {
         crossOrigin: true,
         error: () => {
-          if (this.image.config.srcObj.type === 'private' && srcSize === 'xtra') {
-            imageUtils.handlePrivateXtraErr(this.image.config)
-              .then((newSrc) => {
-                imageUtils.imgLoadHandler(newSrc, (img) => {
-                  this.imgNaturalSize.width = img.width
-                  this.imgNaturalSize.height = img.height
-                  this.src = newSrc
-                })
-              })
+          if (srcSize === 'xtra') {
+            this.handleXtraErr()
           }
         }
       })
@@ -151,7 +150,7 @@ export default defineComponent({
   },
   async created() {
     const { srcObj } = this
-    if (!srcObj || !srcObj.type) return
+    // if (!srcObj || !srcObj.type) return
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
@@ -205,7 +204,7 @@ export default defineComponent({
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
-      return !srcObj || srcObj.assetId === ''
+      return !srcObj || srcObj.type === ''
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
@@ -228,7 +227,7 @@ export default defineComponent({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
-      const offset = this.$isStk ? 0 : 1 // no need to scale bg image in vivisticker
+      const offset = this.$isStk || this.$isCm ? 0 : 1 // no need to scale bg image in vivisticker
       const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
       const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
       const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
@@ -345,7 +344,7 @@ export default defineComponent({
             previewSrc: ''
           })
           this.src = ''
-          stkWVUtils.setLoadingFlag(-1)
+          layerUtils.setLoadingFlag(-1)
           const modalBtn = {
             msg: i18n.global.t('STK0023') as string,
           }
@@ -376,8 +375,46 @@ export default defineComponent({
         }
       }
     },
+    // the reason to use pointerdown/up to detect a tap,
+    // is bcz the moving feature now enable moving the layer without touches direct attached on the target layer
+    bgPointerDown(e: PointerEvent) {
+      this.pointerEvent.initPos = { x: e.x, y: e.y }
+    },
+    bgPointerUp(e: PointerEvent) {
+      if (this.pointerEvent.initPos) {
+        if (Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5 && layerUtils.layerIndex === -1) {
+          this.setInBgSettingMode()
+        }
+        this.pointerEvent.initPos = null
+      }
+    },
+    handleXtraErr() {
+      const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
+      if (this.image.config.srcObj.type === 'private') {
+        // the browser action might change, the following code might not needed, need to check / test
+        imageUtils.handlePrivateXtraErr(this.image.config)
+          .then((newSrc) => {
+            imageUtils.imgLoadHandler(newSrc, (img) => {
+              if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+                this.imgNaturalSize.width = img.width
+                this.imgNaturalSize.height = img.height
+                this.src = newSrc
+              }
+            })
+          })
+      } else if (this.image.config.srcObj.type === 'public') {
+        imageUtils.imgLoadHandler(imageUtils.getSrc(this.image.config, 'xtra'),
+          (img) => {
+            if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+              this.imgNaturalSize.width = img.width
+              this.imgNaturalSize.height = img.height
+              this.src = img.src
+            }
+          }
+        )
+      }
+    },
     dblTap(e: PointerEvent) {
-      this.setInBgSettingMode()
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
           if (this.image.config.srcObj.type) {
@@ -392,7 +429,7 @@ export default defineComponent({
       })
     },
     handleIsTransparent(img? : HTMLImageElement) {
-      if (!this.$refs.img) return
+      if (!img && !this.$refs.img) return
 
       this.$store.commit('SET_backgroundImageStyles', {
         pageIndex: this.pageIndex,
@@ -444,18 +481,8 @@ export default defineComponent({
           }
         }, {
           error: () => {
-            if (this.image.config.srcObj.type === 'private' && srcSize === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.image.config)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
-              return
+            if (srcSize === 'xtra') {
+              return this.handleXtraErr()
             }
 
             reject(new Error(`cannot load the current image, src: ${src}`))
@@ -467,14 +494,14 @@ export default defineComponent({
     },
     stylesConverter(): { [key: string]: string } {
       return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
+        // use Math.ceil fro solving sub-pixel-rendering error
+        width: `${Math.ceil(this.imageSize.width)}px`,
+        height: `${Math.ceil(this.imageSize.height)}px`,
         transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${this.flipStyles.transform}`
       }
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
-      groupUtils.deselect()
     },
     handleDimensionUpdate(newVal: number | string, oldVal: number) {
       if (this.isBlurImg) return
@@ -497,17 +524,8 @@ export default defineComponent({
         }, {
           crossOrigin: true,
           error: () => {
-            if (this.image.config.srcObj.type === 'private' && newVal === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.image.config)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
+            if (newVal === 'xtra') {
+              this.handleXtraErr()
             }
           }
         })
@@ -552,14 +570,14 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
         }
       }, { crossOrigin: true })
-      if (this.$isStk) {
+      if (this.$isStk || this.$isCm) {
         // detect if SVG image rendered
         const rendering = () => {
           const elImg = this.$refs['adjust-img'] as SVGImageElement
           if (!elImg) return
           if (elImg.width.baseVal.value || elImg.height.baseVal.value) {
             // Render complete
-            stkWVUtils.setLoadingFlag(-1)
+            layerUtils.setLoadingFlag(-1)
           } else {
             // Rendering
             window.requestAnimationFrame(rendering)
@@ -574,8 +592,8 @@ export default defineComponent({
         this.imgNaturalSize.width = img.width
         this.imgNaturalSize.height = img.height
       }
-      if (this.$isStk) {
-        stkWVUtils.setLoadingFlag(-1)
+      if (this.$isStk || this.$isCm) {
+        layerUtils.setLoadingFlag(-1)
       }
     }
   }

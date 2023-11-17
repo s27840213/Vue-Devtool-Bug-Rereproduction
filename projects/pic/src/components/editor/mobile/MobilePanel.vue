@@ -1,17 +1,25 @@
 <script lang="ts">
 import Overlay from '@/components/editor/overlay/Overlay.vue'
-import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
-import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
 import PanelBleed from '@/components/editor/panelMobile/PanelBleed.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelDownload from '@/components/editor/panelMobile/PanelDownload.vue'
+import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
+import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
+import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
+import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
+import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
+import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
+import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
 import PanelFlip from '@nu/vivi-lib/components/editor/panelMobile/PanelFlip.vue'
 import PanelFontFormat from '@nu/vivi-lib/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSize from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontSpacing from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSpacing.vue'
-import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelNudge from '@nu/vivi-lib/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@nu/vivi-lib/components/editor/panelMobile/PanelOpacity.vue'
@@ -19,32 +27,22 @@ import PanelOrder from '@nu/vivi-lib/components/editor/panelMobile/PanelOrder.vu
 import PanelPhotoShadow from '@nu/vivi-lib/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelPosition from '@nu/vivi-lib/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemoveBg.vue'
-import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
-import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
-import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
-import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.vue'
-import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
-import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
-import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
-import mobilePanelMixin from '@nu/vivi-lib/mixin/mobilePanel'
-import { computed, defineComponent, provide } from 'vue'
-import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
+import { computed, defineComponent, provide } from 'vue'
 import { mapMutations } from 'vuex'
 
 export default defineComponent({
   extends: MobilePanel,
-  mixins: [mobilePanelMixin],
   components: {
     PanelTemplate,
     PanelPhoto,
@@ -298,16 +296,16 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     leftBtnName(): string {
-      return this.bgRemoveMode ? 'close-circle' : 'back-circle'
+      return this.bgRemoveMode ? 'panel-close' : 'panel-back'
     },
     // eslint-disable-next-line vue/no-unused-properties
     rightBtnName(): string {
       if (this.currActivePanel === 'download') {
-        return 'close-circle'
+        return 'panel-close'
       } else if (this.bgRemoveMode || (this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
-        return 'check-mobile-circle'
+        return 'panel-done'
       } else {
-        return 'close-circle'
+        return 'panel-close'
       }
     },
     // eslint-disable-next-line vue/no-unused-properties

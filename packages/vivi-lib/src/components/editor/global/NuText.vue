@@ -39,9 +39,8 @@ import { IPage } from '@/interfaces/page'
 import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
-import LayerUtils from '@/utils/layerUtils'
+import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textFillUtils from '@/utils/textFillUtils'
@@ -160,7 +159,7 @@ export default defineComponent({
   },
   watch: {
     'config.paragraphs'(newVal) {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
       this.drawTextBg()
       textUtils.untilFontLoaded(newVal).then(async () => {
         this.drawTextBg()
@@ -266,7 +265,7 @@ export default defineComponent({
       let widthLimit
       if (this.isLayerAutoResizeNeeded()) {
         widthLimit = await textUtils.autoResize(config, this.initSize)
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
       } else {
         widthLimit = config.widthLimit
       }
@@ -278,19 +277,19 @@ export default defineComponent({
           x = config.styles.x - (textHW.width - config.styles.width) / 2
           y = config.styles.y - (textHW.height - config.styles.height) / 2
         }
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
+        layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit, spanDataList: textHW.spanDataList })
       } else {
         /**
-         * use LayerUtils.getLayer and not use this.primaryLayer is bcz the tmp layer may contain the group layer,
+         * use layerUtils.getLayer and not use this.primaryLayer is bcz the tmp layer may contain the group layer,
          * the group layer in the tmp layer would have a wrong updating to the primary tmp layer
          */
-        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        const group = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit, spanDataList: textHW.spanDataList })
+        layerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit, spanDataList: textHW.spanDataList })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+        layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
     },
     async resizeAfterFontLoaded() {
@@ -299,8 +298,8 @@ export default defineComponent({
         setTimeout(async () => {
           await this.resizeCallback()
           await this.drawTextBg() // Redraw TextBg after resize.
-          if (this.$isStk && this.$route.name === 'Screenshot') {
-            stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+          if ((this.$isStk || this.$isCm) && this.$route.name === 'Screenshot') {
+            layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           }
           if (!this.isCurveText) {
             generalUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)

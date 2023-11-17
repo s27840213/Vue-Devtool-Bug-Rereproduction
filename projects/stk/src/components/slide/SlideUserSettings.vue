@@ -38,7 +38,7 @@ div(class="slide-user-settings")
               div(class="slide-user-settings__setting__description") {{ transformText(option.description) }}
             div(class="slide-user-settings__setting__icon")
               svg-icon(v-if="userSettings[state] === option.val"
-                        iconName="vivisticker-check"
+                        iconName="vivisticker_check"
                         iconWidth="24px"
                         iconColor="white")
 </template>

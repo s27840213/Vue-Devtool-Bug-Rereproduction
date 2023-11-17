@@ -13,6 +13,7 @@
   "NN0034": "Excluir",
   "NN0035": "Copiar formato",
   "NN0036": "Recortar",
+  "NN0037": "Pesquisar",
   "NN0038": "Virar",
   "NN0042": "Ajustar",
   "NN0043": "Remover fundo",
@@ -65,10 +66,13 @@
   "NN0117": "Nenhum",
   "NN0118": "Curva",
   "NN0124": "Selecionar páginas",
+  "NN0134": "Página {num}",
   "NN0135": "Upload concluído",
   "NN0136": "Fazendo upload",
   "NN0137": "Falha no upload",
   "NN0139": "Adicionar página",
+  "NN0140": "Duplicar página",
+  "NN0141": "Excluir página",
   "NN0145": "Centro de modelos",
   "NN0146": "Tutoriais",
   "NN0147": "Perguntas frequentes",
@@ -111,8 +115,6 @@
   "NN0385": "Apagar",
   "NN0386": "Restaurar",
   "NN0387": "Tamanho do pincel",
-  "NN0388": "Mostrar original",
-  "NN0389": "Redefinir",
   "NN0393": "Desculpe, não encontramos nenhum {target} para \"{keyword}\". Por favor, tente um termo de pesquisa diferente.",
   "NN0418": "Brilho",
   "NN0419": "Sombras de correspondência de cores",
@@ -345,5 +347,6 @@
   "STK0092": "Próximo aos Fundos",
   "STK0093": "Vamos explorar",
   "STK0094": "Teste grátis ativado.",
-  "STK0095": "Use {day}-Dia de teste grátis."
+  "STK0095": "Use {day}-Dia de teste grátis.",
+  "STK0096": "Acesse Ajustes  > Tempo de Uso > Conteúdo e privacidade > Compras no iTunes e App Store > Toque em “Compras Dentro de Apps” e selecione a opção Permitir."
 }

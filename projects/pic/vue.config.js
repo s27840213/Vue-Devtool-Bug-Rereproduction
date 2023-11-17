@@ -40,6 +40,7 @@ const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
+const DynamicAliasResolvePlugin = require('../../tools/webpack-plugin-dynamic-alias')
 
 function resolve(...dir) {
   return path.join(__dirname, ...dir)
@@ -112,8 +113,8 @@ module.exports = defineConfig({
       .rule('svg-sprite-loader')
       .test(/\.svg$/)
       .include
-        .add(resolve('src/assets/icon'))
-        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        // .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/src/assets/icon'))
       .end()
       .use('svg-sprite-loader')
       .loader('svg-sprite-loader')
@@ -144,8 +145,8 @@ module.exports = defineConfig({
       .rule('image-assets')
       .test(/\.(png|jpg|gif|svg|mp4)$/)
       .exclude
-        .add(resolve('src/assets/icon'))
-        .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        // .add(resolve('../../packages/vivi-lib/dist/src/assets/icon'))
+        .add(resolve('../../packages/vivi-lib/src/assets/icon'))
       .end()
       .type('asset/resource')
     // config.module
@@ -269,6 +270,7 @@ module.exports = defineConfig({
     //     outputFormat: 'humanVerbose',
     //     loaderTopFiles: 5
     // }])
+    config.resolve.alias.delete('@')
   },
 
   devServer: {
@@ -315,9 +317,23 @@ module.exports = defineConfig({
             ? 'src/i18n/shaked/'
             : '../../tools/i18n-tool/result'
         ),
-        '@img': resolve('../../packages/vivi-lib/dist/src/assets/img'),
-        '@': resolve('src/'),
+        '@img': resolve('../../packages/vivi-lib/src/assets/img'),
+        '@json': resolve('../../packages/vivi-lib/src/assets/json'),
+        '@nu/vivi-lib': resolve('../../packages/vivi-lib/src'),
       },
+      plugins: [
+        new DynamicAliasResolvePlugin({
+          alias: '@',
+          dynamic: (request) => {
+            if (request.path.includes('/packages/')) {
+              return resolve('../../packages/vivi-lib/src')
+            }
+            return resolve('src')
+          },
+          pattern: /^@\//,
+          extensions: ['.ts', '/index.ts'],
+        })
+      ]
     }
   }
 })

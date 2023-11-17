@@ -49,7 +49,7 @@ export default defineComponent({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
     dragStart(e: DragEvent) {
-      if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
+      if (!paymentUtils.checkProApp(this.item as {plan: number}, 'pro-object')) return
       const img = this.$refs.img as HTMLImageElement
       if (img) {
         const type = assetUtils.getLayerType(this.item.type)
@@ -62,7 +62,7 @@ export default defineComponent({
       }
     },
     addSvg() {
-      if (!paymentUtils.checkPro(this.item as {plan: number}, 'pro-object')) return
+      if (!paymentUtils.checkProApp(this.item as {plan: number}, 'pro-object')) return
       assetUtils.addAsset(this.item as any, { db: 'svg' })
     },
     showSvgInfo(evt: Event) {

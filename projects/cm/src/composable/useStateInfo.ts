@@ -5,7 +5,6 @@ import { storeToRefs } from 'pinia'
 const useStateInfo = () => {
   const { path } = toRefs(useRoute())
   const editorStore = useEditorStore()
-  const { editorState } = storeToRefs(editorStore)
 
   // #region routing state
   const atHome = computed(() => path.value === '/')
@@ -13,15 +12,19 @@ const useStateInfo = () => {
   const atSettings = computed(() => path.value === '/settings')
   const atMainPage = computed(() => atHome.value || atMyDesign.value)
   const atEditor = computed(() => path.value === '/editor')
+  const atEventTester = computed(() => path.value === '/nativeevttest')
   // #endregion
 
   // #region editor state
+  const { currActiveFeature, inGenResultState, inAspectRatioState, inEditingState, inSavingState } =
+    storeToRefs(editorStore)
+
   const showHomeTabs = computed(() => atHome.value || atMyDesign.value)
-  const showAspectRatioSelector = computed(
-    () => atEditor.value && editorState.value === 'aspectRatio',
+  const showBrushOptions = computed(() => atEditor.value && currActiveFeature.value === 'brush')
+  const showSelectionOptions = computed(
+    () => atEditor.value && currActiveFeature.value === 'selection',
   )
-  const showEditingOpstions = computed(() => atEditor.value && editorState.value === 'editing')
-  const showPromptArea = computed(() => atEditor.value && editorState.value === 'prompt')
+
   // #endregion
 
   // #region img selector state
@@ -35,10 +38,14 @@ const useStateInfo = () => {
     atEditor,
     atSettings,
     atMainPage,
+    atEventTester,
     showHomeTabs,
-    showAspectRatioSelector,
-    showEditingOpstions,
-    showPromptArea,
+    inGenResultState,
+    inAspectRatioState,
+    inEditingState,
+    inSavingState,
+    showBrushOptions,
+    showSelectionOptions,
     showImgSelector,
   }
 }

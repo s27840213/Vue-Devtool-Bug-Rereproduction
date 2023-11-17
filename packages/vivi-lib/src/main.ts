@@ -1,12 +1,12 @@
-// import App from '@/App.vue'
-import PropertyBar from '@/components/global/PropertyBar.vue'
-import SvgIcon from '@/components/global/SvgIcon.vue'
 import colorUtils from '@/utils/colorUtils'
 import modalUtils from '@/utils/modalUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
+import PropertyBar from '@nu/shared-lib/components/PropertyBar.vue'
+import SvgIcon from '@nu/shared-lib/components/SvgIcon.vue'
+import '@nu/shared-lib/css'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
@@ -16,13 +16,12 @@ import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import i18n from './i18n'
-// import router from './router'
 import store from './store'
 import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
-import '@/imports'
+// import '@/imports'
 
 // Add variable that bind in vue this and its type define
 // Ex: div(v-if="$isTouchDevice()" ...) in pug
@@ -110,10 +109,9 @@ app.use(FloatingVue, {
 // })
 
 app.component('RecycleScroller', RecycleScroller)
-
 app.component('svg-icon', SvgIcon)
 app.component('btn', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Btn.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/shared-lib/components/Btn.vue')
 ))
 /**
  * bcz this components use slot, and some components need to get its ref in mounted,
@@ -121,7 +119,7 @@ app.component('btn', defineAsyncComponent(() =>
  */
 app.component('property-bar', PropertyBar)
 app.component('dropdown', defineAsyncComponent(() =>
-  import(/* webpackChunkName: "global-component" */ '@/components/global/Dropdown.vue')
+  import(/* webpackChunkName: "global-component" */ '@nu/shared-lib/components/Dropdown.vue')
 ))
 app.component('nu-image', defineAsyncComponent(() =>
   import(/* webpackChunkName: "global-component" */ '@/components/editor/global/NuImage.vue')

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-shape" :style="styles")
-  svg(:view-box.camel="viewBoxFormatter" preserveAspectRatio="none")
+  svg(:view-box.camel="viewBoxFormatter" preserveAspectRatio="none" :style="svgStyles")
     defs(v-if="config.category === 'E'" v-html="svgFormatter")
     defs
       filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
@@ -17,7 +17,6 @@ import { LayerType } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import { PropType, defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -71,7 +70,7 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
-    priPrimaryLayerIndex: {
+    prePrimaryLayerIndex: {
       type: Number,
       default: -1
     },
@@ -85,7 +84,7 @@ export default defineComponent({
       filterTemplate: '',
       paramsReady: false,
       styleTextContent: [] as string[],
-      transTextContent: [] as string[]
+      transTextContent: [] as string[],
     }
   },
   async created() {
@@ -188,6 +187,9 @@ export default defineComponent({
     }
   },
   computed: {
+    svgStyles(): {[key: string]: string} {
+      return this.$route.name !== 'Preview' ? { overflow: 'visible' } : {} // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
+    },
     viewBoxFormatter(): string {
       if (this.paramsReady) {
         if (this.config.category === 'D') {
@@ -440,44 +442,44 @@ export default defineComponent({
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
-      if (this.$isStk) {
+      if (this.$isStk || this.$isCm) {
         let primaryLayer
-        if (this.priPrimaryLayerIndex !== -1) {
-          primaryLayer = (layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup).layers[this.layerIndex] as IFrame
+        if (this.prePrimaryLayerIndex !== -1) {
+          primaryLayer = (layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex) as IGroup).layers[this.layerIndex] as IFrame
         } else {
           primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
         }
         if (primaryLayer.type === LayerType.frame) {
           this.$nextTick(() => {
-            if (this.priPrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
+            if (this.prePrimaryLayerIndex !== -1 && (this.config as IShape).frameDecType) {
               switch ((this.config as IShape).frameDecType) {
                 case 'decoration':
-                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'd' })
+                  layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'd' })
                   break
                 case 'decorationTop':
-                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'dt' })
+                  layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'dt' })
                   break
                 case 'blend':
-                  stkWVUtils.setLoadingFlag(this.priPrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
+                  layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'b', v: this.subLayerIndex })
                   break
               }
             } else {
               switch ((this.config as IShape).frameDecType) {
                 case 'decoration':
-                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
+                  layerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'd' })
                   break
                 case 'decorationTop':
-                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
+                  layerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'dt' })
                   break
                 case 'blend':
-                  stkWVUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
+                  layerUtils.setLoadingFlag(this.layerIndex, -1, { k: 'b', v: this.subLayerIndex })
                   break
               }
             }
           })
         } else {
           this.$nextTick(() => {
-            stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           })
         }
       }

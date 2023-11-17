@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
 
 export interface IAsset {
@@ -148,5 +148,8 @@ export interface IAssetProps {
     height: number
   }
   has_frame?: number | boolean
-  fit?: number
+  fit?: number,
+  record?: boolean,
+  hideResizer?: boolean,
+  ctrlUnmountCb?: (pageIndex: number ,layerIndex:number, config?: AllLayerTypes) => void
 }

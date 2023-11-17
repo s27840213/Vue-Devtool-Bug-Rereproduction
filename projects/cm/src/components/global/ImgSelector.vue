@@ -1,85 +1,212 @@
 <template lang="pug">
-div(class="image-selector h-full w-full grid grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
-  div(class="bg-app-bg px-24 py-8 flex justify-between items-center")
-    div
-      back-btn
+div(
+  class="image-selector bg-app-bg text-app-tab-default \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
+  //- 1. Top bar
+  div(class="box-border px-24 py-8 flex justify-between items-center")
+    back-btn
+    span(class="text-app-btn-primary-text") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
+    div(class="w-24")
+  //- 2. Tabs for photo & stock
+  tabs(
+    class="bg-app-tab-bg min-h-[52px] rounded-t-[24px]"
+    :tabs="[$t('STK0067'), $t('STK0069')]"
+    v-model="tabIndex")
+  //- 3. (Album bar or search bar) + demo img
+  div(class="bg-app-tab-bg box-border px-12 py-8 h-60 \ grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
+    div(
+      v-if="inPhoto"
+      class="flex items-center gap-10"
+      @click="toggleAlbum")
+      span(class="typo-btn-lg") {{ currAlbumName }}
+      div(
+        class="transition-transform duration-300"
+        :style="{ transform: isAlbumOpened ? 'rotate(180deg)' : 'rotate(0deg)' }")
+        svg-icon(
+          :iconName="'chevron-up'"
+          :iconWidth="'12px'")
+    search-bar(
+      v-if="inStock"
+      class="text-app-text-primary"
+      @search="searchUnsplash")
+    //- Demo img
+    div(
+      v-for="(img, i) in demoImgs"
+      :key="img.assetId"
+      class="relative flex justify-center"
+      @click="selectDemo(i)")
+      img(class="w-44 h-44 object-cover rounded-[10px]" :src="img.assetId")
+      span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
+  //- 4-1. Photo
   div(
-    class="bg-app-tab-bg w-full h-full rounded-t-[24px] pt-16 box-border grid grid-rows-[auto,auto,minmax(0,1fr)] grid-cols-1")
-    div(class="tabs flex justify-around pb-8")
-      span(class="text-app-tab-active typo-btn-lg") Photos
-      span(class="text-app-tab-disable typo-btn-lg") Stocks
-    div(class="flex justify-between items-center px-12 py-8")
-      div(class="flex items-center gap-8" @click="toggleAlbum")
-        span(class="text-app-tab-default typo-btn-lg") {{ currAlbumName }}
-        div(
-          class="transition-transform duration-300"
-          :style="{ transform: isAlbumOpened ? 'rotate(180deg)' : 'rotate(0deg)' }")
-          cm-svg-icon(
-            class="text-app-tab-default"
-            :iconName="'chevron-up'"
-            :iconWidth="'12px'")
+    v-if="inPhoto"
+    class="bg-app-tab-bg w-full h-full box-border grid \ grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
+    //- Photo selector
     div(
       v-if="isAlbumOpened"
-      class="img-selector__img-grid bg-app-bg overflow-scroll"
-      @scroll.stop
-      @touchstart.stop)
-      div(class="grid grid-cols-3 grid-flow-row content-start gap-4")
-        div(class="aspect-square flex flex-col items-center justify-center")
-          cm-svg-icon(class="text-app-tab-default mb-10" :iconName="'camera'")
-          span(class="text-app-tab-default") Camera
-        div(
-          v-for="item in currAlbumContent"
-          :key="item"
-          class="aspect-square")
-          lazy-load(
-            class="lazy-load w-full h-full"
-            target=".img-selector__img-grid"
-            :rootMargin="'1000px 0px 1000px 0px'")
-            img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${item}?ssize=200`")
+      class="img-selector__img-grid bg-app-bg overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
+      div(class="aspect-square flex flex-col items-center justify-center")
+        svg-icon(class="mb-10" iconName="camera")
+        span {{ $t('CM0060') }}
+      div(
+        v-for="img in currAlbumContent"
+        :key="img.id"
+        class="aspect-square relative"
+        @click="selectImage(img, 'ios')")
+        lazy-load(
+          class="lazy-load w-full h-full"
+          target=".img-selector__img-grid"
+          :rootMargin="'1000px 0px 1000px 0px'")
+          img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${img.id}?ssize=200`")
+        svg-icon(
+          v-if="selected(img, 'ios')"
+          class="absolute right-0 top-0"
+          iconName="item-check"
+          iconColor="app-tab-active")
       observer-sentinel(
-        class="flex justify-center py-12"
+        class="flex justify-center box-border py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
         :target="'.img-selector__img-grid'"
         :rootMargin="'1000px 0px 1000px 0px'"
         @callback="handleLoadMore")
-        cm-svg-icon(
-          class="text-app-tab-default mb-10"
+        svg-icon(
+          class="mb-10"
           :iconName="'loading'"
           iconColor="app-text-secondary")
-    div(v-else class="flex flex-col gap-8")
+    //- Album selector
+    div(v-else class="flex flex-col gap-8 mx-10")
       div(
-        v-for="album in smartAlbum"
+        v-for="album in albums"
         :key="album.albumId"
-        class="display flex gap-12"
+        class="display flex gap-8"
         @click="selectAlbum(album)")
-        img(
-          class="object-cover aspect-square w-80"
-          :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-        div(class="flex flex-col items-start justify-evenly")
-          span(class="text-app-tab-default") {{ album.title }}
-          span(class="text-app-tab-default") {{ album.albumSize }}
-      template(v-if="myAlbum.length > 0")
-        div(class="text-left text-app-tab-default") Ｍy Albums
-        div(
-          v-for="album in myAlbum"
-          :key="album.albumId"
-          class="display flex gap-12"
-          @click="selectAlbum(album)")
+        div(v-if="album.albumId === 'myAlbum'" class="text-left") {{ $t('CM0059') }}
+        template(v-else)
           img(
             class="object-cover aspect-square w-80"
             :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-          div(class="flex flex-col items-start justify-evenly")
-            span(class="text-app-tab-default") {{ album.title }}
-            span(class="text-app-tab-default") {{ album.albumSize }}
+          div(class="flex flex-col items-start justify-center gap-4")
+            span {{ album.title }}
+            span {{ album.albumSize }}
+  //- 4-2. Stock
+  div(v-else-if="inStock" class="grid grid-cols-2 gap-16 mx-10 my-16 overflow-scroll")
+    //- Stock selector
+    div(
+      v-for="(col, i) in unsplashCols"
+      :key="i"
+      class="grid gap-16 h-fit")
+      div(
+        v-for="img in col"
+        :key="img.id"
+        class="relative")
+        img(
+          class="w-full"
+          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
+          @click="selectImage(img, 'unsplash')")
+        svg-icon(
+          v-if="selected(img, 'unsplash')"
+          class="absolute right-0 top-0"
+          iconName="item-check"
+          iconColor="app-tab-active")
+    observer-sentinel(
+      class="flex justify-center box-border py-12 col-span-2"
+      :target="'.img-selector__img-grid'"
+      :rootMargin="'1000px 0px 1000px 0px'"
+      @callback="unsplashLoadmore")
+      svg-icon(
+        v-if="unsplashLoading"
+        class="mb-10"
+        :iconName="'loading'"
+        iconColor="app-text-secondary")
+  //- 5. Multi-select candidate UI
+  div(v-if="requireNum > 1 && targetImgs.length" class="mx-16 mt-10 mb-20 grid gap-20")
+    div(class="flex justify-between items-center h-32")
+      span {{ $t('CM0062', { num: requireNum }) }}
+      nubtn(@click="sendToEditor") {{ $t('NN0744') }}
+    div(class="flex flex-row gap-20")
+      div(
+        v-for="img in targetImgs"
+        :key="img.assetId"
+        class="relative")
+        img(class="w-60 h-60 object-cover" :src="imageUtils.getSrc(img, 'tiny')")
+        svg-icon(
+          class="absolute -right-12 -top-12"
+          iconName="close-btn"
+          @click="pull(targetImgs, img)")
 </template>
+
 <script lang="ts" setup>
-import type { IAlbum } from '@/utils/webViewUtils'
-import webViewUtils from '@/utils/webViewUtils'
+import useStateInfo from '@/composable/useStateInfo'
+import { useEditorStore } from '@/stores/editor'
+import { useImgSelectorStore } from '@/stores/imgSelector'
+import vuex from '@/vuex'
+import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
+import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
+import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import type { IAlbum, IAlbumContent } from '@nu/vivi-lib/utils/cmWVUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import { find, pull } from 'lodash'
+
+const router = useRouter()
+
+const props = defineProps({
+  requireNum: {
+    type: Number,
+    required: true,
+  },
+})
+
+// #region var declare
+const { tabIndex } = storeToRefs(useImgSelectorStore())
+const inPhoto = computed(() => tabIndex.value === 0)
+const inStock = computed(() => tabIndex.value === 1)
+const { tc } = useI18n()
+let targetImgs = reactive([] as (SrcObj & { ratio: number })[])
+const demoImgs = [
+  {
+    type: 'local-img',
+    assetId: require('@img/jpg/cm demo img1.jpg'),
+    userId: '',
+    ratio: 320 / 480,
+  },
+  {
+    type: 'local-img',
+    assetId: require('@img/jpg/cm demo img2.jpg'),
+    userId: '',
+    ratio: 384 / 480,
+  },
+]
+
+const { atEditor } = useStateInfo()
+// #endregion
 
 // #region album datas
 const smartAlbum = reactive<IAlbum[]>([])
 const myAlbum = reactive<IAlbum[]>([])
-const currAlbumContent = reactive<string[]>([])
+const albums = computed(() => [
+  ...smartAlbum,
+  ...(myAlbum.length > 0
+    ? [
+        {
+          // 'My album' text
+          albumId: 'myAlbum',
+          albumSize: 0,
+          title: 'myAlbum',
+          thumbId: 'myAlbum',
+        },
+      ]
+    : []),
+  ...myAlbum,
+])
+const currAlbumContent = reactive<IAlbumContent[]>([])
 const currAlbum = reactive<IAlbum>({
   albumId: '',
   albumSize: 0,
@@ -90,15 +217,18 @@ const currAlbumName = computed(() => currAlbum.title)
 // const currAlbumId = computed(() => currAlbum.albumId)
 // #endregion
 
-// #region album states
+// #region album methods
+// Local var
 const nextPage = ref(0)
 const noMoreContent = ref(false)
 const isAlbumOpened = ref(true)
 const isLoadingContent = ref(false)
 const initLoaded = ref(false)
-// #endregion
+// Var from store
+const editorStore = useEditorStore()
+const { setPageSize, setImgAspectRatio } = editorStore
+const { setRequireImgNum, replaceImgFlag } = useImgSelectorStore()
 
-// #region methods
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
 }
@@ -108,7 +238,7 @@ const getAlbumContent = async (album: IAlbum) => {
   isLoadingContent.value = true
 
   Object.assign(currAlbum, album)
-  webViewUtils
+  cmWVUtils
     .getAlbumContent(albumId, nextPage.value)
     .then((res) => {
       currAlbumContent.push(...res.content)
@@ -139,8 +269,99 @@ const selectAlbum = (album: IAlbum) => {
 }
 // #endregion
 
-// get the first image content
-webViewUtils
+// #region stock method
+const unsplash = vuex.state.unsplash
+// Computed
+const unsplashRaw = computed(() => {
+  if (unsplash.keyword) return unsplash.searchResult
+  return unsplash.content
+})
+const unsplashCols = computed(() => useWaterfall(unsplashRaw.value, 2))
+const unsplashLoading = computed(() => {
+  if (
+    (unsplash.keyword && unsplash.nextSearch === -1) ||
+    (!unsplash.keyword && unsplash.nextPage === -1)
+  )
+    return false
+  return unsplash.pending
+})
+
+// Method
+const unsplashLoadmore = () => {
+  if (unsplashLoading.value) return
+  vuex.dispatch('unsplash/getMorePhotos')
+}
+const searchUnsplash = (keyword: string) => {
+  vuex.dispatch('unsplash/resetSearch')
+  if (keyword) {
+    vuex.dispatch('unsplash/getPhotos', { keyword })
+  }
+}
+vuex.dispatch('unsplash/init')
+// #endregion
+
+// #region common method
+const selected = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
+  return find(targetImgs, ['assetId', (type === 'ios' ? 'cameraroll/' : '') + img.id])
+}
+
+const selectDemo = (i: number) => {
+  targetImgs = []
+  if (props.requireNum === 2) {
+    targetImgs = demoImgs
+  } else {
+    targetImgs.push(demoImgs[i])
+  }
+  sendToEditor()
+}
+
+const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
+  if (props.requireNum === targetImgs.length) {
+    modalUtils.setModalInfo(
+      tc('CM0069', { num: props.requireNum }),
+      tc('CM0070', { num: props.requireNum }),
+      { msg: tc('STK0023') },
+    )
+    return
+  }
+
+  targetImgs.push({
+    type,
+    assetId: (type === 'ios' ? 'cameraroll/' : '') + img.id,
+    userId: '',
+    ratio: img.width / img.height,
+  })
+  if (props.requireNum === 1) sendToEditor()
+}
+
+const sendToEditor = async () => {
+  if (replaceImgFlag) {
+    imageUtils.replaceImg(
+      targetImgs[0],
+      imageUtils.getSrc(targetImgs[0], 'prev'),
+      targetImgs[0].ratio,
+    )
+  } else {
+    setImgAspectRatio(targetImgs[0].ratio)
+    const initAtEditor = atEditor.value
+    if (!atEditor.value) await router.push({ name: 'Editor' })
+    setPageSize(900, 1600)
+    nextTick(() => {
+      targetImgs.forEach((img) => {
+        // if we aren't at editor at beginning, we need to fit the image, and don't need to record
+        assetUtils.addImage(img, img.ratio, { fit: initAtEditor ? 0.8 : 1, record: initAtEditor })
+      })
+      if (!initAtEditor) {
+        groupUtils.deselect()
+      }
+    })
+  }
+  setRequireImgNum(0)
+}
+// #endregion
+
+// #region get the first album image content
+cmWVUtils
   .getAlbumList()
   .then((res) => {
     if (res.flag === 1) {
@@ -171,5 +392,7 @@ webViewUtils
     console.error(err)
     isLoadingContent.value = false
   })
+// #endregion
 </script>
+
 <style lang="scss"></style>

@@ -77,6 +77,7 @@ export interface IUserModule {
       right: number
     }
   }
+  showForceLogin: boolean
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -146,7 +147,8 @@ const getDefaultState = (): IUserModule => ({
       bottom: 0,
       right: 0
     }
-  }
+  },
+  showForceLogin: false,
 })
 
 const state = getDefaultState()
@@ -298,6 +300,9 @@ const mutations: MutationTree<IUserModule> = {
       ...state.browserInfo,
       ...browserInfo
     }
+  },
+  setShowForceLogin(state: IUserModule, bool: boolean) {
+    state.showForceLogin = bool
   }
 }
 

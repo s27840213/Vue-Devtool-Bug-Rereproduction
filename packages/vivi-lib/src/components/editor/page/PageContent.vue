@@ -68,7 +68,6 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -300,10 +299,9 @@ export default defineComponent({
       }
     },
     pageClickHandler(): void {
-      if (this.$isStk) {
-        stkWVUtils.deselect()
-        return
-      }
+      if (this.$isStk) return
+      
+      // TODO(Hsing-Chi): Check if pageClickHandler needed.
       if (!this.isImgCtrl) {
         groupUtils.deselect()
         editorUtils.setInMultiSelectionMode(false)

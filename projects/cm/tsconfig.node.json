@@ -5,13 +5,15 @@
     "vitest.config.*",
     "cypress.config.*",
     "nightwatch.conf.*",
-    "playwright.config.*"
+    "playwright.config.*",
+    "src/vite-plugin-transform.d.ts"
   ],
   "compilerOptions": {
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "types": ["node"],
-    "resolvePackageJsonExports": false
+    "resolvePackageJsonExports": false,
+    "rootDir": "../../"
   }
 }

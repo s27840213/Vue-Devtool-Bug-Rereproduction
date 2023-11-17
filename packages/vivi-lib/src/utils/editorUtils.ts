@@ -78,13 +78,10 @@ class EditorUtils {
   handleContentScaleCalc(page: IPage | IBgRemoveInfo) {
     const { hasBleed } = pageUtils
     let { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
-    const aspectRatio = width / height
-
     if (pageUtils.inBgRemoveMode) {
-      width = 1600
-      height = width / aspectRatio
+      width = pageUtils.targetCanvasSize.width
+      height = pageUtils.targetCanvasSize.height
     }
-
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
 
     if (!this.mobileSize.height || !this.mobileSize.width) {
@@ -122,12 +119,14 @@ class EditorUtils {
 
   handleContentScaleRatio(pageIndex: number) {
     if (generalUtils.isTouchDevice()) {
+      const { hasBleed } = pageUtils
       const page = pageUtils.getPage(pageIndex)
+      const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
       const pos = {
-        x: (editorUtils.mobileSize.width - page.width * this.contentScaleRatio) * 0.5,
-        y: (editorUtils.mobileSize.height - page.height * this.contentScaleRatio) * 0.5
+        x: (editorUtils.mobileSize.width - width * this.contentScaleRatio) * 0.5,
+        y: (editorUtils.mobileSize.height - height * this.contentScaleRatio) * 0.5
       }
       pageUtils.updatePagePos(pageIndex, pos)
       pageUtils.updatePageInitPos(pageIndex, pos)

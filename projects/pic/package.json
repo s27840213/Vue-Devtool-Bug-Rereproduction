@@ -4,17 +4,14 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "lint": "vue-cli-service lint",
     "build": "vue-cli-service build",
-    "build-only": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
     "build:dev": "vue-cli-service build --mode development",
-    "serve-vite": "vite",
-    "build-vite": "vue-tsc && vite build",
     "preview-cy": "vite preview --port 8080 --outDir dist-cy"
   },
   "main": "./dist/nueditor.common.js",
   "dependencies": {
-    "@nu/vivi-lib": "workspace:^",
+    "@nu/shared-lib": "workspace:^",
     "@ctrl/tinycolor": "^3.5.0",
     "@dreysolano/prerender-spa-plugin": "^1.0.3",
     "@flatten-js/core": "^1.3.3",

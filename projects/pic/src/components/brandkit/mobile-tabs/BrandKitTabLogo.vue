@@ -130,7 +130,7 @@ export default defineComponent({
       }
     },
     handleUploadLogo() {
-      if (!paymentUtils.checkPro({ plan: 1 }, 'brandkit')) return
+      if (!paymentUtils.checkProApp({ plan: 1 }, 'brandkit')) return
       uploadUtils.chooseAssets('logo')
     },
     handleDownload(logo: IBrandLogo) {

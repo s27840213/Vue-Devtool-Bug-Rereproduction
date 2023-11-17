@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-layer flex-center"
-    :class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '', primaryLayer?.type === 'frame' ? 'transform-origin-0' : '']"
+:class="[inAllPagesMode || isLine ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '', primaryLayer?.type === 'frame' && !forRender ? 'transform-origin-0' : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
     :style="layerWrapperStyles"
@@ -12,7 +12,7 @@ div(class="nu-layer flex-center"
   div(class="full-size pos-left"
       :class="{'preserve3D': !isTouchDevice && isMultipleSelect}"
       :style="layerStyles()"
-      @pointerdown="onPointerDown($event)"
+      @pointerdown="onPointerdown"
       @tap="dblTap"
       @contextmenu.prevent
       @click.right.stop="onRightClick($event)"
@@ -31,7 +31,7 @@ div(class="nu-layer flex-center"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :page="page"
             :primaryLayer="primaryLayer"
-            :priPrimaryLayerIndex="priPrimaryLayerIndex"
+            :prePrimaryLayerIndex="prePrimaryLayerIndex"
             :forRender="forRender"
             :inPreview="inPreview")
           svg(v-if="showSvgContour"
@@ -51,8 +51,8 @@ div(class="nu-layer flex-center"
 </template>
 
 <script lang="ts">
-import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
+import SquareLoading from '@/components/global/SqureLoading.vue'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
@@ -72,6 +72,7 @@ import layerUtils from '@/utils/layerUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -80,7 +81,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { notify } from '@kyvg/vue3-notification'
 import Svgpath from 'svgpath'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -138,9 +139,9 @@ export default defineComponent({
       default: false,
       type: Boolean
     },
-    // Used by this.$props.priPrimaryLayerIndex in mounted
+    // Used by this.$props.prePrimaryLayerIndex in mounted
     // eslint-disable-next-line vue/no-unused-properties
-    priPrimaryLayerIndex: {
+    prePrimaryLayerIndex: {
       default: -1,
       type: Number
     },
@@ -151,7 +152,6 @@ export default defineComponent({
   },
   data() {
     return {
-      initPos: { x: 0, y: 0 },
       dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id),
       movingUtils: null as unknown as MovingUtils,
       imgBuff: {} as {
@@ -188,9 +188,9 @@ export default defineComponent({
         }
       }
     })
-    Object.defineProperty(layerInfo, 'priPrimaryLayerIndex', {
+    Object.defineProperty(layerInfo, 'prePrimaryLayerIndex', {
       get() {
-        return props.priPrimaryLayerIndex
+        return props.prePrimaryLayerIndex
       }
     })
     const _config = { config: this.config }
@@ -210,7 +210,11 @@ export default defineComponent({
 
     if (this.subLayerIndex === -1) {
       this.movingUtils = new MovingUtils(data as any)
-      const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)
+      const moveStart = (e: PointerEvent) => {
+        if (pointerEvtUtils.pointerIds.length <= 1) {
+          this.movingUtils.moveStart(e)
+        }
+      }
       if (this.isLine) {
         lineMover.addEventListener('pointerdown', moveStart)
       } else {
@@ -265,12 +269,11 @@ export default defineComponent({
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       isDuringCopy: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
     }),
     inAllPagesMode(): boolean {
@@ -310,6 +313,7 @@ export default defineComponent({
           pointerEvents,
           clipPath,
           'mix-blend-mode': this.config.styles.blendMode,
+          ...(this.getLayerType === 'shape' && this.$route.name !== 'Preview' && { overflow: 'hidden' }), // solving https://www.notion.so/vivipic/1-43-svg-9de4bd6782614852b503997f7e9256a2?pvs=4
           ...this.transformStyle
         }
       )
@@ -358,10 +362,13 @@ export default defineComponent({
       }
     },
     getPointerEvents(): string {
-      const { isControlling } = this.movingUtils ?? {}
       switch (this.config.type) {
-        case LayerType.image:
-          return isControlling ? 'none' : ''
+        case LayerType.image: {
+          const controlState = this.$store.state.controlState
+          if (controlState.type === 'move' && controlState.phase === 'moving' && controlState.layerInfo.layerIndex === this.layerIndex) {
+            return 'none'
+          } else return ''
+        }
         case LayerType.shape: {
           if (this.primaryLayer && this.primaryLayer.type === LayerType.frame) {
             return 'none'
@@ -371,6 +378,9 @@ export default defineComponent({
       return ''
     },
     isOk2HandleFrameMouseEnter(): boolean {
+      if (this.prePrimaryLayerIndex !== -1 && layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex).locked) {
+        return false
+      }
       if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return false
       }
@@ -417,6 +427,11 @@ export default defineComponent({
             ...shapeUtils.isLine(this.config as AllLayerTypes) ? { pointerEvents: 'none' } : {}
           }
         }
+      }
+    },
+    onPointerdown() {
+      if (this.subLayerIndex !== -1 && this.isImgCtrl) {
+        imageUtils.setImgControlDefault()
       }
     },
     lineMoverStyles(): { [key: string]: string } {
@@ -506,7 +521,9 @@ export default defineComponent({
       }
 
       if (this.getLayerType === 'frame') {
-        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
+        if (this.prePrimaryLayerIndex === -1) {
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
+        }
       }
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
@@ -515,24 +532,12 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          if (this.getLayerType === LayerType.image) {
+          if (this.getLayerType === LayerType.image && this.prePrimaryLayerIndex === -1) {
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
             eventUtils.emit(PanelEvent.switchTab, 'crop')
           }
         }
       })
-    },
-    onPointerDown(e: PointerEvent) {
-      if (this.isPinchingEditor) return
-      const target = e.target as HTMLElement
-      /**
-       * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
-       */
-      if (this.isImgCtrl && !['IMG', 'path', 'image'].includes(target.tagName)) {
-        imageUtils.setImgControlDefault()
-      }
-      this.initPos.x = this.config.styles.x
-      this.initPos.y = this.config.styles.y
     },
     dblClick(e: MouseEvent) {
       e.stopPropagation()
@@ -587,8 +592,10 @@ export default defineComponent({
     },
     handleFrameMouseEnter(e: MouseEvent | PointerEvent) {
       e.stopPropagation()
+      if (this.prePrimaryLayerIndex !== -1 && layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex).locked) {
+        return
+      }
       const currLayer = layerUtils.getCurrLayer as IImage
-      // if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
       if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
         const { srcObj, previewSrc } = this.config
         const clips = generalUtils.deepCopy(this.primaryLayer?.clips) as Array<IImage>
@@ -613,7 +620,7 @@ export default defineComponent({
         frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, {
           srcObj: { ...currLayer.srcObj },
           ...((currLayer as IImage).previewSrc && { previewSrc: (currLayer as IImage).previewSrc as string })
-        })
+        }, this.prePrimaryLayerIndex)
         layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 35 })
         layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: true })
 
@@ -628,7 +635,7 @@ export default defineComponent({
           imgY,
           horizontalFlip: this.primaryLayer && layerUtils.getCurrLayer.styles.horizontalFlip !== this.primaryLayer.styles.horizontalFlip,
           verticalFlip: this.primaryLayer && layerUtils.getCurrLayer.styles.verticalFlip !== this.primaryLayer.styles.verticalFlip
-        })
+        }, this.prePrimaryLayerIndex)
         const body = this.$refs.body as HTMLElement
         body.addEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
         body.addEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
@@ -647,11 +654,11 @@ export default defineComponent({
         layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: false })
         frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, {
           srcObj: { ...this.imgBuff.srcObj }
-        })
+        }, this.prePrimaryLayerIndex)
 
         frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
           ...this.imgBuff.styles
-        })
+        }, this.prePrimaryLayerIndex)
       }
       const body = this.$refs.body as HTMLElement
       body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
@@ -665,7 +672,7 @@ export default defineComponent({
         layerUtils.deleteLayer(layerUtils.pageIndex, layerUtils.layerIndex)
         const newIndex = this.layerIndex > layerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
-        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true })
+        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true }, this.prePrimaryLayerIndex)
         stepsUtils.record()
       }
       const body = this.$refs.body as HTMLElement
@@ -680,12 +687,9 @@ export default defineComponent({
     },
     onFrameDragEnter(e: DragEvent) {
       if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
-      /**
-       * use layerUtils.getLayer is bcz the frame may be included in the group
-       */
-      if (this.config.type !== LayerType.image || layerUtils.getLayer(this.pageIndex, this.layerIndex)?.type !== LayerType.frame) {
-        return
-      }
+      if (this.config.type !== LayerType.image) return
+      if (this.prePrimaryLayerIndex !== -1 && layerUtils.getLayer(this.pageIndex, this.prePrimaryLayerIndex).locked) return
+
       const { primaryLayer } = this
       if (primaryLayer && !primaryLayer.locked) {
         const body = this.$refs.body as HTMLElement
@@ -711,8 +715,8 @@ export default defineComponent({
               verticalFlip: clip.styles.verticalFlip
             }
           })
-          frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.currDraggedPhoto.srcObj)
-          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.currDraggedPhoto.previewSrc })
+          frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.currDraggedPhoto.srcObj, this.prePrimaryLayerIndex)
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.currDraggedPhoto.previewSrc }, this.prePrimaryLayerIndex)
 
           Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)
           const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
@@ -725,7 +729,7 @@ export default defineComponent({
             imgY,
             horizontalFlip: this.primaryLayer && this.primaryLayer.styles.horizontalFlip,
             verticalFlip: this.primaryLayer && this.primaryLayer.styles.verticalFlip
-          })
+          }, this.prePrimaryLayerIndex)
         }
       }
     },
@@ -737,9 +741,9 @@ export default defineComponent({
       body.removeEventListener('drop', this.onFrameDrop)
       const primaryLayer = this.primaryLayer as IFrame
       if (this.currDraggedPhoto.srcObj.type !== '' && !primaryLayer.locked) {
-        frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.srcObj)
-        frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.styles)
-        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.imgBuff.previewSrc })
+        frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.srcObj, this.prePrimaryLayerIndex)
+        frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.styles, this.prePrimaryLayerIndex)
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { previewSrc: this.imgBuff.previewSrc }, this.prePrimaryLayerIndex)
       }
     },
     onFrameDrop(e: DragEvent) {

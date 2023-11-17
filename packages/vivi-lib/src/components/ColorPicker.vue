@@ -3,7 +3,7 @@ div(class="color-picker" ref="colorPicker"
     :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
   div(v-if="$isTouchDevice()")
     div(class="color-picker__mobile__hex")
-      span(class="body-1") Hex
+      span Hex
       div(class="color-picker__mobile__input")
         div(:style="{'background-color': convertedHex}")
         input(
@@ -179,7 +179,9 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   height: fit-content;
-  background-color: white;
+  @include setColors(white, transparent) using ($color) {
+    background-color: $color;
+  }
   &:focus {
     outline: none;
   }
@@ -196,7 +198,9 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     gap: 16px;
-    color: setColor(gray-2);
+    @include setColors(gray-2, white) using ($color) {
+      color: $color;
+    }
     margin-bottom: 14px;
     & > span {
       font-family: Poppins;
@@ -226,8 +230,9 @@ export default defineComponent({
     align-items: center;
     gap: 16px;
     border: 1px solid setColor(gray-4);
-    border-radius: 4px;
+    border-radius: 5px;
     box-sizing: border-box;
+    background-color: white;
     > div {
       border: 1px solid setColor(gray-4);
       border-radius: 3px;

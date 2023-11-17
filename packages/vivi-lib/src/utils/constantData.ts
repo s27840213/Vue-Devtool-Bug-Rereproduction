@@ -11,11 +11,6 @@ import { TranslateResult } from 'vue-i18n'
 import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
 
-const imports = import.meta.glob(
-  `@img/text-effect/select/*`,
-  { eager: true, import: 'default' }
-) as Record<string, string>
-
 interface BillingInfoInput {
   label: TranslateResult
   ph?: TranslateResult
@@ -435,7 +430,7 @@ class ConstantData {
           (option as IEffectOptionSelect).select = ['triangle', 'rounded', 'square'].map((key, i) => ({
             key,
             plan: 0,
-            img: imports[`/src/assets/img/text-effect/select/endpoint-${key}.svg`],
+            img: require(`@img/text-effect/select/endpoint-${key}.svg`),
             // For i18n shake: NN0730, NN0731, NN0732
             label: i18n.global.tc(`NN073${i}`),
             preset: { endpoint: key },
@@ -446,7 +441,7 @@ class ConstantData {
           (option as IEffectOptionSelect).select = tailPositions.map((key) => ({
             key,
             plan: 0,
-            img: imports[`/src/assets/img/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`],
+            img: require(`@img/text-effect/select/tail${effectName === 'speech-bubble-triangle' ? '-triangle' : ''}-${key}.png`),
             label: key,
             preset: { tailPosition: key },
           }))
@@ -1167,7 +1162,7 @@ class ConstantData {
     ]
   }
 
-  stickerTutorialSteps(): { title: string, description: string, video: string, btnText?: string }[] {
+  stickerTutorialSteps(): { title: string, description: string, video: string, thumbnail: string, btnText?: string }[] {
     const stickerVideoUrls = this.stickerVideoUrls()
     // TODO: after tw new videos are povided, remove title and description and make btnText required.
     return this.checkIfUseNewLogic() ? [
@@ -1175,40 +1170,47 @@ class ConstantData {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial1.video,
+        thumbnail: stickerVideoUrls.tutorial1.thumbnail,
         btnText: `${i18n.global.t('STK0091')}`
       },
       {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial2.video,
+        thumbnail: stickerVideoUrls.tutorial2.thumbnail,
         btnText: `${i18n.global.t('STK0092')}`
       },
       {
         title: '',
         description: '',
         video: stickerVideoUrls.tutorial4.video,
+        thumbnail: stickerVideoUrls.tutorial4.thumbnail,
         btnText: `${i18n.global.t('STK0093')}`
       }
     ] : [
       {
         title: `${i18n.global.t('NN0746')}`,
         description: `${i18n.global.t('NN0750')}`,
-        video: stickerVideoUrls.tutorial1.video
+        video: stickerVideoUrls.tutorial1.video,
+        thumbnail: stickerVideoUrls.tutorial1.thumbnail,
       },
       {
         title: `${i18n.global.t('NN0747')}`,
         description: `${i18n.global.t('NN0751')}`,
-        video: stickerVideoUrls.tutorial2.video
+        video: stickerVideoUrls.tutorial2.video,
+        thumbnail: stickerVideoUrls.tutorial2.thumbnail,
       },
       {
         title: `${i18n.global.t('NN0748')}`,
         description: `${i18n.global.t('NN0752')}`,
-        video: stickerVideoUrls.tutorial3.video
+        video: stickerVideoUrls.tutorial3.video,
+        thumbnail: stickerVideoUrls.tutorial3.thumbnail,
       },
       {
         title: `${i18n.global.t('NN0749')}`,
         description: `${i18n.global.t('NN0753')}`,
-        video: stickerVideoUrls.tutorial4.video
+        video: stickerVideoUrls.tutorial4.video,
+        thumbnail: stickerVideoUrls.tutorial4.thumbnail,
       }
     ]
   }
@@ -1253,9 +1255,9 @@ class ConstantData {
   get pinchTransitionTime() {
     return 250
   }
-  
-  // map i18n locale to ISO 3166-1 alpha-3
-  countryMap = new Map(
+
+  // map i18n locale (alpha-2) to ISO 3166-1 alpha-3
+  countryMap223 = new Map(
     [
       ['us', 'USA'],
       ['jp', 'JPN'],
@@ -1263,12 +1265,26 @@ class ConstantData {
     ]
   )
 
+  // map ISO 3166-1 alpha-3 to i18n locale (alpha-2)
+  countryMap322 = new Map([...this.countryMap223.entries()].map(
+    ([key, value]) => ([value, key]))
+  );
+
   // map country code to currency
   currencyMap = new Map([
     ['USA', 'USD'],
     ['JPN', 'JPY'],
     ['TWN', 'TWD'],
   ])
+
+  // plan id for vivisticker payment
+  get planId() {
+    return {
+      monthly: 'com.nuphototw.vivisticker.monthly',
+      annually: 'com.nuphototw.vivisticker.annually',
+      annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
+    }
+  }
 }
 
 export default new ConstantData()

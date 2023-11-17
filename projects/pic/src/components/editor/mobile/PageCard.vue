@@ -8,12 +8,11 @@ div(class="page-card"
     :overflowContainer="editorView"
     :pageState="config"
     :isScaling="isScaling"
-    :isAnyBackgroundImageControl="isAnyBackgroundImageControl"
-    :minContentScaleRatio="minContentScaleRatio")
+    :isAnyBackgroundImageControl="isAnyBackgroundImageControl")
 </template>
 
 <script lang="ts">
-import NuPage from '@/components/editor/global/NuPage.vue'
+import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -54,23 +53,13 @@ export default defineComponent({
       default: false
     }
   },
-  data() {
-    return {
-      minContentScaleRatio: 0
-    }
-  },
   mounted() {
-    this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
-    this.$store.commit('SET_contentScaleRatio4Page', { pageIndex: this.pageIndex, contentScaleRatio: this.minContentScaleRatio })
-    // let card = this.$refs.card as HTMLElement | HTMLElement[]
-    // if (Array.isArray(card)) card = card[0]
-    // const cardRect = card.getBoundingClientRect()
-    // const padding = +card.style.padding.slice(0, -2)
-    // pageUtils.pageEventPosOffset.x = cardRect.x + padding
-    // pageUtils.pageEventPosOffset.y = cardRect.y + padding
+    const contentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
+    this.$store.commit('SET_contentScaleRatio4Page', { pageIndex: this.pageIndex, contentScaleRatio })
   },
   computed: {
     ...mapGetters({
+      contentScaleRatio: 'getContentScaleRatio',
       groupType: 'getGroupType',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
       hasBleed: 'getHasBleed',
@@ -100,11 +89,13 @@ export default defineComponent({
       }
     },
     hasBleed() {
-      this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
+      const contentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
+      this.$store.commit('SET_contentScaleRatio4Page', { pageIndex: this.pageIndex, contentScaleRatio })
     },
     currActivePanel(newVal, oldVal) {
       if (oldVal === 'bleed') {
-        this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
+        const contentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
+        this.$store.commit('SET_contentScaleRatio4Page', { pageIndex: this.pageIndex, contentScaleRatio })
       }
     }
   }

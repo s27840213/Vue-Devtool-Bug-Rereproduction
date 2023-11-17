@@ -1,4 +1,5 @@
 import i18n from '@/i18n'
+import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import store from '@/store'
@@ -12,7 +13,6 @@ import layerUtils from './layerUtils'
 import pageUtils from './pageUtils'
 import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
-import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 
 class BackgroundUtils {
   get inBgSettingMode(): boolean {
@@ -163,12 +163,16 @@ class BackgroundUtils {
   setBgImageSrc() {
     const pageIndex = layerUtils.pageIndex
     const image = layerUtils.getCurrConfig as IImage
+    const _image = generalUtils.deepCopy(image)
+    if (!_image.srcObj.type && _image.previewSrc) {
+      _image.srcObj.type = 'preview'
+      _image.srcObj.assetId = _image.tmpId as string || ''
+    }
     store.commit('SET_backgroundImageSrc', {
       pageIndex: pageIndex,
-      srcObj: image.srcObj,
-      previewSrc: image.previewSrc
+      srcObj: _image.srcObj,
+      previewSrc: _image.previewSrc ?? ''
     })
-    const _image = generalUtils.deepCopy(image)
     _image.styles.width = _image.styles.imgWidth
     _image.styles.height = _image.styles.imgHeight
     _image.styles.initWidth = _image.styles.imgWidth
@@ -200,7 +204,7 @@ class BackgroundUtils {
   replaceBgImg(photo: IAssetPhoto | IPhotoItem, previewSrc: string) {
     const pageIndex = layerUtils.pageIndex
     const srcObj = imageUtils.toSrcObj(photo)
-    
+
     store.commit('SET_backgroundImageSrc', {
       pageIndex: pageIndex,
       srcObj: srcObj,

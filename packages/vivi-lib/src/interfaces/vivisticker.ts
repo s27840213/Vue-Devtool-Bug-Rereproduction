@@ -1,5 +1,5 @@
-import { IViviStickerProFeatures } from '@/utils/stkWVUtils'
 import { IPage } from '@/interfaces/page'
+import { IViviStickerProFeatures } from '@/utils/stkWVUtils'
 
 export interface IUserInfoV1_0 {
   hostId: string,
@@ -112,7 +112,10 @@ export interface IPrice {
 export interface IPrices {
   currency: string,
   monthly: IPrice,
-  annually: IPrice
+  annually: IPrice,
+  annuallyFree0: IPrice,
+  annuallyOriginal: IPrice,
+  annuallyFree0Original: IPrice
 }
 
 export interface IPaymentPending {
@@ -127,7 +130,20 @@ export interface IPayment {
   defaultPrices: { [key: string]: IPrices },
   trialDays: number,
   trialCountry: string[],
-  pending: IPaymentPending
+  pending: IPaymentPending,
+  planId: {
+    monthly: string,
+    annually: string,
+    annuallyFree0: string,
+    annuallyOriginal: string,
+    annuallyFree0Original: string
+  },
+}
+
+export interface IPlanInfo {
+  planId: string,
+  priceText: string,
+  priceValue: string
 }
 
 export interface ISubscribeResult {
@@ -153,7 +169,51 @@ export interface ISubscribeInfo extends ISubscribeResult {
   annually: {
     priceValue: string,
     priceText: string
-  }
+  },
+  planInfo: IPlanInfo[]
+}
+
+export interface ISubscribeResultV1_45Base {
+  option: string,
+  reason?: string,
+  msg?: string
+}
+
+export interface ISubscribeResultCheckState extends ISubscribeResultV1_45Base {
+  complete: '1' | '0',
+  uuid: string,
+  subscribe: '1' | '0',
+  plan_id: string,
+  next_plan_id?: string,
+  next_billing_time?: string,
+  stop_subscribe: '1' | '0',
+  retry: '1' | '0',
+  expire_intent: '0' | '1' | '2',
+}
+
+export interface ISubscribeResultGetProducts extends ISubscribeResultV1_45Base {
+  priceCurrency: string,
+  monthly: {
+    priceValue: string,
+    priceText: string
+  },
+  annually: {
+    priceValue: string,
+    priceText: string
+  },
+  planInfo: IPlanInfo[]
+}
+
+export type ISubscribeResultV1_45 = Partial<ISubscribeResultCheckState> & Partial<ISubscribeResultGetProducts>
+
+export function isCheckState(data: ISubscribeResultV1_45): data is ISubscribeResultCheckState {
+  if (data.option !== 'checkState') return false
+  return true
+}
+
+export function isGetProducts(data: ISubscribeResultV1_45): data is ISubscribeResultGetProducts {
+  if (data.option !== 'getProducts') return false
+  return true
 }
 
 export interface ILoadingOverlay {

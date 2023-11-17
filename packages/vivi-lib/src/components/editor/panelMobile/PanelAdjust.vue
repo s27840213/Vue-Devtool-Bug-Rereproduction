@@ -8,8 +8,10 @@ div(class="panel-adjust")
       :min="field.min"
       :max="field.max"
       @update="handleField")
-  div(class="panel-adjust__reset")
-    button(@click="reset") {{ $t('NN0754') }}
+  nubtn(class="panel-adjust__reset"
+          theme="icon_pill"
+          icon="reset"
+          @click="reset") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -20,7 +22,6 @@ import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import vuexUtils from '@/utils/vuexUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
@@ -47,11 +48,7 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
-    }),
-    ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false
-    }, {
-      controllerHidden: 'vivisticker/getControllerHidden'
+      controllerHidden: 'webView/getControllerHidden'
     }),
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
@@ -161,14 +158,7 @@ export default defineComponent({
   overflow: scroll;
   @include no-scrollbar;
   &__reset {
-    margin-top: 1.25rem;
-    > button {
-      @include setColors(blue-1, black-3) using ($color) {
-        color: $color;
-      }
-      font-size: 14px;
-      padding: 0;
-    }
+    margin: 6px auto 0;
   }
 }
 .slider-input {

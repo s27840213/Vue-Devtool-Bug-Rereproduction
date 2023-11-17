@@ -2,7 +2,6 @@
  * @Note this could be used only in moible
  */
 
-import generalUtils from "./generalUtils"
 
 interface SwipeOptions {
   tolerance: number
@@ -54,10 +53,11 @@ export default class SwipeDetector {
       const duration = performance.now() - this.startTime
       const vx = Math.abs(swipeX / duration) * 1000
       const vy = Math.abs(swipeY / duration) * 1000
+
       if (
         ['all', 'horizontal'].includes(this.swipeOptions.targetDirection) &&
         Math.abs(swipeX) > Math.abs(swipeY) &&
-        Math.abs(generalUtils.isStk ? swipeX : swipeY) > this.swipeOptions.tolerance &&
+        Math.abs(swipeX) > this.swipeOptions.tolerance &&
         vx > this.swipeOptions.velocityLimit
       ) {
         if (swipeX > 0) {

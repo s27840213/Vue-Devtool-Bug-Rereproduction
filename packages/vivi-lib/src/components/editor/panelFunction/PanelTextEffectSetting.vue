@@ -17,10 +17,10 @@ div(class="text-effect-setting")
               class="text-effect-setting__effect pointer"
               :class="{'selected': getStyle(category).name === effect.key }"
               @click="onEffectClick(effect)")
-            svg-icon(v-if="['custom-fill-img'].includes(effect.key)"
+            svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
               :iconName="effectIcon(category, effect).name"
               :iconWidth="effectIcon(category, effect).size"
-              iconColor="white"
+              iconColor="gray-2"
               v-hint="effect.label")
             img(v-else :src="effectIcon(category, effect).name"
               :width="effectIcon(category, effect).size"
@@ -89,7 +89,7 @@ div(class="text-effect-setting")
 
 <!-- eslint-disable vue/no-unused-properties -->
 <script lang="ts">
-import CollapseTitle from '@/components/global/CollapseTitle.vue'
+import CollapseTitle from '@nu/shared-lib/components/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
@@ -114,11 +114,6 @@ import { defineComponent } from 'vue'
 import { Collapse } from 'vue-collapsed'
 import { mapGetters, mapState } from 'vuex'
 
-const imports = import.meta.glob(
-  `@img/text-effect/icon/*.png`,
-  { eager: true, import: 'default' }
-) as Record<string, string>
-
 export default defineComponent({
   name: 'PanelTextEffectSetting',
   components: {
@@ -133,6 +128,7 @@ export default defineComponent({
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as string,
       textEffects: constantData.textEffects(),
       colorTarget: '',
+      theme: this.$isStk || this.$isCm ? 'dark' : 'light',
     }
   },
   computed: {
@@ -189,10 +185,16 @@ export default defineComponent({
           size: '56',
         }
       }
+      if (effect.key === 'none') {
+        return {
+          name: 'no-effect',
+          size: '24px',
+        }
+      }
       switch (effect.key) {
         case 'text-book':
           return {
-            name: imports[`/src/assets/img/text-effect/icon/${category.name}-${effect.key}-${i18n.global.locale}.png`],
+            name: require(`@img/text-effect/${this.theme}_icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
             size: '56',
           }
         case 'custom-fill-img': // svg-icon
@@ -202,7 +204,7 @@ export default defineComponent({
           }
         default:
           return {
-            name: imports[`/src/assets/img/text-effect/icon/${category.name}-${effect.key}.png`],
+            name: require(`@img/text-effect/${this.theme}_icon/${category.name}-${effect.key}.png`),
             size: '56',
           }
       }
@@ -297,8 +299,7 @@ export default defineComponent({
       }
     },
     async onEffectClick(effect: IEffect): Promise<void> {
-      if (this.$isPic && !paymentUtils.checkPro(effect, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(effect, 'text')) return
+      if (!paymentUtils.checkProApp(effect, 'pro-text', 'text')) return
       await this.setEffect({ effectName: effect.key })
       this.recordChange()
 
@@ -308,8 +309,7 @@ export default defineComponent({
       }
     },
     async handleSelectInput(attrs: IEffectOptionSelect['select'][number]) {
-      if (this.$isPic && !paymentUtils.checkPro(attrs, 'pro-text')) return
-      if (this.$isStk && !stkWVUtils.checkPro(attrs, 'text')) return
+      if (!paymentUtils.checkProApp(attrs, 'pro-text', 'text')) return
       await this.setEffect({ effect: attrs.preset })
       this.recordChange()
     },
@@ -357,6 +357,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .text-effect-setting {
   text-align: left;
+
   &__title {
     @include text-H6;
     color: setColor(blue-1);

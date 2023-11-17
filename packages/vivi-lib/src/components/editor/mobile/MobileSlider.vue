@@ -10,7 +10,6 @@ div(class="mobile-slider")
       @change="handleChangeStop")
   div(class="mobile-slider__range-input-wrapper")
     input(class="mobile-slider__range-input input__slider--range"
-      :class="theme"
       v-progress
       :style="{ 'pointer-events': 'none' }"
       v-model.number="propsVal"
@@ -37,6 +36,7 @@ div(class="mobile-slider")
 </template>
 
 <script lang="ts">
+import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
@@ -72,7 +72,7 @@ export default defineComponent({
     },
     theme: {
       type: String,
-      default: 'dark'
+      default: (generalUtils.isStk || generalUtils.isCm) ? 'light' : 'dark'
     },
     autoRecord: {
       type: Boolean,
@@ -140,23 +140,13 @@ export default defineComponent({
     border-radius: 0.25rem;
     background: transparent;
     &.light {
+      border: 1px solid setColor(black-5);
       color: setColor(white);
     }
   }
 
   &__range-input-wrapper {
     position: relative;
-  }
-
-  &__range-input.light {
-    --lower-color: #{setColor(gray-6)};
-    --upper-color: #{setColor(gray-2)};
-    &::-webkit-slider-thumb {
-      border-color: setColor(white);
-    }
-    &::-moz-range-thumb {
-      border-color: setColor(white);
-    }
   }
 
   &__range-input-top {

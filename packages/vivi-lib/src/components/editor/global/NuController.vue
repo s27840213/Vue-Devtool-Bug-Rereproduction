@@ -66,7 +66,7 @@ div(:layer-index="`${layerIndex}`"
             @compositionend="handleTextCompositionEnd")
         template(v-if="!$isTouchDevice()")
           div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               class="control-point__corner-rotate"
               :ref="`corner-rotate-${index}`"
               :key="`corner-rotate-${index}`"
@@ -75,7 +75,7 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="disableTouchEvent")
         template(v-if="isLine()")
           div(v-for="(end, index) in controlPoints.lineEnds"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               class="control-point"
               :key="index"
               :marker-index="index"
@@ -84,29 +84,32 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
           template(v-if="$isTouchDevice()")
             div(v-for="(end, index) in controlPoints.lineEndTouchAreas"
-                v-show="!isMoving"
+                v-show="showControlPtrs"
                 class="control-point"
                 :key="index"
                 :marker-index="index"
                 :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
                 @pointerdown.stop="lineEndMoveStart"
                 @touchstart="disableTouchEvent")
-        div(v-for="(resizer, index) in getResizer(controlPoints)"
-            v-show="!isMoving"
-            :key="index"
-            class="control-point__resize-bar-wrapper")
-          div(class="control-point"
-              :key="`resizer-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
-          div(class="control-point"
-              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+        template(v-if="!config.hideResizer")
+          div(v-for="(resizer, index) in getResizer(controlPoints)"
+              v-show="showControlPtrs"
+              :key="index"
+              class="control-point__resize-bar-wrapper")
+            div(class="control-point"
+                :key="`resizer-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @pointerleave.prevent.stop="pointerLeave"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+            div(class="control-point"
+                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+                @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+                @pointerleave.prevent.stop="pointerLeave"
+                @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()" )
           div(v-for="(resizer, index) in getResizer(controlPoints, false, true)"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               :key="index"
               class="control-point__resize-bar-wrapper")
             div(class="control-point"
@@ -119,7 +122,7 @@ div(:layer-index="`${layerIndex}`"
                 @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
                 @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
-            v-show="!isMoving"
+            v-show="showControlPtrs"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
               class="control-point control-point__move-bar"
@@ -127,7 +130,7 @@ div(:layer-index="`${layerIndex}`"
               :ref="`moveStart-bar_${index}`"
               :style="resizerBarStyles(resizer.styles)")
         div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
-            v-show="!isMoving"
+            v-show="showControlPtrs"
             class="control-point"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -135,13 +138,13 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
         template(v-if="$isTouchDevice()")
           div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalerTouchAreas) : []"
-              v-show="!isMoving"
+              v-show="showControlPtrs"
               class="control-point"
               :key="`scaler-touch-${index}`"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="scaleStart"
               @touchstart="disableTouchEvent")
-        div(v-show="!isMoving"
+        div(v-show="showControlPtrs"
             class="control-point__controller-wrapper")
           template(v-if="isLine()")
             template(v-if="!$isTouchDevice()")
@@ -188,7 +191,7 @@ div(:layer-index="`${layerIndex}`"
                 :extraStyle="actionIconStyles()"
                 @action="MappingUtils.mappingIconAction('lock')")
     template(v-if="$isTouchDevice() && isActive && !isLocked()")
-      div(v-show="!isMoving")
+      div(v-show="showControlPtrs")
         action-icon(v-if="showCloseAction" class="control-point__top-left-icon"
                     iconName="close"
                     iconSize="18px"
@@ -230,6 +233,7 @@ import mathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -315,7 +319,7 @@ export default defineComponent({
       eventTarget: null as unknown as HTMLElement,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any,
-      actionColor: this.$isStk ? 'black-1' : 'blue-2',
+      actionColor: (this.$isStk || this.$isCm ) ? 'black-1' : 'blue-2',
     }
   },
   mounted() {
@@ -337,6 +341,7 @@ export default defineComponent({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
+      controlState: 'getControlState',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -347,18 +352,24 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       useMobileEditor: 'getUseMobileEditor',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTextLike: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
+    isPinchLayer(): boolean {
+      return this.$store.getters.getControlState.type === 'pinch'
+    },
     isControllerShown(): boolean {
       return this.isActive && !this.controllerHidden
+    },
+    showControlPtrs(): boolean {
+      return !['pinch', 'move'].includes(this.controlState.type)
+      // return !this.isMoving && this.controlState.type !== 'pinch'
     },
     ctrlPtrStyles(): Record<string, number | string> {
       if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
@@ -395,21 +406,24 @@ export default defineComponent({
     },
     sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.$isTouchDevice(), this.config.size?.[0])
+      const { ctrlrPadding = 0 } = this.config.styles
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
-      const finalWidth = width * _f
-      const finalHeight = height * _f
-      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
-      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(finalHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY}px)`
+      const scaledWidth = width * _f
+      const scaledHeight = height * _f
+      const offsetX = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(scaledWidth, CONTROLLER_SIZE_MIN)) / 2 : 0
+      const offsetY = this.$isTouchDevice() ? (CONTROLLER_SIZE_MIN - Math.min(scaledHeight, CONTROLLER_SIZE_MIN)) / 2 : 0
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f - offsetX - ctrlrPadding}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f - offsetY - ctrlrPadding}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
+      const finalWidth = (this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, scaledWidth) : scaledWidth) + 2 * ctrlrPadding
+      const finalHeight = (this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, scaledHeight) : scaledHeight) + 2 * ctrlrPadding
       return {
         transform,
-        width: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalWidth) : finalWidth}px`,
-        height: `${this.$isTouchDevice() ? Math.max(CONTROLLER_SIZE_MIN, finalHeight) : finalHeight}px`
+        width: `${finalWidth}px`,
+        height: `${finalHeight}px`
       }
     },
     subContentStyles(): any {
@@ -506,7 +520,7 @@ export default defineComponent({
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
-          editor.setEditable(newVal)
+          editor.setEditable(newVal, false)
         })
       }
       !this.$isTouchDevice() && stepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
@@ -534,9 +548,14 @@ export default defineComponent({
     this.setMoving(false)
 
     popupUtils.closePopup()
+
+    if (this.config && this.config.ctrlUnmountCb) {
+      this.config.ctrlUnmountCb(this.pageIndex, this.layerIndex,this.config);
+    }
   },
   methods: {
     ...mapMutations({
+      setState: 'SET_STATE',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
@@ -567,6 +586,9 @@ export default defineComponent({
         tooShort: this.getLayerHeight() * totalScaleRatio < limit,
         tooNarrow: this.getLayerWidth() * totalScaleRatio < limit
       }
+    },
+    pointerLeave(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
     },
     addMovingListener() {
       const body = (this.$refs.body as HTMLElement[])[0]
@@ -766,9 +788,19 @@ export default defineComponent({
       return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px)`
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.controlState.type) {
         return
       }
+      this.setState({
+        controlState: {
+          layerInfo: {
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex
+          },
+          type: 'scale',
+          id: this.config.id
+        }
+      })
 
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
@@ -805,8 +837,15 @@ export default defineComponent({
       window.addEventListener('keyup', this.handleScaleOffset)
       window.addEventListener('keydown', this.handleScaleOffset)
     },
-    scaling(event: MouseEvent | TouchEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+    scaling(event: PointerEvent) {
+      // find out as the scaling-action-icon is controlling,
+      // if the other pointer is touchs at the screen at the same time, the addPointer might not be called
+      // as the pointerdown-evt in nu-layer is not triggered as expected (might be browser bug)
+      // hence, following workaround detect if there is a untracked pointer, and registing it.
+      if (!pointerEvtUtils.pointerIds.includes(event.pointerId)) {
+        pointerEvtUtils.addPointer(event)
+      }
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       if (generalUtils.getEventType(event) !== 'touch') {
@@ -926,6 +965,7 @@ export default defineComponent({
             scale = 1
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [width, height])
             const corRad = ControlUtils.getCorRadValue([width, height], this.initCorRadPercentage, this.config.shapeType)
+            console.log('this.initCorRadPercentage this.initCorRadPercentage', this.initCorRadPercentage)
             ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, corRad)
           }
           break
@@ -971,8 +1011,15 @@ export default defineComponent({
       }
     },
     scaleEnd(event: PointerEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
-        return
+      eventUtils.removePointerEvent('pointermove', this.scaling)
+      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
+      this.snapUtils.event.emit('clearSnapLines')
+      stepsUtils.record()
+
+      if (this.isPinchLayer) return
+
+      if (this.controlState.type === 'scale' && this.controlState.id === this.config.id) {
+        this.setState({ controlState: { type: '' } })
       }
       this.isControlling = false
       if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
@@ -985,20 +1032,26 @@ export default defineComponent({
         }
         tiptapUtils.updateHtml()
       }
-      stepsUtils.record()
 
       this.setCursorStyle('')
-      eventUtils.removePointerEvent('pointermove', this.scaling)
-      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
       window.removeEventListener('keyup', this.handleScaleOffset)
       window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
-      this.snapUtils.event.emit('clearSnapLines')
     },
     lineEndMoveStart(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (eventUtils.checkIsMultiTouch(event) || this.controlState.type) {
         return
       }
+      this.setState({
+        controlState: {
+          layerInfo: {
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex
+          },
+          type: 'move',
+          id: this.config.id
+        }
+      })
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
       this.isLineEndMoving = true
@@ -1024,7 +1077,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.lineEndMoveEnd)
     },
     lineEndMoving(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       event.preventDefault()
@@ -1054,6 +1107,9 @@ export default defineComponent({
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
     lineEndMoveEnd(event: PointerEvent) {
+      if (this.controlState.type === 'move' && this.controlState.id === this.config.id) {
+        this.setState({ controlState: { type: '' } })
+      }
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -1067,14 +1123,26 @@ export default defineComponent({
       this.$emit('setFocus')
       this.snapUtils.event.emit('clearSnapLines')
     },
-    resizeStart(event: MouseEvent, type: string) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+    resizeStart(event: PointerEvent, type: string) {
+      if (event.type === 'pointerdown') {
+        pointerEvtUtils.addPointer(event)
+      }
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.controlState.type || this.config.hideResizer) {
         return
       }
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-
+      this.setState({
+        controlState: {
+          layerInfo: {
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex
+          },
+          type: 'resize',
+          id: this.config.id
+        }
+      })
       this.isControlling = true
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
@@ -1145,8 +1213,8 @@ export default defineComponent({
           ImageUtils.isHorizon = this.control.isHorizon
       }
     },
-    resizing(event: MouseEvent | TouchEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+    resizing(event: PointerEvent) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       event.preventDefault()
@@ -1264,8 +1332,8 @@ export default defineComponent({
       }
     },
     resizeEnd(event: PointerEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
-        return
+      if (this.controlState.type === 'resize' && this.controlState.id === this.config.id) {
+        this.setState({ controlState: { type: '' } })
       }
       ImageUtils.imgBuffer = {
         width: 0,
@@ -1317,7 +1385,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
-      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
+      if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
       if (!this.config.moved) {
@@ -1364,9 +1432,6 @@ export default defineComponent({
       }
     },
     rotateEnd(event: PointerEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
-        return
-      }
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1
@@ -1401,6 +1466,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.lineRotateEnd)
     },
     lineRotating(event: MouseEvent) {
+      if (this.isPinchLayer) return
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }

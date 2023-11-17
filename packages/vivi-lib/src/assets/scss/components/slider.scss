@@ -3,16 +3,14 @@
 @mixin inputType($type: '') {
   &__slider {
     &--range {
-      @include setColors(blue-1, black-5) using ($color) {
-        @include progressSlider(
-          $height: 3px,
+      @include setColors(blue-1, black-5, app-tab-active) using ($color) {
+        @include progressSlider($height: 3px,
           $thumbSize: 16px,
           $marginTop: -6.5px,
           $thumbColor: setColor(white),
           $border: 2px solid $color,
-          $boxShadow: none
-        );
-      };
+          $boxShadow: none);
+      }
 
       @if $type=='top' {
         &::-webkit-slider-thumb {
@@ -29,22 +27,44 @@
       }
 
       margin: auto;
-      @include setColors(blue-1, black-5) using ($color) {
+
+      @include setColors(blue-1, white, app-tab-active) using ($color) {
         --lower-color: #{$color};
       }
-      @include setColors(gray-4, black-6) using ($color) {
+
+      @include setColors(gray-4, black-3-5, app-tab-slider-bg-raw, $cmOpacity: 0.5) using ($color) {
         --upper-color: #{$color};
-  
+
         &[disabled] {
           &::-webkit-slider-thumb {
             border: 2px solid $color;
           }
-  
+
           &::-moz-range-thumb {
             border: 2px solid $color;
           }
-  
+
           --lower-color: #{$color};
+        }
+      }
+
+      @include stk {
+        &::-webkit-slider-thumb {
+          border-color: setColor(white);
+        }
+
+        &::-moz-range-thumb {
+          border-color: setColor(white);
+        }
+
+        &[disabled] {
+          &::-webkit-slider-thumb {
+            background-color: setColor(black-3-5);
+          }
+
+          &::-moz-range-thumb {
+            background-color: setColor(black-3-5);
+          }
         }
       }
 

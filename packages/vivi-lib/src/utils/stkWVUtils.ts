@@ -6,7 +6,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ITempDesign, IUserInfo, IUserSettings, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
+import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -117,14 +117,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
   hasCopied = false
   everEntersDebugMode = false
-  loadingTimeout = 0
   tutorialFlags = {} as { [key: string]: boolean }
-  loadingFlags = {} as { [key: string]: boolean }
-  loadingCallback = undefined as (() => void) | undefined
-  timeoutCallback = undefined as (() => void) | undefined
   editorStateBuffer = {} as { [key: string]: any }
 
-  STANDALONE_USER_INFO: IUserInfo = {
+  DEFAULT_USER_INFO: IUserInfo = {
     hostId: '',
     appVer: '100.0',
     locale: 'us',
@@ -139,6 +135,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getStateResult',
     'setStateDone',
     'subscribeInfo',
+    'subscribeResult',
     'internalError',
     'validJsonResult'
   ]
@@ -154,7 +151,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     'getAssetResult',
     'uploadImageURL',
     'informWebResult',
-    'subscribeResult',
     'screenshotDone',
     'cloneImageDone',
     'saveImageDone'
@@ -188,11 +184,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   get controllerHidden(): boolean {
-    return store.getters['vivisticker/getControllerHidden']
+    return store.getters['webView/getControllerHidden']
   }
 
-  get isStandaloneMode(): boolean {
-    return store.getters['vivisticker/getIsStandaloneMode']
+  get inBrowserMode(): boolean {
+    return store.getters['vivisticker/getInBrowserMode']
   }
 
   get userSettings(): IUserSettings {
@@ -205,6 +201,10 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isOldPrice(): boolean {
     return !this.checkVersion('1.42')
+  }
+
+  get isGetProductsSupported(): boolean {
+    return this.checkVersion('1.45')
   }
 
   get isTemplateSupported(): boolean {
@@ -250,14 +250,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
   }
 
-  addFontForEmoji() {
-    const defaultEmoji = this.userSettings.emojiSetting
-    if (SYSTEM_FONTS.includes(defaultEmoji)) return
+  addFontForEmoji(emoji?: string) {
+    emoji = emoji ?? this.userSettings.emojiSetting
+    if (SYSTEM_FONTS.includes(emoji)) return
     store.dispatch('text/addFont', {
-      face: defaultEmoji,
+      face: emoji,
       type: 'public',
       ver: store.getters['user/getVerUni']
     })
+  }
+
+  addFontForEmojis() {
+    for (const emojiConfig of USER_SETTINGS_LIST_CONFIG.emojiSetting) {
+      this.addFontForEmoji(emojiConfig.val)
+    }
   }
 
   getMyDesignTags(): IMyDesignTag[] {
@@ -285,24 +291,22 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (locale === '' || !locale) {
       locale = localeUtils.getBrowserLang()
     }
-    this.STANDALONE_USER_INFO.locale = locale
+    this.DEFAULT_USER_INFO.locale = locale
   }
 
   async setDefaultPrices() {
     const userInfo = this.getUserInfoFromStore()
-    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
-    const subscribeInfo = await this.getState('subscribeInfo')
-    store.commit('vivisticker/UPDATE_payment', { prices: subscribeInfo?.prices ?? defaultPrices[locale] })
+    const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
+    const prices = localPrices ?? defaultPrices[locale]
+    if (!prices) return
+    store.commit('vivisticker/UPDATE_payment', { prices })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
   addDesignDisabled() {
     return this.everEntersDebugMode || window.location.hostname !== 'sticker.vivipic.com'
-  }
-
-  setCurrActiveTab(tab: string) {
-    store.commit('vivisticker/SET_currActiveTab', tab)
   }
 
   // filterLog(messageType: string, message: any) {
@@ -323,7 +327,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   sendScreenshotUrl(query: string, action = 'copy') {
     this.sendToIOS('SCREENSHOT', { params: query, action })
-    if (this.isStandaloneMode) {
+    if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
     }
@@ -343,7 +347,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const _action = isLast && action === 'IGPost' ? 'IGPost' : 'download'
       const toast = action === 'download' ? isLast : false
       const query = this.createUrlForJSON({ page: pageUtils.getPage(pageIndex[idx]), noBg: false, toast })
-      if (this.isStandaloneMode) {
+      if (this.inBrowserMode) {
         const url = `${window.location.origin}/screenshot/?${query}`
         window.open(url, '_blank')
         cbProgress(idx + 1)
@@ -422,14 +426,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       res += `&toast=${toast}`
     }
     return res
-  }
-
-  setIsInCategory(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_isInCategory', { tab, bool })
-  }
-
-  setShowAllRecently(tab: string, bool: boolean) {
-    store.commit('vivisticker/SET_showAllRecently', { tab, bool })
   }
 
   getAssetInitiator(asset: IAsset, ...args: any[]): () => Promise<any> {
@@ -542,113 +538,23 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     store.commit('vivisticker/SET_templateShareType', 'none')
   }
 
-  initLoadingFlags(page: IPage | { layers: ILayer[] }, cbLoad?: () => void, cbTimeout?: () => void, noBg = true, timeout = 60000) {
-    window.clearTimeout(this.loadingTimeout)
-    this.loadingFlags = {}
-    this.loadingCallback = cbLoad
-    this.timeoutCallback = cbTimeout
-    if (this.timeoutCallback) {
-      this.loadingTimeout = window.setTimeout(() => {
-        this.loadingCallback = undefined
-        this.timeoutCallback && this.timeoutCallback()
-        this.timeoutCallback = undefined
-      }, timeout)
-    }
-    for (const [index, layer] of page.layers.entries()) {
-      this.initLoadingFlagsForLayer(layer, index)
-    }
-    if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
-      this.loadingFlags[this.makeFlagKey(-1)] = false
-    }
-    logUtils.setLogAndConsoleLog('ScreenShot::Init:', generalUtils.deepCopy(this.loadingFlags))
-  }
-
-  makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    if (layerIndex === -1) return 'bg'
-    const res = subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}`)
-    // additionKey now used in frame's decoration-related-layers
-    const additionKey = addition ? `_${addition.k}${addition.v ?? ''}` : ''
-    return res + additionKey
-  }
-
-  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    switch (layer.type) {
-      case LayerType.group:
-        for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
-          // this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
-        }
-        break
-      case LayerType.frame: {
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
-        const frame = layer as IFrame
-        const clips = [...frame.clips] as Array<IImage | IShape>
-        if (frame.decoration) {
-          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'd' })] = false
-        }
-        if (frame.decorationTop) {
-          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'dt' })] = false
-        }
-        if (frame.blendLayers?.length) {
-          frame.blendLayers.forEach((_, i) => {
-            this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'b', v: i })] = false
-          })
-        }
-        if (subLayerIndex === -1) {
-          for (const [_clipIndex, subLayer] of clips.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex)
-          }
-        } else {
-          for (const [_clipIndex, subLayer] of clips.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, { k: 'c', v: _clipIndex })
-          }
-        }
-      }
-        break
-      default:
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, addition)] = false
-    }
-  }
-
-  initLoadingFlagsForOneLayer(callback?: () => void) {
-    this.loadingFlags = {}
-    this.loadingCallback = callback
-    this.loadingFlags[this.makeFlagKey(0, -1)] = false
-  }
-
-  setLoadingFlag(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
-    const key = this.makeFlagKey(layerIndex, subLayerIndex, addition)
-    if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
-      this.loadingFlags[key] = true
-      logUtils.setLogAndConsoleLog('ScreenShot::Set:', generalUtils.deepCopy(this.loadingFlags), key)
-    }
-    if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
-      window.clearTimeout(this.loadingTimeout)
-      this.loadingCallback()
-      this.loadingFlags = {}
-      this.loadingTimeout = 0
-      this.loadingCallback = undefined
-      this.timeoutCallback = undefined
-    }
-  }
-
   hideController() {
-    store.commit('vivisticker/SET_controllerHidden', true)
+    store.commit('webView/SET_controllerHidden', true)
   }
 
   showController() {
-    store.commit('vivisticker/SET_controllerHidden', false)
+    store.commit('webView/SET_controllerHidden', false)
   }
 
   detectIfInApp() {
     if (window.webkit?.messageHandlers?.APP_LOADED === undefined) {
-      this.enterStandaloneMode()
+      this.enterBrowserMode()
       this.setDefaultLocale()
     }
   }
 
-  enterStandaloneMode() {
-    store.commit('vivisticker/SET_isStandaloneMode', true)
+  enterBrowserMode() {
+    store.commit('vivisticker/SET_inBrowserMode', true)
   }
 
   deselect() {
@@ -684,8 +590,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
       }
+      this.hideController()
     }
-    this.hideController()
   }
 
   copyEditorCore(sender: () => Promise<string>, callback?: (flag: string) => void) {
@@ -783,13 +689,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.isStandaloneMode) return this.getUserInfoFromStore()
+    if (this.inBrowserMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('LOGIN', this.getEmptyMessage(), 'login')
-    const userInfo = this.getUserInfoFromStore()
-    const appCaps = await fetch(`https://template.vivipic.com/static/appCaps_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
-    const jsonCaps = await appCaps.json() as { review_ver: string }
-    store.commit('webView/SET_inReviewMode', jsonCaps.review_ver === userInfo.appVer)
-    return userInfo
+    return this.getUserInfoFromStore()
   }
 
   loginResult(info: Omit<IUserInfo, 'modelName'> & { modelName?: string }) {
@@ -809,8 +711,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateLocale(locale: string): Promise<boolean> {
-    localStorage.setItem('locale', locale) // set locale to localStorage whether standalone mode or not
-    if (this.isStandaloneMode) {
+    localStorage.setItem('locale', locale) // set locale to localStorage whether browser mode or not
+    if (this.inBrowserMode) {
       return true
     }
     const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
@@ -828,12 +730,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async listAsset(key: string): Promise<void> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     await this.callIOSAsAPI('LIST_ASSET', { key }, `list-asset-${key}`)
   }
 
   async listMoreAsset(key: string, nextPage: number): Promise<void> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (nextPage < 0) return
     await this.callIOSAsAPI('LIST_ASSET', { key, pageIndex: nextPage }, `list-asset-${key}`)
   }
@@ -904,7 +806,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async addAsset(key: string, asset: any, limit = 100, files: { [key: string]: any } = {}) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (this.checkVersion('1.27')) {
       await this.callIOSAsAPI('ADD_ASSET', { key, asset, limit, files }, `addAsset-${key}-${asset.id}`)
     } else if (this.checkVersion('1.9')) {
@@ -923,7 +825,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async setState(key: string, value: any) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     if (key === 'tempDesign') {
       // console.trace()
     }
@@ -945,7 +847,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getState(key: string): Promise<WEBVIEW_API_RESULT> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     return await this.callIOSAsAPI('GET_STATE', { key }, `getState-${key}`, { retry: true })
   }
 
@@ -985,7 +887,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async sendCopyEditorCore(action: string): Promise<string> {
-    if (this.isStandaloneMode) {
+    if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return '0'
     }
@@ -1015,7 +917,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   saveDesign(pages_?: IPage[]) {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     const useArgPages = pages_ !== undefined
     const pages = useArgPages ? pages_ : pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
@@ -1146,7 +1048,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async genThumbnail(id: string): Promise<string> {
-    if (this.isStandaloneMode) return '0'
+    if (this.inBrowserMode) return '0'
     return await new Promise<string>((resolve, reject) => {
       try {
         nextTick(() => {
@@ -1215,7 +1117,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
-    if (this.isStandaloneMode) return
+    if (this.inBrowserMode) return
     await Promise.race([
       imageShadowUtils.iosImgDelHandler(),
       new Promise((resolve) => setTimeout(resolve, 3000))
@@ -1330,7 +1232,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         this.initWithMyDesign(design, {
           callback: (pages: Array<IPage>) => {
             const page = pages[0]
-            this.initLoadingFlags(page, () => {
+            layerUtils.initLoadingFlags(page, () => {
               this.handleFrameClipError(page)
             })
           },
@@ -1472,22 +1374,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (this.isPaymentDisabled) return
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
-
-    const subscribeInfo = {
-      subscribe: isSubscribed,
-      prices: {
-        currency: priceCurrency,
-        monthly: {
-          value: parseFloat(monthly.priceValue),
-          text: this.formatPrice(monthly.priceValue, priceCurrency, monthly.priceText)
-        },
-        annually: {
-          value: parseFloat(annually.priceValue),
-          text: this.formatPrice(annually.priceValue, priceCurrency, annually.priceText)
+    const prices = { currency: priceCurrency }
+    const planIds = store.getters['vivisticker/getPayment'].planId
+    data.planInfo.forEach(p => {
+      const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
+      if (!plan) return
+      Object.assign(prices, {
+        [plan]: {
+          value: parseFloat(p.priceValue),
+          text: p.priceText
         }
-      }
-    }
-
+      })
+    })
+    const subscribeInfo = { subscribe: isSubscribed, prices }
     store.commit('vivisticker/UPDATE_payment', subscribeInfo)
     store.commit('vivisticker/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {
@@ -1500,25 +1399,79 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     }
   }
 
-  subscribeResult(data: ISubscribeResult) {
-    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
+  getSubscribeInfo() {
+    const planIds = Object.values(store.getters['vivisticker/getPayment'].planId).concat(Object.values(constantData.planId))
+    this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
+    this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: planIds })
+  }
+
+  subscribeResult(data: ISubscribeResult | ISubscribeResultV1_45) {
     if (this.isPaymentDisabled) return
-    if (data.reason) {
-      store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+    if (this.isGetProductsSupported && isGetProducts(data) || isCheckState(data)) {
+      data = data as ISubscribeResultV1_45
+      if (data.reason) return
+      if (isGetProducts(data)) {
+        const { planInfo, priceCurrency } = data
+        const planIds = store.getters['vivisticker/getPayment'].planId
+        const prices = { currency: priceCurrency }
+        planInfo.forEach(p => {
+          const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
+          plan && Object.assign(prices, {
+            [plan]: {
+              value: parseFloat(p.priceValue),
+              text: p.priceText
+            }
+          })
+        })
+        const annuallyPriceOriginal = planInfo.find(p => p.planId === constantData.planId.annually)
+        const annuallyFree0PriceOriginal = planInfo.find(p => p.planId === constantData.planId.annuallyFree0)
+        Object.assign(prices, {
+          ...(annuallyPriceOriginal && { annuallyOriginal: {
+            value: parseFloat(annuallyPriceOriginal.priceValue),
+            text: annuallyPriceOriginal.priceText
+          }}),
+          ...(annuallyFree0PriceOriginal && { annuallyFree0Original: {
+            value: parseFloat(annuallyFree0PriceOriginal.priceValue),
+            text: annuallyFree0PriceOriginal.priceText
+          }})
+        })
+        store.commit('vivisticker/UPDATE_payment', { prices })
+        store.commit('vivisticker/SET_paymentPending', { info: false })
+        this.setState('prices', prices)
+      }
+      else if (isCheckState(data)) {
+        const { subscribe, complete } = data
+        if (complete === '0') this.registerSticker()
+        const isSubscribed = subscribe === '1'
+        const subscribeInfo = { subscribe: isSubscribed }
+        store.commit('vivisticker/UPDATE_payment', subscribeInfo)
+        this.getState('subscribeInfo').then(subscribeInfo => {
+          if (subscribeInfo?.subscribe && !isSubscribed) {
+            this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
+          }
+        })
+        this.setState('subscribeInfo', subscribeInfo)
+      }
       return
     }
-    const { subscribe, reason } = data
-    const isSubscribed = subscribe === '1'
-    if (!reason) {
-      store.commit('vivisticker/UPDATE_payment', {
-        subscribe: isSubscribed,
+    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
+    if (!data.reason) {
+      const isSubscribed = data.subscribe === '1'
+      store.commit('vivisticker/UPDATE_payment', { subscribe: isSubscribed })
+      if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+      this.getState('subscribeInfo').then(subscribeInfo => {
+        this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
+    } else if (data.reason === 'IAP_DISABLED'){
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [i18n.global.t('STK0096')],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
-    if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
-    this.getState('subscribeInfo').then(subscribeInfo => {
-      this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
-    })
   }
 
   async registerSticker() {
@@ -1689,11 +1642,15 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.setLoadingOverlayShow(true)
   }
 
-  formatPrice(price: number | string, currency: string, fallbackText?: string) {
+  formatPrice(price: number | string, currency: string, fallbackText?: string, theme?: 'modal' | 'original') {
     const currencyFormatters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
-      JPY: (value: string) => `¥${value}円(税込)`
+      JPY: (value: string) => {
+        if (theme === 'modal') return `¥${value}`
+        if (theme === 'original') return `¥${value}円`
+        return `¥${value}円(税込)`
+      }
     } as { [key: string]: (value: string) => string }
     if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
     return currencyFormatters[currency](price.toString())

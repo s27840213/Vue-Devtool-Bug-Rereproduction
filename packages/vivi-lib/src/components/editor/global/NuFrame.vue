@@ -12,7 +12,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
     :inFrame="true"
     :contentScaleRatio="contentScaleRatio"
-    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
     :primaryLayer="config"
     :config="config.decoration"
     :isSubLayer="true")
@@ -25,7 +25,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :inImageFrame="inImageFrame()"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
-    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
     :primaryLayer="config"
     :config="layer"
     :isSubLayer="true")
@@ -37,7 +37,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
     :inFrame="true"
     :contentScaleRatio="contentScaleRatio"
-    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
     :primaryLayer="config"
     :config="config.decorationTop"
     :isSubLayer="true")
@@ -51,7 +51,7 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
       :inFrame="true"
       :subLayerIndex="index"
       :contentScaleRatio="contentScaleRatio"
-      :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+      :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
       :primaryLayer="config"
       :config="layer"
       :isSubLayer="true")
@@ -67,7 +67,6 @@ import generalUtils from '@/utils/generalUtils'
 import ImageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -153,7 +152,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration }, this.subLayerIndex)
         }
       } else if (!json.decoration && config.decoration) {
-        if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
+        if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'd' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: undefined }, this.subLayerIndex)
       }
 
@@ -177,7 +176,7 @@ export default defineComponent({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop }, this.subLayerIndex)
         }
       } else if (!json.decorationTop && config.decorationTop) {
-        if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
+        if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex, { k: 'dt' })
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: undefined }, this.subLayerIndex)
       }
 
@@ -237,13 +236,13 @@ export default defineComponent({
         })
       }
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false }, this.subLayerIndex)
-      if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     } else {
-      if (this.$isStk) stkWVUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      if (this.$isStk || this.$isCm) layerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     }
   },
   mounted() {
-    if (!this.$isStk) return
+    if (!this.$isStk || this.$isCm) return
     if (this.config.clips.length === 1) {
       if (!this.editorTypeTemplate && this.$route.name !== 'Screenshot') frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
       if (this.config.clips[0].srcObj.type === 'frame') {
@@ -255,7 +254,7 @@ export default defineComponent({
             if (this.primaryLayer) {
               frameUtils.iosPhotoSelect({
                 pageIndex: this.pageIndex,
-                priPrimaryLayerIndex: this.layerIndex,
+                prePrimaryLayerIndex: this.layerIndex,
                 layerIndex: this.subLayerIndex,
                 subLayerIdx: 0,
               }, (this.config as IFrame).clips[0])
@@ -332,12 +331,11 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inScreenshotPreview: 'getInScreenshotPreview',
+      controllerHidden: 'webView/getControllerHidden',
     }),
     ...vuexUtils.mapGetters('stk', {
-      controllerHidden: false,
       editorTypeTemplate: false,
     }, {
-      controllerHidden: 'vivisticker/getControllerHidden',
       editorTypeTemplate: 'vivisticker/getEditorTypeTemplate',
     }),
     hasDecor(): boolean {

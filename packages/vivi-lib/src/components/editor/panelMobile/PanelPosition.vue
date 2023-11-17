@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-position bg-white")
+div(class="panel-position")
   div(v-for="(data,index) in alignDatas()"
       :key="`popup-${index}`"
       class="panel-position__item"
@@ -8,7 +8,7 @@ div(class="panel-position bg-white")
       class="pointer"
       :iconName="data.icon"
       :iconWidth="'18px'"
-      :iconColor="'gray-1'")
+      :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
     span(class="ml-5 body-2") {{data.text}}
 </template>
 

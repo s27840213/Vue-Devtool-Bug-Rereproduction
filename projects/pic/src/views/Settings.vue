@@ -90,11 +90,12 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
         //-   :title="$tc('NN0642',1)"
         //-   :iconName="'chevron-right'")
         //- hr
-        mobile-jump-btn(
-          :title="$t('NN0697')"
-          :iconName="'chevron-right'"
-          @click="onCouponClicked")
-        hr
+        template(v-if="!inReviewMode")
+          mobile-jump-btn(
+            :title="$t('NN0697')"
+            :iconName="'chevron-right'"
+            @click="onCouponClicked")
+          hr
         url(:url="$t('NN0858')")
           mobile-jump-btn(
             :title="$t('NN0160')"
@@ -127,14 +128,14 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
 import Avatar from '@/components/Avatar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import MobileJumpBtn from '@/components/editor/mobile/MobileJumpBtn.vue'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import Sidebar from '@/components/settings/Sidebar.vue'
 import router from '@/router'
-import loginUtils from '@/utils/loginUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import { defineComponent } from 'vue'

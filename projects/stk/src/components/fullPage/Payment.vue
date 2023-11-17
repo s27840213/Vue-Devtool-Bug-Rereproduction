@@ -25,14 +25,19 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
         :key="btnPlan.key"
         :class="{selected: btnPlan.key === planSelected, disabled: pending.purchase}"
         @tap="handleBtnPlanClick(btnPlan.key)")
-        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker-check" iconWidth="20px" iconColor="black-3")
+        svg-icon(v-if="btnPlan.key === planSelected" class="payment__btn-plan__radio selected" iconName="vivisticker_check" iconWidth="20px" iconColor="black-3")
         div(v-else class="payment__btn-plan__radio")
         div(class="payment__btn-plan__content")
           div(class="payment__btn-plan__content__title")
             div(class="payment__btn-plan__content__title__main caption-LG") {{ btnPlan.title }}
             div(v-if="btnPlan.subTitle" class="payment__btn-plan__content__title__sub")
               span {{ btnPlan.subTitle }}
-          div(class="payment__btn-plan__content__price text-H6") {{ btnPlan.price }}
+          div(class="payment__btn-plan__content__price text-H6" :class="{'text-H7': isPromote && originalPrice && (payment.prices.currency === 'JPY')}")
+            div(v-if="btnPlan.key === 'annually' && isPromote && originalPrice" class="payment__btn-plan__content__price__original")
+              span 
+                del {{ originalPrice }}
+              svg-icon(iconName="vivisticker_arrow" iconWidth="20px")
+            span(:class="{'text-alarm': btnPlan.key === 'annually' && isPromote && originalPrice}") {{ btnPlan.price }}
         div(v-if="btnPlan.key === planSelected && btnPlan.tag" class="payment__btn-plan__content__tag")
           span(class="caption-SM") {{ btnPlan.tag }}
     div(v-if="!isOldPrice" class="payment__trial")
@@ -59,10 +64,10 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
         div(class="payment__panel__comparison__splitter")
         div(class="payment__panel__comparison__item  first-column") {{ comparison.feature }}
         div(class="payment__panel__comparison__item")
-          svg-icon(v-if="comparison.free" iconName="vivisticker-check" iconWidth="36px" iconColor="white")
+          svg-icon(v-if="comparison.free" iconName="vivisticker_check" iconWidth="36px" iconColor="white")
           template(v-else) -
         div(class="payment__panel__comparison__item")
-          svg-icon(v-if="comparison.pro" iconName="vivisticker-check" iconWidth="36px" iconColor="white")
+          svg-icon(v-if="comparison.pro" iconName="vivisticker_check" iconWidth="36px" iconColor="white")
           template(v-else) -
   Transition(name="fade")
     div(v-if="pending.info || pending.restore" class="payment__spinner")
@@ -71,8 +76,8 @@ div(class="payment" :class="{ 'old-price': isOldPrice }" v-touch @swipe.stop)
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
-import ToggleBtn from '@/components/global/ToggleBtn.vue'
-import { IPaymentPending, IPrices, isV1_42 } from '@nu/vivi-lib/interfaces/vivisticker'
+import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
+import { IPayment, IPaymentPending, IPrices, isV1_42 } from '@nu/vivi-lib/interfaces/vivisticker'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import networkUtils from '@nu/vivi-lib/utils/networkUtils'
 import stkWVUtils, { IViviStickerProFeatures } from '@nu/vivi-lib/utils/stkWVUtils'
@@ -173,7 +178,7 @@ export default defineComponent({
   },
   created() {
     const userInfo = stkWVUtils.getUserInfoFromStore()
-    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(this.$i18n.locale)
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(this.$i18n.locale) ?? 'USA'
     this.defaultTrialToggled = this.payment.trialCountry.includes(locale) || this.isOldPrice
     this.isTrialToggled = this.defaultTrialToggled
   },
@@ -201,9 +206,12 @@ export default defineComponent({
       pending: (state: any) => state.payment.pending as IPaymentPending,
     }),
     ...mapGetters({
-      payment: 'vivisticker/getPayment',
       isPaymentPending: 'vivisticker/getIsPaymentPending',
+      isPromote: 'vivisticker/getIsPromote',
     }),
+    payment(): IPayment {
+      return this.$store.state.vivisticker.payment as IPayment
+    },
     txtBtnSubscribe() {
       return this.isTrialToggled ? this.$t('STK0046') : this.$t('STK0047')
     },
@@ -223,22 +231,28 @@ export default defineComponent({
       }
     },
     btnPlans() {
+      const annuallyPrice = (!stkWVUtils.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0 :this.payment.prices.annually
       return [
         {
           key: 'monthly',
           title: this.$t('NN0514'),
           subTitle: '',
-          price: this.payment.prices.monthly.text,
+          price: stkWVUtils.formatPrice(this.payment.prices.monthly.value, this.payment.prices.currency, this.payment.prices.monthly.text),
           tag: ''
         },
         {
           key: 'annually',
           title: this.$t('NN0515'),
           subTitle: this.isOldPrice ? this.$t('STK0048', { day: 3 }) : '',
-          price: this.payment.prices.annually.text,
+          price: stkWVUtils.formatPrice(annuallyPrice.value, this.payment.prices.currency, annuallyPrice.text),
           tag: this.localizedTag
         }
       ]
+    },
+    originalPrice() {
+      const annuallyPriceOriginal = (!stkWVUtils.isOldPrice && !this.isTrialToggled) ? this.payment.prices.annuallyFree0Original : this.payment.prices.annuallyOriginal
+      if(!annuallyPriceOriginal) return ''
+      return stkWVUtils.formatPrice(annuallyPriceOriginal.value, this.payment.prices.currency, annuallyPriceOriginal.text, 'original')
     },
     containerWidth() {
       return this.isTablet && this.isLandscape ? round(this.windowSize.width * 0.44) : this.windowSize.width // round to prevent subpixel problem
@@ -286,7 +300,10 @@ export default defineComponent({
         return
       }
       if (this.isPaymentPending) return
-      if (option === 'annually' && (this.isTrialDisabled || !this.isTrialToggled)) option = 'com.nuphototw.vivisticker.yearly_free0'
+      if (!stkWVUtils.isOldPrice) {
+        if (option === 'monthly') option = this.payment.planId.monthly
+        else if (option === 'annually') option = (this.isTrialDisabled || !this.isTrialToggled) ? this.payment.planId.annuallyFree0 : this.payment.planId.annually
+      }
       this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
       stkWVUtils.sendToIOS('SUBSCRIBE', { option })
       if (timeout) {
@@ -518,6 +535,17 @@ export default defineComponent({
       &__price {
         position: relative;
         text-align: right;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        &__original{
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          > svg {
+            transform: rotate(180deg);
+          }
+        }
       }
       &__tag {
           align-self: start;

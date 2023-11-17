@@ -3,17 +3,13 @@ div(class="w-full box-border p-24 rounded-[20px] flex items-center justify-betwe
   div(class="flex gap-10 items-start justify-between flex-col")
     div(class="typo-h4") {{ title }}
     div(class="typo-body-md") {{ description }}
-    cm-btn(
-      theme="primary"
-      :hasIcon="btnIconName !== undefined"
-      :iconName="btnIconName"
-      :full="true"
+    nubtn(
+      size="mid-full"
+      :icon="btnIconName"
       @click="handleClick") {{ btnText }}
   img(:src="imgSrc" class="w-128")
 </template>
 <script setup lang="ts">
-import useImageUtils from '@/composable/useImageUtils'
-
 const props = defineProps<{
   btnIconName?: string
   btnText: string
@@ -29,10 +25,8 @@ const handleClick = () => {
   emits('clickBtn')
 }
 
-const { getImageUrl } = useImageUtils()
-
 const imgSrc = computed(() => {
-  return getImageUrl(props.iconName)
+  return require(props.iconName + '.png')
 })
 </script>
 <style lang="scss">

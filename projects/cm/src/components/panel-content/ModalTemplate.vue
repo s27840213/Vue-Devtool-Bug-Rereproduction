@@ -1,16 +1,15 @@
 <template lang="pug">
-div(class="flex flex-col items-center justify-center px-24")
+div(class="flex flex-col items-center justify-center box-border px-24")
   div(class="text-app-tab-active typo-h4") {{ title }}
   div(class="text-app-text-secondary typo-btn-sm my-24 flex flex-col justify-center")
     span(v-for="line in multilineContent") {{ line }}
   div(class="flex justify-between w-full gap-24")
-    cm-btn(
+    nubtn(
       theme="secondary"
-      :full="true"
+      size="mid-full"
       @click="confirm") {{ confirmText }}
-    cm-btn(
-      theme="primary"
-      :full="true"
+    nubtn(
+      size="mid-full"
       @click="cancel") {{ cancelText }}
 </template>
 <script setup lang="ts">

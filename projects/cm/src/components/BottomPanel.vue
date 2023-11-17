@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="bottom-panel" ref="bottomPanelRef")
+div(class="bottom-panel tutorial-powerful-fill-4--highlight" ref="bottomPanelRef")
   slot(
     name="content"
     :setSlotRef="setSlotRef")
@@ -11,12 +11,12 @@ div(class="bottom-panel" ref="bottomPanelRef")
  * Here pass setSlotRef to the parent
  * and parent use setSlotRef to pass the ref here
  */
-import { useElementSize } from '@vueuse/core'
+import { useElementBounding } from '@vueuse/core'
 
 const bottomPanelRef = ref<HTMLElement | null>(null)
 const slotRef = ref<HTMLElement | null>(null)
 
-const { height } = useElementSize(slotRef)
+const { height } = useElementBounding(slotRef)
 const setSlotRef = (ref: HTMLElement) => {
   slotRef.value = ref
 }
@@ -33,7 +33,7 @@ watch(
 </script>
 <style lang="scss">
 .bottom-panel {
-  @apply bg-app-tab-bg w-full rounded-t-[24px] py-16 box-border;
-  transition: height 0.3s;
+  @apply bg-app-tab-bg w-full rounded-t-[24px] box-border py-16;
+  transition: all 0.3s;
 }
 </style>

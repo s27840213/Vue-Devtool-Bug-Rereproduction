@@ -1,17 +1,21 @@
 <template lang="pug">
 div(class="panel-shadow")
   div(class="flex-between photo-shadow__options mb-10")
-    div(v-for="icon in shadowOptions" :key="icon")
-      svg-icon(
-        :key="`shadow-${icon}`"
-        :iconName="`mobile-photo-shadow-${icon}`"
-        @click="onEffectClick(icon)"
-        class="photo-shadow__options__option pointer"
-        :class="{ 'photo-shadow__options__option--selected': currentEffect === icon }"
-        iconWidth="56px"
-        iconColor="gray-2")
-      div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
+    div(v-for="icon in shadowOptions" :key="icon"
+        :class="[`photo-shadow-${icon}`, {'selected': currentEffect === icon}]"
+        @click="onEffectClick(icon)")
+      //- class photo-shadow-<icon> is for Cypress to query, don't remove it
+      div(class="photo-shadow__options__icon-bg")
+      svg-icon(v-if="icon === 'none'"
+            iconName="no-effect"
+            iconWidth="24px"
+            class="photo-shadow__options--icon" :iconColor="theme === 'dark' ? 'white' : 'black-2'")
+      img(v-else :src="imgSrc(icon)"
+        class="photo-shadow__options--icon"
+        width="56"
+        height="56")
   div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
+    span(class="photo-shadow__effect-name") {{$t(shadowPropI18nMap[currentEffect]._effectName)}}
     div(v-for="field in shadowFields" :key="field")
       mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field] as string)}`"
         :borderTouchArea="true"
@@ -22,29 +26,34 @@ div(class="panel-shadow")
         @update="handleEffectUpdate")
     div(v-if="!['none', 'imageMatched'].includes(currentEffect)" class="photo-shadow__row-wrapper")
       div(class="photo-shadow__row")
-        div(class="photo-shadow__color-name text-gray-3 body-2 no-wrap") {{$t('NN0017')}}
-        div(class="photo-shadow__color"
-          :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
-          @click="handleColorModal")
+        div(class="photo-shadow__color-name body-2 no-wrap" :class="$isStk ? 'text-white' : 'text-gray-2'") {{$t('NN0017')}}
+        color-btn(class="photo-shadow__color"
+                  :color="(currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color) || '#000000'"
+                  size="30px" @click="handleColorModal")
     div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
-      div(class="photo-shadow__reset")
-        button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
+      nubtn(class="photo-shadow__reset"
+            theme="icon_pill"
+            icon="reset"
+            @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
+
 export default defineComponent({
   components: {
-    MobileSlider
+    MobileSlider,
+    ColorBtn,
   },
   emits: ['openExtraColorModal', 'toggleColorPanel'],
   data() {
@@ -52,14 +61,15 @@ export default defineComponent({
       imageShadowPanelUtils,
       shadowPropI18nMap,
       fieldRange,
-      handleColor: false
+      handleColor: false,
+      theme: this.$isStk || this.$isCm ? 'dark' : 'light',
     }
   },
   mounted() {
     imageShadowPanelUtils.mount()
   },
   beforeUnmount() {
-    if (this.$isStk && colorUtils.currEvent !== ColorEventType.photoShadow) {
+    if ((this.$isStk || this.$isCm) && colorUtils.currEvent !== ColorEventType.photoShadow) {
       imageShadowPanelUtils.handleShadowUpload()
       setTimeout(() => {
         const cb = (this.$store.getters['shadow/uploadingCallback'] as Map<string, () => void>).get(layerUtils.getCurrConfig.id)
@@ -69,6 +79,7 @@ export default defineComponent({
         }
       }, 300)
     }
+    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },
   computed: {
     ...mapGetters({
@@ -109,11 +120,17 @@ export default defineComponent({
       return {
         'max-height': this.currentEffect === ShadowEffectType.none ? '0' : '1000px'
       }
+    },
+    iconBgColor(): string {
+      return (this.theme === 'dark' ? colorUtils.colorMap.get('black-3') : colorUtils.colorMap.get('gray-5')) ?? 'white'
     }
   },
   methods: {
     getFieldValue(field: string): number {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
+    },
+    imgSrc(icon: string): string {
+      return require(`@img/photo-shadow/${this.theme}_icon/photo-shadow-${icon}.png`)
     },
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
@@ -166,20 +183,58 @@ export default defineComponent({
     overflow-x: scroll;
     @include no-scrollbar;
 
-    &__option {
-      margin-top: 10px;
+    > div {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      width: 56px;
+      height: 56px;
+      margin: 0px auto;
       border-radius: 5px;
-      border: 2px solid transparent;
-      &--selected {
-        @include setColors(blue-1, black-5) using ($color) {
-          border-color: $color;
+      overflow: hidden;
+      box-sizing: border-box;
+      transition: border 0.3s;
+      &.selected {
+        @include setColors(blue-1, white) using ($color) {
+          border: 2px solid $color;
+        }
+        > img, > svg {
+          transform: scale(0.85);
+        }
+        > div {
+          border-radius: 3px;
+          width: 47.6px;
+          height: 47.6px;
         }
       }
-      &-font {
-        box-sizing: border-box;
-        font-size: 10px;
+      .photo-shadow__options--icon {
+        border-radius: 5px;
+        object-fit: cover;
+        pointer-events: none;
       }
     }
+    &__icon-bg {
+      z-index: -1;
+      border-radius: 5px;
+      background-color: v-bind(iconBgColor);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      transition: width 0.3s, height 0.3s;
+    }
+  }
+
+  &__effect-name {
+    @include body-SM;
+    @include setColors(gray-1, white) using ($color) {
+      color: $color;
+    }
+    text-align: center;
   }
 
   &__row {
@@ -194,14 +249,6 @@ export default defineComponent({
   }
 
   &__color {
-    border: 1px solid #d9dbe1;
-    width: 32px;
-    height: 24px;
-    box-sizing: border-box;
-    line-height: 20px;
-    border-radius: 3px;
-    text-align: center;
-
     &-name {
       text-align: left;
       text-transform: capitalize;
@@ -218,13 +265,7 @@ export default defineComponent({
     @include no-scrollbar;
   }
   &__reset {
-    > button {
-      @include setColors(blue-1, black-3) using ($color) {
-        color: $color;
-      }
-      font-size: 14px;
-      padding: 0;
-    }
+    margin: 6px auto 0;
   }
 }
 </style>

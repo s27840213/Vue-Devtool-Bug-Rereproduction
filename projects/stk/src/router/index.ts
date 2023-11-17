@@ -1,22 +1,23 @@
+import store from '@/store'
+import Screenshot from '@/views/Screenshot.vue'
+import ViviSticker from '@/views/ViviSticker.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
-import store from '@/store'
+import router from '@nu/vivi-lib/router'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import overlayUtils from '@nu/vivi-lib/utils/overlayUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
+import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
-import Screenshot from '@/views/Screenshot.vue'
-import ViviSticker from '@/views/ViviSticker.vue'
-import router from '@nu/vivi-lib/router'
 
 declare let window: CustomWindow
 
@@ -28,6 +29,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         if (stkWVUtils.checkVersion('1.5')) {
+          if (stkWVUtils.isGetProductsSupported) stkWVUtils.getSubscribeInfo()
           await stkWVUtils.fetchDebugModeEntrance()
           await stkWVUtils.fetchLoadedFonts()
           await stkWVUtils.fetchTutorialFlags()
@@ -42,16 +44,17 @@ const routes: Array<RouteRecordRaw> = [
           }
           if (appVer !== lastAppVer) await stkWVUtils.setState('lastAppVer', { value: appVer })
 
-          const recentPanel = await stkWVUtils.getState('recentPanel')
-          const userSettings = await stkWVUtils.getState('userSettings')
-          if (userSettings) {
-            store.commit('vivisticker/UPDATE_userSettings', userSettings)
-            stkWVUtils.addFontForEmoji()
+          const recentPanelRes = await stkWVUtils.getState('recentPanel') as { value: string } | undefined
+          let recentPanel = recentPanelRes?.value ?? 'object'
+          if (recentPanel === 'none') { // prevent panel being 'none' for stk
+            recentPanel = 'object'
           }
+          await store.dispatch('vivisticker/fetchUserSettings')
+          stkWVUtils.addFontForEmoji()
           const hasCopied = await stkWVUtils.getState('hasCopied')
           stkWVUtils.hasCopied = hasCopied?.data ?? false
           stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
-          stkWVUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+          assetPanelUtils.setCurrActiveTab(recentPanel)
         }
         next()
       } catch (error) {
@@ -66,6 +69,8 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        await store.dispatch('vivisticker/fetchUserSettings')
+        stkWVUtils.addFontForEmojis()
         stkWVUtils.hideController()
         next()
       } catch (error) {
@@ -129,12 +134,21 @@ router.addRoute({
     const urlParams = new URLSearchParams(window.location.search)
     const standalone = urlParams.get('standalone')
     if (standalone) {
-      stkWVUtils.enterStandaloneMode()
+      stkWVUtils.enterBrowserMode()
       stkWVUtils.setDefaultLocale()
     } else {
       stkWVUtils.detectIfInApp()
     }
     const userInfo = await stkWVUtils.getUserInfo()
+    const appLoadedTimeout = store.getters['vivisticker/getAppLoadedTimeout']
+    if (appLoadedTimeout > 0) {
+      window.setTimeout(() => {
+        if (!stkWVUtils.appLoadedSent) {
+          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`)
+        }
+        stkWVUtils.sendAppLoaded()
+      }, appLoadedTimeout)
+    }
     if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
@@ -217,6 +231,8 @@ router.beforeEach(async (to, from, next) => {
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 
+    store.commit('vivisticker/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
+
     store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 
     store.commit('user/SET_STATE', {
@@ -250,14 +266,17 @@ router.beforeEach(async (to, from, next) => {
       })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
+    store.commit('vivisticker/SET_promote', json.promote)
 
     if (json.default_price && Object.keys(json.default_price).length) {
+      const planPostfix = json.default_price.plan_id ? '_' + json.default_price.plan_id : ''
       store.commit('vivisticker/UPDATE_payment', {
         defaultPrices: Object.fromEntries(
           Object.entries(
             json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
           ).map(([locale, prices]) => {
             const currency = constantData.currencyMap.get(locale) ?? 'USD'
+            const defaultAnnuallyPriceOriginal = json.default_price.original_prices?.[locale]?.annually ?? NaN
             return [
               locale,
               {
@@ -267,16 +286,35 @@ router.beforeEach(async (to, from, next) => {
                     plan,
                     {
                       value: price,
-                      text: stkWVUtils.formatPrice(price, currency)
+                      text: price.toString()
                     },
                   ]),
                 ),
+                annuallyFree0: {
+                  value: prices.annually,
+                  text: prices.annually.toString()
+                },
+                annuallyOriginal: {
+                  value: defaultAnnuallyPriceOriginal,
+                  text: defaultAnnuallyPriceOriginal.toString()
+                },
+                annuallyFree0Original: {
+                  value: defaultAnnuallyPriceOriginal,
+                  text: defaultAnnuallyPriceOriginal.toString()
+                }
               },
             ]
           }),
         ) as { [key: string]: IPrices },
         trialDays: json.default_price.trial_days,
-        trialCountry: json.default_price.trial_country
+        trialCountry: json.default_price.trial_country,
+        planId: {
+          monthly: constantData.planId.monthly,
+          annually: constantData.planId.annually + planPostfix,
+          annuallyFree0: constantData.planId.annuallyFree0 + planPostfix,
+          annuallyOriginal: constantData.planId.annually,
+          annuallyFree0Original: constantData.planId.annuallyFree0
+        }
       })
     }
 

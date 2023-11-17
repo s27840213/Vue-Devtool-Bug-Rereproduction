@@ -3,10 +3,10 @@ import * as path from 'path'
 // import AutoImport from 'unplugin-auto-import/vite'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
+import { replaceCodePlugin } from 'vite-plugin-replace'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
+import transformPlugin from 'vite-plugin-transform'
 import extractImg from '../../tools/vite-plugin-lib-extract-img'
-import removePugAssertion from '../../tools/vite-plugin-remove-pug-type-assertion'
-
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
 }
@@ -17,7 +17,12 @@ export default defineConfig({
     // When Using pug with option api, it will treat ts in pug as js,
     // so remove type assertions to resolve the issue.
     // https://github.com/vitejs/vite-plugin-vue/issues/18#issuecomment-1719035794
-    removePugAssertion(),
+    transformPlugin({
+      exclude: ['node_modules', /(?<!\.vue)$/],
+      callbackArray: [
+        (s: string) => s.replace(/(?<==".+)( as [\w<>|', ]+)/g, '')
+      ]
+    }),
     vue(),
     // Components({
     //   dirs: ['src/components'],
@@ -35,8 +40,18 @@ export default defineConfig({
         dest: 'src',
       }]
     }),
+    // TODO: Use vite-plugin-lib-extract-img for cm.
     // Extracts resource files referenced in lib mode instead of embedded them as base64.
     extractImg,
+    replaceCodePlugin({
+      replacements: [{
+        from: /require\(["'`](@img\/.+)["'`]\)/g,
+        to: (match: string, src: string) => {
+          src = src.replace('@img/', '')
+          return `new URL(\`/src/assets/img/${src}\`, import.meta.url).href`
+        }
+      }]
+    }),
   ],
   build: {
     lib: {
@@ -65,6 +80,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@json': resolve('src/assets/json'),
       '@img': resolve('src/assets/img'),
       '@': resolve('src')
     }

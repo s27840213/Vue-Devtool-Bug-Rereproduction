@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="category-fonts pointer feature-button"
-  :class="{ active: props.font === item.id }"
+div(class="feature-button category-fonts pointer"
+  :class="{ active: $isPic && props.font === item.id }"
   draggable="false"
   @click="setFont()")
   div(class="category-fonts__item-wrapper")
@@ -13,9 +13,9 @@ div(class="category-fonts pointer feature-button"
       @error="handleNotFound")
   div(class="category-fonts__icon")
     svg-icon(v-if="props.font === item.id"
-      iconName="done"
-      iconColor="gray-2"
-      iconWidth="25px")
+      iconName="panel-done"
+      :iconColor="!$isPic ? 'white' : 'gray-2'"
+      iconWidth="20px")
     svg-icon(v-else-if="pending && pending === item.id"
       iconName="loading"
       iconColor="gray-1"
@@ -26,17 +26,17 @@ div(class="category-fonts pointer feature-button"
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
+import imagePreview from '@img/svg/image-preview.svg'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import imagePreview from '@img/svg/image-preview.svg'
 
 export default defineComponent({
   emits: [],
@@ -184,8 +184,8 @@ export default defineComponent({
           ver: this.item.ver
         })
 
-        if (this.$isStk) {
-          stkWVUtils.setState('recentFont', updateItem)
+        if (this.$isStk || this.$isCm) {
+          getAutoWVUtils().setState('recentFont', updateItem)
         }
 
         const currLayerIndex = layerUtils.getCurrPage.layers
@@ -346,6 +346,12 @@ export default defineComponent({
   display: grid;
   grid-template-columns: 7fr 4fr 1fr;
   grid-gap: 10px;
+  border-radius: 10px;
+  @include app(stk, cm) {
+    &:active {
+      background-color: setColor(black-3-5);
+    }
+  }
   &__item-wrapper {
     overflow: hidden;
     position: relative;
@@ -354,10 +360,15 @@ export default defineComponent({
   &__item {
     height: 25px;
     object-fit: contain;
+    @include app(stk, cm) {
+      filter: brightness(0) invert(1);
+    }
   }
   &__icon {
     position: absolute;
     right: 0;
+    top: 50%;
+    transform: translate(0, -50%);
   }
 }
 </style>

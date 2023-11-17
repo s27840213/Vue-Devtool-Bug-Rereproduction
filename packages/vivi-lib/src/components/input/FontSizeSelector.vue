@@ -6,18 +6,18 @@ div(class="font-size-selector relative")
       :style="numberButtonStyles"
       @pointerdown="fontSizeStepping(-1)"
       @contextmenu.prevent)
-      svg-icon(iconName="minus-small" :iconWidth="iconSize" iconColor="gray-2")
+      svg-icon(iconName="minus-small" :iconWidth="iconSize" :iconColor="$isStk || $isCm ? 'black-5' : 'gray-2'")
     button(class="font-size-selector__range-input-button"
           :style="inputButtonStyles"
           @click="handleValueModal")
-      input(class="body-2 text-gray-2 center record-selection" type="number" ref="input-fontSize"
+      input(class="body-2 center record-selection" type="number" ref="input-fontSize"
             :class="{ mobile: $isTouchDevice() }"
             @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
     div(class="pointer"
       :style="numberButtonStyles"
       @pointerdown="fontSizeStepping(1)"
       @contextmenu.prevent)
-      svg-icon(iconName="plus-small" :iconWidth="iconSize" iconColor="gray-2")
+      svg-icon(iconName="plus-small" :iconWidth="iconSize" :iconColor="$isStk || $isCm ? 'black-5' : 'gray-2'")
   value-selector(v-if="openValueSelector"
               v-click-outside="handleValueModal"
               :valueArray="fontSelectValue"
@@ -142,25 +142,26 @@ export default defineComponent({
 .font-size-selector {
   user-select: none;
   &__number {
-    border: 1px solid setColor(gray-4);
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-
-    > div {
-      height: 100%;
+    @include setColors(gray-4, black-5) using ($color) {
+      border: 1px solid $color;
+      border-radius: 5px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: setColor(gray-2);
 
-      &:nth-child(1) {
-        border-right: 1px solid setColor(gray-4);
-      }
+      > div {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
 
-      &:nth-child(3) {
-        border-left: 1px solid setColor(gray-4);
+        &:nth-child(1) {
+          border-right: 1px solid $color;
+        }
+
+        &:nth-child(3) {
+          border-left: 1px solid $color;
+        }
       }
     }
   }
@@ -169,6 +170,10 @@ export default defineComponent({
     & > input {
       padding: 0;
       text-align: center;
+      background-color: transparent;
+      @include setColors(gray-2, white) using ($color) {
+        color: $color;
+      }
       &.mobile {
         @include body-MD;
       }

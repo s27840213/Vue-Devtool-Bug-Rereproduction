@@ -1,9 +1,8 @@
-import { useEditorStore } from '@/stores/editor'
-import { storeToRefs } from 'pinia'
+import { useStore } from 'vuex'
 
 const useMouseUtils = () => {
-  const editorStore = useEditorStore()
-  const { pageScaleRatio } = storeToRefs(editorStore)
+  const store = useStore()
+  const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 
   const getEventType = (e: MouseEvent | TouchEvent | PointerEvent) => {
     if (e.type.includes('pointer')) {
@@ -34,13 +33,13 @@ const useMouseUtils = () => {
         : (e as TouchEvent).touches[0].clientY
     return {
       x,
-      y
+      y,
     }
   }
 
   const getMouseRelPoint = (
     e: MouseEvent | TouchEvent | PointerEvent,
-    target: HTMLElement | { x: number; y: number }
+    target: HTMLElement | { x: number; y: number },
   ) => {
     let x: number
     let y: number
@@ -70,21 +69,22 @@ const useMouseUtils = () => {
 
   const getMousePosInTarget = (
     e: MouseEvent | TouchEvent | PointerEvent,
-    target: HTMLElement
+    target: HTMLElement,
   ): { x: number; y: number; xPercentage: number; yPercentage: number } => {
     const mouseRelPos = getMouseRelPoint(e, target)
+    
     return {
-      x: mouseRelPos.x / pageScaleRatio.value,
-      y: mouseRelPos.y / pageScaleRatio.value,
+      x: mouseRelPos.x / contentScaleRatio.value,
+      y: mouseRelPos.y / contentScaleRatio.value,
       xPercentage: mouseRelPos.x / target.clientWidth,
-      yPercentage: mouseRelPos.y / target.clientHeight
+      yPercentage: mouseRelPos.y / target.clientHeight,
     }
   }
 
   return {
     getMouseAbsPoint,
     getMouseRelPoint,
-    getMousePosInTarget
+    getMousePosInTarget,
   }
 }
 

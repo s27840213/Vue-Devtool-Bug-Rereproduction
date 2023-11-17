@@ -12,6 +12,7 @@ import { round } from 'lodash'
 import { nextTick } from 'vue'
 import controlUtils from './controlUtils'
 import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
 import mathUtils from './mathUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
@@ -19,7 +20,6 @@ import shapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import uploadUtils from './uploadUtils'
-import generalUtils from './generalUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -28,6 +28,7 @@ class LayerUtils {
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
   get getCurrLayer(): AllLayerTypes { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayerStyles(): IStyle { return this.getLayer(this.pageIndex, this.layerIndex).styles }
   get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
   get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
   get getLayer(): (pageIndex: number, layerIndex: number) => AllLayerTypes {
@@ -55,7 +56,7 @@ class LayerUtils {
         case 'group':
           return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
         case 'frame':
-          return subLayerIdx !== -1 && (!generalUtils.isStk || !store.getters['vivisticker/getControllerHidden']) ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
+          return subLayerIdx !== -1 && (!generalUtils.isStk || !store.getters['webView/getControllerHidden']) ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
         default:
           return this.currSelectedInfo.layers[0].styles.opacity
       }
@@ -85,6 +86,11 @@ class LayerUtils {
       return (this.getCurrLayer as IFrame).clips[this.subLayerIdx]
     })()
   }
+
+  loadingTimeout = 0
+  loadingFlags = {} as { [key: string]: boolean }
+  loadingCallback = undefined as (() => void) | undefined
+  timeoutCallback = undefined as (() => void) | undefined
 
   updatecCurrTypeLayerProp(prop: { [key: string]: string | boolean | number | Array<IParagraph> }) {
     const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = this
@@ -665,7 +671,7 @@ class LayerUtils {
       value = 100
     }
     const { getCurrLayer: currLayer, subLayerIdx, layerIndex } = this
-    if (subLayerIdx === -1 || (generalUtils.isStk && store.getters['vivisticker/getControllerHidden'])) {
+    if (subLayerIdx === -1 || (generalUtils.isStk && store.getters['webView/getControllerHidden'])) {
       if (this.currSelectedInfo.layers.length === 1) {
         this.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
           opacity: value
@@ -743,6 +749,96 @@ class LayerUtils {
 
   setAutoResizeNeededForTextLayer(layer: IText, isAutoResizeNeeded: boolean) {
     layer.isAutoResizeNeeded = isAutoResizeNeeded
+  }
+
+  initLoadingFlags(page: IPage | { layers: ILayer[] }, cbLoad?: () => void, cbTimeout?: () => void, noBg = true, timeout = 60000) {
+    window.clearTimeout(this.loadingTimeout)
+    this.loadingFlags = {}
+    this.loadingCallback = cbLoad
+    this.timeoutCallback = cbTimeout
+    if (this.timeoutCallback) {
+      this.loadingTimeout = window.setTimeout(() => {
+        this.loadingCallback = undefined
+        this.timeoutCallback && this.timeoutCallback()
+        this.timeoutCallback = undefined
+      }, timeout)
+    }
+    for (const [index, layer] of page.layers.entries()) {
+      this.initLoadingFlagsForLayer(layer, index)
+    }
+    if (!noBg && 'backgroundImage' in page && page.backgroundImage.config.srcObj?.assetId !== '') {
+      this.loadingFlags[this.makeFlagKey(-1)] = false
+    }
+    logUtils.setLogAndConsoleLog('ScreenShot::Init:', generalUtils.deepCopy(this.loadingFlags))
+  }
+
+  makeFlagKey(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
+    if (layerIndex === -1) return 'bg'
+    const res = subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}`)
+    // additionKey now used in frame's decoration-related-layers
+    const additionKey = addition ? `_${addition.k}${addition.v ?? ''}` : ''
+    return res + additionKey
+  }
+
+  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
+    switch (layer.type) {
+      case LayerType.group:
+        for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+          // this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
+        }
+        break
+      case LayerType.frame: {
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
+        const frame = layer as IFrame
+        const clips = [...frame.clips] as Array<IImage | IShape>
+        if (frame.decoration) {
+          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'd' })] = false
+        }
+        if (frame.decorationTop) {
+          this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'dt' })] = false
+        }
+        if (frame.blendLayers?.length) {
+          frame.blendLayers.forEach((_, i) => {
+            this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, { k: 'b', v: i })] = false
+          })
+        }
+        if (subLayerIndex === -1) {
+          for (const [_clipIndex, subLayer] of clips.entries()) {
+            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex)
+          }
+        } else {
+          for (const [_clipIndex, subLayer] of clips.entries()) {
+            this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, { k: 'c', v: _clipIndex })
+          }
+        }
+      }
+        break
+      default:
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, addition)] = false
+    }
+  }
+
+  initLoadingFlagsForOneLayer(callback?: () => void) {
+    this.loadingFlags = {}
+    this.loadingCallback = callback
+    this.loadingFlags[this.makeFlagKey(0, -1)] = false
+  }
+
+  setLoadingFlag(layerIndex: number, subLayerIndex = -1, addition?: { k: string, v?: number }) {
+    const key = this.makeFlagKey(layerIndex, subLayerIndex, addition)
+    if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
+      this.loadingFlags[key] = true
+      logUtils.setLogAndConsoleLog('ScreenShot::Set:', generalUtils.deepCopy(this.loadingFlags), key)
+    }
+    if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
+      window.clearTimeout(this.loadingTimeout)
+      this.loadingCallback()
+      this.loadingFlags = {}
+      this.loadingTimeout = 0
+      this.loadingCallback = undefined
+      this.timeoutCallback = undefined
+    }
   }
 }
 

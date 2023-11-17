@@ -7,13 +7,12 @@ div(class="color-btn" :style="wrapperStyle")
     div(v-else :style="{backgroundColor: color}"
         :class="`color-btn__color color-${color.replace('#', '')}`")
     svg-icon(v-if="focus"
-        iconName="item-check"
-        :iconColor="$isStk ? 'black-3' : 'blue-1'"
-        iconWidth="40%")
+        :iconName="`check-mobile-circle${$isStk || $isCm ? '-black' : ''}`"
+        iconWidth="50%")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'ColorBtn',
@@ -76,20 +75,24 @@ export default defineComponent({
     border-radius: 4px;
   }
   &__add-color {
-    background-image: url("~@img/svg/addColor.svg");
+    background-image: url("@img/svg/addColor.svg");
     background-size: cover;
   }
   &__multi-color {
-    background-image: url("~@img/jpg/multi-color.jpg");
+    background-image: url("@img/jpg/multi-color.jpg");
     background-size: cover;
   }
   &__color {
     box-sizing: border-box;
-    border: 1px solid setColor(gray-0, 0.2);
+    @include setColors(gray-0, white) using ($color) {
+      border: 1px solid setColor($color, 0.2);
+    }
   }
   .svg-disable {
     padding: calc((100% - 18px) / 2);
-    border: 1px solid setColor(gray-0, 0.2);
+    @include setColors(gray-0, white) using ($color) {
+      border: 1px solid setColor($color, 0.2);
+    }
     border-radius: 4px;
   }
   &__wrapper {
@@ -101,16 +104,16 @@ export default defineComponent({
       }
     }
     &.focus, &.active {
-      @include setColors(blue-1, black-5) using ($color) {
+      @include setColors(blue-1, white) using ($color) {
         border: 2px solid $color;
       }
     }
     &:not(.mobile):hover {
-      @include setColors(blue-hover, black-5) using ($color) {
+      @include setColors(blue-hover, white) using ($color) {
         border: 2px solid $color;
       }
     }
-    .svg-item-check {
+    .svg-icon {
       position: absolute;
       right: -11%;
       bottom: -11%;

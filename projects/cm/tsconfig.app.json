@@ -1,26 +1,67 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.json", "../../packages/*/src/*"],
-  "exclude": ["src/**/__tests__/*", "../../packages/vivi-lib"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/**/*.json",
+    "../../packages/vivi-lib/src/**/*.vue",
+    "../../packages/vivi-lib/src/**/*.ts",
+    "../../packages/shared-lib/src/**/*.vue",
+    "../../packages/shared-lib/src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/*"
+  ],
   "compilerOptions": {
-    "rootDir": "../../",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
     "composite": true,
+    "rootDir": "../../",
     "baseUrl": ".",
     "paths": {
+      "//": ["Write @nu/vivi-lib/ paths before @/ for import auto complete."],
+      "@nu/vivi-lib/*": [
+        "../../packages/vivi-lib/src/*",
+        "../../packages/vivi-lib/src/index"
+      ],
+      "@/*": [
+        "./src/*",
+        "../../packages/vivi-lib/src/*"
+      ],
+      "@nu/shared-lib/*": [
+        "../../packages/shared-lib/src/*"
+      ],
+      "@nu/shared-lib": [
+        "../../packages/shared-lib/src/index"
+      ],
       "@i18n/*": [
         "./src/i18n/shaked/*"
       ],
-      "@/*": ["./src/*"],
-      "@nu/shared-lib/*": ["../../packages/shared-lib/src/*"],
-      "@nu/shared-lib": ["../../packages/shared-lib/src/index"]
+      "@img/*": [
+        "../../packages/vivi-lib/src/assets/img/*"
+      ],
+      "@json/*": [
+        "../../packages/vivi-lib/src/assets/json/*"
+      ]
     },
-    "types": ["vite/client"],
-    "resolveJsonModule": true,
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
-    "module": "ESNext"
+    "types": [
+      "vite/client"
+    ],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "dom.iterable"
+    ]
   },
   "vueCompilerOptions": {
-    "plugins": ["@vue/language-plugin-pug"]
+    "plugins": [
+      "@vue/language-plugin-pug"
+    ]
   }
 }

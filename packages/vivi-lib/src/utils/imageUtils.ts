@@ -1,6 +1,11 @@
 import imageApi from '@/apis/image-api'
-import frameDefaultImg from '@img/svg/frame.svg'
-import { IAssetPhoto, IImageSize, IPhotoItem, IUserImageContentData, isIAssetPhoto } from '@/interfaces/api'
+import {
+  IAssetPhoto,
+  IImageSize,
+  IPhotoItem,
+  IUserImageContentData,
+  isIAssetPhoto,
+} from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
@@ -12,14 +17,15 @@ import { LayerType } from '@/store/types'
 import { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
-import LayerUtils from '@/utils/layerUtils'
+import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import frameDefaultImg from '@img/svg/frame.svg'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v7576'
+const APP_VER_FOR_REFRESH_CACHE = 'v785'
 
 class ImageUtils {
   get imageSizeMap(): { [key: string]: number } {
@@ -29,11 +35,15 @@ class ImageUtils {
       midd: 766,
       smal: 510,
       tiny: 320,
-      prev: 150
+      prev: 150,
     }
   }
 
-  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: (img?: HTMLImageElement) => void, crossOrigin?: boolean }) {
+  async imgLoadHandler<T>(
+    src: string,
+    cb: (img: HTMLImageElement) => T,
+    options?: { error?: (img?: HTMLImageElement) => void; crossOrigin?: boolean },
+  ) {
     const { error, crossOrigin = true } = options || {}
     return new Promise<T>((resolve, reject) => {
       const image = new Image()
@@ -50,22 +60,20 @@ class ImageUtils {
     return [srcObj.type, srcObj.userId, srcObj.assetId, ...attrs].join(',')
   }
 
-  isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
-    if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
-      const currLayer = LayerUtils.getCurrLayer
+  isImgControl(pageIndex: number = layerUtils.pageIndex): boolean {
+    if (pageIndex === layerUtils.pageIndex && layerUtils.getCurrLayer) {
+      const currLayer = layerUtils.getCurrLayer
       switch (currLayer.type) {
         case 'image':
           return (currLayer as IImage).imgControl
         case 'group':
-          return (currLayer as IGroup).layers
-            .some(layer => {
-              return layer.type === 'image' && layer.imgControl
-            })
+          return (currLayer as IGroup).layers.some((layer) => {
+            return layer.type === 'image' && layer.imgControl
+          })
         case 'frame':
-          return (currLayer as IFrame).clips
-            .some(layer => {
-              return layer.type === 'image' && layer.imgControl
-            })
+          return (currLayer as IFrame).clips.some((layer) => {
+            return layer.type === 'image' && layer.imgControl
+          })
       }
     }
     return false
@@ -85,21 +93,30 @@ class ImageUtils {
     }
   }
 
-  getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean): string {
+  getSrc(
+    config: Partial<IImage> | SrcObj,
+    size?: string | number,
+    ver?: number,
+    forBgRemove?: boolean,
+  ): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
-    let { type, userId, assetId, brandId, updateQuery, maxSize } = {} as SrcObj
+    let { type, userId, assetId, brandId, querys, maxSize } = {} as SrcObj
     let ratio = 1
     if (this.isSrcObj(config)) {
-      ({ type, userId, assetId, brandId, maxSize } = config)
+      ; ({ type, userId, assetId, brandId, maxSize } = config)
     } else {
       if (!config.srcObj && !config.src_obj) return ''
-      const srcObj = config.srcObj || config.src_obj as SrcObj
-      ({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
+      const srcObj = config.srcObj || (config.src_obj as SrcObj)
+        ; ({ type, userId, assetId, brandId, querys, maxSize } = srcObj)
       if (typeof size === 'undefined' && config.styles) {
         const { imgWidth, imgHeight } = config.styles
         size = this.getSrcSize(
           srcObj,
-          config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 : 0
+          config.styles
+            ? this.getSignificantDimension(imgWidth, imgHeight) *
+            store.getters.getPageScaleRatio *
+            0.01
+            : 0,
         )
       }
       ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
@@ -118,14 +135,19 @@ class ImageUtils {
         if (typeof size === 'string' && (size as string).includes('ext')) {
           res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
-          const query = forBgRemove ? `?rand_ver=${generalUtils.generateRandomString(6)}` : '?origin=true'
-          res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
+          const query = forBgRemove
+            ? `?rand_ver=${generalUtils.generateRandomString(6)}`
+            : '?origin=true'
+          res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'
+            }${query}`
         }
         break
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        const query = forBgRemove ? `&rand_ver=${generalUtils.generateRandomString(6)}` : '&origin=true'
+        const query = forBgRemove
+          ? `&rand_ver=${generalUtils.generateRandomString(6)}`
+          : '&origin=true'
         res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
         res = this.privateXtraExtract(res)
         break
@@ -143,38 +165,55 @@ class ImageUtils {
         break
       }
       case 'unsplash':
-        res = `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        res = `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766
+          }&origin=true`
         break
       case 'pexels':
-        res = `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        res = `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'
+          }=${size || 766}&origin=true`
         break
       case 'background':
-        res = `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
+        res = `https://template.vivipic.com/background/${assetId}/${size || 'full'
+          }?origin=true&ver=${store.getters['user/getVerUni']}`
         break
       case 'frame':
+        console.log(frameDefaultImg)
         res = frameDefaultImg
         break
       case 'shadow-private': {
-        const shadowImgs = (store.getters['shadow/shadowImgs'] as Map<number, IShadowAsset>)
+        const shadowImgs = store.getters['shadow/shadowImgs'] as Map<number, IShadowAsset>
         if (typeof assetId === 'number') {
           if (shadowImgs.has(assetId)) {
-            res = (shadowImgs as Map<any, any>).get(assetId)?.urls[size as string || 'midd'] || ''
+            res = (shadowImgs as Map<any, any>).get(assetId)?.urls[(size as string) || 'midd'] || ''
             break
           }
         }
         res = ''
         break
       }
-      case 'local':
-        return assetId as string
       case 'svg':
-        res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
+        res = `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']
+          }`
         break
       case 'ios':
-        res = `vvstk://${assetId}`
+        if (generalUtils.isCm) {
+          res = `chmix://${assetId}`
+        } else if (generalUtils.isStk) {
+          res = `vvstk://${assetId}`
+        }
         break
+      case 'local-img': {
+        return assetId as string
+      }
       default:
         res = ''
+    }
+
+
+    if (querys) {
+      querys.forEach((q) => {
+        res = this.appendQuery(res, q.key, q.val)
+      })
     }
 
     if (!res && !this.isSrcObj(config) && (config as IImage).previewSrc) {
@@ -198,16 +237,18 @@ class ImageUtils {
     if (sizeMap?.length) {
       let i = 0
       if (typeof dimension === 'number') {
-        i = findLastIndex(sizeMap, s => dimension <= s.size)
+        i = findLastIndex(sizeMap, (s) => dimension <= s.size)
         i = Math.max(i, 0) // For i === -1
       } else if (typeof dimension === 'string') {
-        i = Math.max(sizeMap.findIndex(m => m[key] === dimension, 0))
+        i = Math.max(sizeMap.findIndex((m) => m[key] === dimension, 0))
       }
       return preload
-        ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
+        ? preload === 'pre'
+          ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key]
+          : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
         : sizeMap[i][key]
     }
-    return (type === 'pexels' || type === 'unsplash') ? 1080 : 'full'
+    return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
   }
 
   getSignificantDimension(width: number, height: number) {
@@ -222,11 +263,12 @@ class ImageUtils {
     if (src.includes('template.vivipic.com/admin')) {
       return src.includes('logo') ? 'logo-public' : 'public'
     }
-    if (src.includes('vvstk')) return 'ios'
+    if (src.includes('vvstk') || src.includes('chmix')) return 'ios'
     if (src.includes('asset.vivipic')) {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
     if (src.startsWith('data:image')) return ''
+    if(src.includes(window.location.hostname)) return 'local-img'
     throw Error(`Unexpected getSrcType result for src '${src}'.`)
   }
 
@@ -249,25 +291,29 @@ class ImageUtils {
   getAssetId(src: string, type = this.getSrcType(src)) {
     switch (type) {
       case 'logo-public': {
-        return src.match(/logo\/\w+\/(\w+)\//)?.[1] ?? ''
+        return src.match(/logo\/[^/]+\/([^/]+)\//)?.[1] ?? ''
       }
       case 'public': {
-        return src.match(/image\/(\w+)\//)?.[1] ?? ''
+        return src.match(/image\/([^/]+)\//)?.[1] ?? ''
       }
       case 'unsplash': {
-        return src.match(/com\/([\w-]+)\?/)?.[1] ?? ''
+        return src.match(/com\/([^?]+)\?/)?.[1] ?? ''
       }
       case 'background': {
-        return src.match(/background\/(\w+)\//)?.[1] ?? ''
+        return src.match(/background\/([^/]+)\//)?.[1] ?? ''
       }
       case 'svg': {
-        return src.match(/svg\/(\w+)\//)?.[1] ?? ''
+        return src.match(/svg\/([^/]+)\//)?.[1] ?? ''
       }
       case 'ios': {
-        return src.match(/vvstk:\/\/(.+)/)?.[1] ?? ''
+        // result example
+        // "chmix://cameraroll/AFB61F5C-424F-491B-8A09-D342DE7F3797/L0/001?appver=v7576", "chmix", "cameraroll/AFB61F5C-424F-491B-8A09-D342DE7F3797/L0/001?appver=v7576"]
+        return src.match(/(vvstk|chmix):\/\/(.+)/)?.[2] ?? ''
       }
+      case 'local-img':
+        return src
       default:
-        if (type === '' && src.startsWith('data:image')) return ''
+        if (type === '' && (src.startsWith('data:image'))) return ''
         throw Error(`Unexpected getAssetId type '${type}' for src '${src}'.`)
     }
   }
@@ -285,7 +331,7 @@ class ImageUtils {
             token: '',
             type,
             asset_index: assetId as number,
-            cache
+            cache,
           })
         } else if (typeof userId === 'string' && typeof assetId === 'string') {
           return imageApi.getImgSize({
@@ -293,7 +339,7 @@ class ImageUtils {
             type,
             asset_id: assetId,
             team_id: userId,
-            cache
+            cache,
           })
         }
         break
@@ -304,7 +350,7 @@ class ImageUtils {
             token: '',
             type: 'background',
             key_id: assetId,
-            cache
+            cache,
           })
         }
         break
@@ -315,7 +361,7 @@ class ImageUtils {
             token: '',
             type: 'svg',
             key_id: assetId,
-            cache
+            cache,
           })
         }
       }
@@ -328,29 +374,28 @@ class ImageUtils {
     return tokens[tokens.length - 3]
   }
 
-  toSrcObj(asset: IAssetPhoto | IPhotoItem) {
+  toSrcObj(asset: IAssetPhoto | IPhotoItem): SrcObj {
     if (!isIAssetPhoto(asset)) {
       return { type: 'unsplash', userId: '', assetId: asset.id }
     }
 
     const src = asset.urls.full
     const type = this.getSrcType(src)
-    const assetIndex = ['logo-private', 'private'].includes(type)
-      ? asset.assetIndex : undefined
+    const assetIndex = ['logo-private', 'private'].includes(type) ? asset.assetIndex : undefined
     return {
       type,
       userId: this.getUserId(src, type),
       assetId: assetIndex ?? this.getAssetId(src, type),
-      brandId: this.getBrandId(src, type)
+      brandId: this.getBrandId(src, type),
     }
   }
 
   setImgControlDefault(deselect = true) {
-    const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
+    const { pageIndex, layerIndex, getCurrLayer: currLayer } = layerUtils
     if (currLayer) {
       switch (currLayer.type) {
         case 'image':
-          LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
           break
         case 'group': {
           const primaryLayer = currLayer as IGroup
@@ -362,14 +407,17 @@ class ImageUtils {
             if (deselect) {
               props.active = false
             }
-            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
+            layerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
           }
           break
         }
         case 'frame': {
           const primaryLayer = currLayer as IFrame
           for (let i = 0; i < primaryLayer.clips.length; i++) {
-            FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, { active: false, imgControl: false })
+            FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, i, {
+              active: false,
+              imgControl: false,
+            })
           }
         }
       }
@@ -378,24 +426,24 @@ class ImageUtils {
 
   initLayerSize: ISize = {
     width: 0,
-    height: 0
+    height: 0,
   }
 
   initImgPos: ICoordinate = {
     x: 0,
-    y: 0
+    y: 0,
   }
 
   initImgSize: ISize = {
     width: 0,
-    height: 0
+    height: 0,
   }
 
   imgBuffer: IBounding = {
     width: 0,
     height: 0,
     x: 0,
-    y: 0
+    y: 0,
   }
 
   isHorizon = false
@@ -405,7 +453,7 @@ class ImageUtils {
   resizeExceedLimit(width: number, height: number, offsetX: number, offsetY: number): boolean {
     const imgPos = {
       x: this.initImgPos.x,
-      y: this.initImgPos.y
+      y: this.initImgPos.y,
     }
     /**
      * Below is a conclusion of checking-if-the-Resizer-exceed-limit for the top/left resizer
@@ -430,32 +478,60 @@ class ImageUtils {
     return false
   }
 
-  imgResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number, updatePos = null as any, updateSize = null as any) {
+  imgResizeHandler(
+    width: number,
+    height: number,
+    offsetWidth: number,
+    offsetHeight: number,
+    updatePos = null as any,
+    updateSize = null as any,
+  ) {
     let offsetX
     let offsetY
     if ((this.isHorizon && this.xSign < 0) || (!this.isHorizon && this.ySign < 0)) {
       offsetX = offsetWidth
       offsetY = offsetHeight
     }
-    if (this.resizeExceedLimit(this.initLayerSize.width, this.initLayerSize.height, offsetWidth, offsetHeight)) {
+    if (
+      this.resizeExceedLimit(
+        this.initLayerSize.width,
+        this.initLayerSize.height,
+        offsetWidth,
+        offsetHeight,
+      )
+    ) {
       if (this.imgBuffer.width === 0 && this.imgBuffer.height === 0) {
         this.imgScaling(width + offsetWidth, height + offsetHeight, 0, 0)
         this.imgBuffer.width = offsetWidth
         this.imgBuffer.height = offsetHeight
       }
-      this.imgScaling(width, height, offsetWidth - this.imgBuffer.width, offsetHeight - this.imgBuffer.height, updatePos, updateSize)
+      this.imgScaling(
+        width,
+        height,
+        offsetWidth - this.imgBuffer.width,
+        offsetHeight - this.imgBuffer.height,
+        updatePos,
+        updateSize,
+      )
     } else {
       this.imgClipping(width, height, offsetX, offsetY, updatePos, updateSize)
     }
   }
 
-  imgScaling(layerWidth: number, layerHeight: number, offsetWidth: number, offsetHeight: number, updatePos = null as any, updateSize = null as any) {
-    // ControlUtils.updateLayerInitSize(LayerUtils.pageIndex, LayerUtils.layerIndex, layerWidth, layerHeight, 1)
+  imgScaling(
+    layerWidth: number,
+    layerHeight: number,
+    offsetWidth: number,
+    offsetHeight: number,
+    updatePos = null as any,
+    updateSize = null as any,
+  ) {
+    // ControlUtils.updateLayerInitSize(layerUtils.pageIndex, layerUtils.layerIndex, layerWidth, layerHeight, 1)
     let imgWidth = this.initImgSize.width
     let imgHeight = this.initImgSize.height
     const imgPos = {
       x: this.initImgPos.x,
-      y: this.initImgPos.y
+      y: this.initImgPos.y,
     }
 
     const ratio = imgHeight / imgWidth
@@ -497,31 +573,53 @@ class ImageUtils {
     if (updatePos) {
       updatePos(imgPos.x > 0 ? 0 : imgPos.x, imgPos.y > 0 ? 0 : imgPos.y)
     } else {
-      this.updateImgPos(LayerUtils.pageIndex, LayerUtils.layerIndex, imgPos.x > 0 ? 0 : imgPos.x, imgPos.y > 0 ? 0 : imgPos.y)
+      this.updateImgPos(
+        layerUtils.pageIndex,
+        layerUtils.layerIndex,
+        imgPos.x > 0 ? 0 : imgPos.x,
+        imgPos.y > 0 ? 0 : imgPos.y,
+      )
     }
 
     if (updateSize) {
       updateSize(imgWidth, imgHeight)
     } else {
-      this.updateImgSize(LayerUtils.pageIndex, LayerUtils.layerIndex, imgWidth, imgHeight)
+      this.updateImgSize(layerUtils.pageIndex, layerUtils.layerIndex, imgWidth, imgHeight)
     }
   }
 
-  imgClipping(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined, updatePos = null as any, updateSize = null as any) {
-    // ControlUtils.updateLayerInitSize(LayerUtils.pageIndex, LayerUtils.layerIndex, width, height, 1)
+  imgClipping(
+    width: number,
+    height: number,
+    offsetX: number | undefined,
+    offsetY: number | undefined,
+    updatePos = null as any,
+    updateSize = null as any,
+  ) {
+    // ControlUtils.updateLayerInitSize(layerUtils.pageIndex, layerUtils.layerIndex, width, height, 1)
     const imgX = this.initImgPos.x
     const imgY = this.initImgPos.y
 
     if (updatePos) {
       updatePos((offsetX ?? 0) + imgX, (offsetY ?? 0) + imgY)
     } else {
-      this.updateImgPos(LayerUtils.pageIndex, LayerUtils.layerIndex, (offsetX ?? 0) + imgX, (offsetY ?? 0) + imgY)
+      this.updateImgPos(
+        layerUtils.pageIndex,
+        layerUtils.layerIndex,
+        (offsetX ?? 0) + imgX,
+        (offsetY ?? 0) + imgY,
+      )
     }
 
     if (updateSize) {
       updateSize(this.initImgSize.width, this.initImgSize.height)
     } else {
-      this.updateImgSize(LayerUtils.pageIndex, LayerUtils.layerIndex, this.initImgSize.width, this.initImgSize.height)
+      this.updateImgSize(
+        layerUtils.pageIndex,
+        layerUtils.layerIndex,
+        this.initImgSize.width,
+        this.initImgSize.height,
+      )
     }
   }
 
@@ -531,8 +629,8 @@ class ImageUtils {
       layerIndex,
       styles: {
         imgX,
-        imgY
-      }
+        imgY,
+      },
     })
   }
 
@@ -542,19 +640,24 @@ class ImageUtils {
       layerIndex,
       styles: {
         imgWidth,
-        imgHeight
-      }
+        imgHeight,
+      },
     })
   }
 
-  async getImageSize(url: string, defaultWidth: number, defaultHeight: number, setAnonymous = true): Promise<{ width: number; height: number, exists: boolean }> {
+  async getImageSize(
+    url: string,
+    defaultWidth: number,
+    defaultHeight: number,
+    setAnonymous = true,
+  ): Promise<{ width: number; height: number; exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
       if (!url.includes('appver')) {
         url = this.appendQuery(url, 'appver', APP_VER_FOR_REFRESH_CACHE)
       }
       this.imgLoadHandler(url, (img) => resolve(img), {
         error: () => reject(new Error('Could not load image')),
-        crossOrigin: true
+        crossOrigin: true,
       })
     })
     try {
@@ -565,8 +668,12 @@ class ImageUtils {
     }
   }
 
-  adaptToSize(srcSize: { width: number, height: number }, targetSize: { width: number, height: number }): { width: number, height: number, posX: number, posY: number } {
-    if (!srcSize.width || !srcSize.height) return { width: srcSize.width, height: srcSize.height, posX: 0, posY: 0 }
+  adaptToSize(
+    srcSize: { width: number; height: number },
+    targetSize: { width: number; height: number },
+  ): { width: number; height: number; posX: number; posY: number } {
+    if (!srcSize.width || !srcSize.height)
+      return { width: srcSize.width, height: srcSize.height, posX: 0, posY: 0 }
     const srcAspectRatio = srcSize.width / srcSize.height
     const targetAspectRatio = targetSize.width / targetSize.height
     let width = 0
@@ -589,8 +696,14 @@ class ImageUtils {
    * @param page Target page
    * @returns Adapted size and position
    */
-  adaptToPage(srcSize: { width: number, height: number }, page: IPage): { width: number, height: number, posX: number, posY: number } {
-    let { width, height, posX, posY } = this.adaptToSize(srcSize, page.unit === 'px' ? page : pageUtils.getPageSizeWithBleeds(page))
+  adaptToPage(
+    srcSize: { width: number; height: number },
+    page: IPage,
+  ): { width: number; height: number; posX: number; posY: number } {
+    let { width, height, posX, posY } = this.adaptToSize(
+      srcSize,
+      page.unit === 'px' ? page : pageUtils.getPageSizeWithBleeds(page),
+    )
     if (page.unit && page.unit !== 'px' && page.bleeds) {
       posX -= page.bleeds.left
       posY -= page.bleeds.top
@@ -604,12 +717,12 @@ class ImageUtils {
         srcObj: {
           type: this.getSrcType(src),
           userId: '',
-          assetId: this.getAssetId(src)
+          assetId: this.getAssetId(src),
         },
         styles: {
           width: img.width,
-          height: img.height
-        }
+          height: img.height,
+        },
       }
       return mouseUtils.clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
     })
@@ -627,15 +740,30 @@ class ImageUtils {
       assetIndex: image.asset_index,
       teamId: image.team_id,
       urls: {
-        prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev` : image.signed_url?.prev ?? '',
-        full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/full` : image.signed_url?.full ?? '',
-        larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg` : image.signed_url?.larg ?? '',
-        original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/original` : image.signed_url?.original ?? '',
-        midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd` : image.signed_url?.midd ?? '',
-        smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal` : image.signed_url?.smal ?? '',
-        tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? ''
+        prev: isAdmin
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev`
+          : image.signed_url?.prev ?? '',
+        full: isAdmin
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/full`
+          : image.signed_url?.full ?? '',
+        larg: isAdmin
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg`
+          : image.signed_url?.larg ?? '',
+        original: isAdmin
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id
+          }/original`
+          : image.signed_url?.original ?? '',
+        midd: isAdmin
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd`
+          : image.signed_url?.midd ?? '',
+        smal: isAdmin
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal`
+          : image.signed_url?.smal ?? '',
+        tiny: isAdmin
+          ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny`
+          : image.signed_url?.tiny ?? '',
       },
-      initSrc
+      initSrc,
     }
   }
 
@@ -657,7 +785,7 @@ class ImageUtils {
         smal: url,
         tiny: url,
       },
-      initSrc
+      initSrc,
     }
   }
 
@@ -706,25 +834,64 @@ class ImageUtils {
     return src
   }
 
+  async handlePublicXtraErr(config: IImage, pageId: string, isBgImg = false) {
+    const src = this.getSrc(config, 'xtra')
+    const id = config.id
+    return new Promise<string>((resolve) => {
+      this.imgLoadHandler(src, () => {
+        const pageIndex = pageUtils.getPages.findIndex((page) => page.id === pageId)
+        const querys = config.srcObj.querys ?
+          [...config.srcObj.querys, { key: 'xtraVer', val: generalUtils.generateRandomString(4)}]
+          : [{ key: 'xtraVer', val: generalUtils.generateRandomString(4)}]
+        if (isBgImg) {
+          store.commit('SET_backgroundImageSrc', {
+            pageIndex: pageIndex,
+            srcObj: {
+              ...config.srcObj,
+              querys
+            }
+          })
+        } else {
+          const layerIndex = pageUtils.getPages[pageIndex].layers.findIndex(l => l.id === id)
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {
+            srcObj: {
+              ...config.srcObj,
+              querys
+            }
+          })
+        }
+        resolve(this.getSrc(config, 'xtra'))
+      })
+    })
+  }
+
   async handlePrivateXtraErr(config: IImage) {
     const editorImg = store.getters['file/getEditorViewImages']
     const src = editorImg(config.srcObj.assetId).xtra
     // calling the resize-image-api
-    return new Promise<string>(resolve => {
-      this.imgLoadHandler(src, () => {
-        // replace the xtra src in file/editorView with newSrc
-        const newSrc = this.appendQuery(this.privateXtraExtract(src), 'ver', generalUtils.generateRandomString(4))
-        store.commit('file/UPDATE_IMAGE_XTRA', {
-          assetId: config.srcObj.assetId,
-          src: newSrc
-        })
-        resolve(newSrc)
-      }, {
-        crossOrigin: false,
-        error: (img) => {
-          console.error('hanlePrivateXtraErr error', img)
-        }
-      })
+    return new Promise<string>((resolve) => {
+      this.imgLoadHandler(
+        src,
+        () => {
+          // replace the xtra src in file/editorView with newSrc
+          const newSrc = this.appendQuery(
+            this.privateXtraExtract(src),
+            'ver',
+            generalUtils.generateRandomString(4),
+          )
+          store.commit('file/UPDATE_IMAGE_XTRA', {
+            assetId: config.srcObj.assetId,
+            src: newSrc,
+          })
+          resolve(newSrc)
+        },
+        {
+          crossOrigin: false,
+          error: (img) => {
+            console.error('hanlePrivateXtraErr error', img)
+          },
+        },
+      )
     })
   }
 
@@ -735,49 +902,70 @@ class ImageUtils {
     // However, if the xtra image is not produced yet,
     // this returned src would bump into 404 ERROR,
     // then the func 'handlePrivateXtraErr' should be called.
-    if (src.includes('xtra') && src.includes('https://template.vivipic.com/') && store.state.user.userId !== 'backendRendering') {
+    if (
+      src.includes('xtra') &&
+      src.includes('https://template.vivipic.com/') &&
+      store.state.user.userId !== 'backendRendering'
+    ) {
       return 'https://' + src.slice('https://template.vivipic.com/'.length)
     }
     return src
   }
 
-  replaceImg(photo: IAssetPhoto | IPhotoItem, previewSrc: string) {
-    const { getCurrLayer: layer, getCurrConfig: _config, pageIndex, layerIndex, subLayerIdx } = LayerUtils
+  replaceImg(photo: SrcObj, previewSrc: string, aspectRatio: number) {
+    const {
+      getCurrLayer: layer,
+      getCurrConfig: _config,
+      pageIndex,
+      layerIndex,
+      subLayerIdx,
+    } = layerUtils
     if (_config.type !== LayerType.image && _config.type !== LayerType.frame) return
-
-    const srcObj = this.toSrcObj(photo)
 
     const resizeRatio = RESIZE_RATIO_IMAGE
     const pageSize = pageUtils.currFocusPageSize
     const pageAspectRatio = pageSize.width / pageSize.height
-    const photoAspectRatio = photo.width / photo.height
-    const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
-    const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+    const photoWidth =
+      aspectRatio > pageAspectRatio
+        ? pageSize.width * resizeRatio
+        : pageSize.height * resizeRatio * aspectRatio
+    const photoHeight =
+      aspectRatio > pageAspectRatio
+        ? (pageSize.width * resizeRatio) / aspectRatio
+        : pageSize.height * resizeRatio
 
     const isPrimaryLayerFrame = layer.type === LayerType.frame
-    const config = isPrimaryLayerFrame ? ((layer as IFrame).clips.find(c => c.active) ?? (layer as IFrame).clips[0]) : _config as IImage
+    const config = isPrimaryLayerFrame
+      ? (layer as IFrame).clips.find((c) => c.active) ?? (layer as IFrame).clips[0]
+      : (_config as IImage)
     const { imgWidth, imgHeight } = config.styles
     const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
     const styles = {
       ...config.styles,
-      ...mouseUtils.clipperHandler({
-        styles: {
-          width: photoWidth,
-          height: photoHeight
-        }
-      } as unknown as IImage, path, config.styles).styles,
+      ...mouseUtils.clipperHandler(
+        {
+          styles: {
+            width: photoWidth,
+            height: photoHeight,
+          },
+        } as unknown as IImage,
+        path,
+        config.styles,
+      ).styles,
       ...{
         initWidth: config.styles.initWidth,
-        initHeight: config.styles.initHeight
-      }
+        initHeight: config.styles.initHeight,
+      },
     }
     if (isPrimaryLayerFrame) {
       FrameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)
-      FrameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), srcObj)
-      FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { previewSrc })
+      FrameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), photo)
+      FrameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), {
+        previewSrc,
+      })
     } else {
-      LayerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-      LayerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, previewSrc }, subLayerIdx)
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: photo, previewSrc }, subLayerIdx)
     }
     store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
     stepsUtils.record()

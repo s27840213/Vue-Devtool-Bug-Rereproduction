@@ -22,12 +22,13 @@ div(ref="main" class="full-page relative")
 </template>
 
 <script lang="ts">
+import Payment from '@/components/fullPage/Payment.vue'
+import Welcome from '@/components/fullPage/Welcome.vue'
 import { IFullPageConfig } from '@nu/vivi-lib/interfaces/vivisticker'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import Payment from '@/components/fullPage/Payment.vue'
-import Welcome from '@/components/fullPage/Welcome.vue'
 
 export default defineComponent({
   components: {
@@ -62,6 +63,10 @@ export default defineComponent({
       clearFullPageConfig: 'vivisticker/UPDATE_clearFullPageConfig'
     }),
     initialize() {
+      logUtils.setLog(`Show full page: {
+        type: ${this.fullPageConfig.type}
+        params: ${JSON.stringify(this.fullPageConfig.params)}
+      }`)
       this.showCloseButton = false
       this.showOnVideoFinish = false
       switch (this.fullPageConfig.type) {

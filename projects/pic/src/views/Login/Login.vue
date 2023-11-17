@@ -195,17 +195,17 @@ div(style="position: relative;")
 </template>
 
 <script lang="ts">
-import userApis from '@nu/vivi-lib/apis/user'
-import { ILoginResult } from '@nu/vivi-lib/interfaces/api'
 import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
+import { notify } from '@kyvg/vue3-notification'
+import userApis from '@nu/vivi-lib/apis/user'
+import { ILoginResult } from '@nu/vivi-lib/interfaces/api'
 import gtmUtils from '@nu/vivi-lib/utils/gtmUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
-import loginUtils from '@/utils/loginUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -600,7 +600,7 @@ export default defineComponent({
       }
     },
     popPayment() {
-      if (this.type === 'payment') paymentUtils.checkPro({ plan: 1 }, 'pro-template')
+      if (this.type === 'payment') paymentUtils.checkProApp({ plan: 1 }, 'pro-template')
     }
   }
 })

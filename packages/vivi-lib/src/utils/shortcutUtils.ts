@@ -51,7 +51,7 @@ class ShortcutUtils {
     this.offsetCount = 0
   }
 
-  private regenerateLayerInfo(_layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
+  regenerateLayerInfo(_layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
     const { toCenter = false, offset = 10, targetPageIndex } = props
     let layer = GeneralUtils.deepCopy(_layer)
     if (toCenter && targetPageIndex !== undefined) {
@@ -272,6 +272,8 @@ class ShortcutUtils {
   }
 
   altDuplicate(targetPageIndex: number, targetLayerIndex: number, config: ILayer) {
+    if (GeneralUtils.isTouchDevice()) return
+
     const ori_config = config as any
     const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config as IShape | IText | IImage | IGroup | IFrame), { offset: 0 })
     newLayer.active = false

@@ -1,21 +1,22 @@
+import store from '@/store'
+import Editor from '@/views/Editor.vue'
+import Home from '@/views/Home.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n from '@nu/vivi-lib/i18n'
-import store from '@/store'
+import router from '@nu/vivi-lib/router'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import overlayUtils from '@nu/vivi-lib/utils/overlayUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
-import Editor from '@/views/Editor.vue'
-import Home from '@/views/Home.vue'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
-import router from '@nu/vivi-lib/router'
 
 const MOBILE_ROUTES = [
   'Home',
@@ -234,7 +235,7 @@ if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: () => import('@/views/NubtnList.vue')
+    component: () => import('@nu/vivi-lib/views/NubtnList.vue')
   })
   routes.push({
     path: 'nativeevttest',
@@ -266,6 +267,15 @@ router.addRoute({
       picWVUtils.registerCallbacks('router')
     }
     await picWVUtils.getUserInfo()
+    const appLoadedTimeout = store.getters['webView/getAppLoadedTimeout']
+    if (appLoadedTimeout > 0) {
+      window.setTimeout(() => {
+        if (!picWVUtils.appLoadedSent) {
+          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`)
+        }
+        picWVUtils.sendAppLoaded()
+      }, appLoadedTimeout)
+    }
     let argoError = false
     try {
       const status = (await fetch(`https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`)).status
@@ -327,24 +337,13 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Force login in these page
-  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) && (window as any).__PRERENDER_INJECTED === undefined) {
-    if (!store.getters['user/isLogin']) {
-      const token = localStorage.getItem('token')
-      if (token === '' || !token) {
-        next({ name: 'SignUp', query: { redirect: to.fullPath } })
-        return
-      } else {
-        await store.dispatch('user/login', { token: token })
-      }
-    }
-  } else {
-    if (!store.getters['user/isLogin']) {
-      const token = localStorage.getItem('token')
-      if (token && token.length > 0) {
-        await store.dispatch('user/login', { token: token })
-      }
-    }
-  }
+  const needForceLogin = 
+    ['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) &&
+    !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) &&
+    window.__PRERENDER_INJECTED === undefined
+  loginUtils.checkToken(needForceLogin ? () => {
+    next({ name: 'SignUp', query: { redirect: to.fullPath } })
+  } : undefined)
 
   if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
     /**
@@ -358,6 +357,8 @@ router.beforeEach(async (to, from, next) => {
     // const json = appJson as any
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
+
+    store.commit('webView/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
 
     store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
 
