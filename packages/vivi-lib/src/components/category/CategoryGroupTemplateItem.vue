@@ -21,7 +21,7 @@ div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
 </template>
 
 <script lang="ts">
-import ImageCarousel from '@/components/global/ImageCarousel.vue'
+import ImageCarousel from '@nu/shared-lib/components/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import GeneralUtils from '@/utils/generalUtils'
 import { notify } from '@kyvg/vue3-notification'

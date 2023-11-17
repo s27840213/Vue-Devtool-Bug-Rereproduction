@@ -57,7 +57,7 @@ div(v-else class="overlay mobile" :class="theme")
 <script lang="ts">
 import MobileSlider from '@nu/vivi-lib/components/editor/mobile/MobileSlider.vue'
 import OverlayItem from '@/components/editor/overlay/OverlayItem.vue'
-import CollapseTitle from '@nu/vivi-lib/components/global/CollapseTitle.vue'
+import CollapseTitle from '@nu/shared-lib/components/CollapseTitle.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'

@@ -23,15 +23,11 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
       @pointer-down="setIsChangingBrushSize(true)"
       @pointer-up="setIsChangingBrushSize(false)")
   div(class="w-full flex justify-between items-center box-border px-24")
-    cm-btn(
+    nubtn(
       theme="secondary"
-      size="sm"
       @click="cancel") {{ $t('NN0203') }}
     span(class="typo-h6 text-app-text-secondary") {{ $t('CM0017') }}
-    cm-btn(
-      theme="primary"
-      size="sm"
-      @click="apply") {{ $t('CM0061') }}
+    nubtn(@click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">
 import { useCanvasStore } from '@/stores/canvas'

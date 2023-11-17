@@ -32,7 +32,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
-      svg(v-if="isAdjustImage"
+      svg(v-if="isAdjustImage && (!forRender || !$isTouchDevice())"
         :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
@@ -40,7 +40,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(:id="filterId"
+          filter(v-if="!isCurrLayerPinched" :id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -288,40 +288,40 @@ export default defineComponent({
           this.setImgConfig(this.layerInfo())
         }
       } else {
-        groupUtils.deselect()
+        // groupUtils.deselect()
         this.setImgConfig(undefined)
-        this.$nextTick(() => {
-          const reSelecting = () => {
-            const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
-            const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
-            groupUtils.deselect()
-            groupUtils.select(this.pageIndex, [targetIdx])
-            if (isSubLayer) {
-              const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
-              if (this.primaryLayerType() === LayerType.group) {
-                layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
-              } else if (this.primaryLayerType() === LayerType.frame) {
-                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
-              }
-            }
-          }
-          if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
-            reSelecting()
-          }
-          if (this.isDuringCopy) {
-            const start = Date.now()
-            const timer = setInterval(() => {
-              if (Date.now() - start > 10000) {
-                clearInterval(timer)
-              }
-              if (!this.isDuringCopy) {
-                reSelecting()
-                clearInterval(timer)
-              }
-            }, 300)
-          }
-        })
-        this.handleDimensionUpdate()
+        // this.$nextTick(() => {
+        //   const reSelecting = () => {
+        //     const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
+        //     const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
+        //     groupUtils.deselect()
+        //     groupUtils.select(this.pageIndex, [targetIdx])
+        //     if (isSubLayer) {
+        //       const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        //       if (this.primaryLayerType() === LayerType.group) {
+        //         layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
+        //       } else if (this.primaryLayerType() === LayerType.frame) {
+        //         frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
+        //       }
+        //     }
+        //   }
+        //   if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
+        //     reSelecting()
+        //   }
+        //   if (this.isDuringCopy) {
+        //     const start = Date.now()
+        //     const timer = setInterval(() => {
+        //       if (Date.now() - start > 10000) {
+        //         clearInterval(timer)
+        //       }
+        //       if (!this.isDuringCopy) {
+        //         reSelecting()
+        //         clearInterval(timer)
+        //       }
+        //     }, 300)
+        //   }
+        // })
+        // this.handleDimensionUpdate()
       }
       if (this.forRender) {
         return
@@ -371,15 +371,8 @@ export default defineComponent({
       }, {
         crossOrigin: true,
         error: () => {
-          if (this.config.srcObj.type === 'private' && newSize === 'xtra') {
-            imageUtils.handlePrivateXtraErr(this.config as IImage)
-              .then((newSrc) => {
-                imageUtils.imgLoadHandler(newSrc, (img) => {
-                  this.imgNaturalSize.width = img.width
-                  this.imgNaturalSize.height = img.height
-                  this.src = newSrc
-                })
-              })
+          if (newSize === 'xtra') {
+            this.handleXtraErr()
           }
         }
       })
@@ -395,6 +388,7 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing',
       isShowPagePreview: 'page/getIsShowPagePreview',
+      controlState: 'getControlState'
     }),
     ...vuexUtils.mapState('stk', {
       isDuringCopy: false,
@@ -414,6 +408,12 @@ export default defineComponent({
         (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
       ) return false
       return true
+    },
+    isCurrLayerPinched(): boolean {
+      const { controlState } = this
+      if (controlState.layerInfo) {
+        return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+      } else return false
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -581,6 +581,31 @@ export default defineComponent({
     },
     onError() {
       this._onError()
+    },
+    handleXtraErr() {
+      const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
+      if (this.config.srcObj.type === 'private') {
+        imageUtils.handlePrivateXtraErr(this.config as IImage)
+          .then((newSrc) => {
+            imageUtils.imgLoadHandler(newSrc, (img) => {
+              if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+                this.imgNaturalSize.width = img.width
+                this.imgNaturalSize.height = img.height
+                this.src = newSrc
+              }
+            })
+          })
+      } else if (this.config.srcObj.type === 'public') {
+        imageUtils.imgLoadHandler(imageUtils.getSrc(this.config, 'xtra'),
+          (img) => {
+            if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+              this.imgNaturalSize.width = img.width
+              this.imgNaturalSize.height = img.height
+              this.src = img.src
+            }
+          }
+        )
+      }
     },
     _onError(imgLoadHandlerError = false) {
       if (!this.src && !imgLoadHandlerError && this.userId !== 'backendRendering') return
@@ -805,18 +830,8 @@ export default defineComponent({
           }
         }, {
           error: () => {
-            if (this.config.srcObj.type === 'private' && srcSize === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
-              return
+            if (srcSize === 'xtra') {
+              return this.handleXtraErr()
             }
 
             reject(new Error(`cannot load the current image, src: ${this.src}`))
@@ -850,17 +865,8 @@ export default defineComponent({
         }, {
           crossOrigin: true,
           error: () => {
-            if (this.config.srcObj.type === 'private' && newVal === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
+            if (newVal === 'xtra') {
+              this.handleXtraErr()
             }
           }
         })

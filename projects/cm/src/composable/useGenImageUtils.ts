@@ -3,8 +3,9 @@ import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import type { GenImageResult } from '@/types/api'
-import { generalUtils, logUtils } from '@nu/shared-lib'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { useEventBus } from '@vueuse/core'
 
@@ -45,16 +46,14 @@ const useGenImageUtils = () => {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
     RECORD_TIMING && testUtils.start('polling', false)
-    const json = await polling<GenImageResult>(
-      `https://template.vivipic.com/charmix/${userId.value}/result/${requestId}.json`,
-    )
+    await polling<GenImageResult>(res.url.url, { isJson: false })
     RECORD_TIMING && testUtils.log('polling', '')
-    if (json.flag !== 0) {
-      throw new Error('Run /gen-image Failed,' + json.msg ?? '')
-    }
+    // if (json.flag !== 0) {
+    //   throw new Error('Run /gen-image Failed,' + json.msg ?? '')
+    // }
 
     setPrevGenParams({ requestId, prompt })
-    return json.url
+    return res.url.url
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {

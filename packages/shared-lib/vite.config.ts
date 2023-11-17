@@ -1,34 +1,30 @@
 import vue from '@vitejs/plugin-vue'
 import * as path from 'path'
-// import typescript2 from 'rollup-plugin-typescript2'
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
+// import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
-import svgSpritePlugin from 'vite-plugin-svg-sprite-component'
+import svgSpritePlugin from 'vite-plugin-svg-sprite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    svgSpritePlugin.default({ symbolId: (name) => name }),
-    Components({
-      dirs: ['src/components'],
-      extensions: ['vue'],
-      dts: 'src/components.d.ts',
+    svgSpritePlugin({
+      symbolId: '[name]',
+      svgo: false,
+      include: '**/src/assets/icon/**/*.svg',
     }),
-    // https://github.com/antfu/unplugin-auto-import
-    AutoImport({
-      imports: ['vue', 'vue-router', 'vue-i18n'],
-      dts: 'src/auto-import.d.ts',
-    }),
+    // Components({
+    //   dirs: ['src/components'],
+    //   extensions: ['vue'],
+    //   dts: 'src/components.d.ts',
+    // }),
   ],
   build: {
-    cssCodeSplit: true,
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: ['src/index.ts', 'src/plugin.ts', 'src/types.ts'],
+      entry: 'src/main.ts',
       name: '@nu/shared-lib',
-      formats: ['es', 'cjs'],
+      formats: ['es'],
       fileName: (format, entry) => `${entry}.${format}.js`,
     },
     rollupOptions: {
@@ -40,6 +36,10 @@ export default defineConfig({
         globals: {
           vue: 'Vue',
         },
+        // preserveModules can keep dist folder structure
+        // https://github.com/vitejs/vite/discussions/2447#discussioncomment-6768114
+        preserveModules: true,
+        preserveModulesRoot: './',
       },
     },
   },

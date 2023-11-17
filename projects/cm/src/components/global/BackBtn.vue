@@ -3,7 +3,7 @@ router-link(
   custom
   :to="toTarget"
   v-slot="{ navigate }")
-  cm-svg-icon(
+  svg-icon(
     icon-color="app-icon-light"
     icon-name="arrow-left"
     icon-width="24px"
@@ -49,7 +49,7 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 
 // #region editor
 const editorStore = useEditorStore()
-const { setEditorState } = editorStore
+const { changeEditorState } = editorStore
 const { inGenResultState, inSavingState } = storeToRefs(editorStore)
 // #endregion
 
@@ -63,14 +63,9 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (inSavingState.value) {
-    setEditorState('genResult')
+  if (inSavingState.value || inGenResultState.value) {
+    changeEditorState('prev')
 
-    return
-  }
-
-  if (inGenResultState.value) {
-    setEditorState('editing')
     return
   }
 
