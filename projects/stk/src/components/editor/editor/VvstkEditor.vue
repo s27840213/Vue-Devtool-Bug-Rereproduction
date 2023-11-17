@@ -364,6 +364,7 @@ export default defineComponent({
     },
     pinchStart(e: AnyTouchEvent) {
       if (this.$store.getters['imgControl/isImgCtrl'] || this.$store.getters['imgControl/isImgCtrl']) return
+      if (this.$store.getters['bgRemove/getInBgRemoveMode']) return
 
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
 
