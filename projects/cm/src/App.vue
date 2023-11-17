@@ -1,5 +1,6 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato]")
+div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato]"
+  :class="{'bg-app-bg': !isDuringCopy}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"

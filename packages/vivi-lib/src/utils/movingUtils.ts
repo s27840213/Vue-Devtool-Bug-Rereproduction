@@ -141,7 +141,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor']) return
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getDisableLayerAction) return
     this.initLayerPos.x = this.getLayerPos.x
     this.initLayerPos.y = this.getLayerPos.y
     this.initPageTranslate.x = pageUtils.getCurrPage.x

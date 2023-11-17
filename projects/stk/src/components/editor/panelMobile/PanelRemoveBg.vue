@@ -103,7 +103,9 @@ export default defineComponent({
 
           this.previewSrc = src
 
+          console.time('to dataUrl')
           this.toDataURL(src, (dataUrl: string) => {
+            console.timeEnd('to dataUrl')
             generalUtils.dataURLtoBlob(dataUrl)
             this.setIsProcessing(true)
             uploadUtils.uploadAsset(type, [dataUrl])

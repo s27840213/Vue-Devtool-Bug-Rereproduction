@@ -17,8 +17,8 @@ import { Itheme } from '@/interfaces/theme'
 import assetPanel from '@/store/module/assetPanel'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
-import color from '@/store/module/color'
 import cmWV from '@/store/module/cmWV'
+import color from '@/store/module/color'
 import font from '@/store/module/font'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
@@ -155,6 +155,7 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
+  disableLayerAction: false
 })
 
 const state = getDefaultState()
@@ -382,6 +383,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getModalInfo(state: IEditorState): { [key: string]: string } {
     return state.modalInfo
   },
+  getDisableLayerAction(state: IEditorState): boolean {
+    return state.disableLayerAction
+  }
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1567,6 +1571,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_modalInfo(state: IEditorState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
+  SET_disableLayerAction(state: IEditorState, disableLayerAction: boolean) {
+    state.disableLayerAction = disableLayerAction
+  }
 }
 window.addEventListener(
   'resize',

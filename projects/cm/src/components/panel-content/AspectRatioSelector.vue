@@ -19,6 +19,7 @@ div(class="w-full box-border pl-24")
 </template>
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
@@ -28,6 +29,8 @@ const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
 
 const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
 const selectedType = ref('9_16')
+
+const bus = useEventBus('editor')
 
 const selectAspectRatio = (type: string) => {
   selectedType.value = type
@@ -55,6 +58,7 @@ const selectAspectRatio = (type: string) => {
     }
   }
 
+  bus.emit('fitPage', {})
   updateLayerStyleToFitPage()
 
   /**
@@ -95,5 +99,12 @@ const updateLayerStyleToFitPage = () => {
     })
   }
 }
+
+onMounted(() => {
+  editorUtils.setDisableLayerAction(true)
+})
+onBeforeUnmount(() => {
+  editorUtils.setDisableLayerAction(false)
+})
 </script>
 <style lang="scss"></style>

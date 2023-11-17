@@ -80,7 +80,7 @@ const useGenImageUtils = () => {
         uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
           .then(() => {
             RECORD_TIMING && testUtils.log('upload screenshot', '')
-            console.log('screenshot:', (new Date()).getTime())
+            console.log('screenshot:', new Date().getTime())
             cleanup()
             resolve()
           })
@@ -93,7 +93,7 @@ const useGenImageUtils = () => {
   }
 
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
-    const bus = useEventBus('generation')
+    const bus = useEventBus('editor')
     RECORD_TIMING && testUtils.start('mask to dataUrl', false)
     return new Promise<void>((resolve, reject) => {
       bus.emit('genMaskUrl', {
@@ -103,7 +103,7 @@ const useGenImageUtils = () => {
             RECORD_TIMING && testUtils.start('upload mask', false)
             await uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`)
             RECORD_TIMING && testUtils.log('upload mask', '')
-            console.log('mask:', (new Date()).getTime())
+            console.log('mask:', new Date().getTime())
             resolve()
           } catch (error) {
             logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
