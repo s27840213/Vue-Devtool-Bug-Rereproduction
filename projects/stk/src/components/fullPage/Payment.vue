@@ -207,7 +207,7 @@ export default defineComponent({
     }),
     ...mapGetters({
       isPaymentPending: 'vivisticker/getIsPaymentPending',
-      isPromote: 'vivisticker/getIsPromote',
+      isPromote: 'vivisticker/getIsPromoteCountry',
     }),
     payment(): IPayment {
       return this.$store.state.vivisticker.payment as IPayment

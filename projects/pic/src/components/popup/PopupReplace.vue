@@ -36,7 +36,7 @@ import networkUtils from '@nu/vivi-lib/utils/networkUtils'
 import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 interface IPopupReplaceItem extends IImageListItem {
