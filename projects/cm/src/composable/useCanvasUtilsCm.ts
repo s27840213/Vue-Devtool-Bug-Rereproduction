@@ -352,26 +352,65 @@ const useCanvasUtils = (
     mapEditorToCanvas(() => {
       if (canvasCtx && canvasCtx.value) {
         const pixels = canvasCtx.value.getImageData(0, 0, canvasWidth.value, canvasHeight.value)
+        const result = new ImageData(
+          new Uint8ClampedArray(pixels.data),
+          canvasWidth.value,
+          canvasHeight.value,
+        )
         // The total number of pixels (RGBA values).
         const bufferSize = pixels.data.length
 
         // Iterate over every pixel to find the boundaries of the non-transparent content.
         for (let i = 0; i < bufferSize; i += 4) {
           // Check the alpha (transparency) value of each pixel.
-          if (pixels.data[i + 3] < 10) {
-            // If the pixel is not transparent, set it to transparent.
-            pixels.data[i] = 255
-            pixels.data[i + 1] = 114
-            pixels.data[i + 2] = 98
-            pixels.data[i + 3] = 255
-          } else {
+          if (pixels.data[i + 3] === 0) {
             // If the pixel is transparent, set it to opaque.
+            // const x = (i / 4) % canvasWidth.value
+            // const y = Math.floor(i / (4 * canvasWidth.value))
 
-            pixels.data[i + 3] = 0
+            // for (let dx = -8; dx <= 8; dx++) {
+            //   for (let dy = -8; dy <= 8; dy++) {
+            //     setPixelColor(x, y, 255, 114, 98)
+            //   }
+            // }
+            result.data[i] = 255
+            result.data[i + 1] = 114
+            result.data[i + 2] = 98
+            result.data[i + 3] = 255
+          } else {
+            // If the pixel is not transparent, set it to transparent.
+            result.data[i + 3] = 0
           }
         }
+        canvasCtx.value.putImageData(result, 0, 0)
+        const tmpCanvas = document.createElement('canvas')
+        tmpCanvas.width = canvasWidth.value
+        tmpCanvas.height = canvasHeight.value
+        const tmpCtx = tmpCanvas.getContext('2d')
+        canvas.value && tmpCtx?.drawImage(canvas.value, 0, 0)
+        clearCtx()
 
-        canvasCtx.value.putImageData(pixels, 0, 0)
+        canvasCtx.value.save()
+        canvasCtx.value.shadowBlur = 0 // Blur level
+        canvasCtx.value.shadowColor = '#ff7262' // Color
+        const shiftDir = [
+          [0, 1],
+          [-1, 0],
+          [0, -1],
+          [1, 0],
+          [1, 1],
+          [-1, 1],
+          [-1, -1],
+          [1, -1],
+        ]
+        // X offset loop
+        for (const dir of shiftDir) {
+          const [xDir, yDir] = dir
+          canvasCtx.value.shadowOffsetX = 5 * xDir // X offset
+          canvasCtx.value.shadowOffsetY = 5 * yDir // Y offset
+          canvasCtx.value.drawImage(tmpCanvas, 0, 0, canvasWidth.value, canvasHeight.value)
+        }
+        canvasCtx.value.restore()
         record()
       }
     })
