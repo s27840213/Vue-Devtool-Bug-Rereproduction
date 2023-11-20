@@ -6,7 +6,7 @@ div(v-if="$slots.left"
   div(class="flex justify-start items-center"
     :style="{gap: `${leftGap}px`}")
     slot(name="left")
-  div(v-if="$slots.middle" class="flex justify-center items-center"
+  div(v-if="$slots.middle" class="flex justify-center items-center whitespace-nowrap"
     :style="{gap: `${middGap}px`}")
     slot(name="middle")
   div(v-if="$slots.right" class="flex justify-end items-center"

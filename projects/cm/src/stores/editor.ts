@@ -1,5 +1,5 @@
 import useSteps from '@/composable/useSteps'
-import type { EditorFeature, EditorStates, EditorType, PowerfulfillStates } from '@/types/editor'
+import type { EditorFeature, EditorStates, EditorType, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
@@ -10,6 +10,7 @@ import { useCanvasStore } from './canvas'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
+  'hidden-message': ['aspectRatio', 'editing', 'genResult', 'saving'] as HiddenMessageStates[],
 }
 
 export interface IGenResult {
@@ -112,6 +113,11 @@ export const useEditorStore = defineStore('editor', {
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
     },
+    startEditing(type: EditorType) {
+      this.currStateIndex = 0
+      this.editorType = type
+      this.editorStates = editorStatesMap[this.editorType]
+    },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
       const toNext = dir === 'next'
@@ -123,9 +129,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrActiveFeature(feature: EditorFeature) {
       this.currActiveFeature = feature
-    },
-    setEditorType(type: EditorType) {
-      this.editorType = type
     },
     setIsGenerating(isGenerating: boolean) {
       this.isGenerating = isGenerating

@@ -31,7 +31,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(v-if="!atEventTester && !isDuringCopy"
+  bottom-panel(v-if="bottomPanelComponent && !atEventTester && !isDuringCopy"
     class="z-bottom-panel row-start-3 row-end-4"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
     :style="disableBtmPanelTransition ? 'transition: none' : ''")
@@ -128,6 +128,7 @@ const {
   atMyDesign,
   atSettings,
   atMainPage,
+  atDescription,
   atEventTester,
   showImgSelector,
   inGenResultState,
@@ -150,6 +151,8 @@ const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean
 
 const bottomPanelComponent = computed(() => {
   switch (true) {
+    case atDescription.value:
+      return null
     case wantToQuit.value:
       return ModalTemplate
     case vuex.state.user.showForceLogin:
