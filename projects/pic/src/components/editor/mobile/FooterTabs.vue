@@ -147,6 +147,7 @@ export default defineComponent({
     bgSettingTab(): Array<IFooterTab> {
       const { hasBgImage } = backgroundUtils
       return [
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
         ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light', hidden: !hasBgImage, disabled: this.backgroundLocked }] : [],
