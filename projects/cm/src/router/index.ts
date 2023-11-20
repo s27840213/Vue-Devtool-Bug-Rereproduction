@@ -129,7 +129,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  store.commit('user/SET_state', { userId: generalUtils.generateRandomString(20) })
+  store.commit('user/SET_STATE', { userId: generalUtils.generateRandomString(20) })
   useUploadUtils().getUrlMap()
 
   loginUtils.checkToken()
