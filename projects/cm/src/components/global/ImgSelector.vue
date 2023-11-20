@@ -154,6 +154,7 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
+import { notify } from '@kyvg/vue3-notification'
 
 const router = useRouter()
 
@@ -267,7 +268,13 @@ const selectAlbum = (album: IAlbum) => {
   isAlbumOpened.value = true
 }
 const useCamera = () => {
-  cmWVUtils.callIOSAsHTTPAPI('USE_CAMERA')
+  cmWVUtils.callIOSAsHTTPAPI('USE_CAMERA').then((img) => {
+    console.log('img', img) // TODO: delete it.
+    if (!img || img.flag) {
+      notify({ group: 'error', text: 'Camera img select error' })
+    }
+    selectImage(img as IAlbumContent, 'ios')
+  })
 }
 // #endregion
 
