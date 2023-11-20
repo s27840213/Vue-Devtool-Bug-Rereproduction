@@ -8,16 +8,19 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { useEventBus } from '@vueuse/core'
+import { useStore } from 'vuex'
 
 const RECORD_TIMING = true
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
   const { setPrevGenParams } = userStore
-  const { userId, prevGenParams } = storeToRefs(useUserStore())
+  const { prevGenParams } = storeToRefs(useUserStore())
   const editorStore = useEditorStore()
   const { setInitImgSrc } = editorStore
   const { editorType, pageSize, contentScaleRatio } = storeToRefs(useEditorStore())
+  const store = useStore()
+  const userId = store.getters['user/getUserId']
 
   const { uploadImage, polling } = useUploadUtils()
 
@@ -27,8 +30,8 @@ const useGenImageUtils = () => {
     if (!showMore) {
       try {
         await Promise.all([
-          uploadEditorAsImage(userId.value, requestId),
-          uploadMaskAsImage(userId.value, requestId),
+          uploadEditorAsImage(userId, requestId),
+          uploadMaskAsImage(userId, requestId),
         ])
       } catch (error) {
         logUtils.setLogForError(error as Error)
@@ -38,8 +41,7 @@ const useGenImageUtils = () => {
       prompt = prevGenParams.value.prompt
     }
     RECORD_TIMING && testUtils.start('call API', false)
-    const res = (await genImageApis.genImage(userId.value, requestId, prompt, editorType.value))
-      .data
+    const res = (await genImageApis.genImage(userId, requestId, prompt, editorType.value)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
