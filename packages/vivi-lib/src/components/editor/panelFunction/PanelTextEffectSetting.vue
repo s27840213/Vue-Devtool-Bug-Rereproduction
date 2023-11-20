@@ -186,10 +186,6 @@ export default defineComponent({
         }
       }
       switch (effect.key) {
-        case 'stretch-dog':
-        case 'stretch-rabbit':
-        case 'stretch-cat':
-        case 'stretch-dragon':
         case 'none':
           return {
             name: 'no-effect',
