@@ -36,6 +36,7 @@ import { IAssetPhoto } from '@/interfaces/api'
 import { IImage } from '@/interfaces/layer'
 import { FunctionPanelType } from '@/store/types'
 import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import DragUtils from '@/utils/dragUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -94,6 +95,7 @@ export default defineComponent({
       getPageSize: 'getPageSize',
       checkedAssets: 'file/getCheckedAssets',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isAdmin: 'user/isAdmin'
     }),
     isUploading(): boolean {
@@ -210,11 +212,15 @@ export default defineComponent({
       if (this.replaceImgInject) {
         this.replaceImgInject(photo)
       } else if (this.$isTouchDevice() && this.mobilePanel === 'replace') { // Replace frame and img frame.
-        imageUtils.replaceImg(
-          imageUtils.toSrcObj(photo),
-          this.previewSrc,
-          photo.width / photo.height,
-        )
+        if (this.inBgSettingMode) {
+            backgroundUtils.replaceBgImg(photo, this.previewSrc)
+        } else {
+          imageUtils.replaceImg(
+            imageUtils.toSrcObj(photo),
+            this.previewSrc,
+            photo.width / photo.height,
+          )
+        }
       } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)
       } else {

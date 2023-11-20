@@ -508,6 +508,11 @@ class UploadUtils {
                           if (pollingCallback) {
                             pollingCallback(json)
                           }
+
+                          notify({
+                            group: 'copy',
+                            text: `${i18n.global.t('NN0918')}`,
+                          })
                         }
                       } else {
                         store.commit('file/DEL_PREVIEW', { assetId })

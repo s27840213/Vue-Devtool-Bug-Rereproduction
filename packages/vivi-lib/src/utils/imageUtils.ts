@@ -738,7 +738,7 @@ class ImageUtils {
       height: image.height,
       id: image.id,
       assetIndex: image.asset_index,
-      teamId: image.team_id,
+      teamId: teamId,
       urls: {
         prev: isAdmin
           ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev`

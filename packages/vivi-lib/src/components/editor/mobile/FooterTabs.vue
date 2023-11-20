@@ -115,6 +115,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      isProcessing: 'bgRemove/getIsProcessing',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       isUploadShadow: 'shadow/isUploading',
@@ -233,6 +234,15 @@ export default defineComponent({
     },
     isGroup(): boolean {
       return layerUtils.getCurrLayer.type === LayerType.group
+    },
+    isUploadingImg(): boolean {
+      const currLayer = layerUtils.getCurrLayer
+      if(currLayer.type === LayerType.image) {
+        const {srcObj} = currLayer
+        return !(srcObj.type && srcObj.assetId && imageUtils.getSrc(srcObj, 'prev'))
+      } else {
+        return false
+      }
     },
     // eslint-disable-next-line vue/no-unused-properties
     isGroupOrTmp(): boolean {
