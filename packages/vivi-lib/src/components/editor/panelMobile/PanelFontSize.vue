@@ -1,6 +1,8 @@
 <template lang="pug">
 div(class="panel-font-size")
-  font-size-selector
+  font-size-selector(v-if="!$isCm")
+  //- TODO: Convert inline style to tailwind.
+  div(v-else class="text-white" style="width: 26px") {{ fontSize }}
   input(class="panel-font-size__range-input input__slider--range"
     v-progress
     v-model.number="fontSize"
@@ -65,7 +67,12 @@ export default defineComponent({
   width: 100%;
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: 3fr 7fr;
+  @include not(cm) {
+    grid-template-columns: 3fr 7fr;
+  }
+  @include cm {
+    grid-template-columns: auto 1fr;
+  }
   column-gap: 20px;
   align-items: center;
 

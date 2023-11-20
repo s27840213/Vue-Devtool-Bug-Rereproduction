@@ -272,6 +272,8 @@ class ShortcutUtils {
   }
 
   altDuplicate(targetPageIndex: number, targetLayerIndex: number, config: ILayer) {
+    if (GeneralUtils.isTouchDevice()) return
+
     const ori_config = config as any
     const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config as IShape | IText | IImage | IGroup | IFrame), { offset: 0 })
     newLayer.active = false

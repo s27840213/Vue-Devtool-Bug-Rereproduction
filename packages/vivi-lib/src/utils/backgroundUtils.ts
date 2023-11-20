@@ -227,9 +227,8 @@ class BackgroundUtils {
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageMode(pageIndex, true)
 
-    if (generalUtils.isTouchDevice()) {
-      editorUtils.setInBgSettingMode(true)
-    }
+    store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
+    stepsUtils.record()
   }
 
   fitPageBackground(pageIndex: number) {

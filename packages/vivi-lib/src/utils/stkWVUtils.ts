@@ -1655,6 +1655,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
     return currencyFormatters[currency](price.toString())
   }
+
+  getLanguageByCountry(country: string) {
+    if (['CHN', 'MAC', 'HKG', 'TWN'].includes(country)) return 'tw'
+    if (['JPN'].includes(country)) return 'jp'
+    if (['BRA', 'PRT'].includes(country)) return 'pt'
+    return 'us'
+  }
 }
 
 export default new ViviStickerUtils()

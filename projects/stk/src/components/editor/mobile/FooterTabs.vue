@@ -90,7 +90,7 @@ export default defineComponent({
       const tabs:Array<IFooterTab> = [
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode || this.inImageEditor },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) && (layerUtils.getCurrLayer as IFrame).lenght !== 1}, // vivisticker can only crop frame besides template editor
         {
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
@@ -321,35 +321,26 @@ export default defineComponent({
       if (this.inBgRemoveMode) {
         return this.bgRemoveTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
-        console.warn(1)
         /** tmp layer treated as group */
         return this.multiPhotoTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
-        console.warn(2)
         return this.photoInGroupTabs
       // text + shape color
       } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
-        console.warn(3)
         return [...this.multiObjectTabs, ...this.fontTabs]
       } else if (this.isGroupOrTmp && this.targetIs('text')) {
-        console.warn(4)
         return this.multiFontTabs
       } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
-        console.warn(5)
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
-        console.warn(6)
         return this.multiGeneralTabs
       // When deselect in object editor with frame
       } else if (this.showFrame) {
-        console.warn(7)
         return [...this.frameTabs, ...this.genearlLayerTabs]
       // When select empty frame in object editor
       } else if (this.showEmptyFrameTabs) {
-        console.warn(8)
         return this.emptyFrameTabs
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
-        console.warn(9)
         return this.photoTabs
       } else if (this.showFontTabs) {
         const res = [
@@ -372,7 +363,7 @@ export default defineComponent({
       } else if (this.editorTypeTemplate ? this.isGroupOrTmp : this.showGeneralTabs) {
         return [...this.genearlLayerTabs]
       } else if (this.showFrameTabs) {
-        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+        if ((layerUtils.getCurrLayer as IFrame).clips.length === 1) {
           return this.photoTabs
         }
         return this.frameTabs
@@ -473,10 +464,8 @@ export default defineComponent({
                   layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
                   break
                 case 'frame':
-                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active)
-                  if (index >= 0) {
-                    frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
-                  }
+                  index = Math.max((layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active), 0)
+                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true, active: true })
                   break
                 case 'group':
                   if (layerUtils.getCurrConfig.type === LayerType.image) {

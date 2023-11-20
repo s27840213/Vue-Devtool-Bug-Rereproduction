@@ -155,6 +155,8 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
+  disableLayerAction: false,
+  controlState: { type: '' }
 })
 
 const state = getDefaultState()
@@ -382,6 +384,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   getModalInfo(state: IEditorState): { [key: string]: string } {
     return state.modalInfo
   },
+  getDisableLayerAction(state: IEditorState): boolean {
+    return state.disableLayerAction
+  },
+  getControlState(state: IEditorState) {
+    return state.controlState
+  }
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1582,6 +1590,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_modalInfo(state: IEditorState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
+  SET_disableLayerAction(state: IEditorState, disableLayerAction: boolean) {
+    state.disableLayerAction = disableLayerAction
+  }
 }
 window.addEventListener(
   'resize',

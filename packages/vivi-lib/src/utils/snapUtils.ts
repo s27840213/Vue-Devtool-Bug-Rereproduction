@@ -374,7 +374,16 @@ class SnapUtils {
   }
 
   calAngleSnap(angle: number, forcedSnapFor15Deg = false): number {
-    this.getClosestSnapAngle(angle, forcedSnapFor15Deg ? 15 : 90, forcedSnapFor15Deg ? 8 : 2)
+    const options = {
+      snapIncrement: forcedSnapFor15Deg ? 15 : 90,
+      allowedOffset: forcedSnapFor15Deg ? 8 : 2
+    }
+    return this.calAngleSnapHandler(angle, options)
+  }
+
+  calAngleSnapHandler(angle: number, options?: { snapIncrement?: number, allowedOffset?: number }): number {
+    const { snapIncrement = 90, allowedOffset = 2 } = options ?? {}
+    this.getClosestSnapAngle(angle, snapIncrement, allowedOffset)
     if (this.closestSnapAngle >= 0) {
       return this.closestSnapAngle
     }

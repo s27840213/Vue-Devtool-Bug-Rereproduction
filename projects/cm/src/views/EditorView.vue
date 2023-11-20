@@ -52,7 +52,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             :pageIndex="0"
             :pageState="pageState[0]"
             :overflowContainer="editorContainerRef"
-            :noBg="isDuringCopy && isNoBg")
+            :noBg="isDuringCopy && isNoBg"
+            :hideHighlighter="true")
           canvas-section(
             v-if="inEditingState"
             class="absolute top-0 left-0 w-full h-full"
@@ -65,7 +66,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="inEditingState && !inGenResultState && !showSelectionOptions"
+      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions"
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
@@ -193,6 +194,7 @@ const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementSize(editorContainerRef)
+const editorContainerAR = computed(() => editorContainerWidth.value / editorContainerHeight.value)
 
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
@@ -240,10 +242,7 @@ const handleNextAction = function () {
     changeEditorState('next')
     tutorialUtils.runTutorial('powerful-fill')
     nextTick(() => {
-      store.commit('SET_contentScaleRatio4Page', {
-        pageIndex: 0,
-        contentScaleRatio: fitScaleRatio.value,
-      })
+      fitPage(fitScaleRatio.value)
     })
   } else if (inGenResultState.value) {
     changeEditorState('next')
@@ -289,18 +288,11 @@ const fitScaleRatio = computed(() => {
     return 1
 
   const pageAspectRatio = pageSize.value.width / pageSize.value.height
-  const newWidth = pageAspectRatio > 1 ? 1600 : 1600 * pageAspectRatio
-  const newHeight = pageAspectRatio > 1 ? 1600 / pageAspectRatio : 1600
-  /**
-   * @param shiftOffset - is a param used to prevent the page directly snap to the edge of the editor container
-   */
-  const shiftOffset = 8
-  const widthRatio =
-    (editorContainerWidth.value - sidebarTabsWidth.value - 24 - shiftOffset) / newWidth
-  const heightRatio = (editorContainerHeight.value - shiftOffset) / newHeight
-
+  const newWidth = pageAspectRatio > editorContainerAR.value ? 1600 : 1600 * pageAspectRatio
+  const newHeight = pageAspectRatio > editorContainerAR.value ? 1600 / pageAspectRatio : 1600
+  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
+  const heightRatio = editorContainerHeight.value / newHeight
   const ratio = Math.min(widthRatio, heightRatio) * 0.9
-
   return ratio
 })
 
@@ -311,6 +303,10 @@ const wrapperStyles = computed(() => {
   }
 })
 
+const fitPage = (ratio: number) => {
+  store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
+}
+
 /**
  * fitPage
  */
@@ -319,7 +315,7 @@ watchOnce(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value) return
-    store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: newVal })
+    fitPage(newVal)
   },
   // useDebounceFn((newVal, oldVal) => {
   //   if (newVal === oldVal || !atEditor.value) return
@@ -401,17 +397,23 @@ const demoBrushSizeStyles = computed(() => {
 })
 // #endregion
 
-// #region Canvas functions
-const bus = useEventBus<string>('generation')
+// #region event bus
+const bus = useEventBus<string>('editor')
 const unsubcribe = bus.on((event: string, { callback }) => {
   if (event === 'genMaskUrl') {
     callback(getCanvasDataUrl())
+  }
+
+  if (event === 'fitPage') {
+    fitPage(fitScaleRatio.value)
   }
 })
 onBeforeUnmount(() => {
   unsubcribe()
 })
+// #endregion
 
+// #region Canvas functions
 const canvasRef = ref<VNodeRef | null>(null)
 const downloadCanvas = () => {
   if (!canvasRef.value) return
