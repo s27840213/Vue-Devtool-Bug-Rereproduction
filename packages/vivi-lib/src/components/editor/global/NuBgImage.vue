@@ -333,7 +333,7 @@ export default defineComponent({
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
           break
         case 'ios': {
-          this.logImgError(new Error('srcObj type ios error'))
+          this.logImgError(new Error('bg-img srcObj type ios error'))
           // replace error image
           this.$store.commit('SET_backgroundImageSrc', {
             pageIndex: this.pageIndex,
