@@ -224,7 +224,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult } = editorStore
+const { changeEditorState, updateGenResult, editorType } = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -240,7 +240,7 @@ const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
-    tutorialUtils.runTutorial('powerful-fill')
+    tutorialUtils.runTutorial(editorType)
     nextTick(() => {
       fitPage(fitScaleRatio.value)
     })

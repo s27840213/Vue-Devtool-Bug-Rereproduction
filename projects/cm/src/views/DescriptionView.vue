@@ -22,21 +22,25 @@ div(class="description-page w-full h-full text-app-text-secondary px-24")
         :key="img"
         :src="img"
         class="w-32 h-32 overflow-hidden rounded object-cover object-center"
-        :class="{'outline-solid outline-2 -outline-offset-2 outline-app-tab-active': idx === idxCurrImg}"
+        :class="{ 'outline-solid outline-2 -outline-offset-2 outline-app-tab-active': idx === idxCurrImg }"
         @click="idxCurrImg = idx")
     div(class="typo-body-md") {{ description }}
-    nubtn(size="mid-full" @click="handleNext") {{$t("CM0055")}}
+    nubtn(
+      size="mid-full"
+      @click="handleNext") {{ $t('CM0055') }}
 </template>
 <script setup lang="ts">
-import i18n from '@/i18n';
-import { useEditorStore } from '@/stores/editor';
-import type { EditorType } from '@/types/editor';
-import { useRoute, useRouter } from 'vue-router';
+import i18n from '@/i18n'
+import { useEditorStore } from '@/stores/editor'
+import type { EditorType } from '@/types/editor'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 const target: Ref<EditorType> = ref(route.query.target as EditorType)
-const imgs: Ref<string[]> = ref(Array.from(Array(3), (_, index) => require(`demo/${target.value}-demo-${index}.png`)))
+const imgs: Ref<string[]> = ref(
+  Array.from(Array(3), (_, index) => require(`demo/${target.value}-demo-${index}.png`)),
+)
 const idxCurrImg = ref(0)
 
 const title = ref('')
@@ -46,13 +50,15 @@ switch (target.value) {
   case 'hidden-message':
     title.value = 'Hidden Message'
     description.value = i18n.global.t('CM0079')
-    break;
+    break
 }
 
-const { startEditing } = useEditorStore()
+const { startEditing, setPageSize, setImgAspectRatio } = useEditorStore()
 const handleNext = () => {
   startEditing(target.value)
-  router.push('/editor')
+  setImgAspectRatio(9/16)
+  setPageSize(900, 1600)
+  router.push({ name: 'Editor' })
 }
 </script>
 <style lang="scss">
