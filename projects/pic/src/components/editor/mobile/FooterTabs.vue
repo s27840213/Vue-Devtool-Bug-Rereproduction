@@ -208,6 +208,12 @@ export default defineComponent({
       const { hasBgImage } = backgroundUtils
       return [
         {
+          icon: 'replace',
+          text: `${this.$t('NN0490')}`,
+          panelType: 'replace',
+          hidden: this.isInFrame,
+        },
+        {
           icon: 'transparency',
           text: `${this.$t('NN0030')}`,
           panelType: 'opacity',
