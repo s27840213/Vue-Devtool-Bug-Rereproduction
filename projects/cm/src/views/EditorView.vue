@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(
-    class="editor-header box-border px-24"
+    class="editor-header box-border px-24 z-median"
     :middGap="32"
     ref="headerbarRef")
     template(#left)
@@ -33,9 +33,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     class="editor-container flex justify-center items-center relative"
     ref="editorContainerRef"
     @pointerdown="selectStart")
-    div(
-      class="w-full h-full box-border overflow-scroll flex justify-center items-center"
-      @click.self="outerClick")
+    div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
       div(
         id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
@@ -66,7 +64,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions"
+      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions"
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
@@ -144,7 +142,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :bgColor="highResolutionPhoto ? 'app-tab-active' : 'primary-lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
-  transition(name="bottom-up")
+  transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
@@ -178,7 +176,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
-import { useElementSize, useEventBus, watchOnce } from '@vueuse/core'
+import { useEventBus } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
@@ -190,10 +188,10 @@ const editorWrapperRef = ref<HTMLElement | null>(null)
 const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
-const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
+const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
-  useElementSize(editorContainerRef)
+  useElementBounding(editorContainerRef)
 const editorContainerAR = computed(() => editorContainerWidth.value / editorContainerHeight.value)
 
 const i18n = useI18n()
@@ -232,7 +230,6 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
-  imgAspectRatio,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
 
@@ -241,9 +238,6 @@ const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
     tutorialUtils.runTutorial('powerful-fill')
-    nextTick(() => {
-      fitPage(fitScaleRatio.value)
-    })
   } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
@@ -286,13 +280,16 @@ const fitScaleRatio = computed(() => {
     pageSize.value.height === 0
   )
     return 1
-
+  // make longer side become 1600px
   const pageAspectRatio = pageSize.value.width / pageSize.value.height
-  const newWidth = pageAspectRatio > editorContainerAR.value ? 1600 : 1600 * pageAspectRatio
-  const newHeight = pageAspectRatio > editorContainerAR.value ? 1600 / pageAspectRatio : 1600
-  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
+  const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
+  const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
+
+  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
-  const ratio = Math.min(widthRatio, heightRatio) * 0.9
+
+  const reductionRatio = isDuringCopy ? 1 : 0.9
+  const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
   return ratio
 })
 
@@ -300,6 +297,7 @@ const wrapperStyles = computed(() => {
   return {
     width: `${pageSize.value.width * contentScaleRatio.value}px`,
     height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
   }
 })
 
@@ -307,22 +305,25 @@ const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
 }
 
+watch(sidebarTabsWidth, () => {
+  fitPage(fitScaleRatio.value)
+})
 /**
  * fitPage
  */
 
-watchOnce(
+watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value) return
     fitPage(newVal)
   },
-  // useDebounceFn((newVal, oldVal) => {
-  //   if (newVal === oldVal || !atEditor.value) return
-  //   setPageScaleRatio(newVal)
-  //   setPageScaleRatio(newVal)
-  // }, 300),
 )
+
+watch(isDuringCopy, () => {
+  fitPage(fitScaleRatio.value)
+})
+
 onMounted(() => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
@@ -387,7 +388,7 @@ const selectStart = (e: PointerEvent) => {
 
 // #region demo brush size section
 const canvasStore = useCanvasStore()
-const { brushSize, isChangingBrushSize } = storeToRefs(canvasStore)
+const { brushSize, isChangingBrushSize, isAutoFilling } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {

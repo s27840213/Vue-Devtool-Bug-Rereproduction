@@ -9,7 +9,7 @@ const useUploadUtils = () => {
   const { setUploadMap } = uploadStore
   const { uploadMap } = storeToRefs(uploadStore)
   const store = useStore()
-  const userId = store.getters['user/getUserId']
+  const userId = computed(() => store.getters['user/getUserId'])
 
   const getUrlMap = async () => {
     const res = (await staticApis.getStatic()).data
@@ -43,7 +43,7 @@ const useUploadUtils = () => {
       'Content-Disposition',
       `attachment; filename*=UTF-8''${encodeURIComponent(filename || getFileName(path))}`,
     )
-    formData.append('x-amz-meta-tn', userId)
+    formData.append('x-amz-meta-tn', userId.value)
 
     const target = isFile ? file : generalUtils.dataURLtoBlob(file as string)
     if (formData.has('file')) {
