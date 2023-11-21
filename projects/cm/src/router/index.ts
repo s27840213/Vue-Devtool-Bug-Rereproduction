@@ -1,4 +1,5 @@
 import useUploadUtils from '@/composable/useUploadUtils'
+import { useUserStore } from '@/stores/user'
 import HomeView from '@/views/HomeView.vue'
 import store from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
@@ -99,7 +100,9 @@ router.addRoute({
     // useI18n().locale = 'tw'
     cmWVUtils.setupAPIInterface()
     cmWVUtils.detectIfInApp()
-    cmWVUtils.getUserInfo()
+    const { setIosLaunchInfo } = useUserStore()
+    const iosLaunchInfo = await cmWVUtils.getUserInfo()
+    setIosLaunchInfo(iosLaunchInfo)
     cmWVUtils.fetchTutorialFlags()
     let argoError = false
     try {

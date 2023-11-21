@@ -1,17 +1,18 @@
 <template lang="pug">
 div(class="panel-font-format")
-  div(class="panel-font-format__bar mb-15")
-    svg-icon(v-for="(icon,index) in mappingIcons('font')"
-      class="record-selection feature-button p-5"
-      :class="{ pointer: iconClickable(icon)}"
-      :key="`gp-action-icon-${index}`"
-      :id="`icon-${icon}`"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? activeColor : iconClickable(icon) ? inactiveColor : disabledColor" @touchstart="onPropertyClick(icon)")
-  div(class="panel-font-format__bar")
-    svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-      class="pointer feature-button p-5"
-      :key="`gp-action-icon-${index}`"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? activeColor : inactiveColor" @touchstart="onParaPropsClick(icon)")
+  div(
+    v-for="(icon1d, i) in content"
+    :key="i"
+    class="panel-font-format__bar")
+    svg-icon(
+      v-for="icon in icon1d"
+      :key="icon.name"
+      class="p-5"
+      :class="{'click-disabled': !icon.clickable}"
+      :iconName="icon.name"
+      iconWidth="20px"
+      :iconColor="icon.active ? activeColor : icon.clickable ? inactiveColor : disabledColor"
+      @touchstart="icon.action")
 </template>
 
 <script lang="ts">
@@ -24,8 +25,16 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import { indexOf } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
+
+type IFontFormatIcon = {
+  name: string
+  clickable: boolean
+  active: boolean
+  action: (icon: string) => void
+}
 
 export default defineComponent({
   emits: [],
@@ -68,11 +77,38 @@ export default defineComponent({
       }
       return (currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
     },
+    content(): IFontFormatIcon[][] {
+      const fontAlign = mappingUtils.mappingIconSet('font-align')
+
+      // If non-cm version be removed, trun it to 1d.
+      const iconArr2d = this.$isCm ? [[
+        ...mappingUtils.mappingIconSet('font'),
+        `text-align-${this.props.textAlign}`
+      ]]: [
+        mappingUtils.mappingIconSet('font'),
+        fontAlign,
+      ]
+
+      return iconArr2d.map((iconArr) => iconArr.map(icon => ({
+        name: icon,
+        clickable: this.iconClickable(icon),
+        active: this.iconIsActived(icon),
+        action: () => {
+          if (!icon.startsWith('text-align-')) {
+            this.onPropertyClick(icon)
+          } else if (this.$isCm) {
+            this.handleTextAlign( // Loop text align.
+              fontAlign[((indexOf(fontAlign, icon) as number) + 1) % 4]
+            )
+          } else {
+            this.handleTextAlign(icon)
+          }
+          stepsUtils.record()
+        }
+      })))
+    }
   },
   methods: {
-    mappingIcons(type: string) {
-      return mappingUtils.mappingIconSet(type)
-    },
     iconClickable(icon: string): boolean {
       switch (icon) {
         case 'font-vertical':
@@ -88,29 +124,21 @@ export default defineComponent({
     iconIsActived(iconName: string): boolean {
       switch (iconName) {
         case 'bold':
-          if (this.props.weight === 'bold') return true
-          break
+          return this.props.weight === 'bold'
         case 'underline':
-          if (this.props.decoration === 'underline' && !this.hasTextFill) return true
-          break
+          return this.props.decoration === 'underline' && !this.hasTextFill
         case 'italic':
-          if (this.props.style === 'italic') return true
-          break
+          return this.props.style === 'italic'
         case 'font-vertical':
-          if (this.props.isVertical) return true
-          break
+          return this.props.isVertical
         case 'text-align-left':
-          if (this.props.textAlign === 'left') return true
-          break
+          return this.props.textAlign === 'left'
         case 'text-align-center':
-          if (this.props.textAlign === 'center') return true
-          break
+          return this.props.textAlign === 'center'
         case 'text-align-right':
-          if (this.props.textAlign === 'right') return true
-          break
+          return this.props.textAlign === 'right'
         case 'text-align-justify':
-          if (this.props.textAlign === 'justify') return true
-          break
+          return this.props.textAlign === 'justify'
       }
       return false
     },
@@ -139,7 +167,6 @@ export default defineComponent({
         }
       }
       this.updateLayerProps({ isEdited: true })
-      stepsUtils.record()
     },
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = layerUtils
@@ -193,24 +220,8 @@ export default defineComponent({
       }
       textPropUtils.updateTextPropsState({ [prop]: newPropVal })
     },
-    onParaPropsClick(iconName: string) {
-      switch (iconName) {
-        case 'text-align-left':
-          this.handleTextAlign('left')
-          break
-        case 'text-align-center':
-          this.handleTextAlign('center')
-          break
-        case 'text-align-right':
-          this.handleTextAlign('right')
-          break
-        case 'text-align-justify':
-          this.handleTextAlign('justify')
-          break
-      }
-      stepsUtils.record()
-    },
     handleTextAlign(prop: string) {
+      prop = prop.replace('text-align-', '')
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = layerUtils
       if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
         const layers = (currLayer as IGroup | ITmp).layers
@@ -234,6 +245,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .panel-font-format {
   width: 100%;
+  display: grid;
+  gap: 15px;
 
   &__bar {
     display: flex;
