@@ -22,18 +22,20 @@ const setSlotRef = (ref: HTMLElement) => {
   slotRef.value = ref
 }
 
-watch(
-  () => height.value,
-  (newVal, oldVal) => {
-    // 20 is not important, modify it to make a good transition
-    const newHeight = newVal === 0 ? oldVal * 0.6 : newVal
-    if (newVal === oldVal || !bottomPanelRef.value) return
-    bottomPanelRef.value.style.height = `${newHeight + 32 + homeIndicatorHeight.value}px`
-  },
-)
-
 const userStore = useUserStore()
 const { homeIndicatorHeight } = storeToRefs(userStore)
+
+watch(
+  [height, homeIndicatorHeight],
+  ([newHeight, newHomeIndicatorHeight], [oldHeight, oldHomeIndicatorHeight]) => {
+    // 32 is not important, modify it to make a good transition
+    const tmpNewHeight = newHeight === 0 ? oldHeight * 0.6 : newHeight
+
+    const finalHeight = tmpNewHeight + 32 + newHomeIndicatorHeight
+    if (newHeight === finalHeight || !bottomPanelRef.value) return
+    bottomPanelRef.value.style.height = `${finalHeight}px`
+  },
+)
 </script>
 <style lang="scss" scoped>
 .bottom-panel {

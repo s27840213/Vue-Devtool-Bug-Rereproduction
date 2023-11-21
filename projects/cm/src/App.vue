@@ -6,7 +6,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
-  tutorial
   transition(name="fade-in-only")
     div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16 h-72")
       router-link(
@@ -33,7 +32,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(v-if="!atEventTester && !isDuringCopy"
+  bottom-panel(v-if="!atEventTester && !(isDuringCopy && !isAutoFilling)"
     class="z-bottom-panel row-start-3 row-end-4"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
     :style="disableBtmPanelTransition ? 'transition: none' : ''")
@@ -49,50 +48,54 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
                   :currPage="currPage"
                   :currTab="currActivePanel"
                   @switchTab="switchTab")
+  tutorial
+  //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
     v-if="wantToQuit || isModalOpen"
     class="mask"
     ref="maskRef"
     @click.stop="closeModal")
-  transition(name="bottom-up-down")
-    img-selector(
-      v-if="showImgSelector"
-      class="absolute top-0 left-0 w-full h-full z-img-selector"
-      :requireNum="requireImgNum")
-  div(class="popup-area")
-    popup
-  div(class="modal-container" v-if="isModalOpen")
-    modal-card
-  spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
-  notifications(
-    class="notification flex justify-center items-center"
-    position="top center"
-    group="success"
-    :max="2"
-    :duration="2000")
-    template(v-slot:body="{ item }")
-      div(class="notification__content")
-        svg-icon(iconName="ok-hand")
-        span( v-html="item.text")
-  //- notifications(
-  //-   group="error"
-  //-   position="top center"
-  //-   width="300px"
-  //-   :max="1"
-  //-   :duration="5000")
-  //-   template(v-slot:body="{ item }")
-  //-     div(class="notification error " v-html="item.text")
-  transition(name="bottom-up-down")
-    div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
-        action-sheet(
-          :primaryActions="primaryActions"
-          :secondaryActions="secondaryActions")
+  //- why we need this is to make the status bar height could work to every overlay element
+  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container"
+    :style="{paddingTop: `${statusBarHeight}px`}")
+    transition(name="bottom-up-down")
+      img-selector(
+        v-if="showImgSelector"
+        class="w-full h-full z-img-selector pointer-events-auto"
+        :requireNum="requireImgNum")
+    div(class="popup-area")
+      popup(class="pointer-events-auto")
+    div(class="modal-container" v-if="isModalOpen")
+      modal-card(class="pointer-events-auto")
+    spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
+    notifications(
+      class="notification flex justify-center items-center"
+      position="center center"
+      group="success"
+      :max="2"
+      :duration="2000")
+      template(v-slot:body="{ item }")
+        div(class="notification__content")
+          svg-icon(iconName="ok-hand")
+          span( v-html="item.text")
+    //- notifications(
+    //-   group="error"
+    //-   position="top center"
+    //-   width="300px"
+    //-   :max="1"
+    //-   :duration="5000")
+    //-   template(v-slot:body="{ item }")
+    //-     div(class="notification error " v-html="item.text")
+    transition(name="bottom-up-down")
+      div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
+          action-sheet(
+            :primaryActions="primaryActions"
+            :secondaryActions="secondaryActions")
 </template>
 
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
 import vuex from '@/vuex'
-import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
@@ -101,7 +104,7 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
 import { useGlobalStore } from '@/stores/global'
-import Spinner from '@nu/vivi-lib/components/global/Spinner.vue'
+import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -112,13 +115,12 @@ import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
-import Popup from './components/popup/Popup.vue'
 import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
+import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
 import { useUserStore } from './stores/user'
-
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
 // #region state info
@@ -139,6 +141,8 @@ const {
 
 const globalStore = useGlobalStore()
 const { showSpinner, spinnerText } = storeToRefs(globalStore)
+const canvasStore = useCanvasStore()
+const { isAutoFilling } = storeToRefs(canvasStore)
 // #endregion
 
 // #region function panel
@@ -310,5 +314,9 @@ const { statusBarHeight, homeIndicatorHeight } = storeToRefs(userStore)
   &__content {
     @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success;
   }
+}
+
+.absolute-container {
+  pointer-events: none;
 }
 </style>

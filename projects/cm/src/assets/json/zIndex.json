@@ -5,10 +5,12 @@
   "modal-mask",
   "bottom-panel",
   "asset-panel",
+  "median",
   "popup",
   "img-selector",
   "action-sheet",
   "tutorial-highlight",
   "tutorial-overlay",
+  "abs-container",
   "highest"
 ]
