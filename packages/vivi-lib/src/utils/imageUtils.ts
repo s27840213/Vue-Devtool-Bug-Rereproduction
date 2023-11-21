@@ -326,7 +326,7 @@ class ImageUtils {
       case 'logo-private':
       case 'logo-public': {
         const type = _type.includes('logo') ? 'logo' : 'image'
-        if (!userId && typeof assetId === 'number') {
+        if (typeof assetId === 'number') {
           return imageApi.getImgSize({
             token: '',
             type,
