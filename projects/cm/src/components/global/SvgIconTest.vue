@@ -77,7 +77,7 @@ const loadingSvg = `
       `
 const iconStyles = computed(() => {
   let width = props.iconWidth
-  let height = props.iconHeight
+  const height = props.iconHeight
 
   if (!props.sameSize) {
     if (!props.iconWidth && props.iconHeight) {
