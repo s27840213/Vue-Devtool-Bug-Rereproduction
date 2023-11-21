@@ -14,7 +14,9 @@ div(class="canvas-section absolute top-0 left-0 z-canvas")
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-plugin-vue/issues/2322
 import { useStore } from 'vuex'
+
 // #region data section
 const props = defineProps<{
   containerDOM: HTMLElement | null
