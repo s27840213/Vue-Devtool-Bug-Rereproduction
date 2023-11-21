@@ -274,7 +274,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<any | undefined> {
     if (this.inBrowserMode) return
-    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
+    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }, { retry: true }) as IGetStateResponse
     return data.value ? JSON.parse(data.value) : undefined
   }
 
