@@ -2,10 +2,6 @@ import { IUserInfo } from '@nu/vivi-lib/utils/cmWVUtils'
 import { defineStore } from 'pinia'
 
 export const useUserStore = defineStore('user', () => {
-  const userId = ref('')
-  const setUserId = (id: string) => {
-    userId.value = id
-  }
   const prevGenParams = reactive({
     requestId: '',
     prompt: '',
@@ -44,9 +40,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   return {
-    userId,
     prevGenParams,
-    setUserId,
     setPrevGenParams,
     iosLaunchInfo,
     setIosLaunchInfo,

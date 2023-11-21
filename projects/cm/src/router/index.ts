@@ -1,5 +1,4 @@
 import useUploadUtils from '@/composable/useUploadUtils'
-import { useUserStore } from '@/stores/user'
 import HomeView from '@/views/HomeView.vue'
 import store from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
@@ -132,8 +131,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const { setUserId } = useUserStore()
-  setUserId(generalUtils.generateRandomString(20))
+  store.commit('user/SET_STATE', { userId: generalUtils.generateRandomString(20) })
   useUploadUtils().getUrlMap()
 
   loginUtils.checkToken()
