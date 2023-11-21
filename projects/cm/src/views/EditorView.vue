@@ -15,15 +15,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :url="centerUrl")
       template(v-else)
         svg-icon(
-          iconName="undo"
-          :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-          iconWidth="20px"
-          @click="undo")
-        svg-icon(
-          iconName="redo"
-          :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-          iconWidth="20px"
-          @click="redo")
+          v-for="btn in cneterBtns"
+          :key="btn.icon"
+          :iconName="btn.icon"
+          :iconColor="btn.disabled ? 'app-tab-disable' : 'app-btn-primary-text'"
+          :iconWidth="`${btn.width}px`"
+          @click="btn.action")
     template(#right)
       nubtn(
         v-if="inAspectRatioState || inGenResultState"
@@ -169,6 +166,7 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
@@ -271,6 +269,18 @@ const handleNextAction = function () {
 
 const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep
+
+const cneterBtns = computed(() => {
+  const retTabs = []
+  const stepBtns = [
+    { icon: 'undo', disabled: isInFirstStep, width: 20, action: undo },
+    { icon: 'redo', disabled: isInLastStep, width: 20, action: redo }
+  ]
+  if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20 })
+  retTabs.push(...stepBtns)
+  if (editorType === 'hidden-message') retTabs.push({ icon: TOGGLE_BG_ICONS[editorBgIndex.value], disabled: false, width: 20, action: toggleBgColor })
+  return retTabs
+})
 // #endregion
 
 // #region page related
@@ -382,6 +392,14 @@ const selectStart = (e: PointerEvent) => {
       groupUtils.deselect()
     }
   }
+}
+
+const EDITOR_BGS = ['#FFFFFF', '#2B2B2B']
+const TOGGLE_BG_ICONS = ['toggle-color-light', 'toggle-color-dark']
+const editorBgIndex = ref(EDITOR_BGS.findIndex(color => color === colorUtils.currPageBackgroundColor))
+const toggleBgColor = () => {
+  editorBgIndex.value = (editorBgIndex.value + 1) % EDITOR_BGS.length
+  colorUtils.setCurrPageBackgroundColor(EDITOR_BGS[editorBgIndex.value])
 }
 // #endregion
 
@@ -571,16 +589,18 @@ const handleSwipe = (dir: string) => {
     @apply grid grid-rows-[minmax(0,1fr),auto,auto] grid-cols-1 justify-items-center items-center h-full w-full gap-16;
   }
 }
+
 // @TODO discuss with allen
 //@apply max-w-full max-h-full object-contain;
 .result-showcase {
   transform-style: preserve-3d;
+
   &__card {
     @apply max-h-full object-contain;
     backface-visibility: hidden;
     transition: transform 0.6s;
-    &--back {
-    }
+
+    &--back {}
   }
 }
 

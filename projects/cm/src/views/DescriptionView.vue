@@ -33,6 +33,7 @@ div(class="description-page w-full h-full text-app-text-secondary px-24")
 import i18n from '@/i18n'
 import { useEditorStore } from '@/stores/editor'
 import type { EditorType } from '@/types/editor'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils';
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -58,6 +59,11 @@ const handleNext = () => {
   startEditing(target.value)
   setImgAspectRatio(9/16)
   setPageSize(900, 1600)
+  switch (target.value) {
+    case 'hidden-message':
+      colorUtils.setCurrPageBackgroundColor('#2B2B2B')
+      break
+  }
   router.push({ name: 'Editor' })
 }
 </script>
