@@ -24,7 +24,9 @@ export interface IUserInfo {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string
+  modelName: string,
+  flag: string,
+  locale: string,
 }
 
 export interface IAlbum {
@@ -84,6 +86,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     statusBarHeight: 0,
     homeIndicatorHeight: 0,
     country: '',
+    flag: '0',
+    locale: 'en',
     modelName: 'web',
   }
 

@@ -73,17 +73,17 @@ if (window.location.host !== 'cm.vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue'),
   })
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
-    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue'),
   })
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue'),
   })
 }
 
@@ -100,7 +100,9 @@ router.addRoute({
     // useI18n().locale = 'tw'
     cmWVUtils.setupAPIInterface()
     cmWVUtils.detectIfInApp()
-    cmWVUtils.getUserInfo()
+    const { setIosLaunchInfo } = useUserStore()
+    const iosLaunchInfo = await cmWVUtils.getUserInfo()
+    setIosLaunchInfo(iosLaunchInfo)
     cmWVUtils.fetchTutorialFlags()
     let argoError = false
     try {

@@ -144,7 +144,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :bgColor="highResolutionPhoto ? 'app-tab-active' : 'primary-lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
-  transition(name="bottom-up")
+  transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
@@ -178,7 +178,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
-import { useElementSize, useEventBus, watchOnce } from '@vueuse/core'
+import { useEventBus, watchOnce } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
@@ -190,10 +190,10 @@ const editorWrapperRef = ref<HTMLElement | null>(null)
 const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
-const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
+const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
-  useElementSize(editorContainerRef)
+  useElementBounding(editorContainerRef)
 const editorContainerAR = computed(() => editorContainerWidth.value / editorContainerHeight.value)
 
 const i18n = useI18n()
@@ -232,7 +232,6 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
-  imgAspectRatio,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
 
@@ -241,9 +240,6 @@ const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
     tutorialUtils.runTutorial('powerful-fill')
-    nextTick(() => {
-      fitPage(fitScaleRatio.value)
-    })
   } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
@@ -286,13 +282,12 @@ const fitScaleRatio = computed(() => {
     pageSize.value.height === 0
   )
     return 1
-
   const pageAspectRatio = pageSize.value.width / pageSize.value.height
   const newWidth = pageAspectRatio > editorContainerAR.value ? 1600 : 1600 * pageAspectRatio
   const newHeight = pageAspectRatio > editorContainerAR.value ? 1600 / pageAspectRatio : 1600
-  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
+  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
-  const ratio = Math.min(widthRatio, heightRatio) * 0.9
+  const ratio = Math.min(widthRatio, heightRatio) * 0.95
   return ratio
 })
 
@@ -300,6 +295,7 @@ const wrapperStyles = computed(() => {
   return {
     width: `${pageSize.value.width * contentScaleRatio.value}px`,
     height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
   }
 })
 
@@ -307,6 +303,9 @@ const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
 }
 
+watchOnce(sidebarTabsWidth, () => {
+  fitPage(fitScaleRatio.value)
+})
 /**
  * fitPage
  */
