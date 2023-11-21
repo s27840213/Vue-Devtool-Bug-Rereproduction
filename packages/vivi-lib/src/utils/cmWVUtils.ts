@@ -141,7 +141,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
     if (loginResult.flag === 0) {
       store.dispatch('user/loginSetup', { data: loginResult })
-      close()
+      return loginResult
     } else {
       // logUtils.setLogAndConsoleLog('Apple login failed')
       notify({ group: 'error', text: loginResult.msg })

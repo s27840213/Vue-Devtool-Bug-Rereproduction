@@ -286,9 +286,7 @@ const accountOptions = computed(
       {
         title: tc('NN0167', 1),
         iconName: 'logout2',
-        callback: () => {
-          loginUtils.logout()
-        },
+        callback: loginUtils.logout,
       },
       {
         title: tc('NN0317', 1),

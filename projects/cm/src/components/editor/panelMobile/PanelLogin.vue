@@ -24,9 +24,11 @@ const termsPage = ''
 const privacyPage = ''
 
 const close = () => vuex.commit('user/setShowForceLogin', false)
-const login = () => {
-  cmWVUtils.login('Apple', 'en')
-  close()
+const login = async () => {
+  const loginResult = await cmWVUtils.login('Apple', 'en')
+  if (loginResult && loginResult.flag === 0) {
+    close()
+  }
 }
 </script>
 
