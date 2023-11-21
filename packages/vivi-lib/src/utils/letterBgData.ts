@@ -670,7 +670,7 @@ class LetterBGData {
   }
 
   bgNeedRotate(name: ITextLetterBgName) {
-    return /(paper-tap)/.test(name)
+    return /(paper-tap|stretch-)/.test(name)
   }
 }
 export default new LetterBGData()

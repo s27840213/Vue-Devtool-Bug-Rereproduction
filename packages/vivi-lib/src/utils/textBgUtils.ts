@@ -928,23 +928,31 @@ class TextBg {
     } else if (isITextLetterBg(textBg)) {
       const scale = textBg.size / 100
       const needRotate = letterBgData.bgNeedRotate(textBg.name)
-      const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, bend, mainFontSize)
+
+      const textWidth = textShapeData.textWidth
+      if (letterBgData.extraHeadTail(textBg.name)) {
+        textWidth.push(textWidth[textWidth.length - 1])
+        textWidth.unshift(textWidth[0])
+      }
+      const textShapeStyle = textShapeUtils.convertTextShape(textWidth, bend, mainFontSize)
+
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
       const pos = [] as (Record<'i' | 'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let [i, spaceCount] = [0, 0]
       rows.forEach((row) => {
-        if (letterBgData.extraHeadTail(textBg.name)) {
-          let last = row.spanData.length - 1
-          row.spanData.push(cloneDeep(row.spanData[last]))
-          row.spanData.unshift(cloneDeep(row.spanData[0]))
-          last = row.spanData.length - 1
-          row.spanData[last].x = row.spanData[last].x + row.spanData[last].width
-          row.spanData[0].x = row.spanData[0].x - row.spanData[0].width
+        const { spanData } = row
+        if (letterBgData.extraHeadTail(textBg.name) && spanData.length) {
+          let last = spanData.length - 1
+          spanData.push(cloneDeep(spanData[last]))
+          spanData.unshift(cloneDeep(spanData[0]))
+          last = spanData.length - 1
+          spanData[last].x = spanData[last].x + spanData[last].width
+          spanData[0].x = spanData[0].x - spanData[0].width
         }
 
-        row.spanData.forEach((span, spanIndex) => {
+        spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
           if (text === ' ' && !letterBgData.fixedHeadTail(textBg.name)) spaceCount += 1
           else {
