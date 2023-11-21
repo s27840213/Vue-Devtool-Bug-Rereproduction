@@ -168,7 +168,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
         cy.wait(30)
           .togglePanel('陰影')
           .snapshotTest(`Shadow ${shadow.name} preset`)
-          .get('.nu-layer .nu-image').invoke('attr', 'cy-ready').should('eq', 'true')
+          .get('.nu-layer .nu-image', { timeout: 15000 }).should('have.attr', 'cy-ready', 'true')
           .togglePanel('陰影')
       }
     })

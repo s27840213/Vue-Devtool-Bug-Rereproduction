@@ -1,4 +1,4 @@
-import i18n, { LocaleName } from '@/i18n'
+import i18n from '@/i18n'
 import { tailPositions } from '@/interfaces/format'
 import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
@@ -10,6 +10,7 @@ import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
 import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
+import localeUtils from '@/utils/localeUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -105,17 +106,10 @@ export enum DeviceType {
   Other
 }
 
-const NEED_FALLBACK_LOCALES = ['pt' as const]
 const NO_TUTORIAL_LOCALES = ['pt']
 class ConstantData {
   get isLogin(): boolean {
     return store.getters['user/isLogin']
-  }
-
-  get localeWithFallback() {
-    return (NEED_FALLBACK_LOCALES as string[]).includes(i18n.global.locale)
-      ? 'us'
-      : i18n.global.locale as Exclude<LocaleName, typeof NEED_FALLBACK_LOCALES[number]>
   }
 
   // For header.vue and mobileMenu.vue
@@ -245,7 +239,7 @@ class ConstantData {
           newTab: true
         }]
       }]
-    }[this.localeWithFallback] as IHeaderL2[]
+    }[localeUtils.localeWithFallback] as IHeaderL2[]
 
     const resource = {
       tw: [{
@@ -339,7 +333,7 @@ class ConstantData {
           url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
         }]
       }]
-    }[this.localeWithFallback] as IHeaderL2[]
+    }[localeUtils.localeWithFallback] as IHeaderL2[]
 
     const pricing = {
       name: 'Pricing',

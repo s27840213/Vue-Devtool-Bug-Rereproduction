@@ -16,7 +16,7 @@ export interface IGeneralFailureResponse {
 
 type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
 
-export interface IUserInfo {
+export type IUserInfo = {
   hostId: string
   appVer: string
   osVer: string
@@ -24,7 +24,9 @@ export interface IUserInfo {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string
+  modelName: string,
+  flag: string,
+  locale: string,
 }
 
 export interface IAlbum {
@@ -84,6 +86,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     statusBarHeight: 0,
     homeIndicatorHeight: 0,
     country: '',
+    flag: '0',
+    locale: 'en',
     modelName: 'web',
   }
 
@@ -123,7 +127,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async getUserInfo(): Promise<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
-    const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH', this.getEmptyMessage())
+    const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH')
     return userInfo as IUserInfo
   }
 
@@ -145,7 +149,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {
-    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST', this.getEmptyMessage())
+    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST')
 
     return albumList as IAlbumListResponse
   }

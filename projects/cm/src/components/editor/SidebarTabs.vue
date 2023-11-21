@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide mr-4")
+div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide")
   div(
     v-for="(tab, index) in defaultEditorTabs"
     :key="`${tab.icon}-${index}`"

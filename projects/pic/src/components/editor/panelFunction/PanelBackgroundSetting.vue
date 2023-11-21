@@ -225,7 +225,6 @@ export default defineComponent({
             const url = isIAssetPhoto(img) ? img.urls.prev
               : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 'prev')
             backgroundUtils.replaceBgImg(img, url)
-            stepsUtils.record()
           }
         })
         return

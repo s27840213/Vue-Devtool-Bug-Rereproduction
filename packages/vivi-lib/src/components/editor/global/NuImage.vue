@@ -638,6 +638,7 @@ export default defineComponent({
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([srcObj.assetId]) })
           break
         case 'ios': {
+          this.logImgError(new Error('srcObj type ios error'))
           if (this.primaryLayer?.type === LayerType.frame) {
             frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
               {

@@ -1,29 +1,31 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato]")
+div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
+  :class="{'bg-app-bg': !isDuringCopy}"
+  :style="{paddingTop: `${statusBarHeight}px`}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
   tutorial
-  div(class="w-full justify-between items-center box-border px-16 h-72"
-      :class="atMainPage ? 'flex' : 'hidden'")
-    router-link(
-      custom
-      :to="'/'"
-      v-slot="{ navigate }")
-      img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
-    div(class="flex justify-center items-center gap-18")
-      transition(
-          name="rotate-right-in"
-          mode="out-in")
-        div(v-if="atMyDesign" )
-          router-link(
-            custom
-            to="/settings"
-            v-slot="{ navigate }")
-            svg-icon(iconName="settings"
-              :iconColor="'app-tab-default'" @click="navigate")
-      nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+  transition(name="fade-in-only")
+    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16 h-72")
+      router-link(
+        custom
+        :to="'/'"
+        v-slot="{ navigate }")
+        img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
+      div(class="flex justify-center items-center gap-18")
+        transition(
+            name="rotate-right-in"
+            mode="out-in")
+          div(v-if="atMyDesign" )
+            router-link(
+              custom
+              to="/settings"
+              v-slot="{ navigate }")
+              svg-icon(iconName="settings"
+                :iconColor="'app-tab-default'" @click="navigate")
+        nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="box-border pb-12 min-h-full row-start-2 row-end-3"
     v-slot="{ Component, route }")
@@ -52,7 +54,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     class="mask"
     ref="maskRef"
     @click.stop="closeModal")
-  transition(name="bottom-up")
+  transition(name="bottom-up-down")
     img-selector(
       v-if="showImgSelector"
       class="absolute top-0 left-0 w-full h-full z-img-selector"
@@ -80,7 +82,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
   //-   :duration="5000")
   //-   template(v-slot:body="{ item }")
   //-     div(class="notification error " v-html="item.text")
-  transition(name="bottom-up")
+  transition(name="bottom-up-down")
     div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
         action-sheet(
           :primaryActions="primaryActions"
@@ -115,6 +117,7 @@ import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
+import { useUserStore } from './stores/user'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
@@ -260,6 +263,9 @@ onBeforeUnmount(() => {
 // #region action sheet
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
 // #endregion
+
+const userStore = useUserStore()
+const { statusBarHeight, homeIndicatorHeight } = storeToRefs(userStore)
 </script>
 
 <style lang="scss">
