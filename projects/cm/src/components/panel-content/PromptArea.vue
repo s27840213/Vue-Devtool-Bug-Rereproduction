@@ -28,6 +28,7 @@ import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
+import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -44,6 +45,11 @@ const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImage } = useGenImageUtils()
 
 const handleGenerate = () => {
+  if (vuex.state.user.token === '') {
+    // Open PanelLogin
+    vuex.commit('user/setShowForceLogin', true)
+    return
+  }
   const debugSkipGenarate = false
 
   if (debugSkipGenarate) {

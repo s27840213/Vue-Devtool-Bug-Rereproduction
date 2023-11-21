@@ -26,7 +26,9 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
         icon="crown"
         size="mid-full") {{ $t('CM0032') }}
     div(class="flex flex-col gap-16 text-app-btn-primary-text text-left typo-h6")
-      template(v-for="op in config" :key="op.title")
+      template(
+        v-for="op in config"
+        :key="op.title")
         function-bar(
           v-if="op.iconName"
           :title="op.title"
@@ -34,7 +36,10 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           :active="op.selected"
           :class="op.class"
           @click="op.callback")
-        span(v-else :class="op.class" @click="op.callback") {{ op.title }}
+        span(
+          v-else
+          :class="op.class"
+          @click="op.callback") {{ op.title }}
 </template>
 
 <script setup lang="ts">
@@ -42,6 +47,7 @@ import { useGlobalStore } from '@/stores/global'
 import vuex from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import { storeToRefs } from 'pinia'
 
 interface IOptionConfig {
@@ -62,38 +68,45 @@ const buildNumber = computed(() => {
   return buildNumber ? `v.${buildNumber}` : 'local'
 })
 
-const domainOptions = computed((): IOptionConfig[] => ([{
-  //   title: 'production',
-  //   iconName: 'global',
-  //   selected: () => {
-  //     return hostname === 'sticker.vivipic.com'
-  //   },
-  //   action: () => {
-  //     // this.switchDomain('sticker')
-  //   },
-  // }, {
+const domainOptions = computed((): IOptionConfig[] => [
+  {
+    //   title: 'production',
+    //   iconName: 'global',
+    //   selected: () => {
+    //     return hostname === 'sticker.vivipic.com'
+    //   },
+    //   action: () => {
+    //     // this.switchDomain('sticker')
+    //   },
+    // }, {
     title: 'rd',
     iconName: 'global',
     selected: hostname.includes('cmrd'),
     callback: () => {
       cmWVUtils.switchDomain('https://cmrd.vivipic.com')
     },
-  }, ...Array(3).fill(1).map((_, index) => ({
-    title: `localhost:808${index}`,
-    iconName: 'global',
-    selected: hostname.includes(`localhost:808${index}`),
-    callback: () => {
-      cmWVUtils.switchDomain(`localhost:808${index}`)
-    },
-  })), ...Array(6).fill(1).map((_, index) => ({
-    title: `dev${index}`,
-    iconName: 'global',
-    selected: hostname.includes(`dev${index}`),
-    callback: () => {
-      cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
-    },
-  })),
-]))
+  },
+  ...Array(3)
+    .fill(1)
+    .map((_, index) => ({
+      title: `localhost:808${index}`,
+      iconName: 'global',
+      selected: hostname.includes(`localhost:808${index}`),
+      callback: () => {
+        cmWVUtils.switchDomain(`localhost:808${index}`)
+      },
+    })),
+  ...Array(6)
+    .fill(1)
+    .map((_, index) => ({
+      title: `dev${index}`,
+      iconName: 'global',
+      selected: hostname.includes(`dev${index}`),
+      callback: () => {
+        cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
+      },
+    })),
+])
 // #endregion
 
 // #region settings state
@@ -162,7 +175,8 @@ const supportOptions: Array<IOptionConfig> = [
     title: t('CM0037'),
     iconName: 'user-cycle',
     callback: () => {
-      if (vuex.state.user.token === '') { // Open PanelLogin
+      if (vuex.state.user.token === '') {
+        // Open PanelLogin
         vuex.commit('user/setShowForceLogin', true)
       } else {
         setCurrState('account')
@@ -246,42 +260,55 @@ const debugOptions: Array<IOptionConfig> = [
 ]
 
 const segmentTitleStyle = 'py-4 border-0 border-b-[1px] border-solid border-app-slider-bg'
-const initOptions = computed(() => ([
-  { title: t('CM0036'), class: segmentTitleStyle },
-  ...supportOptions,
-  { title: t('CM0040'), class: segmentTitleStyle },
-  ...mediaOptions,
-  { title: t('CM0043'), class: segmentTitleStyle },
-  ...aboutOptions, {
-    title: `1.0/1.0/ v.${buildNumber.value} ${domain}`, // Debug info
-    class: 'typo-body-sm text-center text-primary-lighter py-10',
-    callback: handleDebugMode
-  }, ...(debugMode.value ? debugOptions : []),
-] as IOptionConfig[]))
+const initOptions = computed(
+  () =>
+    [
+      { title: t('CM0036'), class: segmentTitleStyle },
+      ...supportOptions,
+      { title: t('CM0040'), class: segmentTitleStyle },
+      ...mediaOptions,
+      { title: t('CM0043'), class: segmentTitleStyle },
+      ...aboutOptions,
+      {
+        title: `1.0/1.0/ v.${buildNumber.value} ${domain}`, // Debug info
+        class: 'typo-body-sm text-center text-primary-lighter py-10',
+        callback: handleDebugMode,
+      },
+      ...(debugMode.value ? debugOptions : []),
+    ] as IOptionConfig[],
+)
 // #endregion
 
 // #region account options
-const accountOptions = computed(() => ([{
-  title: tc('NN0167', 1),
-  iconName: 'logout2',
-  callback: () => {
-    //
-  }
-}, {
-  title: tc('NN0317', 1),
-  iconName: 'info-warning',
-  callback: () => {
-    //
-  }
-}] as IOptionConfig[]))
+const accountOptions = computed(
+  () =>
+    [
+      {
+        title: tc('NN0167', 1),
+        iconName: 'logout2',
+        callback: () => {
+          loginUtils.logout()
+        },
+      },
+      {
+        title: tc('NN0317', 1),
+        iconName: 'info-warning',
+        callback: () => {
+          //
+        },
+      },
+    ] as IOptionConfig[],
+)
 // #endregion
 
-const configs = computed(() => ({
-  domain: domainOptions.value,
-  account: accountOptions.value,
-  '': initOptions.value,
-}) as Record<string, IOptionConfig[]>)
-
+const configs = computed(
+  () =>
+    ({
+      domain: domainOptions.value,
+      account: accountOptions.value,
+      '': initOptions.value,
+    }) as Record<string, IOptionConfig[]>,
+)
 </script>
 <style scoped lang="scss">
 .gradient--yellow {
