@@ -1,3 +1,4 @@
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import type { EditorFeature, EditorStates, EditorType, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
@@ -6,7 +7,6 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
-import { useCanvasStore } from './canvas'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -100,12 +100,9 @@ export const useEditorStore = defineStore('editor', {
   },
   actions: {
     setPageSize(width: number, height: number) {
-      useCanvasStore().setCanvasStoreState({
-        canvasWidth: width,
-        canvasHeight: height,
-      })
-
+      const { updateCanvasSize } = useCanvasUtils()
       pageUtils.setPageSize(0, width, height)
+      updateCanvasSize()
     },
     createNewPage(width: number, height: number) {
       pageUtils.setPages([pageUtils.newPage({ width, height })])

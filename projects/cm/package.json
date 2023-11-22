@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check build-only",
+    "build": "run-p type-check build-only lint",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc -p tsconfig.app.json --composite false",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint": "eslint . --ext .vue,.ts",
     "format": "prettier --write src/ --ignore-path"
   },
   "dependencies": {

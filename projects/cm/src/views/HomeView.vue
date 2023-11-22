@@ -11,10 +11,10 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
   //-   class="my-10"
   //-   icon="crown"
   //-   @click="openImgSelecotr") Test Img Selector
-  nubtn(
-    class="my-10"
-    icon="crown"
-    @click="exportVedio") Test video Selector
+  //- nubtn(
+  //-   class="my-10"
+  //-   icon="crown"
+  //-   @click="exportVedio") Test video Selector
   div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
@@ -55,12 +55,7 @@ import PixiRecorder from '@/utils/pixiRecorder';
 import vuex from '@/vuex';
 import { useRouter } from 'vue-router';
 
-const router = useRouter()
-const inBrowserMode = computed(() => vuex.getters['webView/getInBrowserMode'])
 const { setRequireImgNum } = useImgSelectorStore()
-const goToEditor = () => {
-  router.push('/editor')
-}
 
 const openImgSelecotr = (requireImgNum: number) => {
   setRequireImgNum(requireImgNum)
@@ -78,12 +73,6 @@ const openImgSelecotr = (requireImgNum: number) => {
   //     isPreview: true,
   //   }
   // )
-}
-const exportVedio = () => {
-  const pixiRecorder = new PixiRecorder()
-  pixiRecorder.genVideo().then((res) => {
-    console.log('gen vedio', res)
-  })
 }
 
 // #region feature card
@@ -130,6 +119,13 @@ const aiArtFeatures: FeatureCard[] = [
   }
 ]
 // #endregion
+
+// const exportVedio = () => {
+//   const pixiRecorder = new PixiRecorder()
+//   pixiRecorder.genVideo().then((res) => {
+//     console.log('gen vedio', res)
+//   })
+// }
 </script>
 <style scoped lang="scss">
 .feature-section {

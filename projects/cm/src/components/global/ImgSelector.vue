@@ -268,8 +268,7 @@ const selectAlbum = (album: IAlbum) => {
   isAlbumOpened.value = true
 }
 const useCamera = () => {
-  cmWVUtils.callIOSAsHTTPAPI('USE_CAMERA').then((img) => {
-    console.log('img', img) // TODO: delete it.
+  cmWVUtils.callIOSAsHTTPAPI('USE_CAMERA', undefined, { timeout: -1 }).then((img) => {
     if (!img || img.flag) {
       notify({ group: 'error', text: 'Camera img select error' })
     }
