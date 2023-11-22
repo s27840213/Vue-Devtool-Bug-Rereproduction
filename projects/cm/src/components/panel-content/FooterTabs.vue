@@ -44,6 +44,7 @@ import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
@@ -113,6 +114,7 @@ export default defineComponent({
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs:Array<IFooterTab> = [
         { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+        { icon: 'invert', text: `${this.$t('CM0080')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode || this.inImageEditor },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
         {
@@ -607,6 +609,15 @@ export default defineComponent({
           break
         case 'camera': {
           // Wait for coding
+          break
+        }
+        case 'invert': {
+          imageAdjustUtil.setAdjust({
+            adjust: { invert: +!(this.currLayer as IImage).styles?.adjust?.invert },
+            pageIndex,
+            layerIndex,
+            subLayerIndex: subLayerIdx >= 0 ? subLayerIdx : undefined
+          })
           break
         }
         default: {

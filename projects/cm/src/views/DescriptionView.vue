@@ -54,13 +54,14 @@ switch (target.value) {
     break
 }
 
-const { startEditing, setPageSize, setImgAspectRatio } = useEditorStore()
+const { startEditing, setPageSize, setImgAspectRatio, setCurrActiveFeature } = useEditorStore()
 const handleNext = () => {
   startEditing(target.value)
   setImgAspectRatio(9/16)
   setPageSize(900, 1600)
   switch (target.value) {
     case 'hidden-message':
+      setCurrActiveFeature('add')
       colorUtils.setCurrPageBackgroundColor('#2B2B2B')
       break
   }
