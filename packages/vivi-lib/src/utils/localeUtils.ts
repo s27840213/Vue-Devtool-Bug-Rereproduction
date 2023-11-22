@@ -31,25 +31,25 @@ class LocaleUtils {
       code: 'jp',
       base: '/jp',
       name: '日本語'
-    }, {
-      abbreviation: 'pt',
-      code: 'pt',
-      base: '/pt',
-      name: '🍇🦷語測試',
+    // }, {
+    //   abbreviation: 'pt',
+    //   code: 'pt',
+    //   base: '/pt',
+    //   name: '🍇🦷語測試',
     }]
 
     this.localeMap = {
       tw: 'tw',
       us: 'us',
       jp: 'jp',
-      pt: 'pt',
+      // pt: 'pt',
     }
 
     this.nativeLocaleMap = {
       'zh-Hant': 'tw',
       en: 'us',
       ja: 'jp',
-      pt: 'pt',
+      // pt: 'pt',
     }
 
     this.defaultLocale = 'us'
