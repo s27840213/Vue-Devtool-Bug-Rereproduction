@@ -6,11 +6,11 @@ import { WebViewUtils } from './webViewUtils'
 export interface IRequest {
   eventId: string
   event: string
-  message: any
+  message: Record<string, unknown>
 }
 
-export abstract class HTTPLikeWebViewUtils<T extends { [key: string]: any }> extends WebViewUtils<T> {
-  makeAPIRequest(event: string, message: any): IRequest {
+export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> extends WebViewUtils<T> {
+  makeAPIRequest(event: string, message: Record<string, unknown>): IRequest {
     const eventId = generalUtils.generateAssetId()
     return {
       event,
@@ -31,7 +31,7 @@ export abstract class HTTPLikeWebViewUtils<T extends { [key: string]: any }> ext
 
   async callIOSAsHTTPAPI(
     type: string,
-    message: any,
+    message = this.getEmptyMessage() as Record<string, unknown>,
     { timeout = 5000, retry = false, retryTimes = 0 } = {},
   ): Promise<WEBVIEW_API_RESULT> {
     const request = this.makeAPIRequest(type, message)
@@ -85,6 +85,10 @@ export abstract class HTTPLikeWebViewUtils<T extends { [key: string]: any }> ext
     this.registerCallbacksCore('nativeResponse')
   }
 
+  setupAppActiveInterface() {
+    this.registerCallbacksCore('appBecomeActive')
+  }
+
   nativeResponse({
     eventId,
     output,
@@ -110,5 +114,9 @@ export abstract class HTTPLikeWebViewUtils<T extends { [key: string]: any }> ext
         })
       }
     }
+  }
+
+  appBecomeActive() {
+    console.log('app become active!')
   }
 }

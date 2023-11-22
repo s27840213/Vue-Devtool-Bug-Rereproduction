@@ -73,17 +73,17 @@ if (window.location.host !== 'cm.vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue'),
   })
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
-    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue'),
   })
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue'),
   })
 }
 
@@ -99,8 +99,11 @@ router.addRoute({
     useI18n() // prevent import being removed
     // useI18n().locale = 'tw'
     cmWVUtils.setupAPIInterface()
+    cmWVUtils.setupAppActiveInterface()
     cmWVUtils.detectIfInApp()
-    cmWVUtils.getUserInfo()
+    const { setIosLaunchInfo } = useUserStore()
+    const iosLaunchInfo = await cmWVUtils.getUserInfo()
+    setIosLaunchInfo(iosLaunchInfo)
     cmWVUtils.fetchTutorialFlags()
     let argoError = false
     try {
@@ -130,8 +133,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const { setUserId } = useUserStore()
-  setUserId(generalUtils.generateRandomString(20))
+  store.commit('user/SET_STATE', { userId: generalUtils.generateRandomString(20) })
   useUploadUtils().getUrlMap()
 
   loginUtils.checkToken()

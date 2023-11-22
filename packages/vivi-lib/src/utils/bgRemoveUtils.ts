@@ -124,7 +124,6 @@ class BgRemoveUtils {
                 top: scrollTop,
                 left: scrollLeft
               })
-
               this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
               this.setInBgRemoveMode(true)
               editorUtils.setCurrActivePanel('remove-bg')
@@ -132,7 +131,7 @@ class BgRemoveUtils {
 
             console.timeEnd('polling')
             console.timeEnd('removeBg total time')
-            console.log(json.data)
+            this.setIsProcessing(false)
             return true
           }
           if (json.flag === 1) {
@@ -143,7 +142,6 @@ class BgRemoveUtils {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                 inProcess: LayerProcessType.none
               })
-
               notify({ group: 'error', text: `${i18n.global.t('NN0349')}` })
             }
 
@@ -162,8 +160,8 @@ class BgRemoveUtils {
             inProcess: false
           })
         }
-        this.setIsProcessing(false)
         paymentUtils.errorHandler(data.msg)
+        this.setIsProcessing(false)
       }
     })
   }
@@ -176,7 +174,6 @@ class BgRemoveUtils {
     logUtils.setLog('start removing bg')
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
     console.timeEnd('send API ~ get response time')
-
     logUtils.setLog('finish removing bg')
 
     console.time('generate frontend data time')

@@ -915,6 +915,7 @@
   "NN0915": "Stretch Rabbit",
   "NN0916": "Stretch Cat",
   "NN0917": "Stretch Dragon",
+  "NN0918": "Image uploaded successfully",
   "STK0001": "Add a text",
   "STK0002": "Tap to copy",
   "STK0003": "Press and hold to share",
@@ -1121,5 +1122,9 @@
   "CM0074": "By using Charmix, you agree to our {use}, {privacy} and to receive offers and updates.",
   "CM0075": "Saving as",
   "CM0076": "Select format to keep your creations.",
-  "CM0077": "Video"
+  "CM0077": "Video",
+  "CM0078": "Hidden Message",
+  "CM0079": "Transform a selected area into an imaginative and aesthetically pleasing surreal scene.",
+  "CM0080": "Invert",
+  "CM0081": "Auto filling "
 }

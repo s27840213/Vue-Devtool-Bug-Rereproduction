@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(
-    class="editor-header box-border px-24"
+    class="editor-header box-border px-24 z-median"
     :middGap="32"
     ref="headerbarRef")
     template(#left)
@@ -32,10 +32,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
     ref="editorContainerRef"
-    @pointerdown="selectStart")
-    div(
-      class="w-full h-full box-border overflow-scroll flex justify-center items-center"
-      @click.self="outerClick")
+    @pointerdown="selectStart"
+    @pointerup="selectEnd"
+    @pinch="onPinch"
+    @pointerleave="removePointer"
+    v-touch)
+    div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
       div(
         id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
@@ -66,7 +68,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions"
+      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions"
       class="absolute top-1/2 right-0 -translate-y-1/2"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
@@ -144,7 +146,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :bgColor="highResolutionPhoto ? 'app-tab-active' : 'primary-lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
-  transition(name="bottom-up")
+  transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
@@ -166,6 +168,8 @@ import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
+import type { ILayerInfo } from '@nu/vivi-lib/store/types'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
@@ -177,8 +181,11 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
+import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
-import { useElementSize, useEventBus, watchOnce } from '@vueuse/core'
+import { useEventBus } from '@vueuse/core'
+import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
@@ -190,10 +197,10 @@ const editorWrapperRef = ref<HTMLElement | null>(null)
 const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
-const { width: sidebarTabsWidth } = useElementSize(sidebarTabsRef)
+const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
-  useElementSize(editorContainerRef)
+  useElementBounding(editorContainerRef)
 const editorContainerAR = computed(() => editorContainerWidth.value / editorContainerHeight.value)
 
 const i18n = useI18n()
@@ -232,7 +239,6 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
-  imgAspectRatio,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
 
@@ -241,9 +247,6 @@ const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
     tutorialUtils.runTutorial('powerful-fill')
-    nextTick(() => {
-      fitPage(fitScaleRatio.value)
-    })
   } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
@@ -286,13 +289,16 @@ const fitScaleRatio = computed(() => {
     pageSize.value.height === 0
   )
     return 1
-
+  // make longer side become 1600px
   const pageAspectRatio = pageSize.value.width / pageSize.value.height
-  const newWidth = pageAspectRatio > editorContainerAR.value ? 1600 : 1600 * pageAspectRatio
-  const newHeight = pageAspectRatio > editorContainerAR.value ? 1600 / pageAspectRatio : 1600
-  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value - 24) / newWidth
+  const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
+  const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
+
+  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
-  const ratio = Math.min(widthRatio, heightRatio) * 0.9
+
+  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 0.95
+  const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
   return ratio
 })
 
@@ -300,6 +306,7 @@ const wrapperStyles = computed(() => {
   return {
     width: `${pageSize.value.width * contentScaleRatio.value}px`,
     height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
   }
 })
 
@@ -307,22 +314,25 @@ const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
 }
 
+watch(sidebarTabsWidth, () => {
+  fitPage(fitScaleRatio.value)
+})
 /**
  * fitPage
  */
 
-watchOnce(
+watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value) return
     fitPage(newVal)
   },
-  // useDebounceFn((newVal, oldVal) => {
-  //   if (newVal === oldVal || !atEditor.value) return
-  //   setPageScaleRatio(newVal)
-  //   setPageScaleRatio(newVal)
-  // }, 300),
 )
+
+watch(isDuringCopy, () => {
+  fitPage(fitScaleRatio.value)
+})
+
 onMounted(() => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
@@ -348,46 +358,138 @@ const outerClick = () => {
   pageUtils.setBackgroundImageControlDefault()
 }
 
+const pointerEvent = ref({
+  initPos: null as { x: number, y: number } | null
+})
+let movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
+  recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
-  const isClickOnController = controlUtils.isClickOnController(e)
-  if (isImgCtrl.value && !isClickOnController) {
-    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-    switch (currLayer.type) {
-      case LayerType.image:
-      case LayerType.group:
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-        break
-      case LayerType.frame:
-        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
-        break
+  if (isImgCtrl.value) {
+    const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
+      groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[Math.max(layerUtils.subLayerIdx, 0)] : layerUtils.getCurrLayer
+    if (!controlUtils.isClickOnController(e, layer)) {
+      const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+      switch (currLayer.type) {
+        case LayerType.image:
+        case LayerType.group:
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+          break
+        case LayerType.frame:
+          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+            imgControl: false,
+          })
+          break
+      }
+      return
     }
-    return
   }
   if (layerUtils.layerIndex !== -1) {
-    /**
-     * when the user click the control-region outsize the page,
-     * the moving logic should be applied to the EditorView.
-     */
-    if (isClickOnController) {
-      const movingUtils = new MovingUtils({
-        _config: { config: layerUtils.getCurrLayer },
-        snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        body: document.getElementById(
-          `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-        ) as HTMLElement,
-      })
-      movingUtils.moveStart(e)
+    // when there is an layer being active, the moving logic applied to the EditorView
+    movingUtils = new MovingUtils({
+      _config: { config: layerUtils.getCurrLayer },
+      snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+      body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+    })
+    movingUtils.moveStart(e)
+    pointerEvent.value.initPos = { x: e.x, y: e.y }
+  }
+}
+
+// the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
+// is bcz the native click/tap event is triggered as the event happened in a-short-time even the layer has moved a little position,
+// this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
+const selectEnd = (e: PointerEvent) => {
+  if (pointerEvent.value.initPos) {
+    const isSingleTouch = pointerEvtUtils.pointers.length === 1
+    const isConsiderNotMoved = Math.abs(e.x - pointerEvent.value.initPos.x) < 5 && Math.abs(e.y - pointerEvent.value.initPos.y) < 5
+    if (isSingleTouch && isConsiderNotMoved && !store.getters['imgControl/isImgCtrl']) {
+      // the moveingEnd would consider the layer to be selected,
+      // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
+      // following code remove the moveEnd event.
+      if (store.getters.getControlState.type === 'move') {
+        store.commit('SET_STATE', { controlState: { type: '' } })
+      }
+      const layer = layerUtils.getCurrLayer
+      if (!controlUtils.isClickOnController(e, layer)) {
+        groupUtils.deselect()
+        movingUtils?.removeListener()
+      }
+    }
+    pointerEvent.value.initPos = null
+  }
+  // pointerEvtUtils.removePointer(e.pointerId)
+}
+
+const isPinchInit = ref<null | boolean>(false)
+let pinchControlUtils = null as null | PinchControlUtils
+const onPinch = (e: AnyTouchEvent) => {
+  if (e.phase === 'end' && isPinchInit.value) {
+    // pinch end handling
+    pinchHandler(e)
+    isPinchInit.value = false
+    pinchControlUtils = null
+  } else {
+    const touches = (e.nativeEvent as TouchEvent).touches
+    if (touches.length !== 2 || layerUtils.layerIndex === -1) return
+    if (!isPinchInit.value) {
+      // first pinch initialization
+      isPinchInit.value = true
+      return pinchStart(e)
     } else {
-      groupUtils.deselect()
+      // pinch move handling
+      pinchHandler(e)
     }
   }
+}
+
+const pinchHandler = (e: AnyTouchEvent) => {
+  pinchControlUtils?.pinch(e)
+}
+
+const pinchStart = (e: AnyTouchEvent) => {
+  if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
+  if (store.getters['bgRemove/getInBgRemoveMode']) return
+
+  const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
+
+  if (_config.config.locked) return
+  if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
+
+  const  layerInfo = new Proxy({
+    pageIndex: layerUtils.pageIndex,
+    layerIndex: layerUtils.layerIndex
+  }, {
+    get(_, key) {
+      if (key === 'pageIndex') return layerUtils.pageIndex
+      else if (key === 'layerIndex') return layerUtils.layerIndex
+    }
+  }) as ILayerInfo
+  const movingUtils = new MovingUtils({
+    _config,
+    layerInfo,
+    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+    body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+  })
+  const data = {
+    layerInfo,
+    config: undefined,
+    movingUtils: movingUtils as MovingUtils
+  }
+  pinchControlUtils = new PinchControlUtils(data)
+}
+
+const recordPointer = (e: PointerEvent) => {
+  pointerEvtUtils.addPointer(e)
+}
+const removePointer = (e: PointerEvent) => {
+  pointerEvtUtils.removePointer(e.pointerId)
 }
 // #endregion
 
 // #region demo brush size section
 const canvasStore = useCanvasStore()
-const { brushSize, isChangingBrushSize } = storeToRefs(canvasStore)
+const { brushSize, isChangingBrushSize, isAutoFilling } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {
