@@ -197,7 +197,7 @@ class ImageUtils {
         break
       case 'ios':
         if (generalUtils.isCm) {
-          res = `chmix://${assetId}`
+          res = `chmix://${assetId}?lsize=1600`
         } else if (generalUtils.isStk) {
           res = `vvstk://${assetId}`
         }
