@@ -2,7 +2,8 @@
 div(class="mobile-slider")
   div(class="mobile-slider__top"  :class="theme")
     span(class="mobile-slider__name no-wrap") {{title}}
-    input(class="mobile-slider__number"
+    span(v-if="!hasNumberInput") {{ propsVal }}
+    input(v-else class="mobile-slider__number"
       :class="theme"
       type="number"
       v-model.number="propsVal"
@@ -81,6 +82,10 @@ export default defineComponent({
     disabled: {
       type: Boolean,
       default: false,
+    },
+    hasNumberInput: {
+      type: Boolean,
+      default: true,
     }
   },
   computed: {
