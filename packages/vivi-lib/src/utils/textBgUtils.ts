@@ -941,8 +941,10 @@ class TextBg {
 
       const pos = [] as (Record<'i' | 'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let [i, spaceCount] = [0, 0]
-      rows.forEach((row) => {
-        const { spanData } = row
+      const spanDatas = withShape 
+        ? [rows.flatMap(row => row.spanData)]
+        : rows.map(row => row.spanData)
+      spanDatas.forEach(spanData => {
         if (letterBgData.extraHeadTail(textBg.name) && spanData.length) {
           let last = spanData.length - 1
           spanData.push(cloneDeep(spanData[last]))
@@ -957,7 +959,11 @@ class TextBg {
           if (text === ' ' && !letterBgData.fixedHeadTail(textBg.name)) spaceCount += 1
           else {
             pos.push({
-              ...letterBgData.getLetterBgSetting(textBg, i - spaceCount, spanIndex === 0, spanIndex === row.spanData.length - 1),
+              ...letterBgData.getLetterBgSetting(textBg,
+                i - spaceCount,
+                spanIndex === 0,
+                spanIndex === spanData.length - 1
+              ),
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
