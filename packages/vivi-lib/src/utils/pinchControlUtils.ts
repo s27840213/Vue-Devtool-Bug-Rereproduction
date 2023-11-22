@@ -14,6 +14,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { AnyTouchEvent } from 'any-touch'
 import stepsUtils from './stepsUtils'
+import textPropUtils from './textPropUtils'
 import textUtils from './textUtils'
 
 export default class PinchControlUtils {
@@ -244,6 +245,7 @@ export default class PinchControlUtils {
         const textInitWidth = this.config.styles.width / this.config.styles.scale
         const textInitHeight = this.config.styles.height / this.config.styles.scale
         controlUtils.updateLayerInitSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, textInitWidth, textInitHeight)
+        textPropUtils.updateTextPropState('fontSize', true)
         break
       }
       case 'shape': {

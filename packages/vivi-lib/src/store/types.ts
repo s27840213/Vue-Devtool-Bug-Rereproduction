@@ -117,6 +117,7 @@ export interface IEditorState {
   showGlobalErrorModal: boolean,
   newTemplateShownMode: boolean,
   modalInfo: { [key: string]: any },
+  disableLayerAction: boolean,
 }
 
 export enum SidebarPanelType {

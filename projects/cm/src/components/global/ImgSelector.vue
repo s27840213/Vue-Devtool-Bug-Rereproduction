@@ -44,7 +44,7 @@ div(
     div(
       v-if="isAlbumOpened"
       class="img-selector__img-grid bg-app-bg overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
-      div(class="aspect-square flex flex-col items-center justify-center")
+      div(class="aspect-square flex flex-col items-center justify-center" @click="useCamera")
         svg-icon(class="mb-10" iconName="camera")
         span {{ $t('CM0060') }}
       div(
@@ -154,6 +154,7 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
+import { notify } from '@kyvg/vue3-notification'
 
 const router = useRouter()
 
@@ -214,7 +215,6 @@ const currAlbum = reactive<IAlbum>({
   thumbId: '',
 })
 const currAlbumName = computed(() => currAlbum.title)
-// const currAlbumId = computed(() => currAlbum.albumId)
 // #endregion
 
 // #region album methods
@@ -266,6 +266,14 @@ const selectAlbum = (album: IAlbum) => {
   noMoreContent.value = false
   getAlbumContent(album)
   isAlbumOpened.value = true
+}
+const useCamera = () => {
+  cmWVUtils.callIOSAsHTTPAPI('USE_CAMERA', undefined, { timeout: -1 }).then((img) => {
+    if (!img || img.flag) {
+      notify({ group: 'error', text: 'Camera img select error' })
+    }
+    selectImage(img as IAlbumContent, 'ios')
+  })
 }
 // #endregion
 

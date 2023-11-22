@@ -282,7 +282,7 @@ export default defineComponent({
       if (e.pointerType === 'mouse' && e.button !== 0) return
       if (this.isImgCtrl) {
         const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
-          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[0] : layerUtils.getCurrLayer
+          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[Math.max(layerUtils.subLayerIdx, 0)] : layerUtils.getCurrLayer
         if (!controlUtils.isClickOnController(e, layer)) {
           const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
           switch (currLayer.type) {
@@ -364,6 +364,7 @@ export default defineComponent({
     },
     pinchStart(e: AnyTouchEvent) {
       if (this.$store.getters['imgControl/isImgCtrl'] || this.$store.getters['imgControl/isImgCtrl']) return
+      if (this.$store.getters['bgRemove/getInBgRemoveMode']) return
 
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
 

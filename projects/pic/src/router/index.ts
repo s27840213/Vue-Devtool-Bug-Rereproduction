@@ -341,7 +341,7 @@ router.beforeEach(async (to, from, next) => {
     ['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) &&
     !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) &&
     window.__PRERENDER_INJECTED === undefined
-  loginUtils.checkToken(needForceLogin ? () => {
+  await loginUtils.checkToken(needForceLogin ? () => {
     next({ name: 'SignUp', query: { redirect: to.fullPath } })
   } : undefined)
 

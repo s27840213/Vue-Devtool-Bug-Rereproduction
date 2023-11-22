@@ -147,7 +147,7 @@ export default defineComponent({
     ...mapState('user', ['uname', 'enableAdminView']),
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
-      isModalOpen: 'modal/getModalOpen',
+      _isModalOpen: 'modal/getModalOpen',
       modalInfo: 'modal/getModalInfo',
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
@@ -155,6 +155,9 @@ export default defineComponent({
       browserInfo: 'user/getBrowserInfo',
       debugMode: 'vivisticker/getDebugMode',
     }),
+    isModalOpen(): boolean {
+      return this._isModalOpen && this.$route.name !== 'Screenshot'
+    },
     currLocale(): string {
       return localeUtils.currLocale()
     },

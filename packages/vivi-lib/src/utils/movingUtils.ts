@@ -201,6 +201,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent, params?: { pointerId?: number, isFollowByPinch?: boolean }) {
+    if(store.getters.getDisableLayerAction) return
     const { pointerId, isFollowByPinch = false } = params || {}
     const eventType = eventUtils.getEventType(event)
     if (eventType === 'pointer') {
