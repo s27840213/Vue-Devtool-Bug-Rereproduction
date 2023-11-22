@@ -143,9 +143,10 @@ export default class PinchControlUtils {
       height: this.init.size.height * evtScale
     }
     const movingTranslate = {
-      x: e.x - this.init.evtPos.x,
-      y: e.y - this.init.evtPos.y
+      x: (e.x - this.init.evtPos.x) / store.getters.getContentScaleRatio,
+      y: (e.y - this.init.evtPos.y) / store.getters.getContentScaleRatio
     }
+
     const compensateTranslate = {
       x: (this.init.size.width - newSize.width) * 0.5,
       y: (this.init.size.height - newSize.height) * 0.5

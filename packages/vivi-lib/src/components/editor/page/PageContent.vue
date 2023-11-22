@@ -301,7 +301,7 @@ export default defineComponent({
       }
     },
     pageClickHandler(): void {
-      if (this.$isStk) return
+      if (this.$isStk || this.$isCm) return
 
       // TODO(Hsing-Chi): Check if pageClickHandler needed.
       if (!this.isImgCtrl) {
