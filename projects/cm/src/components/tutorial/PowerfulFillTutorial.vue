@@ -30,6 +30,7 @@ div(class="w-screen h-screen")
 
 <script setup lang="ts">
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-plugin-vue/issues/2322
 
 defineOptions({ name: 'powerful-fill-tutorial' })
 const emit = defineEmits(['nextStep'])

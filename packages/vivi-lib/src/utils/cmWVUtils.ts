@@ -141,7 +141,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
     if (loginResult.flag === 0) {
       store.dispatch('user/loginSetup', { data: loginResult })
-      close()
+      return loginResult
     } else {
       // logUtils.setLogAndConsoleLog('Apple login failed')
       notify({ group: 'error', text: loginResult.msg })
@@ -278,7 +278,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<any | undefined> {
     if (this.inBrowserMode) return
-    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
+    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }, { retry: true }) as IGetStateResponse
     return data.value ? JSON.parse(data.value) : undefined
   }
 
