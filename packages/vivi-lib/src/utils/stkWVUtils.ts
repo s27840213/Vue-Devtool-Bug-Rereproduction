@@ -3,7 +3,7 @@ import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
@@ -1249,6 +1249,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
     if (missingClips.length) {
+      logUtils.setLog(`Error occurs in handleFrameClipError with config: ${generalUtils.deepCopy(missingClips)}`)
+
       const action = missingClips.length !== 1 ? undefined : () => {
         let subLayerIdx = -1
         let layerIndex = -1
@@ -1654,6 +1656,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     } as { [key: string]: (value: string) => string }
     if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
     return currencyFormatters[currency](price.toString())
+  }
+
+  getLanguageByCountry(country: string) {
+    if (['CHN', 'MAC', 'HKG', 'TWN'].includes(country)) return 'tw'
+    if (['JPN'].includes(country)) return 'jp'
+    if (['BRA', 'PRT'].includes(country)) return 'pt'
+    return 'us'
   }
 }
 

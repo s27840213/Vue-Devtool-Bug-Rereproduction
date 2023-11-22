@@ -69,6 +69,6 @@ export default defineComponent({
   transition: 0.3s;
   transform: translateX(0) scale(0.8);
   transition: transform 0.3s ease-in-out;
-  background-color: setColor(white);
+  background-color: white;
 }
 </style>

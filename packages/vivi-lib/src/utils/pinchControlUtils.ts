@@ -14,6 +14,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { AnyTouchEvent } from 'any-touch'
 import stepsUtils from './stepsUtils'
+import textPropUtils from './textPropUtils'
 import textUtils from './textUtils'
 
 export default class PinchControlUtils {
@@ -142,9 +143,10 @@ export default class PinchControlUtils {
       height: this.init.size.height * evtScale
     }
     const movingTranslate = {
-      x: e.x - this.init.evtPos.x,
-      y: e.y - this.init.evtPos.y
+      x: (e.x - this.init.evtPos.x) / store.getters.getContentScaleRatio,
+      y: (e.y - this.init.evtPos.y) / store.getters.getContentScaleRatio
     }
+
     const compensateTranslate = {
       x: (this.init.size.width - newSize.width) * 0.5,
       y: (this.init.size.height - newSize.height) * 0.5
@@ -244,6 +246,7 @@ export default class PinchControlUtils {
         const textInitWidth = this.config.styles.width / this.config.styles.scale
         const textInitHeight = this.config.styles.height / this.config.styles.scale
         controlUtils.updateLayerInitSize(this.layerInfo.pageIndex, this.layerInfo.layerIndex, textInitWidth, textInitHeight)
+        textPropUtils.updateTextPropState('fontSize', true)
         break
       }
       case 'shape': {

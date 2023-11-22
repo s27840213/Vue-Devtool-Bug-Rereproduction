@@ -445,7 +445,6 @@ export default defineComponent({
         bottom: editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
       }
     },
-    // eslint-disable-next-line
     pinchHandler(e: AnyTouchEvent) {
       if (this.isHandlingEdgeReach || !this.$store.getters['user/isAdmin']) return
 

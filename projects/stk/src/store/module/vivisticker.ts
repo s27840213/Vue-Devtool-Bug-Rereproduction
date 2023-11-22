@@ -281,8 +281,17 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getPromote(state: IViviStickerState): string[] {
     return state.promote
   },
-  getIsPromote(state: IViviStickerState): boolean {
+  getIsPromote(state: IViviStickerState, getters): string[] {
+    return getters.getIsPromoteCountry && getters.getIsPromoteLanguage
+  },
+  getIsPromoteCountry(state: IViviStickerState): boolean {
     return state.promote.includes(state.userInfo.storeCountry ?? '')
+  },
+  getIsPromoteLanguage(state: IViviStickerState, getters): boolean {
+    return getters.getPromoteLanguages.includes(state.userInfo.locale)
+  },
+  getPromoteLanguages(state: IViviStickerState): string[] {
+    return [...new Set(state.promote.map(stkWVUtils.getLanguageByCountry))]
   }
 }
 

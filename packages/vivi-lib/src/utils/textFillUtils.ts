@@ -18,6 +18,7 @@ import { notify } from '@kyvg/vue3-notification'
 import { AxiosResponse } from 'axios'
 import { find, omit, pick } from 'lodash'
 import { InjectionKey } from 'vue'
+import localeUtils from '@/utils/localeUtils'
 
 interface IApiTextFillPresetRawImg {
   assetIndex: number
@@ -69,7 +70,7 @@ class TextFill {
       const firstImg = fill.list[0]?.param.img
       return {
         key: `${fill.id}`,
-        label: fill[`title_${constantData.localeWithFallback}`],
+        label: fill[`title_${localeUtils.localeWithFallback}`],
         plan: fill.plan,
         img: firstImg ? `https://template.vivipic.com/admin/${firstImg.teamId}/asset/image/${firstImg.id}/tiny`
           : imagePreview,

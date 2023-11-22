@@ -2,7 +2,7 @@
 div(class="flex flex-col items-center justify-center box-border px-24")
   div(class="text-app-tab-active typo-h4") {{ title }}
   div(class="text-app-text-secondary typo-btn-sm my-24 flex flex-col justify-center")
-    span(v-for="line in multilineContent") {{ line }}
+    span(v-for="line in multilineContent" :key="line") {{ line }}
   div(class="flex justify-between w-full gap-24")
     nubtn(
       theme="secondary"

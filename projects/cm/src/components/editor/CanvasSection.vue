@@ -2,8 +2,9 @@
 div(class="canvas-section absolute top-0 left-0 z-canvas")
   canvas(
     v-show="!isDuringCopy"
-    class="canvas-section w-full h-full opacity-30"
-    ref="canvasRef")
+    class="canvas-section opacity-30"
+    ref="canvasRef"
+    :style="canvasStyle")
   div(
     v-if="showBrush"
     class="absolute top-0 left-0 pointer-events-none rounded-full opacity-60"
@@ -11,8 +12,11 @@ div(class="canvas-section absolute top-0 left-0 z-canvas")
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import { useEditorStore } from '@/stores/editor'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-plugin-vue/issues/2322
 import { useStore } from 'vuex'
+
 // #region data section
 const props = defineProps<{
   containerDOM: HTMLElement | null
@@ -20,6 +24,18 @@ const props = defineProps<{
 }>()
 
 const { containerDOM, wrapperDOM } = toRefs(props)
+
+const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
+const editorStore = useEditorStore()
+const { pageSize } = storeToRefs(editorStore)
+
+const canvasStyle = computed(() => {
+  return {
+    width: `${pageSize.value.width * contentScaleRatio.value}px`,
+    height: `${pageSize.value.height * contentScaleRatio.value}px`,
+  }
+})
+
 // #endregion
 
 // #region Canvas feature section

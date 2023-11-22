@@ -133,7 +133,7 @@ div(ref="page-wrapper" :id="`nu-page-wrapper_${pageIndex}`"
                 :contentScaleRatio="contentScaleRatio"
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
-      div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
+      div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex) && !hideHighlighter"
         :class="[useMobileEditor ? 'page-highlighter page-highlighter--mobile' : 'page-highlighter', {'page-highlighter--in-bg-settings': inBgSettingMode}]"
         :style="wrapperStyles")
       //- for ruler to get rectangle of page content (without bleeds)
@@ -238,6 +238,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    hideHighlighter: {
+      type: Boolean,
+      default: false
+    }
   },
   emits: ['stepChange'],
   mounted() {

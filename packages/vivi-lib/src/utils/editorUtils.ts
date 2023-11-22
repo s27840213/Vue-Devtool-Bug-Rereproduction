@@ -203,6 +203,10 @@ class EditorUtils {
       store.commit('mobileEditor/SET_showMobileSubPanel', bool)
     }
   }
+
+  setDisableLayerAction(bool: boolean): void {
+    store.commit('SET_disableLayerAction', bool)
+  }
 }
 
 const editorUtils = new EditorUtils()

@@ -18,25 +18,34 @@ div(class="w-full box-border pl-24")
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
 </template>
 <script setup lang="ts">
+import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 const editorStore = useEditorStore()
-
 const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
+const { updateCanvasSize } = useCanvasUtilsCm()
 
 const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
 const selectedType = ref('9_16')
+
+const bus = useEventBus('editor')
+
+const updateEditingSectionSize = (width: number, height: number) => {
+  pageUtils.setPageSize(0, width, height)
+  updateCanvasSize()
+}
 
 const selectAspectRatio = (type: string) => {
   selectedType.value = type
 
   if (type === 'original') {
     if (imgAspectRatio.value > 1) {
-      pageUtils.setPageSize(0, 1600, 1600 / imgAspectRatio.value)
+      updateEditingSectionSize(1600, 1600 / imgAspectRatio.value)
     } else {
-      pageUtils.setPageSize(0, 1600 * imgAspectRatio.value, 1600)
+      updateEditingSectionSize(1600 * imgAspectRatio.value, 1600)
       layerUtils.updateLayerStyles(0, 0, {
         width: 1600 * imgAspectRatio.value,
         height: 1600,
@@ -49,12 +58,13 @@ const selectAspectRatio = (type: string) => {
     const pageAspectRatio = width / height
 
     if (pageAspectRatio >= 1) {
-      pageUtils.setPageSize(0, 1600, (1600 * height) / width)
+      updateEditingSectionSize(1600, (1600 * height) / width)
     } else {
-      pageUtils.setPageSize(0, (1600 * width) / height, 1600)
+      updateEditingSectionSize((1600 * width) / height, 1600)
     }
   }
 
+  bus.emit('fitPage', {})
   updateLayerStyleToFitPage()
 
   /**
@@ -95,5 +105,12 @@ const updateLayerStyleToFitPage = () => {
     })
   }
 }
+
+onMounted(() => {
+  editorUtils.setDisableLayerAction(true)
+})
+onBeforeUnmount(() => {
+  editorUtils.setDisableLayerAction(false)
+})
 </script>
 <style lang="scss"></style>

@@ -1,71 +1,18 @@
 @use '../utils' as *;
 
 .fade-in-out {
-  transition: all 1s 0.2s;
-
-  &-enter-active {
-    &[data-transition="notification"] {
-      // Not in use
-      transition: all 0.5s;
-    }
-
-    &[data-transition="modal"] {
-      transition: all 0.6s;
-    }
-
-    &[data-transition="story-board"] {
-      transition: all 1.5s;
-    }
-
-    &[data-transition="story-beginner"] {
-      transition: all 0.4s;
-    }
-
-    &[data-transition="level-up"] {
-      transition: all 1s 0.3s;
-    }
-
-    &[data-transition="speedline"] {
-      transition: all 0.8s;
-    }
-  }
-
+  &-enter-active,
   &-leave-active {
-    transition: all 0.5s;
-
-    &[data-transition="notification"],
-    &[data-transition="modal"] {
-      transition: all 0.5s;
-    }
-
-    &[data-transition="story-board"] {
-      transition: all 0.8s;
-    }
-
-    &[data-transition="story-beginner"] {
-      transition: all 0.6s;
-    }
-
-    &[data-transition="level-up"] {
-      transition: all 0.5s;
-    }
-
-    &[data-transition="speedline"] {
-      transition: all 0.2s;
-    }
+    transition: all 0.3s;
   }
 
-  &-enter-from {
-    opacity: 0;
-  }
-
+  &-enter-from ,
   &-leave-to {
     opacity: 0;
   }
 }
 
 .fade-in {
-
   &-enter-active,
   &-leave-active {
     transition: opacity 0.3s;
@@ -77,130 +24,26 @@
   }
 }
 
-.fade-down-up {
+.fade-in-only {
   &-enter-active {
-    transition: all 0.5s;
-  }
-
-  &-leave-active {
-    transition: all 0.5s;
+    transition: opacity 0.3s;
   }
 
   &-enter-from {
-    transform: translateY(100px);
     opacity: 0;
   }
+}
 
+.fade-down-up {
+  &-enter-active ,
+  &-leave-active {
+    transition: all 0.5s;
+  }
+
+  &-enter-from ,
   &-leave-to {
     transform: translateY(100px);
     opacity: 0;
-  }
-}
-
-.slide {
-  &-x {
-    &-left {
-
-      &-enter-active,
-      &-leave-active,
-      &-move {
-        transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
-      }
-
-      &-enter-from,
-      &-leave-to {
-        opacity: 0;
-        transform: translateX(-24px);
-      }
-
-      &-leave-active {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-      }
-
-      &-right {
-
-        &-enter-active,
-        &-leave-active,
-        &-move {
-          transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
-        }
-
-        &-enter-from {
-          opacity: 0;
-          transform: translateX(24px);
-        }
-
-        &-leave-to {
-          opacity: 0;
-          transform: translateX(-24px);
-        }
-
-        &-leave-active {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-      }
-    }
-
-    &-right {
-
-      &-enter-active,
-      &-leave-active,
-      &-move {
-        transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
-      }
-
-      &-enter-from,
-      &-leave-to {
-        opacity: 0;
-        transform: translateX(24px);
-      }
-
-      &-leave-active {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-      }
-
-      &-left {
-
-        &-enter-active,
-        &-leave-active,
-        &-move {
-          transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
-        }
-
-        &-enter-from {
-          opacity: 0;
-          transform: translateX(-24px);
-        }
-
-        &-leave-to {
-          opacity: 0;
-          transform: translateX(24px);
-        }
-
-        &-leave-active {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-      }
-    }
-  }
-}
-
-// seed warehouse panel transition
-.fade-up {
-  &-leave-active {
-    animation: fade-up 0.15s;
-  }
-
-  &-enter-active {
-    animation: fade-up 0.25s reverse;
   }
 }
 
@@ -234,6 +77,134 @@
   }
 }
 
-.layer-flip {
-  transition: transform 0.2s linear;
+.slide-in {
+  &-enter-active,
+  &-leave-active {
+    transition: transform 0.5s;
+  }
+
+  &-enter-from {
+    transform: translateX(100%);
+  }
+
+  &-leave-to {
+    transform: translateX(-100%);
+  }
+}
+
+.rotate-right-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      transform 0.25s,
+      opacity 0.25s,
+  }
+
+  &-enter-from,
+  &-leave-to {
+    transform: rotate(45deg);
+    opacity: 0;
+  }
+}
+
+.bottom-up-down {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+.fade-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+  }
+
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+
+
+.fade-bottom-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(-25px);
+  }
+}
+
+.fade-top-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateY(-25px);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+}
+
+.fade-right-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+}
+
+.fade-left-in {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.25s,
+      transform 0.25s;
+  }
+
+  &-enter-from {
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+  &-leave-to {
+    opacity: 0;
+    transform: translateX(50%);
+  }
 }

@@ -18,7 +18,6 @@ div(class="fps")
   div(class="fps__value")
     span(@click="showGraph") FPS: {{ fps }}
     span(v-if="jsHeapSize !== -1") JS-Heap: {{ jsHeapSize }}MB
-    span {{ `Current env: ${currentEnv}` }}
     span {{ `Current log num: ${logCount}` }}
 </template>
 
@@ -92,7 +91,6 @@ export default defineComponent({
       graph: {} as IFpsGraph,
       valleys: [] as Valley[],
       jsHeapSize: 0,
-      currentEnv: process.env.NODE_ENV,
     }
   },
   computed: {
