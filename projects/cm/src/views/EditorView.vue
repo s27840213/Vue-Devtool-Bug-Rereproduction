@@ -69,7 +69,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :style="demoBrushSizeStyles")
     sidebar-tabs(
       v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions"
-      class="absolute top-1/2 right-0 -translate-y-1/2"
+      class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
   div(v-else class="editor-view__saving-state")
@@ -194,14 +194,13 @@ import { useStore } from 'vuex'
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
-const sidebarTabsRef = ref<HTMLElement | null>(null)
+// const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
-const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
+// const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementBounding(editorContainerRef)
-const editorContainerAR = computed(() => editorContainerWidth.value / editorContainerHeight.value)
 
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
@@ -294,10 +293,11 @@ const fitScaleRatio = computed(() => {
   const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
   const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
 
-  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
+  // const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
+  const widthRatio = (editorContainerWidth.value - 8) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
 
-  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 0.95
+  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
   return ratio
 })
@@ -314,9 +314,9 @@ const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
 }
 
-watch(sidebarTabsWidth, () => {
-  fitPage(fitScaleRatio.value)
-})
+// watch(sidebarTabsWidth, () => {
+//   fitPage(fitScaleRatio.value)
+// })
 /**
  * fitPage
  */
@@ -359,15 +359,19 @@ const outerClick = () => {
 }
 
 const pointerEvent = ref({
-  initPos: null as { x: number, y: number } | null
+  initPos: null as { x: number; y: number } | null,
 })
 let movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
   recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
   if (isImgCtrl.value) {
-    const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
-      groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[Math.max(layerUtils.subLayerIdx, 0)] : layerUtils.getCurrLayer
+    const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
+      ? groupUtils.mapLayersToPage(
+          [layerUtils.getCurrConfig as IImage],
+          layerUtils.getCurrLayer as IGroup,
+        )[Math.max(layerUtils.subLayerIdx, 0)]
+      : layerUtils.getCurrLayer
     if (!controlUtils.isClickOnController(e, layer)) {
       const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
       switch (currLayer.type) {
@@ -389,7 +393,9 @@ const selectStart = (e: PointerEvent) => {
     movingUtils = new MovingUtils({
       _config: { config: layerUtils.getCurrLayer },
       snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-      body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+      body: document.getElementById(
+        `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+      ) as HTMLElement,
     })
     movingUtils.moveStart(e)
     pointerEvent.value.initPos = { x: e.x, y: e.y }
@@ -402,7 +408,9 @@ const selectStart = (e: PointerEvent) => {
 const selectEnd = (e: PointerEvent) => {
   if (pointerEvent.value.initPos) {
     const isSingleTouch = pointerEvtUtils.pointers.length === 1
-    const isConsiderNotMoved = Math.abs(e.x - pointerEvent.value.initPos.x) < 5 && Math.abs(e.y - pointerEvent.value.initPos.y) < 5
+    const isConsiderNotMoved =
+      Math.abs(e.x - pointerEvent.value.initPos.x) < 5 &&
+      Math.abs(e.y - pointerEvent.value.initPos.y) < 5
     if (isSingleTouch && isConsiderNotMoved && !store.getters['imgControl/isImgCtrl']) {
       // the moveingEnd would consider the layer to be selected,
       // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
@@ -451,30 +459,37 @@ const pinchStart = (e: AnyTouchEvent) => {
   if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
   if (store.getters['bgRemove/getInBgRemoveMode']) return
 
-  const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
+  const _config = {
+    config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex),
+  } as unknown as { config: ILayer }
 
   if (_config.config.locked) return
   if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
 
-  const  layerInfo = new Proxy({
-    pageIndex: layerUtils.pageIndex,
-    layerIndex: layerUtils.layerIndex
-  }, {
-    get(_, key) {
-      if (key === 'pageIndex') return layerUtils.pageIndex
-      else if (key === 'layerIndex') return layerUtils.layerIndex
-    }
-  }) as ILayerInfo
+  const layerInfo = new Proxy(
+    {
+      pageIndex: layerUtils.pageIndex,
+      layerIndex: layerUtils.layerIndex,
+    },
+    {
+      get(_, key) {
+        if (key === 'pageIndex') return layerUtils.pageIndex
+        else if (key === 'layerIndex') return layerUtils.layerIndex
+      },
+    },
+  ) as ILayerInfo
   const movingUtils = new MovingUtils({
     _config,
     layerInfo,
     snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-    body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+    body: document.getElementById(
+      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+    ) as HTMLElement,
   })
   const data = {
     layerInfo,
     config: undefined,
-    movingUtils: movingUtils as MovingUtils
+    movingUtils: movingUtils as MovingUtils,
   }
   pinchControlUtils = new PinchControlUtils(data)
 }

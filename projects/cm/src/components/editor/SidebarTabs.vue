@@ -125,7 +125,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'canvas',
       text: t('CM0053'),
       panelType: '',
-      disabled: true,
+      // disabled: true,
     },
   ]
 })
@@ -176,6 +176,13 @@ const handleTabAction = (tab: ISidebarTab) => {
 }
 </script>
 <style lang="scss" scoped>
+.sidebar-tabs {
+  // filter: drop-shadow(0px 0px 0px 20px #4444dd);
+  filter: drop-shadow(1px 1px 0px rgba(32, 32, 32, 0.2))
+    drop-shadow(-1px 1px 0px rgba(32, 32, 32, 0.2)) drop-shadow(1px -1px 0px rgba(32, 32, 32, 0.2))
+    drop-shadow(-1px -1px 0px rgba(32, 32, 32, 0.2));
+}
+
 .sub-tabs {
   transition:
     grid-template-rows 0.3s ease-in-out,
