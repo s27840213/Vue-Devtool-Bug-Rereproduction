@@ -34,7 +34,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     ref="editorContainerRef"
     @pointerdown="selectStart"
     @pointerup="selectEnd"
-    @pinch="onPinch"
+    @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
     div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
@@ -180,6 +180,7 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
+import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
@@ -430,6 +431,7 @@ const selectEnd = (e: PointerEvent) => {
 }
 
 const isPinchInit = ref<null | boolean>(false)
+const pagePinchHandler = (new PagePinchUtils()).pinchHandler
 let pinchControlUtils = null as null | PinchControlUtils
 const onPinch = (e: AnyTouchEvent) => {
   if (e.phase === 'end' && isPinchInit.value) {
