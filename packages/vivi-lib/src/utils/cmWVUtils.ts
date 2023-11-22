@@ -74,7 +74,7 @@ export interface ISaveAssetFromUrlResponse {
   type: 'gif' | 'jpg' | 'png' | 'mp4',
   flag: string,
   msg?: string,
-  imageId?: string
+  fileId?: string
 }
 
 class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
