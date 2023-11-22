@@ -30,7 +30,10 @@ import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
+import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const globalStore = useGlobalStore()
@@ -63,11 +66,25 @@ const handleGenerate = () => {
     setShowSpinner(true)
     setIsGenerating(true)
     genImage(promptText.value)
-      .then((url) => {
-        unshiftGenResults(url, generalUtils.generateRandomString(4))
-        changeEditorState('next')
-        setIsGenerating(false)
-        setShowSpinner(false)
+      .then(async (url) => {
+        const data = await cmWVUtils.saveAssetFromUrl('png', url)
+        const { flag, fileId } = data
+        if (flag === '0' && fileId) {
+          const srcObj: SrcObj = {
+            type: 'ios',
+            assetId: `cameraroll/${fileId}`,
+            userId: '',
+          }
+
+          const imgSrc = imageUtils.getSrc(srcObj)
+          console.log(imgSrc)
+          unshiftGenResults(imgSrc, generalUtils.generateRandomString(4))
+          changeEditorState('next')
+          setIsGenerating(false)
+          setShowSpinner(false)
+        } else {
+          throw new Error('saveAssetFromUrl failed')
+        }
       })
       .catch((error) => {
         logUtils.setLogForError(error as Error)
