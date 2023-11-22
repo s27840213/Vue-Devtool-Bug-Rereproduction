@@ -4,8 +4,7 @@ div(class="popup-submit bg-white")
   input(ref="input"
     type="text"
     v-model="id")
-  btn(:type="'primary-sm'" class="rounded my-5"
-    @click="upload()") 上傳
+  nubtn(@click="upload()") 上傳
 </template>
 
 <script lang="ts">

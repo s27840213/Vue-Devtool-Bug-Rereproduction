@@ -68,7 +68,6 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vuexUtils from '@/utils/vuexUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -128,7 +127,7 @@ export default defineComponent({
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       currSelectedInfo: 'getCurrSelectedInfo',
-      scaleRatio: 'getPageScaleRatio',
+      pageScaleRatio: 'getPageScaleRatio',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
@@ -144,7 +143,7 @@ export default defineComponent({
       return this.isProcessImgShadow || this.isUploadImgShadow
     },
     pageStyles(): { [index: string]: string } {
-      const _f = this.contentScaleRatio * (this.inPreview || !this.$isTouchDevice() ? 1 : this.scaleRatio * 0.01)
+      const _f = this.contentScaleRatio * (this.inPreview || !this.$isTouchDevice() ? 1 : this.pageScaleRatio * 0.01)
       return {
         width: `${this.config.width * _f + this.margin.right}px`,
         height: `${this.config.height * _f + this.margin.bottom}px`,
@@ -176,9 +175,11 @@ export default defineComponent({
           ].join(' ')
         }
       }
+      const width = this.$isTouchDevice() ? this.config.width * this.pageScaleRatio * 0.01 : this.config.width
+      const height = this.$isTouchDevice() ? this.config.height * this.pageScaleRatio * 0.01 : this.config.height
       return {
-        width: (this.config.width - this.config.bleeds.left - this.config.bleeds.right) * this.contentScaleRatio + 'px',
-        height: (this.config.height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
+        width: (width - this.config.bleeds.left - this.config.bleeds.right) * this.contentScaleRatio + 'px',
+        height: (height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
         margin: [
           this.config.bleeds.top * this.contentScaleRatio + 'px',
           this.config.bleeds.right * this.contentScaleRatio + this.margin.right + 'px',
@@ -300,10 +301,9 @@ export default defineComponent({
       }
     },
     pageClickHandler(): void {
-      if (this.$isStk) {
-        stkWVUtils.deselect()
-        return
-      }
+      if (this.$isStk || this.$isCm) return
+
+      // TODO(Hsing-Chi): Check if pageClickHandler needed.
       if (!this.isImgCtrl) {
         groupUtils.deselect()
         editorUtils.setInMultiSelectionMode(false)

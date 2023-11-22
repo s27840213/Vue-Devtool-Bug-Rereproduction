@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide mr-4")
+div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide")
   div(
     v-for="(tab, index) in defaultEditorTabs"
     :key="`${tab.icon}-${index}`"
@@ -9,7 +9,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
       class="sidebar__tab flex flex-col items-center justify-center gap-2 box-border p-4"
       @click.stop="handleTabAction(tab)"
       @pointerdown.stop)
-      cm-svg-icon(
+      svg-icon(
         class="pointer-events-none"
         :style="tab.styles"
         :iconName="tab.icon"
@@ -27,7 +27,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
         class="flex flex-col items-center justify-center gap-2 box-border p-4"
         @click.stop="handleTabAction(subTab)"
         @pointerdown.stop)
-        cm-svg-icon(
+        svg-icon(
           :style="subTab.styles"
           :iconName="subTab.icon"
           :iconColor="currActiveFeature === subTab.icon ? 'app-tab-active' : 'app-btn-primary-text'"

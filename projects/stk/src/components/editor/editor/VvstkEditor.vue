@@ -4,6 +4,9 @@ div(
   ref="editorView"
   :style="copyingStyles()"
   @pointerdown="selectStart"
+  @pointerup="selectEnd"
+  @pinch="onPinch"
+  @pointerleave="removePointer"
   v-touch)
   div(
     v-show="!isInBgRemoveSection"
@@ -68,18 +71,24 @@ import PageCard from '@/components/editor/mobile/PageCard.vue'
 import ShareTemplate from '@/components/editor/mobile/ShareTemplate.vue'
 import PagePreview from '@/components/editor/pagePreview/PagePreview.vue'
 import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
+import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
+import { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
 import { IPageState } from '@nu/vivi-lib/interfaces/page'
-import { LayerType } from '@nu/vivi-lib/store/types'
+import { ILayerInfo, LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
+import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import resizeUtils from '@nu/vivi-lib/utils/resizeUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -109,7 +118,13 @@ export default defineComponent({
       swipeDetector: null as unknown as SwipeDetector,
       bgRemoveContainerRef: null as unknown as HTMLElement,
       isInPageAdd: false,
+      isPinchInit: false,
+      pinchControlUtils: null as null | PinchControlUtils,
+      movingUtils: null as null | MovingUtils,
       mobilePanelHeight: 0,
+      pointerEvent: {
+        initPos: null as null | ICoordinate
+      },
     }
   },
   mounted() {
@@ -224,6 +239,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
+      controlState: 'getControlState',
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -261,44 +277,121 @@ export default defineComponent({
       pageUtils.setBackgroundImageControlDefault()
     },
     selectStart(e: PointerEvent) {
+      this.recordPointer(e)
       if (this.inBgRemoveMode || this.isInBgRemoveSection) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
-      const isClickOnController = controlUtils.isClickOnController(e)
-      if (this.isImgCtrl && !isClickOnController) {
-        const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-        switch (currLayer.type) {
-          case LayerType.image:
-          case LayerType.group:
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-            break
-          case LayerType.frame:
-            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
-              imgControl: false,
-            })
-            break
+      if (this.isImgCtrl) {
+        const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
+          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[Math.max(layerUtils.subLayerIdx, 0)] : layerUtils.getCurrLayer
+        if (!controlUtils.isClickOnController(e, layer)) {
+          const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+          switch (currLayer.type) {
+            case LayerType.image:
+            case LayerType.group:
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+              break
+            case LayerType.frame:
+              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+                imgControl: false,
+              })
+              break
+          }
+          return
         }
-        return
       }
       if (layerUtils.layerIndex !== -1) {
-        /**
-         * when the user click the control-region outsize the page,
-         * the moving logic should be applied to the EditorView.
-         */
-        if (isClickOnController) {
-          const movingUtils = new MovingUtils({
-            _config: { config: layerUtils.getCurrLayer },
-            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-            body: document.getElementById(
-              `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-            ) as HTMLElement,
-          })
-          movingUtils.moveStart(e)
-        } else {
-          if (this.isInEditor) {
-            stkWVUtils.deselect()
+        // when there is an layer being active, the moving logic applied to the EditorView
+        this.movingUtils = new MovingUtils({
+          _config: { config: layerUtils.getCurrLayer },
+          snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+          body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+        })
+        this.movingUtils.moveStart(e)
+        this.pointerEvent.initPos = { x: e.x, y: e.y }
+      }
+    },
+    // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
+    // is bcz the native click/tap event is triggered as the event happened in a-short-time even the layer has moved a little position,
+    // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
+    selectEnd(e: PointerEvent) {
+      if (this.pointerEvent.initPos) {
+        const isSingleTouch = pointerEvtUtils.pointers.length === 1
+        const isConsiderNotMoved = Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5
+        if (isSingleTouch && isConsiderNotMoved && !this.$store.getters['imgControl/isImgCtrl']) {
+          // the moveingEnd would consider the layer to be selected,
+          // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
+          // following code remove the moveEnd event.
+          if (this.$store.getters.getControlState.type === 'move') {
+            this.$store.commit('SET_STATE', { controlState: { type: '' } })
+          }
+          const layer = layerUtils.getCurrLayer
+          if (!controlUtils.isClickOnController(e, layer)) {
+            groupUtils.deselect()
+            this.movingUtils?.removeListener()
           }
         }
+        this.pointerEvent.initPos = null
       }
+      pointerEvtUtils.removePointer(e.pointerId)
+    },
+    recordPointer(e: PointerEvent) {
+      pointerEvtUtils.addPointer(e)
+    },
+    removePointer(e: PointerEvent) {
+      pointerEvtUtils.removePointer(e.pointerId)
+    },
+    onPinch(e: AnyTouchEvent) {
+      if (e.phase === 'end' && this.isPinchInit) {
+        // pinch end handling
+        this.pinchHandler(e)
+        this.isPinchInit = false
+        this.pinchControlUtils = null
+      } else {
+        const touches = (e.nativeEvent as TouchEvent).touches
+        if (touches.length !== 2 || layerUtils.layerIndex === -1) return
+        if (!this.isPinchInit) {
+          // first pinch initialization
+          this.isPinchInit = true
+          return this.pinchStart(e)
+        } else {
+          // pinch move handling
+          this.pinchHandler(e)
+        }
+      }
+    },
+    pinchHandler(e: AnyTouchEvent) {
+      this.pinchControlUtils?.pinch(e)
+    },
+    pinchStart(e: AnyTouchEvent) {
+      if (this.$store.getters['imgControl/isImgCtrl'] || this.$store.getters['imgControl/isImgCtrl']) return
+      if (this.$store.getters['bgRemove/getInBgRemoveMode']) return
+
+      const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
+
+      if (_config.config.locked) return
+      if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
+
+      const  layerInfo = new Proxy({
+        pageIndex: layerUtils.pageIndex,
+        layerIndex: layerUtils.layerIndex
+      }, {
+        get(_, key) {
+          if (key === 'pageIndex') return layerUtils.pageIndex
+          else if (key === 'layerIndex') return layerUtils.layerIndex
+        }
+      }) as ILayerInfo
+      const movingUtils = new MovingUtils({
+        _config,
+        layerInfo,
+        snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+      })
+      const data = {
+        layerInfo,
+        config: undefined,
+        movingUtils: movingUtils as MovingUtils
+      }
+      this.pinchControlUtils = new PinchControlUtils(data)
     },
     showPanelPageManagement() {
       editorUtils.setCurrActivePanel('page-management')

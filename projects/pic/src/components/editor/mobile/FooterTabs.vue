@@ -36,37 +36,55 @@ export default defineComponent({
     customContentStyles() {
       return {
         borderTop: !this.contentEditable && this.isSettingTabsOpen ? '0.5px solid #D9DBE1' : 'none',
-        boxShadow: !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none',
+        boxShadow:
+          !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none',
       }
     },
     groupTab(): IFooterTab {
       return {
-        icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
+        icon: this.isGroup ? 'ungroup' : 'group',
+        text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`,
+        hidden: !this.isGroup && this.selectedLayerNum === 1,
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
     homeTabs(): Array<IFooterTab> {
-      const useCameraroll = generalUtils.versionCheck({ greaterThan: '1.05', version: picWVUtils.getUserInfoFromStore().appVer })
+      const useCameraroll = generalUtils.versionCheck({
+        greaterThan: '1.05',
+        version: picWVUtils.getUserInfoFromStore().appVer,
+      })
       return [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
-        ...useCameraroll ? [{ icon: 'cameraroll', text: `${this.$tc('STK0067', 2)}` }]
-          : [{ icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' }],
+        ...(useCameraroll
+          ? [{ icon: 'cameraroll', text: `${this.$tc('STK0067', 2)}` }]
+          : [{ icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' }]),
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
-        ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-dark' }] : [],
-        ...useCameraroll ? [{ icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' }] : [],
+        ...(this.isAdmin
+          ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-dark' }]
+          : []),
+        ...(useCameraroll
+          ? [{ icon: 'photo', text: `${this.$t('STK0069')}`, panelType: 'photo' }]
+          : []),
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
         { icon: 'paste', text: `${this.$t('NN0230')}` },
-        ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
+        ...(brandkitUtils.isBrandkitAvailable
+          ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }]
+          : []),
       ] as Array<IFooterTab>
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
+        {
+          icon: 'replace',
+          text: `${this.$t('NN0490')}`,
+          panelType: 'replace',
+          hidden: this.isInFrame,
+        },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         {
@@ -75,10 +93,14 @@ export default defineComponent({
           panelType: 'photo-shadow',
           hidden: this.isInFrame,
           // empty type in srcObj means the image is being uploading
-          disabled: (this.isHandleShadow || this.isUploadShadow || !(layerUtils.getCurrConfig as IImage).srcObj.type) && this.mobilePanel !== 'photo-shadow'
+          disabled:
+            (this.isHandleShadow ||
+              this.isUploadShadow ||
+              !(layerUtils.getCurrConfig as IImage).srcObj.type) &&
+            this.mobilePanel !== 'photo-shadow',
         },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
       ]
     },
     photoTabs(): Array<IFooterTab> {
@@ -93,89 +115,168 @@ export default defineComponent({
           panelType: 'photo-shadow',
           hidden: this.isInFrame,
           // empty type in srcObj means the image is being uploading
-          disabled: (this.isHandleShadow || this.isUploadShadow || !(layerUtils.getCurrConfig as IImage).srcObj?.type) && this.mobilePanel !== 'photo-shadow'
+          disabled:
+            (this.isHandleShadow ||
+              this.isUploadShadow ||
+              !(layerUtils.getCurrConfig as IImage).srcObj?.type) &&
+            this.mobilePanel !== 'photo-shadow',
         },
-        ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light' }] : [],
+        ...(this.isAdmin
+          ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light' }]
+          : []),
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isCopyFormatDisabled },
-        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame, disabled: this.isSvgImage }] : []
+        {
+          icon: 'brush',
+          text: `${this.$t('NN0035')}`,
+          panelType: 'copy-style',
+          hidden: this.isCopyFormatDisabled,
+        },
+        ...(!picWVUtils.inReviewMode
+          ? [
+              {
+                icon: 'remove-bg',
+                text: `${this.$t('NN0043')}`,
+                panelType: 'remove-bg',
+                hidden: this.isInFrame,
+                disabled: this.isSvgImage || this.isProcessing || this.isUploadingImg,
+              },
+            ]
+          : []),
       ]
     },
     frameTabs(): Array<IFooterTab> {
       const frame = layerUtils.getCurrLayer
       if (frame.type !== 'frame') return []
-      const showReplace = frame.clips.length === 1 || frame.clips.some(c => c.active)
-      const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
+      const showReplace = frame.clips.length === 1 || frame.clips.some((c) => c.active)
+      const replace = showReplace
+        ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }]
+        : []
       return [
         ...replace,
-        ...(frame.clips.length === 1 ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
+        ...(frame.clips.length === 1
+          ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }]
+          : []),
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
           hidden: this.globalSelectedColor === 'none',
           props: {
-            currColorEvent: ColorEventType.shape
-          }
+            currColorEvent: ColorEventType.shape,
+          },
         },
         ...this.genearlLayerTabs,
-        ...this.copyPasteTabs
+        ...this.copyPasteTabs,
       ]
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer) },
-        { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
+        {
+          icon: 'edit',
+          text: `${this.$t('NN0504')}`,
+          hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer),
+        },
+        {
+          icon: 'font',
+          text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`),
+          panelType: 'fonts',
+        },
         { icon: 'font-size', text: `${this.$t('NN0122')}`, panelType: 'font-size' },
         {
           icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
           props: {
-            currColorEvent: ColorEventType.text
-          }
+            currColorEvent: ColorEventType.text,
+          },
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isCopyFormatDisabled }
+        {
+          icon: 'brush',
+          text: `${this.$t('NN0035')}`,
+          panelType: 'copy-style',
+          hidden: this.isCopyFormatDisabled,
+        },
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
       const { hasBgImage } = backgroundUtils
       return [
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        ...this.isAdmin ? [{ icon: 'overlay', text: this.$t('NN0899'), panelType: 'overlay-light', hidden: !hasBgImage, disabled: this.backgroundLocked }] : [],
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        {
+          icon: 'replace',
+          text: `${this.$t('NN0490')}`,
+          panelType: 'replace',
+          hidden: this.isInFrame,
+        },
+        {
+          icon: 'transparency',
+          text: `${this.$t('NN0030')}`,
+          panelType: 'opacity',
+          disabled: this.backgroundLocked,
+        },
+        {
+          icon: 'crop',
+          text: `${this.$t('NN0036')}`,
+          panelType: 'crop',
+          hidden: !hasBgImage,
+          disabled: this.backgroundLocked,
+        },
+        ...(this.isAdmin
+          ? [
+              {
+                icon: 'overlay',
+                text: this.$t('NN0899'),
+                panelType: 'overlay-light',
+                hidden: !hasBgImage,
+                disabled: this.backgroundLocked,
+              },
+            ]
+          : []),
+        {
+          icon: 'flip',
+          text: `${this.$t('NN0038')}`,
+          panelType: 'flip',
+          hidden: !hasBgImage,
+          disabled: this.backgroundLocked,
+        },
+        {
+          icon: 'sliders',
+          text: `${this.$t('NN0042')}`,
+          panelType: 'adjust',
+          hidden: !hasBgImage,
+          disabled: this.backgroundLocked,
+        },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
           hidden: this.globalSelectedColor === 'none',
           props: {
-            currColorEvent: ColorEventType.background
+            currColorEvent: ColorEventType.background,
           },
-          disabled: this.backgroundLocked
+          disabled: this.backgroundLocked,
         },
-        { icon: 'bg-separate', text: `${this.$t('NN0708')}`, hidden: !hasBgImage, disabled: this.backgroundLocked }
+        {
+          icon: 'bg-separate',
+          text: `${this.$t('NN0708')}`,
+          hidden: !hasBgImage,
+          disabled: this.backgroundLocked,
+        },
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
       return [
         ...this.multiGeneralTabs,
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
-      return [
-        ...this.multiGeneralTabs,
-        ...this.fontTabs
-      ]
+      return [...this.multiGeneralTabs, ...this.fontTabs]
     },
     multiObjectTabs(): Array<IFooterTab> {
       return [
@@ -186,9 +287,9 @@ export default defineComponent({
           panelType: 'color',
           hidden: this.globalSelectedColor === 'none',
           props: {
-            currColorEvent: ColorEventType.shape
-          }
-        }
+            currColorEvent: ColorEventType.shape,
+          },
+        },
       ]
     },
     objectTabs(): Array<IFooterTab> {
@@ -199,10 +300,15 @@ export default defineComponent({
           panelType: 'color',
           hidden: this.globalSelectedColor === 'none',
           props: {
-            currColorEvent: ColorEventType.shape
-          }
+            currColorEvent: ColorEventType.shape,
+          },
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
+        {
+          icon: 'sliders',
+          text: `${this.$t('NN0042')}`,
+          panelType: 'object-adjust',
+          hidden: !this.showShapeAdjust,
+        },
       ]
     },
     pageTabs(): Array<IFooterTab> {
@@ -210,7 +316,7 @@ export default defineComponent({
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
         // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
-        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 }
+        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 },
         // { icon: 'adjust-order', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
@@ -222,44 +328,56 @@ export default defineComponent({
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'nudge', text: `${this.$t('NN0872')}`, panelType: 'nudge' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' }
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
+        {
+          icon: 'layers-alt',
+          text: `${this.$t('NN0031')}`,
+          panelType: 'order',
+          hidden: this.hasSubSelectedLayer,
+        },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
-        ...this.copyPasteTabs
+        ...this.copyPasteTabs,
       ]
     },
     copyPasteTabs(): Array<IFooterTab> {
       return [
         { icon: 'copy', text: `${this.$t('NN0032')}` },
-        { icon: 'paste', text: `${this.$t('NN0230')}` }
+        { icon: 'paste', text: `${this.$t('NN0230')}` },
       ]
     },
     settingTabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
-      // A group that only has images
-      } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
+        // A group that only has images
+      } else if (
+        this.isGroupOrTmp &&
+        this.targetIs('image') &&
+        (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)
+      ) {
         return this.multiPhotoTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
         return this.photoInGroupTabs
-      // text + shape color
+        // text + shape color
       } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
         return [...this.multiObjectTabs, ...this.fontTabs]
-      // only text
+        // only text
       } else if (this.isGroupOrTmp && this.targetIs('text')) {
         return this.multiFontTabs
-      // only shape
+        // only shape
       } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
         return this.multiObjectTabs
-      } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
+      } else if (
+        (this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) &&
+        !this.singleTargetType()
+      ) {
         return this.multiGeneralTabs
       } else if (this.showPhotoTabs) {
         return this.photoTabs
@@ -280,36 +398,54 @@ export default defineComponent({
       return []
     },
     showPhotoTabs(): boolean {
-      return (!this.isFontsPanelOpened &&
-        this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive || this.inBgRemoveMode
+      return (
+        (!this.isFontsPanelOpened && this.targetIs('image') && this.singleTargetType()) ||
+        this.hasFrameClipActive ||
+        this.inBgRemoveMode
+      )
     },
     showObjectColorAndFontTabs(): boolean {
       const { subLayerIdx } = layerUtils
       const currLayer = layerUtils.getCurrLayer
-      if (!(currLayer.type === 'group' || currLayer.type === 'tmp') || subLayerIdx !== -1) return false
-      const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
-      const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
-      const hasImages = (currLayer.layers.filter(l => l.type === 'image') as IImage[]).length !== 0
-      if (hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1)) return false
+      if (!(currLayer.type === 'group' || currLayer.type === 'tmp') || subLayerIdx !== -1)
+        return false
+      const singleColorShapes = currLayer.layers.filter(
+        (l) => l.type === 'shape' && l.color.length === 1,
+      ) as IShape[]
+      const multiColorShapes = currLayer.layers.filter(
+        (l) => l.type === 'shape' && l.color.length !== 1,
+      ) as IShape[]
+      const hasImages =
+        (currLayer.layers.filter((l) => l.type === 'image') as IImage[]).length !== 0
+      if (hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1))
+        return false
       else return true
     },
     hasFrameClipActive(): boolean {
       const layer = layerUtils.getCurrLayer
       if (layer.type === LayerType.frame) {
-        return (layer as IFrame).clips.some(c => c.active)
+        return (layer as IFrame).clips.some((c) => c.active)
       } else return false
     },
     showFontTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.targetIs('text') && this.singleTargetType()
+      return (
+        !this.inBgRemoveMode &&
+        !this.isFontsPanelOpened &&
+        this.targetIs('text') &&
+        this.singleTargetType()
+      )
     },
     showShapeSetting(): boolean {
       const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
-      const typeConditon = (this.targetIs('shape') && this.singleTargetType())
+      const typeConditon = this.targetIs('shape') && this.singleTargetType()
       return stateCondition && typeConditon
     },
     showFrameTabs(): boolean {
-      return this.targetIs('frame') && this.singleTargetType() && !(layerUtils.getCurrLayer as IFrame).clips.some(c => c.active)
+      return (
+        this.targetIs('frame') &&
+        this.singleTargetType() &&
+        !(layerUtils.getCurrLayer as IFrame).clips.some((c) => c.active)
+      )
     },
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
@@ -330,15 +466,32 @@ export default defineComponent({
               let index
               switch (layerUtils.getCurrLayer.type) {
                 case 'image':
-                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
+                    imgControl: true,
+                  })
                   break
                 case 'frame':
-                  index = Math.max((layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active), 0)
-                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                  index = Math.max(
+                    (layerUtils.getCurrLayer as IFrame).clips.findIndex(
+                      (l) => l.type === 'image' && l.active,
+                    ),
+                    0,
+                  )
+                  frameUtils.updateFrameLayerProps(
+                    layerUtils.pageIndex,
+                    layerUtils.layerIndex,
+                    index,
+                    { imgControl: true },
+                  )
                   break
                 case 'group':
                   if (layerUtils.getCurrConfig.type === LayerType.image) {
-                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                    layerUtils.updateLayerProps(
+                      layerUtils.pageIndex,
+                      layerUtils.layerIndex,
+                      { imgControl: true },
+                      layerUtils.subLayerIdx,
+                    )
                   }
                   break
               }
@@ -347,7 +500,7 @@ export default defineComponent({
             if (this.backgroundLocked) return this.handleLockedNotify()
             this.setBgImageControl({
               pageIndex: pageUtils.currFocusPageIndex,
-              imgControl: !this.backgroundImgControl
+              imgControl: !this.backgroundImgControl,
             })
           }
           break
@@ -368,7 +521,7 @@ export default defineComponent({
               if (images.length > 0) {
                 generalUtils.toDataURL(`vvpic://${images[0]}`, (dataUrl: string) => {
                   uploadUtils.uploadAsset('image', [dataUrl], {
-                    addToPage: true
+                    addToPage: true,
                   })
                 })
               }
@@ -401,15 +554,18 @@ export default defineComponent({
         case 'add-page': {
           const page = pageUtils.getPage(pageUtils.currFocusPageIndex)
           const currPage = pageUtils.currFocusPage
-          pageUtils.addPageToPos(pageUtils.newPage({
-            width: page.width,
-            height: page.height,
-            bleeds: currPage.bleeds,
-            physicalBleeds: currPage.physicalBleeds,
-            isEnableBleed: currPage.isEnableBleed,
-            backgroundColor: currPage.backgroundColor,
-            unit: currPage.unit
-          }), pageUtils.currFocusPageIndex + 1)
+          pageUtils.addPageToPos(
+            pageUtils.newPage({
+              width: page.width,
+              height: page.height,
+              bleeds: currPage.bleeds,
+              physicalBleeds: currPage.physicalBleeds,
+              isEnableBleed: currPage.isEnableBleed,
+              backgroundColor: currPage.backgroundColor,
+              unit: currPage.unit,
+            }),
+            pageUtils.currFocusPageIndex + 1,
+          )
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
           break
@@ -427,7 +583,7 @@ export default defineComponent({
           targetPreviewPage?.scrollIntoView({
             behavior: 'smooth',
             block: 'center',
-            inline: 'center'
+            inline: 'center',
           })
           break
         }
@@ -442,7 +598,7 @@ export default defineComponent({
         }
         case 'text-format': {
           if (!this.selectMultiple && !this.isGroup) {
-            tiptapUtils.agent(editor => editor.commands.selectAll())
+            tiptapUtils.agent((editor) => editor.commands.selectAll())
           }
           break
         }
@@ -453,7 +609,7 @@ export default defineComponent({
           if (!this.hasSubSelectedLayer) {
             if (currLayer.type === 'text') {
               layerUtils.updateLayerProps(pageIndex, index, {
-                contentEditable: true
+                contentEditable: true,
               })
             }
 
@@ -467,9 +623,14 @@ export default defineComponent({
             const { subLayerIdx } = layerUtils
             const subLayer = (currLayer as IGroup).layers[subLayerIdx]
             if (subLayer.type === 'text') {
-              layerUtils.updateLayerProps(pageIndex, index, {
-                contentEditable: true
-              }, subLayerIdx)
+              layerUtils.updateLayerProps(
+                pageIndex,
+                index,
+                {
+                  contentEditable: true,
+                },
+                subLayerIdx,
+              )
             }
             this.$nextTick(() => {
               tiptapUtils.focus({ scrollIntoView: false }, 'end')
@@ -539,7 +700,9 @@ export default defineComponent({
         this.$emit('switchTab', tab.panelType, tab.props)
       }
 
-      if (['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)) {
+      if (
+        ['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)
+      ) {
         this.clickedTab = tab.icon
         this.clickedTabTimer = window.setTimeout(() => {
           this.clickedTab = ''
@@ -547,7 +710,10 @@ export default defineComponent({
       }
 
       if (['copy', 'paste'].includes(tab.icon)) {
-        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
+        notify({
+          group: 'copy',
+          text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813'),
+        })
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
@@ -556,7 +722,13 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     settingTabColor(icon: IFooterTab): string {
-      return (icon.disabled || this.isLocked || (icon.icon !== 'remove-bg' && this.inBgRemoveMode)) ? 'gray-4' : this.tabActive(icon) ? 'blue-1' : this.isSettingTabsOpen ? 'gray-2' : 'white'
+      return icon.disabled || this.isLocked || (icon.icon !== 'remove-bg' && this.inBgRemoveMode)
+        ? 'gray-4'
+        : this.tabActive(icon)
+        ? 'blue-1'
+        : this.isSettingTabsOpen
+        ? 'gray-2'
+        : 'white'
     },
     // eslint-disable-next-line vue/no-unused-properties
     customContainerStyles(isSubContainer: boolean): { [index: string]: string } {
@@ -571,6 +743,6 @@ export default defineComponent({
         backgroundColor: '#F4F5F7',
       }
     },
-  }
+  },
 })
 </script>

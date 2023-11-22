@@ -1,6 +1,8 @@
+import { ILoginResult } from '@/interfaces/api'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 
 export interface IGeneralSuccessResponse {
@@ -14,7 +16,7 @@ export interface IGeneralFailureResponse {
 
 type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
 
-export interface IUserInfo {
+export type IUserInfo = {
   hostId: string
   appVer: string
   osVer: string
@@ -22,7 +24,9 @@ export interface IUserInfo {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string
+  modelName: string,
+  flag: string,
+  locale: string,
 }
 
 export interface IAlbum {
@@ -82,6 +86,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     statusBarHeight: 0,
     homeIndicatorHeight: 0,
     country: '',
+    flag: '0',
+    locale: 'en',
     modelName: 'web',
   }
 
@@ -121,12 +127,29 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async getUserInfo(): Promise<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
-    const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH', this.getEmptyMessage())
+    const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH')
     return userInfo as IUserInfo
   }
 
+  // Like picWVUtils, need merge.
+  async login(type: 'Apple' | 'Google' | 'Facebook', locale: string) {
+    const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as 
+      { data: ILoginResult, flag: number, msg?: string }
+    if (!loginResult) {
+      throw new Error('login failed')
+    }
+
+    if (loginResult.flag === 0) {
+      store.dispatch('user/loginSetup', { data: loginResult })
+      return loginResult
+    } else {
+      // logUtils.setLogAndConsoleLog('Apple login failed')
+      notify({ group: 'error', text: loginResult.msg })
+    }
+  }
+
   async getAlbumList(): Promise<IAlbumListResponse> {
-    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST', this.getEmptyMessage())
+    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST')
 
     return albumList as IAlbumListResponse
   }
@@ -255,7 +278,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<any | undefined> {
     if (this.inBrowserMode) return
-    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
+    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }, { retry: true }) as IGetStateResponse
     return data.value ? JSON.parse(data.value) : undefined
   }
 

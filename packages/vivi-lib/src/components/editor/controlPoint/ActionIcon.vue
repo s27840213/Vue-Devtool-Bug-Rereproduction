@@ -12,6 +12,7 @@ div(class="control-point__action-icon")
 
 <script setup lang="ts">
 import generalUtils from '@/utils/generalUtils'
+import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import type { PropType } from 'vue'
 
 defineProps({
@@ -44,6 +45,7 @@ defineProps({
 const emit = defineEmits<{(event: 'action', e: PointerEvent): void}>()
 
 const pointerDown = (e: PointerEvent) => {
+  pointerEvtUtils.addPointer(e)
   emit('action', e)
 }
 const disableTouchEvent = (e: TouchEvent) => {

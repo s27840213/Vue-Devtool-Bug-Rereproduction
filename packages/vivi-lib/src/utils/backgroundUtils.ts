@@ -166,6 +166,7 @@ class BackgroundUtils {
     const _image = generalUtils.deepCopy(image)
     if (!_image.srcObj.type && _image.previewSrc) {
       _image.srcObj.type = 'preview'
+      _image.srcObj.assetId = _image.tmpId as string || ''
     }
     store.commit('SET_backgroundImageSrc', {
       pageIndex: pageIndex,
@@ -226,9 +227,8 @@ class BackgroundUtils {
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageMode(pageIndex, true)
 
-    if (generalUtils.isTouchDevice()) {
-      editorUtils.setInBgSettingMode(true)
-    }
+    store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
+    stepsUtils.record()
   }
 
   fitPageBackground(pageIndex: number) {

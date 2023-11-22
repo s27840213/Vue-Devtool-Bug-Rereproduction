@@ -9,7 +9,7 @@ div(class="panel-objects")
   //- Admin tool
   div(v-if="showAdminTool" class="panel-objects-2html")
     input(type="text" placeholder="項目網址" v-model="panelParams")
-    btn(@click="downloadAll") Download all
+    nubtn(@click="downloadAll") Download all
   //- Search result empty msg
   div(v-if="emptyResultMessage")
     span {{ emptyResultMessage }}
@@ -47,15 +47,15 @@ div(class="panel-objects")
 </template>
 
 <script lang="ts">
+import { notify } from '@kyvg/vue3-notification'
+import Url from '@nu/shared-lib/components/Url.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@nu/vivi-lib/components/category/CategoryObjectItem.vue'
-import Url from '@/components/global/Url.vue'
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -248,6 +248,6 @@ export default defineComponent({
   > input:focus {
     border: 1px solid black;
   }
-  > button { margin: 10px auto; }
+  > .nubtn { margin: 10px auto; }
 }
 </style>

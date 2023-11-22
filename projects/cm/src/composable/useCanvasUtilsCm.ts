@@ -1,13 +1,12 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
-import { generalUtils } from '@nu/shared-lib'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { useStore } from 'vuex'
 import useMouseUtils from './useMouseUtils'
 
 export interface ICanvasParams {
@@ -27,25 +26,18 @@ const useCanvasUtils = (
 
   // #endregion
 
-  // #region Vuex
-  const store = useStore()
-  const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
-  // #endregion
-
   // #region canvasStore
   const canvasStore = useCanvasStore()
   const { setCurrStep, pushStep, clearStep } = canvasStore
   const {
     brushSize,
     resultCanvas,
-    inCanvasMode,
+    isUsingCanvas,
     canvasMode,
     isProcessingCanvas,
     isProcessingStepsQueue,
     loading,
     isChangingBrushSize,
-    canvasWidth,
-    canvasHeight,
     isDrawing,
     maskCanvas,
     canvas,
@@ -61,6 +53,10 @@ const useCanvasUtils = (
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
 
   const { setCanvasStoreState } = canvasStore
+  // #endregion
+
+  // #region page related
+  const { pageSize, contentScaleRatio } = storeToRefs(useEditorStore())
   // #endregion
 
   watch(
@@ -152,6 +148,17 @@ const useCanvasUtils = (
     }
 
     return canvasCtx
+  }
+
+  const updateCanvasSize = (
+    targetCanvas = canvas.value,
+    width = pageSize.value.width,
+    height = pageSize.value.height,
+  ) => {
+    if (targetCanvas) {
+      targetCanvas.width = width
+      targetCanvas.height = height
+    }
   }
 
   // #region Drawing methods
@@ -256,7 +263,7 @@ const useCanvasUtils = (
       return
     }
     if (canvasCtx && canvasCtx.value) {
-      canvasCtx.value.clearRect(0, 0, canvasWidth.value, canvasHeight.value)
+      canvasCtx.value.clearRect(0, 0, pageSize.value.width, pageSize.value.height)
     }
   }
 
@@ -287,8 +294,8 @@ const useCanvasUtils = (
       const {
         x = 0,
         y = 0,
-        width = canvasWidth.value,
-        height = canvasHeight.value,
+        width = pageSize.value.width,
+        height = pageSize.value.height,
         rotate = 0,
       } = options
 
@@ -310,7 +317,7 @@ const useCanvasUtils = (
 
   onMounted(() => {
     if (wrapperRef && wrapperRef.value && editorContainerRef && editorContainerRef.value) {
-      createInitCanvas(canvasWidth.value, canvasHeight.value)
+      createInitCanvas(pageSize.value.width, pageSize.value.height)
       clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
@@ -323,7 +330,7 @@ const useCanvasUtils = (
 
   const reverseSelection = () => {
     if (canvasCtx && canvasCtx.value) {
-      const pixels = canvasCtx.value.getImageData(0, 0, canvasWidth.value, canvasHeight.value)
+      const pixels = canvasCtx.value.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
       // The total number of pixels (RGBA values).
       const bufferSize = pixels.data.length
       // Iterate over every pixel to find the boundaries of the non-transparent content.
@@ -349,37 +356,81 @@ const useCanvasUtils = (
   const autoFill = () => {
     groupUtils.deselect()
     clearCtx()
+    setCanvasStoreState({
+      isAutoFilling: true,
+    })
     mapEditorToCanvas(() => {
       if (canvasCtx && canvasCtx.value) {
-        const pixels = canvasCtx.value.getImageData(0, 0, canvasWidth.value, canvasHeight.value)
+        const pixels = canvasCtx.value.getImageData(
+          0,
+          0,
+          pageSize.value.width,
+          pageSize.value.height,
+        )
+        const result = new ImageData(
+          new Uint8ClampedArray(pixels.data),
+          pageSize.value.width,
+          pageSize.value.height,
+        )
         // The total number of pixels (RGBA values).
         const bufferSize = pixels.data.length
 
         // Iterate over every pixel to find the boundaries of the non-transparent content.
         for (let i = 0; i < bufferSize; i += 4) {
           // Check the alpha (transparency) value of each pixel.
-          if (
-            pixels.data[i + 3] !== 0 &&
-            pixels.data[i] !== 14 &&
-            pixels.data[i + 1] !== 14 &&
-            pixels.data[i + 2] !== 14 &&
-            pixels.data[i] !== 5 &&
-            pixels.data[i + 1] !== 5 &&
-            pixels.data[i + 2] !== 5
-          ) {
-            // If the pixel is not transparent, set it to transparent.
-            pixels.data[i + 3] = 0
-          } else {
+          if (pixels.data[i + 3] === 0) {
             // If the pixel is transparent, set it to opaque.
-            pixels.data[i] = 255
-            pixels.data[i + 1] = 114
-            pixels.data[i + 2] = 98
-            pixels.data[i + 3] = 255
+            // const x = (i / 4) % pageSize.value.width
+            // const y = Math.floor(i / (4 * pageSize.value.width))
+
+            // for (let dx = -8; dx <= 8; dx++) {
+            //   for (let dy = -8; dy <= 8; dy++) {
+            //     setPixelColor(x, y, 255, 114, 98)
+            //   }
+            // }
+            result.data[i] = 255
+            result.data[i + 1] = 114
+            result.data[i + 2] = 98
+            result.data[i + 3] = 255
+          } else {
+            // If the pixel is not transparent, set it to transparent.
+            result.data[i + 3] = 0
           }
         }
+        canvasCtx.value.putImageData(result, 0, 0)
+        const tmpCanvas = document.createElement('canvas')
+        tmpCanvas.width = pageSize.value.width
+        tmpCanvas.height = pageSize.value.height
+        const tmpCtx = tmpCanvas.getContext('2d')
+        canvas.value && tmpCtx?.drawImage(canvas.value, 0, 0)
+        clearCtx()
 
-        canvasCtx.value.putImageData(pixels, 0, 0)
+        canvasCtx.value.save()
+        canvasCtx.value.shadowBlur = 0 // Blur level
+        canvasCtx.value.shadowColor = '#ff7262' // Color
+        const shiftDir = [
+          [0, 1],
+          [-1, 0],
+          [0, -1],
+          [1, 0],
+          [1, 1],
+          [-1, 1],
+          [-1, -1],
+          [1, -1],
+        ]
+        // X offset loop
+        for (const dir of shiftDir) {
+          const [xDir, yDir] = dir
+          canvasCtx.value.shadowOffsetX = 5 * xDir // X offset
+          canvasCtx.value.shadowOffsetY = 5 * yDir // Y offset
+          canvasCtx.value.drawImage(tmpCanvas, 0, 0, pageSize.value.width, pageSize.value.height)
+        }
+        canvasCtx.value.restore()
         record()
+
+        setCanvasStoreState({
+          isAutoFilling: false,
+        })
       }
     })
   }
@@ -398,11 +449,10 @@ const useCanvasUtils = (
   }
 
   const mapEditorToCanvas = async (cb?: () => void) => {
-    const { pageSize, contentScaleRatio } = useEditorStore()
-    const { width: pageWidth, height: pageHeight } = pageSize
+    const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = await cmWVUtils.copyEditor(
-      { width: pageWidth * contentScaleRatio, height: pageHeight * contentScaleRatio },
+      { width: pageWidth * contentScaleRatio.value, height: pageHeight * contentScaleRatio.value },
       true,
     )
     if (flag !== '0') {
@@ -491,6 +541,7 @@ const useCanvasUtils = (
     redo,
     reset,
     drawImageToCtx,
+    updateCanvasSize,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,
@@ -500,7 +551,7 @@ const useCanvasUtils = (
     isBrushMode,
     resultCanvas,
     currStep,
-    inCanvasMode,
+    isUsingCanvas,
     isProcessingCanvas,
     isProcessingStepsQueue,
     loading,

@@ -1,12 +1,16 @@
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
-import type { EditorFeature, EditorType, PowerfulfillStates } from '@/types/editor'
+import type { EditorFeature, EditorStates, EditorType, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
-import { useCanvasStore } from './canvas'
+
+const editorStatesMap = {
+  'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
+}
 
 export interface IGenResult {
   id: string
@@ -16,7 +20,8 @@ export interface IGenResult {
 
 interface IEditorStore {
   imgAspectRatio: number
-  editorState: PowerfulfillStates
+  editorStates: EditorStates
+  currStateIndex: number
   currActiveFeature: EditorFeature
   editorType: EditorType
   maskDataUrl: string
@@ -32,9 +37,10 @@ interface IEditorStore {
 export const useEditorStore = defineStore('editor', {
   state: (): IEditorStore => ({
     imgAspectRatio: 9 / 16,
-    editorState: 'aspectRatio',
-    currActiveFeature: 'none',
     editorType: 'powerful-fill',
+    editorStates: editorStatesMap['powerful-fill'],
+    currStateIndex: 0,
+    currActiveFeature: 'none',
     maskDataUrl: '',
     isGenerating: false,
     generatedResults: [],
@@ -64,16 +70,16 @@ export const useEditorStore = defineStore('editor', {
       return this.currActiveFeature === 'selection'
     },
     inAspectRatioState(): boolean {
-      return this.editorState === 'aspectRatio'
+      return this.editorStates[this.currStateIndex] === 'aspectRatio'
     },
     inEditingState(): boolean {
-      return this.editorState === 'editing'
+      return this.editorStates[this.currStateIndex] === 'editing'
     },
     inGenResultState(): boolean {
-      return this.editorState === 'genResult'
+      return this.editorStates[this.currStateIndex] === 'genResult'
     },
     inSavingState(): boolean {
-      return this.editorState === 'saving'
+      return this.editorStates[this.currStateIndex] === 'saving'
     },
     editorSteps(): Array<IStep> {
       return stepsUtils.steps
@@ -93,12 +99,9 @@ export const useEditorStore = defineStore('editor', {
   },
   actions: {
     setPageSize(width: number, height: number) {
-      useCanvasStore().setCanvasStoreState({
-        canvasWidth: width,
-        canvasHeight: height,
-      })
-
+      const { updateCanvasSize } = useCanvasUtils()
       pageUtils.setPageSize(0, width, height)
+      updateCanvasSize()
     },
     createNewPage(width: number, height: number) {
       pageUtils.setPages([pageUtils.newPage({ width, height })])
@@ -106,14 +109,20 @@ export const useEditorStore = defineStore('editor', {
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
     },
-    setEditorState(state: PowerfulfillStates) {
-      this.editorState = state
+    changeEditorState(dir: 'next' | 'prev') {
+      const statesLen = this.editorStates.length
+      const toNext = dir === 'next'
+      if (toNext && this.currStateIndex < statesLen - 1) {
+        this.currStateIndex++
+      } else if (!toNext && this.currStateIndex > 0) {
+        this.currStateIndex--
+      }
     },
     setCurrActiveFeature(feature: EditorFeature) {
       this.currActiveFeature = feature
     },
-    setEditorType(state: PowerfulfillStates) {
-      this.editorState = state
+    setEditorType(type: EditorType) {
+      this.editorType = type
     },
     setIsGenerating(isGenerating: boolean) {
       this.isGenerating = isGenerating
@@ -170,7 +179,7 @@ export const useEditorStore = defineStore('editor', {
       this.initImgSrc = src
     },
     keepEditingInit() {
-      this.setEditorState('genResult')
+      this.changeEditorState('prev')
       this.createNewPage(this.pageSize.width, this.pageSize.height)
 
       assetUtils.addImage(

@@ -1,13 +1,15 @@
 import staticApis from '@/apis/static'
 import { useUploadStore } from '@/stores/upload'
-import { useUserStore } from '@/stores/user'
-import { generalUtils } from '@nu/shared-lib'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import { useStore } from 'vuex'
 
 const useUploadUtils = () => {
-  const { userId } = storeToRefs(useUserStore())
   const uploadStore = useUploadStore()
   const { setUploadMap } = uploadStore
   const { uploadMap } = storeToRefs(uploadStore)
+  const store = useStore()
+  const userId = computed(() => store.getters['user/getUserId'])
 
   const getUrlMap = async () => {
     const res = (await staticApis.getStatic()).data
@@ -19,7 +21,11 @@ const useUploadUtils = () => {
     return path.split('/').pop()!
   }
 
-  const uploadImage = async (file: Blob | string, path: string, filename?: string): Promise<void> => {
+  const uploadImage = async (
+    file: Blob | string,
+    path: string,
+    filename?: string,
+  ): Promise<void> => {
     if (uploadMap.value === undefined) {
       throw new Error('Upload map is not defined')
     }
@@ -33,7 +39,10 @@ const useUploadUtils = () => {
 
     formData.append('key', `${uploadMap.value.path}${path}`)
 
-    formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename || getFileName(path))}`)
+    formData.append(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(filename || getFileName(path))}`,
+    )
     formData.append('x-amz-meta-tn', userId.value)
 
     const target = isFile ? file : generalUtils.dataURLtoBlob(file as string)
@@ -54,8 +63,11 @@ const useUploadUtils = () => {
     })
   }
 
-  const polling = async<T> (url: string, { timeInterval = 500, timeout = 180000 } = {}) => {
-    return new Promise<T>((resolve, reject) => {
+  const polling = async <T>(
+    url: string,
+    { timeInterval = 500, timeout = 180000, isJson = true } = {},
+  ) => {
+    return new Promise<T | void>((resolve, reject) => {
       let accPollingTime = 0
       const interval = window.setInterval(async () => {
         if (accPollingTime >= timeout) {
@@ -63,13 +75,21 @@ const useUploadUtils = () => {
           reject(new Error('Polling Timeout'))
           return
         }
-        accPollingTime+=timeInterval
-        const pollingTargetSrc = `${url}?ver=${generalUtils.generateRandomString(6)}`
+        accPollingTime += timeInterval
+        const pollingTargetSrc = imageUtils.appendQuery(
+          url,
+          'ver',
+          generalUtils.generateRandomString(6),
+        )
         const response = await fetch(pollingTargetSrc)
         if (response.status === 200) {
           clearInterval(interval)
-          const json: T = await response.json()
-          resolve(json)
+          if (isJson) {
+            const json: T = await response.json()
+            resolve(json)
+          } else {
+            resolve()
+          }
         }
       }, timeInterval)
     })

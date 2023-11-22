@@ -12,6 +12,7 @@ class LocaleUtils {
   localeMap: { [index: string]: string }
   nativeLocaleMap: { [index: string]: string }
   defaultLocale: string
+  NEED_FALLBACK_LOCALES = ['pt' as const]
   constructor() {
     this.SUPPORTED_LOCALES = [{
       abbreviation: 'us',
@@ -30,18 +31,25 @@ class LocaleUtils {
       code: 'jp',
       base: '/jp',
       name: '日本語'
+    // }, {
+    //   abbreviation: 'pt',
+    //   code: 'pt',
+    //   base: '/pt',
+    //   name: '🍇🦷語測試',
     }]
 
     this.localeMap = {
       tw: 'tw',
       us: 'us',
-      jp: 'jp'
+      jp: 'jp',
+      // pt: 'pt',
     }
 
     this.nativeLocaleMap = {
       'zh-Hant': 'tw',
       en: 'us',
-      ja: 'jp'
+      ja: 'jp',
+      // pt: 'pt',
     }
 
     this.defaultLocale = 'us'
@@ -53,6 +61,12 @@ class LocaleUtils {
 
   currLocale(): string {
     return i18n.global.locale
+  }
+
+  get localeWithFallback() {
+    return (this.NEED_FALLBACK_LOCALES as string[]).includes(i18n.global.locale)
+      ? 'us'
+      : i18n.global.locale as Exclude<LocaleName, typeof this.NEED_FALLBACK_LOCALES[number]>
   }
 
   getLocaleRegex(): string {

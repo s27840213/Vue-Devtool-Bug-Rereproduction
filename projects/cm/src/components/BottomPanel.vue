@@ -11,6 +11,7 @@ div(class="bottom-panel tutorial-powerful-fill-4--highlight" ref="bottomPanelRef
  * Here pass setSlotRef to the parent
  * and parent use setSlotRef to pass the ref here
  */
+import { useUserStore } from '@/stores/user'
 import { useElementBounding } from '@vueuse/core'
 
 const bottomPanelRef = ref<HTMLElement | null>(null)
@@ -21,19 +22,24 @@ const setSlotRef = (ref: HTMLElement) => {
   slotRef.value = ref
 }
 
+const userStore = useUserStore()
+const { homeIndicatorHeight } = storeToRefs(userStore)
+
 watch(
-  () => height.value,
-  (newVal, oldVal) => {
-    // 20 is not important, modify it to make a good transition
-    const newHeight = newVal === 0 ? oldVal * 0.6 : newVal
-    if (newVal === oldVal || !bottomPanelRef.value) return
-    bottomPanelRef.value.style.height = `${newHeight + 32}px`
+  [height, homeIndicatorHeight],
+  ([newHeight, newHomeIndicatorHeight], [oldHeight, oldHomeIndicatorHeight]) => {
+    // 32 is not important, modify it to make a good transition
+    const tmpNewHeight = newHeight === 0 ? oldHeight * 0.6 : newHeight
+
+    const finalHeight = tmpNewHeight + 32 + newHomeIndicatorHeight
+    if (newHeight === finalHeight || !bottomPanelRef.value) return
+    bottomPanelRef.value.style.height = `${finalHeight}px`
   },
 )
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .bottom-panel {
-  @apply bg-app-tab-bg w-full rounded-t-[24px] box-border py-16;
+  @apply bg-app-tab-bg w-full rounded-t-[24px] box-border pt-16;
   transition: all 0.3s;
 }
 </style>

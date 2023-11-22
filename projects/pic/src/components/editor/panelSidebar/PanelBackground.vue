@@ -58,7 +58,7 @@ import CategoryBackgroundItem from '@nu/vivi-lib/components/category/CategoryBac
 import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/CategoryList.vue'
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import i18n from '@nu/vivi-lib/i18n'

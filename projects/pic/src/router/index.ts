@@ -10,6 +10,7 @@ import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import overlayUtils from '@nu/vivi-lib/utils/overlayUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
@@ -336,24 +337,13 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Force login in these page
-  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) && !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) && (window as any).__PRERENDER_INJECTED === undefined) {
-    if (!store.getters['user/isLogin']) {
-      const token = localStorage.getItem('token')
-      if (token === '' || !token) {
-        next({ name: 'SignUp', query: { redirect: to.fullPath } })
-        return
-      } else {
-        await store.dispatch('user/login', { token: token })
-      }
-    }
-  } else {
-    if (!store.getters['user/isLogin']) {
-      const token = localStorage.getItem('token')
-      if (token && token.length > 0) {
-        await store.dispatch('user/login', { token: token })
-      }
-    }
-  }
+  const needForceLogin = 
+    ['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) &&
+    !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) &&
+    window.__PRERENDER_INJECTED === undefined
+  await loginUtils.checkToken(needForceLogin ? () => {
+    next({ name: 'SignUp', query: { redirect: to.fullPath } })
+  } : undefined)
 
   if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
     /**
