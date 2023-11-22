@@ -297,7 +297,7 @@ const fitScaleRatio = computed(() => {
   const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
 
-  const reductionRatio = isDuringCopy ? 1 : 0.9
+  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 0.95
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
   return ratio
 })

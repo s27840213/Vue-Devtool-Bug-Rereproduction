@@ -85,6 +85,10 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
     this.registerCallbacksCore('nativeResponse')
   }
 
+  setupAppActiveInterface() {
+    this.registerCallbacksCore('appBecomeActive')
+  }
+
   nativeResponse({
     eventId,
     output,
@@ -110,5 +114,9 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
         })
       }
     }
+  }
+
+  appBecomeActive() {
+    console.log('app become active!')
   }
 }

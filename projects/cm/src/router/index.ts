@@ -99,6 +99,7 @@ router.addRoute({
     useI18n() // prevent import being removed
     // useI18n().locale = 'tw'
     cmWVUtils.setupAPIInterface()
+    cmWVUtils.setupAppActiveInterface()
     cmWVUtils.detectIfInApp()
     const { setIosLaunchInfo } = useUserStore()
     const iosLaunchInfo = await cmWVUtils.getUserInfo()
