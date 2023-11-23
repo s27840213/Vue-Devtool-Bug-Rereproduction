@@ -1561,6 +1561,7 @@ const mutations: MutationTree<IEditorState> = {
     payload: { pageIndex: number; contentScaleRatio: number },
   ) {
     const { pageIndex, contentScaleRatio } = payload
+    console.warn('contentScaleRatio4 page', pageIndex, contentScaleRatio)
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
   UPDATE_RWD(state: IEditorState) {

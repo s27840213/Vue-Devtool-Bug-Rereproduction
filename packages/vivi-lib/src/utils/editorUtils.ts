@@ -82,9 +82,9 @@ class EditorUtils {
       width = pageUtils.targetCanvasSize.width
       height = pageUtils.targetCanvasSize.height
     }
-    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight || 0
 
-    if (!this.mobileSize.height || !this.mobileSize.width) {
+    if ((!this.mobileSize.height || !this.mobileSize.width)) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
         this.setMobilePhysicalData({
@@ -94,7 +94,9 @@ class EditorUtils {
           }
         })
       }
+      console.log(mobileEditor, mobileEditor?.clientWidth, mobileEditor?.clientHeight)
     }
+    console.log('this.mobileSize', this.mobileSize)
     const PAGE_SIZE_W = (this.mobileSize.width || Number.MAX_SAFE_INTEGER) * 0.926
     const PAGE_SIZE_H = (this.mobileSize.height || Number.MAX_SAFE_INTEGER) * 0.926
 
@@ -128,8 +130,14 @@ class EditorUtils {
         x: (editorUtils.mobileSize.width - width * this.contentScaleRatio) * 0.5,
         y: (editorUtils.mobileSize.height - height * this.contentScaleRatio) * 0.5
       }
-      pageUtils.updatePagePos(pageIndex, pos)
-      pageUtils.updatePageInitPos(pageIndex, pos)
+      console.warn('editorUtils.mobileSize', editorUtils.mobileSize, contentScaleRatio)
+      console.warn('page', generalUtils.deepCopy(page))
+      console.warn(contentScaleRatio, pos)
+      // test
+      if (!generalUtils.isCm) {
+        pageUtils.updatePagePos(pageIndex, pos)
+        pageUtils.updatePageInitPos(pageIndex, pos)
+      }
       return contentScaleRatio
     }
     return 1

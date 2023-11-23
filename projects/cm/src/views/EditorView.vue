@@ -32,6 +32,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
     ref="editorContainerRef"
+    id="mobile-editor__content"
     @pointerdown="selectStart"
     @pointerup="selectEnd"
     @pinch="pagePinchHandler"
@@ -313,6 +314,7 @@ const wrapperStyles = computed(() => {
 
 const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
+  editorUtils.handleContentScaleRatio(0)
 }
 
 // watch(sidebarTabsWidth, () => {
