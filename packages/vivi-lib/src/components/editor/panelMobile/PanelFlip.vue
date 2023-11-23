@@ -81,6 +81,7 @@ export default defineComponent({
     gap: 64px;
     padding: 8px;
     background-color: setColor(app-tab-slider-bg-raw, 0.2);
+    border-radius: 8px;
     > .svg-icon:nth-child(2) {
       transform: rotate(90deg);
     } 

@@ -56,14 +56,14 @@ export default defineComponent({
       noPaddingPanels: ['text-effect'],
       // eslint-disable-next-line vue/no-unused-properties
       fixSizePanels: [
-        'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'crop-flip', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust',
         'copy-style', 'multiple-select', 'remove-bg', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
-      hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
+      hideDynamicCompPanels: ['crop-flip', 'copy-style', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      noRowGapPanels: ['crop', 'color', 'copy-style', 'multiple-select'],
+      noRowGapPanels: ['crop-flip', 'color', 'copy-style', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['remove-bg'],
     }
@@ -97,7 +97,7 @@ export default defineComponent({
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
-        case 'crop': {
+        case 'crop-flip': {
           return `${this.$t('NN0496')}`
         }
         case 'copy-style': {
@@ -236,7 +236,7 @@ export default defineComponent({
     rightButtonAction(): () => void {
       return () => {
         switch (this.currActivePanel) {
-          case 'crop': {
+          case 'crop-flip': {
             if (this.selectedLayerNum > 0) {
               if (imageUtils.isImgControl()) {
                 imageUtils.setImgControlDefault()

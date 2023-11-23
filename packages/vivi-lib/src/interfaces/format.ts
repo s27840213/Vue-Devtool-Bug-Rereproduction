@@ -3,7 +3,7 @@
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { IParagraphStyle, ISpanStyle } from '@/interfaces/layer'
-import { textLetterBgName } from '@/utils/letterBgData'
+import { ITextLetterBgName, textLetterBgName } from '@/utils/letterBgData'
 
 export interface ITextEffect {
   name: string
@@ -60,7 +60,7 @@ export interface ITextGooey {
 }
 
 export interface ITextLetterBg {
-  name: typeof textLetterBgName[number]
+  name: ITextLetterBgName
   xOffset200: number
   yOffset200: number
   opacity: number
@@ -72,21 +72,21 @@ export interface ITextLetterBg {
 export type ITextBg = ITextBox | ITextSpeechBubble | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
 
 export function isITextBox(object: ITextBg): object is ITextBox {
-  return object && object.name &&
+  return object && !!object.name &&
     ['square-borderless', 'rounded-borderless', 'square-hollow',
       'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
 }
 export function isITextSpeechBubble(object: ITextBg): object is ITextSpeechBubble {
-  return object && object.name && ['speech-bubble', 'speech-bubble-triangle'].includes(object.name)
+  return object && !!object.name && ['speech-bubble', 'speech-bubble-triangle'].includes(object.name)
 }
 export function isITextUnderline(object: ITextBg): object is ITextUnderline {
-  return object && object.name && object.name === 'underline'
+  return object && !!object.name && object.name === 'underline'
 }
 export function isITextGooey(object: ITextBg): object is ITextGooey {
-  return object && object.name && ['gooey'].includes(object.name)
+  return object && !!object.name && ['gooey'].includes(object.name)
 }
 export function isITextLetterBg(object: ITextBg): object is ITextLetterBg {
-  return object && object.name &&
+  return object && !!object.name &&
     (textLetterBgName as unknown as string[]).includes(object.name)
 }
 
