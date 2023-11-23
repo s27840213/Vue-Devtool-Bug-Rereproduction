@@ -27,18 +27,9 @@ div(v-else class="panel-order")
 <script lang="ts">
 import MappingUtils from '@/utils/mappingUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: [],
-  data() {
-    return {
-    }
-  },
   computed: {
-    ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo'
-    }),
     orderDatas() {
       const orderSet = [
         {
