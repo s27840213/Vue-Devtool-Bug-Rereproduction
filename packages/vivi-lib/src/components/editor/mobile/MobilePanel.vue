@@ -358,7 +358,7 @@ export default defineComponent({
           ...window.location.host.startsWith('localhost') ? [] : ['contextmenu']]
       }
     },
-    middlewareCondition(): boolean {
+    middlewareCondition(target: HTMLElement): boolean {
       return false
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
@@ -367,7 +367,7 @@ export default defineComponent({
         target.matches?.('.modal-container, .modal-container *') || // Skip modal-card
         target.className.includes?.('footer-tabs') || // Skip footer-bar icon
         target.className === 'inputNode' ||
-        this.middlewareCondition()
+        this.middlewareCondition(target)
       )
     },
     closeMobilePanel() {
