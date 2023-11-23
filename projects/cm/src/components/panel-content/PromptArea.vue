@@ -37,7 +37,7 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const globalStore = useGlobalStore()
-const { setShowSpinner, setSpinnerText } = globalStore
+const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
 const { setIsGenerating, unshiftGenResults, changeEditorState } = editorStore
@@ -48,7 +48,7 @@ const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImage } = useGenImageUtils()
 
 const handleGenerate = () => {
-  if (vuex.state.user.token === '') {
+  if (vuex.state.user.token === '' && !debugMode) {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
     return

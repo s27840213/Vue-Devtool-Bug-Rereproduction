@@ -1,50 +1,47 @@
 <template lang="pug">
-div(class="panel-position")
-  div(v-for="(data,index) in alignDatas()"
+div(v-if="!$isCm" class="panel-position")
+  div(v-for="(align,index) in alignDatas"
       :key="`popup-${index}`"
       class="panel-position__item"
-      @click="MappingUtils.mappingIconAction(data.icon)")
+      @click="align.action")
     svg-icon(
       class="pointer"
-      :iconName="data.icon"
-      :iconWidth="'18px'"
+      :iconName="align.icon"
+      iconWidth="18px"
       :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
-    span(class="ml-5 body-2") {{data.text}}
+    span(class="ml-5 body-2") {{ align.text }}
+div(v-else class="panel-position")
+  svg-icon(
+    v-for="align in alignDatas"
+    :key="align.icon"
+    class="pointer"
+    :iconName="align.icon"
+    iconWidth="24px"
+    :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
 </template>
 
 <script lang="ts">
-import MappingUtils from '@/utils/mappingUtils'
+import mappingUtils from '@/utils/mappingUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: [],
-  data() {
-    return {
-      MappingUtils
+  computed: {
+    alignDatas() {
+      const texts = [
+        this.$t('NN0046'),
+        this.$t('NN0047'),
+        this.$t('NN0048'),
+        this.$t('NN0049'),
+        this.$t('NN0050'),
+        this.$t('NN0051'),
+      ]
+      return mappingUtils.mappingIconSet('align').map((icon, i) => ({
+        icon,
+        text: texts[i],
+        action: () => mappingUtils.mappingIconAction(icon)
+      }))
     }
   },
-  computed: {
-    ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo'
-    }),
-  },
-  methods: {
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
-    alignDatas() {
-      const icons = this.mappingIcons('align')
-      const texts = [`${this.$t('NN0046')}`, `${this.$t('NN0047')}`, `${this.$t('NN0048')}`, `${this.$t('NN0049')}`, `${this.$t('NN0050')}`, `${this.$t('NN0051')}`]
-
-      return icons.map((icon: string, index: number) => {
-        return {
-          icon: icon,
-          text: texts[index]
-        }
-      })
-    },
-  }
 })
 </script>
 
@@ -60,5 +57,13 @@ export default defineComponent({
   &__item {
     @include btn-action-mobile;
   }
+
+  @include cm {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    background-color: setColor(app-tab-slider-bg-raw, 0.2);
+    border-radius: 8px;
+  };
 }
 </style>

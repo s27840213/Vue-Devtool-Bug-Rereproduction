@@ -1,11 +1,18 @@
 <template lang="pug">
-div(class="panel-opacity")
+div(v-if="!$isCm" class="panel-opacity")
   mobile-slider(:title="`${$t('NN0030')}`"
     :borderTouchArea="true"
     :value="opacity"
     :min="0"
     :max="100"
     @update="updateLayerOpacity")
+div(v-else class="panel-opacity text-white")
+  //- TODO: Convert inline style to tailwind.
+  span(style="width: 26px") {{ opacity }}
+  input(class="input__slider--range"
+    type="range"
+    v-model.number="opacity"
+    v-progress)
 </template>
 
 <script lang="ts">
@@ -14,24 +21,22 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapMutations } from 'vuex'
+
 export default defineComponent({
-  emits: [],
   components: {
     MobileSlider
   },
   computed: {
     ...mapGetters({
-      currSidebarPanel: 'getCurrFunctionPanelType',
-      currSelectedInfo: 'getCurrSelectedInfo',
-      currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      isShowPagePreview: 'page/getIsShowPagePreview',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
-    opacity(): number {
-      return this.inBgSettingMode ? this.backgroundOpacity : layerUtils.getCurrOpacity
+    opacity: {
+      get() {
+        return this.inBgSettingMode ? this.backgroundOpacity : layerUtils.getCurrOpacity
+      },
+      set(val: number) {
+        this.updateLayerOpacity(val)
+      }
     },
     backgroundOpacity(): number {
       const { styles: { opacity } } = pageUtils.getPage(pageUtils.currFocusPageIndex).backgroundImage.config
@@ -45,7 +50,6 @@ export default defineComponent({
     updateLayerOpacity(val: number) {
       this.inBgSettingMode ? this.setBgOpacity({
         pageIndex: pageUtils.currFocusPageIndex,
-        // opacity: `${opacity}`
         opacity: val
       }) : layerUtils.updateLayerOpacity(val)
     }
@@ -57,5 +61,10 @@ export default defineComponent({
 .panel-opacity {
   padding-top: 3px;
   width: 100%;
+  @include cm {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+  };
 }
 </style>

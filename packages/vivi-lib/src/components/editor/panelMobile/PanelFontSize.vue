@@ -21,10 +21,9 @@ import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 
 export default defineComponent({
-  emits: [],
   components: {
     FontSizeSelector
   },
@@ -36,10 +35,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      layerIndex: 'getCurrSelectedIndex'
-    }),
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['props']),
     fontSize: {
       get(): number | string {
         return this.props.fontSize === '--' ? this.props.fontSize : _.round(this.props.fontSize, 2)
