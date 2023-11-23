@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
 import { ITextLetterBg } from '@/interfaces/format'
-import constantData from '@/utils/constantData'
+import constantData, { IEffectRaw } from '@/utils/constantData'
 import textUtils from '@/utils/textUtils'
 
 export const textLetterBgName = [
@@ -18,7 +18,7 @@ export const textLetterBgName = [
 export type ITextLetterBgName = typeof textLetterBgName[number]
 
 class LetterBGData {
-  getEffects() {
+  getEffects(): IEffectRaw[] {
     const noColor = constantData.toOptions([
       'xOffset200',
       'yOffset200',

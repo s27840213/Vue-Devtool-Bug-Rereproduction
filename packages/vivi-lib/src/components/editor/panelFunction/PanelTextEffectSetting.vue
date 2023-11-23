@@ -18,13 +18,13 @@ div(class="text-effect-setting")
               :class="{'selected': getStyle(category).name === effect.key }"
               @click="onEffectClick(effect)")
             svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
-              :iconName="effectIcon(category, effect).name"
-              :iconWidth="effectIcon(category, effect).size"
+              :iconName="effect.icon"
+              :iconWidth="effect.size"
               iconColor="gray-2"
               v-hint="effect.label")
-            img(v-else :src="effectIcon(category, effect).name"
-              :width="effectIcon(category, effect).size"
-              :height="effectIcon(category, effect).size"
+            img(v-else :src="effect.icon"
+              :width="effect.size"
+              :height="effect.size"
               draggable="false"
               v-hint="effect.label")
             pro-item(v-if="effect.plan" theme="roundedRect")
@@ -92,7 +92,6 @@ div(class="text-effect-setting")
 import CollapseTitle from '@nu/shared-lib/components/CollapseTitle.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import i18n from '@/i18n'
 import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { isTextFill } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
@@ -123,11 +122,12 @@ export default defineComponent({
   },
   emits: ['toggleColorPanel'],
   data() {
+    const { content: textEffects, theme } = constantData.textEffects()
     return {
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as string,
-      textEffects: constantData.textEffects(),
+      textEffects,
       colorTarget: '',
-      theme: this.$isStk || this.$isCm ? 'dark' : 'light',
+      theme,
     }
   },
   computed: {
@@ -177,36 +177,6 @@ export default defineComponent({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    effectIcon(category: IEffectCategory, effect: IEffect) {
-      if (effect.img) { // For TextFill that from appJSON, use web img as icon.
-        return {
-          name: effect.img,
-          size: '56',
-        }
-      }
-      switch (effect.key) {
-        case 'none':
-          return {
-            name: 'no-effect',
-            size: '24px',
-          }
-        case 'text-book':
-          return {
-            name: require(`@img/text-effect/${this.theme}_icon/${category.name}-${effect.key}-${i18n.global.locale}.png`),
-            size: '56',
-          }
-        case 'custom-fill-img': // svg-icon
-          return {
-            name: 'add-image',
-            size: '24px',
-          }
-        default:
-          return {
-            name: require(`@img/text-effect/${this.theme}_icon/${category.name}-${effect.key}.png`),
-            size: '56',
-          }
-      }
-    },
     handleColorModal(option: IEffectOption) {
       const currColor = this.colorParser(this.currentStyle[option.key] as string)
 
