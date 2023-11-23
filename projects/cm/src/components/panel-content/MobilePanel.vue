@@ -293,7 +293,7 @@ export default defineComponent({
     }),
     // eslint-disable-next-line vue/no-unused-properties
     notKeepPanel(): boolean {
-      return !(this.bgRemoveMode || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)
+      return !(this.isImgCtrl || this.bgRemoveMode || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)
     },
     // eslint-disable-next-line vue/no-unused-properties
     headerbarHeight() {
@@ -302,6 +302,12 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     _panelParentHeight() {
       return document.querySelector('#app')?.clientHeight ?? 0
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    middlewareCondition(target: HTMLElement | SVGElement): boolean {
+      const isSvg = target.nodeName === 'svg'
+      return isSvg ? (target as SVGElement).classList.contains('layer-action') :
+        (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
     },
   }
 })

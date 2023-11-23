@@ -5,7 +5,7 @@
   position: absolute;
   background-color: setColor(white);
 
-  @include setColors(blue-2, black-5) using ($color) {
+  @include setColors(blue-2, black-5, neutral-light-active) using ($color) {
     border: 2px solid $color;
   }
 
