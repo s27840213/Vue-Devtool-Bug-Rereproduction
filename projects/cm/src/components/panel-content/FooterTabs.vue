@@ -612,8 +612,10 @@ export default defineComponent({
           break
         }
         case 'invert': {
+          const imgLayer = this.currLayer as IImage
+          const adjust = imgLayer.styles?.adjust
           imageAdjustUtil.setAdjust({
-            adjust: { invert: +!(this.currLayer as IImage).styles?.adjust?.invert },
+            adjust: { ...adjust, invert: +!adjust?.invert },
             pageIndex,
             layerIndex,
             subLayerIndex: subLayerIdx >= 0 ? subLayerIdx : undefined

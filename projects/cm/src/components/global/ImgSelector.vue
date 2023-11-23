@@ -1,5 +1,6 @@
 <template lang="pug">
 div(
+  v-if="!srcPreprocessImg"
   class="image-selector bg-app-bg text-app-tab-default \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
   div(class="box-border px-24 py-8 flex justify-between items-center")
@@ -132,6 +133,43 @@ div(
           class="absolute -right-12 -top-12"
           iconName="close-btn"
           @click="pull(targetImgs, img)")
+//- Preprocess view
+div(v-else class="preprocess w-full h-full fle justify-center items-center bg-app-bg text-app-text-secondary")
+  img(
+    class="w-full max-h-[60%] mt-37 mb-20 object-cover object-center filter"
+    :class="{'grayscale': editorType === 'hidden-message', invert: isInvert}"
+    :src="srcPreprocessImg")
+  div(class="p-24 pb-45 flex flex-col gap-16")
+    div(class="flex justify-between items-center typo-h5 py-8")
+      div(class="flex gap-8")
+        span {{ $t('CM0080') }}
+        svg-icon(
+          iconName="information-circle"
+          iconWidth="24px"
+        )
+      toggle-btn(class="payment__trial__toggle" v-model="isInvert" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+    div(class="flex justify-between items-center typo-h5 py-8")
+      div(class="flex gap-8")
+        svg-icon(
+          class="bg-app-tab-active text-app-bg rounded-full"
+          iconName="crown"
+          iconWidth="24px"
+        )
+        span {{ $t('CM0082') }}
+        svg-icon(
+          iconName="information-circle"
+          iconWidth="24px"
+        )
+      toggle-btn(class="payment__trial__toggle" v-model="isBgRemove" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+    div(class="flex justify-between items-center typo-h6")
+      nubtn(
+        theme="secondary"
+        size="sm"
+        @click="cancelPreprocess") {{ $t('NN0203') }}
+      span {{ $t('CM0083') }}
+      nubtn(
+        size="sm"
+        @click="applyPreprocess") {{ $t('CM0061') }}
 </template>
 
 <script lang="ts" setup>
@@ -155,6 +193,7 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
 import { notify } from '@kyvg/vue3-notification'
+import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
 
 const router = useRouter()
 
@@ -226,7 +265,7 @@ const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
-const { setPageSize, setImgAspectRatio } = editorStore
+const { setPageSize, setImgAspectRatio, editorType } = editorStore
 const { setRequireImgNum, replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
@@ -350,21 +389,38 @@ const sendToEditor = async () => {
       targetImgs[0].ratio,
     )
   } else {
-    setImgAspectRatio(targetImgs[0].ratio)
     const initAtEditor = atEditor.value
+    if (initAtEditor && editorType === 'hidden-message' && !srcPreprocessImg.value) {
+      srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
+      return
+    }
+    setImgAspectRatio(targetImgs[0].ratio)
     if (!atEditor.value) await router.push({ name: 'Editor' })
     setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
-        assetUtils.addImage(img, img.ratio, { fit: initAtEditor ? 0.8 : 1, record: initAtEditor })
+        assetUtils.addImage(
+          img,
+          img.ratio,
+          {
+            fit: initAtEditor ? 0.8 : 1,
+            record: initAtEditor,
+            styles: {
+              adjust: {
+                ...(editorType === 'hidden-message' && { saturate: -100 }),
+                invert: +isInvert.value
+              }
+            }
+          })
       })
-      if (!initAtEditor) {
+      if (!initAtEditor || editorType === 'hidden-message') {
         groupUtils.deselect()
       }
     })
   }
   setRequireImgNum(0)
+  srcPreprocessImg.value = null
 }
 // #endregion
 
@@ -400,6 +456,21 @@ cmWVUtils
     console.error(err)
     isLoadingContent.value = false
   })
+// #endregion
+
+// #region preprocess
+const srcPreprocessImg = ref(null) as Ref<string | null>
+const isInvert = ref(false)
+const isBgRemove = ref(false)
+const cancelPreprocess = () => {
+  srcPreprocessImg.value = null
+}
+const applyPreprocess = () => {
+  sendToEditor()
+  if (isBgRemove.value) {
+    // TODO: remove bg
+  }
+}
 // #endregion
 </script>
 

@@ -11,7 +11,7 @@ import { defineStore } from 'pinia'
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
   'hidden-message': ['aspectRatio', 'editing', 'genResult', 'saving'] as HiddenMessageStates[],
-}
+} as { [key in EditorType]: EditorStates }
 
 export interface IGenResult {
   id: string
