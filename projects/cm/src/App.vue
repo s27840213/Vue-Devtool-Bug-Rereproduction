@@ -1,13 +1,13 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
-  :class="{'bg-app-bg': !isDuringCopy}"
-  :style="{paddingTop: `${statusBarHeight}px`}")
+  :class="{'bg-app-bg': !isDuringCopy}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
   transition(name="fade-in-only")
-    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16 h-72")
+    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16 box-border"
+      :style="{paddingTop: `${statusBarHeight}px`}")
       router-link(
         custom
         :to="'/'"
