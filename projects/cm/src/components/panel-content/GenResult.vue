@@ -41,7 +41,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
             img(
               v-if="genResult.url.length"
               class="w-full h-full object-cover"
-              :src="apeendRandomQuery(genResult.url)")
+              :src="appendSizeQuery(genResult.url)")
   div(class="flex flex-col gap-8 justify-between items-center")
     nubtn(
       size="mid-full"
@@ -92,8 +92,8 @@ const showMoreRes = () => {
     })
 }
 
-const apeendRandomQuery = (url: string) => {
-  return imageUtils.appendRandomQuery(url)
+const appendSizeQuery = (url: string, size = 200) => {
+  return imageUtils.appendQuery(url, 'lsize', `${size}`)
 }
 
 const handleKeepEditing = () => {
