@@ -37,7 +37,7 @@ class LocaleUtils {
       abbreviation: 'pt',
       code: 'pt',
       base: '/pt',
-      name: '🍇🦷語測試',
+      name: 'Português',
     }] : []]
   }
 
