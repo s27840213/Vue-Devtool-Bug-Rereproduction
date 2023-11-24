@@ -115,5 +115,6 @@ export default defineConfig({
     // process not define in vite, inject it here.
     // Ref: https://stackoverflow.com/a/66389044/22514709, https://stackoverflow.com/a/73012106/22514709
     'process.env': loadEnv('production', process.cwd(), 'VUE_APP'),
+    'process.env.VUE_APP_BUILD_NUMBER': JSON.stringify(process.env.BITBUCKET_BUILD_NUMBER),
   },
 })

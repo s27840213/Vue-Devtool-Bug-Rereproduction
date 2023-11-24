@@ -6,7 +6,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       rel="stylesheet"
       type="text/css")
   transition(name="fade-in-only")
-    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16 box-border"
+    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16"
       :style="{paddingTop: `${statusBarHeight}px`}")
       router-link(
         custom
@@ -56,8 +56,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
-  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container"
-    :style="{paddingTop: `${statusBarHeight}px`}")
+  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-end box-border"
+    :style="{paddingTop: `${statusBarHeight}px`, paddingBottom: `${homeIndicatorHeight}px`}")
     transition(name="bottom-up-down")
       img-selector(
         v-if="showImgSelector"
@@ -87,7 +87,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     //-   template(v-slot:body="{ item }")
     //-     div(class="notification error " v-html="item.text")
     transition(name="bottom-up-down")
-      div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
+      div(v-if="isActionSheetOpen" class="w-full z-action-sheet px-16 box-border")
           action-sheet(
             :primaryActions="primaryActions"
             :secondaryActions="secondaryActions")
