@@ -89,6 +89,8 @@ const iconStyles = computed(() => {
   return {
     width: width || (props.sameSize && height) || '40px',
     height: height || (props.sameSize && width) || '40px',
+    // For debug, to find missing svg icon files.
+    ...missingUse.value && { background: 'red' },
   }
 })
 
@@ -102,7 +104,13 @@ const iconAspectRatio = computed(() => {
 
   return 1
 })
-const useRef = ref<HTMLElement | null>(null)
+const useRef = ref<SVGGraphicsElement | null>(null)
+const missingUse = computed(() => {
+  if (!useRef.value) return
+  const missing = useRef.value.getBBox().width === 0
+  if (missing) console.error(`Missing svg icon: ${props.iconName}.`)
+  return missing
+})
 </script>
 
 <style lang="scss" scoped>
