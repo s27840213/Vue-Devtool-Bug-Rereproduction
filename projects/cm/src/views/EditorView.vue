@@ -13,7 +13,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
-      template(v-if="isCropping")
+      template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
           iconName="flip-h-cm"
