@@ -251,11 +251,11 @@ const debugOptions: Array<IOptionConfig> = [
     },
   },
   {
-    title: 'App事件測試',
+    title: '進入 Native 事件測試器',
     class: 'debug-option',
     iconName: 'code-bracket-square',
     callback: () => {
-      console.log('callback')
+      router.push({ name: 'NativeEventTester' })
     },
   },
 ]

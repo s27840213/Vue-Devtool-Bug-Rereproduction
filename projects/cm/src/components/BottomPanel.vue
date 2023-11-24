@@ -24,7 +24,6 @@ const setSlotRef = (ref: HTMLElement) => {
 }
 
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'] as IUserInfo)
-// const { homeIndicatorHeight } = toRefs(userInfo.value)
 
 watch(
   [height, () => userInfo.value.homeIndicatorHeight],
