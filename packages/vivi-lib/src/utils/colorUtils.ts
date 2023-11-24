@@ -5,6 +5,8 @@ import layerUtils from '@/utils/layerUtils'
 import { EventEmitter } from 'events'
 import { clamp, filter, flatten, uniq } from 'lodash'
 import pageUtils from './pageUtils'
+import textPropUtils from './textPropUtils'
+import groupUtils from './groupUtils'
 
 const STOP_POSTFIX = '_st'
 
@@ -169,6 +171,18 @@ class ColorUtils {
     store.commit('SET_backgroundColor', {
       pageIndex: pageUtils.currFocusPageIndex,
       color
+    })
+  }
+
+  setAllLayerColor(color: string) {
+    groupUtils.deselect()
+    const currPage = layerUtils.getCurrPage
+    currPage.layers.forEach((layer, layerIndex) => {
+      if (layer.type === 'shape') {
+        layer.color = layer.color.map(() => color)
+      } else if (layer.type === 'text') {
+        textPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex)
+      }
     })
   }
 }

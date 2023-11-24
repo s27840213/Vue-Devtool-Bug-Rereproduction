@@ -281,7 +281,7 @@ const cneterBtns = computed(() => {
   ]
   if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20 })
   retTabs.push(...stepBtns)
-  if (editorType === 'hidden-message') retTabs.push({ icon: TOGGLE_BG_ICONS[editorBgIndex.value], disabled: false, width: 20, action: toggleBgColor })
+  if (editorType === 'hidden-message') retTabs.push({ icon: toggleBgIcons[currEditorBgTheme.value], disabled: false, width: 20, action: toggleBgColor })
   return retTabs
 })
 // #endregion
@@ -496,12 +496,20 @@ const removePointer = (e: PointerEvent) => {
   pointerEvtUtils.removePointer(e.pointerId)
 }
 
-const EDITOR_BGS = ['#FFFFFF', '#2B2B2B']
-const TOGGLE_BG_ICONS = ['toggle-color-light', 'toggle-color-dark']
-const editorBgIndex = ref(EDITOR_BGS.findIndex(color => color === colorUtils.currPageBackgroundColor))
+type EditorBgTheme = 'light' | 'dark'
+const editorBgs = {
+  light: '#FFFFFF',
+  dark: '#2B2B2B'
+} as { [key in EditorBgTheme]: string }
+const toggleBgIcons = {
+  light: 'toggle-color-light',
+  dark: 'toggle-color-dark'
+} as { [key in EditorBgTheme]: string }
+const currEditorBgTheme = ref((Object.keys(editorBgs).find(theme => editorBgs[theme as EditorBgTheme] === colorUtils.currPageBackgroundColor) ?? 'dark') as EditorBgTheme)
 const toggleBgColor = () => {
-  editorBgIndex.value = (editorBgIndex.value + 1) % EDITOR_BGS.length
-  colorUtils.setCurrPageBackgroundColor(EDITOR_BGS[editorBgIndex.value])
+  currEditorBgTheme.value = currEditorBgTheme.value === 'dark' ? 'light' : 'dark'
+  colorUtils.setCurrPageBackgroundColor(editorBgs[currEditorBgTheme.value])
+  colorUtils.setAllLayerColor(editorBgs[currEditorBgTheme.value === 'dark' ? 'light' : 'dark'])
 }
 // #endregion
 
