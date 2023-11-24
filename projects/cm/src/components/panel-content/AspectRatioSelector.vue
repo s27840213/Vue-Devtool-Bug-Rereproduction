@@ -12,7 +12,7 @@ div(class="w-full box-border pl-24")
         :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
         iconWidth="32px"
         iconHeight="32px"
-        :iconName="aspectRatio")
+        :iconName="'ratio-' + aspectRatio.replace(':', '-')")
       span(
         class="typo-btn-sm transition-colors duration-300 capitalize"
         :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
@@ -28,7 +28,7 @@ const editorStore = useEditorStore()
 const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
 const { updateCanvasSize } = useCanvasUtilsCm()
 
-const aspectRatioTypes = ['9_16', 'original', '16_9', '1_1', '2_3', '3_2', '4_5', '5_4']
+const aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4']
 const selectedType = ref('9_16')
 
 const bus = useEventBus('editor')
