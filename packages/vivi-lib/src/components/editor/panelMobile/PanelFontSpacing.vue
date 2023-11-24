@@ -7,6 +7,7 @@ div(class="panel-spacing")
     :max="fieldRange.fontSpacing.max"
     :step="1"
     name="fs"
+    :hasNumberInput="!$isCm"
     @update="updateValue")
   mobile-slider(:title="`${$t('NN0110')}`"
     :borderTouchArea="true"
@@ -15,6 +16,7 @@ div(class="panel-spacing")
     :max="fieldRange.lineHeight.max"
     :step="0.01"
     name="lh"
+    :hasNumberInput="!$isCm"
     @update="updateValue")
 </template>
 

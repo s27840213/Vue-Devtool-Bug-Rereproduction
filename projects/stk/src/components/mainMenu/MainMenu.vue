@@ -44,7 +44,7 @@ export default defineComponent({
     currTab(): string {
       if (!this.$options.components) return ''
       const currTab = `panel-${this.currActiveTab}`
-      if (this.$i18n.locale !== 'us') return currTab
+      if (!['us', 'pt'].includes(this.$i18n.locale)) return currTab
 
       const currTabUs = currTab + '-us'
       const compNames = Object.entries(this.$options.components).map(([key, comp]) => comp.name)
