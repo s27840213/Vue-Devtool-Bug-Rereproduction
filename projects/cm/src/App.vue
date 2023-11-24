@@ -95,16 +95,16 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
+import { useGlobalStore } from '@/stores/global'
 import vuex from '@/vuex'
+import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-// import VConsole from 'vconsole'
-import { useGlobalStore } from '@/stores/global'
-import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
+import VConsole from 'vconsole'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -252,16 +252,16 @@ onBeforeUnmount(() => {
 })
 // #endregion
 
-// const vConsole = new VConsole({ theme: 'dark' })
-// vConsole.setSwitchPosition(25, 80)
+const vConsole = new VConsole({ theme: 'dark' })
+vConsole.setSwitchPosition(25, 80)
 
-// watch(isDuringCopy, (newVal) => {
-//   if (newVal) {
-//     vConsole.hideSwitch()
-//   } else {
-//     vConsole.showSwitch()
-//   }
-// })
+watch(isDuringCopy, (newVal) => {
+  if (newVal) {
+    vConsole.hideSwitch()
+  } else {
+    vConsole.showSwitch()
+  }
+})
 
 // #region action sheet
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
