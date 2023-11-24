@@ -12,8 +12,11 @@ import svgIconUtils from '@nu/vivi-lib/utils/svgIconUtils'
 // import '@nu/vivi-lib/css' // Import all CSS rules from vivi-lib
 
 const svgs = import.meta.glob('./assets/icon/**/*.svg', { eager: true })
-const svgs2 = import.meta.glob(
-  '../../../packages/vivi-lib/src/assets/icon/**/*.svg',
+const svgs2 = import.meta.glob([
+    '../../../packages/vivi-lib/src/assets/icon/**/*.svg',
+    // Skip pic & stk only icon.
+    '!../../../packages/vivi-lib/src/assets/icon/(vivisticker|stk|pic)/**/*.svg',
+  ],
   { eager: true }
 )
 
