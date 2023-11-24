@@ -5,7 +5,7 @@ router-link(
   v-slot="{ navigate }")
   svg-icon(
     iconColor="app-icon-light"
-    iconName="arrow-left"
+    iconName="arrow-left-cm"
     iconWidth="24px"
     @click="handleBackAction(() => navigate())")
 </template>
