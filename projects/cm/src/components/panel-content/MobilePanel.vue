@@ -56,14 +56,14 @@ export default defineComponent({
       noPaddingPanels: ['text-effect'],
       // eslint-disable-next-line vue/no-unused-properties
       fixSizePanels: [
-        'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'crop-flip', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust',
         'copy-style', 'multiple-select', 'remove-bg', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
-      hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
+      hideDynamicCompPanels: ['crop-flip', 'copy-style', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      noRowGapPanels: ['crop', 'color', 'copy-style', 'multiple-select'],
+      noRowGapPanels: ['crop-flip', 'color', 'copy-style', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['remove-bg'],
     }
@@ -97,7 +97,7 @@ export default defineComponent({
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
-        case 'crop': {
+        case 'crop-flip': {
           return `${this.$t('NN0496')}`
         }
         case 'copy-style': {
@@ -236,7 +236,7 @@ export default defineComponent({
     rightButtonAction(): () => void {
       return () => {
         switch (this.currActivePanel) {
-          case 'crop': {
+          case 'crop-flip': {
             if (this.selectedLayerNum > 0) {
               if (imageUtils.isImgControl()) {
                 imageUtils.setImgControlDefault()
@@ -293,7 +293,7 @@ export default defineComponent({
     }),
     // eslint-disable-next-line vue/no-unused-properties
     notKeepPanel(): boolean {
-      return !(this.bgRemoveMode || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)
+      return !(this.isImgCtrl || this.bgRemoveMode || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)
     },
     // eslint-disable-next-line vue/no-unused-properties
     headerbarHeight() {
@@ -302,6 +302,12 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     _panelParentHeight() {
       return document.querySelector('#app')?.clientHeight ?? 0
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    middlewareCondition(target: HTMLElement | SVGElement): boolean {
+      const isSvg = target.nodeName === 'svg'
+      return isSvg ? (target as SVGElement).classList.contains('layer-action') :
+        (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
     },
   }
 })

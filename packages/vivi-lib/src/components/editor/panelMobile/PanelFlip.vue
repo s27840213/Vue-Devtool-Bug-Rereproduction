@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="panel-flip")
-  div(v-for="(data,index) in flipData()"
+div(v-if="!$isCm" class="panel-flip")
+  div(v-for="(data,index) in flipData"
       :key="`popup-${index}`"
       class="panel-flip__item"
       @click="handleFlipAction(data)")
@@ -10,6 +10,15 @@ div(class="panel-flip")
       :iconWidth="'12px'"
       :iconColor="($isStk || $isCm) ? 'white' : 'gray-1'")
     span(class="ml-5 body-2") {{data.text}}
+div(v-else class="panel-flip")
+  svg-icon(
+    v-for="flip in flipData"
+    :key="flip.icon"
+    class="pointer"
+    iconName="flip-h-cm"
+    iconWidth="24px"
+    :iconColor="($isStk || $isCm) ? 'white' : 'gray-1'"
+    @click="handleFlipAction(flip)")
 </template>
 
 <script lang="ts">
@@ -20,30 +29,24 @@ import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: [],
-  data() {
-    return {
-    }
-  },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
     layerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
-    }
+    },
+    flipData() {
+      return [{
+        icon: 'flip-h',
+        text: this.$t('NN0053'),
+      }, {
+        icon: 'flip-v',
+        text: this.$t('NN0054'),
+      }]
+    },
   },
   methods: {
-    flipData() {
-      const icons = ['flip-h', 'flip-v']
-      const texts = [`${this.$t('NN0053')}`, `${this.$t('NN0054')}`]
-      return icons.map((icon: string, index: number) => {
-        return {
-          icon: icons[index],
-          text: texts[index]
-        }
-      })
-    },
     handleFlipAction(data: { icon: string, text: string }) {
       if (this.layerNum > 0) {
         MappingUtils.mappingIconAction(data.icon)
@@ -66,5 +69,17 @@ export default defineComponent({
   &__item {
     @include btn-action-mobile;
   }
+
+  @include cm {
+    display: flex;
+    justify-content: center;
+    gap: 64px;
+    padding: 8px;
+    background-color: setColor(app-tab-slider-bg-raw, 0.2);
+    border-radius: 8px;
+    > .svg-icon:nth-child(2) {
+      transform: rotate(90deg);
+    } 
+  };
 }
 </style>

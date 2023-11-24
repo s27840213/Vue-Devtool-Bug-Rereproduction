@@ -79,55 +79,58 @@ export default defineComponent({
       controllerHidden: 'webView/getControllerHidden',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
     }),
+    layerNum(): number {
+      return this.currPage.layers.length
+    },
     groupTab(): IFooterTab {
       return {
-        icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
+        icon: this.isGroup ? 'ungroup-cm' : 'group-cm', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
       }
     },
-    editorType(): string {
-      return 'template' // adapting stk logic, charmix is always in template mode
-    },
-    inImageEditor(): boolean {
-      return this.editorType === 'image'
-    },
-    editorTypeTemplate(): boolean {
-      return this.editorType === 'template'
-    },
     photoInGroupTabs(): Array<IFooterTab> {
+      const genearlTabsNoFlip = [...this.genearlLayerTabs]
+      const flipIndex = genearlTabsNoFlip.findIndex(t => t.icon === 'flip-h-cm')
+      const flipTab = genearlTabsNoFlip[flipIndex]
+      genearlTabsNoFlip.splice(flipIndex, 1)
       return [
+        { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' },
+        flipTab,
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isInFrame },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !this.editorTypeTemplate },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !this.editorTypeTemplate },
-        {
-          icon: 'effect',
-          text: `${this.$t('NN0429')}`,
-          panelType: 'photo-shadow',
-          hidden: !this.editorTypeTemplate || this.isInFrame,
-          disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
-        },
-        ...this.genearlLayerTabs,
+        // charmix disabled for now
+        // {
+        //   icon: 'effect',
+        //   text: `${this.$t('NN0429')}`,
+        //   panelType: 'photo-shadow',
+        //   hidden: this.isInFrame,
+        //   disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
+        // },
+        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        ...genearlTabsNoFlip,
       ]
     },
     photoTabs(): Array<IFooterTab> {
       const genearlTabsNoFlip = [...this.genearlLayerTabs]
-      const flipIndex = genearlTabsNoFlip.findIndex(t => t.icon === 'flip')
+      const flipIndex = genearlTabsNoFlip.findIndex(t => t.icon === 'flip-h-cm')
+      const flipTab = genearlTabsNoFlip[flipIndex]
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs:Array<IFooterTab> = [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
-        { icon: 'invert', text: `${this.$t('CM0080')}`, hidden: !this.editorTypeTemplate },
-        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode || this.inImageEditor },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) }, // vivisticker can only crop frame besides template editor
-        {
-          icon: 'effect',
-          text: `${this.$t('NN0429')}`,
-          panelType: 'photo-shadow',
-          hidden: layerUtils.getCurrLayer.type === LayerType.frame,
-          // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
-        },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
+        { icon: 'invert', text: `${this.$t('CM0080')}` },
+        { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' }, // vivisticker can only crop frame besides template editor
+        flipTab,
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode },
+        // charmix disabled for now
+        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame || this.inImageEditor, disabled: this.isProcessing },
+        // {
+        //   icon: 'effect',
+        //   text: `${this.$t('NN0429')}`,
+        //   panelType: 'photo-shadow',
+        //   hidden: layerUtils.getCurrLayer.type === LayerType.frame,
+        //   // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        // },
+        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...genearlTabsNoFlip,
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame || this.inImageEditor, disabled: this.isProcessing },
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: !this.editorTypeTemplate },
+        { icon: 'copy-edits', text: `${this.$t('CM0084')}`, panelType: 'copy-style' },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
         tabs.unshift({
@@ -147,6 +150,7 @@ export default defineComponent({
         { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer) },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
         {
           icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
@@ -157,19 +161,17 @@ export default defineComponent({
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
-        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: this.editorTypeTemplate },
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+        { icon: 'copy-edits', text: `${this.$t('CM0084')}`, panelType: 'copy-style' }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
       const { hasBgImage } = backgroundUtils
       return [
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
+        { icon: 'opacity-cm', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'flip-h-cm', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -186,7 +188,7 @@ export default defineComponent({
     multiPhotoTabs(): Array<IFooterTab> {
       return [
         ...this.multiGeneralTabs,
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !this.editorTypeTemplate }
+        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -220,7 +222,7 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
+        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -229,9 +231,9 @@ export default defineComponent({
       const showAdjust = targetLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
       const showReplace = targetLayer.clips.length === 1 || targetLayer.clips.some(c => c.active)
       return [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
-        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !this.editorTypeTemplate || !showReplace },
-        { icon: 'set-as-frame', text: `${this.$t('NN0098')}`, hidden: !this.editorTypeTemplate || targetLayer.clips.length !== 1 },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
+        { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !showReplace },
+        { icon: 'set-as-frame', text: `${this.$t('NN0098')}`, hidden: targetLayer.clips.length !== 1 },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -241,14 +243,15 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.editorTypeTemplate || !showAdjust || this.isSvgImage },
-        ...(this.editorTypeTemplate ? this.genearlLayerTabs : []),
+        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !showAdjust || this.isSvgImage },
+        ...this.genearlLayerTabs,
       ]
     },
     showEmptyFrameTabs(): boolean {
-      const currLayer = layerUtils.getCurrLayer as IFrame
-      return !this.controllerHidden && this.editorType === 'object' && currLayer.type === LayerType.frame &&
-        currLayer.clips.some(i => i.active && i.srcObj.type === 'frame')
+      // const currLayer = layerUtils.getCurrLayer as IFrame
+      // return !this.controllerHidden && this.editorType === 'object' && currLayer.type === LayerType.frame &&
+      //   currLayer.clips.some(i => i.active && i.srcObj.type === 'frame')
+      return false
     },
     emptyFrameTabs(): Array<IFooterTab> {
       return [
@@ -266,35 +269,35 @@ export default defineComponent({
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
-        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order', hidden: !this.editorTypeTemplate },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        this.groupTab,
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position', hidden: !this.editorTypeTemplate },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !this.editorTypeTemplate },
-        { icon: 'nudge', text: `${this.$t('NN0872')}`, panelType: 'nudge', hidden: !this.editorTypeTemplate },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', hidden: !this.editorTypeTemplate }
+        { icon: 'flip-h-cm', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'opacity-cm', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', disabled: this.layerNum === 1 },
+        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' },
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+        // charmix disabled for now
+        // { icon: 'nudge', text: `${this.$t('NN0872')}`, panelType: 'nudge' },
       ]
     },
     bgRemoveTabs(): Array<IFooterTab> {
       return [
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
+        { icon: 'remove-bg-cm', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: !this.editorTypeTemplate || this.hasSubSelectedLayer },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
         this.groupTab,
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position', hidden: !this.editorTypeTemplate },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', hidden: !this.editorTypeTemplate },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
+        { icon: 'opacity-cm', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
       ]
     },
     // copyPasteTabs(): Array<IFooterTab> {
-    //   return this.editorTypeTemplate ? [
+    //   return [
     //     { icon: 'copy', text: `${this.$t('NN0032')}` },
     //     { icon: 'paste', text: `${this.$t('NN0230')}` }
-    //   ] : []
+    //   ]
     // },
     settingTabs(): Array<IFooterTab> {
       return this.tabs
@@ -347,14 +350,14 @@ export default defineComponent({
         return this.photoTabs
       } else if (this.showFontTabs) {
         const res = [
-          ...(this.editorTypeTemplate ? [{ icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` }] : []), // conditional insert to prevent duplicate key
+          { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
           ...this.fontTabs
         ]
-        res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs)
+        res.splice(res.length - 1, 0, ...this.genearlLayerTabs)
         return res
       } else if (this.showShapeSetting) {
         return [
-          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+          { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
           ...this.objectTabs,
           ...this.genearlLayerTabs,
         ]
@@ -362,7 +365,7 @@ export default defineComponent({
         return this.bgSettingTab
       } else if (this.showInGroupFrame) {
         return [...this.frameTabs, ...this.genearlLayerTabs]
-      } else if (this.editorTypeTemplate ? this.isGroupOrTmp : this.showGeneralTabs) {
+      } else if (this.isGroupOrTmp) {
         return [...this.genearlLayerTabs]
       } else if (this.showFrameTabs) {
         if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
@@ -375,7 +378,7 @@ export default defineComponent({
     },
     showPhotoTabs(): boolean {
       if (this.inBgRemoveMode) return false
-      return (!this.isFontsPanelOpened && this.targetIs('image') && this.singleTargetType()) || (this.editorTypeTemplate && this.hasFrameClipActive)
+      return (!this.isFontsPanelOpened && this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive
     },
     showObjectColorAndFontTabs(): boolean {
       const { subLayerIdx } = layerUtils
@@ -397,14 +400,15 @@ export default defineComponent({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.targetIs('text') && this.singleTargetType()
     },
-    showGeneralTabs(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.selectedLayerNum !== 0
-    },
+    // showGeneralTabs(): boolean {
+    //   return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+    //     this.selectedLayerNum !== 0
+    // },
     showFrame(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.selectedLayerNum !== 0 && this.editorType === 'object' && layerUtils.getCurrLayer.type === LayerType.frame &&
-        (layerUtils.subLayerIdx === -1 || this.controllerHidden)
+      // return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+      //   this.selectedLayerNum !== 0 && this.editorType === 'object' && layerUtils.getCurrLayer.type === LayerType.frame &&
+      //   (layerUtils.subLayerIdx === -1 || this.controllerHidden)
+      return false
     },
     showInGroupFrame(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
@@ -447,12 +451,12 @@ export default defineComponent({
       // If current state is in cropping, the layerIndex sould be stored
       // bcz after we disable the cropping, the current active index would be lost
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils
-      if (tab.icon !== 'crop' && this.isCropping) {
+      if (tab.icon !== 'crop-flip' && this.isCropping) {
         imageUtils.setImgControlDefault()
       }
 
       switch (tab.icon) {
-        case 'crop': {
+        case 'crop-flip': {
           if (this.selectedLayerNum > 0) {
             if (this.isCropping) {
               imageUtils.setImgControlDefault()
@@ -530,8 +534,8 @@ export default defineComponent({
           }
           break
         }
-        case 'group':
-        case 'ungroup': {
+        case 'group-cm':
+        case 'ungroup-cm': {
           this.disableTabScroll = true
           mappingUtils.mappingIconAction(tab.icon)
           break
@@ -556,13 +560,13 @@ export default defineComponent({
           shortcutUtils.paste()
           break
         }
-        case 'vivisticker_duplicate': {
+        case 'duplicate2': {
           shortcutUtils.copy().then(() => {
             shortcutUtils.paste()
           })
           break
         }
-        case 'brush': {
+        case 'copy-edits': {
           if (this.hasCopiedFormat) {
             formatUtils.clearCopiedFormat()
           } else {
@@ -570,7 +574,7 @@ export default defineComponent({
           }
           break
         }
-        case 'remove-bg': {
+        case 'remove-bg-cm': {
           if (this.isInEditor) {
             // TODO: need cm version of beRemoveSection
             // this.setIsInBgRemoveSection(!this.isInBgRemoveSection)
@@ -627,7 +631,7 @@ export default defineComponent({
         }
       }
 
-      if (tab.icon !== 'crop') {
+      if (tab.icon !== 'crop-flip') {
         if (this.isCropping) {
           imageUtils.setImgControlDefault()
         }

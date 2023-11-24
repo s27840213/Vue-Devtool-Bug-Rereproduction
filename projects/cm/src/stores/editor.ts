@@ -131,6 +131,9 @@ export const useEditorStore = defineStore('editor', {
       this.isGenerating = isGenerating
     },
     unshiftGenResults(url: string, id: string) {
+      if (this.generatedResults.length > 0) {
+        this.currGenResultIndex += 1
+      }
       this.generatedResults.unshift({
         url,
         id,
