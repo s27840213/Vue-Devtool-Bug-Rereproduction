@@ -180,7 +180,7 @@ export default defineComponent({
         // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width * _f}px`,
         height: `${this.config.styles.height * _f}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px solid ${generalUtils.getOutlineColor()}`
+        outline: `${2 * (100 / this.scaleRatio)}px solid ${this.$isCm ? '#FDD248' : generalUtils.getOutlineColor()}`
       }
     },
     scalerStyles(scaler: { [key: string]: string | number }) {

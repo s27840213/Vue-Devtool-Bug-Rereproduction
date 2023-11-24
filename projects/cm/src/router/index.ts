@@ -101,9 +101,7 @@ router.addRoute({
     cmWVUtils.setupAPIInterface()
     cmWVUtils.setupAppActiveInterface()
     cmWVUtils.detectIfInApp()
-    const { setIosLaunchInfo } = useUserStore()
-    const iosLaunchInfo = await cmWVUtils.getUserInfo()
-    setIosLaunchInfo(iosLaunchInfo)
+    await cmWVUtils.getUserInfo()
     cmWVUtils.fetchTutorialFlags()
     let argoError = false
     try {

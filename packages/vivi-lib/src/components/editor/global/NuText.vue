@@ -265,6 +265,7 @@ export default defineComponent({
       let widthLimit
       if (this.isLayerAutoResizeNeeded()) {
         widthLimit = await textUtils.autoResize(config, this.initSize)
+        if (!this.isLayerAutoResizeNeeded()) return
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
       } else {
         widthLimit = config.widthLimit

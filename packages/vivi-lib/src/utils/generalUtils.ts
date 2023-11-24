@@ -49,7 +49,7 @@ class GeneralUtils {
   }
 
   getOutlineColor(): string {
-    return this.isPic ? '#7190CC' : '#9C9C9C'
+    return this.isPic ? '#7190CC' : (this.isStk ? '#9C9C9C' : '#7A7A7A')
   }
 
   scaleFromCenter(el: HTMLElement) {

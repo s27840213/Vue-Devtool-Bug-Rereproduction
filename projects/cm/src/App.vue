@@ -1,13 +1,13 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
-  :class="{'bg-app-bg': !isDuringCopy}"
-  :style="{paddingTop: `${statusBarHeight}px`}")
+  :class="{'bg-app-bg': !isDuringCopy}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
   transition(name="fade-in-only")
-    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16 h-72")
+    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16"
+      :style="{paddingTop: `${userInfo.statusBarHeight}px`}")
       router-link(
         custom
         :to="'/'"
@@ -22,7 +22,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
               custom
               to="/settings"
               v-slot="{ navigate }")
-              svg-icon(iconName="settings"
+              svg-icon(iconName="cm_settings"
                 :iconColor="'app-tab-default'" @click="navigate")
         nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
@@ -56,8 +56,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
-  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container"
-    :style="{paddingTop: `${statusBarHeight}px`}")
+  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-end box-border"
+    :style="{paddingTop: `${userInfo.statusBarHeight}px`}")
     transition(name="bottom-up-down")
       img-selector(
         v-if="showImgSelector"
@@ -87,7 +87,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     //-   template(v-slot:body="{ item }")
     //-     div(class="notification error " v-html="item.text")
     transition(name="bottom-up-down")
-      div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
+      div(v-if="isActionSheetOpen" class="w-full z-action-sheet px-16 box-border")
           action-sheet(
             :primaryActions="primaryActions"
             :secondaryActions="secondaryActions")
@@ -95,16 +95,16 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
+import { useGlobalStore } from '@/stores/global'
 import vuex from '@/vuex'
+import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-// import VConsole from 'vconsole'
-import { useGlobalStore } from '@/stores/global'
-import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
+import VConsole from 'vconsole'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -120,7 +120,6 @@ import useStateInfo from './composable/useStateInfo'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
-import { useUserStore } from './stores/user'
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
 // #region state info
@@ -253,23 +252,22 @@ onBeforeUnmount(() => {
 })
 // #endregion
 
-// const vConsole = new VConsole({ theme: 'dark' })
-// vConsole.setSwitchPosition(25, 80)
+const vConsole = new VConsole({ theme: 'dark' })
+vConsole.setSwitchPosition(25, 80)
 
-// watch(isDuringCopy, (newVal) => {
-//   if (newVal) {
-//     vConsole.hideSwitch()
-//   } else {
-//     vConsole.showSwitch()
-//   }
-// })
+watch(isDuringCopy, (newVal) => {
+  if (newVal) {
+    vConsole.hideSwitch()
+  } else {
+    vConsole.showSwitch()
+  }
+})
 
 // #region action sheet
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
 // #endregion
 
-const userStore = useUserStore()
-const { statusBarHeight, homeIndicatorHeight } = storeToRefs(userStore)
+const userInfo = computed(() => store.getters['cmWV/getUserInfo'])
 </script>
 
 <style lang="scss">

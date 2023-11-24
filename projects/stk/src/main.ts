@@ -14,7 +14,7 @@ app.mount('#app')
 const svgs = require.context(
   '@nu/vivi-lib/assets/icon',
   true,
-  /^((?!pic\/).)*\.svg$/, // Skip pic only icon.
+  /^((?!pic\/|cm\/).)*\.svg$/, // Skip pic & cm only icon.
   'lazy-once'
 )
 const svgModules = svgs.keys().map(svgs) as Promise<{ default: { id: string} }>[]

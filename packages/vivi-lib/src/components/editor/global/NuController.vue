@@ -1024,6 +1024,7 @@ export default defineComponent({
       this.isControlling = false
       if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
         const newLayer = TextUtils.resetScaleForLayer(this.config as AllLayerTypes)
+        LayerUtils.setAutoResizeNeededForLayer(newLayer, false)
         LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
         if (newLayer.type === 'tmp') {
           groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
@@ -1343,6 +1344,16 @@ export default defineComponent({
       }
       if (this.config.type === 'shape' && this.config.category === 'E') {
         ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, shapeUtils.clipCorRad(this.config.shapeType, this.config.vSize, this.config.size))
+      }
+      if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
+        const newLayer = generalUtils.deepCopy(this.config as AllLayerTypes)
+        LayerUtils.setAutoResizeNeededForLayer(newLayer, false)
+        LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
+        if (newLayer.type === 'tmp') {
+          groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
+        } else {
+          groupUtils.set(this.pageIndex, this.layerIndex, [newLayer])
+        }
       }
       this.isControlling = false
       stepsUtils.record()
