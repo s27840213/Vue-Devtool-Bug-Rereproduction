@@ -22,7 +22,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
               custom
               to="/settings"
               v-slot="{ navigate }")
-              svg-icon(iconName="settings"
+              svg-icon(iconName="settings-cm"
                 :iconColor="'app-tab-default'" @click="navigate")
         nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(

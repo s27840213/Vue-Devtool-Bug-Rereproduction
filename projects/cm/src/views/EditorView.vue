@@ -28,12 +28,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="mappingUtils.mappingIconAction('flip-v')")
       template(v-else)
         svg-icon(
-          iconName="undo"
+          iconName="undo-cm"
           :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="undo")
         svg-icon(
-          iconName="redo"
+          iconName="redo-cm"
           :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="redo")
