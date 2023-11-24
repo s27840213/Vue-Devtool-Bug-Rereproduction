@@ -15,7 +15,7 @@ div(v-else class="panel-flip")
     v-for="flip in flipData"
     :key="flip.icon"
     class="pointer"
-    iconName="scan"
+    iconName="flip-h-cm"
     iconWidth="24px"
     :iconColor="($isStk || $isCm) ? 'white' : 'gray-1'"
     @click="handleFlipAction(flip)")
@@ -29,11 +29,6 @@ import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: [],
-  data() {
-    return {
-    }
-  },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'

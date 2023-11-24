@@ -128,6 +128,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async getUserInfo(): Promise<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
     const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH')
+    store.commit('cmWV/SET_userInfo', userInfo)
     return userInfo as IUserInfo
   }
 

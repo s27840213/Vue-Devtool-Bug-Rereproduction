@@ -188,7 +188,9 @@ export default defineComponent({
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.4);
+    @include not(cm) {
+      background: rgba(0, 0, 0, 0.4);
+    }
     pointer-events: none;
     transform-style: preserve-3d;
   }

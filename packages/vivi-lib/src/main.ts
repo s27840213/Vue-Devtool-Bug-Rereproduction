@@ -315,12 +315,21 @@ app.directive('press', longpress)
 
 function setProgressStyle(el: HTMLInputElement) {
   nextTick(() => {
+    const value = +el.value
+    const max = +el.max || 100
+    const min = +el.min || 0
     if (el.disabled) {
       el.style.setProperty('--base', '0')
       el.style.setProperty('--progress', '50%')
     } else {
-      el.style.setProperty('--base', `${(Math.min(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
-      el.style.setProperty('--progress', `${(Math.max(+el.value, 0) - (+el.min)) / (+el.max - (+el.min)) * 100}%`)
+      el.style.setProperty(
+        '--base',
+        `${(Math.min(value, 0) - min) / (max - min) * 100}%`
+      )
+      el.style.setProperty(
+        '--progress',
+        `${(Math.max(value, 0) - min) / (max - min) * 100}%`
+      )
     }
   })
 }

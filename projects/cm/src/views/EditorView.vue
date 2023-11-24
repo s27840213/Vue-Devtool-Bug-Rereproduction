@@ -13,14 +13,27 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      template(v-else-if="isCropping")
+        svg-icon(
+          class="layer-action"
+          iconName="flip-h-cm"
+          iconColor="app-btn-primary-text"
+          iconWidth="20px"
+          @click="mappingUtils.mappingIconAction('flip-h')")
+        svg-icon(
+          class="layer-action"
+          iconName="flip-v-cm"
+          iconColor="app-btn-primary-text"
+          iconWidth="20px"
+          @click="mappingUtils.mappingIconAction('flip-v')")
       template(v-else)
         svg-icon(
-          iconName="undo"
+          iconName="cm_undo"
           :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="undo")
         svg-icon(
-          iconName="redo"
+          iconName="cm_redo"
           :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="redo")
@@ -69,7 +82,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions"
+      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
@@ -180,6 +193,7 @@ import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -207,6 +221,9 @@ const { width: editorContainerWidth, height: editorContainerHeight } =
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
+const isCropping = computed(() => {
+  return store.getters.getPages.length > 0 && imageUtils.isImgControl()
+})
 
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)

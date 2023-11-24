@@ -18,8 +18,8 @@ import ImageUtils from './imageUtils'
 import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
-import textUtils from './textUtils'
 import stkWVUtils from './stkWVUtils'
+import textUtils from './textUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -471,12 +471,11 @@ class GroupUtils {
         layer.styles.imgX *= tmpLayer.styles.scale
         layer.styles.imgY *= tmpLayer.styles.scale
 
-        // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
-        // const ratio = tmpLayer.styles.scale
-        // const [x1, y1] = [layer.styles.x, layer.styles.y]
-        // const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
-        // layer.styles.x = shiftX
-        // layer.styles.y = shiftY
+        const ratio = tmpLayer.styles.scale
+        const [x1, y1] = [layer.styles.x, layer.styles.y]
+        const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+        layer.styles.x = shiftX
+        layer.styles.y = shiftY
       } else if (layer.type === 'shape') {
         if (layer.category === 'D') {
           const [lineWidth] = (layer as IShape).size ?? [1]
@@ -546,7 +545,7 @@ class GroupUtils {
       }
 
       // calculate the center shift of scaled image
-      if (layer.styles.scale !== 1) {
+      if (layer.type !== 'image' && layer.styles.scale !== 1) {
         // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
         const ratio = tmpLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]

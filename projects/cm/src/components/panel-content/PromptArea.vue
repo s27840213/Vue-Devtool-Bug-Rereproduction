@@ -4,7 +4,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
     svg-icon(
       v-if="false"
-      iconName="settings"
+      iconName="cm_settings"
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
@@ -37,7 +37,7 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const globalStore = useGlobalStore()
-const { setShowSpinner, setSpinnerText } = globalStore
+const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
 const { setIsGenerating, unshiftGenResults, changeEditorState } = editorStore
@@ -48,7 +48,7 @@ const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImage } = useGenImageUtils()
 
 const handleGenerate = () => {
-  if (vuex.state.user.token === '') {
+  if (vuex.state.user.token === '' && !debugMode) {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
     return

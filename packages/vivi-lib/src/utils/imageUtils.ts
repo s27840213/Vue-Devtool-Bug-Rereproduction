@@ -25,7 +25,7 @@ import frameDefaultImg from '@img/svg/frame.svg'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v785'
+const APP_VER_FOR_REFRESH_CACHE = 'v922'
 
 class ImageUtils {
   get imageSizeMap(): { [key: string]: number } {

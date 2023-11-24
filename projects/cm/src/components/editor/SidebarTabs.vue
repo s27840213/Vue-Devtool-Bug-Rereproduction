@@ -102,7 +102,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       panelType: '',
     },
     {
-      icon: 'brush',
+      icon: 'cm_brush',
       text: t('CM0017'),
       panelType: '',
     },
