@@ -4,7 +4,7 @@ div(
   ref="headerbarRef"
   class="bg-app-bg box-border pt-10 pb-8 grid grid-rows-1 grid-flow-col auto-cols-fr min-h-[56px] w-full"
   :class="hide ? 'invisible pointer-events-none' : ''"
-  :style="{ paddingTop: `${statusBarHeight}px` }")
+  :style="{ paddingTop: `${userInfo.statusBarHeight}px` }")
   div(class="flex justify-start items-center" :style="{ gap: `${leftGap}px` }")
     slot(name="left")
   div(
@@ -19,7 +19,7 @@ div(
     slot(name="right")
 </template>
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user'
+import { useStore } from 'vuex';
 
 withDefaults(
   defineProps<{
@@ -39,7 +39,7 @@ withDefaults(
 const headerbarRef = ref(null)
 defineExpose({ headerbarRef })
 
-const userStore = useUserStore()
-const { statusBarHeight } = storeToRefs(userStore)
+const store = useStore()
+const userInfo = computed(() => store.getters['cmWV/getUserInfo'])
 </script>
 <style lang="scss"></style>

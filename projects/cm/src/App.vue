@@ -7,7 +7,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       type="text/css")
   transition(name="fade-in-only")
     div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16"
-      :style="{paddingTop: `${statusBarHeight}px`}")
+      :style="{paddingTop: `${userInfo.statusBarHeight}px`}")
       router-link(
         custom
         :to="'/'"
@@ -57,7 +57,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
   div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-end box-border"
-    :style="{paddingTop: `${statusBarHeight}px`, paddingBottom: `${homeIndicatorHeight}px`}")
+    :style="{paddingTop: `${userInfo.statusBarHeight}px`}")
     transition(name="bottom-up-down")
       img-selector(
         v-if="showImgSelector"
@@ -120,7 +120,6 @@ import useStateInfo from './composable/useStateInfo'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
-import { useUserStore } from './stores/user'
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
 // #region state info
@@ -268,8 +267,7 @@ onBeforeUnmount(() => {
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
 // #endregion
 
-const userStore = useUserStore()
-const { statusBarHeight, homeIndicatorHeight } = storeToRefs(userStore)
+const userInfo = computed(() => store.getters['cmWV/getUserInfo'])
 </script>
 
 <style lang="scss">
