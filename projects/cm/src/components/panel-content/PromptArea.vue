@@ -4,7 +4,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
     svg-icon(
       v-if="false"
-      iconName="settings-cm"
+      iconName="cm_settings"
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
