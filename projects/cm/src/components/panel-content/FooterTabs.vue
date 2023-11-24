@@ -113,7 +113,7 @@ export default defineComponent({
       const flipTab = genearlTabsNoFlip[flipIndex]
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs:Array<IFooterTab> = [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`},
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}`},
         { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' }, // vivisticker can only crop frame besides template editor
         flipTab,
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode },
@@ -229,7 +229,7 @@ export default defineComponent({
       const showAdjust = targetLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
       const showReplace = targetLayer.clips.length === 1 || targetLayer.clips.some(c => c.active)
       return [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !showReplace },
         { icon: 'set-as-frame', text: `${this.$t('NN0098')}`, hidden: targetLayer.clips.length !== 1 },
         {
@@ -283,7 +283,7 @@ export default defineComponent({
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
         this.groupTab,
         { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
         { icon: 'opacity-cm', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
@@ -348,14 +348,14 @@ export default defineComponent({
         return this.photoTabs
       } else if (this.showFontTabs) {
         const res = [
-          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
+          { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
           ...this.fontTabs
         ]
         res.splice(res.length - 1, 0, ...this.genearlLayerTabs)
         return res
       } else if (this.showShapeSetting) {
         return [
-          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` },
+          { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
           ...this.objectTabs,
           ...this.genearlLayerTabs,
         ]
@@ -558,7 +558,7 @@ export default defineComponent({
           shortcutUtils.paste()
           break
         }
-        case 'vivisticker_duplicate': {
+        case 'duplicate2': {
           shortcutUtils.copy().then(() => {
             shortcutUtils.paste()
           })
