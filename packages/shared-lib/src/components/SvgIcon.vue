@@ -107,7 +107,7 @@ const iconAspectRatio = computed(() => {
 const useRef = ref<SVGGraphicsElement | null>(null)
 const missingUse = computed(() => {
   if (!useRef.value) return
-  const missing = useRef.value.getBBox().width === 0
+  const missing = !document.querySelector(`symbol#${props.iconName}`)
   if (missing) console.error(`Missing svg icon: ${props.iconName}.`)
   return missing
 })
