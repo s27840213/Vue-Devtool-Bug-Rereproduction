@@ -4,9 +4,9 @@ router-link(
   :to="toTarget"
   v-slot="{ navigate }")
   svg-icon(
-    icon-color="app-icon-light"
-    icon-name="arrow-left"
-    icon-width="24px"
+    iconColor="app-icon-light"
+    iconName="arrow-left"
+    iconWidth="24px"
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
