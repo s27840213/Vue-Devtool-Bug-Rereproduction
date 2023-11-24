@@ -64,9 +64,7 @@ const hostname = window.location.hostname
 // #region userInfo
 const domain = `${hostname.replace('.vivipic.com', '')}`
 const buildNumber = computed(() => {
-  const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
-  console.log(process.env)
-  console.log(buildNumber)
+  const { BITBUCKET_BUILD_NUMBER: buildNumber } = process.env
   return buildNumber ? `v.${buildNumber}` : 'local'
 })
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'])
