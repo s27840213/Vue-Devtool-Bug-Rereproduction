@@ -6,10 +6,10 @@ div(class="editing-options w-full")
       svg-icon(
         v-for="shape in shapeTypes"
         :key="shape"
-        icon-color="primary-light-active"
-        :icon-name="shape"
-        icon-height="32px"
-        :same-size="false"
+        iconColor="primary-light-active"
+        :iconName="shape"
+        iconHeight="32px"
+        :sameSize="false"
         @click="chooseSelectionOption(shape)")
   div(class="flex justify-between items-center box-border px-24")
     nubtn(

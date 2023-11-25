@@ -4,7 +4,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
     svg-icon(
       v-if="false"
-      iconName="settings"
+      iconName="cm_settings"
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
@@ -30,11 +30,14 @@ import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
+import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const globalStore = useGlobalStore()
-const { setShowSpinner, setSpinnerText } = globalStore
+const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
 const { setIsGenerating, unshiftGenResults, changeEditorState } = editorStore
@@ -45,7 +48,7 @@ const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImage } = useGenImageUtils()
 
 const handleGenerate = () => {
-  if (vuex.state.user.token === '') {
+  if (vuex.state.user.token === '' && !debugMode) {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
     return
@@ -63,11 +66,25 @@ const handleGenerate = () => {
     setShowSpinner(true)
     setIsGenerating(true)
     genImage(promptText.value)
-      .then((url) => {
-        unshiftGenResults(url, generalUtils.generateRandomString(4))
-        changeEditorState('next')
-        setIsGenerating(false)
-        setShowSpinner(false)
+      .then(async (url) => {
+        const data = await cmWVUtils.saveAssetFromUrl('png', url)
+        const { flag, fileId } = data
+        if (flag === '0' && fileId) {
+          const srcObj: SrcObj = {
+            type: 'ios',
+            assetId: `cameraroll/${fileId}`,
+            userId: '',
+          }
+
+          const imgSrc = imageUtils.getSrc(srcObj)
+          console.log(imgSrc)
+          unshiftGenResults(imgSrc, generalUtils.generateRandomString(4))
+          changeEditorState('next')
+          setIsGenerating(false)
+          setShowSpinner(false)
+        } else {
+          throw new Error('saveAssetFromUrl failed')
+        }
       })
       .catch((error) => {
         logUtils.setLogForError(error as Error)

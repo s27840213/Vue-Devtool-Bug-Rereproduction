@@ -926,7 +926,8 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
           this.src = src
         }, {
-          crossOrigin: false,
+          // stk screenshot need the cross-origin as UI
+          crossOrigin: this.$isStk,
           error: () => {
             this._onError()
         } })

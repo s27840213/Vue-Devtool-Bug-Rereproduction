@@ -358,11 +358,7 @@ export default defineComponent({
     },
     async showPushModalInfo(): Promise<boolean> {
       // parse modal info
-      let locale = this.userInfo.locale
-      if (!['us', 'tw', 'jp'].includes(locale)) {
-        locale = 'us'
-      }
-      const prefix = locale + '_'
+      const prefix = this.userInfo.locale + '_'
       const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
         ([k, v]) => {
           if (k.startsWith(prefix)) k = k.replace(prefix, '')

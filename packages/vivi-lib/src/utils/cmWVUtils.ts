@@ -74,7 +74,7 @@ export interface ISaveAssetFromUrlResponse {
   type: 'gif' | 'jpg' | 'png' | 'mp4',
   flag: string,
   msg?: string,
-  imageId?: string
+  fileId?: string
 }
 
 class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
@@ -128,6 +128,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async getUserInfo(): Promise<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
     const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH')
+    store.commit('cmWV/SET_userInfo', userInfo)
     return userInfo as IUserInfo
   }
 
