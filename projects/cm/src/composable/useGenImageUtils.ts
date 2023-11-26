@@ -3,14 +3,16 @@ import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import type { GenImageResult } from '@/types/api'
+import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { useEventBus } from '@vueuse/core'
 import { useStore } from 'vuex'
 
-const RECORD_TIMING = true
+export const RECORD_TIMING = true
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
@@ -22,9 +24,22 @@ const useGenImageUtils = () => {
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
 
-  const { uploadImage, polling } = useUploadUtils()
+  const { uploadImage, polling, getPollingController } = useUploadUtils()
 
-  const genImage = async (prompt: string, showMore = false): Promise<string> => {
+  const genImage = async (
+    prompt: string,
+    showMore: boolean,
+    num: number,
+    {
+      onSuccess = undefined,
+      onError = undefined,
+      onApiResponded = undefined,
+    }: {
+      onSuccess?: (index: number, url: string) => void
+      onError?: (index: number, url: string, reason: string) => void
+      onApiResponded?: () => void
+    } = {},
+  ): Promise<string[]> => {
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
 
     if (!showMore) {
@@ -41,21 +56,56 @@ const useGenImageUtils = () => {
       prompt = prevGenParams.value.prompt
     }
     RECORD_TIMING && testUtils.start('call API', false)
-    const res = (await genImageApis.genImage(userId.value, requestId, prompt, editorType.value)).data
+    const res = (
+      await genImageApis.genImage(userId.value, requestId, prompt, editorType.value, num)
+    ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
-    RECORD_TIMING && testUtils.start('polling', false)
-    await polling<GenImageResult>(res.url.url, { isJson: false })
-    RECORD_TIMING && testUtils.log('polling', '')
-    // if (json.flag !== 0) {
-    //   throw new Error('Run /gen-image Failed,' + json.msg ?? '')
-    // }
+
+    onApiResponded && onApiResponded()
 
     setPrevGenParams({ requestId, prompt })
-    return res.url.url
+    const urls = res.urls.map((urlMap) => urlMap.url)
+    const pollingController = getPollingController()
+    await Promise.all([
+      (async () => {
+        const json = await polling<GenImageResult>(
+          `https://template.vivipic.com/charmix/${userId.value}/result/${requestId}.json`,
+        )
+        if (json.flag !== 0) {
+          pollingController.cancelAll()
+          throw new Error('Call /gen-image Failed, ' + json.msg ?? '')
+        }
+      })(),
+      ...urls.map(async (url, index) => {
+        RECORD_TIMING && testUtils.start(`polling ${index}`, false)
+        try {
+          await polling(url, { isJson: false, useVer: false, pollingController })
+        } catch (error) {
+          onError && onError(index, url, 'polling cancelled')
+          return
+        }
+        RECORD_TIMING && testUtils.log(`polling ${index}`, '')
+        const data = (await cmWVUtils.saveAssetFromUrl('png', url)) ?? { flag: '1', fileId: '' }
+        const { flag, fileId } = data
+        if (flag === '0' && fileId) {
+          const srcObj: SrcObj = {
+            type: 'ios',
+            assetId: `cameraroll/${fileId}`,
+            userId: '',
+          }
+
+          const imgSrc = imageUtils.getSrc(srcObj)
+          onSuccess && onSuccess(index, imgSrc)
+        } else {
+          onError && onError(index, url, 'saveAssetFromUrl failed')
+        }
+      }),
+    ])
+    return urls
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {

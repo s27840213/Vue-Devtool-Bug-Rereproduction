@@ -56,8 +56,6 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { notify } from '@kyvg/vue3-notification'
-import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -68,31 +66,33 @@ const { generatedResults, currGenResultIndex, initImgSrc } = storeToRefs(editorS
 
 const { genImage } = useGenImageUtils()
 
-const showMoreRes = () => {
-  const id = generalUtils.generateRandomString(4)
-  unshiftGenResults('', id)
-  genImage('', true)
-    .then(async (url) => {
-      const data = await cmWVUtils.saveAssetFromUrl('png', url)
-      const { flag, fileId } = data
-      if (flag === '0' && fileId) {
-        const srcObj: SrcObj = {
-          type: 'ios',
-          assetId: `cameraroll/${fileId}`,
-          userId: '',
-        }
-
-        const imgSrc = imageUtils.getSrc(srcObj)
-        updateGenResult(id, { url: imgSrc })
-      }
+const showMoreRes = async () => {
+  const genNum = 2
+  const ids: string[] = []
+  for (let i = 0; i < genNum; i++) {
+    ids.push(generalUtils.generateRandomString(4))
+    unshiftGenResults('', ids[i])
+  }
+  try {
+    await genImage('', true, genNum, {
+      onSuccess: (index, imgSrc) => {
+        updateGenResult(ids[index], { url: imgSrc })
+      },
+      onError: (index, url, reason) => {
+        logUtils.setLogAndConsoleLog(`${reason} for ${ids[index]}: ${url}`)
+        notify({
+          group: 'error',
+          text: `Generate Failed For Some Image`,
+        })
+      },
     })
-    .catch((error) => {
-      logUtils.setLogForError(error as Error)
-      notify({
-        group: 'error',
-        text: `Generate Failed`,
-      })
+  } catch (error) {
+    logUtils.setLogForError(error as Error)
+    notify({
+      group: 'error',
+      text: `Generate Failed`,
     })
+  }
 }
 
 const appendSizeQuery = (url: string, size = 200) => {
