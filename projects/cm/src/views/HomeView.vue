@@ -6,7 +6,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     :btnText="$t('CM0003')"
     :theme="'powerful-fill'"
     iconName="brush"
-    @clickBtn="openImgSelecotr(1)")
+    @clickBtn="openImgSelecotr({ targetEditorType: 'powerful-fill' })")
   //- nubtn(
   //-   class="my-10"
   //-   icon="crown"
@@ -55,25 +55,7 @@ import PixiRecorder from '@/utils/pixiRecorder';
 import vuex from '@/vuex';
 import { useRouter } from 'vue-router';
 
-const { setRequireImgNum } = useImgSelectorStore()
-
-const openImgSelecotr = (requireImgNum: number) => {
-  setRequireImgNum(requireImgNum)
-  /**
-   * @Note below codes is used to test in the browser
-   */
-  // const src = require('test.jpg')
-  // console.log(src)
-  // goToEditor()
-  // assetUtils.addImage(
-  //   require('test.jpg'),
-  //   1,
-  //   {
-  //     previewSrc: require('test.jpg'),
-  //     isPreview: true,
-  //   }
-  // )
-}
+const { openImgSelecotr } = useImgSelectorStore()
 
 // #region feature card
 type FeatureCard = {

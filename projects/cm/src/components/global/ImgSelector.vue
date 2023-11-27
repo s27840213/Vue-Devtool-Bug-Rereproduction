@@ -177,6 +177,8 @@ import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import vuex from '@/vuex'
+import { notify } from '@kyvg/vue3-notification'
+import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
 import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
@@ -192,8 +194,6 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
-import { notify } from '@kyvg/vue3-notification'
-import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
 
 const router = useRouter()
 
@@ -235,14 +235,14 @@ const albums = computed(() => [
   ...smartAlbum,
   ...(myAlbum.length > 0
     ? [
-        {
-          // 'My album' text
-          albumId: 'myAlbum',
-          albumSize: 0,
-          title: 'myAlbum',
-          thumbId: 'myAlbum',
-        },
-      ]
+      {
+        // 'My album' text
+        albumId: 'myAlbum',
+        albumSize: 0,
+        title: 'myAlbum',
+        thumbId: 'myAlbum',
+      },
+    ]
     : []),
   ...myAlbum,
 ])
@@ -265,8 +265,9 @@ const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
-const { setPageSize, setImgAspectRatio, editorType } = editorStore
-const { setRequireImgNum, replaceImgFlag } = useImgSelectorStore()
+const { editorType } = storeToRefs(editorStore)
+const { setPageSize, setImgAspectRatio } = editorStore
+const { replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
@@ -348,6 +349,9 @@ vuex.dispatch('unsplash/init')
 // #endregion
 
 // #region common method
+const imgSelectorStore = useImgSelectorStore()
+const { targetEditorType } = storeToRefs(imgSelectorStore)
+const { closeImageSelector } = imgSelectorStore
 const selected = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
   return find(targetImgs, ['assetId', (type === 'ios' ? 'cameraroll/' : '') + img.id])
 }
@@ -390,12 +394,12 @@ const sendToEditor = async () => {
     )
   } else {
     const initAtEditor = atEditor.value
-    if (initAtEditor && editorType === 'hidden-message' && !srcPreprocessImg.value) {
+    if (initAtEditor && editorType.value === 'hidden-message' && !srcPreprocessImg.value) {
       srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
       return
     }
     setImgAspectRatio(targetImgs[0].ratio)
-    if (!atEditor.value) await router.push({ name: 'Editor' })
+    if (!atEditor.value && targetEditorType.value) await router.push({ name: 'Editor', query: { type: targetEditorType.value } })
     setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {
@@ -408,18 +412,18 @@ const sendToEditor = async () => {
             record: initAtEditor,
             styles: {
               adjust: {
-                ...(editorType === 'hidden-message' && { saturate: -100 }),
+                ...(editorType.value === 'hidden-message' && { saturate: -100 }),
                 invert: +isInvert.value
               }
             }
           })
       })
-      if (!initAtEditor || editorType === 'hidden-message') {
+      if (!initAtEditor || editorType.value === 'hidden-message') {
         groupUtils.deselect()
       }
     })
   }
-  setRequireImgNum(0)
+  closeImageSelector()
   srcPreprocessImg.value = null
 }
 // #endregion
@@ -474,4 +478,5 @@ const applyPreprocess = () => {
 // #endregion
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+</style>

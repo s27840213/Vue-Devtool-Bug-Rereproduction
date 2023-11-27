@@ -11,6 +11,7 @@ import logUtils from '@nu/vivi-lib/utils/logUtils'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
+import { editorRouteHandler } from './handler'
 
 const routes = [
   {
@@ -43,6 +44,7 @@ const routes = [
     // this generates a separate chunk (About.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import('@/views/EditorView.vue'),
+    beforeEnter: editorRouteHandler,
   },
   {
     path: '/description',

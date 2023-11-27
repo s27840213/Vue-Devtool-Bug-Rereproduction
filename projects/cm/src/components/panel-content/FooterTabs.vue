@@ -603,8 +603,8 @@ export default defineComponent({
         case 'photo':
         case 'replace': {
           if (tab.panelType !== undefined) break
-          const { setRequireImgNum } = useImgSelectorStore()
-          setRequireImgNum(1, { replace: true })
+          const { openImgSelecotr } = useImgSelectorStore()
+          openImgSelecotr({ replace: true })
           break
         }
         case 'color':

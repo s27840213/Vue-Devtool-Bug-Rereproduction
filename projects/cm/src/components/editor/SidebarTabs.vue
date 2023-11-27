@@ -63,7 +63,7 @@ const { t } = useI18n()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
 const { currActiveFeature } = storeToRefs(editorStore)
-const { setRequireImgNum } = useImgSelectorStore()
+const { openImgSelecotr } = useImgSelectorStore()
 
 const addSubTabs = computed(() => {
   return [
@@ -162,7 +162,7 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'photo-rect':
-      setRequireImgNum(1)
+      openImgSelecotr()
       break
     case 'objects': {
       assetPanelUtils.setCurrActiveTab('object')
