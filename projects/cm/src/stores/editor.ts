@@ -64,7 +64,7 @@ export const useEditorStore = defineStore('editor', {
       return pageUtils.contentScaleRatio
     },
     showBrushOptions(): boolean {
-      return this.currActiveFeature === 'brush'
+      return this.currActiveFeature === 'cm_brush'
     },
     showSelectionOptions(): boolean {
       return this.currActiveFeature === 'selection'

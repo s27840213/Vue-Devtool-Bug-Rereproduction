@@ -24,15 +24,18 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
+// #region states, composables, and vars
 const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
@@ -43,6 +46,9 @@ const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImage } = useGenImageUtils()
+const { checkCanvasIsEmpty } = useCanvasUtils()
+const { t } = useI18n()
+// #endregion
 
 const handleGenerate = async () => {
   if (vuex.state.user.token === '' && !debugMode) {
@@ -58,8 +64,13 @@ const handleGenerate = async () => {
       generalUtils.generateRandomString(4),
     )
     changeEditorState('next')
+  } else if (checkCanvasIsEmpty()) {
+    notify({
+      group: 'error',
+      text: `${t('CM0085')}`,
+    })
   } else {
-    setSpinnerText('Generating...')
+    setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
     setIsGenerating(true)
     const genNum = 2
