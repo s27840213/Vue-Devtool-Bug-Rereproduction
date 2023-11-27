@@ -61,8 +61,16 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const editorStore = useEditorStore()
-const { setGenResultIndex, unshiftGenResults, updateGenResult, keepEditingInit } = editorStore
-const { generatedResults, currGenResultIndex, initImgSrc } = storeToRefs(editorStore)
+const {
+  setGenResultIndex,
+  unshiftGenResults,
+  removeGenResult,
+  updateGenResult,
+  changeEditorState,
+  keepEditingInit,
+} = editorStore
+const { generatedResults, currGenResultIndex, initImgSrc, inGenResultState, generatedResultsNum } =
+  storeToRefs(editorStore)
 
 const { genImage } = useGenImageUtils()
 
@@ -84,6 +92,10 @@ const showMoreRes = async () => {
           group: 'error',
           text: `Generate Failed For Some Image`,
         })
+        removeGenResult(ids[index])
+        if (generatedResultsNum.value === 0 && inGenResultState.value) {
+          changeEditorState('prev')
+        }
       },
     })
   } catch (error) {

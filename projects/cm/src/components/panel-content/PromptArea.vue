@@ -37,8 +37,9 @@ const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, updateGenResult, changeEditorState } = editorStore
-const { isGenerating } = storeToRefs(editorStore)
+const { setIsGenerating, unshiftGenResults, removeGenResult, updateGenResult, changeEditorState } =
+  editorStore
+const { isGenerating, inGenResultState, generatedResultsNum } = storeToRefs(editorStore)
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
@@ -84,6 +85,10 @@ const handleGenerate = async () => {
             group: 'error',
             text: `Generate Failed For Some Image`,
           })
+          removeGenResult(ids[index])
+          if (generatedResultsNum.value === 0 && inGenResultState.value) {
+            changeEditorState('prev')
+          }
         },
       })
       console.log('all images processed')

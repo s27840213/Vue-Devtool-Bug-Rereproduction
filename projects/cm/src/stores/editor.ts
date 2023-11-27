@@ -96,6 +96,9 @@ export const useEditorStore = defineStore('editor', {
     currGeneratedResults(): { id: string; url: string; video?: string } {
       return this.generatedResults[this.currGenResultIndex]
     },
+    generatedResultsNum(): number {
+      return this.generatedResults.length
+    },
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -138,12 +141,27 @@ export const useEditorStore = defineStore('editor', {
     },
     updateGenResult(id: string, data: { url?: string; video?: string }) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
+      if (index === -1) return
       const { url, video } = data
       if (url) {
         this.generatedResults[index].url = url
       }
       if (video) {
         this.generatedResults[index].video = video
+      }
+    },
+    removeGenResult(id: string) {
+      const index = this.generatedResults.findIndex((item) => item.id === id)
+      if (index === -1) return
+      this.generatedResults.splice(index, 1)
+      if (
+        this.currGenResultIndex === index &&
+        this.currGenResultIndex >= this.generatedResults.length
+      ) {
+        this.currGenResultIndex -= 1
+        if (this.currGenResultIndex < 0) {
+          this.currGenResultIndex = 0
+        }
       }
     },
     clearGeneratedResults() {
