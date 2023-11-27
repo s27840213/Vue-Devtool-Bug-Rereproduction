@@ -18,7 +18,7 @@ div(v-else class="panel-order")
     @click="order.action")
     svg-icon(
       class="pointer"
-      :iconName="order.icon + '-cm'"
+      :iconName="'cm_' + order.icon"
       iconWidth="24px"
       :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
     span(class="text-white") {{ order.text }}
