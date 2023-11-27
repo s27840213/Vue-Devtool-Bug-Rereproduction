@@ -29,7 +29,7 @@ import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import { computed, defineComponent, provide } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default defineComponent({
+const component = defineComponent({
   extends: MobilePanel,
   components: {
     PanelColor,
@@ -56,25 +56,47 @@ export default defineComponent({
       noPaddingPanels: ['text-effect'],
       // eslint-disable-next-line vue/no-unused-properties
       fixSizePanels: [
-        'crop-flip', 'bgRemove', 'position', 'flip', 'opacity',
-        'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust',
-        'copy-style', 'multiple-select', 'remove-bg', 'nudge'],
+        'crop-flip',
+        'bgRemove',
+        'position',
+        'flip',
+        'opacity',
+        'order',
+        'font-size',
+        'font-format',
+        'font-spacing',
+        'download',
+        'more',
+        'object-adjust',
+        'copy-style',
+        'multiple-select',
+        'remove-bg',
+        'nudge',
+      ],
       // eslint-disable-next-line vue/no-unused-properties
       hideDynamicCompPanels: ['crop-flip', 'copy-style', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       noRowGapPanels: ['crop-flip', 'color', 'copy-style', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['remove-bg'],
+      // eslint-disable-next-line vue/no-unused-properties
+      hideMobilePanelPanels: ['crop-flip'],
     }
   },
   created() {
     // Provide props to descendant component, https://vuejs.org/guide/components/provide-inject.html
-    provide(replaceImgInject, computed(() => this.extraPanel === 'replace' ? (img: IAssetPhoto | IPhotoItem) => {
-      this.replaceImg(img)
-      this.extraPanel = ''
-      this.panelHistory.pop()
-    } : null))
+    provide(
+      replaceImgInject,
+      computed(() =>
+        this.extraPanel === 'replace'
+          ? (img: IAssetPhoto | IPhotoItem) => {
+              this.replaceImg(img)
+              this.extraPanel = ''
+              this.panelHistory.pop()
+            }
+          : null,
+      ),
+    )
   },
   computed: {
     ...mapGetters({
@@ -130,7 +152,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     specialPanelStyle(): { [index: string]: string } {
       return {
-        ...(this.isDuringCopy && { maxHeight: '0', padding: '0'}),
+        ...(this.isDuringCopy && { maxHeight: '0', padding: '0' }),
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
@@ -157,24 +179,24 @@ export default defineComponent({
       if (this.extraPanel === 'color') {
         return {
           currEvent: this.extraColorEvent,
-          panelHistory: this.panelHistory
+          panelHistory: this.panelHistory,
         }
       }
 
       switch (this.currActivePanel) {
         case 'fonts': {
           return {
-            showTitle: false
+            showTitle: false,
           }
         }
         case 'text-effect': {
           return {
-            panelHistory: this.panelHistory
+            panelHistory: this.panelHistory,
           }
         }
         case 'color': {
           return {
-            panelHistory: this.panelHistory
+            panelHistory: this.panelHistory,
           }
         }
         default: {
@@ -184,7 +206,8 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     dynamicBindMethod(): { [index: string]: any } {
-      const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } = this.getBasicBindMethods()
+      const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } =
+        this.getBasicBindMethods()
       switch (this.currActivePanel) {
         case 'color':
           return { pushHistory }
@@ -244,12 +267,21 @@ export default defineComponent({
                 let index
                 switch (layerUtils.getCurrLayer.type) {
                   case 'image':
-                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
+                      imgControl: true,
+                    })
                     break
                   case 'frame':
-                    index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                    index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(
+                      (l) => l.type === 'image',
+                    )
                     if (index >= 0) {
-                      frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                      frameUtils.updateFrameLayerProps(
+                        layerUtils.pageIndex,
+                        layerUtils.layerIndex,
+                        index,
+                        { imgControl: true },
+                      )
                     }
                     break
                 }
@@ -258,7 +290,7 @@ export default defineComponent({
               if (this.backgroundLocked) return this.handleLockedNotify()
               this.setBgImageControl({
                 pageIndex: pageUtils.currFocusPageIndex,
-                imgControl: false
+                imgControl: false,
               })
             }
             break
@@ -285,7 +317,7 @@ export default defineComponent({
         }
         this.closeMobilePanel()
       }
-    }
+    },
   },
   methods: {
     ...mapMutations({
@@ -293,11 +325,21 @@ export default defineComponent({
     }),
     // eslint-disable-next-line vue/no-unused-properties
     notKeepPanel(): boolean {
-      return !(this.isImgCtrl || this.bgRemoveMode || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)
+      return !(
+        this.isImgCtrl ||
+        this.bgRemoveMode ||
+        this.isBgImgCtrl ||
+        this.isProcessing ||
+        this.inMultiSelectionMode
+      )
     },
     // eslint-disable-next-line vue/no-unused-properties
     headerbarHeight() {
-      return (document.querySelector('.editor-header')?.clientHeight ?? 0) + (document.querySelector('.footer-tabs-row')?.clientHeight ?? 0) + 40
+      return (
+        (document.querySelector('.editor-header')?.clientHeight ?? 0) +
+        (document.querySelector('.footer-tabs-row')?.clientHeight ?? 0) +
+        40
+      )
     },
     // eslint-disable-next-line vue/no-unused-properties
     _panelParentHeight() {
@@ -306,9 +348,12 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     middlewareCondition(target: HTMLElement | SVGElement): boolean {
       const isSvg = target.nodeName === 'svg'
-      return isSvg ? (target as SVGElement).classList.contains('layer-action') :
-        (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
+      return isSvg
+        ? (target as SVGElement).classList.contains('layer-action')
+        : (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
     },
-  }
+  },
 })
+export default component
+export type CMobilePanel = InstanceType<typeof component>
 </script>

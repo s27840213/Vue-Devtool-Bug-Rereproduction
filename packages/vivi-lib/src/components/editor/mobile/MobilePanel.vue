@@ -1,5 +1,6 @@
 <template lang="pug">
-div(class="mobile-panel"
+div(v-show="!hideMobilePanel"
+    class="mobile-panel"
     :class="{'panel-padding': !noPaddingTheme, 'not-rounded': noRoundTheme, 'at-bottom': bottomTheme}"
     :style="panelStyle"
     v-click-outside="vcoConfig()"
@@ -127,6 +128,7 @@ export default defineComponent({
       hideDynamicCompPanels: [] as string[],
       noRowGapPanels: [] as string[],
       hideFooterPanels: [] as string[],
+      hideMobilePanelPanels: [] as string[],
     }
   },
   computed: {
@@ -296,6 +298,9 @@ export default defineComponent({
     },
     overflowY(): string {
       return this.insertTheme || this.fixSize || this.extraFixSizeCondition ? 'hidden' : 'scroll'
+    },
+    hideMobilePanel(): boolean {
+      return this.hideMobilePanelPanels.includes(this.currActivePanel)
     },
   },
   watch: {
