@@ -155,6 +155,7 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
 import { notify } from '@kyvg/vue3-notification'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 
 const router = useRouter()
 
@@ -360,6 +361,7 @@ const sendToEditor = async () => {
         assetUtils.addImage(img, img.ratio, { fit: initAtEditor ? 0.8 : 1, record: initAtEditor })
       })
       if (!initAtEditor) {
+        stepsUtils.reset()
         groupUtils.deselect()
       }
     })

@@ -24,30 +24,40 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
-import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
+// #region states, composables, and vars
 const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, changeEditorState } = editorStore
-const { isGenerating } = storeToRefs(editorStore)
+const {
+  setIsGenerating,
+  setGenResultIndex,
+  unshiftGenResults,
+  removeGenResult,
+  updateGenResult,
+  changeEditorState,
+} = editorStore
+const { isGenerating, inGenResultState, generatedResultsNum } = storeToRefs(editorStore)
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImage } = useGenImageUtils()
+const { checkCanvasIsEmpty } = useCanvasUtils()
+const { t } = useI18n()
+// #endregion
 
-const handleGenerate = () => {
+const handleGenerate = async () => {
   if (vuex.state.user.token === '' && !debugMode) {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
@@ -62,40 +72,52 @@ const handleGenerate = () => {
       generalUtils.generateRandomString(4),
     )
     changeEditorState('next')
+  } else if (checkCanvasIsEmpty()) {
+    notify({
+      group: 'error',
+      text: `${t('CM0085')}`,
+    })
   } else {
-    setSpinnerText('Generating...')
+    setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
     setIsGenerating(true)
-    genImage(promptText.value)
-      .then(async (url) => {
-        const data = await cmWVUtils.saveAssetFromUrl('png', url)
-        const { flag, fileId } = data
-        if (flag === '0' && fileId) {
-          const srcObj: SrcObj = {
-            type: 'ios',
-            assetId: `cameraroll/${fileId}`,
-            userId: '',
-          }
-
-          const imgSrc = imageUtils.getSrc(srcObj)
-          console.log(imgSrc)
-          unshiftGenResults(imgSrc, generalUtils.generateRandomString(4))
+    const genNum = 2
+    const ids: string[] = []
+    for (let i = 0; i < genNum; i++) {
+      ids.push(generalUtils.generateRandomString(4))
+      unshiftGenResults('', ids[i])
+    }
+    setGenResultIndex(-1)
+    try {
+      await genImage(promptText.value, false, genNum, {
+        onApiResponded: () => {
           changeEditorState('next')
           setIsGenerating(false)
           setShowSpinner(false)
-        } else {
-          throw new Error('saveAssetFromUrl failed')
-        }
+        },
+        onSuccess: (index, imgSrc) => {
+          updateGenResult(ids[index], { url: imgSrc, updateIndex: true })
+        },
+        onError: (index, url, reason) => {
+          logUtils.setLogAndConsoleLog(`${reason} for ${ids[index]}: ${url}`)
+          notify({
+            group: 'error',
+            text: `Generate Failed For Some Image`,
+          })
+          removeGenResult(ids[index])
+          if (generatedResultsNum.value === 0 && inGenResultState.value) {
+            changeEditorState('prev')
+          }
+        },
       })
-      .catch((error) => {
-        logUtils.setLogForError(error as Error)
-        setIsGenerating(false)
-        setShowSpinner(false)
-        notify({
-          group: 'error',
-          text: `Generate Failed`,
-        })
+      console.log('all images processed')
+    } catch (error) {
+      logUtils.setLogForError(error as Error)
+      notify({
+        group: 'error',
+        text: `Generate Failed`,
       })
+    }
   }
 }
 const clearPromt = () => {

@@ -8,6 +8,7 @@ div(class="panel-file"
     nubtn(v-if="$isTouchDevice()" theme="icon2" icon="trash" size="mid"
           :active="inMultiSelectMode === 'on'"
           @click="toggleMultiSelect()")
+    //- nubtn(size="mid" @click="selectAll") 全選
   image-gallery(
     ref="mainContent"
     :myfile="myfileImages"
@@ -83,7 +84,8 @@ export default defineComponent({
       getMoreMyfiles: 'file/getMoreMyfiles'
     }),
     ...mapMutations({
-      clearCheckedAssets: 'file/CLEAR_CHECKED_ASSETS'
+      clearCheckedAssets: 'file/CLEAR_CHECKED_ASSETS',
+      selectAll: 'file/SELECT_ALL_ASSETS',
     }),
     toggleMultiSelect() {
       this.inMultiSelectMode = this.inMultiSelectMode === 'on' ? 'off' : 'on'

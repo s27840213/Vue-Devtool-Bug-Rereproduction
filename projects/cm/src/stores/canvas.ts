@@ -1,7 +1,6 @@
 import { PowerfulFillCanvasMode } from '@/types/editor'
 import { defineStore } from 'pinia'
 export interface ICanvasState {
-  isUsingCanvas: boolean
   canvasMode: PowerfulFillCanvasMode
   brushSize: number
   resultCanvas: HTMLCanvasElement
@@ -24,7 +23,6 @@ const MAX_STEP_COUNT = 20
 
 export const useCanvasStore = defineStore('canvas', {
   state: (): ICanvasState => ({
-    isUsingCanvas: false,
     canvasMode: 'brush',
     brushSize: 16,
     resultCanvas: null as unknown as HTMLCanvasElement,

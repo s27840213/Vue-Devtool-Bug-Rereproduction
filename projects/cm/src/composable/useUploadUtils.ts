@@ -4,6 +4,21 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import { useStore } from 'vuex'
 
+class PollingController {
+  polling: boolean
+  constructor() {
+    this.polling = true
+  }
+
+  cancelAll() {
+    this.polling = false
+  }
+
+  checkIfCancelled() {
+    return !this.polling
+  }
+}
+
 const useUploadUtils = () => {
   const uploadStore = useUploadStore()
   const { setUploadMap } = uploadStore
@@ -63,11 +78,27 @@ const useUploadUtils = () => {
     })
   }
 
-  const polling = async <T>(
+  const getPollingController = () => {
+    return new PollingController()
+  }
+
+  const polling = async <T extends object>(
     url: string,
-    { timeInterval = 500, timeout = 180000, isJson = true } = {},
+    {
+      timeInterval = 500,
+      timeout = 180000,
+      isJson = true,
+      useVer = true,
+      pollingController = undefined,
+    }: {
+      timeInterval?: number
+      timeout?: number
+      isJson?: boolean
+      useVer?: boolean
+      pollingController?: PollingController
+    } = {},
   ) => {
-    return new Promise<T | void>((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       let accPollingTime = 0
       const interval = window.setInterval(async () => {
         if (accPollingTime >= timeout) {
@@ -75,12 +106,15 @@ const useUploadUtils = () => {
           reject(new Error('Polling Timeout'))
           return
         }
+        if (pollingController?.checkIfCancelled()) {
+          clearInterval(interval)
+          reject(new Error('Polling Cancelled'))
+          return
+        }
         accPollingTime += timeInterval
-        const pollingTargetSrc = imageUtils.appendQuery(
-          url,
-          'ver',
-          generalUtils.generateRandomString(6),
-        )
+        const pollingTargetSrc = useVer
+          ? imageUtils.appendQuery(url, 'ver', generalUtils.generateRandomString(6))
+          : url
         const response = await fetch(pollingTargetSrc)
         if (response.status === 200) {
           clearInterval(interval)
@@ -88,7 +122,7 @@ const useUploadUtils = () => {
             const json: T = await response.json()
             resolve(json)
           } else {
-            resolve()
+            resolve({} as T)
           }
         }
       }, timeInterval)
@@ -99,6 +133,7 @@ const useUploadUtils = () => {
     getUrlMap,
     uploadImage,
     polling,
+    getPollingController,
   }
 }
 
