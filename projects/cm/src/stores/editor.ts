@@ -139,15 +139,18 @@ export const useEditorStore = defineStore('editor', {
         id,
       })
     },
-    updateGenResult(id: string, data: { url?: string; video?: string }) {
+    updateGenResult(id: string, data: { url?: string; video?: string; updateIndex?: boolean }) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
       if (index === -1) return
-      const { url, video } = data
+      const { url, video, updateIndex } = data
       if (url) {
         this.generatedResults[index].url = url
       }
       if (video) {
         this.generatedResults[index].video = video
+      }
+      if (data.updateIndex && this.currGenResultIndex === -1) {
+        this.currGenResultIndex = index
       }
     },
     removeGenResult(id: string) {
