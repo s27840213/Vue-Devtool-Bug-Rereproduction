@@ -73,9 +73,9 @@ export default defineComponent({
           action: this.preview
         }
       ].concat(this.pages.length > 1 ? {
-        key: 'delete',
+        key: 'trash',
         title: this.$t('NN0034'),
-        iconName: 'delete',
+        iconName: 'trash',
         action: this.deletePage
       } : [])
     }

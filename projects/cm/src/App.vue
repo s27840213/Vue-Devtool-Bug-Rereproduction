@@ -7,7 +7,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       type="text/css")
   transition(name="fade-in-only")
     div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16"
-      :style="{paddingTop: `${userInfo.statusBarHeight}px`}")
+      :style="{paddingTop: `${statusBarHeight}px`}")
       router-link(
         custom
         :to="'/'"
@@ -56,8 +56,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
-  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-end box-border"
-    :style="{paddingTop: `${userInfo.statusBarHeight}px`}")
+  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-start box-border"
+    :style="{paddingTop: `${statusBarHeight}px`}")
     transition(name="bottom-up-down")
       img-selector(
         v-if="showImgSelector"
@@ -69,25 +69,28 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       modal-card(class="pointer-events-auto")
     spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
     notifications(
-      class="notification flex justify-center items-center"
+      class="notification flex justify-center items-center "
       position="center center"
       group="success"
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content")
+        div(class="notification__content bg-app-toast-success")
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
-    //- notifications(
-    //-   group="error"
-    //-   position="top center"
-    //-   width="300px"
-    //-   :max="1"
-    //-   :duration="5000")
-    //-   template(v-slot:body="{ item }")
-    //-     div(class="notification error " v-html="item.text")
+    notifications(
+      class="notification flex justify-center items-center "
+      position="center center"
+      group="error"
+      :max="2"
+      :duration="2000")
+      template(v-slot:body="{ item }")
+        div(class="notification__content bg-app-toast-fail text-primary-white")
+          svg-icon(iconName="ok-hand")
+          span( v-html="item.text")
     transition(name="bottom-up-down")
-      div(v-if="isActionSheetOpen" class="w-full z-action-sheet px-16 box-border")
+      div(v-if="isActionSheetOpen" class="w-full h-full flex items-end z-action-sheet px-16 box-border "
+      :style="{paddingBottom: `${homeIndicatorHeight}px`}")
           action-sheet(
             :primaryActions="primaryActions"
             :secondaryActions="secondaryActions")
@@ -96,6 +99,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
 import { useGlobalStore } from '@/stores/global'
+import type { IUserInfo } from '@/utils/cmWVUtils'
 import vuex from '@/vuex'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
@@ -270,7 +274,9 @@ watch(isDuringCopy, (newVal) => {
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
 // #endregion
 
-const userInfo = computed(() => store.getters['cmWV/getUserInfo'])
+const userInfo = computed(() => store.getters['cmWV/getUserInfo'] as IUserInfo)
+const statusBarHeight = computed(() => userInfo.value.statusBarHeight)
+const homeIndicatorHeight = computed(() => userInfo.value.homeIndicatorHeight)
 </script>
 
 <style lang="scss">
@@ -313,7 +319,7 @@ const userInfo = computed(() => store.getters['cmWV/getUserInfo'])
   // to diable vue-notification's default style(display: block)
   display: flex !important;
   &__content {
-    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success;
+    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8;
   }
 }
 

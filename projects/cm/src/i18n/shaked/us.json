@@ -475,5 +475,7 @@
   "CM0080": "Invert",
   "CM0082": "Background Remove",
   "CM0083": "Pre-process image",
-  "CM0084": "Copy edits"
+  "CM0084": "Copy edits",
+  "CM0085": "Mask is empty",
+  "CM0086": "Generating"
 }

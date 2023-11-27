@@ -24,28 +24,39 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
-import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 
+// #region states, composables, and vars
 const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, updateGenResult, changeEditorState } = editorStore
-const { isGenerating } = storeToRefs(editorStore)
+const {
+  setIsGenerating,
+  setGenResultIndex,
+  unshiftGenResults,
+  removeGenResult,
+  updateGenResult,
+  changeEditorState,
+} = editorStore
+const { isGenerating, inGenResultState, generatedResultsNum } = storeToRefs(editorStore)
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImage } = useGenImageUtils()
+const { checkCanvasIsEmpty } = useCanvasUtils()
+const { t } = useI18n()
+// #endregion
 
 const handleGenerate = async () => {
   if (vuex.state.user.token === '' && !debugMode) {
@@ -61,8 +72,13 @@ const handleGenerate = async () => {
       generalUtils.generateRandomString(4),
     )
     changeEditorState('next')
+  } else if (checkCanvasIsEmpty()) {
+    notify({
+      group: 'error',
+      text: `${t('CM0085')}`,
+    })
   } else {
-    setSpinnerText('Generating...')
+    setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
     setIsGenerating(true)
     const genNum = 2
@@ -71,6 +87,7 @@ const handleGenerate = async () => {
       ids.push(generalUtils.generateRandomString(4))
       unshiftGenResults('', ids[i])
     }
+    setGenResultIndex(-1)
     try {
       await genImage(promptText.value, false, genNum, {
         onApiResponded: () => {
@@ -79,7 +96,7 @@ const handleGenerate = async () => {
           setShowSpinner(false)
         },
         onSuccess: (index, imgSrc) => {
-          updateGenResult(ids[index], { url: imgSrc })
+          updateGenResult(ids[index], { url: imgSrc, updateIndex: true })
         },
         onError: (index, url, reason) => {
           logUtils.setLogAndConsoleLog(`${reason} for ${ids[index]}: ${url}`)
@@ -87,6 +104,10 @@ const handleGenerate = async () => {
             group: 'error',
             text: `Generate Failed For Some Image`,
           })
+          removeGenResult(ids[index])
+          if (generatedResultsNum.value === 0 && inGenResultState.value) {
+            changeEditorState('prev')
+          }
         },
       })
       console.log('all images processed')

@@ -16,13 +16,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
-          iconName="flip-h-cm"
+          iconName="cm_flip-h"
           iconColor="app-btn-primary-text"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-h')")
         svg-icon(
           class="layer-action"
-          iconName="flip-v-cm"
+          iconName="cm_flip-v"
           iconColor="app-btn-primary-text"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-v')")
@@ -56,7 +56,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         img(
           v-if="inGenResultState"
           class="h-full object-cover"
-          :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+          :src="currImgSrc")
         template(v-else)
           nu-page(
             class="z-page"
@@ -89,7 +89,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
           :class="{ 'is-flipped': !showVideo }"
-          :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+          :src="currImgSrc")
         img(
           class="result-showcase__card result-showcase__card--front"
           :class="{ 'is-flipped': showVideo }"
@@ -97,7 +97,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //- img(
         //-   class="result-showcase__card result-showcase__card--front"
         //-   :class="{ 'is-flipped': !showVideo }"
-        //-   :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+        //-   :src="currImgSrc")
         //- div(class="result-showcase__card result-showcase__card--back" :class="{ 'is-flipped': showVideo }")
         //-   img(
         //-     v-if="!isVideoGened"
@@ -254,7 +254,7 @@ const {
   currGenResultIndex,
   initImgSrc,
 } = storeToRefs(editorStore)
-const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
+const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
@@ -285,6 +285,12 @@ const handleNextAction = function () {
     }
   }
 }
+
+const currImgSrc = computed(() => {
+  return currGenResultIndex.value === -1
+    ? initImgSrc.value
+    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+})
 
 const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep

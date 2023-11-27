@@ -84,12 +84,12 @@ export default defineComponent({
     },
     groupTab(): IFooterTab {
       return {
-        icon: this.isGroup ? 'ungroup-cm' : 'group-cm', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
+        icon: this.isGroup ? 'cm_ungroup' : 'cm_group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
       }
     },
     photoInGroupTabs(): Array<IFooterTab> {
       const genearlTabsNoFlip = [...this.genearlLayerTabs]
-      const flipIndex = genearlTabsNoFlip.findIndex(t => t.icon === 'flip-h-cm')
+      const flipIndex = genearlTabsNoFlip.findIndex(t => t.icon === 'cm_flip-h')
       const flipTab = genearlTabsNoFlip[flipIndex]
       genearlTabsNoFlip.splice(flipIndex, 1)
       return [
@@ -104,13 +104,13 @@ export default defineComponent({
         //   hidden: this.isInFrame,
         //   disabled: (this.isHandleShadow || this.isUploadShadow) && this.mobilePanel !== 'photo-shadow'
         // },
-        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...genearlTabsNoFlip,
       ]
     },
     photoTabs(): Array<IFooterTab> {
       const genearlTabsNoFlip = [...this.genearlLayerTabs]
-      const flipIndex = genearlTabsNoFlip.findIndex(t => t.icon === 'flip-h-cm')
+      const flipIndex = genearlTabsNoFlip.findIndex(t => t.icon === 'cm_flip-h')
       const flipTab = genearlTabsNoFlip[flipIndex]
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs:Array<IFooterTab> = [
@@ -128,7 +128,7 @@ export default defineComponent({
         //   hidden: layerUtils.getCurrLayer.type === LayerType.frame,
         //   // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
         // },
-        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
+        { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...genearlTabsNoFlip,
         { icon: 'copy-edits', text: `${this.$t('CM0084')}`, panelType: 'copy-style' },
       ]
@@ -167,11 +167,11 @@ export default defineComponent({
     bgSettingTab(): Array<IFooterTab> {
       const { hasBgImage } = backgroundUtils
       return [
-        { icon: 'opacity-cm', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
+        { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'flip-h-cm', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'cm_flip-h', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -188,7 +188,7 @@ export default defineComponent({
     multiPhotoTabs(): Array<IFooterTab> {
       return [
         ...this.multiGeneralTabs,
-        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
+        { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -222,7 +222,7 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
+        { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -243,7 +243,7 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders-cm', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !showAdjust || this.isSvgImage },
+        { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !showAdjust || this.isSvgImage },
         ...this.genearlLayerTabs,
       ]
     },
@@ -269,8 +269,8 @@ export default defineComponent({
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
-        { icon: 'flip-h-cm', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'opacity-cm', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'cm_flip-h', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select', disabled: this.layerNum === 1 },
         { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
@@ -280,7 +280,7 @@ export default defineComponent({
     },
     bgRemoveTabs(): Array<IFooterTab> {
       return [
-        { icon: 'remove-bg-cm', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
+        { icon: 'cm_remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
@@ -288,7 +288,7 @@ export default defineComponent({
         { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
         this.groupTab,
         { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
-        { icon: 'opacity-cm', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
       ]
@@ -534,8 +534,8 @@ export default defineComponent({
           }
           break
         }
-        case 'group-cm':
-        case 'ungroup-cm': {
+        case 'cm_group':
+        case 'cm_ungroup': {
           this.disableTabScroll = true
           mappingUtils.mappingIconAction(tab.icon)
           break
@@ -574,7 +574,7 @@ export default defineComponent({
           }
           break
         }
-        case 'remove-bg-cm': {
+        case 'cm_remove-bg': {
           if (this.isInEditor) {
             // TODO: need cm version of beRemoveSection
             // this.setIsInBgRemoveSection(!this.isInBgRemoveSection)

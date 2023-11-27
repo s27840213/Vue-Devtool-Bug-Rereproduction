@@ -17,14 +17,16 @@ const useStateInfo = () => {
   // #endregion
 
   // #region editor state
-  const { currActiveFeature, inGenResultState, inAspectRatioState, inEditingState, inSavingState } =
-    storeToRefs(editorStore)
+  const {
+    inGenResultState,
+    inAspectRatioState,
+    inEditingState,
+    inSavingState,
+    showBrushOptions,
+    showSelectionOptions,
+  } = storeToRefs(editorStore)
 
   const showHomeTabs = computed(() => atHome.value || atMyDesign.value)
-  const showBrushOptions = computed(() => atEditor.value && currActiveFeature.value === 'brush')
-  const showSelectionOptions = computed(
-    () => atEditor.value && currActiveFeature.value === 'selection',
-  )
 
   // #endregion
 

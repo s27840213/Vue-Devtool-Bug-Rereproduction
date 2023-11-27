@@ -7,10 +7,10 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     :theme="'powerful-fill'"
     iconName="brush"
     @clickBtn="openImgSelecotr({ targetEditorType: 'powerful-fill' })")
-  //- nubtn(
-  //-   class="my-10"
-  //-   icon="crown"
-  //-   @click="openImgSelecotr") Test Img Selector
+  nubtn(
+    class="my-10"
+    icon="crown"
+    @click="testNotify") Test Img Selector
   //- nubtn(
   //-   class="my-10"
   //-   icon="crown"
@@ -51,9 +51,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
 import i18n from '@/i18n';
 import { useImgSelectorStore } from '@/stores/imgSelector';
 import type { EditorType } from '@/types/editor';
-import PixiRecorder from '@/utils/pixiRecorder';
-import vuex from '@/vuex';
-import { useRouter } from 'vue-router';
+import { notify } from '@kyvg/vue3-notification'
 
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -108,6 +106,13 @@ const aiArtFeatures: FeatureCard[] = [
 //     console.log('gen vedio', res)
 //   })
 // }
+
+const testNotify = () => {
+  notify({
+    group: 'success',
+    text: 'Test notification',
+  })
+}
 </script>
 <style scoped lang="scss">
 .feature-section {
