@@ -574,17 +574,12 @@ export class MovingUtils {
     const { getCurrPage: page } = pageUtils
     const contentScaleRatio = store.getters.getContentScaleRatio
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
-    const EDGE_WIDTH = {
-      x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
-      y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
-    }
-    console.log(editorUtils.mobileSize, page.width * contentScaleRatio, EDGE_WIDTH)
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
-    const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
-    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
-    const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
+    const isReachLeftEdge = page.x >= 0 && offsetPos.x > 0
+    const isReachRightEdge = page.x <= page.width * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.x < 0
+    const isReachTopEdge = page.y >= 0 && offsetPos.y > 0
+    const isReachBottomEdge = page.y <= page.height * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.y < 0
 
     let x = -1
     let y = -1
@@ -594,7 +589,7 @@ export class MovingUtils {
       } else {
         console.log('isReachLeftEdge')
       }
-      x = isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
+      x = isReachRightEdge ? page.width * contentScaleRatio * (1 - pageScaleRatio) : 0
     } else {
       x = offsetPos.x + page.x
     }
@@ -605,7 +600,7 @@ export class MovingUtils {
       } else {
         console.log('isReachBottomEdge')
       }
-      y = isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
+      y = isReachBottomEdge ? page.height * contentScaleRatio * (1 - pageScaleRatio) : 0
     } else {
       y = offsetPos.y + page.y
     }

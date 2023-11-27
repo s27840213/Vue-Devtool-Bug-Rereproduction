@@ -9,12 +9,15 @@ class pagePinchUtils {
   private initPagePos = { x: 0, y: 0 }
   private initPinchPos = { x: 0, y: 0 }
   private initPinchScale = -1
+  private editorView: HTMLElement
   private get page(): IPage { return pageUtils.getCurrPage }
   private get contentScaleRatio(): number { return this.page.contentScaleRatio}
   private get pageScaleRatio(): number { return store.getters.getPageScaleRatio }
 
-  constructor() {
+  constructor(editorView: HTMLElement) {
+    console.warn('editorView', editorView)
     this.pinchHandler = this.pinchHandler.bind(this)
+    this.editorView = editorView
   }
 
   private pinchInit(e: AnyTouchEvent) {
@@ -41,14 +44,27 @@ class pagePinchUtils {
     return this.initPinchPos
   }
 
+  private getTranslationRatio(e: AnyTouchEvent, el: HTMLElement) {
+    const rect = el.getBoundingClientRect()
+    // console.log('rect', rect)
+    // console.log(e.x, e.y)
+    return {
+      x: (e.x - rect.left) / rect.width,
+      y: (e.y - rect.top) / rect.height
+      // x: (e.x - rect.left) / (rect.width - e.x + rect.left),
+      // y: (e.y - rect.top) / (rect.height - e.y + rect.top)
+    }
+  }
+
   private pinchMove(e: AnyTouchEvent) {
     const { page, contentScaleRatio } = this
     const newScaleRatio = this.initPinchScale * e.scale
     // size difference via pinching
     const sizeDiff = {
-      width: (newScaleRatio - this.initPinchScale) * 0.01 * (page.width * contentScaleRatio),
-      height: (newScaleRatio - this.initPinchScale) * 0.01 * (page.height * contentScaleRatio)
+      width: (newScaleRatio - this.initPinchScale) * (page.width * contentScaleRatio),
+      height: (newScaleRatio - this.initPinchScale) * (page.height * contentScaleRatio)
     }
+    console.log(this.getTranslationRatio(e, this.editorView))
     store.commit('mobileEditor/UPDATE_pinchScale', e.scale * this.initPinchScale)
     // pageUtils.updatePageProps()
   }

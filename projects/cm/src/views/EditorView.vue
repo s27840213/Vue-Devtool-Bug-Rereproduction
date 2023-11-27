@@ -358,6 +358,7 @@ watch(isDuringCopy, () => {
   fitPage(fitScaleRatio.value)
 })
 
+let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
 onMounted(() => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
@@ -374,6 +375,7 @@ onMounted(() => {
       y: rect.top,
     },
   })
+  pagePinchHandler = (new PagePinchUtils(editorWrapperRef.value as HTMLElement)).pinchHandler
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
@@ -480,7 +482,6 @@ const selectEnd = (e: PointerEvent) => {
 }
 
 const isPinchInit = ref<null | boolean>(false)
-const pagePinchHandler = (new PagePinchUtils()).pinchHandler
 let pinchControlUtils = null as null | PinchControlUtils
 
 const onLayerPinch = (e: AnyTouchEvent) => {
