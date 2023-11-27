@@ -93,6 +93,7 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
+    console.log('1111', store.getters['mobileEditor/getIsPinchingEditor'])
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
 
     this.initPageTranslate.x = pageUtils.getCurrPage.x
@@ -112,7 +113,9 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch') {
+    if (store.getters['mobileEditor/getIsPinchingEditor'] ||
+      store.getters.getControlState.type === 'pinch' ||
+      pointerEvtUtils.pointers.length > 1) {
       this.removeListener()
       return
     }
@@ -560,8 +563,7 @@ export class MovingUtils {
     }
   }
 
-  pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (!generalUtils.isPic) return
+  _pageMovingHandler4cm(e: MouseEvent | TouchEvent | PointerEvent) {
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return
     }
@@ -576,6 +578,7 @@ export class MovingUtils {
       x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
       y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
     }
+    console.log(editorUtils.mobileSize, page.width * contentScaleRatio, EDGE_WIDTH)
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
     const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
@@ -586,12 +589,22 @@ export class MovingUtils {
     let x = -1
     let y = -1
     if (isReachRightEdge || isReachLeftEdge) {
+      if (isReachRightEdge) {
+        console.log('isReachRightEdge')
+      } else {
+        console.log('isReachLeftEdge')
+      }
       x = isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
     } else {
       x = offsetPos.x + page.x
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
+      if (isReachTopEdge) {
+        console.log('isReachTopEdge')
+      } else {
+        console.log('isReachBottomEdge')
+      }
       y = isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
     } else {
       y = offsetPos.y + page.y
@@ -603,6 +616,70 @@ export class MovingUtils {
     }
     if (!isReachBottomEdge && !isReachTopEdge) {
       this.initMousePos.y += offsetPos.y
+    }
+  }
+
+  _pageMovingHandler4pic(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
+      return
+    }
+    if (this.initMousePos === null) {
+      this.initMousePos = mouseUtils.getMouseAbsPoint(e)
+      return
+    }
+    const { getCurrPage: page } = pageUtils
+    const contentScaleRatio = store.getters.getContentScaleRatio
+    const pageScaleRatio = store.state.pageScaleRatio * 0.01
+    const EDGE_WIDTH = {
+      x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
+      y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
+    }
+    console.log(editorUtils.mobileSize, page.width * contentScaleRatio, EDGE_WIDTH)
+    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
+
+    const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
+    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
+    const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
+    const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
+
+    let x = -1
+    let y = -1
+    if (isReachRightEdge || isReachLeftEdge) {
+      if (isReachRightEdge) {
+        console.log('isReachRightEdge')
+      } else {
+        console.log('isReachLeftEdge')
+      }
+      x = isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
+    } else {
+      x = offsetPos.x + page.x
+    }
+
+    if (isReachTopEdge || isReachBottomEdge) {
+      if (isReachTopEdge) {
+        console.log('isReachTopEdge')
+      } else {
+        console.log('isReachBottomEdge')
+      }
+      y = isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
+    } else {
+      y = offsetPos.y + page.y
+    }
+    pageUtils.updatePagePos(this.pageIndex, { x, y })
+
+    if (!isReachLeftEdge && !isReachRightEdge) {
+      this.initMousePos.x += offsetPos.x
+    }
+    if (!isReachBottomEdge && !isReachTopEdge) {
+      this.initMousePos.y += offsetPos.y
+    }
+  }
+
+  pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (generalUtils.isPic) {
+      this._pageMovingHandler4pic(e)
+    } else if (generalUtils.isCm) {
+      this._pageMovingHandler4cm(e)
     }
   }
 

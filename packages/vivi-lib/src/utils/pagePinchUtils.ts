@@ -1,6 +1,7 @@
 import { IPage } from "@/interfaces/page"
 import store from "@/store"
 import { AnyTouchEvent } from "any-touch"
+import layerUtils from "./layerUtils"
 import pageUtils from "./pageUtils"
 
 class pagePinchUtils {
@@ -9,8 +10,8 @@ class pagePinchUtils {
   private initPinchPos = { x: 0, y: 0 }
   private initPinchScale = -1
   private get page(): IPage { return pageUtils.getCurrPage }
-  private get scaleRatio(): number { return pageUtils.scaleRatio }
   private get contentScaleRatio(): number { return this.page.contentScaleRatio}
+  private get pageScaleRatio(): number { return store.getters.getPageScaleRatio }
 
   constructor() {
     this.pinchHandler = this.pinchHandler.bind(this)
@@ -52,6 +53,36 @@ class pagePinchUtils {
     // pageUtils.updatePageProps()
   }
 
+  private handleEdging(e: AnyTouchEvent) {
+    const newPageScaleRatio = e.scale * this.initPinchScale * this.pageScaleRatio
+
+    if (newPageScaleRatio < 100) {
+      store.commit('SET_pageScaleRatio', 100)
+      pageUtils.updatePagePos(layerUtils.pageIndex, {
+        x: this.page.initPos.x,
+        y: this.page.initPos.y
+      })
+      console.log('page init pos', this.page.initPos)
+    } else {
+      // no need to edging the page
+      store.commit('SET_pageScaleRatio', newPageScaleRatio)
+    }
+    console.log('SET_pageScaleRatio', newPageScaleRatio)
+  }
+
+  private pinchEnd(e: AnyTouchEvent) {
+    this.resetState()
+    this.handleEdging(e)
+    console.log('pinch end', e.scale)
+  }
+
+  private resetState() {
+    store.commit('mobileEditor/SET_isPinchingEditor', false)
+    store.commit('mobileEditor/UPDATE_pinchScale', 1)
+    store.commit('SET_isPageScaling', false)
+    this.isPinchInit = false
+  }
+
   pinchHandler(e: AnyTouchEvent) {
     window.requestAnimationFrame(() => this._pinchHandler(e))
   }
@@ -59,15 +90,14 @@ class pagePinchUtils {
   private _pinchHandler(e: AnyTouchEvent) {
     switch (e.phase) {
       case 'move': {
-        if (!this.isPinchInit || !this.initPinchPos) {
+        if (!this.isPinchInit) {
           return this.pinchInit(e)
         }
         this.pinchMove(e)
-        console.log('pinch move')
         break
       }
       case 'end': {
-        console.log('pinch end')
+        this.pinchEnd(e)
       }
     }
   }

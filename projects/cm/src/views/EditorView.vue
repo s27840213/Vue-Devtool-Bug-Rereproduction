@@ -277,7 +277,6 @@ const handleNextAction = function () {
         )
         const pixiRecorder = new PixiRecorder(src, res)
         pixiRecorder.genVideo().then((data) => {
-          console.log('gen video', data)
           if (data) {
             isVideoGened.value = true
             updateGenResult(currGenResult.id, { video: data })
@@ -381,45 +380,70 @@ const outerClick = () => {
 const pointerEvent = ref({
   initPos: null as { x: number; y: number } | null,
 })
-let movingUtils = null as MovingUtils | null
+const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
+  console.log('select start')
   recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
-  if (isImgCtrl.value) {
-    const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
-      ? groupUtils.mapLayersToPage(
-          [layerUtils.getCurrConfig as IImage],
-          layerUtils.getCurrLayer as IGroup,
-        )[Math.max(layerUtils.subLayerIdx, 0)]
-      : layerUtils.getCurrLayer
-    if (!controlUtils.isClickOnController(e, layer)) {
-      const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      switch (currLayer.type) {
-        case LayerType.image:
-        case LayerType.group:
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-          break
-        case LayerType.frame:
-          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
-            imgControl: false,
-          })
-          break
-      }
-      return
+
+  const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
+    ? groupUtils.mapLayersToPage(
+        [layerUtils.getCurrConfig as IImage],
+        layerUtils.getCurrLayer as IGroup,
+      )[0]
+    : layerUtils.getCurrLayer
+  const isClickOnController = controlUtils.isClickOnController(e, layer)
+
+  if (isImgCtrl.value && !isClickOnController) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+    switch (currLayer.type) {
+      case LayerType.image:
+      case LayerType.group:
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+        break
+      case LayerType.frame:
+        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+          imgControl: false,
+        })
+        break
     }
+    return
   }
-  if (layerUtils.layerIndex !== -1) {
-    // when there is an layer being active, the moving logic applied to the EditorView
-    movingUtils = new MovingUtils({
+
+  const movingUtils = new MovingUtils({
+    _config: { config: layerUtils.getCurrLayer },
+    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+    body: document.getElementById(
+      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+    ) as HTMLElement,
+  })
+
+  if (isClickOnController) {
+    movingUtils.removeListener()
+    movingUtils.updateProps({
       _config: { config: layerUtils.getCurrLayer },
-      snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-      body: document.getElementById(
-        `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-      ) as HTMLElement,
+      body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
     })
     movingUtils.moveStart(e)
-    pointerEvent.value.initPos = { x: e.x, y: e.y }
+  } else {
+    movingUtils.removeListener()
+    movingUtils.pageMoveStart(e)
   }
+  pointerEvent.value.initPos = { x: e.x, y: e.y }
+
+  // layer pinch logic
+  // if (layerUtils.layerIndex !== -1) {
+  //   // when there is an layer being active, the moving logic applied to the EditorView
+  //   movingUtils = new MovingUtils({
+  //     _config: { config: layerUtils.getCurrLayer },
+  //     snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+  //     body: document.getElementById(
+  //       `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+  //     ) as HTMLElement,
+  //   })
+  //   movingUtils.moveStart(e)
+  //   pointerEvent.value.initPos = { x: e.x, y: e.y }
+  // }
 }
 
 // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
@@ -452,10 +476,11 @@ const selectEnd = (e: PointerEvent) => {
 const isPinchInit = ref<null | boolean>(false)
 const pagePinchHandler = (new PagePinchUtils()).pinchHandler
 let pinchControlUtils = null as null | PinchControlUtils
-const onPinch = (e: AnyTouchEvent) => {
+
+const onLayerPinch = (e: AnyTouchEvent) => {
   if (e.phase === 'end' && isPinchInit.value) {
     // pinch end handling
-    pinchHandler(e)
+    layerPinchHandler(e)
     isPinchInit.value = false
     pinchControlUtils = null
   } else {
@@ -464,19 +489,19 @@ const onPinch = (e: AnyTouchEvent) => {
     if (!isPinchInit.value) {
       // first pinch initialization
       isPinchInit.value = true
-      return pinchStart(e)
+      return layerPinchStart(e)
     } else {
       // pinch move handling
-      pinchHandler(e)
+      layerPinchHandler(e)
     }
   }
 }
 
-const pinchHandler = (e: AnyTouchEvent) => {
+const layerPinchHandler = (e: AnyTouchEvent) => {
   pinchControlUtils?.pinch(e)
 }
 
-const pinchStart = (e: AnyTouchEvent) => {
+const layerPinchStart = (e: AnyTouchEvent) => {
   if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
   if (store.getters['bgRemove/getInBgRemoveMode']) return
 

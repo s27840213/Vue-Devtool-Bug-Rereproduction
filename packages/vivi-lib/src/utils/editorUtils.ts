@@ -94,9 +94,7 @@ class EditorUtils {
           }
         })
       }
-      console.log(mobileEditor, mobileEditor?.clientWidth, mobileEditor?.clientHeight)
     }
-    console.log('this.mobileSize', this.mobileSize)
     const PAGE_SIZE_W = (this.mobileSize.width || Number.MAX_SAFE_INTEGER) * 0.926
     const PAGE_SIZE_H = (this.mobileSize.height || Number.MAX_SAFE_INTEGER) * 0.926
 
@@ -126,13 +124,11 @@ class EditorUtils {
       const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
+      // store.commit('SET_pageScaleRatio', 100)
       const pos = {
         x: (editorUtils.mobileSize.width - width * this.contentScaleRatio) * 0.5,
         y: (editorUtils.mobileSize.height - height * this.contentScaleRatio) * 0.5
       }
-      console.warn('editorUtils.mobileSize', editorUtils.mobileSize, contentScaleRatio)
-      console.warn('page', generalUtils.deepCopy(page))
-      console.warn(contentScaleRatio, pos)
       // test
       if (!generalUtils.isCm) {
         pageUtils.updatePagePos(pageIndex, pos)
