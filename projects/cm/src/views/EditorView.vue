@@ -16,13 +16,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
-          iconName="flip-h-cm"
+          iconName="cm_flip-h"
           iconColor="app-btn-primary-text"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-h')")
         svg-icon(
           class="layer-action"
-          iconName="flip-v-cm"
+          iconName="cm_flip-v"
           iconColor="app-btn-primary-text"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-v')")
