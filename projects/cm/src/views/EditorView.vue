@@ -289,7 +289,13 @@ const handleNextAction = function () {
 const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep
 
-const centerBtns = computed(() => {
+type centerBtn = {
+  icon: string,
+  disabled: boolean,
+  width: number,
+  action?: () => void
+}
+const centerBtns = computed<centerBtn[]>(() => {
   const retTabs = []
   const stepBtns = [
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },

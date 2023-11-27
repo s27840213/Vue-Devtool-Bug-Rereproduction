@@ -114,7 +114,7 @@ export default defineComponent({
       const flipTab = genearlTabsNoFlip[flipIndex]
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs:Array<IFooterTab> = [
-        { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}`},
         { icon: 'invert', text: `${this.$t('CM0080')}` },
         { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' }, // vivisticker can only crop frame besides template editor
         flipTab,
