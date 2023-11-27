@@ -180,7 +180,7 @@ class ColorUtils {
     currPage.layers.forEach((layer, layerIndex) => {
       if (layer.type === 'shape') {
         layer.color = layer.color.map(() => color)
-      } else if (layer.type === 'text') {
+      } else if (layer.type === 'text' || layer.type === 'group') {
         textPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex)
       }
     })
