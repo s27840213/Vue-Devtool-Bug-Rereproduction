@@ -256,7 +256,7 @@ const {
   currGenResultIndex,
   initImgSrc,
 } = storeToRefs(editorStore)
-const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
+const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
