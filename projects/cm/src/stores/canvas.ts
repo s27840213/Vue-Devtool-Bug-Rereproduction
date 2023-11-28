@@ -17,6 +17,7 @@ export interface ICanvasState {
   canvasCtx: CanvasRenderingContext2D | null
   currCanvasImageElement: HTMLImageElement
   isAutoFilling: boolean
+  drawingColor: string
 }
 
 const MAX_STEP_COUNT = 20
@@ -39,6 +40,7 @@ export const useCanvasStore = defineStore('canvas', {
     canvasCtx: null as unknown as CanvasRenderingContext2D,
     currCanvasImageElement: new Image(),
     isAutoFilling: false,
+    drawingColor: '#FF7262',
   }),
   getters: {
     isInCanvasFirstStep(): boolean {

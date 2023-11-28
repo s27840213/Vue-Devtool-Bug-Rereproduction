@@ -76,6 +76,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"
+          :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
       v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
@@ -165,6 +166,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import useBiColorEditor from '@/composable/useBiColorEditor'
+import type { EditorTheme } from '@/composable/useBiColorEditor'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
@@ -183,7 +186,6 @@ import type { ILayerInfo } from '@nu/vivi-lib/store/types'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
-import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
@@ -309,7 +311,7 @@ const centerBtns = computed<centerBtn[]>(() => {
   ]
   if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20 })
   retTabs.push(...stepBtns)
-  if (editorType === 'hidden-message') retTabs.push({ icon: toggleBgIcons[currEditorBgTheme.value], disabled: false, width: 20, action: toggleBgColor })
+  if (editorType === 'hidden-message') retTabs.push({ icon: toggleThemeIcons[currEditorTheme.value], disabled: false, width: 20, action: toggleEditorTheme })
   return retTabs
 })
 // #endregion
@@ -540,31 +542,31 @@ const removePointer = (e: PointerEvent) => {
   pointerEvtUtils.removePointer(e.pointerId)
 }
 
-type EditorBgTheme = 'light' | 'dark'
-const editorBgs = {
-  light: '#FFFFFF',
-  dark: '#2B2B2B'
-} as { [key in EditorBgTheme]: string }
-const toggleBgIcons = {
+// toggle editor theme
+const biColorEditorStore = useBiColorEditor()
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = biColorEditorStore
+const toggleThemeIcons = {
   light: 'toggle-color-light',
   dark: 'toggle-color-dark'
-} as { [key in EditorBgTheme]: string }
-const currEditorBgTheme = ref((Object.keys(editorBgs).find(theme => editorBgs[theme as EditorBgTheme] === colorUtils.currPageBackgroundColor) ?? 'dark') as EditorBgTheme)
-const toggleBgColor = () => {
-  currEditorBgTheme.value = currEditorBgTheme.value === 'dark' ? 'light' : 'dark'
-  colorUtils.setCurrPageBackgroundColor(editorBgs[currEditorBgTheme.value])
-  colorUtils.setAllLayerColor(editorBgs[currEditorBgTheme.value === 'dark' ? 'light' : 'dark'])
-}
+} as { [key in EditorTheme]: string }
 // #endregion
 
 // #region demo brush size section
 const canvasStore = useCanvasStore()
-const { brushSize, isChangingBrushSize, isAutoFilling } = storeToRefs(canvasStore)
+const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {
     width: `${brushSize.value * contentScaleRatio.value}px`,
     height: `${brushSize.value * contentScaleRatio.value}px`,
+    backgroundColor: `${drawingColor.value}4C`, // 30% opacity
+  }
+})
+
+const demoBrushSizeOutline = computed(() => {
+  return {
+    'outline-primary-white': !isBiColorEditor.value,
+    'outline-neutral-light-hover': isBiColorEditor.value
   }
 })
 // #endregion
@@ -733,8 +735,8 @@ const handleSwipe = (dir: string) => {
 @use '@/assets/scss/transitions.scss';
 
 .demo-brush {
-  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
-  @apply pointer-events-none rounded-full outline-4 outline-primary-white z-highest;
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  @apply pointer-events-none rounded-full outline-4 z-highest;
   outline-style: solid;
 }
 
