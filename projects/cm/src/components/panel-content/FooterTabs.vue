@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24 pb-8")
+div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
   transition(
     name="panel-up"
     @after-leave="afterLeave")
@@ -81,7 +81,7 @@ export default defineComponent({
   extends: FooterTabs,
   data() {
     return {
-      hideTabsPanels: ['crop-flip'],
+      hideTabsPanels: ['crop-flip', 'fonts'],
       bottomTitlePanels: ['crop-flip'],
     }
   },

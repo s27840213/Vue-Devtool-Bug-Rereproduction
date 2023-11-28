@@ -119,17 +119,8 @@ const component = defineComponent({
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
-        case 'crop-flip': {
-          return `${this.$t('NN0496')}`
-        }
         case 'copy-style': {
           return `${this.$t('NN0809')}`
-        }
-        case 'multiple-select': {
-          return `${this.$t('NN0657')}`
-        }
-        case 'none': {
-          return ''
         }
         default: {
           return ''
@@ -137,8 +128,12 @@ const component = defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
+    hideTopSection(): boolean {
+      return this.hideDragBar && !this.showLeftBtn && !this.showRightBtn && this.panelTitle === ''
+    },
+    // eslint-disable-next-line vue/no-unused-properties
     showRightBtn(): boolean {
-      return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
+      return ['fonts'].includes(this.currActivePanel)
     },
     // eslint-disable-next-line vue/no-unused-properties
     showLeftBtn(): boolean {
