@@ -53,6 +53,7 @@ export default defineComponent({
       controllerHidden: 'webView/getControllerHidden',
       debugMode: 'vivisticker/getDebugMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isImgCtrl: 'imgControl/isImgCtrl',
       isProcessing: 'bgRemove/getIsProcessing',
     }),
     inImageEditor(): boolean {
@@ -437,6 +438,13 @@ export default defineComponent({
       if (!paymentUtils.checkProApp({ plan: tab.forPro ? 1 : 0 }, undefined, tab.plan)) return
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      }
+      if (tab.icon !== 'crop' && (this.isBgImgCtrl || this.isImgCtrl)) {
+        if (this.isBgImgCtrl) {
+          return backgroundUtils.setBgImageControl({ pageIndex: layerUtils.pageIndex, imgControl: false })
+        } else {
+          return imageUtils.setImgControlDefault()
+        }
       }
       // If current state is in cropping, the layerIndex sould be stored
       // bcz after we disable the cropping, the current active index would be lost
