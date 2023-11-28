@@ -81,8 +81,8 @@ export default defineComponent({
   extends: FooterTabs,
   data() {
     return {
-      hideTabsPanels: ['crop-flip', 'fonts'],
-      bottomTitlePanels: ['crop-flip'],
+      hideTabsPanels: ['crop-flip', 'adjust', 'fonts'],
+      bottomTitlePanels: ['crop-flip', 'adjust'],
     }
   },
   props: {
@@ -566,6 +566,8 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'crop-flip':
           return this.$t('NN0036')
+        case 'adjust':
+          return this.$t('NN0042')
       }
       return ''
     },
