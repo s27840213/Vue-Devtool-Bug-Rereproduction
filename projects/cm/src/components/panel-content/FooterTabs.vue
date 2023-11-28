@@ -77,9 +77,18 @@ import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { CMobilePanel } from './MobilePanel.vue'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import useBiColorEditor from '@/composable/useBiColorEditor'
 
 export default defineComponent({
   extends: FooterTabs,
+  setup() {
+    const { isBiColorEditor } = useBiColorEditor()
+    const { openImgSelecotr } = useImgSelectorStore()
+    return {
+      isBiColorEditor,
+      openImgSelecotr
+    }
+  },
   data() {
     return {
       hideTabsPanels: ['crop-flip', 'adjust', 'fonts'],
@@ -173,7 +182,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -202,6 +211,7 @@ export default defineComponent({
           props: {
             currColorEvent: ColorEventType.text,
           },
+          hidden: this.isBiColorEditor,
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
@@ -278,7 +288,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -291,7 +301,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -778,8 +788,7 @@ export default defineComponent({
         case 'photo':
         case 'replace': {
           if (tab.panelType !== undefined) break
-          const { openImgSelecotr } = useImgSelectorStore()
-          openImgSelecotr({ replace: true })
+          this.openImgSelecotr({ replace: true })
           break
         }
         case 'color':
