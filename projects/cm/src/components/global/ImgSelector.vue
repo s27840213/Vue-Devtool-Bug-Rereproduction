@@ -194,6 +194,7 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 
 const router = useRouter()
 
@@ -418,6 +419,7 @@ const sendToEditor = async () => {
             }
           })
       })
+      if (!initAtEditor) stepsUtils.reset()
       if (!initAtEditor || editorType.value === 'hidden-message') {
         groupUtils.deselect()
       }

@@ -182,9 +182,6 @@ export const useEditorStore = defineStore('editor', {
     redo() {
       stepsUtils.redo()
     },
-    delayedRecord() {
-      stepsUtils.delayedRecord()
-    },
     stepsReset() {
       stepsUtils.reset()
     },
