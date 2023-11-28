@@ -575,7 +575,7 @@ export default defineComponent({
   watch: {
     hasBottomTitle(newVal) {
       if (newVal) {
-        stepsUtils.setMilestone()
+        stepsUtils.setCheckpoint()
       }
     }
   },
@@ -812,7 +812,7 @@ export default defineComponent({
       // }
     },
     handleBottomCancel() {
-      stepsUtils.goToMilestone()
+      stepsUtils.goToCheckpoint()
       switch (this.currActivePanel) {
         case 'crop-flip':
           this.setImgConfig('reset')
