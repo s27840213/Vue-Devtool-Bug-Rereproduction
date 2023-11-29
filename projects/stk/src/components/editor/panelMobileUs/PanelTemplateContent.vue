@@ -1,13 +1,14 @@
 <template lang="pug">
 div(class="panel-template-content" ref="panel" :class="{'in-category': isInCategory, 'in-group-template': isInGroupTemplate, 'with-search-bar': isInMainContent, 'rwd-container': isInEditor}")
-  Tags(v-show="tags && tags.length"
+  tags(
+      v-for="(tag, i) in tagsContent"
+      :key="i"
+      v-show="tag.show"
       class="panel-template-content__tags"
-      :tags="tags"
-      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+      :tags="tag.content"
       ref="tags"
       theme="dark"
-      @search="(keyword?: string) => $emit('search', keyword)"
-      @scroll="(scrollLeft: number) => tagScrollLeft = (isInCategory || isInGroupTemplate) ? tagScrollLeft : scrollLeft")
+      @search="(keyword?: string) => $emit('search', keyword)")
   div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
