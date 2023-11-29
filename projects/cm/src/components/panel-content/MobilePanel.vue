@@ -303,15 +303,12 @@ const component = defineComponent({
             formatUtils.clearCopiedFormat()
             break
           }
-
-          case 'multiple-select': {
-            if (this.inMultiSelectionMode) {
-              editorUtils.setInMultiSelectionMode(false)
-            }
-            break
-          }
         }
-        this.closeMobilePanel()
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
+        } else {
+          this.closeMobilePanel()
+        }
       }
     },
   },

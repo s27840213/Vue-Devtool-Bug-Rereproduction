@@ -149,10 +149,6 @@ const canvasStore = useCanvasStore()
 const { isAutoFilling } = storeToRefs(canvasStore)
 // #endregion
 
-// #region function panel
-const layerIndex = computed(() => layerUtils.layerIndex)
-// #endregion
-
 // #region bottom panel warning modal
 const modalStore = useModalStore()
 const { isModalOpen: wantToQuit } = storeToRefs(modalStore)
@@ -198,6 +194,8 @@ const currColorEvent = ref('')
 const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+const layerIndex = computed(() => layerUtils.layerIndex)
+const selectedLayerNum = computed(() => store.getters.getCurrSelectedInfo.layers.length)
 
 const currPage = computed(() => {
   return pageUtils.getPage(pageUtils.currFocusPageIndex)
@@ -218,7 +216,9 @@ const switchTab = (panelType: string, props?: IFooterTabProps) => {
     // Close panel if re-click
   } else if (currActivePanel.value === panelType || panelType === 'none') {
     editorUtils.setShowMobilePanel(false)
-    editorUtils.setInMultiSelectionMode(false)
+    if (panelType === 'none') {
+      editorUtils.setInMultiSelectionMode(false)
+    }
   } else {
     editorUtils.setCurrActivePanel(panelType)
     if (panelType === 'color' && props?.currColorEvent) {
@@ -236,6 +236,17 @@ watch(
       editorUtils.setShowMobilePanel(false)
     }
   },
+)
+
+watch(
+  selectedLayerNum,
+  (newVal) => {
+    if (newVal === 0) {
+      editorUtils.setCurrActivePanel('none')
+      editorUtils.setInMultiSelectionMode(false)
+      editorUtils.setShowMobilePanel(false)
+    }
+  }
 )
 
 const afterEnter = () => {
