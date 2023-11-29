@@ -108,7 +108,7 @@ import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-import VConsole from 'vconsole'
+// import VConsole from 'vconsole'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -238,16 +238,13 @@ watch(
   },
 )
 
-watch(
-  selectedLayerNum,
-  (newVal) => {
-    if (newVal === 0) {
-      editorUtils.setCurrActivePanel('none')
-      editorUtils.setInMultiSelectionMode(false)
-      editorUtils.setShowMobilePanel(false)
-    }
+watch(selectedLayerNum, (newVal) => {
+  if (newVal === 0) {
+    editorUtils.setCurrActivePanel('none')
+    editorUtils.setInMultiSelectionMode(false)
+    editorUtils.setShowMobilePanel(false)
   }
-)
+})
 
 const afterEnter = () => {
   if (layerIndex.value !== -1) {
@@ -268,16 +265,16 @@ onBeforeUnmount(() => {
 })
 // #endregion
 
-const vConsole = new VConsole({ theme: 'dark' })
-vConsole.setSwitchPosition(25, 80)
+// const vConsole = new VConsole({ theme: 'dark' })
+// vConsole.setSwitchPosition(25, 80)
 
-watch(isDuringCopy, (newVal) => {
-  if (newVal) {
-    vConsole.hideSwitch()
-  } else {
-    vConsole.showSwitch()
-  }
-})
+// watch(isDuringCopy, (newVal) => {
+//   if (newVal) {
+//     vConsole.hideSwitch()
+//   } else {
+//     vConsole.showSwitch()
+//   }
+// })
 
 // #region action sheet
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()

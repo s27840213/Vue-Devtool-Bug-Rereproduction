@@ -39,14 +39,19 @@ const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const {
-  setIsGenerating,
-  unshiftGenResults,
-  changeEditorState,
-} = editorStore
-const { isGenerating } = storeToRefs(editorStore)
-const promptText = ref('')
-const promptLen = computed(() => promptText.value.length)
+const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt } = editorStore
+const { isGenerating, currPrompt } = storeToRefs(editorStore)
+const promptText = computed({
+  // getter
+  get() {
+    return currPrompt.value
+  },
+  set(newValue) {
+    setCurrPrompt(newValue)
+  },
+})
+
+const promptLen = computed(() => currPrompt.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
 const { genImageFlow } = useGenImageUtils()
 const { checkCanvasIsEmpty } = useCanvasUtils()
@@ -81,7 +86,7 @@ const handleGenerate = async () => {
         changeEditorState('next')
         setIsGenerating(false)
         setShowSpinner(false)
-      }
+      },
     })
   }
 }
