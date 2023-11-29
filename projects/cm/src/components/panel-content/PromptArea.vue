@@ -33,8 +33,6 @@ import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
-import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()
@@ -43,17 +41,14 @@ const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 const editorStore = useEditorStore()
 const {
   setIsGenerating,
-  setGenResultIndex,
   unshiftGenResults,
-  removeGenResult,
-  updateGenResult,
   changeEditorState,
 } = editorStore
-const { isGenerating, inGenResultState, generatedResultsNum } = storeToRefs(editorStore)
+const { isGenerating } = storeToRefs(editorStore)
 const promptText = ref('')
 const promptLen = computed(() => promptText.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
-const { genImage } = useGenImageUtils()
+const { genImageFlow } = useGenImageUtils()
 const { checkCanvasIsEmpty } = useCanvasUtils()
 const { t } = useI18n()
 // #endregion
@@ -81,51 +76,13 @@ const handleGenerate = async () => {
     setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
     setIsGenerating(true)
-    const genNum = 2
-    const ids: string[] = []
-    for (let i = 0; i < genNum; i++) {
-      ids.push(generalUtils.generateRandomString(4))
-      unshiftGenResults('', ids[i])
-    }
-    setGenResultIndex(-1)
-    try {
-      await genImage(promptText.value, false, genNum, {
-        onApiResponded: () => {
-          changeEditorState('next')
-          setIsGenerating(false)
-          setShowSpinner(false)
-        },
-        onSuccess: (index, imgSrc) => {
-          updateGenResult(ids[index], { url: imgSrc, updateIndex: true })
-        },
-        onError: (index, url, reason) => {
-          logUtils.setLogAndConsoleLog(`${reason} for ${ids[index]}: ${url}`)
-          modalUtils.setModalInfo(
-            `${t('CM0087')} ${t('CM0089')}`,
-            t('CM0088'),
-            { msg: t('STK0023') },
-          )
-          removeGenResult(ids[index])
-          if (generatedResultsNum.value === 0 && inGenResultState.value) {
-            changeEditorState('prev')
-          }
-        },
-      })
-      console.log('all images processed')
-    } catch (error) {
-      logUtils.setLogForError(error as Error)
-      modalUtils.setModalInfo(
-        t('CM0087'),
-        t('CM0088'),
-        { msg: t('STK0023') },
-      )
-      for (const id of ids) {
-        removeGenResult(id)
+    await genImageFlow(promptText.value, false, 2, {
+      onApiResponded: () => {
+        changeEditorState('next')
+        setIsGenerating(false)
+        setShowSpinner(false)
       }
-      if (generatedResultsNum.value === 0 && inGenResultState.value) {
-        changeEditorState('prev')
-      }
-    }
+    })
   }
 }
 const clearPromt = () => {

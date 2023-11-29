@@ -54,69 +54,21 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 </template>
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
-import i18n from '@/i18n'
 import { useEditorStore } from '@/stores/editor'
-import { notify } from '@kyvg/vue3-notification'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
-import modalUtils from '@nu/vivi-lib/utils/modalUtils'
-import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 const editorStore = useEditorStore()
 const {
   setGenResultIndex,
-  unshiftGenResults,
-  removeGenResult,
-  updateGenResult,
-  changeEditorState,
   keepEditingInit,
 } = editorStore
-const { generatedResults, currGenResultIndex, initImgSrc, inGenResultState, generatedResultsNum } =
+const { generatedResults, currGenResultIndex, initImgSrc } =
   storeToRefs(editorStore)
 
-const { genImage } = useGenImageUtils()
-const { t } = useI18n()
+const { genImageFlow } = useGenImageUtils()
 
 const showMoreRes = async () => {
-  const genNum = 2
-  const ids: string[] = []
-  for (let i = 0; i < genNum; i++) {
-    ids.push(generalUtils.generateRandomString(4))
-    unshiftGenResults('', ids[i])
-  }
-  try {
-    await genImage('', true, genNum, {
-      onSuccess: (index, imgSrc) => {
-        updateGenResult(ids[index], { url: imgSrc })
-      },
-      onError: (index, url, reason) => {
-        logUtils.setLogAndConsoleLog(`${reason} for ${ids[index]}: ${url}`)
-        modalUtils.setModalInfo(
-          `${t('CM0087')} ${t('CM0089')}`,
-          t('CM0088'),
-          { msg: t('STK0023') },
-        )
-        removeGenResult(ids[index])
-        if (generatedResultsNum.value === 0 && inGenResultState.value) {
-          changeEditorState('prev')
-        }
-      },
-    })
-  } catch (error) {
-    logUtils.setLogForError(error as Error)
-    modalUtils.setModalInfo(
-      t('CM0087'),
-      t('CM0088'),
-      { msg: t('STK0023') },
-    )
-    for (const id of ids) {
-      removeGenResult(id)
-    }
-    if (generatedResultsNum.value === 0 && inGenResultState.value) {
-      changeEditorState('prev')
-    }
-  }
+  await genImageFlow('', true, 2)
 }
 
 const appendSizeQuery = (url: string, size = 200) => {

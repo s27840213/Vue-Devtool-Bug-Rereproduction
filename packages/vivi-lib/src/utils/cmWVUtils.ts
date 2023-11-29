@@ -165,7 +165,17 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string, options?: { key?: string, subPath?: string, name?: string }): Promise<ISaveAssetFromUrlResponse> {
-    return this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { type, url, ...options }, { timeout: -1 }) as Promise<ISaveAssetFromUrlResponse>
+    let retryTimes = 0
+    let result
+    while (retryTimes < 3) {
+      result = await (this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { type, url, ...options }, { timeout: -1 }) as Promise<ISaveAssetFromUrlResponse>)
+      if (result.flag === '1') {
+        retryTimes += 1
+      } else {
+        break
+      }
+    }
+    return result!
   }
 
   async switchDomain(url: string): Promise<void> {

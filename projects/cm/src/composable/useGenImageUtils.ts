@@ -8,9 +8,11 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { useEventBus } from '@vueuse/core'
 import { useStore } from 'vuex'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 export const RECORD_TIMING = true
 
@@ -19,12 +21,75 @@ const useGenImageUtils = () => {
   const { setPrevGenParams } = userStore
   const { prevGenParams } = storeToRefs(useUserStore())
   const editorStore = useEditorStore()
-  const { setInitImgSrc } = editorStore
-  const { editorType, pageSize, contentScaleRatio } = storeToRefs(useEditorStore())
+  const {
+    setInitImgSrc,
+    setGenResultIndex,
+    unshiftGenResults,
+    removeGenResult,
+    updateGenResult,
+    changeEditorState,
+  } = editorStore
+  const { editorType, pageSize, contentScaleRatio, inGenResultState, generatedResultsNum } = storeToRefs(useEditorStore())
+  const { uploadImage, polling, getPollingController } = useUploadUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
+  const { t } = useI18n()
 
-  const { uploadImage, polling, getPollingController } = useUploadUtils()
+  const genImageFlow = async (
+    prompt: string,
+    showMore: boolean,
+    num: number,
+    {
+      onApiResponded = undefined,
+    }: {
+      onApiResponded?: () => void
+    } = {},
+  ): Promise<void> => {
+    const ids: string[] = []
+    for (let i = 0; i < num; i++) {
+      ids.push(generalUtils.generateRandomString(4))
+      unshiftGenResults('', ids[i])
+    }
+    if (!showMore) {
+      setGenResultIndex(-1)
+    }
+    try {
+      await genImage(prompt, showMore, num, {
+        onApiResponded,
+        onSuccess: (index, imgSrc) => {
+          updateGenResult(ids[index], { url: imgSrc, updateIndex: !showMore })
+        },
+        onError: (index, url, reason) => {
+          const errorId = generalUtils.generateRandomString(6)
+          logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
+          modalUtils.setModalInfo(
+            `${t('CM0087')} ${t('CM0089')}`,
+            `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
+            { msg: t('STK0023') },
+          )
+          removeGenResult(ids[index])
+          if (generatedResultsNum.value === 0 && inGenResultState.value) {
+            changeEditorState('prev')
+          }
+        },
+      })
+    } catch (error) {
+      const errorId = generalUtils.generateRandomString(6)
+      logUtils.setLog(errorId)
+      logUtils.setLogForError(error as Error)
+      modalUtils.setModalInfo(
+        t('CM0087'),
+        `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
+        { msg: t('STK0023') },
+      )
+      for (const id of ids) {
+        removeGenResult(id)
+      }
+      if (generatedResultsNum.value === 0 && inGenResultState.value) {
+        changeEditorState('prev')
+      }
+    }
+  }
 
   const genImage = async (
     prompt: string,
@@ -169,6 +234,7 @@ const useGenImageUtils = () => {
   }
 
   return {
+    genImageFlow,
     genImage,
     uploadEditorAsImage,
     uploadMaskAsImage,
