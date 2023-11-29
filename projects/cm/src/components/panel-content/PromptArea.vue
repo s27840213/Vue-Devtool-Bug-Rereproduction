@@ -34,6 +34,7 @@ import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()
@@ -99,10 +100,11 @@ const handleGenerate = async () => {
         },
         onError: (index, url, reason) => {
           logUtils.setLogAndConsoleLog(`${reason} for ${ids[index]}: ${url}`)
-          notify({
-            group: 'error',
-            text: `Generate Failed For Some Image`,
-          })
+          modalUtils.setModalInfo(
+            `${t('CM0087')} ${t('CM0089')}`,
+            t('CM0088'),
+            { msg: t('STK0023') },
+          )
           removeGenResult(ids[index])
           if (generatedResultsNum.value === 0 && inGenResultState.value) {
             changeEditorState('prev')
@@ -112,10 +114,17 @@ const handleGenerate = async () => {
       console.log('all images processed')
     } catch (error) {
       logUtils.setLogForError(error as Error)
-      notify({
-        group: 'error',
-        text: `Generate Failed`,
-      })
+      modalUtils.setModalInfo(
+        t('CM0087'),
+        t('CM0088'),
+        { msg: t('STK0023') },
+      )
+      for (const id of ids) {
+        removeGenResult(id)
+      }
+      if (generatedResultsNum.value === 0 && inGenResultState.value) {
+        changeEditorState('prev')
+      }
     }
   }
 }

@@ -84,8 +84,11 @@ const useGenImageUtils = () => {
         RECORD_TIMING && testUtils.start(`polling ${index}`, false)
         try {
           await polling(url, { isJson: false, useVer: false, pollingController })
-        } catch (error) {
-          onError && onError(index, url, 'polling cancelled')
+        } catch (error: any) {
+          logUtils.setLogForError(error)
+          if (!error.message.includes('Cancelled')) {
+            onError && onError(index, url, error.message)
+          }
           return
         }
         RECORD_TIMING && testUtils.log(`polling ${index}`, '')
