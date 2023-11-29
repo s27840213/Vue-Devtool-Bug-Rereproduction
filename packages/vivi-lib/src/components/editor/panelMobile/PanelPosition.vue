@@ -17,7 +17,8 @@ div(v-else class="panel-position")
     class="pointer"
     :iconName="align.icon"
     iconWidth="24px"
-    :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
+    :iconColor="$isStk || $isCm ? 'white' : 'gray-1'"
+    @click="align.action")
 </template>
 
 <script lang="ts">
