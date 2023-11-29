@@ -22,8 +22,9 @@ div(class="panel-adjust")
         :style="fieldsStyle")
       template(v-for="field in fields" :key="field.name")
         div(
-          class="flex flex-col items-center justify-center h-44 gap-4 px-4"
+          class="flex flex-col items-center justify-center h-52 gap-4 px-4"
           @click="selectedField = field")
+          div(class="panel-adjust__modified" :class="`bg-${isFieldModified(field) ? (isFieldSelected(field) ? 'app-tab-active' : 'app-tab-default') : 'transparent'}`")
           svg-icon(
             class="click-disabled"
             :iconName="field.name"
@@ -139,6 +140,9 @@ export default defineComponent({
     isFieldSelected(field: Field) {
       return this.selectedField.name === field.name
     },
+    isFieldModified(field: Field) {
+      return (this.adjustVal[field.name] ?? 0) !== this.defaultProps[field.name]
+    },
     handleField(val: number | string, name: string) {
       const fieldVal = Number.isNaN(+val) ? 0 : +val
       this.adjustVal[name] = fieldVal
@@ -222,7 +226,11 @@ export default defineComponent({
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 10px;
-  };
+  }
+  &__modified {
+    @include size(4px);
+    border-radius: 50%;
+  }
 }
 .slider-input {
   &__top {
