@@ -128,12 +128,13 @@ export default defineComponent({
           if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
             toRecord = true
           }
-          this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()) })
+          const res = tiptapUtils.toIParagraph(editor.getJSON())
+          this.$emit('update', { ...res })
           this.$emit('compositionend', toRecord)
           tiptapUtils.agent(editor => {
             // setContent will be skipped while composing even when isSetContentRequired is true in NuController/NuSubController.
             // So do it here. (the JSON created by toJSON(.) is probably different from editor.getJSON(.))
-            editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
+            editor.chain().setContent(tiptapUtils.toJSON(res.paragraphs)).selectPrevious().run()
           })
         })
       }
