@@ -57,7 +57,6 @@ div(v-show="!hideMobilePanel"
   transition(name="panel-up")
     mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
       :currActivePanel="currActiveSubPanel"
-      :currColorEvent="currSubColorEvent"
       :isSubPanel="true"
       :currPage="currPage"
       @switchTab="switchTab"
@@ -71,6 +70,7 @@ import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -117,7 +117,6 @@ export default defineComponent({
       replaceImg: (() => { /**/ }) as (img: IAssetPhoto | IPhotoItem) => void,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
-      currSubColorEvent: '',
       innerTabIndex: 0,
       resizeObserver: null as unknown as ResizeObserver,
       // eslint-disable-next-line vue/no-unused-properties
@@ -446,7 +445,7 @@ export default defineComponent({
         this.setCurrActiveSubPanel(panelType)
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {
-            this.currSubColorEvent = props.currColorEvent
+            colorUtils.setCurrEvent(props.currColorEvent as string)
           }
         }
       }

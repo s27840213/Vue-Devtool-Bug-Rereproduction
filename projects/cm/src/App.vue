@@ -124,6 +124,7 @@ import useStateInfo from './composable/useStateInfo'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
@@ -190,7 +191,6 @@ const closeModal = () => {
 // #region mobile panel
 const store = useStore()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
-const currColorEvent = ref('')
 const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
@@ -210,9 +210,9 @@ const switchTab = (panelType: string, props?: IFooterTabProps) => {
     currActivePanel.value === panelType &&
     panelType === 'color' &&
     props?.currColorEvent &&
-    currColorEvent.value !== props.currColorEvent
+    colorUtils.currEvent !== props.currColorEvent
   ) {
-    currColorEvent.value = props.currColorEvent
+    colorUtils.setCurrEvent(props.currColorEvent as string)
     // Close panel if re-click
   } else if (currActivePanel.value === panelType || panelType === 'none') {
     editorUtils.setShowMobilePanel(false)
@@ -222,7 +222,7 @@ const switchTab = (panelType: string, props?: IFooterTabProps) => {
   } else {
     editorUtils.setCurrActivePanel(panelType)
     if (panelType === 'color' && props?.currColorEvent) {
-      currColorEvent.value = props.currColorEvent
+      colorUtils.setCurrEvent(props.currColorEvent as string)
     }
   }
 }
