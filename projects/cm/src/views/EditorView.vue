@@ -164,7 +164,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
       class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
-      :style="assetPanelStyles")
+      :style="assetPanelStyles"
+      v-bind="assetPanelProps")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
@@ -314,7 +315,7 @@ const centerBtns = computed<centerBtn[]>(() => {
   ]
   if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20 })
   retTabs.push(...stepBtns)
-  if (editorType === 'hidden-message') retTabs.push({ icon: toggleThemeIcons[currEditorTheme.value], disabled: false, width: 20, action: toggleEditorTheme })
+  if (editorType === 'hidden-message') retTabs.push({ icon: toggleThemeIcon.value, disabled: false, width: 20, action: toggleEditorTheme })
   return retTabs
 })
 // #endregion
@@ -547,11 +548,14 @@ const removePointer = (e: PointerEvent) => {
 
 // toggle editor theme
 const biColorEditorStore = useBiColorEditor()
-const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = biColorEditorStore
-const toggleThemeIcons = {
-  light: 'toggle-color-light',
-  dark: 'toggle-color-dark'
-} as { [key in EditorTheme]: string }
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor, currFgColor } = biColorEditorStore
+const toggleThemeIcon = computed(() => {
+  const toggleThemeIcons = {
+    light: 'toggle-color-light',
+    dark: 'toggle-color-dark'
+  } as { [key in EditorTheme]: string }
+  return toggleThemeIcons[currEditorTheme.value]
+})
 // #endregion
 
 // #region demo brush size section
@@ -644,6 +648,24 @@ const assetPanelComponent = computed(() => {
       return PanelObject
     default:
       return PanelText
+  }
+})
+
+const assetPanelProps = computed((): { [index: string]: any } => {
+  const monoColor = isBiColorEditor.value ? currFgColor.value : undefined
+  switch (currActiveTab.value) {
+    case 'text': {
+      return {
+        monoColor
+      }
+    }
+    case 'object':
+      return {
+        monoColor
+      }
+    default: {
+      return {}
+    }
   }
 })
 

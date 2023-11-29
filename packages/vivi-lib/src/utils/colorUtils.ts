@@ -175,14 +175,43 @@ class ColorUtils {
   }
 
   setAllLayerColor(color: string) {
+    const getColoredTextLayer = (layer: IText) => {
+      return textPropUtils.spanParagraphPropertyHandler(
+        'color',
+        { color },
+        { pIndex: 0, sIndex: 0, offset: 0 },
+        { pIndex: layer.paragraphs.length-1, sIndex: 0, offset: 0 },
+        layer
+      )
+    }
+
     groupUtils.deselect()
-    const currPage = layerUtils.getCurrPage
-    currPage.layers.forEach((layer, layerIndex) => {
-      if (layer.type === 'shape') {
-        layer.color = layer.color.map(() => color)
-      } else if (layer.type === 'text' || layer.type === 'group') {
-        textPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex)
-      }
+    const pages = pageUtils.getPages
+    pages.forEach((page, pageIndex) => {
+      page.layers.forEach((layer, layerIndex) => {
+        if (layer.type === 'shape') {
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {color: layer.color.map(() => color)})
+        } else if (layer.type === 'text') {
+          layerUtils.updateLayerProps(
+            pageIndex,
+            layerIndex,
+            { paragraphs: getColoredTextLayer(layer).paragraphs }
+          )
+        } else if (layer.type === 'group') {
+          layer.layers.forEach((subLayer, subLayerIdx) => {
+            if (subLayer.type === 'shape') {
+              layerUtils.updateLayerProps(pageIndex, layerIndex, {color: subLayer.color.map(() => color)}, subLayerIdx)
+            } else if (subLayer.type === 'text') {
+              layerUtils.updateLayerProps(
+                pageIndex,
+                layerIndex,
+                { paragraphs: getColoredTextLayer(subLayer).paragraphs },
+                subLayerIdx
+              )
+            }
+          })
+        }
+      })
     })
   }
 }

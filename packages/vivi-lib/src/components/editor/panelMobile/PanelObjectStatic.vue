@@ -52,6 +52,7 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
           category-object-item(class="panel-static__item"
             :src="item.src"
             :item="item"
+            :monoColor="monoColor"
             :style="itemStyles"
             @click4in1="click4in1"
             @dbclick4in1="toggleFavorites4in1"
@@ -63,6 +64,7 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
           :key="item.id"
           :src="item.src"
           :item="item"
+          :monoColor="monoColor"
           :style="itemStyles"
           @click4in1="click4in1"
           @dbclick4in1="toggleFavorites4in1"
@@ -102,6 +104,9 @@ export default defineComponent({
     showFav: {
       type: Boolean,
       required: true
+    },
+    monoColor: {
+      type: String,
     }
   },
   data() {

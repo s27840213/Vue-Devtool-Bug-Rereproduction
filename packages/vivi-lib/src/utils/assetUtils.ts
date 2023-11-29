@@ -2,14 +2,14 @@ import listApi from '@/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-  IGroup,
-  IImage,
-  IImageStyle,
-  IShape,
-  ISpanStyle,
-  IStyle,
-  IText,
-  ITmp,
+IGroup,
+IImage,
+IImageStyle,
+IShape,
+ISpanStyle,
+IStyle,
+IText,
+ITmp,
 } from '@/interfaces/layer'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
@@ -38,6 +38,7 @@ import resizeUtils from './resizeUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
+import textPropUtils from './textPropUtils'
 import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import unitUtils, { PRECISION } from './unitUtils'
@@ -312,7 +313,7 @@ class AssetUtils {
   }
 
   svgJsonInit(json: any, attrs: IAssetProps = {}): IShape {
-    const { pageIndex, styles = {} } = attrs
+    const { pageIndex, styles = {}, monoColor } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
     const currentPage = this.getPage(targetPageIndex)
@@ -344,6 +345,7 @@ class AssetUtils {
         vSize,
         ...styles,
       },
+      ...(monoColor && json.color && {color: json.color.map(() => monoColor)}),
     }
   }
 
@@ -602,7 +604,7 @@ class AssetUtils {
 
   addText(json: any, attrs: IAssetProps = {}) {
     json = generalUtils.deepCopy(json)
-    const { pageIndex, has_frame, styles = {} } = attrs
+    const { pageIndex, has_frame, styles = {}, monoColor } = attrs
     const { x, y } = styles
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
@@ -688,6 +690,31 @@ class AssetUtils {
       // }
 
       if (newLayer !== null) {
+        // apply color to new layer
+        if (monoColor) {
+          const applyTextColor = (layer: IText) => {
+            layer.paragraphs = textPropUtils.spanParagraphPropertyHandler(
+              'color',
+              { color: monoColor },
+              { pIndex: 0, sIndex: 0, offset: 0 },
+              { pIndex: layer.paragraphs.length-1, sIndex: 0, offset: 0 },
+              layer
+            ).paragraphs
+          }
+          if (newLayer.type === 'text') {
+            applyTextColor(newLayer)
+          } else if (newLayer.type === 'group') {
+            newLayer.layers.forEach(subLayer => {
+              if (subLayer.type === 'text') {
+                applyTextColor(subLayer)
+              }
+              if (subLayer.type === 'shape') {
+                Object.assign(subLayer, {color: subLayer.color.map(() => monoColor)})
+              }
+            })
+          }
+        }
+
         layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
       }
     } else {

@@ -43,7 +43,8 @@ div(class="overflow-container full-size rwd-container")
           template(v-slot:preview="{ item }")
             category-text-item(class="panel-text__item"
               :item="item"
-              :itemWidth="itemWidth")
+              :itemWidth="itemWidth"
+              :monoColor="monoColor")
       template(v-slot:category-text-item="{ list, title }")
         div(v-if="title" class="panel-text__header") {{ title }}
         div(class="panel-text__items" :style="itemsStyles")
@@ -52,6 +53,7 @@ div(class="overflow-container full-size rwd-container")
             :key="item.id"
             :item="item"
             :itemWidth="itemWidth"
+            :monoColor="monoColor"
             :style="{margin: isTablet ? 0 : '0 auto'}")
     btn-add(v-if="!keyword && !showAllRecently" class="text-H6" :elScrollable="elMainContent" :text="$t('STK0001')" @click="handleAddText")
 </template>
@@ -87,6 +89,11 @@ export default defineComponent({
     CategoryListRows,
     CategoryTextItem,
     BtnAdd
+  },
+  props: {
+    monoColor: {
+      type: String,
+    }
   },
   data() {
     return {

@@ -20,6 +20,14 @@ const useBiColorEditor = () => {
 
   const currEditorTheme = ref((Object.keys(editorThemes).find(theme => editorThemes.value[theme as EditorTheme] === colorUtils.currPageBackgroundColor) ?? 'dark') as EditorTheme)
 
+  const currBgColor = computed(() => {
+    return editorThemes.value[currEditorTheme.value]
+  })
+
+  const currFgColor = computed(() => {
+    return editorThemes.value[currEditorTheme.value === 'light' ? 'dark' : 'light']
+  })
+
   const initBiColorEditor = (theme: EditorTheme) => {
     const oppositeTheme = theme === 'light' ? 'dark' : 'light'
     colorUtils.setCurrPageBackgroundColor(editorThemes.value[theme])
@@ -40,6 +48,8 @@ const useBiColorEditor = () => {
     isBiColorEditor,
     editorThemes,
     currEditorTheme,
+    currBgColor,
+    currFgColor,
     initBiColorEditor,
     toggleEditorTheme
   }

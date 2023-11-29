@@ -76,6 +76,11 @@ export default defineComponent({
     CategoryTextPreview,
     ProItem
   },
+  props: {
+    monoColor: {
+      type: String,
+    }
+  },
   mounted() {
     generalUtils.panelInit('text',
       this.handleSearch,
@@ -179,7 +184,7 @@ export default defineComponent({
     addText(item: any) {
       if (!paymentUtils.checkProApp(item, undefined, 'text')) return
       if (this.isInEditor) {
-        AssetUtils.addAsset(item).then(() => {
+        AssetUtils.addAsset(item, { monoColor: this.monoColor }).then(() => {
           textPropUtils.updateTextPropsState()
         })
       } else {
