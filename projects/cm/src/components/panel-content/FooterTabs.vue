@@ -223,6 +223,7 @@ export default defineComponent({
         },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'font-curve', text: `${this.$t('NN0118')}`, panelType: 'font-curve', hidden: !this.isBiColorEditor },
         {
           icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
@@ -232,7 +233,7 @@ export default defineComponent({
           },
           hidden: this.isBiColorEditor,
         },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect', hidden: this.isBiColorEditor },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'copy-edits', text: `${this.$t('CM0084')}`, panelType: 'copy-style' },
       ]
