@@ -98,6 +98,7 @@ export default Extension.create({
   addStorage() {
     return {
       spanStyle: undefined,
+      paragraphStyle: undefined,
       from: undefined,
       to: undefined,
       pasting: false
@@ -105,15 +106,19 @@ export default Extension.create({
   },
   onSelectionUpdate() {
     const spanAttrs = this.editor.getAttributes('textStyle')
+    const paragraphAttrs = this.editor.getAttributes('paragraph')
     if (Object.keys(spanAttrs).length && spanAttrs.font !== 'undefined') {
       this.storage.spanStyle = tiptapUtils.textStyles(spanAttrs)
     } else {
-      const spanStyle = this.editor.getAttributes('paragraph').spanStyle
+      const spanStyle = paragraphAttrs.spanStyle
       if (spanStyle) {
         this.storage.spanStyle = tiptapUtils.textStyles(
-          tiptapUtils.makeSpanStyle(this.editor.getAttributes('paragraph'))
+          tiptapUtils.makeSpanStyle(paragraphAttrs)
         )
       }
+    }
+    if (Object.keys(paragraphAttrs).length && paragraphAttrs.font !== 'undefined') {
+      this.storage.paragraphStyle = tiptapUtils.textStyles(paragraphAttrs)
     }
     if (textPropUtils.pageIndex >= 0 && textPropUtils.layerIndex >= 0) {
       textPropUtils.updateTextPropsState()
