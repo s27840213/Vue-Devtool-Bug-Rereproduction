@@ -26,7 +26,7 @@ class StepsUtils {
   // pageSteps: Array<number>
   currStep: number
   MAX_STORAGE_COUNT: number
-  milestoneStep: number
+  checkpointStep: number
   get isPopupOpen(): boolean {
     return popupUtils.isPopupOpen
   }
@@ -46,7 +46,7 @@ class StepsUtils {
     this.currStep = -1
     this.MAX_STORAGE_COUNT = 30
     this.timers = {}
-    this.milestoneStep = -1
+    this.checkpointStep = -1
   }
 
   filterDataForLayer(layer: ILayer): any {
@@ -279,8 +279,8 @@ class StepsUtils {
     // console.warn(generalUtils.deepCopy(this.steps))
   }
 
-  setMilestone() {
-    this.milestoneStep = this.currStep
+  setCheckpoint() {
+    this.checkpointStep = this.currStep
   }
 
   async undo() {
@@ -305,15 +305,15 @@ class StepsUtils {
     await this.goToCurrStep()
   }
 
-  async goToMilestone() {
-    if (this.currStep === -1) {
+  async goToCheckpoint() {
+    if (this.checkpointStep === -1) {
       return
     }
     if (this.isPopupOpen) {
       popupUtils.closePopup()
     }
-    this.currStep = this.milestoneStep
-    this.milestoneStep = -1
+    this.currStep = this.checkpointStep
+    this.checkpointStep = -1
     await this.goToCurrStep()
   }
 

@@ -26,10 +26,10 @@
   "NN0051": "Bottom",
   "NN0053": "Horizontally",
   "NN0054": "Vertically",
-  "NN0055": "Brightness",
+  "NN0055": "Exposure",
   "NN0056": "Contrast",
   "NN0057": "Saturation",
-  "NN0058": "Color",
+  "NN0058": "Tint",
   "NN0059": "Blur",
   "NN0060": "Vignette",
   "NN0061": "Warmth",
@@ -470,5 +470,8 @@
   "CM0077": "Video",
   "CM0084": "Copy edits",
   "CM0085": "Mask is empty",
-  "CM0086": "Generating"
+  "CM0086": "Generating",
+  "CM0087": "Image Generation Failed",
+  "CM0088": "Sorry, we could not generate the image this time. Please try again.",
+  "CM0089": "for Some Image"
 }

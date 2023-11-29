@@ -72,6 +72,7 @@ const component = defineComponent({
         'multiple-select',
         'remove-bg',
         'nudge',
+        'adjust',
       ],
       // eslint-disable-next-line vue/no-unused-properties
       hideDynamicCompPanels: ['crop-flip', 'copy-style', 'multiple-select'],
@@ -302,15 +303,12 @@ const component = defineComponent({
             formatUtils.clearCopiedFormat()
             break
           }
-
-          case 'multiple-select': {
-            if (this.inMultiSelectionMode) {
-              editorUtils.setInMultiSelectionMode(false)
-            }
-            break
-          }
         }
-        this.closeMobilePanel()
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
+        } else {
+          this.closeMobilePanel()
+        }
       }
     },
   },
@@ -340,12 +338,17 @@ const component = defineComponent({
     _panelParentHeight() {
       return document.querySelector('#app')?.clientHeight ?? 0
     },
-    // eslint-disable-next-line vue/no-unused-properties
-    middlewareCondition(target: HTMLElement | SVGElement): boolean {
+    checkLayerAction(target: HTMLElement | SVGElement): boolean {
+      if (target.nodeName === 'body') return false
       const isSvg = target.nodeName === 'svg'
-      return isSvg
+      const isLayerAction = isSvg
         ? (target as SVGElement).classList.contains('layer-action')
         : (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
+      return isLayerAction ? true : (target.parentElement ? this.checkLayerAction(target.parentElement) : false)
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    middlewareCondition(target: HTMLElement | SVGElement): boolean {
+      return this.checkLayerAction(target)
     },
   },
 })

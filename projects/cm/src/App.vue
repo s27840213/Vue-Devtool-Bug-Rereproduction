@@ -108,7 +108,7 @@ import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-import VConsole from 'vconsole'
+// import VConsole from 'vconsole'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -124,6 +124,7 @@ import useStateInfo from './composable/useStateInfo'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
@@ -147,10 +148,6 @@ const globalStore = useGlobalStore()
 const { showSpinner, spinnerText } = storeToRefs(globalStore)
 const canvasStore = useCanvasStore()
 const { isAutoFilling } = storeToRefs(canvasStore)
-// #endregion
-
-// #region function panel
-const layerIndex = computed(() => layerUtils.layerIndex)
 // #endregion
 
 // #region bottom panel warning modal
@@ -194,10 +191,11 @@ const closeModal = () => {
 // #region mobile panel
 const store = useStore()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
-const currColorEvent = ref('')
 const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+const layerIndex = computed(() => layerUtils.layerIndex)
+const selectedLayerNum = computed(() => store.getters.getCurrSelectedInfo.layers.length)
 
 const currPage = computed(() => {
   return pageUtils.getPage(pageUtils.currFocusPageIndex)
@@ -212,17 +210,19 @@ const switchTab = (panelType: string, props?: IFooterTabProps) => {
     currActivePanel.value === panelType &&
     panelType === 'color' &&
     props?.currColorEvent &&
-    currColorEvent.value !== props.currColorEvent
+    colorUtils.currEvent !== props.currColorEvent
   ) {
-    currColorEvent.value = props.currColorEvent
+    colorUtils.setCurrEvent(props.currColorEvent as string)
     // Close panel if re-click
   } else if (currActivePanel.value === panelType || panelType === 'none') {
     editorUtils.setShowMobilePanel(false)
-    editorUtils.setInMultiSelectionMode(false)
+    if (panelType === 'none') {
+      editorUtils.setInMultiSelectionMode(false)
+    }
   } else {
     editorUtils.setCurrActivePanel(panelType)
     if (panelType === 'color' && props?.currColorEvent) {
-      currColorEvent.value = props.currColorEvent
+      colorUtils.setCurrEvent(props.currColorEvent as string)
     }
   }
 }
@@ -237,6 +237,14 @@ watch(
     }
   },
 )
+
+watch(selectedLayerNum, (newVal) => {
+  if (newVal === 0) {
+    editorUtils.setCurrActivePanel('none')
+    editorUtils.setInMultiSelectionMode(false)
+    editorUtils.setShowMobilePanel(false)
+  }
+})
 
 const afterEnter = () => {
   if (layerIndex.value !== -1) {
@@ -257,16 +265,16 @@ onBeforeUnmount(() => {
 })
 // #endregion
 
-const vConsole = new VConsole({ theme: 'dark' })
-vConsole.setSwitchPosition(25, 80)
+// const vConsole = new VConsole({ theme: 'dark' })
+// vConsole.setSwitchPosition(25, 80)
 
-watch(isDuringCopy, (newVal) => {
-  if (newVal) {
-    vConsole.hideSwitch()
-  } else {
-    vConsole.showSwitch()
-  }
-})
+// watch(isDuringCopy, (newVal) => {
+//   if (newVal) {
+//     vConsole.hideSwitch()
+//   } else {
+//     vConsole.showSwitch()
+//   }
+// })
 
 // #region action sheet
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()

@@ -98,7 +98,8 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
       remainingHeightPercentage,
       xShift: bound.left * imgScaleRatio, // The x-coordinate shift applied during trimming.
       yShift: bound.top * imgScaleRatio, // The y-coordinate shift applied during trimming.
-      cropJSON
+      cropJSON,
+      bound
     }
   }
 
