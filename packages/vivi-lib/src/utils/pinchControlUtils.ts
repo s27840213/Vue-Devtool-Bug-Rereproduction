@@ -152,7 +152,7 @@ export default class PinchControlUtils {
       y: touches[1].clientY - touches[0].clientY
     }
     const AdotB = lineA.x * lineB.x + lineA.y * lineB.y
-    let _angle = Math.acos(AdotB / (Math.sqrt(lineA.x ** 2 + lineA.y ** 2) * Math.sqrt(lineB.x ** 2 + lineB.y ** 2)))
+    let _angle = Math.acos(Math.min(AdotB / (Math.sqrt(lineA.x ** 2 + lineA.y ** 2) * Math.sqrt(lineB.x ** 2 + lineB.y ** 2)), 1))
     const AcrossB = lineA.x * lineB.y - lineA.y * lineB.x
     if (AcrossB < 0) {
       _angle *= -1
