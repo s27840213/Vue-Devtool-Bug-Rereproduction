@@ -1,5 +1,6 @@
 <script lang="ts">
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
@@ -48,6 +49,12 @@ const component = defineComponent({
     PanelObjectAdjust,
     PanelRemoveBg,
     Tabs,
+  },
+  setup() {
+    const { isBiColorEditor } = useBiColorEditor()
+    return {
+      isBiColorEditor,
+    }
   },
   data() {
     return {
@@ -193,6 +200,11 @@ const component = defineComponent({
         case 'color': {
           return {
             panelHistory: this.panelHistory,
+          }
+        }
+        case 'adjust': { 
+          return {
+            isBiColorEditor: this.isBiColorEditor,
           }
         }
         default: {
