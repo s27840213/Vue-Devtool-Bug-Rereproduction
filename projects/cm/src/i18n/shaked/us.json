@@ -475,5 +475,8 @@
   "CM0083": "Pre-process image",
   "CM0084": "Copy edits",
   "CM0085": "Mask is empty",
-  "CM0086": "Generating"
+  "CM0086": "Generating",
+  "CM0087": "Image Generation Failed",
+  "CM0088": "Sorry, we could not generate the image this time. Please try again.",
+  "CM0089": "for Some Image"
 }

@@ -33,27 +33,27 @@ import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const {
-  setIsGenerating,
-  setGenResultIndex,
-  unshiftGenResults,
-  removeGenResult,
-  updateGenResult,
-  changeEditorState,
-} = editorStore
-const { isGenerating, inGenResultState, generatedResultsNum } = storeToRefs(editorStore)
-const promptText = ref('')
-const promptLen = computed(() => promptText.value.length)
+const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt } = editorStore
+const { isGenerating, currPrompt } = storeToRefs(editorStore)
+const promptText = computed({
+  // getter
+  get() {
+    return currPrompt.value
+  },
+  set(newValue) {
+    setCurrPrompt(newValue)
+  },
+})
+
+const promptLen = computed(() => currPrompt.value.length)
 const isDuringTutorial = tutorialUtils.isDuringTutorial
-const { genImage } = useGenImageUtils()
+const { genImageFlow } = useGenImageUtils()
 const { checkCanvasIsEmpty } = useCanvasUtils()
 const { t } = useI18n()
 // #endregion
@@ -81,43 +81,13 @@ const handleGenerate = async () => {
     setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
     setIsGenerating(true)
-    const genNum = 2
-    const ids: string[] = []
-    for (let i = 0; i < genNum; i++) {
-      ids.push(generalUtils.generateRandomString(4))
-      unshiftGenResults('', ids[i])
-    }
-    setGenResultIndex(-1)
-    try {
-      await genImage(promptText.value, false, genNum, {
-        onApiResponded: () => {
-          changeEditorState('next')
-          setIsGenerating(false)
-          setShowSpinner(false)
-        },
-        onSuccess: (index, imgSrc) => {
-          updateGenResult(ids[index], { url: imgSrc, updateIndex: true })
-        },
-        onError: (index, url, reason) => {
-          logUtils.setLogAndConsoleLog(`${reason} for ${ids[index]}: ${url}`)
-          notify({
-            group: 'error',
-            text: `Generate Failed For Some Image`,
-          })
-          removeGenResult(ids[index])
-          if (generatedResultsNum.value === 0 && inGenResultState.value) {
-            changeEditorState('prev')
-          }
-        },
-      })
-      console.log('all images processed')
-    } catch (error) {
-      logUtils.setLogForError(error as Error)
-      notify({
-        group: 'error',
-        text: `Generate Failed`,
-      })
-    }
+    await genImageFlow(promptText.value, false, 2, {
+      onApiResponded: () => {
+        changeEditorState('next')
+        setIsGenerating(false)
+        setShowSpinner(false)
+      },
+    })
   }
 }
 const clearPromt = () => {

@@ -33,6 +33,7 @@ interface IEditorStore {
   currStepTypeIndex: number
   initImgSrc: string
   useTmpSteps: boolean
+  currPrompt: string
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -50,6 +51,7 @@ export const useEditorStore = defineStore('editor', {
     currStepTypeIndex: -1,
     initImgSrc: '',
     useTmpSteps: false,
+    currPrompt: '',
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -201,6 +203,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setInitImgSrc(src: string) {
       this.initImgSrc = src
+    },
+    setCurrPrompt(prompt: string) {
+      this.currPrompt = prompt
     },
     keepEditingInit() {
       this.changeEditorState('prev')

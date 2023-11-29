@@ -45,10 +45,11 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
             //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
     div(v-if="hasBottomTitle" class="footer-tabs-row flex items-center justify-between")
       nubtn(
+        class="layer-action"
         theme="secondary"
         @click="handleBottomCancel") {{ $t('NN0203') }}
       div(class="typo-h6 text-app-text-secondary") {{ bottomTitle }}
-      nubtn(@click="handleBottomApply") {{ $t('CM0061') }}
+      nubtn(class="layer-action" @click="handleBottomApply") {{ $t('CM0061') }}
 //- className cm-footer-tabs is for v-click-outside middleware
 </template>
 
@@ -113,6 +114,24 @@ export default defineComponent({
       controllerHidden: 'webView/getControllerHidden',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
     }),
+    hideTabs(): boolean {
+      return this.hideTabsPanels.includes(this.currActivePanel)
+    },
+    hasBottomTitle(): boolean {
+      return this.bottomTitlePanels.includes(this.currActivePanel) || this.inMultiSelectionMode
+    },
+    bottomTitle(): string {
+      switch (this.currActivePanel) {
+        case 'crop-flip':
+          return this.$t('NN0036')
+        case 'adjust':
+          return this.$t('NN0042')
+      }
+      if (this.inMultiSelectionMode) {
+        return this.$t('NN0807')
+      }
+      return ''
+    },
     layerNum(): number {
       return this.currPage.layers.length
     },
@@ -372,8 +391,8 @@ export default defineComponent({
         {
           icon: 'multiple-select',
           text: `${this.$t('NN0807')}`,
-          panelType: 'multiple-select',
           disabled: this.layerNum === 1,
+          hidden: this.inMultiSelectionMode,
         },
         { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
@@ -388,7 +407,7 @@ export default defineComponent({
       return [
         { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
         this.groupTab,
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, hidden: this.inMultiSelectionMode },
         { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         {
           icon: 'layers-alt',
@@ -568,21 +587,6 @@ export default defineComponent({
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
     },
-    hideTabs(): boolean {
-      return this.hideTabsPanels.includes(this.currActivePanel)
-    },
-    hasBottomTitle(): boolean {
-      return this.bottomTitlePanels.includes(this.currActivePanel)
-    },
-    bottomTitle(): string {
-      switch (this.currActivePanel) {
-        case 'crop-flip':
-          return this.$t('NN0036')
-        case 'adjust':
-          return this.$t('NN0042')
-      }
-      return ''
-    },
   },
   watch: {
     hasBottomTitle(newVal) {
@@ -611,9 +615,9 @@ export default defineComponent({
     handleTabAction(tab: IFooterTab) {
       // if (!paymentUtils.checkProApp({ plan: tab.forPro ? 1 : 0 }, undefined, tab.plan)) return
       if (!paymentUtils.checkProApp({ plan: 0 }, undefined, tab.plan)) return // cm currently disables all pro-items
-      if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
-        editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
-      }
+      // if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
+      //   editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      // }
       // If current state is in cropping, the layerIndex sould be stored
       // bcz after we disable the cropping, the current active index would be lost
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils
@@ -722,7 +726,7 @@ export default defineComponent({
         case 'cm_group':
         case 'cm_ungroup': {
           this.disableTabScroll = true
-          mappingUtils.mappingIconAction(tab.icon)
+          mappingUtils.mappingIconAction(tab.icon.replace('cm_', ''))
           break
         }
         case 'multiple-select': {
@@ -838,6 +842,9 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'crop-flip':
           this.setImgConfig('reset')
+      }
+      if (this.inMultiSelectionMode) {
+        editorUtils.setInMultiSelectionMode(false)
       }
       editorUtils.setShowMobilePanel(false)
     },
