@@ -1007,7 +1007,6 @@ class TextBg {
                 : require(`@img/text-effect/LetterBG/${p.href}.svg`),
               width: p.height * scale,
               height: p.height * scale,
-              ...!withShape && { x, y },
             },
             style: {
               color: p.color,
@@ -1015,8 +1014,9 @@ class TextBg {
                 transform: `translate(${x}px, ${y}px) ` + textShapeStyle[p.i] + offset,
                 // For rotate svg component against its center.
                 transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
-              } : needRotate ? { transform: transform + offset } // If needRotate cancel xy exchange and add transform on it.
-                : { transform: offset },
+              } : { // If needRotate cancel xy exchange and add transform on it.
+                transform: `translate(${x}px, ${y}px) ` + (needRotate ? transform : '') + offset
+              },
             }
           }
         })

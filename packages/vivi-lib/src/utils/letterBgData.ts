@@ -634,16 +634,16 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1010
       },
       'stretch-dog': {
-        lineHeight: 1.96, fontSpacing: 350,
-      },
-      'stretch-rabbit': {
         lineHeight: 1.96, fontSpacing: 280,
       },
+      'stretch-rabbit': {
+        lineHeight: 1.96, fontSpacing: 200,
+      },
       'stretch-cat': {
-        lineHeight: 1.96, fontSpacing: 270,
+        lineHeight: 1.96, fontSpacing: 200,
       },
       'stretch-dragon': {
-        lineHeight: 1.96, fontSpacing: 190,
+        lineHeight: 1.96, fontSpacing: 160,
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
