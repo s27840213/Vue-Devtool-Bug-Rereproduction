@@ -108,6 +108,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   CALLBACK_MAPS = {}
   everEntersDebugMode = false
+  appLoadedSent = false
   tutorialFlags = {} as { [key: string]: boolean }
 
   get inBrowserMode() {
@@ -142,6 +143,13 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   addDesignDisabled() {
     return this.everEntersDebugMode || window.location.hostname !== 'cm.vivipic.com'
+  }
+
+  sendAppLoaded() {
+    if (!this.appLoadedSent) {
+      this.sendToIOS('REQUEST', this.makeAPIRequest('APP_LOADED', {}), true)
+      this.appLoadedSent = true
+    }
   }
 
   async getUserInfo(): Promise<IUserInfo> {
