@@ -1,6 +1,5 @@
 import '@/_require' // Must be import first.
 import '@/assets/css/main.css'
-import Notifications from '@kyvg/vue3-notification'
 import { initApp } from '@nu/vivi-lib/main'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
@@ -29,5 +28,4 @@ app.use(createPinia())
 app.use(vuex)
 app.use(router)
 app.use(i18n)
-app.use(Notifications)
 app.mount('#app')

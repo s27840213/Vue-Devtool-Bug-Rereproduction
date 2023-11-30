@@ -156,7 +156,7 @@ class TiptapUtils {
         // If p is empty, no span exist, so need to store span style in p.spanStyle
         if (p.spanStyle) {
           attrs.spanStyle = true
-          const sStyles = this.generateSpanStyle(p.spanStyle)
+          const sStyles = this.generateStyleFromStr(p.spanStyle, true)
           Object.assign(attrs, this.extractSpanStyleForParagraph(sStyles))
         }
         pObj.attrs = attrs
@@ -200,23 +200,29 @@ class TiptapUtils {
     }
   }
 
+  generateStyleFromStr(styleStr: string, isSpan: true): ISpanStyle
+  generateStyleFromStr(styleStr: string, isSpan: false): IParagraphStyle
+  generateStyleFromStr(styleStr: string, isSpan: boolean): ISpanStyle | IParagraphStyle {
+    const cssStyle = this.str2css(styleStr)
+    const fontProps = this.extractFontProps(styleStr)
+    const res = {
+      font: cssStyle.fontFamily.split(',')[0],
+      weight: cssStyle.getPropertyValue('-webkit-text-stroke-width').includes('+') ? 'bold' : 'normal',
+      size: Math.round(parseFloat(cssStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
+      decoration: cssStyle.textDecorationLine ? cssStyle.textDecorationLine : cssStyle.getPropertyValue('-webkit-text-decoration-line'),
+      style: cssStyle.fontStyle,
+      color: checkAndConvertToHex(cssStyle.color),
+      ...(cssStyle.lineHeight && { lineHeight: parseFloat(cssStyle.lineHeight.match(/[+-]?\d+(\.\d+)?/)![0]) }),
+      ...(cssStyle.letterSpacing && { fontSpacing: parseFloat(cssStyle.letterSpacing.match(/[+-]?\d+(\.\d+)?/)![0]) }),
+      ...(cssStyle.textAlign && { align: cssStyle.textAlign }),
+      ...fontProps
+    }
+    return isSpan ? this.makeSpanStyle(res) : this.makeParagraphStyle(res)
+  }
+
   makeParagraphStyle(attributes: any): IParagraphStyle {
     const { font, lineHeight, fontSpacing, size, align, type, userId, assetId } = attributes
     return { font, lineHeight, fontSpacing, size, align, type, userId, assetId }
-  }
-
-  generateSpanStyle(spanStyleStr: string): ISpanStyle {
-    const spanStyle = this.str2css(spanStyleStr)
-    const fontProps = this.extractFontProps(spanStyleStr)
-    return {
-      font: spanStyle.fontFamily.split(',')[0],
-      weight: spanStyle.getPropertyValue('-webkit-text-stroke-width').includes('+') ? 'bold' : 'normal',
-      size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
-      decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
-      style: spanStyle.fontStyle,
-      color: checkAndConvertToHex(spanStyle.color),
-      ...fontProps
-    } as ISpanStyle
   }
 
   makeSpanStyle(attributes: any): ISpanStyle {
@@ -291,7 +297,8 @@ class TiptapUtils {
       })
     }
 
-    const defaultStyle = this.editor.storage.nuTextStyle.spanStyle as string
+    const defaultSpanStyle = this.editor.storage.nuTextStyle.spanStyle as string
+    const defaultParagraphStyle = this.editor.storage.nuTextStyle.paragraphStyle as string
     const result: IParagraph[] = []
     for (const paragraph of tiptapJSON.content) {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
@@ -320,7 +327,7 @@ class TiptapUtils {
           if (paragraph.attrs.spanStyle) {
             sStyles = this.makeSpanStyle(paragraph.attrs)
           } else {
-            sStyles = this.generateSpanStyle(defaultStyle)
+            sStyles = this.generateStyleFromStr(defaultSpanStyle, true)
           }
           if (sStyles.size > largestSize) largestSize = sStyles.size
           if (sStyles.pre && !span.text.match(/^ +$/)) {
@@ -331,6 +338,12 @@ class TiptapUtils {
         }
       }
       if (spans.length === 0) {
+        if (pStyles.font === 'undefined') {
+          // <p>s of pasted text may have 'undefined' font
+          // If so, use the font of the first <span>
+          Object.assign(pStyles, this.generateStyleFromStr(defaultParagraphStyle, false))
+          isSetContentRequired = true
+        }
         if (paragraph.attrs.spanStyle) {
           const sStyles = this.makeSpanStyle(paragraph.attrs)
           spans.push({ text: '', styles: sStyles })
@@ -343,7 +356,7 @@ class TiptapUtils {
           result.push({ spans, styles: pStyles, spanStyle: this.textStyles(sStyles) })
         } else {
           isSetContentRequired = true
-          const sStyles = this.generateSpanStyle(defaultStyle)
+          const sStyles = this.generateStyleFromStr(defaultSpanStyle, true)
           spans.push({ text: '', styles: sStyles })
           pStyles.size = sStyles.size
           pStyles.font = sStyles.font
@@ -351,7 +364,7 @@ class TiptapUtils {
           pStyles.userId = sStyles.userId
           pStyles.assetId = sStyles.assetId
           pStyles.fontUrl = sStyles.fontUrl
-          result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
+          result.push({ spans, styles: pStyles, spanStyle: defaultSpanStyle })
         }
       } else {
         if (pStyles.size !== largestSize) {
@@ -362,6 +375,7 @@ class TiptapUtils {
         if (pStyles.font === 'undefined') {
           // <p>s of pasted text may have 'undefined' font
           // If so, use the font of the first <span>
+          Object.assign(pStyles, this.generateStyleFromStr(defaultParagraphStyle, false))
           const sStyles = spans[0].styles
           pStyles.font = sStyles.font
           pStyles.type = sStyles.type
@@ -435,7 +449,7 @@ class TiptapUtils {
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
-            const attr = this.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
+            const attr = this.generateStyleFromStr(editor.storage.nuTextStyle.spanStyle, true)
             attr[key] = value
             Object.assign(attr, otherUpdates)
             editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
@@ -501,7 +515,7 @@ class TiptapUtils {
         const ranges = editor.state.selection.ranges
         if (ranges.length > 0) {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
-            const attr = this.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
+            const attr = this.generateStyleFromStr(editor.storage.nuTextStyle.spanStyle, true)
             editor.chain().setMark('textStyle', attr).run()
             if (setFocus) {
               setTimeout(() => {

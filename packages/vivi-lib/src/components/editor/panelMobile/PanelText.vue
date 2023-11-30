@@ -239,7 +239,10 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getRecAndCate({ reset, key: this.$isStk ? 'textStock' : undefined })
+        await this.getRecAndCate({
+          reset,
+          key: this.$isStk || this.$isCm ? 'textStock' : undefined
+        })
       })
     this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
   },

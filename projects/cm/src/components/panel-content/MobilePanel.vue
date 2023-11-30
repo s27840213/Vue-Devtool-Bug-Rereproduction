@@ -72,6 +72,7 @@ const component = defineComponent({
         'multiple-select',
         'remove-bg',
         'nudge',
+        'adjust',
       ],
       // eslint-disable-next-line vue/no-unused-properties
       hideDynamicCompPanels: ['crop-flip', 'copy-style', 'multiple-select'],
@@ -119,17 +120,8 @@ const component = defineComponent({
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
-        case 'crop-flip': {
-          return `${this.$t('NN0496')}`
-        }
         case 'copy-style': {
           return `${this.$t('NN0809')}`
-        }
-        case 'multiple-select': {
-          return `${this.$t('NN0657')}`
-        }
-        case 'none': {
-          return ''
         }
         default: {
           return ''
@@ -137,8 +129,12 @@ const component = defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
+    hideTopSection(): boolean {
+      return this.hideDragBar && !this.showLeftBtn && !this.showRightBtn && this.panelTitle === ''
+    },
+    // eslint-disable-next-line vue/no-unused-properties
     showRightBtn(): boolean {
-      return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
+      return ['fonts'].includes(this.currActivePanel)
     },
     // eslint-disable-next-line vue/no-unused-properties
     showLeftBtn(): boolean {
@@ -307,15 +303,12 @@ const component = defineComponent({
             formatUtils.clearCopiedFormat()
             break
           }
-
-          case 'multiple-select': {
-            if (this.inMultiSelectionMode) {
-              editorUtils.setInMultiSelectionMode(false)
-            }
-            break
-          }
         }
-        this.closeMobilePanel()
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
+        } else {
+          this.closeMobilePanel()
+        }
       }
     },
   },
@@ -345,12 +338,17 @@ const component = defineComponent({
     _panelParentHeight() {
       return document.querySelector('#app')?.clientHeight ?? 0
     },
-    // eslint-disable-next-line vue/no-unused-properties
-    middlewareCondition(target: HTMLElement | SVGElement): boolean {
+    checkLayerAction(target: HTMLElement | SVGElement): boolean {
+      if (target.nodeName === 'body') return false
       const isSvg = target.nodeName === 'svg'
-      return isSvg
+      const isLayerAction = isSvg
         ? (target as SVGElement).classList.contains('layer-action')
         : (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
+      return isLayerAction ? true : (target.parentElement ? this.checkLayerAction(target.parentElement) : false)
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    middlewareCondition(target: HTMLElement | SVGElement): boolean {
+      return this.checkLayerAction(target)
     },
   },
 })

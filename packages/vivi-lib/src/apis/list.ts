@@ -6,6 +6,8 @@ import localeUtils from '@/utils/localeUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import authToken from './auth-token'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -157,23 +159,25 @@ class ListService {
         locale: localeUtils.currLocale(),
         type: 'color'
       })
-    } else if (generalUtils.isStk) {
-      stkWVUtils.listAsset('color')
+    } else if (generalUtils.isStk || generalUtils.isCm) {
+      getAutoWVUtils().listAsset('color')
     }
   }
 
   addRecentlyUsedColor(color: string) {
-    generalUtils.isStk && stkWVUtils.addAsset('color', { id: color })
+    (generalUtils.isStk || generalUtils.isCm) && getAutoWVUtils().addAsset('color', { id: color })
     if (generalUtils.isStk && stkWVUtils.addDesignDisabled()) return
+    if (generalUtils.isCm && cmWVUtils.addDesignDisabled()) return
     axios.request<IListServiceResponse>({
       url: '/add-design',
       method: 'POST',
       data: {
-        token: generalUtils.isPic ? (authToken().token || '') : '1',
+        token: (generalUtils.isPic || generalUtils.isCm) ? (authToken().token || '') : '1',
         type: 'color',
         design_id: color,
         locale: localeUtils.currLocale(),
-        ...generalUtils.isStk && { host_id: uploadUtils.hostId },
+        app: generalUtils.isPic ? '0' : (generalUtils.isStk ? '1' : '2'), // 2 for charmix
+        ...(generalUtils.isStk || generalUtils.isCm) && { host_id: uploadUtils.hostId },
       }
     })
   }

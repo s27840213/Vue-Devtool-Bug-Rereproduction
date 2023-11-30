@@ -26,6 +26,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           iconColor="app-btn-primary-text"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-v')")
+      template(v-else-if="currActivePanel === 'adjust'")
+        div(id='header-reset')
       template(v-else)
         svg-icon(
           iconName="cm_undo"
@@ -224,6 +226,7 @@ const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
 const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
+const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
