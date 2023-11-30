@@ -142,7 +142,7 @@ export default defineComponent({
           original: '',
           json: ''
         }
-      }, this.$isStk ? 'font' : undefined)
+      }, (this.$isStk || this.$isCm) ? 'font' : undefined)
     },
     async setEditorFont() {
       if (this.pending) return
@@ -230,7 +230,7 @@ export default defineComponent({
               original: '',
               json: ''
             }
-          }, this.$isStk ? 'font' : undefined)
+          }, (this.$isStk || this.$isCm) ? 'font' : undefined)
           // StepsUtils.record()
           if (subLayerIdx === -1) { // no sub layer is selected
             const group = layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup
@@ -298,7 +298,7 @@ export default defineComponent({
             original: '',
             json: ''
           }
-        }, this.$isStk ? 'font' : undefined)
+        }, (this.$isStk || this.$isCm) ? 'font' : undefined)
         TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')

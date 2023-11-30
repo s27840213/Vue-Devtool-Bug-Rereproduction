@@ -42,6 +42,7 @@ import textShapeUtils from './textShapeUtils'
 import textUtils from './textUtils'
 import unitUtils, { PRECISION } from './unitUtils'
 import ZindexUtils from './zindexUtils'
+import { getAutoWVUtils } from './autoWVUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -1208,7 +1209,7 @@ class AssetUtils {
         editorUtils.setCloseMobilePanelFlag(true)
         generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
       }
-      this.addAssetToRecentlyUsed(asset, generalUtils.isStk ? key : undefined)
+      this.addAssetToRecentlyUsed(asset, (generalUtils.isStk || generalUtils.isCm) ? key : undefined)
       return asset.jsonData
     } catch (error) {
       logUtils.setLogForError(error as Error)
@@ -1267,7 +1268,7 @@ class AssetUtils {
         recentlyUsed.list.unshift(item)
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
-      if (key && generalUtils.isStk) stkWVUtils.addAsset(key, item)
+      if (key) getAutoWVUtils().addAsset(key, item)
       const params = {} as { [key: string]: any }
       if (typeCategory === 'font') {
         params.is_asset = src === 'private' || src === 'admin' ? 1 : 0
