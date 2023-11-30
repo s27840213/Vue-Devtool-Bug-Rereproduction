@@ -618,18 +618,9 @@ export default defineComponent({
         this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.config as IImage)
         this.errorSrcIdentifier.retry = 1
       }
-      const { srcObj, styles: { width, height } } = this.config
+      const { srcObj } = this.config
       this.isOnError = true
       let updater
-      if (imageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          srcObj: {
-            ...srcObj,
-            maxSize: 'larg'
-          }
-        })
-        return
-      }
       switch (srcObj.type) {
         case 'private':
           updater = async () => await this.updateImages({ assetSet: new Set<string>([srcObj.assetId]) })
