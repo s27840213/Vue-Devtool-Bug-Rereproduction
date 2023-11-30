@@ -177,7 +177,7 @@ class ListService {
         design_id: color,
         locale: localeUtils.currLocale(),
         app: generalUtils.isPic ? '0' : (generalUtils.isStk ? '1' : '2'), // 2 for charmix
-        ...generalUtils.isStk && { host_id: uploadUtils.hostId },
+        ...(generalUtils.isStk || generalUtils.isCm) && { host_id: uploadUtils.hostId },
       }
     })
   }
