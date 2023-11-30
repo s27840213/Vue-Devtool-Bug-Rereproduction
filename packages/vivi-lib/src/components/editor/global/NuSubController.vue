@@ -46,9 +46,7 @@ import { isTextFill } from '@/interfaces/format'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
 import cssConverter from '@/utils/cssConverter'
-import eventUtils from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -62,7 +60,6 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -367,7 +364,7 @@ export default defineComponent({
     },
     outlineStyles() {
       const outlineColor = this.config.locked ? '#EB5757' : generalUtils.getOutlineColor()
-      const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath ?? '')
       if (layerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 
       if (this.isControllerShown) {
