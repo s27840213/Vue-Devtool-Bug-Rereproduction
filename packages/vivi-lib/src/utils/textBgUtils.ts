@@ -1015,7 +1015,7 @@ class TextBg {
                 // For rotate svg component against its center.
                 transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
               } : { // If needRotate cancel xy exchange and add transform on it.
-                transform: `translate(${x}px, ${y}px) ` + (needRotate ? transform : '') + offset
+                transform: (needRotate ? transform : '') + `translate(${x}px, ${y}px) ` +  offset
               },
             }
           }
