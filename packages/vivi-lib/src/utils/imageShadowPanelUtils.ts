@@ -150,7 +150,6 @@ export default new class ImageShadowPanelUtils {
     logUtils.setLog('phase: start upload shadow')
     setMark('upload', 0)
     if (layerData) {
-      // imageShadowUtils.clearHandler()
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
@@ -187,8 +186,8 @@ export default new class ImageShadowPanelUtils {
         this.setIsUploading(pageId, config.id as string, '', true)
       }
       /** uploadAssetId used to identify the upload-shadow-img in undo/redo step */
-      const uploadAssetId = generalUtils.generateRandomString(6)
-      this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
+      const uploadAssetId = config.styles.shadow.srcObj.type === 'upload' ? config.styles.shadow.srcObj.assetId as string : generalUtils.generateRandomString(6)
+      this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId || generalUtils.generateRandomString(6))
       const assetId = generalUtils.generateAssetId()
       stepsUtils.record()
       if (generalUtils.isPic) {
@@ -280,7 +279,6 @@ export default new class ImageShadowPanelUtils {
         }
         case ShadowEffectType.imageMatched:
           await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, params)
-
           break
         case ShadowEffectType.floating:
           await imageShadowUtils.drawFloatingShadow([updateCanvas], config, params)

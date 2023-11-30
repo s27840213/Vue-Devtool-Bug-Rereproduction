@@ -962,6 +962,14 @@ export default defineComponent({
         if (uploadData) {
           imageShadowUtils.updateShadowSrc(this.layerInfo(), uploadData.srcObj)
           imageShadowUtils.updateShadowStyles(this.layerInfo(), uploadData.styles)
+        } else {
+          const primarylayerId = layerUtils.getLayer(this.layerInfo().pageIndex, this.layerInfo().layerIndex).id
+          const layerData = {
+            primarylayerId,
+            config: this.config,
+            layerInfo: this.layerInfo
+          }
+          imageShadowPanelUtils.handleShadowUpload(layerData)
         }
       }
     },

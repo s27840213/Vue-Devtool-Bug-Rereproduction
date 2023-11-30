@@ -377,7 +377,7 @@ export default defineComponent({
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
 
       if (_config.config.locked) return
-      if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
+      // if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
 
       const  layerInfo = new Proxy({
         pageIndex: layerUtils.pageIndex,
