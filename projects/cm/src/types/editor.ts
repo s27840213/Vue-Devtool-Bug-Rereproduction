@@ -3,5 +3,5 @@ export type EditorType = 'powerful-fill'
 export type PowerfulfillStates = 'aspectRatio' | 'editing' | 'genResult' | 'saving'
 export type EditorStates = Array<PowerfulfillStates>
 //
-export type EditorFeature = 'none' | 'brush' | 'selection' | 'add'
+export type EditorFeature = 'none' | 'cm_brush' | 'selection' | 'add'
 export type PowerfulFillCanvasMode = 'brush' | 'erase' | 'move'

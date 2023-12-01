@@ -1092,6 +1092,11 @@ class TextBg {
       const oldTextBg = layer.styles.textBg
       const newTextBg = {} as ITextBg
 
+      // Send splitSpan to toIParagraph.
+      tiptapUtils.agent(editor => {
+        editor.storage.nuTextStyle.splitSpan = textBgUtils.isSplitSpan(layer.styles)
+      })
+
       // Set lineHeight and fontSpacing by call tiptap
       for (const [key, val] of Object.entries(attrs ?? {})) {
         if (['lineHeight', 'fontSpacing'].includes(key)) {

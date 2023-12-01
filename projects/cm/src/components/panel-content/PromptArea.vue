@@ -24,30 +24,41 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
-import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
 
+// #region states, composables, and vars
 const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, changeEditorState } = editorStore
-const { isGenerating } = storeToRefs(editorStore)
-const promptText = ref('')
-const promptLen = computed(() => promptText.value.length)
-const isDuringTutorial = tutorialUtils.isDuringTutorial
-const { genImage } = useGenImageUtils()
+const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt } = editorStore
+const { isGenerating, currPrompt } = storeToRefs(editorStore)
+const promptText = computed({
+  // getter
+  get() {
+    return currPrompt.value
+  },
+  set(newValue) {
+    setCurrPrompt(newValue)
+  },
+})
 
-const handleGenerate = () => {
+const promptLen = computed(() => currPrompt.value.length)
+const isDuringTutorial = tutorialUtils.isDuringTutorial
+const { genImageFlow } = useGenImageUtils()
+const { checkCanvasIsEmpty } = useCanvasUtils()
+const { t } = useI18n()
+// #endregion
+
+const handleGenerate = async () => {
   if (vuex.state.user.token === '' && !debugMode) {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
@@ -61,40 +72,22 @@ const handleGenerate = () => {
       generalUtils.generateRandomString(4),
     )
     changeEditorState('next')
+  } else if (checkCanvasIsEmpty()) {
+    notify({
+      group: 'error',
+      text: `${t('CM0085')}`,
+    })
   } else {
-    setSpinnerText('Generating...')
+    setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
     setIsGenerating(true)
-    genImage(promptText.value)
-      .then(async (url) => {
-        const data = await cmWVUtils.saveAssetFromUrl('png', url)
-        const { flag, fileId } = data
-        if (flag === '0' && fileId) {
-          const srcObj: SrcObj = {
-            type: 'ios',
-            assetId: `cameraroll/${fileId}`,
-            userId: '',
-          }
-
-          const imgSrc = imageUtils.getSrc(srcObj)
-          console.log(imgSrc)
-          unshiftGenResults(imgSrc, generalUtils.generateRandomString(4))
-          changeEditorState('next')
-          setIsGenerating(false)
-          setShowSpinner(false)
-        } else {
-          throw new Error('saveAssetFromUrl failed')
-        }
-      })
-      .catch((error) => {
-        logUtils.setLogForError(error as Error)
+    await genImageFlow(promptText.value, false, 2, {
+      onApiResponded: () => {
+        changeEditorState('next')
         setIsGenerating(false)
         setShowSpinner(false)
-        notify({
-          group: 'error',
-          text: `Generate Failed`,
-        })
-      })
+      },
+    })
   }
 }
 const clearPromt = () => {

@@ -135,7 +135,7 @@ const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
     case 'selection':
-    case 'brush':
+    case 'cm_brush':
     case 'add': {
       if (currActiveFeature.value === tab.icon) {
         setCurrActiveFeature('none')

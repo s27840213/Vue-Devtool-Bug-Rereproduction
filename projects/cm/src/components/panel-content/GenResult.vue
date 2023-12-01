@@ -55,44 +55,20 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
-import { notify } from '@kyvg/vue3-notification'
-import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const editorStore = useEditorStore()
-const { setGenResultIndex, unshiftGenResults, updateGenResult, keepEditingInit } = editorStore
-const { generatedResults, currGenResultIndex, initImgSrc } = storeToRefs(editorStore)
+const {
+  setGenResultIndex,
+  keepEditingInit,
+} = editorStore
+const { generatedResults, currGenResultIndex, initImgSrc } =
+  storeToRefs(editorStore)
 
-const { genImage } = useGenImageUtils()
+const { genImageFlow } = useGenImageUtils()
 
-const showMoreRes = () => {
-  const id = generalUtils.generateRandomString(4)
-  unshiftGenResults('', id)
-  genImage('', true)
-    .then(async (url) => {
-      const data = await cmWVUtils.saveAssetFromUrl('png', url)
-      const { flag, fileId } = data
-      if (flag === '0' && fileId) {
-        const srcObj: SrcObj = {
-          type: 'ios',
-          assetId: `cameraroll/${fileId}`,
-          userId: '',
-        }
-
-        const imgSrc = imageUtils.getSrc(srcObj)
-        updateGenResult(id, { url: imgSrc })
-      }
-    })
-    .catch((error) => {
-      logUtils.setLogForError(error as Error)
-      notify({
-        group: 'error',
-        text: `Generate Failed`,
-      })
-    })
+const showMoreRes = async () => {
+  await genImageFlow('', true, 2)
 }
 
 const appendSizeQuery = (url: string, size = 200) => {

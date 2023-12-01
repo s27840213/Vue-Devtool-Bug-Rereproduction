@@ -87,7 +87,7 @@ class UploadUtils {
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
-  get hostId(): string { return store.getters['vivisticker/getUserInfo'].hostId }
+  get hostId(): string { return generalUtils.isStk ? store.getters['vivisticker/getUserInfo'].hostId : store.getters['cmWV/getUserInfo'].hostId }
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }

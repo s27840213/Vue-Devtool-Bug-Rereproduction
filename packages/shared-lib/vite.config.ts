@@ -4,6 +4,10 @@ import * as path from 'path'
 import { defineConfig } from 'vite'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
 
+function resolve(...dir: string[]) {
+  return path.join(__dirname, ...dir)
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -45,7 +49,15 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': resolve('src'),
+      '@nu/vivi-lib': resolve('../../packages/vivi-lib/src'),
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: '@use "@nu/vivi-lib/assets/scss/utils" as *;',
+      },
     },
   },
 })

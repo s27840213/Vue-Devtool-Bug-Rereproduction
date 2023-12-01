@@ -169,7 +169,7 @@ class TextPropUtils {
     paragraphs.forEach((p) => {
       pHandler && pHandler(p)
       if (isVertical && p.spanStyle) {
-        const pStyle = tiptapUtils.generateSpanStyle(p.spanStyle as string)
+        const pStyle = tiptapUtils.generateStyleFromStr(p.spanStyle as string, true)
         if (pStyle.style === 'italic') {
           pStyle.style = 'normal'
         }
@@ -381,7 +381,7 @@ class TextPropUtils {
       const paragraph = config.paragraphs[pIndex]
       Object.assign(paragraph.styles, prop)
       if (paragraph.spanStyle) {
-        const spanStyle = tiptapUtils.generateSpanStyle(paragraph.spanStyle as string)
+        const spanStyle = tiptapUtils.generateStyleFromStr(paragraph.spanStyle as string, true)
         Object.assign(spanStyle, prop)
         paragraph.spanStyle = tiptapUtils.textStyles(spanStyle)
       }
@@ -701,7 +701,7 @@ class TextPropUtils {
             if (editor.getAttributes('paragraph').spanStyle) {
               startStyles = tiptapUtils.makeSpanStyle(editor.getAttributes('paragraph'))
             } else {
-              startStyles = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
+              startStyles = tiptapUtils.generateStyleFromStr(editor.storage.nuTextStyle.spanStyle, true)
             }
           }
 
@@ -838,7 +838,7 @@ class TextPropUtils {
           if (layerUtils.subLayerIdx !== -1) {
             scale *= (currLayer as IGroup).layers[layerUtils.subLayerIdx].styles.scale
           }
-          const sAttrs = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
+          const sAttrs = tiptapUtils.generateStyleFromStr(editor.storage.nuTextStyle.spanStyle, true)
           sAttrs.size = modifier(sAttrs.size)
           editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
           if (generalUtils.isPic) {
@@ -1020,7 +1020,7 @@ class TextPropUtils {
     tiptapUtils.agent(editor => {
       const selection = editor.view.state.selection
       if (selection.empty) {
-        const sAttrs = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
+        const sAttrs = tiptapUtils.generateStyleFromStr(editor.storage.nuTextStyle.spanStyle, true)
         baseFontSize = sAttrs.size
       } else {
         const from = selection.$from
@@ -1093,7 +1093,7 @@ class TextPropUtils {
     }
     paragraphs.forEach(p => {
       if (p.spanStyle) {
-        const sStyles = tiptapUtils.generateSpanStyle(p.spanStyle)
+        const sStyles = tiptapUtils.generateStyleFromStr(p.spanStyle, true)
         sStyles.size = changer(sStyles.size)
         p.spanStyle = tiptapUtils.textStyles(sStyles)
       }
@@ -1360,7 +1360,7 @@ class TextPropUtils {
           if (propType.includes('paragraph')) {
             Object.assign(p.styles, prop)
             if (p.spanStyle) {
-              const spanStyle = tiptapUtils.generateSpanStyle(p.spanStyle as string)
+              const spanStyle = tiptapUtils.generateStyleFromStr(p.spanStyle as string, true)
               Object.assign(spanStyle, prop)
               p.spanStyle = tiptapUtils.textStyles(spanStyle)
             }
