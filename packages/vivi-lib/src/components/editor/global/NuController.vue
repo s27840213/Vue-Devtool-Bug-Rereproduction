@@ -35,7 +35,7 @@ div(:layer-index="`${layerIndex}`"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
         div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
+          nu-text-editor(:id="`text-${layerIndex}`"
             class="text__body"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
@@ -500,9 +500,6 @@ export default defineComponent({
     },
     needAutoRescale(): boolean {
       return this.config.inAutoRescaleMode && this.getLayerRotate() === 0 && !textShapeUtils.isCurvedText(this.config.styles.textShape)
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
     },
     tooSmall(): boolean {
       const { tooShort, tooNarrow } = this.checkLimits(this.$isTouchDevice(), !this.resizerProfile.hasHorizontal && !this.resizerProfile.hasVertical)

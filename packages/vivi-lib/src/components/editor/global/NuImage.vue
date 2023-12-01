@@ -70,6 +70,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
 
 <script lang="ts">
 import i18n from '@/i18n'
+import { SrcObj } from '@/interfaces/gallery'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -340,7 +341,7 @@ export default defineComponent({
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }
-        this.handleUploadShadowImg()
+        // this.handleUploadShadowImg()
         this.isShadowImgLoaded = false
       },
       deep: true
@@ -353,8 +354,8 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIndex: subLayerIdx } = this
           const srcObj = latest.srcObj
           const shadowImgStyles = latest.styles
-          imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-          imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+          imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj as SrcObj)
+          imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles as IImageStyle)
         }
       },
       deep: true
@@ -950,7 +951,7 @@ export default defineComponent({
       if (srcObj.type === 'upload' && srcObj.assetId) {
         const uploadData = (this.uploadShadowImgs as Array<IUploadShadowImg>)
           .find((data: IUploadShadowImg) => data.id === srcObj.assetId)
-        if (uploadData) {
+        if (uploadData && uploadData.srcObj && uploadData.styles) {
           imageShadowUtils.updateShadowSrc(this.layerInfo(), uploadData.srcObj)
           imageShadowUtils.updateShadowStyles(this.layerInfo(), uploadData.styles)
         } else {

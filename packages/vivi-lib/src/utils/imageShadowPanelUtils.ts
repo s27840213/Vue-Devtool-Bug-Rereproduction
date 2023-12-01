@@ -3,6 +3,7 @@ import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShad
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
+import { IUploadShadowImg } from '@/store/module/shadow'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
 import generalUtils from './generalUtils'
@@ -186,8 +187,12 @@ export default new class ImageShadowPanelUtils {
         this.setIsUploading(pageId, config.id as string, '', true)
       }
       /** uploadAssetId used to identify the upload-shadow-img in undo/redo step */
-      const uploadAssetId = config.styles.shadow.srcObj.type === 'upload' ? config.styles.shadow.srcObj.assetId as string : generalUtils.generateRandomString(6)
-      this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId || generalUtils.generateRandomString(6))
+      const uploadAssetId = generalUtils.generateRandomString(6)
+      this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
+      imageShadowUtils.addUploadImg({
+        id: uploadAssetId,
+        state: 'uploading'
+      })
       const assetId = generalUtils.generateAssetId()
       stepsUtils.record()
       if (generalUtils.isPic) {
@@ -380,8 +385,9 @@ export default new class ImageShadowPanelUtils {
                     const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
                     layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
                     /** update the upload img in shadow module */
-                    imageShadowUtils.addUploadImg({
+                    store.commit('shadow/UPDATE_UPLOAD_IMG', {
                       id: uploadAssetId,
+                      state: 'success',
                       owner: { pageId, layerId, subLayerId },
                       srcObj,
                       styles: shadowImgStyles
@@ -410,6 +416,17 @@ export default new class ImageShadowPanelUtils {
                 }
               })
             }).finally(() => {
+              const uploadData = (store.state.shadow.uploadShadowImgs as Array<IUploadShadowImg>)
+                .find((data: IUploadShadowImg) => data.id === uploadAssetId)
+              if (uploadData?.state !== 'success') {
+                store.commit('shadow/UPDATE_UPLOAD_IMG', {
+                  id: uploadAssetId,
+                  state: 'fail',
+                  owner: { pageId, layerId, subLayerId },
+                  srcObj,
+                  styles: shadowImgStyles
+                })
+              }
               this.resetHandleState()
               imageShadowUtils.setUploadProcess(false)
             })

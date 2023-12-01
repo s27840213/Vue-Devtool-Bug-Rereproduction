@@ -52,7 +52,10 @@ class TiptapUtils {
     this.eventHandler = undefined
   }
 
-  init(content: any, editable: boolean) {
+  init(config: IText) {
+    const editable = config.contentEditable
+    const content = this.toJSON(config.paragraphs)
+
     this.editor = new Editor({
       content: content ?? '',
       extensions: [
@@ -99,6 +102,8 @@ class TiptapUtils {
         editor.commands.selectAll()
       }
     })
+
+    this.editor.storage.nuTextStyle.splitSpan = textBgUtils.isSplitSpan(config.styles)
   }
 
   agent(callback: (editor: Editor) => any) {
@@ -278,9 +283,7 @@ class TiptapUtils {
     let isSetContentRequired = false
 
     // If fixedWidth, all span should split into one text per span
-    const splitSpan = tiptapJSON.content?.some(p => {
-      return p.content?.some(span => ![-1, undefined].includes(span.marks?.[0].attrs?.spanIndex))
-    })
+    const splitSpan = this.editor.storage.nuTextStyle.splitSpan
     if (splitSpan) {
       tiptapJSON.content.forEach(p => {
         p.content && p.content.forEach(s => {

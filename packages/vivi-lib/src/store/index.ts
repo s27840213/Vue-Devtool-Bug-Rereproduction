@@ -2,14 +2,14 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-  IFrame,
-  IGroup,
-  IImage,
-  IImageStyle,
-  IParagraph,
-  IShape,
-  IText,
-  ITmp,
+IFrame,
+IGroup,
+IImage,
+IImageStyle,
+IParagraph,
+IShape,
+IText,
+ITmp,
 } from '@/interfaces/layer'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
@@ -48,11 +48,11 @@ import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import {
-  FunctionPanelType,
-  IEditorState,
-  ISpecLayerData,
-  LayerType,
-  SidebarPanelType,
+FunctionPanelType,
+IEditorState,
+ISpecLayerData,
+LayerType,
+SidebarPanelType,
 } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -1246,7 +1246,7 @@ const mutations: MutationTree<IEditorState> = {
   ) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const groupLayer = state.pages[pageIndex].config.layers[primaryLayerIndex] as IGroup
-    if (groupLayer.type === 'group') {
+    if (['group', 'tmp'].includes(groupLayer.type)) {
       const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
       for (const clip of clipsLayer) {
         Object.assign(clip.styles, generalUtils.deepCopy(styles))
