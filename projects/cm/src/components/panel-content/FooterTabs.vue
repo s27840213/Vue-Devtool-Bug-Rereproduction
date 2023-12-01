@@ -55,7 +55,9 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
 
 <script lang="ts">
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
+import i18n from '@nu/vivi-lib/i18n'
 import type { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import type { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
 import type { IPage } from '@nu/vivi-lib/interfaces/page'
@@ -73,10 +75,10 @@ import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { CMobilePanel } from './MobilePanel.vue'
-import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 
 export default defineComponent({
   extends: FooterTabs,
@@ -151,6 +153,16 @@ export default defineComponent({
         // },
         { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...genearlTabsNoFlip,
+        {
+          icon: 'copy-edits',
+          text: `${this.$t('NN0035')}`,
+          hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
+        },
       ]
     },
     photoTabs(): Array<IFooterTab> {
@@ -183,7 +195,16 @@ export default defineComponent({
           hidden: this.isSvgImage,
         },
         ...genearlTabsNoFlip,
-        { icon: 'copy-edits', text: `${this.$t('CM0084')}`, panelType: 'copy-style' },
+        {
+          icon: 'copy-edits',
+          text: `${this.$t('NN0035')}`,
+          hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
+        },
       ]
       if (layerUtils.getCurrLayer.type === LayerType.frame) {
         tabs.unshift({
@@ -222,7 +243,16 @@ export default defineComponent({
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
-        { icon: 'copy-edits', text: `${this.$t('CM0084')}`, panelType: 'copy-style' },
+        {
+          icon: 'copy-edits',
+          text: `${this.$t('NN0035')}`,
+          hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
+        },
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
@@ -350,6 +380,16 @@ export default defineComponent({
           hidden: !showAdjust || this.isSvgImage,
         },
         ...this.genearlLayerTabs,
+        {
+          icon: 'copy-edits',
+          text: `${this.$t('NN0035')}`,
+          hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
+        },
       ]
     },
     showEmptyFrameTabs(): boolean {
@@ -489,7 +529,19 @@ export default defineComponent({
       } else if (this.showInGroupFrame) {
         return [...this.frameTabs, ...this.genearlLayerTabs]
       } else if (this.isGroupOrTmp) {
-        return [...this.genearlLayerTabs]
+        return [
+          ...this.genearlLayerTabs,
+          {
+            icon: 'copy-edits',
+            text: `${this.$t('NN0035')}`,
+            hidden: this.isCopyFormatDisabled,
+          },
+          {
+            icon: 'paste-edits',
+            text: `${this.$t('NN0919')}`,
+            hidden: this.isPasteFormatDisabled,
+          },
+        ]
       } else if (this.showFrameTabs) {
         if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
           return this.photoTabs
@@ -744,11 +796,11 @@ export default defineComponent({
           break
         }
         case 'copy-edits': {
-          if (this.hasCopiedFormat) {
-            formatUtils.clearCopiedFormat()
-          } else {
-            this.handleCopyFormat()
-          }
+          this.handleCopyFormat()
+          break
+        }
+        case 'paste-edits': {
+          formatUtils.applyFormatIfCopied(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, false)
           break
         }
         case 'cm_remove-bg': {
@@ -807,13 +859,21 @@ export default defineComponent({
         this.$emit('switchTab', tab.panelType, tab.props)
       }
 
-      // if (['copy', 'paste'].includes(tab.icon)) {
-      //   this.clickedTab = tab.icon
-      //   notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
-      //   this.clickedTabTimer = window.setTimeout(() => {
-      //     this.clickedTab = ''
-      //   }, 800)
-      // }
+      if (
+        ['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page', 'copy-edits'].includes(tab.icon)
+      ) {
+        this.clickedTab = tab.icon
+        this.clickedTabTimer = window.setTimeout(() => {
+          this.clickedTab = ''
+        }, 400)
+      }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        notify({
+          group: 'copy',
+          text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813'),
+        })
+      }
     },
     handleBottomCancel() {
       stepsUtils.goToCheckpoint()

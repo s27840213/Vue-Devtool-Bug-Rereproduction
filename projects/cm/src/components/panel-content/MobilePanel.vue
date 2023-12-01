@@ -68,16 +68,15 @@ const component = defineComponent({
         'download',
         'more',
         'object-adjust',
-        'copy-style',
         'multiple-select',
         'remove-bg',
         'nudge',
         'adjust',
       ],
       // eslint-disable-next-line vue/no-unused-properties
-      hideDynamicCompPanels: ['crop-flip', 'copy-style', 'multiple-select'],
+      hideDynamicCompPanels: ['crop-flip', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      noRowGapPanels: ['crop-flip', 'color', 'copy-style', 'multiple-select'],
+      noRowGapPanels: ['crop-flip', 'color', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['remove-bg'],
       // eslint-disable-next-line vue/no-unused-properties
@@ -120,9 +119,6 @@ const component = defineComponent({
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
-        case 'copy-style': {
-          return `${this.$t('NN0809')}`
-        }
         default: {
           return ''
         }
@@ -296,11 +292,6 @@ const component = defineComponent({
             if (this.bgRemoveMode && !this.isProcessing) {
               bgRemoveUtils.setInBgRemoveMode(false)
             }
-            break
-          }
-
-          case 'copy-style': {
-            formatUtils.clearCopiedFormat()
             break
           }
         }

@@ -33,7 +33,6 @@ import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -90,11 +89,11 @@ export default defineComponent({
         'order', 'font-size', 'font-format', 'color-picker', 
         'font-spacing', 'download', 'more', 'object-adjust',
         'vvstk-more', 'giphy-more', 'my-design-more', 'select-design',
-        'copy-style', 'multiple-select', 'remove-bg', 'nudge'],
+        'multiple-select', 'remove-bg', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
-      hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
+      hideDynamicCompPanels: ['crop', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      noRowGapPanels: ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'],
+      noRowGapPanels: ['crop', 'color', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['remove-bg'],
     }
@@ -173,9 +172,6 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'crop': {
           return `${this.$t('NN0496')}`
-        }
-        case 'copy-style': {
-          return `${this.$t('NN0809')}`
         }
         case 'multiple-select': {
           return `${this.$t('NN0657')}`
@@ -418,11 +414,6 @@ export default defineComponent({
             if (this.bgRemoveMode && !this.isProcessing) {
               bgRemoveUtils.setInBgRemoveMode(false)
             }
-            break
-          }
-
-          case 'copy-style': {
-            formatUtils.clearCopiedFormat()
             break
           }
 

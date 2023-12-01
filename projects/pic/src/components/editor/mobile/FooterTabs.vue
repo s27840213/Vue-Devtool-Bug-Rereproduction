@@ -101,6 +101,16 @@ export default defineComponent({
         },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
+        {
+          icon: 'copy-edits',
+          text: `${this.$t('NN0035')}`,
+          hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
+        },
       ]
     },
     photoTabs(): Array<IFooterTab> {
@@ -129,10 +139,14 @@ export default defineComponent({
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
         {
-          icon: 'brush',
+          icon: 'copy-edits',
           text: `${this.$t('NN0035')}`,
-          panelType: 'copy-style',
           hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
         },
         ...(!picWVUtils.inReviewMode
           ? [
@@ -170,6 +184,16 @@ export default defineComponent({
         },
         ...this.genearlLayerTabs,
         ...this.copyPasteTabs,
+        {
+          icon: 'copy-edits',
+          text: `${this.$t('NN0035')}`,
+          hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
+        },
       ]
     },
     fontTabs(): Array<IFooterTab> {
@@ -197,10 +221,14 @@ export default defineComponent({
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
         {
-          icon: 'brush',
+          icon: 'copy-edits',
           text: `${this.$t('NN0035')}`,
-          panelType: 'copy-style',
           hidden: this.isCopyFormatDisabled,
+        },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
         },
       ]
     },
@@ -273,6 +301,11 @@ export default defineComponent({
       return [
         ...this.multiGeneralTabs,
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        {
+          icon: 'paste-edits',
+          text: `${this.$t('NN0919')}`,
+          hidden: this.isPasteFormatDisabled,
+        },
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -388,7 +421,19 @@ export default defineComponent({
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else if (this.isGroupOrTmp) {
-        return this.genearlLayerTabs
+        return [
+          ...this.genearlLayerTabs,
+          {
+            icon: 'copy-edits',
+            text: `${this.$t('NN0035')}`,
+            hidden: this.isCopyFormatDisabled,
+          },
+          {
+            icon: 'paste-edits',
+            text: `${this.$t('NN0919')}`,
+            hidden: this.isPasteFormatDisabled,
+          },
+        ]
       } else if (this.showFrameTabs) {
         if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
           return this.photoTabs
@@ -664,12 +709,12 @@ export default defineComponent({
           shortcutUtils.paste()
           break
         }
-        case 'brush': {
-          if (this.hasCopiedFormat) {
-            formatUtils.clearCopiedFormat()
-          } else {
-            this.handleCopyFormat()
-          }
+        case 'copy-edits': {
+          this.handleCopyFormat()
+          break
+        }
+        case 'paste-edits': {
+          formatUtils.applyFormatIfCopied(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, false)
           break
         }
         case 'effect': {
@@ -701,7 +746,7 @@ export default defineComponent({
       }
 
       if (
-        ['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)
+        ['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page', 'copy-edits'].includes(tab.icon)
       ) {
         this.clickedTab = tab.icon
         this.clickedTabTimer = window.setTimeout(() => {
