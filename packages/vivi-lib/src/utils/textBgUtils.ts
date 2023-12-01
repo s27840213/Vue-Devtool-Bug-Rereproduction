@@ -4,7 +4,7 @@ import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@
 import store from '@/store'
 import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
-import letterBgData from '@/utils/letterBgData'
+import letterBgData, { ITextLetterBgName } from '@/utils/letterBgData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import { obj2Point, Path, Point } from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -1115,6 +1115,13 @@ class TextBg {
         Object.assign(newTextBg, defaultAttrs, localAttrs, attrs, { name: effect })
         await letterBgData.setExtraDefaultAttrs(effect)
 
+        // Exchange the x and y offsets to justify the position for vertical text using bgNeedRotate LetterBg.
+        if (layer.styles.writingMode === 'vertical' && 
+          isITextLetterBg(newTextBg) &&
+          letterBgData.bgNeedRotate(newTextBg.name)) {
+          [newTextBg.xOffset200, newTextBg.yOffset200] = [newTextBg.yOffset200, newTextBg.xOffset200]
+        }
+
         // Sync setting between different name effect:
         // Bring original effect color to new effect.
         const oldColor = this.getEffectMainColor(oldTextBg)[1]
@@ -1192,6 +1199,30 @@ class TextBg {
       tiptapUtils.agent((editor: Editor) => {
         editor.commands.selectAll()
         editor.chain().updateAttributes('textStyle', { spanIndex: -1 }).run()
+      })
+    }
+  }
+
+  exchangeXY() {
+    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
+    const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
+    const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
+    const subLayerIndex = layerUtils.subLayerIdx
+
+    for (const idx in layers) {
+      if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
+
+      const layer = layers[idx]
+      if (layer.type !== 'text') continue
+      const textBg = cloneDeep(layer.styles.textBg)
+      if (!isITextLetterBg(textBg) || !letterBgData.bgNeedRotate(textBg.name)) continue
+      [textBg.xOffset200, textBg.yOffset200] = [textBg.yOffset200, textBg.xOffset200]
+
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex: +idx,
+        styles: { textBg }
       })
     }
   }
