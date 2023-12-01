@@ -9,7 +9,7 @@ div(class="nu-sub-controller")
           div(v-if="config.type === 'text' && config.active"
             class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
             @pointerdown="onPointerdown")
-            nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+            nu-text-editor(:id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
               :style="textBodyStyle()"
               :pageIndex="pageIndex"
               :page="page"
@@ -294,9 +294,6 @@ export default defineComponent({
     }),
     isDraggedPanelPhoto(): boolean {
       return this.currDraggedPhoto.srcObj.type !== ''
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
     },
     textWrapperStyle(): Record<string, string | number> {
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01

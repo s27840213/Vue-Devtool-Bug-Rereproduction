@@ -16,10 +16,6 @@ export default defineComponent({
     EditorContent
   },
   props: {
-    initText: {
-      type: Object,
-      required: true
-    },
     pageIndex: {
       type: Number,
       required: true
@@ -70,9 +66,7 @@ export default defineComponent({
       subLayerIdx: this.subLayerIndex
     }
 
-    const contentEditable = this.config.contentEditable
-
-    tiptapUtils.init(this.initText, contentEditable)
+    tiptapUtils.init(this.config)
     // tiptapUtils.applyDivStyle()
     /**
      * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
