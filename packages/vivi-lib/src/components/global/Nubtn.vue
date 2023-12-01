@@ -199,7 +199,7 @@ export default component
   &.default {
     background-color: #FDD248;
   }
-  &.desktop:hover, &.hover, &.pressed ,&.active {
+  &.desktop:hover, &.hover, &.pressed, &.active {
     background-color: #E4BD41;
   }
   &.disabled {
@@ -383,7 +383,7 @@ export default component
   &.default {
     background-color: #FEF1C6;
   }
-  &.active {
+  &.hover, &.pressed, &.active {
     background-color: #CAA83A;
   }
   &.disabled {

@@ -22,6 +22,7 @@ import { captureException } from '@sentry/browser'
 import { get, round } from 'lodash'
 import { nextTick } from 'vue'
 import assetPanelUtils from './assetPanelUtils'
+import { getAutoWVUtils } from './autoWVUtils'
 import backgroundUtils from './backgroundUtils'
 import ControlUtils from './controlUtils'
 import editorUtils from './editorUtils'
@@ -975,7 +976,8 @@ class AssetUtils {
         )
         return Promise.all(updatePromise)
       })
-      .then((jsonDataList: IPage[]) => {
+      .then((pageJsonDatas: IPage[]) => {
+        const pages = pageUtils.newPages(pageJsonDatas)
         const currFocusPage: IPage = this.getPage(pageUtils.currFocusPageIndex)
         let targetIndex = pageUtils.currFocusPageIndex
         if (generalUtils.isStk) {
@@ -1008,11 +1010,11 @@ class AssetUtils {
 
         // pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
         if (resize)
-          jsonDataList.forEach((page: IPage) => {
+          pages.forEach((page: IPage) => {
             resizeUtils.resizePage(-1, page, resize)
           }) // resize template json data before adding to the store
-        layerUtils.setAutoResizeNeededForLayersInPages(jsonDataList, true)
-        pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
+        layerUtils.setAutoResizeNeededForLayersInPages(pages, true)
+        pageUtils.appendPagesTo(pages, targetIndex, replace)
         nextTick(() => {
           if (generalUtils.isStk) {
             stkWVUtils.scrollIntoPage(targetIndex, 300)
@@ -1027,14 +1029,14 @@ class AssetUtils {
               unit: pageUnit = 'px',
             } = this.getPage(pageUtils.currFocusPageIndex)
             const precision = pageUnit === 'px' ? 0 : PRECISION
-            for (const idx in jsonDataList) {
+            for (const idx in pages) {
               const {
                 height,
                 width,
                 physicalWidth = width,
                 physicalHeight = height,
                 unit = 'px',
-              } = jsonDataList[idx]
+              } = pages[idx]
               const templateSize = unitUtils.convertSize(
                 physicalWidth,
                 physicalHeight,
@@ -1066,7 +1068,7 @@ class AssetUtils {
               physicalBleeds = isDetailPage ? detailPageBleeds : currFocusPage.physicalBleeds
               const dpi = pageUtils.getPageDPI(currFocusPage)
               const unit =
-                resize?.unit ?? (isDetailPage ? currFocusPage.unit : jsonDataList[0]?.unit) ?? 'px'
+                resize?.unit ?? (isDetailPage ? currFocusPage.unit : pages[0]?.unit) ?? 'px'
               if (currFocusPage.unit !== unit)
                 physicalBleeds = Object.fromEntries(
                   Object.entries(physicalBleeds).map(([k, v]) => [
@@ -1080,7 +1082,7 @@ class AssetUtils {
                   ]),
                 ) as IBleed
             }
-            for (const idx in jsonDataList) {
+            for (const idx in pages) {
               const pageIndex = +idx + targetIndex
               pageUtils.setIsEnableBleed(!!currFocusPage.isEnableBleed, pageIndex)
               if (!physicalBleeds) continue
@@ -1208,7 +1210,7 @@ class AssetUtils {
         editorUtils.setCloseMobilePanelFlag(true)
         generalUtils.isCm && assetPanelUtils.setCurrActiveTab('none')
       }
-      this.addAssetToRecentlyUsed(asset, generalUtils.isStk ? key : undefined)
+      this.addAssetToRecentlyUsed(asset, (generalUtils.isStk || generalUtils.isCm) ? key : undefined)
       return asset.jsonData
     } catch (error) {
       logUtils.setLogForError(error as Error)
@@ -1267,7 +1269,7 @@ class AssetUtils {
         recentlyUsed.list.unshift(item)
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
-      if (key && generalUtils.isStk) stkWVUtils.addAsset(key, item)
+      if (key) getAutoWVUtils().addAsset(key, item)
       const params = {} as { [key: string]: any }
       if (typeCategory === 'font') {
         params.is_asset = src === 'private' || src === 'admin' ? 1 : 0

@@ -29,7 +29,7 @@ const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
 const { updateCanvasSize } = useCanvasUtilsCm()
 
 const aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4']
-const selectedType = ref('9_16')
+const selectedType = ref('9:16')
 
 const bus = useEventBus('editor')
 
@@ -52,7 +52,7 @@ const selectAspectRatio = (type: string) => {
       })
     }
   } else {
-    const [w, h] = type.split('_')
+    const [w, h] = type.split(':')
     const width = parseInt(w)
     const height = parseInt(h)
     const pageAspectRatio = width / height

@@ -8,6 +8,9 @@ export default new (class Utils {
     return apiUtils.requestWithRetry(() => axios.request<StaticResponse>({
       url: '/get-charmix-static',
       method: 'GET',
+      params: {
+        us: 1
+      },
     }))
   }
 })()

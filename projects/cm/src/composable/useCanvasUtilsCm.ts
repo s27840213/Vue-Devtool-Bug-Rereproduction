@@ -22,7 +22,7 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { currActiveFeature } = storeToRefs(editorStore)
+  const { showBrushOptions } = storeToRefs(editorStore)
 
   // #endregion
 
@@ -32,7 +32,6 @@ const useCanvasUtils = (
   const {
     brushSize,
     resultCanvas,
-    isUsingCanvas,
     canvasMode,
     isProcessingCanvas,
     isProcessingStepsQueue,
@@ -82,7 +81,7 @@ const useCanvasUtils = (
 
   const disableTouchEvent = (e: TouchEvent) => {
     const enableTouchEventFlag = (e.target as HTMLElement).classList.contains('sidebar__tab')
-    if (isManupulatingCanvas.value && !enableTouchEventFlag) {
+    if (showBrushOptions.value && !enableTouchEventFlag) {
       e.preventDefault()
       e.stopPropagation()
     }
@@ -109,10 +108,6 @@ const useCanvasUtils = (
     if (canvasCtx && canvasCtx.value) {
       canvasCtx.value.lineWidth = newVal
     }
-  })
-
-  const isManupulatingCanvas = computed(() => {
-    return currActiveFeature.value === 'brush'
   })
 
   const isBrushMode = computed(() => {
@@ -197,8 +192,15 @@ const useCanvasUtils = (
   }
 
   const drawStart = (e: PointerEvent) => {
+    console.log('drawStart')
+    console.log(
+      showBrushOptions.value,
+      isBrushMode.value || isEraseMode.value,
+      !loading.value,
+      wrapperRef,
+    )
     if (
-      isManupulatingCanvas.value &&
+      showBrushOptions.value &&
       (isBrushMode.value || isEraseMode.value) &&
       !loading.value &&
       wrapperRef &&
@@ -468,6 +470,28 @@ const useCanvasUtils = (
     })
   }
 
+  const checkCanvasIsEmpty = (targetCanvasCtx = canvasCtx) => {
+    if (targetCanvasCtx && targetCanvasCtx.value) {
+      const pixels = targetCanvasCtx.value.getImageData(
+        0,
+        0,
+        pageSize.value.width,
+        pageSize.value.height,
+      )
+      // The total number of pixels (RGBA values).
+      const bufferSize = pixels.data.length
+      // Iterate over every pixel to find the boundaries of the non-transparent content.
+      for (let i = 0; i < bufferSize; i += 4) {
+        // Check the alpha (transparency) value of each pixel.
+        if (pixels.data[i + 3] !== 0) {
+          // If the pixel is not transparent, set it to transparent.
+          return false
+        }
+      }
+      return true
+    }
+  }
+
   const getCanvasBlob: (mycanvas: HTMLCanvasElement) => Promise<Blob | null> = (
     mycanvas: HTMLCanvasElement,
   ) => {
@@ -542,6 +566,7 @@ const useCanvasUtils = (
     reset,
     drawImageToCtx,
     updateCanvasSize,
+    checkCanvasIsEmpty,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,
@@ -551,7 +576,6 @@ const useCanvasUtils = (
     isBrushMode,
     resultCanvas,
     currStep,
-    isUsingCanvas,
     isProcessingCanvas,
     isProcessingStepsQueue,
     loading,

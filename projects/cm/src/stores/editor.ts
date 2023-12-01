@@ -32,6 +32,7 @@ interface IEditorStore {
   currStepTypeIndex: number
   initImgSrc: string
   useTmpSteps: boolean
+  currPrompt: string
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -49,6 +50,7 @@ export const useEditorStore = defineStore('editor', {
     currStepTypeIndex: -1,
     initImgSrc: '',
     useTmpSteps: false,
+    currPrompt: '',
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -64,7 +66,7 @@ export const useEditorStore = defineStore('editor', {
       return pageUtils.contentScaleRatio
     },
     showBrushOptions(): boolean {
-      return this.currActiveFeature === 'brush'
+      return this.currActiveFeature === 'cm_brush'
     },
     showSelectionOptions(): boolean {
       return this.currActiveFeature === 'selection'
@@ -95,6 +97,9 @@ export const useEditorStore = defineStore('editor', {
     },
     currGeneratedResults(): { id: string; url: string; video?: string } {
       return this.generatedResults[this.currGenResultIndex]
+    },
+    generatedResultsNum(): number {
+      return this.generatedResults.length
     },
   },
   actions: {
@@ -136,14 +141,32 @@ export const useEditorStore = defineStore('editor', {
         id,
       })
     },
-    updateGenResult(id: string, data: { url?: string; video?: string }) {
+    updateGenResult(id: string, data: { url?: string; video?: string; updateIndex?: boolean }) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
-      const { url, video } = data
+      if (index === -1) return
+      const { url, video, updateIndex } = data
       if (url) {
         this.generatedResults[index].url = url
       }
       if (video) {
         this.generatedResults[index].video = video
+      }
+      if (data.updateIndex && this.currGenResultIndex === -1) {
+        this.currGenResultIndex = index
+      }
+    },
+    removeGenResult(id: string) {
+      const index = this.generatedResults.findIndex((item) => item.id === id)
+      if (index === -1) return
+      this.generatedResults.splice(index, 1)
+      if (
+        this.currGenResultIndex === index &&
+        this.currGenResultIndex >= this.generatedResults.length
+      ) {
+        this.currGenResultIndex -= 1
+        if (this.currGenResultIndex < 0) {
+          this.currGenResultIndex = 0
+        }
       }
     },
     clearGeneratedResults() {
@@ -157,9 +180,6 @@ export const useEditorStore = defineStore('editor', {
     },
     redo() {
       stepsUtils.redo()
-    },
-    delayedRecord() {
-      stepsUtils.delayedRecord()
     },
     stepsReset() {
       stepsUtils.reset()
@@ -180,6 +200,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setInitImgSrc(src: string) {
       this.initImgSrc = src
+    },
+    setCurrPrompt(prompt: string) {
+      this.currPrompt = prompt
     },
     keepEditingInit() {
       this.changeEditorState('prev')
