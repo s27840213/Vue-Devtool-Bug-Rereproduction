@@ -13,12 +13,14 @@ const SET_HANDLE_ID = 'SET_HANDLE_ID' as const
 const ADD_UPLOAD_IMG = 'ADD_UPLOAD_IMG' as const
 const ADD_SHADOW_IMG = 'ADD_SHADOW_IMG' as const
 const SET_UPLOADING_CB = 'SET_UPLOADING_CB' as const
+const UPDATE_UPLOAD_IMG = 'UPDATE_UPLOAD_IMG' as const
 
 export interface IUploadShadowImg {
   id: string,
-  owner: ILayerIdentifier,
-  srcObj: SrcObj,
-  styles: Partial<IImageStyle>
+  state: 'uploading' | 'success' | 'failed',
+  owner?: ILayerIdentifier,
+  srcObj?: SrcObj,
+  styles?: Partial<IImageStyle>
 }
 
 export interface IShadowAsset {
@@ -101,6 +103,12 @@ const mutations: MutationTree<IShadowState> = {
       state.uploadingCallback.set(data.id, data.cb)
     } else {
       state.uploadingCallback.delete(data.id)
+    }
+  },
+  [UPDATE_UPLOAD_IMG](state, data: IUploadShadowImg) {
+    const index = state.uploadShadowImgs.findIndex(item => item.id === data.id)
+    if (index !== -1) {
+      state.uploadShadowImgs[index] = data
     }
   }
 }
