@@ -4,7 +4,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
     svg-icon(
       v-if="false"
-      iconName="settings"
+      iconName="cm_settings"
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
@@ -24,28 +24,42 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
 </template>
 <script setup lang="ts">
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
 
+// #region states, composables, and vars
 const globalStore = useGlobalStore()
-const { setShowSpinner, setSpinnerText } = globalStore
+const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, changeEditorState } = editorStore
-const { isGenerating } = storeToRefs(editorStore)
-const promptText = ref('')
-const promptLen = computed(() => promptText.value.length)
-const isDuringTutorial = tutorialUtils.isDuringTutorial
-const { genImage } = useGenImageUtils()
+const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt } = editorStore
+const { isGenerating, currPrompt } = storeToRefs(editorStore)
+const promptText = computed({
+  // getter
+  get() {
+    return currPrompt.value
+  },
+  set(newValue) {
+    setCurrPrompt(newValue)
+  },
+})
 
-const handleGenerate = () => {
-  if (vuex.state.user.token === '') {
+const promptLen = computed(() => currPrompt.value.length)
+const isDuringTutorial = tutorialUtils.isDuringTutorial
+const { genImageFlow } = useGenImageUtils()
+const { checkCanvasIsEmpty } = useCanvasUtils()
+const { t } = useI18n()
+// #endregion
+
+const handleGenerate = async () => {
+  if (vuex.state.user.token === '' && !debugMode) {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
     return
@@ -58,26 +72,22 @@ const handleGenerate = () => {
       generalUtils.generateRandomString(4),
     )
     changeEditorState('next')
+  } else if (checkCanvasIsEmpty()) {
+    notify({
+      group: 'error',
+      text: `${t('CM0085')}`,
+    })
   } else {
-    setSpinnerText('Generating...')
+    setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
     setIsGenerating(true)
-    genImage(promptText.value)
-      .then((url) => {
-        unshiftGenResults(url, generalUtils.generateRandomString(4))
+    await genImageFlow(promptText.value, false, 2, {
+      onApiResponded: () => {
         changeEditorState('next')
         setIsGenerating(false)
         setShowSpinner(false)
-      })
-      .catch((error) => {
-        logUtils.setLogForError(error as Error)
-        setIsGenerating(false)
-        setShowSpinner(false)
-        notify({
-          group: 'error',
-          text: `Generate Failed`,
-        })
-      })
+      },
+    })
   }
 }
 const clearPromt = () => {

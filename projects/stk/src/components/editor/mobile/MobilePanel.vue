@@ -127,8 +127,8 @@ export default defineComponent({
       currActiveObjectFavTab: 'assetPanel/getCurrActiveObjectFavTab',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
-    isUs(): boolean {
-      return this.$i18n.locale === 'us'
+    useUsPanel(): boolean {
+      return ['us', 'pt'].includes(this.$i18n.locale)
     },
     isTextInCategory(): boolean {
       return this.isInCategory('text')
@@ -152,7 +152,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideDragBar(): boolean {
-      return (!this.insertTheme && !this.isUs && this.panelTitle !== '') || this.fixSize || this.extraFixSizeCondition
+      return (!this.insertTheme && !this.useUsPanel && this.panelTitle !== '') || this.fixSize || this.extraFixSizeCondition
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideTopSection(): boolean {
@@ -181,7 +181,7 @@ export default defineComponent({
           return `${this.$t('NN0657')}`
         }
         case 'text': {
-          return this.isTextShowAllRecently && this.isUs ? `${this.$t('NN0024')}` : ''
+          return this.isTextShowAllRecently && this.useUsPanel ? `${this.$t('NN0024')}` : ''
         }
         case 'none': {
           return ''
@@ -234,7 +234,7 @@ export default defineComponent({
           return 'popup-download'
         }
         case 'text': {
-          return 'panel-text' + (this.isUs ? '-us' : '')
+          return 'panel-text' + (this.useUsPanel ? '-us' : '')
         }
         case 'none':
           return ''

@@ -4,7 +4,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
     div(class="gen-result__block flex rounded-lg bg-app-btn-primary-text" @click="setGenResultIndex(-1)")
       div(
         class="box-border outline-2 outline rounded-lg w-full h-full transition-all duration-300"
-        :class="[currGenResultIndex === -1 ? 'outline-app-tab-active' : 'outline-transparent']")
+        :class="[currGenResultIndex === -1 ? 'outline-primary-normal' : 'outline-transparent']")
         div(class="overflow-hidden rounded-lg w-full h-full px-2 py-4 box-border")
           img(class="w-full h-full object-contain" :src="initImgSrc")
     div(class="bg-app-tab-disable w-2 h-4/5")
@@ -29,19 +29,22 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       //-     :class="{ 'outline-app-tab-active': index === currGenResultIndex }")
       //-     div(class="overflow-hidden w-full h-full")
       //-       //- img(class="w-full h-full object-cover" src="@/assets/img/test.jpg")
-      div(
-        v-for="(genResult, index) in generatedResults"
-        :key="index"
-        class="gen-result__block flex rounded-lg bg-app-btn-primary-text"
-        @click="setGenResultIndex(index)")
+      transition-group(name="list")
         div(
-          class="box-border outline-2 outline rounded-lg w-full h-full transition-all duration-300"
-          :class="[index === currGenResultIndex ? 'outline-app-tab-active' : 'outline-transparent']")
-          div(class="overflow-hidden rounded-lg w-full h-full")
-            img(
-              v-if="genResult.url.length"
-              class="w-full h-full object-cover"
-              :src="apeendRandomQuery(genResult.url)")
+          v-for="(genResult, index) in generatedResults"
+          :key="genResult.id"
+          class="gen-result__block flex rounded-lg relative"
+          @click="genResult.url.length && setGenResultIndex(index)")
+          div(
+            class="box-border outline-2 outline rounded-lg w-full h-full transition-all duration-300 z-2"
+            :class="[index === currGenResultIndex ? 'outline-primary-normal' : 'outline-transparent']")
+            div(class="overflow-hidden rounded-lg w-full h-full")
+              img(
+                v-if="genResult.url.length"
+                class="w-full h-full object-cover"
+                :src="appendSizeQuery(genResult.url)")
+          div(v-if="!genResult.url.length" class="loading-block")
+          div(class="absolute top-0 left-0 rounded-lg w-full h-full bg-app-tab-bg z-1")
   div(class="flex flex-col gap-8 justify-between items-center")
     nubtn(
       size="mid-full"
@@ -52,35 +55,24 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
-import { notify } from '@kyvg/vue3-notification'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const editorStore = useEditorStore()
-const { setGenResultIndex, unshiftGenResults, updateGenResult, keepEditingInit } = editorStore
-const { generatedResults, currGenResultIndex, initImgSrc } = storeToRefs(editorStore)
+const {
+  setGenResultIndex,
+  keepEditingInit,
+} = editorStore
+const { generatedResults, currGenResultIndex, initImgSrc } =
+  storeToRefs(editorStore)
 
-const { genImage } = useGenImageUtils()
+const { genImageFlow } = useGenImageUtils()
 
-const showMoreRes = () => {
-  const id = generalUtils.generateRandomString(4)
-  unshiftGenResults('', id)
-  genImage('', true)
-    .then((url) => {
-      updateGenResult(id,  { url })
-    })
-    .catch((error) => {
-      logUtils.setLogForError(error as Error)
-      notify({
-        group: 'error',
-        text: `Generate Failed`,
-      })
-    })
+const showMoreRes = async () => {
+  await genImageFlow('', true, 2)
 }
 
-const apeendRandomQuery = (url: string) => {
-  return imageUtils.appendRandomQuery(url)
+const appendSizeQuery = (url: string, size = 200) => {
+  return imageUtils.appendQuery(url, 'lsize', `${size}`)
 }
 
 const handleKeepEditing = () => {
@@ -88,8 +80,49 @@ const handleKeepEditing = () => {
 }
 </script>
 <style lang="scss" scoped>
+$loading-padding: 4px;
 .gen-result__block {
   height: 80px;
   aspect-ratio: 50/80;
+}
+
+.loading-block {
+  @apply absolute top-0 left-0 w-full h-full box-border overflow-hidden;
+  transform: scaleX(1.132) scaleY(1.06);
+  border-radius: 10px;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    aspect-ratio: 1/1;
+    background: linear-gradient(0deg, #ffffff 40%, #e4b61f 100%);
+    transform: translateX(-50%) rotate(90deg) scale(1.2);
+    animation: rotate 1.2s linear infinite;
+    // bcz loading-block has transform, so the stacking context is different, make z-index won't work
+    // z-index: -1;
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: translateX(-50%) scale(1.2) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-50%) scale(1.2) rotate(360deg);
+  }
+}
+
+.list-move, /* apply transition to moving elements */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
 }
 </style>

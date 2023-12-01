@@ -18,6 +18,7 @@
   "app-text-primary": "#323232",
   "app-text-secondary": "#ffffff",
   "app-toast-success": "#fff8e480",
+  "app-toast-fail": "#ff7262cc",
   "neutral-dark-active": "#050505",
   "neutral-dark-hover": "#0d0d0d",
   "neutral-dark": "#121212",

@@ -123,7 +123,8 @@ export default defineComponent({
       movingUtils: null as null | MovingUtils,
       mobilePanelHeight: 0,
       pointerEvent: {
-        initPos: null as null | ICoordinate
+        initPos: null as null | ICoordinate,
+        pointerIds: [] as Array<number>
       },
     }
   },
@@ -282,7 +283,7 @@ export default defineComponent({
       if (e.pointerType === 'mouse' && e.button !== 0) return
       if (this.isImgCtrl) {
         const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
-          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[Math.max(layerUtils.subLayerIdx, 0)] : layerUtils.getCurrLayer
+          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[0] : layerUtils.getCurrLayer
         if (!controlUtils.isClickOnController(e, layer)) {
           const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
           switch (currLayer.type) {
@@ -341,13 +342,20 @@ export default defineComponent({
       pointerEvtUtils.removePointer(e.pointerId)
     },
     onPinch(e: AnyTouchEvent) {
+      const touches = (e.nativeEvent as TouchEvent).touches
+      // prevent 3 touches above error
+      if (this.pointerEvent.pointerIds.length === 2 && touches.length === 2 &&
+        (!this.pointerEvent.pointerIds.includes(touches[0].identifier) ||
+        !this.pointerEvent.pointerIds.includes(touches[1].identifier)))
+      return this.pinchStart(e)
+
       if (e.phase === 'end' && this.isPinchInit) {
         // pinch end handling
         this.pinchHandler(e)
         this.isPinchInit = false
         this.pinchControlUtils = null
+        this.pointerEvent.pointerIds.length = 0
       } else {
-        const touches = (e.nativeEvent as TouchEvent).touches
         if (touches.length !== 2 || layerUtils.layerIndex === -1) return
         if (!this.isPinchInit) {
           // first pinch initialization
@@ -369,7 +377,7 @@ export default defineComponent({
       const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
 
       if (_config.config.locked) return
-      if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
+      // if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
 
       const  layerInfo = new Proxy({
         pageIndex: layerUtils.pageIndex,
@@ -392,6 +400,8 @@ export default defineComponent({
         movingUtils: movingUtils as MovingUtils
       }
       this.pinchControlUtils = new PinchControlUtils(data)
+      console.log('pinchControlUtils', pointerEvtUtils.pointerIds)
+      this.pointerEvent.pointerIds = [...pointerEvtUtils.pointerIds]
     },
     showPanelPageManagement() {
       editorUtils.setCurrActivePanel('page-management')

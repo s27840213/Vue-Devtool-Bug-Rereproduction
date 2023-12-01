@@ -1,10 +1,11 @@
 /* eslint-disable indent */
-import { AllLayerTypes, IFrame, IGroup, IImage } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import store from '@/store'
 import controlUtils from '@/utils/controlUtils'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import frameUtils from './frameUtils'
+import imageUtils from './imageUtils'
 
 class FlipUtils {
   isGroup(currSelectedInfo: any): boolean {
@@ -34,43 +35,13 @@ class FlipUtils {
     }
   }
 
-  horizontalFlip() {
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index)
-    const defaultFlip = () => {
-      this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
-        horizontalFlip: !layer.styles.horizontalFlip
-      })
-    }
-    switch (layer.type) {
-      case 'frame':
-        if (layerUtils.subLayerIdx !== -1 || frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
-          const subIdx = Math.max(layerUtils.subLayerIdx, 0)
-          const horizontalFlip = !(layer as IFrame).clips[subIdx].styles.horizontalFlip
-          const { imgX, imgY } = this.imgFlipMapper((layer as IFrame).clips[subIdx], 'h')
-          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, subIdx, { horizontalFlip, imgX, imgY })
-        } else {
-          defaultFlip()
-        }
-        break
-      case 'group':
-        if (layerUtils.subLayerIdx !== -1) {
-          const horizontalFlip = !(layer as IGroup).layers[layerUtils.subLayerIdx].styles.horizontalFlip
-          const { imgX, imgY } = this.imgFlipMapper((layer as IGroup).layers[layerUtils.subLayerIdx] as IImage, 'h')
-          layerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index,
-            { horizontalFlip, imgX, imgY }, layerUtils.subLayerIdx)
-        }
-        break
-      case 'image': {
-        const horizontalFlip = !(layer as IImage).styles.horizontalFlip
-        const { imgX, imgY } = this.imgFlipMapper(layer as IImage, 'h')
-        layerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { horizontalFlip, imgX, imgY })
-        break
-      }
-      default:
-        defaultFlip()
-    }
+  controlledImgFlip(styles: Partial<IImageStyle>) {
+    store.commit('imgControl/UPDATE_CONFIG', styles)
   }
+
+  getImgToFlip(currLayer: IImage): IImage {
+    return imageUtils.isImgControl() ? store.state.imgControl.image! : currLayer
+  } 
 
   imgFlipMapper(layer: IImage, dir: 'h' | 'v') {
     const { styles: { imgHeight, imgWidth, width, height } } = layer
@@ -83,9 +54,59 @@ class FlipUtils {
     return { imgX, imgY }
   }
 
+  horizontalFlip() {
+    const currSelectedInfo = store.getters.getCurrSelectedInfo
+    let layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index) as AllLayerTypes
+    const defaultFlip = () => {
+      this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
+        horizontalFlip: !layer.styles.horizontalFlip
+      })
+    }
+    switch (layer.type) {
+      case 'frame':
+        if (layerUtils.subLayerIdx !== -1 || frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+          const subIdx = Math.max(layerUtils.subLayerIdx, 0)
+          const horizontalFlip = !(layer as IFrame).clips[subIdx].styles.horizontalFlip
+          layer = this.getImgToFlip((layer as IFrame).clips[subIdx])
+          const { imgX, imgY } = this.imgFlipMapper(layer, 'h')
+          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, subIdx, { horizontalFlip, imgX, imgY })
+          if (imageUtils.isImgControl()) {
+            this.controlledImgFlip({ horizontalFlip, imgX, imgY })
+          }
+        } else {
+          defaultFlip()
+        }
+        break
+      case 'group':
+        if (layerUtils.subLayerIdx !== -1) {
+          const horizontalFlip = !(layer as IGroup).layers[layerUtils.subLayerIdx].styles.horizontalFlip
+          layer = this.getImgToFlip((layer as IGroup).layers[layerUtils.subLayerIdx] as IImage)
+          const { imgX, imgY } = this.imgFlipMapper(layer, 'h')
+          layerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index,
+            { horizontalFlip, imgX, imgY }, layerUtils.subLayerIdx)
+          if (imageUtils.isImgControl()) {
+            this.controlledImgFlip({ horizontalFlip, imgX, imgY })
+          }
+        }
+        break
+      case 'image': {
+        const horizontalFlip = !(layer as IImage).styles.horizontalFlip
+        layer = this.getImgToFlip(layer as IImage)
+        const { imgX, imgY } = this.imgFlipMapper(layer, 'h')
+        layerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { horizontalFlip, imgX, imgY })
+        if (imageUtils.isImgControl()) {
+          this.controlledImgFlip({ horizontalFlip, imgX, imgY })
+        }
+        break
+      }
+      default:
+        defaultFlip()
+    }
+  }
+
   verticalFlip() {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
-    const layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index)
+    let layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index) as AllLayerTypes
     const defaultFlip = () => {
       this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
         verticalFlip: !layer.styles.verticalFlip
@@ -96,8 +117,12 @@ class FlipUtils {
         if (layerUtils.subLayerIdx !== -1 || frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
           const subIdx = Math.max(layerUtils.subLayerIdx, 0)
           const verticalFlip = !(layer as IFrame).clips[subIdx].styles.verticalFlip
-          const { imgX, imgY } = this.imgFlipMapper((layer as IFrame).clips[subIdx], 'v')
+          layer = this.getImgToFlip((layer as IFrame).clips[subIdx])
+          const { imgX, imgY } = this.imgFlipMapper(layer, 'v')
           frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, subIdx, { verticalFlip, imgX, imgY })
+          if (imageUtils.isImgControl()) {
+            this.controlledImgFlip({ verticalFlip, imgX, imgY })
+          }
         } else {
           defaultFlip()
         }
@@ -105,15 +130,23 @@ class FlipUtils {
       case 'group':
         if (layerUtils.subLayerIdx !== -1) {
           const verticalFlip = !(layer as IGroup).layers[layerUtils.subLayerIdx].styles.verticalFlip
-          const { imgX, imgY } = this.imgFlipMapper((layer as IGroup).layers[layerUtils.subLayerIdx] as IImage, 'v')
+          layer = this.getImgToFlip((layer as IGroup).layers[layerUtils.subLayerIdx] as IImage)
+          const { imgX, imgY } = this.imgFlipMapper(layer, 'v')
           layerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index,
             { verticalFlip, imgX, imgY }, layerUtils.subLayerIdx)
+          if (imageUtils.isImgControl()) {
+            this.controlledImgFlip({ verticalFlip, imgX, imgY })
+          }
         }
         break
       case 'image': {
         const verticalFlip = !(layer as IImage).styles.verticalFlip
-        const { imgX, imgY } = this.imgFlipMapper(layer as IImage, 'v')
+        layer = this.getImgToFlip(layer as IImage)
+        const { imgX, imgY } = this.imgFlipMapper(layer, 'v')
         layerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { verticalFlip, imgX, imgY })
+        if (imageUtils.isImgControl()) {
+          this.controlledImgFlip({ verticalFlip, imgX, imgY })
+        }
         break
       }
       default:

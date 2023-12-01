@@ -13,14 +13,29 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      template(v-else-if="isCropping")
+        svg-icon(
+          class="layer-action"
+          iconName="cm_flip-h"
+          iconColor="app-btn-primary-text"
+          iconWidth="20px"
+          @click="mappingUtils.mappingIconAction('flip-h')")
+        svg-icon(
+          class="layer-action"
+          iconName="cm_flip-v"
+          iconColor="app-btn-primary-text"
+          iconWidth="20px"
+          @click="mappingUtils.mappingIconAction('flip-v')")
+      template(v-else-if="currActivePanel === 'adjust'")
+        div(id='header-reset')
       template(v-else)
         svg-icon(
-          iconName="undo"
+          iconName="cm_undo"
           :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="undo")
         svg-icon(
-          iconName="redo"
+          iconName="cm_redo"
           :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
           iconWidth="20px"
           @click="redo")
@@ -32,7 +47,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
     ref="editorContainerRef"
-    @pointerdown="selectStart")
+    @pointerdown="selectStart"
+    @pointerup="selectEnd"
+    @pinch="onPinch"
+    @pointerleave="removePointer"
+    v-touch)
     div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
       div(
         id="screenshot-target"
@@ -42,7 +61,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         img(
           v-if="inGenResultState"
           class="h-full object-cover"
-          :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+          :src="currImgSrc")
         template(v-else)
           nu-page(
             class="z-page"
@@ -64,8 +83,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions"
-      class="absolute top-1/2 right-0 -translate-y-1/2"
+      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
+      class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
   div(v-else class="editor-view__saving-state")
@@ -75,7 +94,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
           :class="{ 'is-flipped': !showVideo }"
-          :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+          :src="currImgSrc")
         img(
           class="result-showcase__card result-showcase__card--front"
           :class="{ 'is-flipped': showVideo }"
@@ -83,7 +102,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //- img(
         //-   class="result-showcase__card result-showcase__card--front"
         //-   :class="{ 'is-flipped': !showVideo }"
-        //-   :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+        //-   :src="currImgSrc")
         //- div(class="result-showcase__card result-showcase__card--back" :class="{ 'is-flipped': showVideo }")
         //-   img(
         //-     v-if="!isVideoGened"
@@ -164,6 +183,8 @@ import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
+import type { ILayerInfo } from '@nu/vivi-lib/store/types'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
@@ -173,10 +194,14 @@ import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
+import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useEventBus } from '@vueuse/core'
+import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
 import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
@@ -185,18 +210,21 @@ import { useStore } from 'vuex'
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
-const sidebarTabsRef = ref<HTMLElement | null>(null)
+// const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
-const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
+// const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementBounding(editorContainerRef)
-const editorContainerAR = computed(() => editorContainerWidth.value / editorContainerHeight.value)
 
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
+const isCropping = computed(() => {
+  return store.getters.getPages.length > 0 && imageUtils.isImgControl()
+})
+const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
@@ -231,7 +259,7 @@ const {
   currGenResultIndex,
   initImgSrc,
 } = storeToRefs(editorStore)
-const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
+const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
@@ -263,6 +291,12 @@ const handleNextAction = function () {
   }
 }
 
+const currImgSrc = computed(() => {
+  return currGenResultIndex.value === -1
+    ? initImgSrc.value
+    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+})
+
 const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep
 // #endregion
@@ -285,10 +319,11 @@ const fitScaleRatio = computed(() => {
   const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
   const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
 
-  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
+  // const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
+  const widthRatio = (editorContainerWidth.value - 8) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
 
-  const reductionRatio = isDuringCopy ? 1 : 0.9
+  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
   return ratio
 })
@@ -305,9 +340,9 @@ const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
 }
 
-watch(sidebarTabsWidth, () => {
-  fitPage(fitScaleRatio.value)
-})
+// watch(sidebarTabsWidth, () => {
+//   fitPage(fitScaleRatio.value)
+// })
 /**
  * fitPage
  */
@@ -349,40 +384,147 @@ const outerClick = () => {
   pageUtils.setBackgroundImageControlDefault()
 }
 
+const pointerEvent = ref({
+  initPos: null as { x: number; y: number } | null,
+})
+let movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
+  recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
-  const isClickOnController = controlUtils.isClickOnController(e)
-  if (isImgCtrl.value && !isClickOnController) {
-    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-    switch (currLayer.type) {
-      case LayerType.image:
-      case LayerType.group:
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-        break
-      case LayerType.frame:
-        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
-        break
+  if (isImgCtrl.value) {
+    const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
+      ? groupUtils.mapLayersToPage(
+          [layerUtils.getCurrConfig as IImage],
+          layerUtils.getCurrLayer as IGroup,
+        )[Math.max(layerUtils.subLayerIdx, 0)]
+      : layerUtils.getCurrLayer
+    if (!controlUtils.isClickOnController(e, layer)) {
+      const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+      switch (currLayer.type) {
+        case LayerType.image:
+        case LayerType.group:
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+          break
+        case LayerType.frame:
+          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+            imgControl: false,
+          })
+          break
+      }
+      return
     }
-    return
   }
   if (layerUtils.layerIndex !== -1) {
-    /**
-     * when the user click the control-region outsize the page,
-     * the moving logic should be applied to the EditorView.
-     */
-    if (isClickOnController) {
-      const movingUtils = new MovingUtils({
-        _config: { config: layerUtils.getCurrLayer },
-        snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        body: document.getElementById(
-          `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-        ) as HTMLElement,
-      })
-      movingUtils.moveStart(e)
+    // when there is an layer being active, the moving logic applied to the EditorView
+    movingUtils = new MovingUtils({
+      _config: { config: layerUtils.getCurrLayer },
+      snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+      body: document.getElementById(
+        `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+      ) as HTMLElement,
+    })
+    movingUtils.moveStart(e)
+    pointerEvent.value.initPos = { x: e.x, y: e.y }
+  }
+}
+
+// the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
+// is bcz the native click/tap event is triggered as the event happened in a-short-time even the layer has moved a little position,
+// this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
+const selectEnd = (e: PointerEvent) => {
+  if (pointerEvent.value.initPos) {
+    const isSingleTouch = pointerEvtUtils.pointers.length === 1
+    const isConsiderNotMoved =
+      Math.abs(e.x - pointerEvent.value.initPos.x) < 5 &&
+      Math.abs(e.y - pointerEvent.value.initPos.y) < 5
+    if (isSingleTouch && isConsiderNotMoved && !store.getters['imgControl/isImgCtrl']) {
+      // the moveingEnd would consider the layer to be selected,
+      // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
+      // following code remove the moveEnd event.
+      if (store.getters.getControlState.type === 'move') {
+        store.commit('SET_STATE', { controlState: { type: '' } })
+      }
+      const layer = layerUtils.getCurrLayer
+      if (!controlUtils.isClickOnController(e, layer)) {
+        groupUtils.deselect()
+        movingUtils?.removeListener()
+      }
+    }
+    pointerEvent.value.initPos = null
+  }
+  // pointerEvtUtils.removePointer(e.pointerId)
+}
+
+const isPinchInit = ref<null | boolean>(false)
+let pinchControlUtils = null as null | PinchControlUtils
+const onPinch = (e: AnyTouchEvent) => {
+  if (e.phase === 'end' && isPinchInit.value) {
+    // pinch end handling
+    pinchHandler(e)
+    isPinchInit.value = false
+    pinchControlUtils = null
+  } else {
+    const touches = (e.nativeEvent as TouchEvent).touches
+    if (touches.length !== 2 || layerUtils.layerIndex === -1) return
+    if (!isPinchInit.value) {
+      // first pinch initialization
+      isPinchInit.value = true
+      return pinchStart(e)
     } else {
-      groupUtils.deselect()
+      // pinch move handling
+      pinchHandler(e)
     }
   }
+}
+
+const pinchHandler = (e: AnyTouchEvent) => {
+  pinchControlUtils?.pinch(e)
+}
+
+const pinchStart = (e: AnyTouchEvent) => {
+  if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
+  if (store.getters['bgRemove/getInBgRemoveMode']) return
+
+  const _config = {
+    config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex),
+  } as unknown as { config: ILayer }
+
+  if (_config.config.locked) return
+  if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
+
+  const layerInfo = new Proxy(
+    {
+      pageIndex: layerUtils.pageIndex,
+      layerIndex: layerUtils.layerIndex,
+    },
+    {
+      get(_, key) {
+        if (key === 'pageIndex') return layerUtils.pageIndex
+        else if (key === 'layerIndex') return layerUtils.layerIndex
+      },
+    },
+  ) as ILayerInfo
+  const movingUtils = new MovingUtils({
+    _config,
+    layerInfo,
+    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+    body: document.getElementById(
+      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+    ) as HTMLElement,
+  })
+  const data = {
+    layerInfo,
+    config: undefined,
+    movingUtils: movingUtils as MovingUtils,
+  }
+  pinchControlUtils = new PinchControlUtils(data)
+}
+
+const recordPointer = (e: PointerEvent) => {
+  pointerEvtUtils.addPointer(e)
+}
+const removePointer = (e: PointerEvent) => {
+  pointerEvtUtils.removePointer(e.pointerId)
 }
 // #endregion
 

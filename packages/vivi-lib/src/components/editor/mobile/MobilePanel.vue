@@ -1,5 +1,6 @@
 <template lang="pug">
-div(class="mobile-panel"
+div(v-show="!hideMobilePanel"
+    class="mobile-panel"
     :class="{'panel-padding': !noPaddingTheme, 'not-rounded': noRoundTheme, 'at-bottom': bottomTheme}"
     :style="panelStyle"
     v-click-outside="vcoConfig()"
@@ -56,7 +57,6 @@ div(class="mobile-panel"
   transition(name="panel-up")
     mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
       :currActivePanel="currActiveSubPanel"
-      :currColorEvent="currSubColorEvent"
       :isSubPanel="true"
       :currPage="currPage"
       @switchTab="switchTab"
@@ -70,6 +70,7 @@ import { IAssetPhoto, IPhotoItem } from '@/interfaces/api'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -116,7 +117,6 @@ export default defineComponent({
       replaceImg: (() => { /**/ }) as (img: IAssetPhoto | IPhotoItem) => void,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
-      currSubColorEvent: '',
       innerTabIndex: 0,
       resizeObserver: null as unknown as ResizeObserver,
       // eslint-disable-next-line vue/no-unused-properties
@@ -127,6 +127,7 @@ export default defineComponent({
       hideDynamicCompPanels: [] as string[],
       noRowGapPanels: [] as string[],
       hideFooterPanels: [] as string[],
+      hideMobilePanelPanels: [] as string[],
     }
   },
   computed: {
@@ -297,6 +298,9 @@ export default defineComponent({
     overflowY(): string {
       return this.insertTheme || this.fixSize || this.extraFixSizeCondition ? 'hidden' : 'scroll'
     },
+    hideMobilePanel(): boolean {
+      return this.hideMobilePanelPanels.includes(this.currActivePanel)
+    },
   },
   watch: {
     selectedLayerNum(newVal: number) {
@@ -358,7 +362,7 @@ export default defineComponent({
           ...window.location.host.startsWith('localhost') ? [] : ['contextmenu']]
       }
     },
-    middlewareCondition(): boolean {
+    middlewareCondition(target: HTMLElement): boolean {
       return false
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
@@ -367,7 +371,7 @@ export default defineComponent({
         target.matches?.('.modal-container, .modal-container *') || // Skip modal-card
         target.className.includes?.('footer-tabs') || // Skip footer-bar icon
         target.className === 'inputNode' ||
-        this.middlewareCondition()
+        this.middlewareCondition(target)
       )
     },
     closeMobilePanel() {
@@ -441,7 +445,7 @@ export default defineComponent({
         this.setCurrActiveSubPanel(panelType)
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {
-            this.currSubColorEvent = props.currColorEvent
+            colorUtils.setCurrEvent(props.currColorEvent as string)
           }
         }
       }

@@ -53,6 +53,7 @@ export default defineComponent({
       controllerHidden: 'webView/getControllerHidden',
       debugMode: 'vivisticker/getDebugMode',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isImgCtrl: 'imgControl/isImgCtrl',
       isProcessing: 'bgRemove/getIsProcessing',
     }),
     inImageEditor(): boolean {
@@ -88,7 +89,7 @@ export default defineComponent({
     },
     photoTabs(): Array<IFooterTab> {
       const tabs:Array<IFooterTab> = [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: this.isSvgImage || this.inEffectEditingMode || this.inImageEditor },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !(this.isInFrame || this.editorTypeTemplate) && (layerUtils.getCurrLayer as IFrame).lenght !== 1}, // vivisticker can only crop frame besides template editor
         {
@@ -150,7 +151,7 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: this.editorTypeTemplate },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}`, hidden: this.editorTypeTemplate },
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
@@ -221,7 +222,7 @@ export default defineComponent({
       const showAdjust = targetLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
       const showReplace = targetLayer.clips.length === 1 || targetLayer.clips.some(c => c.active)
       return [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'photo', text: `${this.$t('NN0490')}`, hidden: !this.editorTypeTemplate || !showReplace },
         { icon: 'set-as-frame', text: `${this.$t('NN0098')}`, hidden: !this.editorTypeTemplate || targetLayer.clips.length !== 1 },
         {
@@ -286,7 +287,7 @@ export default defineComponent({
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+        { icon: 'duplicate2', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: !this.editorTypeTemplate || this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
@@ -344,14 +345,14 @@ export default defineComponent({
         return this.photoTabs
       } else if (this.showFontTabs) {
         const res = [
-          ...(this.editorTypeTemplate ? [{ icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}` }] : []), // conditional insert to prevent duplicate key
+          ...(this.editorTypeTemplate ? [{ icon: 'duplicate2', text: `${this.$t('NN0251')}` }] : []), // conditional insert to prevent duplicate key
           ...this.fontTabs
         ]
         res.splice(this.fontTabs.length - 2, 0, ...this.genearlLayerTabs, ...this.copyPasteTabs)
         return res
       } else if (this.showShapeSetting) {
         return [
-          { icon: 'vivisticker_duplicate', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
+          { icon: 'duplicate2', text: `${this.$t('NN0251')}`, hidden: !this.editorTypeTemplate },
           ...this.objectTabs,
           ...this.genearlLayerTabs,
           ...this.copyPasteTabs
@@ -437,6 +438,13 @@ export default defineComponent({
       if (!paymentUtils.checkProApp({ plan: tab.forPro ? 1 : 0 }, undefined, tab.plan)) return
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      }
+      if (tab.icon !== 'crop' && (this.isBgImgCtrl || this.isImgCtrl)) {
+        if (this.isBgImgCtrl) {
+          return backgroundUtils.setBgImageControl({ pageIndex: layerUtils.pageIndex, imgControl: false })
+        } else {
+          return imageUtils.setImgControlDefault()
+        }
       }
       // If current state is in cropping, the layerIndex sould be stored
       // bcz after we disable the cropping, the current active index would be lost
@@ -555,7 +563,7 @@ export default defineComponent({
           shortcutUtils.paste()
           break
         }
-        case 'vivisticker_duplicate': {
+        case 'duplicate2': {
           shortcutUtils.copy().then(() => {
             shortcutUtils.paste()
           })

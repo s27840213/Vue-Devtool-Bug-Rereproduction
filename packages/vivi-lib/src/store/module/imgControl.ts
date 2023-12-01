@@ -1,5 +1,6 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import { IEditorState, ILayerInfo, LayerType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -7,7 +8,6 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { GetterTree, MutationTree } from 'vuex'
-import { IEditorState, ILayerInfo, LayerType } from '@/store/types'
 
 const SET_CONFIG = 'SET_CONFIG' as const
 const SET_BG_CONFIG = 'SET_BG_CONFIG' as const
@@ -169,8 +169,6 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
         }
         return image
       } else {
-        image.styles.x *= primaryLayer.styles.scale
-        image.styles.y *= primaryLayer.styles.scale
         if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
           const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
           const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]

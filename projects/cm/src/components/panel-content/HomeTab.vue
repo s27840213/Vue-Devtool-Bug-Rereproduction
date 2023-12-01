@@ -5,20 +5,20 @@ div(class="w-full flex items-center justify-around")
     v-slot="{ navigate }"
     to="/")
     svg-icon(
-      :icon-name="'home-solid'"
-      :icon-color="atHome ? 'app-tab-active' : 'transparent'"
-      :icon-width="'32px'"
-      :stroke-color="'app-tab-active'"
+      :iconName="'home-solid'"
+      :iconColor="atHome ? 'app-tab-active' : 'transparent'"
+      :iconWidth="'32px'"
+      :strokeColor="'app-tab-active'"
       @click="navigate")
   router-link(
     custom
     v-slot="{ navigate }"
     to="/mydesign")
     svg-icon(
-      :icon-name="'grid-solid'"
-      :icon-color="atMyDesign ? 'app-tab-active' : 'transparent'"
-      :stroke-color="'app-tab-active'"
-      :icon-width="'32px'"
+      :iconName="'grid-solid'"
+      :iconColor="atMyDesign ? 'app-tab-active' : 'transparent'"
+      :strokeColor="'app-tab-active'"
+      :iconWidth="'32px'"
       @click="navigate")
 </template>
 <script setup lang="ts">

@@ -64,9 +64,10 @@ const hostname = window.location.hostname
 // #region userInfo
 const domain = `${hostname.replace('.vivipic.com', '')}`
 const buildNumber = computed(() => {
-  const { VUE_APP_BUILD_NUMBER: buildNumber } = import.meta.env
+  const { BITBUCKET_BUILD_NUMBER: buildNumber } = process.env
   return buildNumber ? `v.${buildNumber}` : 'local'
 })
+const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'])
 
 const domainOptions = computed((): IOptionConfig[] => [
   {
@@ -250,11 +251,11 @@ const debugOptions: Array<IOptionConfig> = [
     },
   },
   {
-    title: 'App事件測試',
+    title: '進入 Native 事件測試器',
     class: 'debug-option',
     iconName: 'code-bracket-square',
     callback: () => {
-      console.log('callback')
+      router.push({ name: 'NativeEventTester' })
     },
   },
 ]
@@ -270,7 +271,7 @@ const initOptions = computed(
       { title: t('CM0043'), class: segmentTitleStyle },
       ...aboutOptions,
       {
-        title: `1.0/1.0/ v.${buildNumber.value} ${domain}`, // Debug info
+        title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}`, // Debug info
         class: 'typo-body-sm text-center text-primary-lighter py-10',
         callback: handleDebugMode,
       },

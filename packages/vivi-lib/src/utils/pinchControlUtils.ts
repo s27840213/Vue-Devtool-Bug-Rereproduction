@@ -21,7 +21,6 @@ export default class PinchControlUtils {
   private init = null as null | {
     evtPos: { x: number, y: number },
     evtScale: number,
-    evtAngle: number,
     layerPos: { x: number, y: number }
     scale: number,
     size: ISize,
@@ -29,7 +28,8 @@ export default class PinchControlUtils {
     rotate: number
     shape?: {
       initCorRadPercentage: number
-    }
+    },
+    touches: Array<{ pos: { x: number, y: number } }>
   }
 
   private id = generalUtils.generateRandomString(4)
@@ -78,11 +78,24 @@ export default class PinchControlUtils {
     this.init = {
       evtPos: { x: e.x, y: e.y },
       evtScale: (e.nativeEvent as any).scale,
-      evtAngle: (e.nativeEvent as any).rotation % 180,
       layerPos: { x: this.config.styles.x, y: this.config.styles.y },
       size: { width: this.config.styles.width, height: this.config.styles.height },
       scale: this.config.styles.scale,
       rotate: this.config.styles.rotate,
+      touches: [
+        {
+          pos: {
+            x: (e.nativeEvent as TouchEvent).touches[0].clientX,
+            y: (e.nativeEvent as TouchEvent).touches[0].clientY
+          }
+        },
+        {
+          pos: {
+            x: (e.nativeEvent as TouchEvent).touches[1].clientX,
+            y: (e.nativeEvent as TouchEvent).touches[1].clientY
+          }
+        }
+      ]
     }
     switch (this.config.type) {
       case 'image':
@@ -128,14 +141,23 @@ export default class PinchControlUtils {
     }
 
     const evtScale = (e.nativeEvent as any).scale / this.init.evtScale
-    let evtAngle = (e.nativeEvent as any).rotation % 180
-    // following math demostrated as a workround for anytouch e.angle always return integer,
-    if (Math.abs(evtAngle - e.angle) > 90) {
-      evtAngle -= 180
+    // calc rotate angle
+    const touches = (e.nativeEvent as TouchEvent).touches
+    const lineA = {
+      x: this.init.touches[1].pos.x - this.init.touches[0].pos.x,
+      y: this.init.touches[1].pos.y - this.init.touches[0].pos.y
     }
-    if (evtAngle < 0) {
-      evtAngle += 360
+    const lineB = {
+      x: touches[1].clientX - touches[0].clientX,
+      y: touches[1].clientY - touches[0].clientY
     }
+    const AdotB = lineA.x * lineB.x + lineA.y * lineB.y
+    let _angle = Math.acos(Math.min(AdotB / (Math.sqrt(lineA.x ** 2 + lineA.y ** 2) * Math.sqrt(lineB.x ** 2 + lineB.y ** 2)), 1))
+    const AcrossB = lineA.x * lineB.y - lineA.y * lineB.x
+    if (AcrossB < 0) {
+      _angle *= -1
+    }
+    _angle = _angle * 180 / Math.PI
 
     const newScale = evtScale * this.init.scale
     const newSize = {
@@ -143,9 +165,10 @@ export default class PinchControlUtils {
       height: this.init.size.height * evtScale
     }
     const movingTranslate = {
-      x: e.x - this.init.evtPos.x,
-      y: e.y - this.init.evtPos.y
+      x: (e.x - this.init.evtPos.x) / store.getters.getContentScaleRatio,
+      y: (e.y - this.init.evtPos.y) / store.getters.getContentScaleRatio
     }
+
     const compensateTranslate = {
       x: (this.init.size.width - newSize.width) * 0.5,
       y: (this.init.size.height - newSize.height) * 0.5
@@ -156,7 +179,7 @@ export default class PinchControlUtils {
     }
 
     const snapUtils = pageUtils.getPageState(this.layerInfo.pageIndex).modules.snapUtils
-    const rotate = snapUtils.calAngleSnapHandler((evtAngle + this.init.rotate) % 360, { snapIncrement: 45, allowedOffset: 5 })
+    const rotate = snapUtils.calAngleSnapHandler((_angle + this.init.rotate) % 360, { snapIncrement: 45, allowedOffset: 5 })
 
     let styles = {
       scale: newScale,

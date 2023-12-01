@@ -102,7 +102,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       panelType: '',
     },
     {
-      icon: 'brush',
+      icon: 'cm_brush',
       text: t('CM0017'),
       panelType: '',
     },
@@ -125,7 +125,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'canvas',
       text: t('CM0053'),
       panelType: '',
-      disabled: true,
+      // disabled: true,
     },
   ]
 })
@@ -135,7 +135,7 @@ const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
     case 'selection':
-    case 'brush':
+    case 'cm_brush':
     case 'add': {
       if (currActiveFeature.value === tab.icon) {
         setCurrActiveFeature('none')
@@ -176,6 +176,13 @@ const handleTabAction = (tab: ISidebarTab) => {
 }
 </script>
 <style lang="scss" scoped>
+.sidebar-tabs {
+  // filter: drop-shadow(0px 0px 0px 20px #4444dd);
+  filter: drop-shadow(1px 1px 0px rgba(32, 32, 32, 0.2))
+    drop-shadow(-1px 1px 0px rgba(32, 32, 32, 0.2)) drop-shadow(1px -1px 0px rgba(32, 32, 32, 0.2))
+    drop-shadow(-1px -1px 0px rgba(32, 32, 32, 0.2));
+}
+
 .sub-tabs {
   transition:
     grid-template-rows 0.3s ease-in-out,

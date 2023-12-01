@@ -7,10 +7,10 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
     :theme="'powerful-fill'"
     iconName="brush"
     @clickBtn="openImgSelecotr(1)")
-  //- nubtn(
-  //-   class="my-10"
-  //-   icon="crown"
-  //-   @click="openImgSelecotr") Test Img Selector
+  nubtn(
+    class="my-10"
+    icon="crown"
+    @click="testNotify") Test Img Selector
   //- nubtn(
   //-   class="my-10"
   //-   icon="crown"
@@ -58,6 +58,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
 </template>
 <script setup lang="ts">
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import { notify } from '@kyvg/vue3-notification'
 
 const { setRequireImgNum } = useImgSelectorStore()
 
@@ -84,6 +85,13 @@ const openImgSelecotr = (requireImgNum: number) => {
 //     console.log('gen vedio', res)
 //   })
 // }
+
+const testNotify = () => {
+  notify({
+    group: 'success',
+    text: 'Test notification',
+  })
+}
 </script>
 <style scoped lang="scss">
 .feature-section {
