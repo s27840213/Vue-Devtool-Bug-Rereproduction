@@ -6,7 +6,7 @@ import { EventEmitter } from 'events'
 import { clamp, filter, flatten, uniq } from 'lodash'
 import pageUtils from './pageUtils'
 import textPropUtils from './textPropUtils'
-import groupUtils from './groupUtils'
+import tiptapUtils from './tiptapUtils'
 
 const STOP_POSTFIX = '_st'
 
@@ -185,7 +185,6 @@ class ColorUtils {
       )
     }
 
-    groupUtils.deselect()
     const pages = pageUtils.getPages
     pages.forEach((page, pageIndex) => {
       page.layers.forEach((layer, layerIndex) => {
@@ -213,6 +212,9 @@ class ColorUtils {
         }
       })
     })
+
+    // for nu-text-editor
+    tiptapUtils.spanStyleHandler('color', color)
   }
 }
 

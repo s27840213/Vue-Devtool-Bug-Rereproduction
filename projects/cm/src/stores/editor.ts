@@ -1,3 +1,4 @@
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import type { EditorFeature, EditorStates, EditorType, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
@@ -33,7 +34,8 @@ interface IEditorStore {
   currStepTypeIndex: number
   initImgSrc: string
   useTmpSteps: boolean
-  currPrompt: string
+  currPrompt: string,
+  editorTheme: null | string
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -52,6 +54,7 @@ export const useEditorStore = defineStore('editor', {
     initImgSrc: '',
     useTmpSteps: false,
     currPrompt: '',
+    editorTheme: null
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -178,11 +181,17 @@ export const useEditorStore = defineStore('editor', {
     setGenResultIndex(index: number) {
       this.currGenResultIndex = index
     },
-    undo() {
-      stepsUtils.undo()
+    async undo() {
+      await stepsUtils.undo()
+
+      const { currEditorTheme, applyEditorTheme } = useBiColorEditor()
+      if (currEditorTheme.value) applyEditorTheme(currEditorTheme.value)
     },
-    redo() {
-      stepsUtils.redo()
+    async redo() {
+      await stepsUtils.redo()
+
+      const { currEditorTheme, applyEditorTheme } = useBiColorEditor()
+      if (currEditorTheme.value) applyEditorTheme(currEditorTheme.value)
     },
     stepsReset() {
       stepsUtils.reset()
@@ -224,5 +233,8 @@ export const useEditorStore = defineStore('editor', {
 
       useSteps().reset()
     },
+    setEditorTheme(theme: string | null) {
+      this.editorTheme = theme
+    }
   },
 })

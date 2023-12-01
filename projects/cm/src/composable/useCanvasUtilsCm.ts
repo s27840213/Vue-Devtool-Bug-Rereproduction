@@ -8,6 +8,7 @@ import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import useMouseUtils from './useMouseUtils'
+import useBiColorEditor from './useBiColorEditor'
 
 export interface ICanvasParams {
   width: number
@@ -23,7 +24,7 @@ const useCanvasUtils = (
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
   const { showBrushOptions } = storeToRefs(editorStore)
-
+  const { isBiColorEditor } = useBiColorEditor()
   // #endregion
 
   // #region canvasStore
@@ -172,13 +173,19 @@ const useCanvasUtils = (
     return canvasCtx
   }
 
-  // fill non-transparent part of canvas with new drawingColor & update brush color
-  watch(drawingColor, (newVal) => {
+  const fillNonTransparent = (color: string) => {
     if (canvas && canvas.value && canvasCtx && canvasCtx.value) {
-      canvasCtx.value.strokeStyle = newVal
       canvasCtx.value.globalCompositeOperation = 'source-atop'
-      canvasCtx.value.fillStyle = newVal
+      canvasCtx.value.fillStyle = color
       canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height);
+    }
+  }
+
+  // update strokeStyle and brush color on drawingColor change
+  watch(drawingColor, (newVal) => {
+    if (canvasCtx && canvasCtx.value) {
+      if (isBiColorEditor) fillNonTransparent(newVal)
+      canvasCtx.value.strokeStyle = newVal
       brushStyle.backgroundColor = getBrushColor(newVal)
     }
   })
@@ -568,6 +575,7 @@ const useCanvasUtils = (
       currCanvasImageElement.value.onload = () => {
         clearCtx()
         drawImageToCtx(currCanvasImageElement.value)
+        if (isBiColorEditor) fillNonTransparent(drawingColor.value)
 
         URL.revokeObjectURL(url)
       }
@@ -582,6 +590,7 @@ const useCanvasUtils = (
       currCanvasImageElement.value.onload = () => {
         clearCtx()
         drawImageToCtx(currCanvasImageElement.value)
+        if (isBiColorEditor) fillNonTransparent(drawingColor.value)
       }
     }
   }

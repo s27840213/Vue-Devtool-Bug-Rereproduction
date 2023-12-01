@@ -1,9 +1,7 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { EditorType } from '@/types/editor'
 import { editorTypes } from '@/types/editor'
-import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import VueRouter from 'vue-router'
 
@@ -23,18 +21,18 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     if (!isValidType(type)) throw new Error('Invalid editor type.')
     
     const { startEditing, setPageSize, setImgAspectRatio, setCurrActiveFeature, stepsReset } = useEditorStore()
-    const { initBiColorEditor } = useBiColorEditor()
-    stepsReset()
+    const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     startEditing(type)
     setImgAspectRatio(9/16)
     setPageSize(900, 1600)
+    stepsReset()
+    if(isBiColorEditor.value) initBiColorEditor(type)
     switch (type) {
       case 'powerful-fill':
 
         break;
       case 'hidden-message':
         setCurrActiveFeature('add')
-        initBiColorEditor('dark')
         break;
       default:
         break;

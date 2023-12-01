@@ -315,7 +315,7 @@ const centerBtns = computed<centerBtn[]>(() => {
   ]
   if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20 })
   retTabs.push(...stepBtns)
-  if (editorType === 'hidden-message') retTabs.push({ icon: toggleThemeIcon.value, disabled: false, width: 20, action: toggleEditorTheme })
+  if (currEditorTheme.value && editorType === 'hidden-message') retTabs.push({ icon: currEditorTheme.value.toggleIcon, disabled: false, width: 20, action: toggleEditorTheme })
   return retTabs
 })
 // #endregion
@@ -547,15 +547,7 @@ const removePointer = (e: PointerEvent) => {
 }
 
 // toggle editor theme
-const biColorEditorStore = useBiColorEditor()
-const { toggleEditorTheme, currEditorTheme, isBiColorEditor, currFgColor } = biColorEditorStore
-const toggleThemeIcon = computed(() => {
-  const toggleThemeIcons = {
-    light: 'toggle-color-light',
-    dark: 'toggle-color-dark'
-  } as { [key in EditorTheme]: string }
-  return toggleThemeIcons[currEditorTheme.value]
-})
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor()
 // #endregion
 
 // #region demo brush size section
@@ -652,7 +644,7 @@ const assetPanelComponent = computed(() => {
 })
 
 const assetPanelProps = computed((): { [index: string]: any } => {
-  const monoColor = isBiColorEditor.value ? currFgColor.value : undefined
+  const monoColor = currEditorTheme.value?.fgColor
   switch (currActiveTab.value) {
     case 'text': {
       return {

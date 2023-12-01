@@ -1,55 +1,77 @@
 import { useCanvasStore } from "@/stores/canvas"
 import { useEditorStore } from "@/stores/editor"
+import { EditorType } from "@/types/editor"
 import colorUtils from "@nu/vivi-lib/utils/colorUtils"
-import stepsUtils from "@nu/vivi-lib/utils/stepsUtils"
 
-export type EditorTheme = 'light' | 'dark'
+type BiColorTheme = {
+  name: string,
+  bgColor: string,
+  fgColor: string,
+  toggleIcon: string
+}
+
+const editorThemes: Partial<{ [key in EditorType]: BiColorTheme[] }> = {
+  'hidden-message': [
+    {
+      name: 'dark',
+      bgColor: '#2B2B2B',
+      fgColor: '#FFFFFF',
+      toggleIcon: 'toggle-color-dark'
+    },
+    {
+      name: 'light',
+      bgColor: '#FFFFFF',
+      fgColor: '#2B2B2B',
+      toggleIcon: 'toggle-color-light'
+    }
+  ]
+}
 
 const useBiColorEditor = () => {
   const canvasStore = useCanvasStore()
   const editorStore = useEditorStore()
 
   const isBiColorEditor = computed(() => {
-    return editorStore.editorType === 'hidden-message'
+    return Object.keys(editorThemes).includes(editorStore.editorType)
   })
 
-  const editorThemes = ref({
-    light: '#FFFFFF',
-    dark: '#2B2B2B'
-  }) as Ref<{ [key in EditorTheme]: string }>
-
-  const currEditorTheme = ref((Object.keys(editorThemes).find(theme => editorThemes.value[theme as EditorTheme] === colorUtils.currPageBackgroundColor) ?? 'dark') as EditorTheme)
-
-  const currBgColor = computed(() => {
-    return editorThemes.value[currEditorTheme.value]
+  // returns undefined if is not bi-color editor
+  const currEditorThemes = computed(() => {
+    return editorThemes[editorStore.editorType]
   })
 
-  const currFgColor = computed(() => {
-    return editorThemes.value[currEditorTheme.value === 'light' ? 'dark' : 'light']
+  // returns undefined if is not bi-color editor
+  const currEditorTheme = computed(() => {
+    return currEditorThemes.value?.find(theme => theme.name === editorStore.editorTheme)
   })
 
-  const initBiColorEditor = (theme: EditorTheme) => {
-    const oppositeTheme = theme === 'light' ? 'dark' : 'light'
-    colorUtils.setCurrPageBackgroundColor(editorThemes.value[theme])
-    canvasStore.setCanvasStoreState({drawingColor: editorThemes.value[oppositeTheme]})
+  const applyEditorTheme = (theme: BiColorTheme) => {
+    editorStore.setEditorTheme(theme.name)
+    colorUtils.setCurrPageBackgroundColor(theme.bgColor)
+    colorUtils.setAllLayerColor(theme.fgColor)
+    canvasStore.setCanvasStoreState({ drawingColor: theme.fgColor })
+  }
+  
+  const initBiColorEditor = (editorType: EditorType) => {
+    const editorTheme = editorThemes[editorType]?.[0]
+    if (!editorTheme) return
+    applyEditorTheme(editorTheme)
   }
 
   const toggleEditorTheme = () => {
-    if (!isBiColorEditor.value) return
-    const prevEditorTheme = currEditorTheme.value
-    currEditorTheme.value = prevEditorTheme === 'dark' ? 'light' : 'dark'
-    colorUtils.setCurrPageBackgroundColor(editorThemes.value[currEditorTheme.value])
-    colorUtils.setAllLayerColor(editorThemes.value[prevEditorTheme])
-    canvasStore.setCanvasStoreState({ drawingColor: editorThemes.value[prevEditorTheme] })
-    stepsUtils.record()
+    if (!currEditorThemes.value) return
+    const idxCurrEditorTheme = currEditorThemes.value.findIndex(theme => theme.name === editorStore.editorTheme)
+    const nextEditorTheme = currEditorThemes.value[(idxCurrEditorTheme + 1) % currEditorThemes.value.length]
+    applyEditorTheme(nextEditorTheme)
   }
 
   return {
     isBiColorEditor,
-    editorThemes,
+    /**
+     * returns undefined if is not bi-color editor
+     */
     currEditorTheme,
-    currBgColor,
-    currFgColor,
+    applyEditorTheme,
     initBiColorEditor,
     toggleEditorTheme
   }
