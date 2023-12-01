@@ -101,7 +101,8 @@ export default Extension.create({
       paragraphStyle: undefined,
       from: undefined,
       to: undefined,
-      pasting: false
+      pasting: false,
+      splitSpan: false,
     }
   },
   onSelectionUpdate() {
