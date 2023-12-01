@@ -109,6 +109,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -116,6 +117,7 @@ import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
+import PanelDescription from './components/panel-content/PanelDescription.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
@@ -124,7 +126,6 @@ import useStateInfo from './composable/useStateInfo'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
-import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
@@ -143,6 +144,7 @@ const {
   showImgSelector,
   inGenResultState,
   inSavingState,
+  showDescriptionPanel
 } = useStateInfo()
 
 const globalStore = useGlobalStore()
@@ -161,6 +163,8 @@ const bottomPanelComponent = computed(() => {
   switch (true) {
     case atDescription.value:
       return null
+    case showDescriptionPanel.value:
+      return PanelDescription
     case wantToQuit.value:
       return ModalTemplate
     case vuex.state.user.showForceLogin:

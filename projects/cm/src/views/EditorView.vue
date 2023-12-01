@@ -170,7 +170,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import type { EditorTheme } from '@/composable/useBiColorEditor'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
@@ -313,7 +312,7 @@ const centerBtns = computed<centerBtn[]>(() => {
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
     { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo }
   ]
-  if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20 })
+  if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20, action: () => editorStore.setDescriptionPanel('hidden-message') })
   retTabs.push(...stepBtns)
   if (currEditorTheme.value && editorType === 'hidden-message') retTabs.push({ icon: currEditorTheme.value.toggleIcon, disabled: false, width: 20, action: toggleEditorTheme })
   return retTabs

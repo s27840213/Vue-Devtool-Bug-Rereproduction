@@ -35,7 +35,8 @@ interface IEditorStore {
   initImgSrc: string
   useTmpSteps: boolean
   currPrompt: string,
-  editorTheme: null | string
+  editorTheme: null | string,
+  descriptionPanel: null | string,
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -54,7 +55,8 @@ export const useEditorStore = defineStore('editor', {
     initImgSrc: '',
     useTmpSteps: false,
     currPrompt: '',
-    editorTheme: null
+    editorTheme: null,
+    descriptionPanel: null,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -105,6 +107,9 @@ export const useEditorStore = defineStore('editor', {
     generatedResultsNum(): number {
       return this.generatedResults.length
     },
+    showDescriptionPanel(): boolean {
+      return this.descriptionPanel !== null
+    }
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -235,6 +240,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setEditorTheme(theme: string | null) {
       this.editorTheme = theme
+    },
+    setDescriptionPanel(panel: string | null) {
+      this.descriptionPanel = panel
     }
   },
 })

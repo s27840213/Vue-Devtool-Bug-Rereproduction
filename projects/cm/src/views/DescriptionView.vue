@@ -13,14 +13,14 @@ div(class="description-page w-full h-full text-app-text-secondary px-24")
         // eslint-disable-next-line vue/require-toggle-inside-transition
         img(
           :key="idxCurrImg"
-          :src="imgs[idxCurrImg]"
+          :src="getImg(idxCurrImg)"
           class="w-full h-full object-cover object-center absolute top-0 left-0")
       div(class="w-6 h-full bg-app-tab-active absolute top-0 left-0")
     div(class="flex justify-center gap-16")
       img(
-        v-for="(img, idx) in imgs"
-        :key="img"
-        :src="img"
+        v-for="idx in 3"
+        :key="idx"
+        :src="getImg(idx)"
         class="w-32 h-32 overflow-hidden rounded object-cover object-center"
         :class="{ 'outline-solid outline-2 -outline-offset-2 outline-app-tab-active': idx === idxCurrImg }"
         @click="idxCurrImg = idx")
@@ -37,10 +37,10 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const target: Ref<EditorType> = ref(route.query.target as EditorType)
-const imgs: Ref<string[]> = ref(
-  Array.from(Array(3), (_, index) => require(`demo/${target.value}-demo-${index}.png`)),
-)
-const idxCurrImg = ref(0)
+const idxCurrImg = ref(1)
+const getImg = (idx: number) => {
+  return require(`demo/${target.value}-demo-${idx}.png`)
+}
 
 const title = ref('')
 const description = ref('')
