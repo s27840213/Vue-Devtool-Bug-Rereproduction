@@ -9,7 +9,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -119,7 +119,7 @@ export default defineComponent({
           } else {
             currLayerInPrevStep = currLayerInPrevStep as IText
           }
-          if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
+          if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor.getJSON())) { // record only when the updated text has not been recorded yet
             toRecord = true
           }
           const res = tiptapUtils.toIParagraph(editor.getJSON())
