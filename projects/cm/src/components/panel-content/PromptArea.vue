@@ -8,7 +8,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
-      class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable"
+      class="w-full box-border p-10 rounded-10 bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable"
       :placeholder="$t('CM0024')"
       :autofocus="!isDuringTutorial"
       v-model="promptText")

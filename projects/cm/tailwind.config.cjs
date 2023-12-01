@@ -19,6 +19,8 @@ for (let i = 0; i <= 360; i++) {
       break
   }
 }
+spacingMap.full = '100%'
+spacingMap.half = '50%'
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   corePlugins: {
@@ -33,6 +35,7 @@ module.exports = {
     zIndex: zIndex.reduce((prevVal, currVal, idx) => ({ ...prevVal, [currVal]: (idx + 1).toString()}), {}) ,
     // this project only for mobile, no need to add to much spacing
     spacing: spacingMap,
+    borderRadius: spacingMap,
   },
   safelist: [
     {

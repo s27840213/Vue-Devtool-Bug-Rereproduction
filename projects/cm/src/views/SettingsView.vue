@@ -14,7 +14,7 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
     class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] gap-16 py-10 overflow-scroll scrollbar-hide")
     div(
       v-show="showInitOptions"
-      class="w-full box-border p-24 rounded-[20px] flex flex-col items-center justify-between gap-16 gradient--yellow")
+      class="w-full box-border p-24 rounded-20 flex flex-col items-center justify-between gap-16 gradient--yellow")
       div(class="w-full h-full flex items-center justify-between")
         div(class="flex flex-col items-start justify-between gap-12")
           div(class="typo-h1") {{ $t('CM0030').toUpperCase() }}

@@ -34,7 +34,7 @@ div(
       :key="img.assetId"
       class="relative flex justify-center"
       @click="selectDemo(i)")
-      img(class="w-44 h-44 object-cover rounded-[10px]" :src="img.assetId")
+      img(class="w-44 h-44 object-cover rounded-10" :src="img.assetId")
       span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
   //- 4-1. Photo
   div(

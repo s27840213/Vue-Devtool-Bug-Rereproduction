@@ -4,7 +4,7 @@ router-link(
   v-slot="{ navigate }"
   to="/")
   div(
-    class="feature-card flex items-end justify-center box-border py-16 rounded-[20px]"
+    class="feature-card flex items-end justify-center box-border py-16 rounded-20"
     :style="cardStyles"
     @click="navigate")
     span(class="typo-h5 text-primary-white") {{ title }}

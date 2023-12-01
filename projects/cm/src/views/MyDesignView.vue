@@ -4,11 +4,11 @@ div(class="my-design w-full h-full flex justify-center items-center py-20 px-16"
     div(v-for="col, i in myDesignCols" :key="i" class="grid gap-20 h-fit")
       div(v-for="design in col" :key="design.id" class="relative ")
         img(
-          class="w-full rounded-[20px]"
+          class="w-full rounded-20"
           :src="`https://images.unsplash.com/${design.id}?cs=tinysrgb&q=80&w=320`"
           @click="selectDesign(design)")
         svg-icon(
-          class="absolute right-10 top-10 bg-app-btn-primary-text rounded-[10px] m-1"
+          class="absolute right-10 top-10 bg-app-btn-primary-text rounded-10 m-1"
           iconName="more_horizontal"
           iconWidth="22px"
           @click="moreDesign(design)")

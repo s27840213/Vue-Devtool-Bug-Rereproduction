@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full box-border p-24 rounded-[20px] flex items-center justify-between" :class="`bg__${theme}`")
+div(class="w-full box-border p-24 rounded-20 flex items-center justify-between" :class="`bg__${theme}`")
   div(class="flex gap-10 items-start justify-between flex-col")
     div(class="typo-h4") {{ title }}
     div(class="typo-body-md") {{ description }}
