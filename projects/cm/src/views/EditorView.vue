@@ -339,7 +339,17 @@ const wrapperStyles = computed(() => {
 
 const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
-  editorUtils.handleContentScaleRatio(0)
+  // editorUtils.handleContentScaleRatio(0)
+  // const { hasBleed } = pageUtils
+  // const page = pageUtils.getPage(0)
+  // const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
+  // const pos = {
+  //   x: (editorUtils.mobileSize.width - width * ratio) * 0.5,
+  //   y: (editorUtils.mobileSize.height - height * ratio) * 0.5
+  // }
+  // test
+  // pageUtils.updatePagePos(0, pos)
+  // pageUtils.updatePageInitPos(0, pos)
 }
 
 // watch(sidebarTabsWidth, () => {

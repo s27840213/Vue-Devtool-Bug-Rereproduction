@@ -59,11 +59,14 @@ class pagePinchUtils {
       height: (newScaleRatio - 1) * (page.height * contentScaleRatio * this.initPageScale * 0.01)
     }
 
-    console.log(this.initPagePos.x - this.translationRatio.x * sizeDiff.width)
-    console.log(this.initPagePos.x, this.translationRatio.x, sizeDiff.width)
+    const movingTranslate = {
+      x: e.x - this.initPinchPos.x,
+      y: e.y - this.initPinchPos.y
+    }
+
     pageUtils.updatePagePos(layerUtils.pageIndex, {
-      x: this.initPagePos.x - this.translationRatio.x * sizeDiff.width,
-      y: this.initPagePos.y - this.translationRatio.y * sizeDiff.height
+      x: this.initPagePos.x - this.translationRatio.x * sizeDiff.width + movingTranslate.x,
+      y: this.initPagePos.y - this.translationRatio.y * sizeDiff.height + movingTranslate.y
     })
     store.commit('mobileEditor/UPDATE_pinchScale', e.scale)
     // pageUtils.updatePageProps()
