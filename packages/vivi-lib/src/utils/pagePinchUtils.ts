@@ -5,7 +5,8 @@ import layerUtils from "./layerUtils"
 import mathUtils from "./mathUtils"
 import pageUtils from "./pageUtils"
 
-const MAX_SCALE = 300
+const MAX_SCALE = 400
+const TRANSITION_TIME = 150
 
 class pagePinchUtils {
   private isPinchInit = false
@@ -91,18 +92,27 @@ class pagePinchUtils {
     const isReachRight = edgeLimit.right > page.x
     const isReachTop = page.y > edgeLimit.top
     const isReachBottom = edgeLimit.bottom > page.y
+    const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
 
     // case 1: page smaller than default size
     if (newPageScaleRatio < 100) {
       console.warn(1)
-      store.commit('SET_pageScaleRatio', 100)
+      currPageEl.classList.add('transition-transform')
       pageUtils.updatePagePos(layerUtils.pageIndex, {
         x: this.page.initPos.x,
         y: this.page.initPos.y
       })
+      const shrinkRatio = 100 / this.initPageScale
+      store.commit('mobileEditor/UPDATE_pinchScale', shrinkRatio)
+      setTimeout(() => {
+        currPageEl.classList.remove('transition-transform')
+        this.resetState()
+        store.commit('SET_pageScaleRatio', 100)
+      }, TRANSITION_TIME)
     // case 2: page bigger than maximum size
     } else if (newPageScaleRatio > MAX_SCALE) {
       console.warn(2)
+      currPageEl.classList.add('transition-transform')
       const sizeDiff = {
         width: (newPageScaleRatio - MAX_SCALE) * (page.width * contentScaleRatio * 0.01),
         height: (newPageScaleRatio - MAX_SCALE) * (page.height * contentScaleRatio * 0.01)
@@ -116,35 +126,52 @@ class pagePinchUtils {
         x: mathUtils.clamp(newPos.x, newEdgeLimit.right, newEdgeLimit.left),
         y: mathUtils.clamp(newPos.y, newEdgeLimit.bottom, newEdgeLimit.top)
       })
-      store.commit('SET_pageScaleRatio', MAX_SCALE)
+      const newPinchScale = MAX_SCALE / this.initPageScale
+      store.commit('mobileEditor/UPDATE_pinchScale', newPinchScale)
+      setTimeout(() => {
+        store.commit('SET_pageScaleRatio', MAX_SCALE)
+        currPageEl.classList.remove('transition-transform')
+        this.resetState()
+      }, TRANSITION_TIME)
     // case 3: page size proper but reach edges
     } else if (isReachLeft || isReachRight || isReachTop || isReachBottom) {
       console.warn(3)
+      currPageEl.classList.add('transition-transform')
       const newPos = {
         x: page.x,
         y: page.y
       }
       if (isReachLeft) {
+        console.log('isReachLeft')
         newPos.x = 0
       } else if (isReachRight) {
-        newPos.x = -edgeLimit.right
+        console.log('isReachRight')
+        newPos.x = edgeLimit.right
       }
       if (isReachTop) {
+        console.log('isReachTop')
         newPos.y = 0
       } else if (isReachBottom) {
-        newPos.y = -edgeLimit.bottom
+        console.log('isReachBottom')
+        newPos.y = edgeLimit.bottom
       }
       pageUtils.updatePagePos(layerUtils.pageIndex, newPos)
+      setTimeout(() => {
+        store.commit('SET_pageScaleRatio', newPageScaleRatio)
+        currPageEl.classList.remove('transition-transform')
+        this.resetState()
+      }, TRANSITION_TIME)
     } else {
       console.warn(4)
       // no need to edging the page
       store.commit('SET_pageScaleRatio', newPageScaleRatio)
+      this.resetState()
     }
   }
 
   private pinchEnd(e: AnyTouchEvent) {
     this.handleEdging(e)
-    this.resetState()
+    // this.resetState()
     console.log('pinch end', e.scale)
   }
 

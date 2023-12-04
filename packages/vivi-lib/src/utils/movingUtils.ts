@@ -427,6 +427,7 @@ export class MovingUtils {
       }
       return
     }
+    console.log('moving')
 
     if (store.state.controlState.phase !== 'moving') {
       store.commit('SET_STATE', {
@@ -475,25 +476,21 @@ export class MovingUtils {
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
       }
       if (this.isTouchDevice && !this.isLocked) {
-        if (posDiff.x > 1 || posDiff.y > 1) {
+        // if (posDiff.x > 1 || posDiff.y > 1) {
+        //   window.requestAnimationFrame(() => {
+        //     this.movingHandler(e)
+        //     this.isHandleMovingHandler = false
+        //   })
+        //   return
+        // }
+        const { mobileSize } = editorUtils
+        const { getCurrPage: page, scaleRatio } = pageUtils
+        const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
+          page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
+        if (!isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
-            this.movingHandler(e)
-            this.isHandleMovingHandler = false
+            this.pageMovingHandler(e)
           })
-          return
-        }
-        if (generalUtils.isPic) {
-          const { mobileSize } = editorUtils
-          const { getCurrPage: page, scaleRatio } = pageUtils
-          const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
-            page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
-          // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
-          if (!isPageFullyInsideEditor) {
-            // if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
-            window.requestAnimationFrame(() => {
-              this.pageMovingHandler(e)
-            })
-          }
         }
       } else {
         if (posDiff.x < 1 && posDiff.y < 1) {
@@ -506,7 +503,7 @@ export class MovingUtils {
 
   movingHandler(e: MouseEvent | PointerEvent) {
     if (this.initMousePos === null) return
-    if (generalUtils.isPic && generalUtils.isTouchDevice() &&
+    if (generalUtils.isTouchDevice() &&
       this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
 
     const config = layerUtils.getCurrLayer
@@ -679,6 +676,7 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
+    console.log('move end')
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
     }
@@ -842,6 +840,7 @@ export class MovingUtils {
   }
 
   removeListener() {
+    console.log('remove listiner')
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
     eventUtils.removePointerEvent('pointerup', this._cursorDragEnd)
