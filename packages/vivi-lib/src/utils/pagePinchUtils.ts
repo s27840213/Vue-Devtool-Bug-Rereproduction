@@ -77,9 +77,9 @@ class pagePinchUtils {
     const { page, contentScaleRatio } = this
     return {
       left: 0,
-      right: (pageScaleRatio - 100) * page.width * contentScaleRatio * 0.01,
+      right: -(pageScaleRatio - 100) * page.width * contentScaleRatio * 0.01,
       top: 0,
-      bottom: (pageScaleRatio - 100) * page.height * contentScaleRatio * 0.01
+      bottom: -(pageScaleRatio - 100) * page.height * contentScaleRatio * 0.01
     }
   }
 
@@ -88,10 +88,9 @@ class pagePinchUtils {
     const newPageScaleRatio = store.state.mobileEditor.pinchScale * initPageScale
     const edgeLimit = this.getEdgeLimit(newPageScaleRatio)
     const isReachLeft = page.x > edgeLimit.left
-    const isReachRight = edgeLimit.right < -page.x
+    const isReachRight = edgeLimit.right > page.x
     const isReachTop = page.y > edgeLimit.top
-    const isReachBottom = edgeLimit.bottom < -page.y
-    console.log(isReachLeft, isReachRight)
+    const isReachBottom = edgeLimit.bottom > page.y
 
     // case 1: page smaller than default size
     if (newPageScaleRatio < 100) {
@@ -103,7 +102,7 @@ class pagePinchUtils {
       })
     // case 2: page bigger than maximum size
     } else if (newPageScaleRatio > MAX_SCALE) {
-      console.warn(3)
+      console.warn(2)
       const sizeDiff = {
         width: (newPageScaleRatio - MAX_SCALE) * (page.width * contentScaleRatio * 0.01),
         height: (newPageScaleRatio - MAX_SCALE) * (page.height * contentScaleRatio * 0.01)
