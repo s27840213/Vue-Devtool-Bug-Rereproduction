@@ -4,7 +4,7 @@ import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText, ITextStyle } from '@
 import store from '@/store'
 import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
-import letterBgData, { ITextLetterBgName } from '@/utils/letterBgData'
+import letterBgData from '@/utils/letterBgData'
 import localStorageUtils from '@/utils/localStorageUtils'
 import { obj2Point, Path, Point } from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -1076,7 +1076,7 @@ class TextBg {
     }
   }
 
-  async setTextBg(effect: string, attrs?: Record<string, unknown>): Promise<void> {
+  async setTextBg(effect: string, attrs?: Partial<ITextBg>): Promise<void> {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
@@ -1090,7 +1090,7 @@ class TextBg {
       if (layer.type !== 'text') continue
       const currSubLayerIndex = targetLayer.layers ? +idx : subLayerIndex
       const oldTextBg = layer.styles.textBg
-      const newTextBg = {} as ITextBg
+      let newTextBg = {} as ITextBg
 
       // Send splitSpan to toIParagraph.
       tiptapUtils.agent(editor => {
@@ -1107,7 +1107,10 @@ class TextBg {
 
       if (oldTextBg && oldTextBg.name === effect) { // Adjust effect option.
         Object.assign(newTextBg, oldTextBg, attrs)
-        localStorageUtils.set('textEffectSetting', effect, newTextBg)
+
+        // Un-exchange and store to local storage
+        const dataToLS = this.checkExchange(layer, newTextBg)
+        localStorageUtils.set('textEffectSetting', effect, dataToLS)
         this.syncShareAttrs(newTextBg, null)
       } else { // Switch to other effect.
         this.syncShareAttrs(newTextBg, effect)
@@ -1116,11 +1119,7 @@ class TextBg {
         await letterBgData.setExtraDefaultAttrs(effect)
 
         // Exchange the x and y offsets to justify the position for vertical text using bgNeedRotate LetterBg.
-        if (layer.styles.writingMode === 'vertical' && 
-          isITextLetterBg(newTextBg) &&
-          letterBgData.bgNeedRotate(newTextBg.name)) {
-          [newTextBg.xOffset200, newTextBg.yOffset200] = [newTextBg.yOffset200, newTextBg.xOffset200]
-        }
+        newTextBg = this.checkExchange(layer, newTextBg)
 
         // Sync setting between different name effect:
         // Bring original effect color to new effect.
@@ -1203,6 +1202,16 @@ class TextBg {
     }
   }
 
+  checkExchange(layer: IText, textBg: ITextBg) {
+    textBg = cloneDeep(textBg)
+    if (layer.styles.writingMode === 'vertical' && 
+      isITextLetterBg(textBg) &&
+      letterBgData.bgNeedRotate(textBg.name)) {
+      [textBg.xOffset200, textBg.yOffset200] = [textBg.yOffset200, textBg.xOffset200]
+    }
+    return textBg
+  }
+
   exchangeXY() {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
@@ -1228,9 +1237,12 @@ class TextBg {
   }
 
   async resetCurrTextEffect() {
-    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    await this.setTextBg(effectName, this.effectDefaultOptions[effectName])
-    await letterBgData.setExtraDefaultAttrs(effectName)
+    const layer = textEffectUtils.getCurrentLayer()
+    let textBg = layer.styles.textBg
+    Object.assign(textBg, this.effectDefaultOptions[textBg.name])
+    textBg = this.checkExchange(layer, textBg)
+    await this.setTextBg(textBg.name, textBg)
+    await letterBgData.setExtraDefaultAttrs(textBg.name)
   }
 }
 
