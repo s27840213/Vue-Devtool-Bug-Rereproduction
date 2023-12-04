@@ -8,6 +8,7 @@ import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import useMouseUtils from './useMouseUtils'
+import useBiColorEditor from './useBiColorEditor'
 
 export interface ICanvasParams {
   width: number
@@ -23,7 +24,7 @@ const useCanvasUtils = (
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
   const { showBrushOptions } = storeToRefs(editorStore)
-
+  const { isBiColorEditor } = useBiColorEditor()
   // #endregion
 
   // #region canvasStore
@@ -47,6 +48,7 @@ const useCanvasUtils = (
     stepsQueue,
     isInCanvasFirstStep,
     isInCanvasLastStep,
+    drawingColor
   } = storeToRefs(canvasStore)
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
@@ -92,10 +94,36 @@ const useCanvasUtils = (
   const initPos = reactive({ x: 0, y: 0 })
   // #endregion
 
+  const getBrushColor = (color: string) => {
+    const mapColorDrawingToBrush = new Map([
+      ['#FF7262', '#fcaea9'],
+    ])
+
+    // darken or lighten color
+    const adjustColor = (color: string) => { // #FFF not supportet rather use #FFFFFF
+      const clamp = (val: number) => Math.min(Math.max(val, 0), 0xFF)
+      const fill = (str: string) => ('00' + str).slice(-2)
+      let offset = 100
+
+      const num = parseInt(color.replace(/^#/, ''), 16)
+      let red = num >> 16
+      let green = (num >> 8) & 0x00FF
+      let blue = num & 0x0000FF
+      if (red * 0.299 + green * 0.587 + blue * 0.114 > 186) offset = -offset // https://stackoverflow.com/a/3943023/112731
+      red = clamp(red + offset)
+      green = clamp(green + offset)
+      blue = clamp(blue + offset)
+      return '#' + fill(red.toString(16)) + fill(green.toString(16)) + fill(blue.toString(16))
+    }
+
+    if (mapColorDrawingToBrush.has(color)) return mapColorDrawingToBrush.get(color)
+    return adjustColor(color)
+  }
+
   const showBrush = ref(false)
 
   const brushStyle = reactive({
-    backgroundColor: '#fcaea9',
+    backgroundColor: getBrushColor(drawingColor.value),
     width: '16px',
     height: '16px',
     transform: 'translate(0,0)',
@@ -123,7 +151,7 @@ const useCanvasUtils = (
   })
 
   const brushColor = computed(() => {
-    return isBrushMode ? '#fcaea9' : '#fdd033'
+    return isBrushMode ? getBrushColor(drawingColor.value) : '#fdd033'
   })
 
   const createInitCanvas = (width: number, height: number) => {
@@ -135,7 +163,7 @@ const useCanvasUtils = (
         canvasCtx: targetCanvas.value.getContext('2d'),
       })
       if (canvasCtx && canvasCtx.value) {
-        canvasCtx.value.strokeStyle = '#FF7262'
+        canvasCtx.value.strokeStyle = drawingColor.value
         canvasCtx.value.lineWidth = brushSize.value
         canvasCtx.value.lineCap = 'round'
         canvasCtx.value.lineJoin = 'round'
@@ -144,6 +172,23 @@ const useCanvasUtils = (
 
     return canvasCtx
   }
+
+  const fillNonTransparent = (color: string) => {
+    if (canvas && canvas.value && canvasCtx && canvasCtx.value) {
+      canvasCtx.value.globalCompositeOperation = 'source-atop'
+      canvasCtx.value.fillStyle = color
+      canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height);
+    }
+  }
+
+  // update strokeStyle and brush color on drawingColor change
+  watch(drawingColor, (newVal) => {
+    if (canvasCtx && canvasCtx.value) {
+      if (isBiColorEditor) fillNonTransparent(newVal)
+      canvasCtx.value.strokeStyle = newVal
+      brushStyle.backgroundColor = getBrushColor(newVal)
+    }
+  })
 
   const updateCanvasSize = (
     targetCanvas = canvas.value,
@@ -324,7 +369,7 @@ const useCanvasUtils = (
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
       if (canvasCtx && canvasCtx.value) {
-        canvasCtx.value.fillStyle = '#ff7262'
+        canvasCtx.value.fillStyle = drawingColor.value
         record()
       }
     }
@@ -409,7 +454,7 @@ const useCanvasUtils = (
 
         canvasCtx.value.save()
         canvasCtx.value.shadowBlur = 0 // Blur level
-        canvasCtx.value.shadowColor = '#ff7262' // Color
+        canvasCtx.value.shadowColor = drawingColor.value // Color
         const shiftDir = [
           [0, 1],
           [-1, 0],
@@ -530,6 +575,7 @@ const useCanvasUtils = (
       currCanvasImageElement.value.onload = () => {
         clearCtx()
         drawImageToCtx(currCanvasImageElement.value)
+        if (isBiColorEditor) fillNonTransparent(drawingColor.value)
 
         URL.revokeObjectURL(url)
       }
@@ -544,6 +590,7 @@ const useCanvasUtils = (
       currCanvasImageElement.value.onload = () => {
         clearCtx()
         drawImageToCtx(currCanvasImageElement.value)
+        if (isBiColorEditor) fillNonTransparent(drawingColor.value)
       }
     }
   }

@@ -69,6 +69,7 @@ import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
@@ -79,9 +80,18 @@ import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { CMobilePanel } from './MobilePanel.vue'
+import useBiColorEditor from '@/composable/useBiColorEditor'
 
 export default defineComponent({
   extends: FooterTabs,
+  setup() {
+    const { isBiColorEditor } = useBiColorEditor()
+    const { openImgSelecotr } = useImgSelectorStore()
+    return {
+      isBiColorEditor,
+      openImgSelecotr
+    }
+  },
   data() {
     return {
       hideTabsPanels: ['crop-flip', 'adjust', 'fonts'],
@@ -172,6 +182,7 @@ export default defineComponent({
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs: Array<IFooterTab> = [
         { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
+        { icon: 'invert', text: `${this.$t('CM0080')}` },
         { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' }, // vivisticker can only crop frame besides template editor
         flipTab,
         {
@@ -211,7 +222,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -233,6 +244,7 @@ export default defineComponent({
         },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'font-curve', text: `${this.$t('NN0118')}`, panelType: 'font-curve', hidden: !this.isBiColorEditor },
         {
           icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
@@ -240,8 +252,9 @@ export default defineComponent({
           props: {
             currColorEvent: ColorEventType.text,
           },
+          hidden: this.isBiColorEditor,
         },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect', hidden: this.isBiColorEditor },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         {
           icon: 'copy-edits',
@@ -325,7 +338,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -338,7 +351,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -832,8 +845,7 @@ export default defineComponent({
         case 'photo':
         case 'replace': {
           if (tab.panelType !== undefined) break
-          const { setRequireImgNum } = useImgSelectorStore()
-          setRequireImgNum(1, { replace: true })
+          this.openImgSelecotr({ replace: true })
           break
         }
         case 'color':
@@ -842,6 +854,17 @@ export default defineComponent({
           break
         case 'camera': {
           // Wait for coding
+          break
+        }
+        case 'invert': {
+          const imgLayer = this.currLayer as IImage
+          const adjust = imgLayer.styles?.adjust
+          imageAdjustUtil.setAdjust({
+            adjust: { ...adjust, invert: +!adjust?.invert },
+            pageIndex,
+            layerIndex,
+            subLayerIndex: subLayerIdx >= 0 ? subLayerIdx : undefined
+          })
           break
         }
         default: {

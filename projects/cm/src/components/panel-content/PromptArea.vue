@@ -1,5 +1,7 @@
 <template lang="pug">
-div(class="flex flex-col justify-center items-center w-full box-border px-24 gap-16")
+div(
+  class="flex flex-col justify-center items-center w-full box-border px-24 gap-16"
+  :class="{'pointer-events-none': preview}")
   div(class="relative w-full")
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
     svg-icon(
@@ -19,6 +21,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
         @click="clearPromt")
         span {{ $t('CM0029') }}
   nubtn(
+    v-if="!preview"
     size="mid-full"
     :disabled="isGenerating"
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
@@ -33,6 +36,15 @@ import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+
+const props = defineProps({
+  // for panelDescription
+  preview: {
+    type: Boolean,
+    default: false,
+  },
+})
+const { preview } = toRefs(props)
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()

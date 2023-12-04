@@ -1,40 +1,41 @@
 <template lang="pug">
 div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide")
-  div(
-    v-for="(tab, index) in defaultEditorTabs"
-    :key="`${tab.icon}-${index}`"
-    class="w-44"
-    :class="{ 'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052') }")
+  template(v-for="(tab, index) in defaultEditorTabs")
     div(
-      class="sidebar__tab flex flex-col items-center justify-center gap-2 box-border p-4"
-      @click.stop="handleTabAction(tab)"
-      @pointerdown.stop)
-      svg-icon(
-        class="pointer-events-none"
-        :style="tab.styles"
-        :iconName="tab.icon"
-        :iconColor="tab.disabled ? 'app-icon-dark' : currActiveFeature === tab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
-        iconWidth="20px")
-      span(
-        class="typo-btn-sm whitespace-nowrap pointer-events-none"
-        :class="tab.disabled ? 'text-app-icon-dark' : 'text-app-btn-primary-text'") {{ tab.text }}
-    div(
-      v-if="tab.icon === currActiveFeature && tab.subTabs"
-      class="flex flex-col items-center justify-center gap-2 bg-neutral-light-active/50 rounded-full")
+      v-if="!tab.hidden"
+      :key="`${tab.icon}-${index}`"
+      class="w-44"
+      :class="{ 'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052') }")
       div(
-        v-for="(subTab, index) in tab.subTabs"
-        :key="`${subTab.icon}-${index}`"
-        class="flex flex-col items-center justify-center gap-2 box-border p-4"
-        @click.stop="handleTabAction(subTab)"
+        class="sidebar__tab flex flex-col items-center justify-center gap-2 box-border p-4"
+        @click.stop="handleTabAction(tab)"
         @pointerdown.stop)
         svg-icon(
-          :style="subTab.styles"
-          :iconName="subTab.icon"
-          :iconColor="currActiveFeature === subTab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+          class="pointer-events-none"
+          :style="tab.styles"
+          :iconName="tab.icon"
+          :iconColor="tab.disabled ? 'app-icon-dark' : currActiveFeature === tab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
           iconWidth="20px")
         span(
-          class="typo-btn-sm whitespace-nowrap"
-          :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
+          class="typo-btn-sm whitespace-nowrap pointer-events-none"
+          :class="tab.disabled ? 'text-app-icon-dark' : 'text-app-btn-primary-text'") {{ tab.text }}
+      div(
+        v-if="tab.icon === currActiveFeature && tab.subTabs"
+        class="flex flex-col items-center justify-center gap-2 bg-neutral-light-active/50 rounded-full")
+        div(
+          v-for="(subTab, index) in tab.subTabs"
+          :key="`${subTab.icon}-${index}`"
+          class="flex flex-col items-center justify-center gap-2 box-border p-4"
+          @click.stop="handleTabAction(subTab)"
+          @pointerdown.stop)
+          svg-icon(
+            :style="subTab.styles"
+            :iconName="subTab.icon"
+            :iconColor="currActiveFeature === subTab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+            iconWidth="20px")
+          span(
+            class="typo-btn-sm whitespace-nowrap"
+            :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
@@ -62,8 +63,8 @@ interface ISidebarTab {
 const { t } = useI18n()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
-const { currActiveFeature } = storeToRefs(editorStore)
-const { setRequireImgNum } = useImgSelectorStore()
+const { currActiveFeature, editorType } = storeToRefs(editorStore)
+const { openImgSelecotr } = useImgSelectorStore()
 
 const addSubTabs = computed(() => {
   return [
@@ -100,6 +101,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'selection',
       text: t('CM0051'),
       panelType: '',
+      hidden: editorType.value === 'hidden-message',
     },
     {
       icon: 'cm_brush',
@@ -110,16 +112,19 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       icon: 'auto-fill',
       text: t('CM0052'),
       panelType: '',
+      hidden: editorType.value === 'hidden-message',
     },
     {
       icon: 'reverse',
       text: t('CM0019'),
       panelType: '',
+      hidden: editorType.value === 'hidden-message',
     },
     {
       icon: 'ban',
       text: t('CM0029'),
       panelType: '',
+      hidden: editorType.value === 'hidden-message',
     },
     {
       icon: 'canvas',
@@ -162,7 +167,7 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'photo-rect':
-      setRequireImgNum(1)
+      openImgSelecotr()
       break
     case 'objects': {
       assetPanelUtils.setCurrActiveTab('object')

@@ -1,7 +1,8 @@
 import { useTutorialStore } from '@/stores/tutorial'
+import type { EditorType } from '@/types/editor'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 
-type ITutorialName = 'powerful-fill'
+const tutorialList: EditorType[] = ['powerful-fill']
 
 export default new (class TutorialUtils {
   get isDuringTutorial() {
@@ -9,13 +10,17 @@ export default new (class TutorialUtils {
     return computed(() => !!name.value)
   }
 
-  runTutorial(tutorialName: ITutorialName) {
-    if (cmWVUtils.inBrowserMode ||
-      cmWVUtils.tutorialFlags['powerful-fill']) return
+  runTutorial(tutorialName: EditorType) {
+    if (
+      cmWVUtils.inBrowserMode ||
+      !tutorialList.includes(tutorialName) ||
+      cmWVUtils.tutorialFlags[tutorialName]
+    )
+      return
     useTutorialStore().showTutorial(tutorialName)
   }
 
-  nextStep(tutorialName: ITutorialName) {
+  nextStep(tutorialName: EditorType) {
     useTutorialStore().tutorialNextStep(tutorialName)
   }
 })()
