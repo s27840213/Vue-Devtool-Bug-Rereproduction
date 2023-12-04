@@ -26,7 +26,10 @@ module.exports = {
   corePlugins: {
     preflight: false
   },
-  content: ['./src/**/*.{vue,js,ts,jsx,tsx}', '../../packages/ui-component/src/**/*.vue'],
+  content: [
+    './src/**/*.{vue,js,ts}',
+    '../../packages/vivi-lib/src/**/*.{vue,js,ts}',
+  ],
   // purge: ['./src/**/*.html', './src/**/*.vue', './src/**/*.ts'],
   theme: {
     extend: {},
