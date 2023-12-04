@@ -3,10 +3,13 @@ import store from "@/store"
 import { AnyTouchEvent } from "any-touch"
 import layerUtils from "./layerUtils"
 import mathUtils from "./mathUtils"
+import { MovingUtils } from "./movingUtils"
 import pageUtils from "./pageUtils"
+import pointerEvtUtils from "./pointerEvtUtils"
 
 const MAX_SCALE = 400
-const TRANSITION_TIME = 150
+const TRANSITION_TIME = 300
+const TRANSITION_CLASS = ['transition-transform', 'duration-300']
 
 class pagePinchUtils {
   private isPinchInit = false
@@ -14,7 +17,16 @@ class pagePinchUtils {
   private initPinchPos = { x: 0, y: 0 }
   private initPageScale = -1
   private editorView: HTMLElement
+  private pointerIds: Array<number> = []
   private translationRatio = { x: 0, y: 0 }
+  private movingUtils = new MovingUtils({
+    _config: { config: layerUtils.getCurrLayer },
+    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+    body: document.getElementById(
+      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+    ) as HTMLElement
+  })
+
   private get page(): IPage { return pageUtils.getCurrPage }
   private get contentScaleRatio(): number { return this.page.contentScaleRatio}
   private get pageScaleRatio(): number { return store.getters.getPageScaleRatio }
@@ -28,16 +40,16 @@ class pagePinchUtils {
   private pinchInit(e: AnyTouchEvent) {
     console.log('pinch init')
     this.isPinchInit = true
-    // if (this.isBgImgCtrl || this.isImgCtrl) return
 
     this.initPagePos.x = this.page.x
     this.initPagePos.y = this.page.y
     this.initPinchPos = { x: e.x, y: e.y }
     this.initPageScale = this.pageScaleRatio
     this.translationRatio = this.getTranslationRatio(e, this.editorView)
-    console.warn('initpinch pos', this.initPagePos, this.initPinchPos)
     store.commit('SET_isPageScaling', true)
     store.commit('mobileEditor/SET_isPinchingEditor', true)
+
+    this.pointerIds = [...pointerEvtUtils.pointerIds]
 
     return this.initPinchPos
   }
@@ -45,8 +57,6 @@ class pagePinchUtils {
   private getTranslationRatio(e: AnyTouchEvent, windowEl: HTMLElement) {
     const rect = windowEl.getBoundingClientRect()
     return {
-      // x: 0.5,
-      // y: 0.5
       x: ((e.x - rect.left) - this.page.x) / (this.page.width * this.pageScaleRatio * this.contentScaleRatio * 0.01),
       y: ((e.y - rect.top) - this.page.y) / (this.page.height * this.pageScaleRatio * this.contentScaleRatio * 0.01)
     }
@@ -55,6 +65,7 @@ class pagePinchUtils {
   private pinchMove(e: AnyTouchEvent) {
     const { page, contentScaleRatio } = this
     const newScaleRatio = e.scale
+
     // size difference via pinching
     const sizeDiff = {
       width: (newScaleRatio - 1) * (page.width * contentScaleRatio * this.initPageScale * 0.01),
@@ -70,8 +81,8 @@ class pagePinchUtils {
       x: this.initPagePos.x - this.translationRatio.x * sizeDiff.width + movingTranslate.x,
       y: this.initPagePos.y - this.translationRatio.y * sizeDiff.height + movingTranslate.y
     })
+
     store.commit('mobileEditor/UPDATE_pinchScale', e.scale)
-    // pageUtils.updatePageProps()
   }
 
   private getEdgeLimit(pageScaleRatio: number) {
@@ -97,7 +108,7 @@ class pagePinchUtils {
     // case 1: page smaller than default size
     if (newPageScaleRatio < 100) {
       console.warn(1)
-      currPageEl.classList.add('transition-transform')
+      currPageEl.classList.add(...TRANSITION_CLASS)
       pageUtils.updatePagePos(layerUtils.pageIndex, {
         x: this.page.initPos.x,
         y: this.page.initPos.y
@@ -105,14 +116,15 @@ class pagePinchUtils {
       const shrinkRatio = 100 / this.initPageScale
       store.commit('mobileEditor/UPDATE_pinchScale', shrinkRatio)
       setTimeout(() => {
-        currPageEl.classList.remove('transition-transform')
-        this.resetState()
+        currPageEl.classList.remove(...TRANSITION_CLASS)
         store.commit('SET_pageScaleRatio', 100)
+        this.resetState()
+        this.movingUtils.pageMoveStart(e as any)
       }, TRANSITION_TIME)
     // case 2: page bigger than maximum size
     } else if (newPageScaleRatio > MAX_SCALE) {
       console.warn(2)
-      currPageEl.classList.add('transition-transform')
+      currPageEl.classList.add(...TRANSITION_CLASS)
       const sizeDiff = {
         width: (newPageScaleRatio - MAX_SCALE) * (page.width * contentScaleRatio * 0.01),
         height: (newPageScaleRatio - MAX_SCALE) * (page.height * contentScaleRatio * 0.01)
@@ -130,13 +142,14 @@ class pagePinchUtils {
       store.commit('mobileEditor/UPDATE_pinchScale', newPinchScale)
       setTimeout(() => {
         store.commit('SET_pageScaleRatio', MAX_SCALE)
-        currPageEl.classList.remove('transition-transform')
+        currPageEl.classList.remove(...TRANSITION_CLASS)
         this.resetState()
+        this.movingUtils.pageMoveStart(e as any)
       }, TRANSITION_TIME)
     // case 3: page size proper but reach edges
     } else if (isReachLeft || isReachRight || isReachTop || isReachBottom) {
       console.warn(3)
-      currPageEl.classList.add('transition-transform')
+      currPageEl.classList.add(...TRANSITION_CLASS)
       const newPos = {
         x: page.x,
         y: page.y
@@ -158,20 +171,23 @@ class pagePinchUtils {
       pageUtils.updatePagePos(layerUtils.pageIndex, newPos)
       setTimeout(() => {
         store.commit('SET_pageScaleRatio', newPageScaleRatio)
-        currPageEl.classList.remove('transition-transform')
+        currPageEl.classList.remove(...TRANSITION_CLASS)
         this.resetState()
+        this.movingUtils.pageMoveStart(e as any)
       }, TRANSITION_TIME)
     } else {
       console.warn(4)
       // no need to edging the page
-      store.commit('SET_pageScaleRatio', newPageScaleRatio)
       this.resetState()
+      store.commit('SET_pageScaleRatio', newPageScaleRatio)
+      this.movingUtils.pageMoveStart(e as any)
     }
   }
 
   private pinchEnd(e: AnyTouchEvent) {
     this.handleEdging(e)
-    // this.resetState()
+    this.pointerIds.length = 0
+
     console.log('pinch end', e.scale)
   }
 
@@ -187,6 +203,11 @@ class pagePinchUtils {
   }
 
   private _pinchHandler(e: AnyTouchEvent) {
+    const touches = (e.nativeEvent as TouchEvent).touches
+    if (this.pointerIds.length === 2 && touches.length === 2 &&
+      (!this.pointerIds.includes(touches[0].identifier) ||
+      !this.pointerIds.includes(touches[1].identifier))) return this.pinchInit(e)
+
     switch (e.phase) {
       case 'move': {
         if (!this.isPinchInit) {
