@@ -1,8 +1,8 @@
 import i18n from '@/i18n'
 import {
-  IAdjustJsonProps,
-  IAdjustProps,
-  ISvgFilterTag
+IAdjustJsonProps,
+IAdjustProps,
+ISvgFilterTag
 } from '@/interfaces/adjust'
 import { IImage } from '@/interfaces/layer'
 import store from '@/store'
@@ -209,6 +209,21 @@ class ImageAdjustUtil {
     }]
   }
 
+  getInvert() {
+    const matInvert = [
+      '-1 0 0 0 1',
+      '0 -1 0 0 1',
+      '0 0 -1 0 1',
+      '0 0 0 1 0'
+    ]
+    return [
+      this.createSvgFilter({
+          tag: 'feColorMatrix',
+          attrs: { type: 'matrix', values: matInvert.join(' ') }
+      })
+    ]
+  }
+
   getSvgFilter(name: string, value: number, config?: IImage): any {
     if (value === 0) return []
     // @TODO: handle more filter func
@@ -225,6 +240,8 @@ class ImageAdjustUtil {
         return this.getBlur(value, config)
       case 'warm':
         return this.getWarm(value)
+      case 'invert':
+        return this.getInvert()
       default:
         return []
     }

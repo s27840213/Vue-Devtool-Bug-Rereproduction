@@ -916,7 +916,7 @@
   "NN0916": "Stretch Cat",
   "NN0917": "Stretch Dragon",
   "NN0918": "Image uploaded successfully",
-  "NN0919": "Paste edits",
+  "Colar edições": "Paste edits",
   "STK0001": "Add a text",
   "STK0002": "Tap to copy",
   "STK0003": "Press and hold to share",
@@ -1136,5 +1136,16 @@
   "CM0089": "for Some Image",
   "CM0090": "Fill by myself",
   "CM0091": "Auto fill blank area?",
-  "CM0092": "We can populate vacant areas as defaults for creation.<newline>Confirm?"
+  "CM0092": "We can populate vacant areas as defaults for creation.<newline>Confirm?",
+  "CM0093": "How to Create a Hidden Message Image?",
+  "CM0094": "Step 1. You can add images, stickers or text as hidden messages in the photo.",
+  "CM0095": "Step 2. After adding elements, type in your ideal scene.",
+  "CM0096": "Why invert  colors? ",
+  "CM0097": "With the same prompt, using inverted colors for hidden message can lead to different results. ",
+  "CM0098": "White Heart",
+  "CM0099": "Black Heart",
+  "CM0100": "Why background remove? ",
+  "CM0101": "With the same prompt, removing the background makes the subject more easy to see.",
+  "CM0102": "Remove BG",
+  "CM0103": "No remove BG"
 }

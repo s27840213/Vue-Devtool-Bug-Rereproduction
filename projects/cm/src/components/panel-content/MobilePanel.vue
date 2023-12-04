@@ -1,11 +1,13 @@
 <script lang="ts">
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
 import PanelFlip from '@nu/vivi-lib/components/editor/panelMobile/PanelFlip.vue'
 import PanelFontFormat from '@nu/vivi-lib/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSize from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSize.vue'
+import PanelFontCurve from '@nu/vivi-lib/components/editor/panelMobile/PanelFontCurve.vue'
 import PanelFontSpacing from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSpacing.vue'
 import PanelNudge from '@nu/vivi-lib/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelObjectAdjust.vue'
@@ -40,6 +42,7 @@ const component = defineComponent({
     PanelFonts,
     PanelFontSize,
     PanelFontFormat,
+    PanelFontCurve,
     PanelFontSpacing,
     PanelNudge,
     PanelAdjust,
@@ -48,6 +51,12 @@ const component = defineComponent({
     PanelObjectAdjust,
     PanelRemoveBg,
     Tabs,
+  },
+  setup() {
+    const { isBiColorEditor } = useBiColorEditor()
+    return {
+      isBiColorEditor,
+    }
   },
   data() {
     return {
@@ -64,6 +73,7 @@ const component = defineComponent({
         'order',
         'font-size',
         'font-format',
+        'font-curve',
         'font-spacing',
         'download',
         'more',
@@ -189,6 +199,11 @@ const component = defineComponent({
         case 'color': {
           return {
             panelHistory: this.panelHistory,
+          }
+        }
+        case 'adjust': { 
+          return {
+            isBiColorEditor: this.isBiColorEditor,
           }
         }
         default: {
