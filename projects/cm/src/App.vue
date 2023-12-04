@@ -121,6 +121,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
@@ -135,6 +136,7 @@ import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
+import router from './router'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
@@ -297,9 +299,15 @@ onBeforeUnmount(() => {
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
 // #endregion
 
+// #region webview
 const userInfo = computed(() => store.getters['cmWV/getUserInfo'] as IUserInfo)
 const statusBarHeight = computed(() => userInfo.value.statusBarHeight)
 const homeIndicatorHeight = computed(() => userInfo.value.homeIndicatorHeight)
+
+router.isReady().then(() => {
+  cmWVUtils.sendAppLoaded()
+})
+// #endregion
 </script>
 
 <style lang="scss">

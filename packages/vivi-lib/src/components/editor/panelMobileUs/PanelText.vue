@@ -28,7 +28,7 @@ div(class="overflow-container full-size rwd-container")
         div(class="panel-text__top-item")
         //- Empty recently used view
         div(v-if="showAllRecently && !item.content.length && !pending" class="panel-text__recent-empty")
-          svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+          svg-icon(iconName="empty-folder" iconWidth="42px" iconColor="white")
           div(class="panel-text__recent-empty--title") No content in Recently Used
       template(v-if="pending" #after)
         div(class="text-center")
@@ -86,8 +86,14 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getCategories({ writeBack: false, key: this.$isStk ? 'textStock' : undefined })
-        await this.getRecently({ writeBack: true, key: this.$isStk ? 'textStock' : undefined })
+        await this.getCategories({
+          writeBack: false,
+          key: this.$isStk || this.$isCm ? 'textStock' : undefined
+        })
+        await this.getRecently({
+          writeBack: true,
+          key: this.$isStk || this.$isCm ? 'textStock' : undefined
+        })
         await this.getContent()
       })
     this.toggleTransitions(false)

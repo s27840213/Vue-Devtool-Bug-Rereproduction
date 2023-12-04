@@ -32,7 +32,6 @@ import PanelPhoto from '@nu/vivi-lib/components/editor/panelSidebar/PanelPhoto.v
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -86,7 +85,7 @@ export default defineComponent({
         'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list',
         'multiple-select', 'remove-bg', 'nudge', 'overlay-light'],
       // eslint-disable-next-line vue/no-unused-properties
       fixSizePanels: [
@@ -94,9 +93,9 @@ export default defineComponent({
         'order', 'font-size', 'font-format',
         'font-spacing', 'more', 'object-adjust', 'brand-list', 'multiple-select', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
-      hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
+      hideDynamicCompPanels: ['crop', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      noRowGapPanels: ['crop', 'color', 'copy-style', 'multiple-select', 'remove-bg',
+      noRowGapPanels: ['crop', 'color', 'multiple-select', 'remove-bg',
         'text-effect'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['download', 'remove-bg'],
@@ -121,9 +120,6 @@ export default defineComponent({
       switch (this.currActivePanel) {
         case 'crop': {
           return `${this.$t('NN0496')}`
-        }
-        case 'copy-style': {
-          return `${this.$t('NN0809')}`
         }
         case 'multiple-select': {
           return `${this.$t('NN0657')}`
@@ -367,11 +363,6 @@ export default defineComponent({
                 imgControl: false
               })
             }
-            break
-          }
-
-          case 'copy-style': {
-            formatUtils.clearCopiedFormat()
             break
           }
 

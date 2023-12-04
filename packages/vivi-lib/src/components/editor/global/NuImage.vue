@@ -70,6 +70,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
 
 <script lang="ts">
 import i18n from '@/i18n'
+import { SrcObj } from '@/interfaces/gallery'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -340,7 +341,7 @@ export default defineComponent({
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }
-        this.handleUploadShadowImg()
+        // this.handleUploadShadowImg()
         this.isShadowImgLoaded = false
       },
       deep: true
@@ -353,8 +354,8 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIndex: subLayerIdx } = this
           const srcObj = latest.srcObj
           const shadowImgStyles = latest.styles
-          imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-          imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+          imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj as SrcObj)
+          imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles as IImageStyle)
         }
       },
       deep: true
@@ -618,18 +619,9 @@ export default defineComponent({
         this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.config as IImage)
         this.errorSrcIdentifier.retry = 1
       }
-      const { srcObj, styles: { width, height } } = this.config
+      const { srcObj } = this.config
       this.isOnError = true
       let updater
-      if (imageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          srcObj: {
-            ...srcObj,
-            maxSize: 'larg'
-          }
-        })
-        return
-      }
       switch (srcObj.type) {
         case 'private':
           updater = async () => await this.updateImages({ assetSet: new Set<string>([srcObj.assetId]) })
@@ -959,9 +951,17 @@ export default defineComponent({
       if (srcObj.type === 'upload' && srcObj.assetId) {
         const uploadData = (this.uploadShadowImgs as Array<IUploadShadowImg>)
           .find((data: IUploadShadowImg) => data.id === srcObj.assetId)
-        if (uploadData) {
+        if (uploadData && uploadData.srcObj && uploadData.styles) {
           imageShadowUtils.updateShadowSrc(this.layerInfo(), uploadData.srcObj)
           imageShadowUtils.updateShadowStyles(this.layerInfo(), uploadData.styles)
+        } else {
+          const primarylayerId = layerUtils.getLayer(this.layerInfo().pageIndex, this.layerInfo().layerIndex).id
+          const layerData = {
+            primarylayerId,
+            config: this.config,
+            layerInfo: this.layerInfo
+          }
+          imageShadowPanelUtils.handleShadowUpload(layerData)
         }
       }
     },

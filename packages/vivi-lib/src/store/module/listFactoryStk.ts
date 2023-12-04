@@ -15,6 +15,7 @@ import stkWVUtils, { MODULE_TYPE_MAPPING } from '@/utils/stkWVUtils'
 import { captureException } from '@sentry/browser'
 import { cloneDeep, filter, find, pull } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
 
 function $all(keyword: string): ITag {
   return {
@@ -134,7 +135,7 @@ export default function (this: any) {
             if (keyword) {
               commit('SET_STATE', { keyword })
             }
-            await stkWVUtils.listAsset(key)
+            await getAutoWVUtils().listAsset(key)
           }
         } else {
           commit('SET_pending', { recently: false })
@@ -189,7 +190,7 @@ export default function (this: any) {
         result.content = recently.content.concat(category.content)
         commit('SET_CATEGORIES', result)
         if (key) {
-          await stkWVUtils.listAsset(key)
+          await getAutoWVUtils().listAsset(key)
         }
         if (category.content.length === 0) {
           dispatch('getMoreContent')

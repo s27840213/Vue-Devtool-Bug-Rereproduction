@@ -71,7 +71,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.getRecently(this.$isStk ? { key: 'font' } : {})
+    this.getRecently((this.$isStk || this.$isCm) ? { key: 'font' } : {})
     if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
       this.fetchFonts()
     }
