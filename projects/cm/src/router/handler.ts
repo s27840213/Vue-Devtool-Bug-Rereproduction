@@ -4,6 +4,7 @@ import type { EditorType } from '@/types/editor'
 import { editorTypes } from '@/types/editor'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import VueRouter from 'vue-router'
+import store from '@/vuex'
 
 const isValidType = (x: any): x is EditorType => editorTypes.includes(x);
 
@@ -19,14 +20,17 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     
     const type = urlParams.get('type')
     if (!isValidType(type)) throw new Error('Invalid editor type.')
-    
-    const { startEditing, setPageSize, setImgAspectRatio, setCurrActiveFeature, stepsReset } = useEditorStore()
+
+    const editorStore = useEditorStore()
+    const { editorType } = storeToRefs(editorStore)
+    const { startEditing, setPageSize, setImgAspectRatio, setCurrActiveFeature, stepsReset } = editorStore
     const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     startEditing(type)
     setImgAspectRatio(9/16)
     setPageSize(900, 1600)
     stepsReset()
-    if(isBiColorEditor.value) initBiColorEditor(type)
+    if (isBiColorEditor.value) initBiColorEditor(editorType.value)
+    store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
     switch (type) {
       case 'powerful-fill':
 
