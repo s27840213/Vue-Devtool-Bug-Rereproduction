@@ -18,7 +18,7 @@ div(class="description-page w-full h-full text-app-text-secondary px-24")
       div(class="w-6 h-full bg-app-tab-active absolute top-0 left-0")
     div(class="flex justify-center gap-16")
       img(
-        v-for="idx in 3"
+        v-for="(n, idx) in 3"
         :key="idx"
         :src="getImg(idx)"
         class="w-32 h-32 overflow-hidden rounded object-cover object-center"
@@ -37,7 +37,7 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const target: Ref<EditorType> = ref(route.query.target as EditorType)
-const idxCurrImg = ref(1)
+const idxCurrImg = ref(0)
 const getImg = (idx: number) => {
   return require(`demo/${target.value}-demo-${idx}.png`)
 }
