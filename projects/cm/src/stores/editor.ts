@@ -1,7 +1,7 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
-import type { EditorFeature, EditorStates, EditorType, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
+import type { DescriptionPanel, EditorFeature, EditorStates, EditorType, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
@@ -36,7 +36,7 @@ interface IEditorStore {
   useTmpSteps: boolean
   currPrompt: string,
   editorTheme: null | string,
-  descriptionPanel: null | string,
+  descriptionPanel: null | DescriptionPanel,
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -241,7 +241,7 @@ export const useEditorStore = defineStore('editor', {
     setEditorTheme(theme: string | null) {
       this.editorTheme = theme
     },
-    setDescriptionPanel(panel: string | null) {
+    setDescriptionPanel(panel: DescriptionPanel | null) {
       this.descriptionPanel = panel
     }
   },

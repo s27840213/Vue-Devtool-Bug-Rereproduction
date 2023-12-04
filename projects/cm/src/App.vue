@@ -63,6 +63,18 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         v-if="showImgSelector"
         class="w-full h-full z-img-selector pointer-events-auto"
         :requireNum="requireImgNum")
+    transition(name="fade-in-out")
+      div(v-if="showDescriptionPanel"
+      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-neutral-dark bg-opacity-70")
+    transition(name="bottom-up-down")
+      bottom-panel(
+        v-if="showDescriptionPanel"
+        class="absolute bottom-0 z-desciption-panel pointer-events-auto")
+        template(#content="{setSlotRef}")
+          transition(
+            name="bottom-panel-transition"
+            mode="out-in")
+            panel-description(:ref="(el: any) => setSlotRef(el)")
     div(class="popup-area")
       popup(class="pointer-events-auto")
     div(class="modal-container" v-if="isModalOpen")
@@ -163,8 +175,6 @@ const bottomPanelComponent = computed(() => {
   switch (true) {
     case atDescription.value:
       return null
-    case showDescriptionPanel.value:
-      return PanelDescription
     case wantToQuit.value:
       return ModalTemplate
     case vuex.state.user.showForceLogin:

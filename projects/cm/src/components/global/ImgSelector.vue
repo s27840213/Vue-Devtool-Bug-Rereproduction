@@ -134,7 +134,7 @@ div(
           iconName="close-btn"
           @click="pull(targetImgs, img)")
 //- Preprocess view
-div(v-else class="preprocess w-full h-full fle justify-center items-center bg-app-bg text-app-text-secondary")
+div(v-else class="preprocess w-full h-full bg-app-bg text-app-text-secondary")
   div(class="w-full h-[60%] mt-37 mb-20 flex justify-center items-center")
     img(
       class="w-full max-h-full object-cover object-center filter"
@@ -147,7 +147,7 @@ div(v-else class="preprocess w-full h-full fle justify-center items-center bg-ap
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-        )
+          @click="() => editorStore.setDescriptionPanel('hidden-message-invert')")
       toggle-btn(class="payment__trial__toggle" v-model="isInvert" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
     div(class="flex justify-between items-center typo-h5 py-8")
       div(class="flex gap-8")
@@ -160,7 +160,7 @@ div(v-else class="preprocess w-full h-full fle justify-center items-center bg-ap
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-        )
+          @click="() => editorStore.setDescriptionPanel('hidden-message-bgrm')")
       toggle-btn(class="payment__trial__toggle" v-model="isBgRemove" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
     div(class="flex justify-between items-center typo-h6")
       nubtn(
