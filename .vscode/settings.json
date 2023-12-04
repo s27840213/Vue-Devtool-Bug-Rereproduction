@@ -50,5 +50,6 @@
   "search.exclude": {
     "**/dist": true,
     "**/prerender": true
-  }
+  },
+  "tailwindCSS.experimental.configFile": "packages/vivi-lilb/tailwind.config.cjs"
 }

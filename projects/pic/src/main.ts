@@ -1,3 +1,4 @@
+import '@nu/vivi-lib/assets/css/main.css'
 import App from '@/App.vue'
 import i18n from '@/i18n'
 import router from '@/router'

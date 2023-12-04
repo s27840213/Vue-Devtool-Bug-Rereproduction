@@ -103,6 +103,8 @@ export default defineConfig({
         additionalData: '@use "@nu/vivi-lib/assets/scss/utils" as *;',
       },
     },
+    // Specific post css config file folder.
+    postcss: '../../packages/vivi-lib',
   },
   server: {
     port: 8082,

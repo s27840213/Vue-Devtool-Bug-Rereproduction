@@ -1,3 +1,4 @@
+import '@nu/vivi-lib/assets/css/main.css'
 import router from '@/router'
 import store from '@/store'
 import { initApp } from '@nu/vivi-lib/main'
