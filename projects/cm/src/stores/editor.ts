@@ -162,7 +162,7 @@ export const useEditorStore = defineStore('editor', {
       if (video) {
         this.generatedResults[index].video = video
       }
-      if (data.updateIndex && this.currGenResultIndex === -1) {
+      if (updateIndex && this.currGenResultIndex === -1) {
         this.currGenResultIndex = index
       }
     },
