@@ -10,7 +10,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
         :currPage="currPage"
         :currActivePanel="currActivePanel")
   div(class="flex flex-col gap-24 bg-app-tab-bg shadow-[0_100px_0_100px_black] shadow-app-tab-bg z-[1]")
-    div(v-if="!hideTabs" class="footer-tabs-row flex gap-24")
+    div(v-if="!hideTabs" ref="footerTabs" class="footer-tabs-row flex gap-24")
       div(class="cm-footer-tabs flex items-center justify-center h-44")
         div(
           class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22"
@@ -54,6 +54,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
 </template>
 
 <script lang="ts">
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
@@ -80,7 +81,6 @@ import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { CMobilePanel } from './MobilePanel.vue'
-import useBiColorEditor from '@/composable/useBiColorEditor'
 
 export default defineComponent({
   extends: FooterTabs,
@@ -94,7 +94,7 @@ export default defineComponent({
   },
   data() {
     return {
-      hideTabsPanels: ['crop-flip', 'adjust', 'fonts'],
+      hideTabsPanels: ['crop-flip', 'adjust', 'fonts', 'color', 'text-effect', 'photo-shadow'],
       bottomTitlePanels: ['crop-flip', 'adjust'],
     }
   },
@@ -182,7 +182,7 @@ export default defineComponent({
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs: Array<IFooterTab> = [
         { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
-        { icon: 'invert', text: `${this.$t('CM0080')}` },
+        { icon: 'invert', text: `${this.$t('CM0080')}`, hidden: !this.isBiColorEditor },
         { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' }, // vivisticker can only crop frame besides template editor
         flipTab,
         {
@@ -192,13 +192,13 @@ export default defineComponent({
         },
         // charmix disabled for now
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame || this.inImageEditor, disabled: this.isProcessing },
-        // {
-        //   icon: 'effect',
-        //   text: `${this.$t('NN0429')}`,
-        //   panelType: 'photo-shadow',
-        //   hidden: layerUtils.getCurrLayer.type === LayerType.frame,
-        //   // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
-        // },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: layerUtils.getCurrLayer.type === LayerType.frame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         {
           icon: 'cm_sliders',
           text: `${this.$t('NN0042')}`,
