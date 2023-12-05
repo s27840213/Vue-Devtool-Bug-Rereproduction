@@ -1,11 +1,13 @@
 import generalUtils from '@/utils/generalUtils'
-import { GetterTree, MutationTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
+import store from '@/store'
 
 export interface IAssetPanelState {
   currActiveTab: string,
   currActiveObjectFavTab: string,
   isInCategoryDict: { [key: string]: boolean },
   showAllRecentlyDict: { [key: string]: boolean },
+  isHiddenMessage: boolean
 }
 
 const tabs = generalUtils.isStk ? ['object', 'background', 'text', 'template']
@@ -25,6 +27,7 @@ const getDefaultState = (): IAssetPanelState => ({
   currActiveObjectFavTab: '',
   isInCategoryDict: getDefaultDict(false),
   showAllRecentlyDict: getDefaultDict(false),
+  isHiddenMessage: false
 })
 
 const state = getDefaultState()
@@ -44,6 +47,9 @@ const getters: GetterTree<IAssetPanelState, unknown> = {
   getShowAllRecently(state: IAssetPanelState): (tab: string) => boolean {
     return (tab: string): boolean => state.showAllRecentlyDict[tab] ?? false
   },
+  getIsHm(state: IAssetPanelState): string {
+    return state.isHiddenMessage ? '1' : '0'
+  },
 }
 
 const mutations: MutationTree<IAssetPanelState> = {
@@ -59,11 +65,26 @@ const mutations: MutationTree<IAssetPanelState> = {
   SET_showAllRecently(state: IAssetPanelState, updateInfo: { tab: string, bool: boolean }) {
     state.showAllRecentlyDict[updateInfo.tab] = updateInfo.bool
   },
+  SET_isHiddenMessage(state: IAssetPanelState, bool: boolean) {
+    state.isHiddenMessage = bool
+  }
+}
+
+const actions: ActionTree<IAssetPanelState, unknown> = {
+  setIsHiddenMessage: ({ commit, state }, value: boolean) => {
+    if (state.isHiddenMessage === value) return
+    commit('SET_isHiddenMessage', value)
+    store.dispatch('objects/resetContent')
+    store.dispatch('objects/resetSearch')
+    store.dispatch('textStock/resetContent')
+    store.dispatch('textStock/resetSearch')
+  }
 }
 
 export default {
   namespaced: true,
   state,
   getters,
-  mutations
+  mutations,
+  actions
 }

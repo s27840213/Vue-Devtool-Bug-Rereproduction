@@ -6,6 +6,8 @@ import { EventEmitter } from 'events'
 import { clamp, filter, flatten, uniq } from 'lodash'
 import pageUtils from './pageUtils'
 import colorTable from '@/assets/json/colors.json'
+import textPropUtils from './textPropUtils'
+import tiptapUtils from './tiptapUtils'
 
 const STOP_POSTFIX = '_st'
 
@@ -120,6 +122,49 @@ class ColorUtils {
       pageIndex: pageUtils.currFocusPageIndex,
       color
     })
+  }
+
+  setAllLayerColor(color: string) {
+    const getColoredTextLayer = (layer: IText) => {
+      return textPropUtils.spanParagraphPropertyHandler(
+        'color',
+        { color },
+        { pIndex: 0, sIndex: 0, offset: 0 },
+        { pIndex: layer.paragraphs.length-1, sIndex: 0, offset: 0 },
+        layer
+      )
+    }
+
+    const pages = pageUtils.getPages
+    pages.forEach((page, pageIndex) => {
+      page.layers.forEach((layer, layerIndex) => {
+        if (layer.type === 'shape') {
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {color: layer.color.map(() => color)})
+        } else if (layer.type === 'text') {
+          layerUtils.updateLayerProps(
+            pageIndex,
+            layerIndex,
+            { paragraphs: getColoredTextLayer(layer).paragraphs }
+          )
+        } else if (layer.type === 'group') {
+          layer.layers.forEach((subLayer, subLayerIdx) => {
+            if (subLayer.type === 'shape') {
+              layerUtils.updateLayerProps(pageIndex, layerIndex, {color: subLayer.color.map(() => color)}, subLayerIdx)
+            } else if (subLayer.type === 'text') {
+              layerUtils.updateLayerProps(
+                pageIndex,
+                layerIndex,
+                { paragraphs: getColoredTextLayer(subLayer).paragraphs },
+                subLayerIdx
+              )
+            }
+          })
+        }
+      })
+    })
+
+    // for nu-text-editor
+    tiptapUtils.spanStyleHandler('color', color)
   }
 }
 

@@ -106,13 +106,23 @@ Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFron
   cy.wrap(subjectFront).click()
     .then(before)
     .snapshotTest('Copy format before')
-    .get('.panel-group, .footer-tabs').find('.svg-brush').click({ force: true })
+    .get('.panel-group, .footer-tabs')
+    .find('.svg-brush, .svg-copy-edits')
+    .click({ force: true })
     .wrap(subjectBack).click('topLeft')
+    .isMobile(() => {
+      cy.get('.footer-tabs').find('.svg-paste-edits').click({ force: true })
+    })
     .snapshotTest('Copy format after')
     // Restore layer to original state
-    .then(after)
-    .get('.panel-group, .footer-tabs').find('.svg-brush').click({ force: true })
+    .wrap(subjectBack).then(after)
+    .get('.panel-group, .footer-tabs')
+    .find('.svg-brush, .svg-copy-edits')
+    .click({ force: true })
     .wrap(subjectFront).click('topLeft')
+    .isMobile(() => {
+      cy.get('.footer-tabs').find('.svg-paste-edits').click({ force: true })
+    })
   return cy.wrap(subjectFront)
 })
 

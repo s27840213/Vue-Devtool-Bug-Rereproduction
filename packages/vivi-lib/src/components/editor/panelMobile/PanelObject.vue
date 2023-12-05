@@ -14,7 +14,9 @@ div(class="panel-objects rwd-container")
   keep-alive
     panel-object-static(v-if="isStatic || isFavoritesStatic"
       class="panel-objects__content"
-      :showFav="isFavoritesStatic" ref="static")
+      :showFav="isFavoritesStatic"
+      :monoColor="monoColor"
+      ref="static")
   keep-alive
     panel-object-gifs(v-if="isGifs || isFavoritesGifs"
       class="panel-objects__content"
@@ -39,6 +41,11 @@ export default defineComponent({
     Tabs,
     PanelObjectStatic,
     PanelObjectGifs
+  },
+  props: {
+    monoColor: {
+      type: String,
+    }
   },
   data() {
     return {

@@ -2,17 +2,20 @@
 router-link(
   custom
   v-slot="{ navigate }"
-  to="/")
+  :to="`/description?target=${target}`")
   div(
     class="feature-card flex items-end justify-center box-border py-16 rounded-20"
     :style="cardStyles"
-    @click="navigate")
+    @click="() => target && navigate()")
     span(class="typo-h5 text-primary-white") {{ title }}
 </template>
 <script setup lang="ts">
+import type { EditorType } from '@/types/editor';
+
 const props = defineProps<{
   bgImg: string
   title: string
+  target?: EditorType
 }>()
 
 const cardStyles = computed(() => {

@@ -135,7 +135,8 @@ export interface IListServiceParams {
   all_theme?: number
   colNum?: number,
   igLayout?: 'story' | 'post'
-  shuffle?: number
+  shuffle?: number,
+  isHm?: number
 }
 
 export interface IGroupDesignInputParams {

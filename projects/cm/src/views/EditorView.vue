@@ -30,15 +30,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         div(id='header-reset')
       template(v-else)
         svg-icon(
-          iconName="cm_undo"
-          :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-          iconWidth="20px"
-          @click="undo")
-        svg-icon(
-          iconName="cm_redo"
-          :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-          iconWidth="20px"
-          @click="redo")
+          v-for="btn in centerBtns"
+          :key="btn.icon"
+          :iconName="btn.icon"
+          :iconColor="btn.disabled ? 'app-tab-disable' : 'app-btn-primary-text'"
+          :iconWidth="`${btn.width}px`"
+          @click="btn.action")
     template(#right)
       nubtn(
         v-if="inAspectRatioState || inGenResultState"
@@ -81,6 +78,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"
+          :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
       v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
@@ -166,16 +164,18 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
       class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
-      :style="assetPanelStyles")
+      :style="assetPanelStyles"
+      v-bind="assetPanelProps")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
+import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import PixiRecorder from '@/utils/pixiRecorder'
-import tutorialUtils from '@/utils/tutorialUtils'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
@@ -250,7 +250,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult } = editorStore
+const { changeEditorState, updateGenResult, editorType } = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -265,7 +265,7 @@ const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
-    tutorialUtils.runTutorial('powerful-fill')
+    useTutorial().runTutorial(editorType)
   } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
@@ -299,6 +299,24 @@ const currImgSrc = computed(() => {
 
 const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep
+
+type centerBtn = {
+  icon: string,
+  disabled: boolean,
+  width: number,
+  action?: () => void
+}
+const centerBtns = computed<centerBtn[]>(() => {
+  const retTabs = []
+  const stepBtns = [
+    { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
+    { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo }
+  ]
+  if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20, action: () => editorStore.setDescriptionPanel('hidden-message') })
+  retTabs.push(...stepBtns)
+  if (currEditorTheme.value && editorType === 'hidden-message') retTabs.push({ icon: currEditorTheme.value.toggleIcon, disabled: false, width: 20, action: toggleEditorTheme })
+  return retTabs
+})
 // #endregion
 
 // #region page related
@@ -526,16 +544,27 @@ const recordPointer = (e: PointerEvent) => {
 const removePointer = (e: PointerEvent) => {
   pointerEvtUtils.removePointer(e.pointerId)
 }
+
+// toggle editor theme
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor()
 // #endregion
 
 // #region demo brush size section
 const canvasStore = useCanvasStore()
-const { brushSize, isChangingBrushSize, isAutoFilling } = storeToRefs(canvasStore)
+const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {
     width: `${brushSize.value * contentScaleRatio.value}px`,
     height: `${brushSize.value * contentScaleRatio.value}px`,
+    backgroundColor: `${drawingColor.value}4C`, // 30% opacity
+  }
+})
+
+const demoBrushSizeOutline = computed(() => {
+  return {
+    'outline-primary-white': !isBiColorEditor.value,
+    'outline-neutral-light-hover': isBiColorEditor.value
   }
 })
 // #endregion
@@ -610,6 +639,24 @@ const assetPanelComponent = computed(() => {
       return PanelObject
     default:
       return PanelText
+  }
+})
+
+const assetPanelProps = computed((): { [index: string]: any } => {
+  const monoColor = currEditorTheme.value?.fgColor
+  switch (currActiveTab.value) {
+    case 'text': {
+      return {
+        monoColor
+      }
+    }
+    case 'object':
+      return {
+        monoColor
+      }
+    default: {
+      return {}
+    }
   }
 })
 
@@ -704,8 +751,8 @@ const handleSwipe = (dir: string) => {
 @use '@/assets/scss/transitions.scss';
 
 .demo-brush {
-  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
-  @apply pointer-events-none rounded-full outline-4 outline-primary-white z-highest;
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  @apply pointer-events-none rounded-full outline-4 z-highest;
   outline-style: solid;
 }
 
@@ -714,16 +761,18 @@ const handleSwipe = (dir: string) => {
     @apply grid grid-rows-[minmax(0,1fr),auto,auto] grid-cols-1 justify-items-center items-center h-full w-full gap-16;
   }
 }
+
 // @TODO discuss with allen
 //@apply max-w-full max-h-full object-contain;
 .result-showcase {
   transform-style: preserve-3d;
+
   &__card {
     @apply max-h-full object-contain;
     backface-visibility: hidden;
     transition: transform 0.6s;
-    &--back {
-    }
+
+    &--back {}
   }
 }
 
