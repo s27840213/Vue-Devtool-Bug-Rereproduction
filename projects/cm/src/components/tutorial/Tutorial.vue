@@ -11,12 +11,14 @@ import { useTutorialStore } from '@/stores/tutorial';
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { storeToRefs } from 'pinia';
 import PowerfulFillTutorial from './PowerfulFillTutorial.vue';
+import HiddenMessageTutorial from './HiddenMessageTutorial.vue';
 
 const DEV = false // set to visualize clickable area
 const tutorialComponent = computed(() => {
   // add new tutorial components here
   const tutorials = [
-    PowerfulFillTutorial
+    PowerfulFillTutorial,
+    HiddenMessageTutorial
   ]
   return tutorials.find((t) => t.name === name.value + '-tutorial')
 })

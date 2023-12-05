@@ -10,7 +10,7 @@ div(
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
-      class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable"
+      class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
       :placeholder="$t('CM0024')"
       :autofocus="!isDuringTutorial"
       v-model="promptText")
@@ -29,9 +29,9 @@ div(
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
+import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
-import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
@@ -64,7 +64,7 @@ const promptText = computed({
 })
 
 const promptLen = computed(() => currPrompt.value.length)
-const isDuringTutorial = tutorialUtils.isDuringTutorial
+const { isDuringTutorial } = useTutorial()
 const { genImageFlow } = useGenImageUtils()
 const { checkCanvasIsEmpty } = useCanvasUtils()
 const { t } = useI18n()

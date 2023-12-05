@@ -369,6 +369,7 @@
   "NN0916": "Stretch Cat",
   "NN0917": "Stretch Dragon",
   "NN0918": "Image uploaded successfully",
+  "NN0919": "Paste edits",
   "STK0001": "Add a text",
   "STK0004": "Save",
   "STK0010": "Auto-save and never ask again.",
@@ -487,5 +488,9 @@
   "CM0100": "Why background remove? ",
   "CM0101": "With the same prompt, removing the background makes the subject more easy to see.",
   "CM0102": "Remove BG",
-  "CM0103": "No remove BG"
+  "CM0103": "No remove BG",
+  "CM0104": "You can add an image as Hidden message.",
+  "CM0105": "or add a sticker as hidden message.",
+  "CM0106": "or add a text as hidden message.",
+  "CM0107": "Type the scene."
 }

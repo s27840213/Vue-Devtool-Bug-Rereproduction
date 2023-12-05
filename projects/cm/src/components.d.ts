@@ -19,6 +19,7 @@ declare module 'vue' {
     FunctionBar: typeof import('./components/global/FunctionBar.vue')['default']
     GenResult: typeof import('./components/panel-content/GenResult.vue')['default']
     Headerbar: typeof import('./components/Headerbar.vue')['default']
+    HiddenMessageTutorial: typeof import('./components/tutorial/HiddenMessageTutorial.vue')['default']
     HighlightSection: typeof import('./components/home/HighlightSection.vue')['default']
     HomeTab: typeof import('./components/panel-content/HomeTab.vue')['default']
     ImgSelector: typeof import('./components/global/ImgSelector.vue')['default']

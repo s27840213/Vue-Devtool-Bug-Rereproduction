@@ -172,10 +172,10 @@ import Headerbar from '@/components/Headerbar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
+import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import PixiRecorder from '@/utils/pixiRecorder'
-import tutorialUtils from '@/utils/tutorialUtils'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
@@ -265,7 +265,7 @@ const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
-    tutorialUtils.runTutorial(editorType)
+    useTutorial().runTutorial(editorType)
   } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false

@@ -5,7 +5,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
       v-if="!tab.hidden"
       :key="`${tab.icon}-${index}`"
       class="w-44"
-      :class="{ 'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(tab.text ?? ''), 'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': tab.text === t('CM0052') }")
+      :class="getTabTutorialClasses(tab.text)")
       div(
         class="sidebar__tab flex flex-col items-center justify-center gap-2 box-border p-4"
         @click.stop="handleTabAction(tab)"
@@ -26,6 +26,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
           v-for="(subTab, index) in tab.subTabs"
           :key="`${subTab.icon}-${index}`"
           class="flex flex-col items-center justify-center gap-2 box-border p-4"
+          :class="getTabTutorialClasses(subTab.text)"
           @click.stop="handleTabAction(subTab)"
           @pointerdown.stop)
           svg-icon(
@@ -177,6 +178,16 @@ const handleTabAction = (tab: ISidebarTab) => {
       assetPanelUtils.setCurrActiveTab('text')
       break
     }
+  }
+}
+
+const getTabTutorialClasses = (text: string) => {
+  return {
+    'tutorial-powerful-fill-1--highlight': [t('CM0052'), t('CM0017'), t('CM0051')].includes(text),
+    'tutorial-powerful-fill-2--highlight tutorial-powerful-fill-2--clickable': text === t('CM0052'),
+    'tutorial-hidden-message-1--highlight': text === t('CM0050'),
+    'tutorial-hidden-message-2--highlight': text === t('CM0049'),
+    'tutorial-hidden-message-3--highlight': text === t('NN0494'),
   }
 }
 </script>
