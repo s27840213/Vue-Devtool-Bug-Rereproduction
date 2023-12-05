@@ -2,7 +2,8 @@
 div(class="canvas-section absolute top-0 left-0 z-canvas")
   canvas(
     v-show="!isDuringCopy"
-    class="canvas-section opacity-30"
+    class="canvas-section"
+    :class="isBiColorEditor ? 'opacity-100' : 'opacity-30'"
     ref="canvasRef"
     :style="canvasStyle")
   div(
@@ -11,6 +12,7 @@ div(class="canvas-section absolute top-0 left-0 z-canvas")
     :style="brushStyle")
 </template>
 <script setup lang="ts">
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -36,6 +38,7 @@ const canvasStyle = computed(() => {
   }
 })
 
+const { isBiColorEditor } = useBiColorEditor()
 // #endregion
 
 // #region Canvas feature section

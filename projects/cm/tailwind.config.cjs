@@ -128,6 +128,13 @@ module.exports = {
           fontWeight: 600,
           lineHeight: '16px',
         },
+        '.typo-btn-xs': {
+          fontFamily: 'Lato',
+          fontSize: '12px',
+          fontWeight: 600,
+          lineHeight: '16px',
+          transform: 'scale(0.9)',
+        },
       }
       addUtilities(textStyles, ['responsive'])
     }),

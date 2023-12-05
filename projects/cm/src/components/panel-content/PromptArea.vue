@@ -1,5 +1,7 @@
 <template lang="pug">
-div(class="flex flex-col justify-center items-center w-full box-border px-24 gap-16")
+div(
+  class="flex flex-col justify-center items-center w-full box-border px-24 gap-16"
+  :class="{'pointer-events-none': preview}")
   div(class="relative w-full")
     span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
     svg-icon(
@@ -8,7 +10,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
       class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
-      class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable"
+      class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
       :placeholder="$t('CM0024')"
       :autofocus="!isDuringTutorial"
       v-model="promptText")
@@ -19,6 +21,7 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
         @click="clearPromt")
         span {{ $t('CM0029') }}
   nubtn(
+    v-if="!preview"
     size="mid-full"
     :disabled="isGenerating"
     @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
@@ -26,21 +29,30 @@ div(class="flex flex-col justify-center items-center w-full box-border px-24 gap
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
+import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
-import tutorialUtils from '@/utils/tutorialUtils'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+
+const props = defineProps({
+  // for panelDescription
+  preview: {
+    type: Boolean,
+    default: false,
+  },
+})
+const { preview } = toRefs(props)
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt } = editorStore
-const { isGenerating, currPrompt } = storeToRefs(editorStore)
+const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt, setGenResultIndex } = editorStore
+const { isGenerating, currPrompt, inEditingState, generatedResults } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
   get() {
@@ -52,7 +64,7 @@ const promptText = computed({
 })
 
 const promptLen = computed(() => currPrompt.value.length)
-const isDuringTutorial = tutorialUtils.isDuringTutorial
+const { isDuringTutorial } = useTutorial()
 const { genImageFlow } = useGenImageUtils()
 const { checkCanvasIsEmpty } = useCanvasUtils()
 const { t } = useI18n()
@@ -84,10 +96,20 @@ const handleGenerate = async () => {
     setIsGenerating(true)
     await genImageFlow(promptText.value, false, 2, {
       onApiResponded: () => {
-        changeEditorState('next')
-        setIsGenerating(false)
-        setShowSpinner(false)
+        if (generatedResults.value.filter(r => r.url.length).length > 0 && inEditingState.value) {
+          changeEditorState('next')
+          setIsGenerating(false)
+          setShowSpinner(false)
+        }
       },
+      onSuccess: (index) => {
+        if (inEditingState.value) {
+          setGenResultIndex(index)
+          changeEditorState('next')
+          setIsGenerating(false)
+          setShowSpinner(false)
+        }
+      }
     })
   }
 }

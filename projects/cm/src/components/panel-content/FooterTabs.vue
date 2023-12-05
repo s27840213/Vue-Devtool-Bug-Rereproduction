@@ -10,7 +10,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
         :currPage="currPage"
         :currActivePanel="currActivePanel")
   div(class="flex flex-col gap-24 bg-app-tab-bg shadow-[0_100px_0_100px_black] shadow-app-tab-bg z-[1]")
-    div(v-if="!hideTabs" class="footer-tabs-row flex gap-24")
+    div(v-if="!hideTabs" ref="footerTabs" class="footer-tabs-row flex gap-24")
       div(class="cm-footer-tabs flex items-center justify-center h-44")
         div(
           class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22"
@@ -54,6 +54,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
 </template>
 
 <script lang="ts">
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
@@ -69,6 +70,7 @@ import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import imageAdjustUtil from '@nu/vivi-lib/utils/imageAdjustUtil'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
@@ -82,9 +84,17 @@ import { CMobilePanel } from './MobilePanel.vue'
 
 export default defineComponent({
   extends: FooterTabs,
+  setup() {
+    const { isBiColorEditor } = useBiColorEditor()
+    const { openImgSelecotr } = useImgSelectorStore()
+    return {
+      isBiColorEditor,
+      openImgSelecotr
+    }
+  },
   data() {
     return {
-      hideTabsPanels: ['crop-flip', 'adjust', 'fonts'],
+      hideTabsPanels: ['crop-flip', 'adjust', 'fonts', 'color', 'text-effect', 'photo-shadow'],
       bottomTitlePanels: ['crop-flip', 'adjust'],
     }
   },
@@ -172,6 +182,7 @@ export default defineComponent({
       genearlTabsNoFlip.splice(flipIndex, 1)
       const tabs: Array<IFooterTab> = [
         { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
+        { icon: 'invert', text: `${this.$t('CM0080')}`, hidden: !this.isBiColorEditor },
         { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' }, // vivisticker can only crop frame besides template editor
         flipTab,
         {
@@ -181,13 +192,13 @@ export default defineComponent({
         },
         // charmix disabled for now
         // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame || this.inImageEditor, disabled: this.isProcessing },
-        // {
-        //   icon: 'effect',
-        //   text: `${this.$t('NN0429')}`,
-        //   panelType: 'photo-shadow',
-        //   hidden: layerUtils.getCurrLayer.type === LayerType.frame,
-        //   // disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
-        // },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: layerUtils.getCurrLayer.type === LayerType.frame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         {
           icon: 'cm_sliders',
           text: `${this.$t('NN0042')}`,
@@ -211,7 +222,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -233,6 +244,7 @@ export default defineComponent({
         },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'font-curve', text: `${this.$t('NN0118')}`, panelType: 'font-curve', hidden: !this.isBiColorEditor },
         {
           icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
@@ -240,8 +252,9 @@ export default defineComponent({
           props: {
             currColorEvent: ColorEventType.text,
           },
+          hidden: this.isBiColorEditor,
         },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect', hidden: this.isBiColorEditor },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         {
           icon: 'copy-edits',
@@ -325,7 +338,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -338,7 +351,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: this.globalSelectedColor === 'none',
+          hidden: this.globalSelectedColor === 'none' || this.isBiColorEditor,
           props: {
             currColorEvent: ColorEventType.shape,
           },
@@ -832,8 +845,7 @@ export default defineComponent({
         case 'photo':
         case 'replace': {
           if (tab.panelType !== undefined) break
-          const { setRequireImgNum } = useImgSelectorStore()
-          setRequireImgNum(1, { replace: true })
+          this.openImgSelecotr({ replace: true })
           break
         }
         case 'color':
@@ -842,6 +854,17 @@ export default defineComponent({
           break
         case 'camera': {
           // Wait for coding
+          break
+        }
+        case 'invert': {
+          const imgLayer = this.currLayer as IImage
+          const adjust = imgLayer.styles?.adjust
+          imageAdjustUtil.setAdjust({
+            adjust: { ...adjust, invert: +!adjust?.invert },
+            pageIndex,
+            layerIndex,
+            subLayerIndex: subLayerIdx >= 0 ? subLayerIdx : undefined
+          })
           break
         }
         default: {

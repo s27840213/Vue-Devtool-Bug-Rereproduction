@@ -1,15 +1,17 @@
 <template lang="pug">
 div(
-  v-if="$slots.left"
+  
   ref="headerbarRef"
-  class="bg-app-bg box-border pt-10 pb-8 grid grid-rows-1 grid-flow-col auto-cols-fr min-h-[56px] w-full"
+  class="bg-app-bg box-border pt-10 pb-8 grid grid-rows-1 grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)] min-h-[56px] w-full"
   :class="hide ? 'invisible pointer-events-none' : ''"
   :style="{ paddingTop: `${userInfo.statusBarHeight}px` }")
-  div(class="flex justify-start items-center" :style="{ gap: `${leftGap}px` }")
+  div(
+    v-if="$slots.left"
+    class="flex justify-start items-center"
+    :style="{ gap: `${leftGap}px` }")
     slot(name="left")
   div(
-    v-if="$slots.middle"
-    class="flex justify-center items-center"
+    class="flex justify-center items-center whitespace-nowrap"
     :style="{ gap: `${middGap}px` }")
     slot(name="middle")
   div(

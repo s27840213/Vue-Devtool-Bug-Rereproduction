@@ -32,8 +32,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(v-if="!atEventTester && !(isDuringCopy && !isAutoFilling)"
-    class="z-bottom-panel row-start-3 row-end-4"
+  bottom-panel(v-if="bottomPanelComponent && !atEventTester && !(isDuringCopy && !isAutoFilling)"
+    class="z-bottom-panel row-start-3 row-end-4 tutorial-powerful-fill-4--highlight tutorial-hidden-message-4--highlight"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
     :style="disableBtmPanelTransition ? 'transition: none' : ''")
     template(#content="{setSlotRef}")
@@ -63,6 +63,18 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         v-if="showImgSelector"
         class="w-full h-full z-img-selector pointer-events-auto"
         :requireNum="requireImgNum")
+    transition(name="fade-in-out")
+      div(v-if="showDescriptionPanel"
+      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-neutral-dark bg-opacity-70")
+    transition(name="bottom-up-down")
+      bottom-panel(
+        v-if="showDescriptionPanel"
+        class="absolute bottom-0 z-desciption-panel pointer-events-auto")
+        template(#content="{setSlotRef}")
+          transition(
+            name="bottom-panel-transition"
+            mode="out-in")
+            panel-description(:ref="(el: any) => setSlotRef(el)")
     div(class="popup-area")
       popup(class="pointer-events-auto")
     div(class="modal-container" v-if="isModalOpen")
@@ -118,6 +130,7 @@ import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
+import PanelDescription from './components/panel-content/PanelDescription.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
@@ -140,10 +153,12 @@ const {
   atMyDesign,
   atSettings,
   atMainPage,
+  atDescription,
   atEventTester,
   showImgSelector,
   inGenResultState,
   inSavingState,
+  showDescriptionPanel
 } = useStateInfo()
 
 const globalStore = useGlobalStore()
@@ -160,6 +175,8 @@ const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean
 
 const bottomPanelComponent = computed(() => {
   switch (true) {
+    case atDescription.value:
+      return null
     case wantToQuit.value:
       return ModalTemplate
     case vuex.state.user.showForceLogin:

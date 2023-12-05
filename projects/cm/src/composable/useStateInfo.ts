@@ -11,6 +11,7 @@ const useStateInfo = () => {
   const atMyDesign = computed(() => path.value === '/mydesign')
   const atSettings = computed(() => path.value === '/settings')
   const atMainPage = computed(() => atHome.value || atMyDesign.value)
+  const atDescription = computed(() => path.value === '/description')
   const atEditor = computed(() => path.value === '/editor')
   const atEventTester = computed(() => path.value === '/nativeevttest')
   // #endregion
@@ -23,6 +24,7 @@ const useStateInfo = () => {
     inSavingState,
     showBrushOptions,
     showSelectionOptions,
+    showDescriptionPanel,
   } = storeToRefs(editorStore)
 
   const showHomeTabs = computed(() => atHome.value || atMyDesign.value)
@@ -40,6 +42,7 @@ const useStateInfo = () => {
     atEditor,
     atSettings,
     atMainPage,
+    atDescription,
     atEventTester,
     showHomeTabs,
     inGenResultState,
@@ -49,6 +52,7 @@ const useStateInfo = () => {
     showBrushOptions,
     showSelectionOptions,
     showImgSelector,
+    showDescriptionPanel,
   }
 }
 
