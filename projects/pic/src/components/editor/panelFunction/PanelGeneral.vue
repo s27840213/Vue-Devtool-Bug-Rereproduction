@@ -5,7 +5,7 @@ div(class="panel-group mb-10")
         :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
         @click="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()")
       span {{isGroup? $t('NN0212'):$t('NN0029')}}
-    div(class="border-gray-4 p-5 btn-opacity"
+    div(class="border-gray-4 border-2 border-solid p-5 btn-opacity"
       v-hint="$t('NN0030')"
     )
       svg-icon(:class="{'pointer': !isLocked}"
