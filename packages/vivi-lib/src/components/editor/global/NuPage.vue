@@ -252,7 +252,9 @@ export default defineComponent({
     if (this.config.x === 0 || this.config.y === 0) {
       editorUtils.handleContentScaleRatio(this.pageIndex)
     }
-    this.$store.commit('SET_pageScaleRatio', 100)
+    if (generalUtils.isCm) {
+      this.$store.commit('SET_pageScaleRatio', 100)
+    }
   },
   watch: {
     pageIndex(val) {

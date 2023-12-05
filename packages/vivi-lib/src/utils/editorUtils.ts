@@ -124,7 +124,9 @@ class EditorUtils {
       const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
       const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
-      // store.commit('SET_pageScaleRatio', 100)
+      if (!generalUtils.isCm) {
+        store.commit('SET_pageScaleRatio', 100)
+      }
       const pos = {
         x: (editorUtils.mobileSize.width - width * this.contentScaleRatio) * 0.5,
         y: (editorUtils.mobileSize.height - height * this.contentScaleRatio) * 0.5

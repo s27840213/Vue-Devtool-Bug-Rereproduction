@@ -427,7 +427,6 @@ export class MovingUtils {
       }
       return
     }
-    console.log('moving')
 
     if (store.state.controlState.phase !== 'moving') {
       store.commit('SET_STATE', {
@@ -581,22 +580,12 @@ export class MovingUtils {
     let x = -1
     let y = -1
     if (isReachRightEdge || isReachLeftEdge) {
-      if (isReachRightEdge) {
-        console.log('isReachRightEdge')
-      } else {
-        console.log('isReachLeftEdge')
-      }
       x = isReachRightEdge ? page.width * contentScaleRatio * (1 - pageScaleRatio) : 0
     } else {
       x = offsetPos.x + page.x
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
-      if (isReachTopEdge) {
-        console.log('isReachTopEdge')
-      } else {
-        console.log('isReachBottomEdge')
-      }
       y = isReachBottomEdge ? page.height * contentScaleRatio * (1 - pageScaleRatio) : 0
     } else {
       y = offsetPos.y + page.y
@@ -626,7 +615,6 @@ export class MovingUtils {
       x: (editorUtils.mobileSize.width - page.width * contentScaleRatio) * 0.5,
       y: (editorUtils.mobileSize.height - page.height * contentScaleRatio) * 0.5
     }
-    console.log(editorUtils.mobileSize, page.width * contentScaleRatio, EDGE_WIDTH)
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
     const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
@@ -637,22 +625,12 @@ export class MovingUtils {
     let x = -1
     let y = -1
     if (isReachRightEdge || isReachLeftEdge) {
-      if (isReachRightEdge) {
-        console.log('isReachRightEdge')
-      } else {
-        console.log('isReachLeftEdge')
-      }
       x = isReachRightEdge ? editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x : EDGE_WIDTH.x
     } else {
       x = offsetPos.x + page.x
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
-      if (isReachTopEdge) {
-        console.log('isReachTopEdge')
-      } else {
-        console.log('isReachBottomEdge')
-      }
       y = isReachBottomEdge ? editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y : EDGE_WIDTH.y
     } else {
       y = offsetPos.y + page.y
@@ -676,7 +654,6 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    console.log('move end')
     if (store.getters.getControlState.id === this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
     }
@@ -840,7 +817,6 @@ export class MovingUtils {
   }
 
   removeListener() {
-    console.log('remove listiner')
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
     eventUtils.removePointerEvent('pointerup', this._cursorDragEnd)
