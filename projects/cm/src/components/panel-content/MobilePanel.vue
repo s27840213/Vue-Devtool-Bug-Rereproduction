@@ -1,13 +1,14 @@
 <script lang="ts">
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
 import PanelFlip from '@nu/vivi-lib/components/editor/panelMobile/PanelFlip.vue'
+import PanelFontCurve from '@nu/vivi-lib/components/editor/panelMobile/PanelFontCurve.vue'
 import PanelFontFormat from '@nu/vivi-lib/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSize from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSize.vue'
-import PanelFontCurve from '@nu/vivi-lib/components/editor/panelMobile/PanelFontCurve.vue'
 import PanelFontSpacing from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSpacing.vue'
 import PanelNudge from '@nu/vivi-lib/components/editor/panelMobile/PanelNudge.vue'
 import PanelObjectAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelObjectAdjust.vue'
@@ -17,12 +18,10 @@ import PanelPhotoShadow from '@nu/vivi-lib/components/editor/panelMobile/PanelPh
 import PanelPosition from '@nu/vivi-lib/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
-import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -140,7 +139,7 @@ const component = defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     showRightBtn(): boolean {
-      return ['fonts'].includes(this.currActivePanel)
+      return ['fonts', 'color', 'text-effect', 'photo-shadow'].includes(this.currActivePanel)
     },
     // eslint-disable-next-line vue/no-unused-properties
     showLeftBtn(): boolean {

@@ -51,8 +51,8 @@ const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt } = editorStore
-const { isGenerating, currPrompt } = storeToRefs(editorStore)
+const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt, setGenResultIndex } = editorStore
+const { isGenerating, currPrompt, inEditingState, generatedResults } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
   get() {
@@ -95,10 +95,20 @@ const handleGenerate = async () => {
     setIsGenerating(true)
     await genImageFlow(promptText.value, false, 2, {
       onApiResponded: () => {
-        changeEditorState('next')
-        setIsGenerating(false)
-        setShowSpinner(false)
+        if (generatedResults.value.filter(r => r.url.length).length > 0 && inEditingState.value) {
+          changeEditorState('next')
+          setIsGenerating(false)
+          setShowSpinner(false)
+        }
       },
+      onSuccess: (index) => {
+        if (inEditingState.value) {
+          setGenResultIndex(index)
+          changeEditorState('next')
+          setIsGenerating(false)
+          setShowSpinner(false)
+        }
+      }
     })
   }
 }

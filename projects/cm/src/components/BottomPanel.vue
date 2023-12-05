@@ -28,7 +28,6 @@ const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'] as IUserInfo)
 watch(
   [height, () => userInfo.value.homeIndicatorHeight],
   ([newHeight, newHomeIndicatorHeight], [oldHeight, oldHomeIndicatorHeight]) => {
-    console.log('updated')
     // 32 is not important, modify it to make a good transition
     const tmpNewHeight = newHeight === 0 ? oldHeight * 0.6 : newHeight
 
