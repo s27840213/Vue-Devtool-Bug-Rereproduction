@@ -4,7 +4,7 @@ declare module 'vite-plugin-transform' {
   interface Options {
     alias?: Record<string, string>
     callbackArray?: ((str: string) => string)[]
-    exclude?: string[]
+    exclude?: (string | RegExp)[]
     replace?: Record<string, string>
     replaceFiles?: string[]
     tEnd?: string

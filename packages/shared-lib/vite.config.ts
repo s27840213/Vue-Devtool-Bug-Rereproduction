@@ -3,6 +3,7 @@ import * as path from 'path'
 // import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
+import jsonImporter from 'node-sass-json-importer'
 
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
@@ -57,6 +58,7 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         additionalData: '@use "@nu/vivi-lib/assets/scss/utils" as *;',
+        importer: jsonImporter(),
       },
     },
   },
