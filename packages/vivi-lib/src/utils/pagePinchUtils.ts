@@ -107,7 +107,7 @@ class pagePinchUtils {
 
     // case 1: page smaller than default size
     if (newPageScaleRatio < 100) {
-      console.warn(1)
+      console.warn('case 1')
       currPageEl.classList.add(...TRANSITION_CLASS)
       pageUtils.updatePagePos(layerUtils.pageIndex, {
         x: this.page.initPos.x,
@@ -119,11 +119,11 @@ class pagePinchUtils {
         currPageEl.classList.remove(...TRANSITION_CLASS)
         store.commit('SET_pageScaleRatio', 100)
         this.resetState()
-        this.movingUtils.pageMoveStart(e as any)
+        this.addPageMoveEvt(e)
       }, TRANSITION_TIME)
     // case 2: page bigger than maximum size
     } else if (newPageScaleRatio > MAX_SCALE) {
-      console.warn(2)
+      console.warn('case 2')
       currPageEl.classList.add(...TRANSITION_CLASS)
       const sizeDiff = {
         width: (newPageScaleRatio - MAX_SCALE) * (page.width * contentScaleRatio * 0.01),
@@ -144,28 +144,24 @@ class pagePinchUtils {
         store.commit('SET_pageScaleRatio', MAX_SCALE)
         currPageEl.classList.remove(...TRANSITION_CLASS)
         this.resetState()
-        this.movingUtils.pageMoveStart(e as any)
+        this.addPageMoveEvt(e)
       }, TRANSITION_TIME)
     // case 3: page size proper but reach edges
     } else if (isReachLeft || isReachRight || isReachTop || isReachBottom) {
-      console.warn(3)
+      console.warn('case 3')
       currPageEl.classList.add(...TRANSITION_CLASS)
       const newPos = {
         x: page.x,
         y: page.y
       }
       if (isReachLeft) {
-        console.log('isReachLeft')
         newPos.x = 0
       } else if (isReachRight) {
-        console.log('isReachRight')
         newPos.x = edgeLimit.right
       }
       if (isReachTop) {
-        console.log('isReachTop')
         newPos.y = 0
       } else if (isReachBottom) {
-        console.log('isReachBottom')
         newPos.y = edgeLimit.bottom
       }
       pageUtils.updatePagePos(layerUtils.pageIndex, newPos)
@@ -173,13 +169,19 @@ class pagePinchUtils {
         store.commit('SET_pageScaleRatio', newPageScaleRatio)
         currPageEl.classList.remove(...TRANSITION_CLASS)
         this.resetState()
-        this.movingUtils.pageMoveStart(e as any)
+        this.addPageMoveEvt(e)
       }, TRANSITION_TIME)
+    // no need to edging the page
     } else {
-      console.warn(4)
-      // no need to edging the page
+      console.warn('case 4')
       this.resetState()
       store.commit('SET_pageScaleRatio', newPageScaleRatio)
+      this.addPageMoveEvt(e)
+    }
+  }
+
+  private addPageMoveEvt(e: AnyTouchEvent) {
+    if (pointerEvtUtils.pointerIds.length === 1) {
       this.movingUtils.pageMoveStart(e as any)
     }
   }
