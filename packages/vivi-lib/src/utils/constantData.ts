@@ -4,13 +4,13 @@ import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
 import letterBgData from '@/utils/letterBgData'
+import localeUtils from '@/utils/localeUtils'
 import { minMaxHash } from '@/utils/mappingUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
 import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
-import localeUtils from '@/utils/localeUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -106,7 +106,7 @@ export enum DeviceType {
   Other
 }
 
-const NO_TUTORIAL_LOCALES = ['pt']
+const NO_TUTORIAL_LOCALES = [] as string[]
 class ConstantData {
   get isLogin(): boolean {
     return store.getters['user/isLogin']
@@ -1210,7 +1210,7 @@ class ConstantData {
   }
 
   checkIfUseNewLogic(): boolean {
-    return ['us', 'jp', ...NO_TUTORIAL_LOCALES].includes(i18n.global.locale)
+    return ['us', 'jp', 'pt', ...NO_TUTORIAL_LOCALES].includes(i18n.global.locale)
   }
 
   stickerVideoUrls(): IStickerVideoUrls {
@@ -1231,7 +1231,7 @@ class ConstantData {
     }
     const res = {} as IStickerVideoUrls
     for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {
-      if (['us', 'jp'].includes(locale)) {
+      if (['us', 'jp', 'pt'].includes(locale)) {
         res[key] = {
           video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}?ver=${verUni}`,
           thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}?ver=${verUni}`
