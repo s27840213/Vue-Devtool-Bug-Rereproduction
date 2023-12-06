@@ -8,16 +8,8 @@ const borderPattern = new RegExp(`border-(${joinedColor})`)
 const strokePattern = new RegExp(`stroke-(${joinedColor})`)
 
 const spacingMap = {}
-for (let i = 0; i <= 360; i++) {
-  switch (true) {
-    case i <= 40:
-    case i <= 120 && i % 4 === 0:
-    case i % 8 === 0:
-      spacingMap[i] = `${i}px`
-      break
-    default:
-      break
-  }
+for (let i = 0; i <= 500; i++) {
+  spacingMap[i] = `${i}px`
 }
 spacingMap.full = '100%'
 spacingMap.half = '50%'
@@ -32,13 +24,27 @@ module.exports = {
   ],
   // purge: ['./src/**/*.html', './src/**/*.vue', './src/**/*.ts'],
   theme: {
-    extend: {},
+    extend: {
+      minWidth: {
+        screen: '100vw',
+        ...spacingMap,
+      },
+      minHeight: spacingMap,
+    },
 
-    colors: { transparent: 'transparent', ...colors },
+    colors,
     zIndex: zIndex.reduce((prevVal, currVal, idx) => ({ ...prevVal, [currVal]: (idx + 1).toString()}), {}) ,
     // this project only for mobile, no need to add to much spacing
     spacing: spacingMap,
     borderRadius: spacingMap,
+    maxWidth: {
+      min: 'min-content',
+      max: 'max-content',
+      fit: 'fit-content',
+      none: 'none',
+      screen: '100vw',
+      ...spacingMap,
+    }
   },
   safelist: [
     {

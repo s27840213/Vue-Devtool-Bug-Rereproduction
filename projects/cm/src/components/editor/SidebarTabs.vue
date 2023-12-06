@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide")
+div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll scrollbar-hide")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
       v-if="!tab.hidden"

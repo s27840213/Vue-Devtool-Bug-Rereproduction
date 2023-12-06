@@ -20,18 +20,18 @@ div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-bord
             iconName="tutorial-arrow-right-primary"
             iconWidth="55px")
         div(class="w-full flex flex-col gap-6 items-end")
-          div(class="relative top-22 w-44 h-[66px] flex flex-col gap-4 items-center")
+          div(class="relative top-22 w-44 h-66 flex flex-col gap-4 items-center")
             svg-icon(
               :iconName="item.iconName"
               iconColor="yellow-0"
               iconWidth="20px")
             span(class="typo-btn-xs") {{ item.iconText }}
             svg-icon(
-              class="absolute top-[17px] left-[-5px]"
+              class="absolute top-17 -left-5"
               iconName="tutorial-highlight-bl"
               iconWidth="11px")
             svg-icon(
-              class="absolute top-[-22px] left-[22px]"
+              class="absolute -top-22 left-22"
               iconName="tutorial-highlight-tr"
               iconWidth="18px")
           img(

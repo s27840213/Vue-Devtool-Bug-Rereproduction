@@ -14,7 +14,7 @@ div(class="powerful-fill-tutorial w-screen h-screen")
           )
         nubtn(
           v-if="hasNextBtn"
-          class="self-start justify-self-center max-w-[96px]"
+          class="self-start justify-self-center max-w-96"
           size="sm-full"
           @click="emit('nextStep')") {{ nextBtnText }}
         div(class="justify-self-end")

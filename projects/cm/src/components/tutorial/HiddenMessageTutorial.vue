@@ -11,13 +11,13 @@ div(class="hidden-message-tutorial w-screen h-screen")
           iconName="tutorial-arrow-right-primary"
           iconWidth="55px")
       div(class="flex flex-col items-end")
-        div(class="h-[79px]")
+        div(class="h-79")
         img(
           class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
           :src="imgB")
     span(class="text-white typo-h6 text-left") {{ text }}
     nubtn(
-      class="max-w-[96px]"
+      class="max-w-96"
       size="sm-full"
       @click="emit('nextStep')") {{ nextBtnText }}
   div(v-else class="w-full absolute grid grid-rows-2 grid-cols-3 gap-y-8" :style="tutorialStyles")
@@ -29,7 +29,7 @@ div(class="hidden-message-tutorial w-screen h-screen")
         iconHeight="61px"
       )
     nubtn(
-      class="max-w-[96px] justify-self-center relative top-9 row-start-2"
+      class="max-w-96 justify-self-center relative top-9 row-start-2"
       size="sm-full"
       @click="emit('nextStep')") {{ nextBtnText }}
 </template>

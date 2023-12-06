@@ -80,7 +80,7 @@ export default defineComponent({
         bg: 'bg-dark-3',
         title: 'text-H4 text-yellow-cm',
         desc: 'body-MD text-white',
-        btn: 'bg-yellow-cm text-dark rounded-[50px]',
+        btn: 'bg-yellow-cm text-dark rounded-50',
       }
 
       return {

@@ -9,7 +9,7 @@ div(
     div(class="w-24")
   //- 2. Tabs for photo & stock
   tabs(
-    class="bg-dark-3 min-h-[52px] rounded-t-[24px]"
+    class="bg-dark-3 min-h-52 rounded-t-24"
     :tabs="[$t('STK0067'), $t('STK0069')]"
     v-model="tabIndex")
   //- 3. (Album bar or search bar) + demo img

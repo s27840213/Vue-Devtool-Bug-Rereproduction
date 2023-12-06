@@ -2,7 +2,7 @@
 div(
   
   ref="headerbarRef"
-  class="bg-dark-6 box-border pt-10 pb-8 grid grid-rows-1 grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)] min-h-[56px] w-full"
+  class="bg-dark-6 box-border pt-10 pb-8 grid grid-rows-1 grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)] min-h-56 w-full"
   :class="hide ? 'invisible pointer-events-none' : ''"
   :style="{ paddingTop: `${userInfo.statusBarHeight}px` }")
   div(
