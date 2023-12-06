@@ -238,6 +238,10 @@ const handleGenerate = async () => {
           setShowSpinner(false)
         }
       },
+      onError: () => {
+        setIsGenerating(false)
+        setShowSpinner(false)
+      }
     })
   }
 }

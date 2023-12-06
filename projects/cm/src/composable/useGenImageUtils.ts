@@ -92,6 +92,7 @@ const useGenImageUtils = () => {
       if (generatedResultsNum.value === 0 && inGenResultState.value) {
         changeEditorState('prev')
       }
+      onError && onError(-1, '', (error as Error).message)
     }
   }
 
