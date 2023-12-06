@@ -534,7 +534,11 @@ export default defineComponent({
         doubleClickCallback: () => {
           if (this.getLayerType === LayerType.image && this.prePrimaryLayerIndex === -1 && !this.$store.state.disableLayerAction) {
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-            eventUtils.emit(PanelEvent.switchTab, 'crop')
+            if (generalUtils.isCm) {
+              eventUtils.emit(PanelEvent.switchTab, 'crop-flip')
+            } else {
+              eventUtils.emit(PanelEvent.switchTab, 'crop')
+            }
           }
         }
       })
