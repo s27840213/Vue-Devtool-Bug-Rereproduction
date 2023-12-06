@@ -88,8 +88,9 @@ div(
       :class="{ 'outline outline-4 outline-primary-normal': idx === genTypes.value }"
       @click="() => (genTypes && (genTypes.value = idx))")
       img(
+        v-if="genType.img"
         class="w-full object-cover object-center rounded-2xl aspect-[148/116]"
-        :src="require('hidden-message.png')")
+        :src="require(genType.img)")
       span {{ genType.text }}
 </template>
 <script setup lang="ts">

@@ -1291,10 +1291,12 @@ class ConstantData {
             {
               key: 'hidden-blend',
               text: i18n.global.t('CM0109'),
+              img: 'hidden-message-blend.png',
             },
             {
               key: 'hidden-light',
               text: i18n.global.t('CM0110'),
+              img: 'hidden-message.png',
             }
           ],
           value: 0,
