@@ -38,7 +38,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="btn.action")
     template(#right)
       nubtn(
-        v-if="inAspectRatioState || inGenResultState"
+        v-if="inGenResultState"
         @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(
     v-if="!inSavingState"
@@ -173,7 +173,6 @@ import Headerbar from '@/components/Headerbar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
-import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import PixiRecorder from '@/utils/pixiRecorder'
@@ -269,10 +268,7 @@ watch(() => isManipulatingCanvas.value, (val) => {
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
-  if (inAspectRatioState.value) {
-    changeEditorState('next')
-    useTutorial().runTutorial(editorType)
-  } else if (inGenResultState.value) {
+  if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
     const currGenResult = generatedResults.value[currGenResultIndex.value]

@@ -1,24 +1,30 @@
 <template lang="pug">
-div(class="w-full box-border pl-24")
+div(class='aspect-ratio-selector')
   div(class="typo-btn-lg text-app-text-secondary") {{ $t('CM0013') }}
-  scrollable-container(:px="0")
-    div(
-      v-for="aspectRatio in aspectRatioTypes"
-      :key="aspectRatio"
-      class="w-56 flex flex-col justify-center items-center gap-4"
-      @click="selectAspectRatio(aspectRatio)")
-      svg-icon(
-        :iconColor="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
-        :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
-        iconWidth="32px"
-        iconHeight="32px"
-        :iconName="'ratio-' + aspectRatio.replace(':', '-')")
-      span(
-        class="typo-btn-sm transition-colors duration-300 capitalize"
-        :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
+  div(class="w-full box-border pl-24")
+    scrollable-container(:px="0" :py="16")
+      div(
+        v-for="aspectRatio in aspectRatioTypes"
+        :key="aspectRatio"
+        class="w-56 flex flex-col justify-center items-center gap-4"
+        @click="selectAspectRatio(aspectRatio)")
+        svg-icon(
+          :iconColor="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
+          :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
+          iconWidth="32px"
+          iconHeight="32px"
+          :iconName="'ratio-' + aspectRatio.replace(':', '-')")
+        span(
+          class="typo-btn-sm transition-colors duration-300 capitalize"
+          :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
+  div(class="w-full box-border px-24")
+    nubtn(
+      size="sm-full"
+      @click="handleNextAction") {{ $t('CM0012') }}
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -105,6 +111,11 @@ const updateLayerStyleToFitPage = () => {
       y: (pageSize.value.height - pageSize.value.height) / 2,
     })
   }
+}
+
+const handleNextAction = function () { 
+  editorStore.changeEditorState('next')
+  useTutorial().runTutorial(editorType.value)
 }
 
 onMounted(() => {
