@@ -196,7 +196,7 @@ export default defineComponent({
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
-          hidden: layerUtils.getCurrLayer.type === LayerType.frame,
+          hidden: layerUtils.getCurrLayer.type === LayerType.frame || this.isBiColorEditor,
           disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
         },
         {
