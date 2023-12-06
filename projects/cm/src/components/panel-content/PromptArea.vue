@@ -208,6 +208,7 @@ const handleGenerate = async () => {
     vuex.commit('user/setShowForceLogin', true)
     return
   }
+  // skip generating progress
   const debugSkipGenarate = false
 
   if (debugSkipGenarate) {

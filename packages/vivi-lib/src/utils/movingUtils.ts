@@ -93,6 +93,7 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
+    console.log('1111', store.getters['mobileEditor/getIsPinchingEditor'])
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
 
     this.initPageTranslate.x = pageUtils.getCurrPage.x
@@ -112,7 +113,9 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch') {
+    if (store.getters['mobileEditor/getIsPinchingEditor'] ||
+      store.getters.getControlState.type === 'pinch' ||
+      pointerEvtUtils.pointers.length > 1) {
       this.removeListener()
       return
     }
@@ -472,25 +475,21 @@ export class MovingUtils {
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
       }
       if (this.isTouchDevice && !this.isLocked) {
-        if (posDiff.x > 1 || posDiff.y > 1) {
+        // if (posDiff.x > 1 || posDiff.y > 1) {
+        //   window.requestAnimationFrame(() => {
+        //     this.movingHandler(e)
+        //     this.isHandleMovingHandler = false
+        //   })
+        //   return
+        // }
+        const { mobileSize } = editorUtils
+        const { getCurrPage: page, scaleRatio } = pageUtils
+        const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
+          page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
+        if (!isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
-            this.movingHandler(e)
-            this.isHandleMovingHandler = false
+            this.pageMovingHandler(e)
           })
-          return
-        }
-        if (generalUtils.isPic) {
-          const { mobileSize } = editorUtils
-          const { getCurrPage: page, scaleRatio } = pageUtils
-          const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
-            page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
-          // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
-          if (!isPageFullyInsideEditor) {
-            // if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
-            window.requestAnimationFrame(() => {
-              this.pageMovingHandler(e)
-            })
-          }
         }
       } else {
         if (posDiff.x < 1 && posDiff.y < 1) {
@@ -503,7 +502,7 @@ export class MovingUtils {
 
   movingHandler(e: MouseEvent | PointerEvent) {
     if (this.initMousePos === null) return
-    if (generalUtils.isPic && generalUtils.isTouchDevice() &&
+    if (generalUtils.isTouchDevice() &&
       this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
 
     const config = layerUtils.getCurrLayer
@@ -560,8 +559,49 @@ export class MovingUtils {
     }
   }
 
-  pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (!generalUtils.isPic) return
+  _pageMovingHandler4cm(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (store.state.disableLayerAction) return
+    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
+      return
+    }
+    if (this.initMousePos === null) {
+      this.initMousePos = mouseUtils.getMouseAbsPoint(e)
+      return
+    }
+    const { getCurrPage: page } = pageUtils
+    const contentScaleRatio = store.getters.getContentScaleRatio
+    const pageScaleRatio = store.state.pageScaleRatio * 0.01
+    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
+
+    const isReachLeftEdge = page.x >= 0 && offsetPos.x > 0
+    const isReachRightEdge = page.x <= page.width * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.x < 0
+    const isReachTopEdge = page.y >= 0 && offsetPos.y > 0
+    const isReachBottomEdge = page.y <= page.height * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.y < 0
+
+    let x = -1
+    let y = -1
+    if (isReachRightEdge || isReachLeftEdge) {
+      x = isReachRightEdge ? page.width * contentScaleRatio * (1 - pageScaleRatio) : 0
+    } else {
+      x = offsetPos.x + page.x
+    }
+
+    if (isReachTopEdge || isReachBottomEdge) {
+      y = isReachBottomEdge ? page.height * contentScaleRatio * (1 - pageScaleRatio) : 0
+    } else {
+      y = offsetPos.y + page.y
+    }
+    pageUtils.updatePagePos(this.pageIndex, { x, y })
+
+    if (!isReachLeftEdge && !isReachRightEdge) {
+      this.initMousePos.x += offsetPos.x
+    }
+    if (!isReachBottomEdge && !isReachTopEdge) {
+      this.initMousePos.y += offsetPos.y
+    }
+  }
+
+  _pageMovingHandler4pic(e: MouseEvent | TouchEvent | PointerEvent) {
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return
     }
@@ -603,6 +643,14 @@ export class MovingUtils {
     }
     if (!isReachBottomEdge && !isReachTopEdge) {
       this.initMousePos.y += offsetPos.y
+    }
+  }
+
+  pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (generalUtils.isPic) {
+      this._pageMovingHandler4pic(e)
+    } else if (generalUtils.isCm) {
+      this._pageMovingHandler4cm(e)
     }
   }
 
