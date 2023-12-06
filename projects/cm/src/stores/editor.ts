@@ -1,7 +1,7 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
-import type { DescriptionPanel, EditorFeature, EditorStates, EditorType, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
+import type { DescriptionPanel, EditorFeature, EditorStates, EditorType, GenImageOptions, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
@@ -35,6 +35,7 @@ interface IEditorStore {
   initImgSrc: string
   useTmpSteps: boolean
   currPrompt: string,
+  currGenOptions: GenImageOptions,
   editorTheme: null | string,
   descriptionPanel: null | DescriptionPanel,
 }
@@ -55,6 +56,7 @@ export const useEditorStore = defineStore('editor', {
     initImgSrc: '',
     useTmpSteps: false,
     currPrompt: '',
+    currGenOptions: [],
     editorTheme: null,
     descriptionPanel: null,
   }),
@@ -220,6 +222,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrPrompt(prompt: string) {
       this.currPrompt = prompt
+    },
+    setCurrGenOptions(options: GenImageOptions) {
+      this.currGenOptions = options
     },
     keepEditingInit() {
       this.changeEditorState('prev')

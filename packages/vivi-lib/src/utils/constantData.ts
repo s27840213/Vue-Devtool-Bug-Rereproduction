@@ -1279,6 +1279,69 @@ class ConstantData {
       annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
     }
   }
+
+  // charmix gen image options
+  getGenImageOptions = (editorType: string) => {
+    return new Map([
+      ['hidden-message', [
+        {
+          type: 'group',
+          key: 'type',
+          group: [
+            {
+              key: 'hidden-blend',
+              text: i18n.global.t('CM0109'),
+            },
+            {
+              key: 'hidden-light',
+              text: i18n.global.t('CM0110'),
+            }
+          ],
+          value: 0,
+        },
+        {
+          type: 'range',
+          key: 'guidance_scale',
+          title: i18n.global.t('CM0111'),
+          subTitle: i18n.global.t('CM0112'),
+          minDescription: i18n.global.t('CM0113'),
+          maxDescription: i18n.global.t('CM0114'),
+          min: 0,
+          max: 10,
+          step: 1,
+          value: 5,
+          icon: 'information-circle-solid',
+        },
+        {
+          type: 'range',
+          key: 'weight',
+          title: i18n.global.t('CM0115'),
+          min: 0,
+          max: 1,
+          step: 0.1,
+          value: 0,
+        },
+        {
+          type: 'range',
+          key: 'guidance_start',
+          title: i18n.global.t('CM0116'),
+          min: 0,
+          max: 1,
+          step: 0.1,
+          value: 0,
+        },
+        {
+          type: 'range',
+          key: 'guidance_end',
+          title: i18n.global.t('CM0117'),
+          min: 0,
+          max: 1,
+          step: 0.1,
+          value: 1,
+        },
+      ]]
+    ]).get(editorType)
+  }
 }
 
 export default new ConstantData()

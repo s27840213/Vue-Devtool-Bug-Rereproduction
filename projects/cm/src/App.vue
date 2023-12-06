@@ -100,6 +100,16 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         div(class="notification__content bg-app-toast-fail text-primary-white")
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
+    notifications(
+      class="notification flex justify-center items-center "
+      position="center center"
+      group="warn"
+      :max="2"
+      :duration="2000")
+      template(v-slot:body="{ item }")
+        div(class="notification__content bg-primary-light-hover bg-opacity-80 text-app-text-primary")
+          svg-icon(iconName="red-exclamation-mark")
+          span( v-html="item.text")
     transition(name="bottom-up-down")
       div(v-if="isActionSheetOpen" class="w-full h-full flex items-end z-action-sheet px-16 box-border "
       :style="{paddingBottom: `${homeIndicatorHeight}px`}")

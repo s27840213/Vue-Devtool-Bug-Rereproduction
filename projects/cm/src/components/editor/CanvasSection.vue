@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="canvas-section absolute top-0 left-0 z-canvas")
   canvas(
-    v-show="!isDuringCopy"
+    v-show="showCanvas"
     id="canvas-section-canvas"
     class="canvas-section absolute top-0 left-0"
     :class="isBiColorEditor ? 'opacity-100' : 'opacity-30'"
@@ -61,6 +61,10 @@ const { brushStyle, showBrush } = useCanvasUtilsCm(canvasRef, wrapperDOM, contai
 // #region WebView feature section
 const store = useStore()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
+const showCanvas = computed(() => {
+  if(editorStore.editorType === 'hidden-message') return true
+  return !isDuringCopy.value
+})
 // #endregion
 
 const getCanvasDataUrl = () => {
