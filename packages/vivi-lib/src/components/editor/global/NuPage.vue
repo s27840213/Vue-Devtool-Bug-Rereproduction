@@ -319,6 +319,13 @@ export default defineComponent({
       }
     },
     lazyloadSize(): unknown {
+      // @TODO discuss with allen, the *5 prevent zooming bug
+      if (generalUtils.isCm) {
+        return {
+          minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5,
+          maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5
+        }
+      }
       return {
         minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100),
         maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)

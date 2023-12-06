@@ -263,6 +263,10 @@ const {
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
+watch(() => isManipulatingCanvas.value, (val) => {
+  store.commit('SET_disableLayerAction', val)
+})
+
 const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inAspectRatioState.value) {
@@ -595,8 +599,8 @@ const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToR
 
 const demoBrushSizeStyles = computed(() => {
   return {
-    width: `${brushSize.value * contentScaleRatio.value}px`,
-    height: `${brushSize.value * contentScaleRatio.value}px`,
+    width: `${brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     backgroundColor: `${drawingColor.value}4C`, // 30% opacity
   }
 })

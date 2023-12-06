@@ -560,6 +560,7 @@ export class MovingUtils {
   }
 
   _pageMovingHandler4cm(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (store.state.disableLayerAction) return
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return
     }
