@@ -136,7 +136,7 @@ export class Rect {
     this.bodyRect = div.getClientRects()[0]
     this.width = this.bodyRect.width
     this.height = this.bodyRect.height
-    this.transform = this.vertical ? 'rotate(90deg) scale(1,-1)' : ''
+    this.transform = this.vertical ? 'translate(100%, 0) rotate(90deg)' : ''
     this.rows = []
 
     for (let pIndex = 0; pIndex < div.children.length; pIndex++) {
@@ -162,7 +162,7 @@ export class Rect {
             y = cr.y + (cr.height - height) / 2
           }
           this.rows.push({
-            rect: cr,
+            rect: cr.toJSON(),
             spanData: [{
               x,
               y,
@@ -185,7 +185,7 @@ export class Rect {
     const { rows, bodyRect } = this
     Object.assign(bodyRect, {
       x: bodyRect.y,
-      y: bodyRect.x,
+      y: -(bodyRect.x + bodyRect.width),
       width: bodyRect.height,
       height: bodyRect.width
     })
@@ -193,12 +193,17 @@ export class Rect {
       const { rect, spanData } = row
       Object.assign(rect, {
         x: rect.y,
-        y: rect.x,
+        y: -(rect.x + rect.width),
         width: rect.height,
         height: rect.width
       })
       spanData.forEach(data => {
-        [data.x, data.y, data.height, data.width] = [data.y, data.x, data.width, data.height]
+        Object.assign(data, {
+          x: data.y,
+          y: -(data.x + data.width),
+          width: data.height,
+          height: data.width
+        })
       })
     })
   }
