@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="description-page w-full h-full text-app-text-secondary px-24")
+div(class="description-page w-full h-full text-white px-24")
   headerbar
     template(#left)
       back-btn(:customCallback="router.back")
@@ -15,14 +15,14 @@ div(class="description-page w-full h-full text-app-text-secondary px-24")
           :key="idxCurrImg"
           :src="getImg(idxCurrImg)"
           class="w-full h-full object-cover object-center absolute top-0 left-0")
-      div(class="w-6 h-full bg-app-tab-active absolute top-0 left-0")
+      div(class="w-6 h-full bg-yellow-cm absolute top-0 left-0")
     div(class="flex justify-center gap-16")
       img(
         v-for="(n, idx) in 3"
         :key="idx"
         :src="getImg(idx)"
         class="w-32 h-32 overflow-hidden rounded object-cover object-center"
-        :class="{ 'outline-solid outline-2 -outline-offset-2 outline-app-tab-active': idx === idxCurrImg }"
+        :class="{ 'outline-solid outline-2 -outline-offset-2 outline-yellow-cm': idx === idxCurrImg }"
         @click="idxCurrImg = idx")
     div(class="typo-body-md") {{ description }}
     nubtn(

@@ -61,5 +61,7 @@ export default defineConfig({
         importer: jsonImporter(),
       },
     },
+    // Specific post css config file folder.
+    postcss: '../../packages/vivi-lib',
   },
 })

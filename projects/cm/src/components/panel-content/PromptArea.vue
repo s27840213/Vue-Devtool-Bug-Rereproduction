@@ -3,21 +3,21 @@ div(
   class="flex flex-col justify-center items-center w-full box-border px-24 gap-16"
   :class="{'pointer-events-none': preview}")
   div(class="relative w-full")
-    span(class="text-app-tab-default typo-btn-lg") {{ $t('CM0022') }}
+    span(class="text-yellow-0 typo-btn-lg") {{ $t('CM0022') }}
     svg-icon(
       v-if="false"
       iconName="cm_settings"
-      class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2")
+      class="text-yellow-0 absolute right-0 top-1/2 -translate-y-1/2")
   div(class="w-full relative")
     textarea(
-      class="w-full box-border p-10 rounded-10 bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+      class="w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
       :placeholder="$t('CM0024')"
       :autofocus="!isDuringTutorial"
       v-model="promptText")
     transition(name="clear-btn-transition")
       div(
         v-if="promptLen > 0"
-        class="absolute bottom-10 right-10 text-app-text-primary typo-body-sm"
+        class="absolute bottom-10 right-10 text-dark typo-body-sm"
         @click="clearPromt")
         span {{ $t('CM0029') }}
   nubtn(

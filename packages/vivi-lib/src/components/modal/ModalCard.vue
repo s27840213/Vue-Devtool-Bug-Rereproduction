@@ -77,10 +77,10 @@ export default defineComponent({
     }),
     classes() {
       if (this.$isCm) return {
-        bg: 'bg-app-tab-bg',
-        title: 'text-H4 text-app-tab-active',
-        desc: 'body-MD text-app-text-secondary',
-        btn: 'bg-app-btn-primary-bg text-app-text-primary rounded-[50px]',
+        bg: 'bg-dark-3',
+        title: 'text-H4 text-yellow-cm',
+        desc: 'body-MD text-white',
+        btn: 'bg-yellow-cm text-dark rounded-[50px]',
       }
 
       return {

@@ -9,16 +9,16 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
         class="mb-16"
         :currPage="currPage"
         :currActivePanel="currActivePanel")
-  div(class="flex flex-col gap-24 bg-app-tab-bg shadow-[0_100px_0_100px_black] shadow-app-tab-bg z-[1]")
+  div(class="flex flex-col gap-24 bg-dark-3 shadow-[0_100px_0_100px_black] shadow-dark-3 z-[1]")
     div(v-if="!hideTabs" ref="footerTabs" class="footer-tabs-row flex gap-24")
       div(class="cm-footer-tabs flex items-center justify-center h-44")
         div(
-          class="flex items-center justify-center bg-primary-white/[.65] rounded-full w-22 h-22"
+          class="flex items-center justify-center bg-white/[.65] rounded-full w-22 h-22"
           @click="handleBack")
           svg-icon(
             iconName="chevron-down"
             iconWidth="14px"
-            iconColor="app-tab-bg")
+            iconColor="dark-3")
       div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar")
         template(v-for="tab in settingTabs")
           div(
@@ -48,7 +48,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
         class="layer-action"
         theme="secondary"
         @click="handleBottomCancel") {{ $t('NN0203') }}
-      div(class="typo-h6 text-app-text-secondary") {{ bottomTitle }}
+      div(class="typo-h6 text-white") {{ bottomTitle }}
       nubtn(class="layer-action" @click="handleBottomApply") {{ $t('CM0061') }}
 //- className cm-footer-tabs is for v-click-outside middleware
 </template>
@@ -654,10 +654,10 @@ export default defineComponent({
     }),
     settingTabColor(tab: IFooterTab): string {
       return tab.disabled || this.isLocked
-        ? 'app-tab-disable'
+        ? 'lighter'
         : this.tabActive(tab)
-        ? 'app-tab-active'
-        : 'app-tab-default'
+        ? 'yellow-cm'
+        : 'yellow-0'
     },
     handleBack() {
       groupUtils.deselect()

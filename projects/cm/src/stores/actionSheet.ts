@@ -1,10 +1,10 @@
-import type { ColorSlip } from '@/types/color'
+import type { IColorKeys } from '@nu/vivi-lib/interfaces/color'
 import { defineStore } from 'pinia'
 
 export interface IActionSheetBtn {
   labels: Array<{
     label: string
-    labelColor: ColorSlip
+    labelColor: IColorKeys
     labelSize: string
   }>
   cb: () => void
@@ -17,12 +17,12 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
       labels: [
         {
           label: '123',
-          labelColor: 'app-text-secondary',
+          labelColor: 'white',
           labelSize: 'typo-btn-lg',
         },
         {
           label: '456',
-          labelColor: 'app-text-secondary',
+          labelColor: 'white',
           labelSize: 'typo-btn-lg',
         },
       ],
@@ -34,12 +34,12 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
       labels: [
         {
           label: '123',
-          labelColor: 'app-text-secondary',
+          labelColor: 'white',
           labelSize: 'typo-btn-lg',
         },
         {
           label: '456',
-          labelColor: 'app-text-secondary',
+          labelColor: 'white',
           labelSize: 'typo-btn-lg',
         },
       ],
@@ -54,12 +54,12 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
       labels: [
         {
           label: '123',
-          labelColor: 'app-text-secondary',
+          labelColor: 'white',
           labelSize: 'typo-btn-lg',
         },
         {
           label: '456',
-          labelColor: 'app-text-secondary',
+          labelColor: 'white',
           labelSize: 'typo-btn-lg',
         },
       ],
@@ -93,12 +93,12 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
         labels: [
           {
             label: '123',
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
           {
             label: '456',
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],
@@ -113,7 +113,7 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
         labels: [
           {
             label: 'Cancel',
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],

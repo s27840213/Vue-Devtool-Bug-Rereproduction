@@ -39,7 +39,7 @@ watch(
 </script>
 <style lang="scss" scoped>
 .bottom-panel {
-  @apply bg-app-tab-bg w-full rounded-t-[24px] box-border pt-16;
+  @apply bg-dark-3 w-full rounded-t-[24px] box-border pt-16;
   transition: all 0.3s;
 }
 </style>

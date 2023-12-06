@@ -17,13 +17,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         svg-icon(
           class="layer-action"
           iconName="cm_flip-h"
-          iconColor="app-btn-primary-text"
+          iconColor="white"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-h')")
         svg-icon(
           class="layer-action"
           iconName="cm_flip-v"
-          iconColor="app-btn-primary-text"
+          iconColor="white"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-v')")
       template(v-else-if="currActivePanel === 'adjust'")
@@ -33,7 +33,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           v-for="btn in centerBtns"
           :key="btn.icon"
           :iconName="btn.icon"
-          :iconColor="btn.disabled ? 'app-tab-disable' : 'app-btn-primary-text'"
+          :iconColor="btn.disabled ? 'lighter' : 'white'"
           :iconWidth="`${btn.width}px`"
           @click="btn.action")
     template(#right)
@@ -119,51 +119,51 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       div(class="flex justify-between items-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
-          :class="showVideo ? 'bg-app-btn-primary-bg' : 'bg-app-slider-bg'"
+          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
           @click="() => (showVideo = true)")
         div(
           class="w-8 h-8 rounded-full transition-colors"
-          :class="!showVideo ? 'bg-app-btn-primary-bg' : 'bg-app-slider-bg'"
+          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
           @click="() => (showVideo = false)")
     div(class="flex justify-between items-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
-        div(class="flex justify-center items-center rounded-full bg-primary-normal aspect-square p-4")
+        div(class="flex justify-center items-center rounded-full bg-yellow-cm aspect-square p-4")
           svg-icon(
             iconName="crown"
-            :iconColor="'app-bg'"
+            :iconColor="'dark-6'"
             iconWidth="20px")
-        span(class="typo-h5 text-app-text-secondary") {{ $t('CM0071') }}
+        span(class="typo-h5 text-white") {{ $t('CM0071') }}
       slide-toggle(
         v-model="removeWatermark"
         :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
         margin="2px"
         optionWidth="22px"
         optionHeight="22px"
-        :bgColor="removeWatermark ? 'app-tab-active' : 'primary-lighter'"
+        :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
     div(class="flex justify-between items-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
-        div(class="flex justify-center items-center rounded-full bg-primary-normal aspect-square p-4")
+        div(class="flex justify-center items-center rounded-full bg-yellow-cm aspect-square p-4")
           svg-icon(
             iconName="crown"
-            :iconColor="'app-bg'"
+            :iconColor="'dark-6'"
             iconWidth="20px")
-        span(class="typo-h5 text-app-text-secondary") {{ $t('CM0072') }}
+        span(class="typo-h5 text-white") {{ $t('CM0072') }}
       slide-toggle(
         v-model="highResolutionPhoto"
         :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
         margin="2px"
         optionWidth="22px"
         optionHeight="22px"
-        :bgColor="highResolutionPhoto ? 'app-tab-active' : 'primary-lighter'"
+        :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
   transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
-      class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
+      class="bg-dark-6 absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles"
       v-bind="assetPanelProps")
 </template>
@@ -563,8 +563,8 @@ const demoBrushSizeStyles = computed(() => {
 
 const demoBrushSizeOutline = computed(() => {
   return {
-    'outline-primary-white': !isBiColorEditor.value,
-    'outline-neutral-light-hover': isBiColorEditor.value
+    'outline-white': !isBiColorEditor.value,
+    'outline-dark-0': isBiColorEditor.value
   }
 })
 // #endregion

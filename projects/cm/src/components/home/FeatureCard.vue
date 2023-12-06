@@ -7,7 +7,7 @@ router-link(
     class="feature-card flex items-end justify-center box-border py-16 rounded-20"
     :style="cardStyles"
     @click="() => target && navigate()")
-    span(class="typo-h5 text-primary-white") {{ title }}
+    span(class="typo-h5 text-white") {{ title }}
 </template>
 <script setup lang="ts">
 import type { EditorType } from '@/types/editor';

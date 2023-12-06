@@ -1,9 +1,9 @@
 <template lang="pug">
-div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-border relative text-app-text-secondary")
+div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-border relative text-white")
   svg-icon(
     class="absolute -top-6 right-16"
     iconName="close"
-    iconColor="app-icon-light"
+    iconColor="yellow-0"
     iconWidth="24px"
     @click="closePanel")
   div(class="typo-h5 mb-16") {{ title }}
@@ -14,7 +14,7 @@ div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-bord
       div(v-for="(item, idx) in hiddenMessageStep1Items" :key="idx" class="flex gap-8")
         div(class="w-full flex flex-col gap-11 items-end")
           img(
-            class="w-100 h-100 rounded-full border-solid border-[3px] border-primary-white object-cover object-center"
+            class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
             :src="item.imgA")
           svg-icon(
             iconName="tutorial-arrow-right-primary"
@@ -23,7 +23,7 @@ div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-bord
           div(class="relative top-22 w-44 h-[66px] flex flex-col gap-4 items-center")
             svg-icon(
               :iconName="item.iconName"
-              iconColor="app-icon-light"
+              iconColor="yellow-0"
               iconWidth="20px")
             span(class="typo-btn-xs") {{ item.iconText }}
             svg-icon(
@@ -35,7 +35,7 @@ div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-bord
               iconName="tutorial-highlight-tr"
               iconWidth="18px")
           img(
-            class="w-100 h-100 rounded-full border-solid border-[3px] border-primary-white object-cover object-center"
+            class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
             :src="item.imgB")
       div(class="w-full typo-body-md text-left") {{ t('CM0095') }}
       prompt-area(preview)

@@ -63,7 +63,7 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     padding: 8px;
-    background-color: setColor(app-tab-slider-bg-raw, 0.2);
+    background-color: setColor(lighter, 0.2);
     border-radius: 8px;
   };
 }

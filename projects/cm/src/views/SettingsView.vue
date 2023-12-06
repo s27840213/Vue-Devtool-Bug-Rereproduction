@@ -4,7 +4,7 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
     template(#left)
       back-btn(:customCallback="handleBackAction")
     template(#middle)
-      span(class="typo-h5 text-app-text-secondary") {{ headerbarTitle }}
+      span(class="typo-h5 text-white") {{ headerbarTitle }}
     template(#right)
   //- Use v-for and v-show to keep scroll position when state switch.
   div(
@@ -25,7 +25,7 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       nubtn(
         icon="crown"
         size="mid-full") {{ $t('CM0032') }}
-    div(class="flex flex-col gap-16 text-app-btn-primary-text text-left typo-h6")
+    div(class="flex flex-col gap-16 text-white text-left typo-h6")
       template(
         v-for="op in config"
         :key="op.title")
@@ -260,7 +260,7 @@ const debugOptions: Array<IOptionConfig> = [
   },
 ]
 
-const segmentTitleStyle = 'py-4 border-0 border-b-[1px] border-solid border-app-slider-bg'
+const segmentTitleStyle = 'py-4 border-0 border-b-[1px] border-solid border-lighter/80'
 const initOptions = computed(
   () =>
     [
@@ -272,7 +272,7 @@ const initOptions = computed(
       ...aboutOptions,
       {
         title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}`, // Debug info
-        class: 'typo-body-sm text-center text-primary-lighter py-10',
+        class: 'typo-body-sm text-center text-lighter py-10',
         callback: handleDebugMode,
       },
       ...(debugMode.value ? debugOptions : []),

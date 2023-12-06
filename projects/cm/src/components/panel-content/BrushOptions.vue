@@ -26,7 +26,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
     nubtn(
       theme="secondary"
       @click="cancel") {{ $t('NN0203') }}
-    span(class="typo-h6 text-app-text-secondary") {{ $t('CM0017') }}
+    span(class="typo-h6 text-white") {{ $t('CM0017') }}
     nubtn(@click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">

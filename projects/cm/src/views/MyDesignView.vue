@@ -8,13 +8,13 @@ div(class="my-design w-full h-full flex justify-center items-center py-20 px-16"
           :src="`https://images.unsplash.com/${design.id}?cs=tinysrgb&q=80&w=320`"
           @click="selectDesign(design)")
         svg-icon(
-          class="absolute right-10 top-10 bg-app-btn-primary-text rounded-10 m-1"
+          class="absolute right-10 top-10 bg-white rounded-10 m-1"
           iconName="more_horizontal"
           iconWidth="22px"
           @click="moreDesign(design)")
   div(v-else class="grid gap-32")
     img(src="@/assets/img/img-empty.png" class="w-240")
-    span(class="text-app-tab-default typo-h4") {{ $t('CM0031') }}
+    span(class="text-yellow-0 typo-h4") {{ $t('CM0031') }}
     nubtn(size="sm-full" @click="init") 載入測試圖片
 </template>
 
@@ -44,7 +44,7 @@ const moreDesign = (design: IPhotoItem) => {
   setPrimaryActions([{
     labels: [{
       label: t('NN0504'),
-      labelColor: 'app-text-secondary',
+      labelColor: 'white',
       labelSize: 'typo-btn-lg',
     }],
     cb: () => {
@@ -53,7 +53,7 @@ const moreDesign = (design: IPhotoItem) => {
   }, {
     labels: [{
       label: t('NN0034'),
-      labelColor: 'app-text-secondary',
+      labelColor: 'white',
       labelSize: 'typo-btn-lg',
     }],
     cb: () => {
@@ -63,7 +63,7 @@ const moreDesign = (design: IPhotoItem) => {
   setSecondaryActions([{
     labels: [{
       label: t('NN0203'),
-      labelColor: 'app-tab-active',
+      labelColor: 'yellow-cm',
       labelSize: 'typo-btn-lg',
     }],
     cb: toggleActionSheet

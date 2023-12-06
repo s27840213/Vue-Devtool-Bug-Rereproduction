@@ -5,7 +5,7 @@ div(class="hidden-message-tutorial w-screen h-screen")
     div(class="flex gap-8")
       div(class="w-full flex flex-col gap-8 items-end")
         img(
-          class="w-100 h-100 rounded-full border-solid border-[3px] border-primary-white object-cover object-center"
+          class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
           :src="imgA")
         svg-icon(
           iconName="tutorial-arrow-right-primary"
@@ -13,15 +13,15 @@ div(class="hidden-message-tutorial w-screen h-screen")
       div(class="flex flex-col items-end")
         div(class="h-[79px]")
         img(
-          class="w-100 h-100 rounded-full border-solid border-[3px] border-primary-white object-cover object-center"
+          class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
           :src="imgB")
-    span(class="text-primary-white typo-h6 text-left") {{ text }}
+    span(class="text-white typo-h6 text-left") {{ text }}
     nubtn(
       class="max-w-[96px]"
       size="sm-full"
       @click="emit('nextStep')") {{ nextBtnText }}
   div(v-else class="w-full absolute grid grid-rows-2 grid-cols-3 gap-y-8" :style="tutorialStyles")
-    span(class="text-primary-white typo-h6 text-left col-start-2 self-end justify-self-center") {{ text }}
+    span(class="text-white typo-h6 text-left col-start-2 self-end justify-self-center") {{ text }}
     div(class="justify-self-end row-start-2")
       svg-icon(
         iconName="tutorial-arrow-down"
