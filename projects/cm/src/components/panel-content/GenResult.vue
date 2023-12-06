@@ -1,18 +1,18 @@
 <template lang="pug">
 div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
   div(class="grid grid-rows-1 grid-cols-[auto,auto,auto,minmax(0,1fr)] gap-x-16 items-center box-border")
-    div(class="gen-result__block flex rounded-lg bg-white" @click="setGenResultIndex(-1)")
+    div(class="gen-result__block flex rounded-8 bg-white" @click="setGenResultIndex(-1)")
       div(
-        class="box-border outline-2 outline rounded-lg w-full h-full transition-all duration-300"
+        class="box-border outline-2 outline rounded-8 w-full h-full transition-all duration-300"
         :class="[currGenResultIndex === -1 ? 'outline-yellow-cm' : 'outline-transparent']")
-        div(class="overflow-hidden rounded-lg w-full h-full px-2 py-4 box-border")
+        div(class="overflow-hidden rounded-8 w-full h-full px-2 py-4 box-border")
           img(class="w-full h-full object-contain" :src="initImgSrc")
     div(class="bg-lighter w-2 h-4/5")
     scrollable-container(
       :px="4"
       :py="4")
       div(
-        class="gen-result__block rounded-md bg-dark-6 flex flex-col justify-center items-center"
+        class="gen-result__block rounded-8 bg-dark-6 flex flex-col justify-center items-center"
         @click="showMoreRes")
         svg-icon(
           iconName="crown"
@@ -22,10 +22,10 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       //- div(
       //-   v-for="(genResult, index) in 10"
       //-   :key="index"
-      //-   class="gen-result__block flex rounded-lg bg-white"
+      //-   class="gen-result__block flex rounded-8 bg-white"
       //-   @click="setGenResultIndex(index)")
       //-   div(
-      //-     class="box-border outline-2 outline rounded-lg w-full h-full"
+      //-     class="box-border outline-2 outline rounded-8 w-full h-full"
       //-     :class="{ 'outline-yellow-cm': index === currGenResultIndex }")
       //-     div(class="overflow-hidden w-full h-full")
       //-       //- img(class="w-full h-full object-cover" src="@/assets/img/test.jpg")
@@ -33,18 +33,18 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
         div(
           v-for="(genResult, index) in generatedResults"
           :key="genResult.id"
-          class="gen-result__block flex rounded-lg relative"
+          class="gen-result__block flex rounded-8 relative"
           @click="genResult.url.length && setGenResultIndex(index)")
           div(
-            class="box-border outline-2 outline rounded-lg w-full h-full transition-all duration-300 z-2"
+            class="box-border outline-2 outline rounded-8 w-full h-full transition-all duration-300 z-2"
             :class="[index === currGenResultIndex ? 'outline-yellow-cm' : 'outline-transparent']")
-            div(class="overflow-hidden rounded-lg w-full h-full")
+            div(class="overflow-hidden rounded-8 w-full h-full")
               img(
                 v-if="genResult.url.length"
                 class="w-full h-full object-cover"
                 :src="appendSizeQuery(genResult.url)")
           div(v-if="!genResult.url.length" class="loading-block")
-          div(class="absolute top-0 left-0 rounded-lg w-full h-full bg-dark-3 z-1")
+          div(class="absolute top-0 left-0 rounded-8 w-full h-full bg-dark-3 z-1")
   div(class="flex flex-col gap-8 justify-between items-center")
     nubtn(
       size="mid-full"

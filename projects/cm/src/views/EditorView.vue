@@ -87,8 +87,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       @downloadMask="downloadCanvas")
   div(v-else class="editor-view__saving-state")
     div(
-      class="w-full h-full flex flex-col gap-8 justify-center items-center overflow-hidden rounded-lg p-16 box-border")
-      div(class="result-showcase w-fit h-fit rounded-xl overflow-hidden" ref="resultShowcase")
+      class="w-full h-full flex flex-col gap-8 justify-center items-center overflow-hidden rounded-8 p-16 box-border")
+      div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
           :class="{ 'is-flipped': !showVideo }"

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="action-sheet" ref="actionSheetRef")
-  div(class="bg-dark-3 flex flex-col rounded-lg")
+  div(class="bg-dark-3 flex flex-col rounded-10")
     div(
       v-for="(action, index) in primaryActions"
       :key="index"
@@ -10,7 +10,7 @@ div(class="action-sheet" ref="actionSheetRef")
         v-for="(label, index) in action.labels"
         :key="index"
         :class="`text-${label.labelColor} ${label.labelSize}`") {{ label.label }}
-  div(class="bg-dark-3 flex flex-col rounded-lg")
+  div(class="bg-dark-3 flex flex-col rounded-10")
     div(
       v-for="(action, index) in secondaryActions"
       :key="index"

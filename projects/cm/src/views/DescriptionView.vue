@@ -7,7 +7,7 @@ div(class="description-page w-full h-full text-white px-24")
       span(class="typo-h5") {{ title }}
     template(#right)
   div(class="w-full h-[90%] flex flex-col gap-16 items-center box-border py-16")
-    div(class="h-[75%] aspect-[9/16] overflow-hidden rounded-lg relative")
+    div(class="h-[75%] aspect-[9/16] overflow-hidden rounded-8 relative")
       transition(name="fade-in")
         // update key to trigger vue transition
         // eslint-disable-next-line vue/require-toggle-inside-transition
@@ -21,7 +21,7 @@ div(class="description-page w-full h-full text-white px-24")
         v-for="(n, idx) in 3"
         :key="idx"
         :src="getImg(idx)"
-        class="w-32 h-32 overflow-hidden rounded object-cover object-center"
+        class="w-32 h-32 overflow-hidden rounded-4 object-cover object-center"
         :class="{ 'outline-solid outline-2 -outline-offset-2 outline-yellow-cm': idx === idxCurrImg }"
         @click="idxCurrImg = idx")
     div(class="typo-body-md") {{ description }}
