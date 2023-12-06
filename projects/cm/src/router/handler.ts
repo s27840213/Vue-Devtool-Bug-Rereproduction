@@ -1,10 +1,11 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useEditorStore } from '@/stores/editor'
-import type { EditorType } from '@/types/editor'
+import type { EditorType, GenImageOptions } from '@/types/editor'
 import { editorTypes } from '@/types/editor'
+import store from '@/vuex'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import VueRouter from 'vue-router'
-import store from '@/vuex'
 
 const isValidType = (x: any): x is EditorType => editorTypes.includes(x);
 
@@ -23,7 +24,7 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
 
     const editorStore = useEditorStore()
     const { editorType } = storeToRefs(editorStore)
-    const { startEditing, setPageSize, setImgAspectRatio, setCurrActiveFeature, stepsReset } = editorStore
+    const { startEditing, setPageSize, setImgAspectRatio, setCurrActiveFeature, stepsReset, setCurrGenOptions } = editorStore
     const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     startEditing(type)
     setImgAspectRatio(9/16)
@@ -37,6 +38,7 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
         break;
       case 'hidden-message':
         setCurrActiveFeature('add')
+        setCurrGenOptions(constantData.getGenImageOptions('hidden-message') as GenImageOptions ?? [])
         break;
       default:
         break;
