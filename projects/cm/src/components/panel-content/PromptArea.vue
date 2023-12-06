@@ -14,14 +14,14 @@ div(
     div(class="w-fit")
       svg-icon(
         v-if="showSettingsIcon"
-        iconName="cm_settings"
+        :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
         class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2"
         @click="isGenSettings = !isGenSettings")
   template(v-if="!isTypeSettings")
     div(class="w-full relative")
       textarea(
         class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
-        :placeholder="$t('CM0024')"
+        :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
         :autofocus="!isDuringTutorial"
         v-model="promptText")
       transition(name="clear-btn-transition")
