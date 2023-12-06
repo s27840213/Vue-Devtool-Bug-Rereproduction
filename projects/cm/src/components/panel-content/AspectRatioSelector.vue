@@ -25,10 +25,10 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 const editorStore = useEditorStore()
-const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
+const { imgAspectRatio, pageAspectRatio, pageSize, editorType } = storeToRefs(editorStore)
 const { updateCanvasSize } = useCanvasUtilsCm()
 
-const aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4']
+const aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4'].filter(r => editorType.value === 'hidden-message' ? r !== 'original' : true)
 const selectedType = ref('9:16')
 
 const bus = useEventBus('editor')
@@ -79,6 +79,7 @@ const selectAspectRatio = (type: string) => {
 }
 
 const updateLayerStyleToFitPage = () => {
+  if (!layerUtils.getCurrPage.layers.length) return
   if (imgAspectRatio.value > pageAspectRatio.value) {
     layerUtils.updateLayerStyles(0, 0, {
       width: pageSize.value.width,

@@ -27,7 +27,6 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     const { startEditing, setPageSize, setImgAspectRatio, setCurrActiveFeature, stepsReset, setCurrGenOptions } = editorStore
     const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     startEditing(type)
-    setImgAspectRatio(9/16)
     setPageSize(900, 1600)
     stepsReset()
     if (isBiColorEditor.value) initBiColorEditor(editorType.value)
