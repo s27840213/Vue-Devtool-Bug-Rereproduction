@@ -44,9 +44,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
     ref="editorContainerRef"
+    id="mobile-editor__content"
     @pointerdown="selectStart"
     @pointerup="selectEnd"
-    @pinch="onPinch"
+    @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
     div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
@@ -196,6 +197,7 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
+import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
@@ -261,6 +263,10 @@ const {
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
+watch(() => isManipulatingCanvas.value, (val) => {
+  store.commit('SET_disableLayerAction', val)
+})
+
 const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inAspectRatioState.value) {
@@ -278,7 +284,6 @@ const handleNextAction = function () {
         )
         const pixiRecorder = new PixiRecorder(src, res)
         pixiRecorder.genVideo().then((data) => {
-          console.log('gen video', data)
           if (data) {
             isVideoGened.value = true
             updateGenResult(currGenResult.id, { video: data })
@@ -356,6 +361,17 @@ const wrapperStyles = computed(() => {
 
 const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
+  // editorUtils.handleContentScaleRatio(0)
+  // const { hasBleed } = pageUtils
+  // const page = pageUtils.getPage(0)
+  // const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
+  // const pos = {
+  //   x: (editorUtils.mobileSize.width - width * ratio) * 0.5,
+  //   y: (editorUtils.mobileSize.height - height * ratio) * 0.5
+  // }
+  // test
+  // pageUtils.updatePagePos(0, pos)
+  // pageUtils.updatePageInitPos(0, pos)
 }
 
 // watch(sidebarTabsWidth, () => {
@@ -377,6 +393,7 @@ watch(isDuringCopy, () => {
   fitPage(fitScaleRatio.value)
 })
 
+let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
 onMounted(() => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
@@ -393,6 +410,7 @@ onMounted(() => {
       y: rect.top,
     },
   })
+  pagePinchHandler = (new PagePinchUtils(editorWrapperRef.value as HTMLElement)).pinchHandler
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
@@ -405,45 +423,70 @@ const outerClick = () => {
 const pointerEvent = ref({
   initPos: null as { x: number; y: number } | null,
 })
-let movingUtils = null as MovingUtils | null
+const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
+  console.log('select start')
   recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
-  if (isImgCtrl.value) {
-    const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
-      ? groupUtils.mapLayersToPage(
-          [layerUtils.getCurrConfig as IImage],
-          layerUtils.getCurrLayer as IGroup,
-        )[Math.max(layerUtils.subLayerIdx, 0)]
-      : layerUtils.getCurrLayer
-    if (!controlUtils.isClickOnController(e, layer)) {
-      const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      switch (currLayer.type) {
-        case LayerType.image:
-        case LayerType.group:
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-          break
-        case LayerType.frame:
-          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
-            imgControl: false,
-          })
-          break
-      }
-      return
+
+  const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
+    ? groupUtils.mapLayersToPage(
+        [layerUtils.getCurrConfig as IImage],
+        layerUtils.getCurrLayer as IGroup,
+      )[0]
+    : layerUtils.getCurrLayer
+  const isClickOnController = controlUtils.isClickOnController(e, layer)
+
+  if (isImgCtrl.value && !isClickOnController) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+    switch (currLayer.type) {
+      case LayerType.image:
+      case LayerType.group:
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+        break
+      case LayerType.frame:
+        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+          imgControl: false,
+        })
+        break
     }
+    return
   }
-  if (layerUtils.layerIndex !== -1) {
-    // when there is an layer being active, the moving logic applied to the EditorView
-    movingUtils = new MovingUtils({
+
+  const movingUtils = new MovingUtils({
+    _config: { config: layerUtils.getCurrLayer },
+    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+    body: document.getElementById(
+      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+    ) as HTMLElement,
+  })
+
+  if (isClickOnController) {
+    movingUtils.removeListener()
+    movingUtils.updateProps({
       _config: { config: layerUtils.getCurrLayer },
-      snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-      body: document.getElementById(
-        `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-      ) as HTMLElement,
+      body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
     })
     movingUtils.moveStart(e)
-    pointerEvent.value.initPos = { x: e.x, y: e.y }
+  } else {
+    movingUtils.removeListener()
+    movingUtils.pageMoveStart(e)
   }
+  pointerEvent.value.initPos = { x: e.x, y: e.y }
+
+  // layer pinch logic
+  // if (layerUtils.layerIndex !== -1) {
+  //   // when there is an layer being active, the moving logic applied to the EditorView
+  //   movingUtils = new MovingUtils({
+  //     _config: { config: layerUtils.getCurrLayer },
+  //     snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+  //     body: document.getElementById(
+  //       `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+  //     ) as HTMLElement,
+  //   })
+  //   movingUtils.moveStart(e)
+  //   pointerEvent.value.initPos = { x: e.x, y: e.y }
+  // }
 }
 
 // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
@@ -475,10 +518,11 @@ const selectEnd = (e: PointerEvent) => {
 
 const isPinchInit = ref<null | boolean>(false)
 let pinchControlUtils = null as null | PinchControlUtils
-const onPinch = (e: AnyTouchEvent) => {
+
+const onLayerPinch = (e: AnyTouchEvent) => {
   if (e.phase === 'end' && isPinchInit.value) {
     // pinch end handling
-    pinchHandler(e)
+    layerPinchHandler(e)
     isPinchInit.value = false
     pinchControlUtils = null
   } else {
@@ -487,19 +531,19 @@ const onPinch = (e: AnyTouchEvent) => {
     if (!isPinchInit.value) {
       // first pinch initialization
       isPinchInit.value = true
-      return pinchStart(e)
+      return layerPinchStart(e)
     } else {
       // pinch move handling
-      pinchHandler(e)
+      layerPinchHandler(e)
     }
   }
 }
 
-const pinchHandler = (e: AnyTouchEvent) => {
+const layerPinchHandler = (e: AnyTouchEvent) => {
   pinchControlUtils?.pinch(e)
 }
 
-const pinchStart = (e: AnyTouchEvent) => {
+const layerPinchStart = (e: AnyTouchEvent) => {
   if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
   if (store.getters['bgRemove/getInBgRemoveMode']) return
 
@@ -555,8 +599,8 @@ const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToR
 
 const demoBrushSizeStyles = computed(() => {
   return {
-    width: `${brushSize.value * contentScaleRatio.value}px`,
-    height: `${brushSize.value * contentScaleRatio.value}px`,
+    width: `${brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     backgroundColor: `${drawingColor.value}4C`, // 30% opacity
   }
 })

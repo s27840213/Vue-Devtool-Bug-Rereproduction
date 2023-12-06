@@ -1,14 +1,17 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import store from '@nu/vivi-lib/store'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import useMouseUtils from './useMouseUtils'
 import useBiColorEditor from './useBiColorEditor'
+import useMouseUtils from './useMouseUtils'
 
 export interface ICanvasParams {
   width: number
@@ -129,12 +132,14 @@ const useCanvasUtils = (
     transform: 'translate(0,0)',
   })
 
-  watch(brushSize, (newVal) => {
-    brushStyle.width = `${newVal * contentScaleRatio.value}px`
-    brushStyle.height = `${newVal * contentScaleRatio.value}px`
+  const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
+
+  watch([brushSize, pageScaleRatio], ([newBrushSize, newScaleRatio]) => {
+    brushStyle.width = `${newBrushSize * contentScaleRatio.value * newScaleRatio * 0.01}px`
+    brushStyle.height = `${newBrushSize * contentScaleRatio.value * newScaleRatio * 0.01}px`
 
     if (canvasCtx && canvasCtx.value) {
-      canvasCtx.value.lineWidth = newVal
+      canvasCtx.value.lineWidth = newBrushSize
     }
   })
 
@@ -221,8 +226,11 @@ const useCanvasUtils = (
     if (wrapperRef && wrapperRef.value) {
       const { x, y } = getMousePosInTarget(e, wrapperRef.value)
       brushStyle.transform = `translate(${
-        x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
-      }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
+        x * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 - (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 + pageUtils.getCurrPage.x
+      }px, ${y * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 - (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 + pageUtils.getCurrPage.y}px)`
+      // brushStyle.transform = `translate(${
+      //   x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
+      // }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
     }
   }
 
@@ -237,6 +245,7 @@ const useCanvasUtils = (
   }
 
   const drawStart = (e: PointerEvent) => {
+    if (pointerEvtUtils.pointerIds.length !== 1) return
     console.log('drawStart')
     console.log(
       showBrushOptions.value,
@@ -267,6 +276,10 @@ const useCanvasUtils = (
     }
   }
   const drawing = (e: PointerEvent) => {
+    if (pointerEvtUtils.pointerIds.length !== 1) {
+      showBrush.value = false
+      return
+    }
     if (isBrushMode.value || isEraseMode.value) {
       const pointerCurrentX = e.clientX
       const pointerCurrentY = e.clientY
