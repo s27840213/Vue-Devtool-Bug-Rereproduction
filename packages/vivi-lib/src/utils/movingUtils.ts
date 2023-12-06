@@ -93,7 +93,6 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
-    console.log('1111', store.getters['mobileEditor/getIsPinchingEditor'])
     if (store.getters['mobileEditor/getIsPinchingEditor']) return
 
     this.initPageTranslate.x = pageUtils.getCurrPage.x

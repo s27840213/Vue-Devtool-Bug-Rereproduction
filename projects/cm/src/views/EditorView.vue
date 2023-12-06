@@ -421,7 +421,6 @@ const pointerEvent = ref({
 })
 const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
-  console.log('select start')
   recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
 

@@ -152,7 +152,7 @@ const useCanvasUtils = (
   })
 
   const isMovingMode = computed(() => {
-    return canvasMode.value === 'erase'
+    return canvasMode.value === 'move'
   })
 
   const brushColor = computed(() => {
