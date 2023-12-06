@@ -64,11 +64,10 @@ const {
 } = editorStore
 const { generatedResults, currGenResultIndex, initImgSrc } =
   storeToRefs(editorStore)
-
 const { genImageFlow } = useGenImageUtils()
 
 const showMoreRes = async () => {
-  await genImageFlow('', true, 2)
+  await genImageFlow({ prompt: '', action: 'powerful-fill' }, true, 2)
 }
 
 const appendSizeQuery = (url: string, size = 200) => {
