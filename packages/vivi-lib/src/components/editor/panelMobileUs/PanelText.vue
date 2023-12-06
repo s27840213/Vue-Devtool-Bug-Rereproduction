@@ -86,10 +86,12 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getCategories({
-          writeBack: false,
-          key: this.$isStk || this.$isCm ? 'textStock' : undefined
-        })
+        if (!(this.$isCm && this.rawContent.list)) { // prevent duplicate request
+          await this.getCategories({
+            writeBack: false,
+            key: this.$isStk || this.$isCm ? 'textStock' : undefined
+          })
+        }
         await this.getRecently({
           writeBack: true,
           key: this.$isStk || this.$isCm ? 'textStock' : undefined
