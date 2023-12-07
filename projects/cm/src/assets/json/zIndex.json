@@ -1,14 +1,22 @@
 [
-  "lowest",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
   "page",
   "canvas",
   "modal-mask",
+  "siebar-tabs",
   "bottom-panel",
   "asset-panel",
+  "median",
   "popup",
   "img-selector",
+  "desciption-panel",
   "action-sheet",
   "tutorial-highlight",
   "tutorial-overlay",
+  "abs-container",
   "highest"
 ]

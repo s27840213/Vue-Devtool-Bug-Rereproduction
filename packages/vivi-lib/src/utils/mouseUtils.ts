@@ -145,7 +145,7 @@ class MouseUtils {
         horizontalFlip: data.styles.horizontalFlip || false,
         verticalFlip: data.styles.verticalFlip || false
       },
-      id: ''
+      id: generalUtils.generateRandomString(8)
     }
 
     switch (data.type) {

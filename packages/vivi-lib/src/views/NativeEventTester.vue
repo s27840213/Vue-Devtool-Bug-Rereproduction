@@ -47,13 +47,13 @@ div(class="native-event-tester")
 </template>
 
 <script setup lang="ts">
-import Checkbox from '@/components/global/Checkbox.vue'
 import type { ICallbackRecord } from '@/interfaces/webView'
 import { app, appType, getAutoWVUtils } from '@/utils/autoWVUtils'
 import generalUtils from '@/utils/generalUtils'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
+import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
+import { computed, nextTick, onBeforeMount, reactive, ref, watch, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 
 enum mobileOSType {
@@ -106,9 +106,15 @@ const eventParamsStr = ref('{}')
 const eventParamsValid = ref(true)
 let eventParams = reactive({})
 
+onBeforeMount(async () => {
+  const autoWVUtils = getAutoWVUtils()
+  eventName.value = (await autoWVUtils.getState('VVNET_event_name') as { value: string } | null | undefined)?.value ?? ''
+  eventParamsStr.value = (await autoWVUtils.getState('VVNET_event_params') as { value: string } | null | undefined)?.value ?? '{}'
+})
+
 watchEffect(() => {
   try {
-    eventParams = JSON.parse(eventParamsStr.value)
+    eventParams = JSON.parse(eventParamsStr.value.replace(/[“”]/g, '"'))
     eventParamsValid.value = true
   } catch (error) {
     eventParamsValid.value = false
@@ -150,6 +156,10 @@ watch(() => callbackRecords, (val) => {
 }, { deep: true })
 
 const submitEvent = async () => {
+  eventParamsStr.value = eventParamsStr.value.replace(/[“”]/g, '"')
+  const autoWVUtils = getAutoWVUtils()
+  await autoWVUtils.setState('VVNET_event_name', { value: eventName.value })
+  await autoWVUtils.setState('VVNET_event_params', { value: eventParamsStr.value })
   if (doClearOnSubmet.value || useHTTPLike.value) {
     clearCallbacks()
   }
@@ -164,7 +174,7 @@ const submitEvent = async () => {
       case mobileOSType.IOS:
         if (useHTTPLike.value) {
           eventId.value = generalUtils.generateAssetId()
-          const httpLikeWVUtils = getAutoWVUtils() as HTTPLikeWebViewUtils<{[key: string]: any}>
+          const httpLikeWVUtils = autoWVUtils as HTTPLikeWebViewUtils<{[key: string]: any}>
           const response = await httpLikeWVUtils.callIOSAsHTTPAPI(eventName.value, eventParams, { retry: false })
           if (response === null) {
             notify({ group: 'error', text: 'request timeouted' })
@@ -176,7 +186,7 @@ const submitEvent = async () => {
             }
           }
         } else {
-          getAutoWVUtils().sendToIOS(eventName.value, eventParams, true)
+          autoWVUtils.sendToIOS(eventName.value, eventParams, true)
         }
         break
       case mobileOSType.Android:

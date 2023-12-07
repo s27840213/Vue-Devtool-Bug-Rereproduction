@@ -133,7 +133,7 @@ div(ref="page-wrapper" :id="`nu-page-wrapper_${pageIndex}`"
                 :contentScaleRatio="contentScaleRatio"
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
-      div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
+      div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex) && !hideHighlighter"
         :class="[useMobileEditor ? 'page-highlighter page-highlighter--mobile' : 'page-highlighter', {'page-highlighter--in-bg-settings': inBgSettingMode}]"
         :style="wrapperStyles")
       //- for ruler to get rectangle of page content (without bleeds)
@@ -238,6 +238,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    hideHighlighter: {
+      type: Boolean,
+      default: false
+    }
   },
   emits: ['stepChange'],
   mounted() {
@@ -247,6 +251,9 @@ export default defineComponent({
     })
     if (this.config.x === 0 || this.config.y === 0) {
       editorUtils.handleContentScaleRatio(this.pageIndex)
+    }
+    if (generalUtils.isCm) {
+      this.$store.commit('SET_pageScaleRatio', 100)
     }
   },
   watch: {
@@ -312,6 +319,13 @@ export default defineComponent({
       }
     },
     lazyloadSize(): unknown {
+      // @TODO discuss with allen, the *5 prevent zooming bug
+      if (generalUtils.isCm) {
+        return {
+          minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5,
+          maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5
+        }
+      }
       return {
         minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100),
         maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)
@@ -373,7 +387,8 @@ export default defineComponent({
       let transformOrigin = ''
 
       // charmix don't need to use absolute position
-      if (generalUtils.isTouchDevice() && !this.$isCm) {
+      // if (generalUtils.isTouchDevice() && !this.$isCm) {
+      if (generalUtils.isTouchDevice()) {
         const { pinchScale, isPinchingEditor } = this.$store.state.mobileEditor
         position = 'absolute'
         transformOrigin = '0 0'

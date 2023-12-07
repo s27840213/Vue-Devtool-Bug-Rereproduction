@@ -59,37 +59,37 @@ module.exports = {
         '.typo-h1': {
           fontFamily: 'Lato',
           fontSize: '32px',
-          fontWeight: 600,
+          fontWeight: 900,
           lineHeight: '40px',
         },
         '.typo-h2': {
           fontFamily: 'Lato',
           fontSize: '28px',
-          fontWeight: 600,
+          fontWeight: 900,
           lineHeight: '36px',
         },
         '.typo-h3': {
           fontFamily: 'Lato',
           fontSize: '24px',
-          fontWeight: 600,
+          fontWeight: 900,
           lineHeight: '32px',
         },
         '.typo-h4': {
           fontFamily: 'Lato',
           fontSize: '22px',
-          fontWeight: 500,
+          fontWeight: 600,
           lineHeight: '28px',
         },
         '.typo-h5': {
           fontFamily: 'Lato',
           fontSize: '16px',
-          fontWeight: 500,
+          fontWeight: 600,
           lineHeight: '24px',
         },
         '.typo-h6': {
           fontFamily: 'Lato',
           fontSize: '14px',
-          fontWeight: 500,
+          fontWeight: 600,
           lineHeight: '20px',
         },
         '.typo-body-lg': {
@@ -127,6 +127,13 @@ module.exports = {
           fontSize: '11px',
           fontWeight: 600,
           lineHeight: '16px',
+        },
+        '.typo-btn-xs': {
+          fontFamily: 'Lato',
+          fontSize: '12px',
+          fontWeight: 600,
+          lineHeight: '16px',
+          transform: 'scale(0.9)',
         },
       }
       addUtilities(textStyles, ['responsive'])

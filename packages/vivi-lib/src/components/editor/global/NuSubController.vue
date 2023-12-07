@@ -9,7 +9,7 @@ div(class="nu-sub-controller")
           div(v-if="config.type === 'text' && config.active"
             class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
             @pointerdown="onPointerdown")
-            nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+            nu-text-editor(:id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
               :style="textBodyStyle()"
               :pageIndex="pageIndex"
               :page="page"
@@ -46,9 +46,7 @@ import { isTextFill } from '@/interfaces/format'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
 import cssConverter from '@/utils/cssConverter'
-import eventUtils from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -62,7 +60,6 @@ import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vuexUtils from '@/utils/vuexUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -271,7 +268,7 @@ export default defineComponent({
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
-          editor.setEditable(newVal)
+          editor.setEditable(newVal, false)
         })
       }
       !this.$isTouchDevice() && StepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
@@ -297,9 +294,6 @@ export default defineComponent({
     }),
     isDraggedPanelPhoto(): boolean {
       return this.currDraggedPhoto.srcObj.type !== ''
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
     },
     textWrapperStyle(): Record<string, string | number> {
       const _f = this.contentScaleRatio * this.scaleRatio * 0.01
@@ -367,7 +361,7 @@ export default defineComponent({
     },
     outlineStyles() {
       const outlineColor = this.config.locked ? '#EB5757' : generalUtils.getOutlineColor()
-      const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath)
+      const isRectFrameClip = layerUtils.getCurrLayer.type === 'frame' && this.config.type === 'image' && frameUtils.checkIsRect(this.config.clipPath ?? '')
       if (layerUtils.getCurrLayer.type === 'frame' && !isRectFrameClip) return 'none'
 
       if (this.isControllerShown) {
@@ -405,6 +399,9 @@ export default defineComponent({
       this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
+      if (this.$store.getters.getControlState.type) {
+        return
+      }
       layerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.calcSize(this.config as IText)
       if (payload.toRecord) {

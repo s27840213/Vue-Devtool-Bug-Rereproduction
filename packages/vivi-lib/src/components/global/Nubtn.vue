@@ -3,15 +3,15 @@ div(:class="`nubtn ${proj} ${theme} ${sizeClass} ${status} ${device}`"
     v-hint="hint"
     ref="root"
     @click="click")
-  svg-icon(v-if="theme.includes('icon') && iconName"
+  svg-icon(v-if="iconName"
           :iconName="iconName" :iconWidth="iconSize" :iconColor="iconColor")
   span(v-if="!theme.includes('icon') || theme.includes('icon_')")
     slot
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue'
 import useTapTransition from '@/composable/useTapTransition'
+import { defineComponent, PropType, ref } from 'vue'
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
@@ -85,13 +85,17 @@ const component = defineComponent({
       return Array.isArray(this.icon) ? this.icon[0] : this.icon
     },
     iconSize(): string {
-      return this.theme === 'icon_pill' && this.size === 'sm' ? '20px' : '24px'
+      if (Array.isArray(this.icon) && this.icon[2]) { // Case 2
+        return this.icon[2]
+      } 
+      return this.theme === 'icon_pill' && this.size.includes('sm') ? '20px' : '24px'
     },
     iconColor(): string {
       if (Array.isArray(this.icon) && this.icon[1]) { // Case 2
         return this.icon[1]
-      } else if (this.theme === 'icon_text') return 'white'
-      else return this.status === 'disabled' ? 'gray-4' : 'gray-2'
+      } 
+      // Empty string means the same color with text.
+      return ''
     },
   },
   methods: {
@@ -112,12 +116,17 @@ export default component
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border-radius: 4px;
   box-sizing: border-box;
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
   transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  > span {
+    // The same with svg-icon.
+    transition: background-color 0.4s, color 0.4s;
+  }
 
   &.full {
     width: 100%;
@@ -137,17 +146,13 @@ export default component
     @include btn-SM;
     font-weight: 600;
     height: 32px;
-    &:not(.full) {
-      padding: 4px 16px;
-    }
+    padding: 4px 16px;
   }
   &.mid {
     @include btn-LG;
     font-weight: 600;
     height: 44px;
-    &:not(.full) {
-      padding: 10px 24px;
-    }
+    padding: 10px 24px;
   }
 }
 
@@ -162,9 +167,7 @@ export default component
     line-height: 20px;
     height: 40px;
   }
-  &:not(.full) {
-    padding: 0 16px;
-  }
+  padding: 8px 16px;
   font-weight: 700;
   border-radius: 50px;
 }
@@ -196,7 +199,7 @@ export default component
   &.default {
     background-color: #FDD248;
   }
-  &.desktop:hover, &.hover, &.pressed ,&.active {
+  &.desktop:hover, &.hover, &.pressed, &.active {
     background-color: #E4BD41;
   }
   &.disabled {
@@ -228,24 +231,17 @@ export default component
   }
 }
 .nubtn.icon_text {
-  svg {
-    margin-right: 8px;
-  }
   &.sm {
     @include btn-SM;
     font-weight: 600;
     height: 36px;
-    &:not(.full) {
-      padding: 6px 16px 6px 12px;
-    }
+    padding: 6px 16px 6px 12px;
   }
   &.mid {
     @include btn-LG;
     font-weight: 600;
     height: 44px;
-    &:not(.full) {
-      padding: 10px 20px 10px 12px;
-    }
+    padding: 10px 20px 10px 12px;
   }
   color: setColor(white);
   background-color: var(--blue);
@@ -253,6 +249,7 @@ export default component
 .nubtn.icon {
   width: 32px;
   height: 32px;
+  color: setColor(gray-2);
   &.active {
     background-color: setColor(blue-3);
   }
@@ -260,6 +257,7 @@ export default component
     background-color: setColor(blue-3, 0.5);
   }
   &.desktop.disabled, &.mobile.disabled {
+    color: setColor(gray-4);
     background-color: transparent;
   }
 }
@@ -273,6 +271,7 @@ export default component
     height: 44px;
   }
   border: 1px solid setColor(gray-3);
+  color: setColor(gray-2);
   background-color: white;
   &.active {
     background-color: setColor(blue-3);
@@ -281,6 +280,7 @@ export default component
     background-color: setColor(blue-4);
   }
   &.desktop.disabled, &.mobile.disabled {
+    color: setColor(gray-4);
     background-color: white;
   }
 }
@@ -289,9 +289,7 @@ export default component
   font-weight: 600;
   height: 36px;
   border-radius: 50px;
-  &:not(.full) {
-    padding: 6px 24px;
-  }
+  padding: 6px 24px;
   &.default, &.active {
     color: setColor(blue-1);
     background-color: setColor(blue-4);
@@ -310,9 +308,7 @@ export default component
   font-weight: 600;
   height: 36px;
   border-radius: 50px;
-  &:not(.full) {
-    padding: 6px 24px;
-  }
+  padding: 6px 24px;
   &.default, &.active {
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);
@@ -366,15 +362,13 @@ export default component
 
 .nubtn.icon_pill {
   border-radius: 100px;
+  gap: 4px;
   &.sm {
     @include body-XS;
     color: setColor(white);
     padding: 4px 8px;
     @include setColors(blue-1, black-3) using ($color) {
       background-color: $color;
-    }
-    > .svg-icon {
-      margin-right: 4px;
     }
     &:active {
       @include setColors(blue-hover, black-5) using ($color) {
@@ -389,7 +383,7 @@ export default component
   &.default {
     background-color: #FEF1C6;
   }
-  &.active {
+  &.hover, &.pressed, &.active {
     background-color: #CAA83A;
   }
   &.disabled {

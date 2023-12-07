@@ -88,12 +88,12 @@ export default defineComponent({
       setIsProcessing: 'bgRemove/SET_isProcessing',
     }),
     removeBg(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
-      console.time('removeBg total time')
-      console.time('upload IOS image')
       this.isInEditor ? this.handleCurrSelectedImage(type) : this.handleIOSImage(type)
     },
     handleIOSImage(type: 'stk-bg-remove' | 'stk-bg-remove-face') {
       stkWVUtils.getIosImg().then(async (images: Array<string>) => {
+        console.time('removeBg total time')
+        console.time('upload IOS image')
         if (images.length) {
           const src = imageUtils.getSrc({
             type: 'ios',
@@ -103,7 +103,10 @@ export default defineComponent({
 
           this.previewSrc = src
 
+          console.time('to dataUrl')
           this.toDataURL(src, (dataUrl: string) => {
+            console.timeEnd('to dataUrl')
+            generalUtils.dataURLtoBlob(dataUrl)
             this.setIsProcessing(true)
             uploadUtils.uploadAsset(type, [dataUrl])
           })

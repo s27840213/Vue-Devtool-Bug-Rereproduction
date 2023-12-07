@@ -32,7 +32,7 @@ div(class="popup-account text-left"
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
 import paymentData from '@nu/vivi-lib/utils/constantData'
-import loginUtils from '@/utils/loginUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'

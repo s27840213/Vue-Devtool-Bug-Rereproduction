@@ -2,90 +2,126 @@
 div(class="nu-header" :style="rootStyles")
   div(class="nu-header__container")
     div
-      router-link(to="/"
+      router-link(
+        to="/"
         class="nu-header__container-link"
-        style="height: 50px;")
-        svg-icon(class="pointer"
+        style="height: 50px")
+        svg-icon(
+          class="pointer"
           :iconName="'logo'"
           :iconWidth="'100px'"
-          style="height: 50px;")
-    transition(name="fade" mode="out-in")
-      div(v-if="!noNavigation" class="body-2 full-height" key="navigation")
-        template(v-for="l1 in navItems" :key="l1.name")
-          div(v-if="!l1.hidden" class="nu-header__container-link"
-              :class="{'text-blue-1': currentPage === l1.name}")
-            url(:url="l1.url") {{l1.label}}
-            svg-icon(v-if="l1.content" iconName="chevron-down"
-                    iconColor="gray-1" iconWidth="16px")
+          style="height: 50px")
+    transition(
+      name="fade"
+      mode="out-in")
+      div(
+        v-if="!noNavigation"
+        class="body-2 full-height"
+        key="navigation")
+        template(
+          v-for="l1 in navItems"
+          :key="l1.name")
+          div(
+            v-if="!l1.hidden"
+            class="nu-header__container-link"
+            :class="{ 'text-blue-1': currentPage === l1.name }")
+            url(:url="l1.url") {{ l1.label }}
+            svg-icon(
+              v-if="l1.content"
+              iconName="chevron-down"
+              iconColor="gray-1"
+              iconWidth="16px")
             div(v-if="l1.singleLayer" class="nu-header__container-link__single-layer")
-              url(v-for="l2 in l1.content" :key="l2.label" :url="l2.url") {{l2.label}}
+              url(
+                v-for="l2 in l1.content"
+                :key="l2.label"
+                :url="l2.url") {{ l2.label }}
             div(v-else-if="l1.content" class="nu-header__container-link__more")
-              div(v-for="l2 in l1.content" :key="l2.label" class="nu-header__container-link__more-col")
-                url(:url="l2.url") {{l2.label}}
-                url(v-for="l3 in l2.content" :key="l3.label" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
-      div(v-else class="body-2" key="no-navigation")
+              div(
+                v-for="l2 in l1.content"
+                :key="l2.label"
+                class="nu-header__container-link__more-col")
+                url(:url="l2.url") {{ l2.label }}
+                url(
+                  v-for="l3 in l2.content"
+                  :key="l3.label"
+                  :url="l3.url"
+                  :newTab="l3.newTab") {{ l3.label }}
+      div(
+        v-else
+        class="body-2"
+        key="no-navigation")
     div(class="body-2")
-      search-bar(v-if="!noSearchbar"
+      search-bar(
+        v-if="!noSearchbar"
         class="nu-header__search"
         :placeholder="$t('NN0037')"
         :color="{ search: 'gray-1', close: 'gray-1' }"
         @search="handleSearch")
-      div(v-if="!isLogin"
+      div(
+        v-if="!isLogin"
         class="nu-header__btn-login py-5 px-30 text-bold pointer text-blue-1"
-        style="white-space: nowrap;"
-        @click="goToPage('Login')") {{$tc('NN0168',2)}}
-      div(v-if="!isLogin"
+        style="white-space: nowrap"
+        @click="goToPage('Login')") {{ $tc('NN0168', 2) }}
+      div(
+        v-if="!isLogin"
         class="nu-header__btn text-bold"
-        @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
+        @click="goToPage('SignUp')") {{ $tc('NN0169', 2) }}
       //- svg-icon(v-if="isLogin"
       //-   :iconName="`notify`"
       //-   :iconWidth="'20px'")
       div(v-if="isLogin")
-        avatar(class="pointer"
+        avatar(
+          class="pointer"
           :textSize="14"
           :avatarSize="35"
           @click="isAccountPopup = true")
-        popup-account(v-if="isAccountPopup"
+        popup-account(
+          v-if="isAccountPopup"
           class="nu-header__account"
           @close="() => (isAccountPopup = false)")
   div(class="nu-header__container-mobile")
     div(class="flex-center")
-      svg-icon(class="pointer"
+      svg-icon(
+        class="pointer"
         :iconName="'logo'"
         :iconWidth="'143px'"
-        style="height: 45px;"
+        style="height: 45px"
         @click="goToPage('Home')")
     div(style="height: 25px")
       template(v-if="!noSearchbar")
-        svg-icon(v-if="!isShowSearchPage"
+        svg-icon(
+          v-if="!isShowSearchPage"
           :iconName="'search'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
           @click="() => { isShowSearchPage = true }")
-        svg-icon(v-else
+        svg-icon(
+          v-else
           :iconName="'close'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
           @click="closeSearchPage")
-        svg-icon(v-if="showCloseIcon"
+        svg-icon(
+          v-if="showCloseIcon"
           :iconName="'close'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
-          @click="()=> $emit('close')")
+          @click="() => $emit('close')")
   slot
-  div(v-if="isShowSearchPage"
-    class="nu-header__search-mobile")
-    search-bar(class="search"
-      :placeholder="$t('NN0092', {target: $t('NN0145')})"
+  div(v-if="isShowSearchPage" class="nu-header__search-mobile")
+    search-bar(
+      class="search"
+      :placeholder="$t('NN0092', { target: $t('NN0145') })"
       @search="handleSearch")
 </template>
 
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
-import Url from '@/components/global/Url.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
-import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import store from '@/store'
+import Url from '@nu/shared-lib/components/Url.vue'
+import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import constantData, { IHeaderL1 } from '@nu/vivi-lib/utils/constantData'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
@@ -96,33 +132,33 @@ export default defineComponent({
     SearchBar,
     PopupAccount,
     Avatar,
-    Url
+    Url,
   },
   directives: {
-    clickOutside: vClickOutside.directive
+    clickOutside: vClickOutside.directive,
   },
   props: {
     noSearchbar: {
-      type: Boolean
+      type: Boolean,
     },
     noNavigation: {
-      type: Boolean
+      type: Boolean,
     },
     showCloseIcon: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   emits: ['search', 'close'],
   data() {
     return {
       isAccountPopup: false,
-      isShowSearchPage: false
+      isShowSearchPage: false,
     }
   },
   computed: {
     ...mapGetters({
-      userInfo: 'webView/getUserInfo'
+      userInfo: 'webView/getUserInfo',
     }),
     navItems(): IHeaderL1[] {
       return constantData.headerItems()
@@ -133,11 +169,11 @@ export default defineComponent({
     isLogin(): boolean {
       return store.getters['user/isLogin']
     },
-    rootStyles(): {[key: string]: string} {
+    rootStyles(): { [key: string]: string } {
       return {
-        paddingTop: `${this.userInfo.statusBarHeight}px`
+        paddingTop: `${this.userInfo.statusBarHeight}px`,
       }
-    }
+    },
   },
   methods: {
     goToPage(pageName = '' as string, queryString = '') {
@@ -168,8 +204,8 @@ export default defineComponent({
     },
     closeSearchPage() {
       this.isShowSearchPage = false
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -183,7 +219,7 @@ export default defineComponent({
   top: 0;
   left: 0;
   width: 100%;
-  z-index: setZindex("nu-header");
+  z-index: setZindex('nu-header');
   &__btn {
     cursor: pointer;
     white-space: nowrap;
@@ -297,7 +333,8 @@ export default defineComponent({
   a:hover {
     color: setColor(blue-hover);
   }
-  &:hover > &__more, &:hover > &__single-layer {
+  &:hover > &__more,
+  &:hover > &__single-layer {
     visibility: visible;
   }
 }
@@ -340,7 +377,7 @@ export default defineComponent({
     > a:first-child {
       @include caption-LG;
       &::before {
-        content: "";
+        content: '';
         width: 6px;
         height: 6px;
         margin: 0px 10px 0px 0px;
@@ -396,16 +433,6 @@ export default defineComponent({
   &-enter-active,
   &-leave-active {
     transition: 0.1s;
-  }
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-  }
-}
-.slide-x-right {
-  &-enter-active,
-  &-leave-active {
-    transition: 0.5s;
   }
   &-enter-from,
   &-leave-to {

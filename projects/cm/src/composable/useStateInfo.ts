@@ -11,19 +11,23 @@ const useStateInfo = () => {
   const atMyDesign = computed(() => path.value === '/mydesign')
   const atSettings = computed(() => path.value === '/settings')
   const atMainPage = computed(() => atHome.value || atMyDesign.value)
+  const atDescription = computed(() => path.value === '/description')
   const atEditor = computed(() => path.value === '/editor')
   const atEventTester = computed(() => path.value === '/nativeevttest')
   // #endregion
 
   // #region editor state
-  const { currActiveFeature, inGenResultState, inAspectRatioState, inEditingState, inSavingState } =
-    storeToRefs(editorStore)
+  const {
+    inGenResultState,
+    inAspectRatioState,
+    inEditingState,
+    inSavingState,
+    showBrushOptions,
+    showSelectionOptions,
+    showDescriptionPanel,
+  } = storeToRefs(editorStore)
 
   const showHomeTabs = computed(() => atHome.value || atMyDesign.value)
-  const showBrushOptions = computed(() => atEditor.value && currActiveFeature.value === 'brush')
-  const showSelectionOptions = computed(
-    () => atEditor.value && currActiveFeature.value === 'selection',
-  )
 
   // #endregion
 
@@ -38,6 +42,7 @@ const useStateInfo = () => {
     atEditor,
     atSettings,
     atMainPage,
+    atDescription,
     atEventTester,
     showHomeTabs,
     inGenResultState,
@@ -47,6 +52,7 @@ const useStateInfo = () => {
     showBrushOptions,
     showSelectionOptions,
     showImgSelector,
+    showDescriptionPanel,
   }
 }
 

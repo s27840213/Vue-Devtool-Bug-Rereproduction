@@ -115,6 +115,7 @@ export default defineComponent({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      isProcessing: 'bgRemove/getIsProcessing',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       isUploadShadow: 'shadow/isUploading',
@@ -185,6 +186,29 @@ export default defineComponent({
       return true
     },
     // eslint-disable-next-line vue/no-unused-properties
+    isPasteFormatDisabled(): boolean {
+      if (!this.hasCopiedFormat) return true // disabled if no format is copied
+      if (this.selectedLayerNum === 1) { // not tmp
+        const types = this.currSelectedInfo.types
+        if (types.has('group')) {
+          if (this.subActiveLayerIndex !== -1) {
+            if (['text', 'image', 'frame'].includes(this.subActiveLayerType)) {
+              return this.isLocked || !formatUtils.isApplicableType(this.subActiveLayerType) // not disabled if selected subLayer is applicable
+            }
+          } else {
+            return this.isLocked // not disabled for group if no subLayer is selected
+          }
+        } else if (types.has('frame')) {
+          return this.isLocked || !formatUtils.isApplicableType('frame') // not disabled if selected layer is applicable
+        } else if (types.has('text')) {
+          return this.isLocked || !formatUtils.isApplicableType('text') // not disabled if selected layer is applicable
+        } else if (types.has('image')) {
+          return this.isLocked || !formatUtils.isApplicableType('image') // not disabled if selected layer is applicable
+        }
+      }
+      return this.isLocked // not disabled for tmp
+    },
+    // eslint-disable-next-line vue/no-unused-properties
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
     },
@@ -233,6 +257,15 @@ export default defineComponent({
     },
     isGroup(): boolean {
       return layerUtils.getCurrLayer.type === LayerType.group
+    },
+    isUploadingImg(): boolean {
+      const currLayer = layerUtils.getCurrLayer
+      if(currLayer.type === LayerType.image) {
+        const {srcObj} = currLayer
+        return !(srcObj.type && srcObj.assetId && imageUtils.getSrc(srcObj, 'prev'))
+      } else {
+        return false
+      }
     },
     // eslint-disable-next-line vue/no-unused-properties
     isGroupOrTmp(): boolean {

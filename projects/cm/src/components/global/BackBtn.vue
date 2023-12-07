@@ -3,10 +3,10 @@ router-link(
   custom
   :to="toTarget"
   v-slot="{ navigate }")
-  cm-svg-icon(
-    icon-color="app-icon-light"
-    icon-name="arrow-left"
-    icon-width="24px"
+  svg-icon(
+    iconColor="app-icon-light"
+    iconName="cm_arrow-left"
+    iconWidth="24px"
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
@@ -43,13 +43,13 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 
 // #region img selector
 const imgSelectorStore = useImgSelectorStore()
-const { setRequireImgNum } = imgSelectorStore
+const { closeImageSelector } = imgSelectorStore
 const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
 // #region editor
 const editorStore = useEditorStore()
-const { setEditorState } = editorStore
+const { changeEditorState } = editorStore
 const { inGenResultState, inSavingState } = storeToRefs(editorStore)
 // #endregion
 
@@ -63,19 +63,14 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (inSavingState.value) {
-    setEditorState('genResult')
+  if (inSavingState.value || inGenResultState.value) {
+    changeEditorState('prev')
 
-    return
-  }
-
-  if (inGenResultState.value) {
-    setEditorState('editing')
     return
   }
 
   if (showImgSelector.value) {
-    setRequireImgNum(0)
+    closeImageSelector()
     return
   }
 
@@ -119,4 +114,5 @@ const handleBackAction = (navagate: () => void) => {
   }
 }
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+</style>

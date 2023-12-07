@@ -1,10 +1,10 @@
+import App from '@/App.vue'
+import i18n from '@/i18n'
 import router from '@/router'
 import store from '@/store'
 import { initApp } from '@nu/vivi-lib/main'
-import { createApp } from 'vue'
-import i18n from '@/i18n'
 import svgIconUtils from '@nu/vivi-lib/utils/svgIconUtils'
-import App from '@/App.vue'
+import { createApp } from 'vue'
 
 const app = initApp(createApp(App))
 app.use(i18n).use(router).use(store)
@@ -14,7 +14,7 @@ app.mount('#app')
 const svgs = require.context(
   '@nu/vivi-lib/assets/icon',
   true,
-  /^((?!vivisticker\/|stk).)*\.svg$/, // Skip stk only icon.
+  /^((?!vivisticker\/|stk\/|cm\/).)*\.svg$/, // Skip stk & cm only icon.
   'lazy-once'
 )
 const svgModules = svgs.keys().map(svgs) as Promise<{ default: { id: string} }>[]

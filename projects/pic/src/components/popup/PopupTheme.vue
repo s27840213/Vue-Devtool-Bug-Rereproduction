@@ -19,7 +19,7 @@ div(class="popup-theme text-left"
 </template>
 
 <script lang="ts">
-import Checkbox from '@nu/vivi-lib/components/global/Checkbox.vue'
+import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
 import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import themeUtils from '@nu/vivi-lib/utils/themeUtils'

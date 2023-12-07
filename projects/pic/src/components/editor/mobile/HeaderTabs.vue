@@ -1,19 +1,23 @@
 <template lang="pug">
-header-tabs(:rootStyles="rootStyles" :leftTabs="leftTabs" :rightTabs="rightTabs")
+header-tabs(
+  :rootStyles="rootStyles"
+  :leftTabs="leftTabs"
+  :rightTabs="rightTabs")
 </template>
 
 <script lang="ts">
-import HeaderTabs from '@nu/vivi-lib/components/editor/mobile/HeaderTabs.vue'
+import { notify } from '@kyvg/vue3-notification'
 import { TabConfig } from '@nu/vivi-lib/components/editor/mobile/HeaderTab.vue'
+import HeaderTabs from '@nu/vivi-lib/components/editor/mobile/HeaderTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
+import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { computed, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -21,12 +25,12 @@ export default defineComponent({
   props: {
     currTab: {
       default: 'none',
-      type: String
+      type: String,
     },
     inAllPagesMode: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   emits: ['switchTab', 'showAllPages'],
   setup() {
@@ -56,7 +60,7 @@ export default defineComponent({
       userInfo: 'webView/getUserInfo',
       uploadingImgs: 'file/getUploadingImgs',
     }),
-    rootStyles(): {[key: string]: string} {
+    rootStyles(): { [key: string]: string } {
       const basePadding = picWVUtils.inBrowserMode ? 10.7 : 8
       return {
         paddingTop: `${this.userInfo.statusBarHeight + basePadding}px`,
@@ -68,17 +72,30 @@ export default defineComponent({
     },
     leftTabs(): TabConfig[] {
       const retTabs = [
-        { icon: 'chevron-left', width: 22, action: this.backBtnAction }
+        { icon: 'chevron-left', width: 22, action: this.backBtnAction },
       ] as TabConfig[]
       if (!this.isShowDownloadPanel) {
         retTabs.push({
           icon: 'group',
           width: 0,
-          tabs: [{
-            icon: 'undo', width: 22, action: this.undo, disabled: (this.inBgRemoveMode ? this.inBgRemoveFirstStep : this.isInFirstStep) || this.isCropping
-          }, {
-            icon: 'redo', width: 22, action: this.redo, disabled: (this.inBgRemoveMode ? this.inBgRemoveLastStep : this.isInLastStep) || this.isCropping
-          }]
+          tabs: [
+            {
+              icon: 'undo',
+              width: 22,
+              action: this.undo,
+              disabled:
+                (this.inBgRemoveMode ? this.inBgRemoveFirstStep : this.isInFirstStep) ||
+                this.isCropping,
+            },
+            {
+              icon: 'redo',
+              width: 22,
+              action: this.redo,
+              disabled:
+                (this.inBgRemoveMode ? this.inBgRemoveLastStep : this.isInLastStep) ||
+                this.isCropping,
+            },
+          ],
         })
       }
       return retTabs
@@ -87,13 +104,13 @@ export default defineComponent({
       return [
         this.createRightTab({ icon: 'copy', disabled: this.isLocked }),
         this.createRightTab({ icon: this.isLocked ? 'lock' : 'unlock' }),
-        this.createRightTab({ icon: 'trash', disabled: this.isLocked })
+        this.createRightTab({ icon: 'trash', disabled: this.isLocked }),
       ]
     },
     bgSettingTabs(): TabConfig[] {
       return [
         this.createRightTab({ icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock' }),
-        this.createRightTab({ icon: 'trash', disabled: this.isLocked })
+        this.createRightTab({ icon: 'trash', disabled: this.isLocked }),
       ]
     },
     rightTabs(): TabConfig[] {
@@ -109,9 +126,16 @@ export default defineComponent({
         return [
           this.createRightTab({ icon: 'bleed', isPanelIcon: true, isHidden: !this.hasBleed }),
           this.createRightTab({ icon: 'resize', isPanelIcon: true }),
-          this.createRightTab({ icon: 'all-pages', isActive: (icon: string) => this.inAllPagesMode }),
-          this.createRightTab({ icon: 'download', isPanelIcon: true, disabled: (this.uploadingImgs as unknown[]).length > 0 }),
-          this.createRightTab({ icon: 'more', isPanelIcon: true })
+          this.createRightTab({
+            icon: 'all-pages',
+            isActive: (icon: string) => this.inAllPagesMode,
+          }),
+          this.createRightTab({
+            icon: 'download',
+            isPanelIcon: true,
+            disabled: (this.uploadingImgs as unknown[]).length > 0,
+          }),
+          this.createRightTab({ icon: 'more', isPanelIcon: true }),
         ] as TabConfig[]
       }
     },
@@ -119,22 +143,27 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
+      return this.inBgSettingMode
+        ? backgroundUtils.backgroundLocked
+        : layerUtils.getSelectedLayer().locked
     },
     isShowDownloadPanel(): boolean {
       return this.currActivePanel === 'download'
-    }
+    },
   },
   methods: {
     createRightTab(configs: Pick<TabConfig, 'icon'> & Partial<TabConfig>): TabConfig {
-      return Object.assign({
-        width: 22,
-        isActive: this.isTabActive,
-        color: { active: 'blue-1' },
-        action: () => {
-          this.handleIconAction(configs.icon)
-        }
-      }, configs)
+      return Object.assign(
+        {
+          width: 22,
+          isActive: this.isTabActive,
+          color: { active: 'blue-1' },
+          action: () => {
+            this.handleIconAction(configs.icon)
+          },
+        },
+        configs,
+      )
     },
     isTabActive(icon: string): boolean {
       return this.currTab === icon
@@ -143,7 +172,10 @@ export default defineComponent({
       this.$router.push({ name: 'Home' })
     },
     backBtnAction() {
-      if (this.inAllPagesMode) {
+      if (this.inBgRemoveMode) {
+        bgRemoveUtils.setInBgRemoveMode(false)
+        this.$emit('switchTab', 'none')
+      } else if (this.inAllPagesMode) {
         this.$emit('showAllPages')
       } else if (this.isShowDownloadPanel) {
         this.$emit('switchTab', 'none')
@@ -203,7 +235,7 @@ export default defineComponent({
           metaKey: true,
           shiftKey: false,
           key: 'z',
-          repeat: false
+          repeat: false,
         })
         window.dispatchEvent(event)
       } else {
@@ -217,13 +249,13 @@ export default defineComponent({
           metaKey: true,
           shiftKey: true,
           key: 'z',
-          repeat: false
+          repeat: false,
         })
         window.dispatchEvent(event)
       } else {
         shortcutUtils.redo()
       }
-    }
-  }
+    },
+  },
 })
 </script>

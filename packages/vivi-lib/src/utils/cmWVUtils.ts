@@ -1,10 +1,14 @@
 import i18n from '@/i18n'
 import { ICmProFeatures } from '@/interfaces/payment'
+import { IListServiceContentDataItem, ILoginResult } from '@/interfaces/api'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
+import assetUtils from './assetUtils'
+import listApis from '@/apis/list'
 
 export interface IGeneralSuccessResponse {
   flag: '0'
@@ -17,7 +21,7 @@ export interface IGeneralFailureResponse {
 
 type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
 
-export interface IUserInfo {
+export type IUserInfo = {
   hostId: string
   appVer: string
   osVer: string
@@ -25,7 +29,9 @@ export interface IUserInfo {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string
+  modelName: string,
+  flag: string,
+  locale: string,
 }
 
 export interface IAlbum {
@@ -73,7 +79,20 @@ export interface ISaveAssetFromUrlResponse {
   type: 'gif' | 'jpg' | 'png' | 'mp4',
   flag: string,
   msg?: string,
-  imageId?: string
+  fileId?: string
+}
+
+export interface IListAssetResponse {
+  key: string
+  assets: any[]
+  nextPage: string
+}
+
+export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
+  objects: 'svg',
+  textStock: 'text',
+  background: 'background',
+  font: 'font',
 }
 
 class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
@@ -85,11 +104,14 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     statusBarHeight: 0,
     homeIndicatorHeight: 0,
     country: '',
+    flag: '0',
+    locale: 'en',
     modelName: 'web',
   }
 
   CALLBACK_MAPS = {}
-
+  everEntersDebugMode = false
+  appLoadedSent = false
   tutorialFlags = {} as { [key: string]: boolean }
 
   get inBrowserMode() {
@@ -122,14 +144,43 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     store.commit('cmWV/SET_inBrowserMode', true)
   }
 
+  addDesignDisabled() {
+    return this.everEntersDebugMode || window.location.hostname !== 'cm.vivipic.com'
+  }
+
+  sendAppLoaded() {
+    if (!this.appLoadedSent) {
+      this.sendToIOS('REQUEST', this.makeAPIRequest('APP_LOADED', {}), true)
+      this.appLoadedSent = true
+    }
+  }
+
   async getUserInfo(): Promise<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
-    const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH', this.getEmptyMessage())
+    const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH')
+    store.commit('cmWV/SET_userInfo', userInfo)
     return userInfo as IUserInfo
   }
 
+  // Like picWVUtils, need merge.
+  async login(type: 'Apple' | 'Google' | 'Facebook', locale: string) {
+    const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as 
+      { data: ILoginResult, flag: number, msg?: string }
+    if (!loginResult) {
+      throw new Error('login failed')
+    }
+
+    if (loginResult.flag === 0) {
+      store.dispatch('user/loginSetup', { data: loginResult })
+      return loginResult
+    } else {
+      // logUtils.setLogAndConsoleLog('Apple login failed')
+      notify({ group: 'error', text: loginResult.msg })
+    }
+  }
+
   async getAlbumList(): Promise<IAlbumListResponse> {
-    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST', this.getEmptyMessage())
+    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST')
 
     return albumList as IAlbumListResponse
   }
@@ -144,7 +195,17 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string, options?: { key?: string, subPath?: string, name?: string }): Promise<ISaveAssetFromUrlResponse> {
-    return this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { type, url, ...options }) as Promise<ISaveAssetFromUrlResponse>
+    let retryTimes = 0
+    let result
+    while (retryTimes < 3) {
+      result = await (this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { type, url, ...options }, { timeout: -1 }) as Promise<ISaveAssetFromUrlResponse>)
+      if (result.flag === '1') {
+        retryTimes += 1
+      } else {
+        break
+      }
+    }
+    return result!
   }
 
   async switchDomain(url: string): Promise<void> {
@@ -258,7 +319,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async getState(key: string): Promise<any | undefined> {
     if (this.inBrowserMode) return
-    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }) as IGetStateResponse
+    const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }, { retry: true }) as IGetStateResponse
     return data.value ? JSON.parse(data.value) : undefined
   }
 
@@ -349,6 +410,83 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async setDefaultPrices() {
     // TODO: update prices
     store.commit('payment/SET_paymentPending', { info: false })
+  }
+  
+  async fetchDebugModeEntrance() {
+    this.everEntersDebugMode = (await this.getState('everEntersDebugMode'))?.value ?? false
+    if (!this.everEntersDebugMode && ((await this.getState('debugMode'))?.value ?? false)) {
+      await this.recordDebugModeEntrance()
+    }
+  }
+
+  async recordDebugModeEntrance() {
+    this.everEntersDebugMode = true
+    await this.setState('everEntersDebugMode', { value: this.everEntersDebugMode })
+  }
+
+  async listAsset(key: string, group?: string): Promise<void> {
+    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
+    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group })
+    if (!res) return
+    this.handleListAssetResult(res as IListAssetResponse)
+  }
+
+  async listMoreAsset(key: string, nextPage: number, group?: string): Promise<void> {
+    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
+    if (nextPage < 0) return
+    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group, pageIndex: nextPage })
+    if (!res) return
+    this.handleListAssetResult(res as IListAssetResponse)
+  }
+
+  handleListAssetResult(data: IListAssetResponse) {
+    if (['color', 'backgroundColor', 'giphy'].includes(data.key)) {
+      assetUtils.setRecentlyUsed(data.key, data.assets)
+      return
+    }
+    let igLayout
+    if (data.key.startsWith('templates')) igLayout = data.key.split('/')[1] as 'story' | 'post' | undefined
+    const designIds = data.assets.map(asset => asset.id)
+    listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds, igLayout).then((response) => {
+      if (response.data.data.content.length !== 0) {
+        const updateList = response.data.data.content[0].list
+        data.assets = this.updateAssetContent(data.assets, updateList)
+        assetUtils.setRecentlyUsed(data.key, data.assets)
+      }
+      this.handleCallback(`list-asset-${data.key}`)
+    })
+  }
+
+  updateAssetContent(targetList: any[], updateList: IListServiceContentDataItem[]): any[] {
+    let targetIndex = 0
+    let updateIndex = 0
+    const resList = []
+    while (updateIndex < updateList.length) {
+      const targetItem = targetList[targetIndex]
+      const updateItem = updateList[updateIndex]
+      if (targetItem.id === updateItem.id) {
+        if (updateItem.valid === 1 || updateItem.valid === undefined) {
+          delete updateItem.valid
+          resList.push(Object.assign(targetItem, updateItem))
+        }
+        targetIndex++
+        updateIndex++
+      } else {
+        targetIndex++
+        if (targetIndex === targetList.length) {
+          targetIndex = 0
+          updateIndex++
+        }
+      }
+    }
+    return resList
+  }
+
+  async addAsset(key: string, asset: any, limit = 100, group?: string) {
+    if (this.inBrowserMode) return
+    if (this.checkVersion('1.0.14')) {
+      await this.callIOSAsHTTPAPI('ADD_ASSET', { key, asset, limit, group })
+    }
   }
 }
 

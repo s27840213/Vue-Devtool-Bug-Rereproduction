@@ -3,6 +3,7 @@ import { AllLayerTypes, IGroup, IImage, IParagraph, IText } from '@/interfaces/l
 import store from '@/store'
 import { cloneDeep, pick } from 'lodash'
 import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
 import imageAdjustUtil from './imageAdjustUtil'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
@@ -21,7 +22,9 @@ class FormatUtils {
     return textShapeUtils.isCurvedText(textShape)
   }
 
-  isApplicableType(copiedType: string, type: string): boolean {
+  isApplicableType(type: string, copiedType?: string): boolean {
+    if (!this.copiedFormat) return false
+    copiedType = copiedType ?? this.copiedFormat.type
     return (this.APPLICABLE_TYPES[copiedType] ?? []).includes(type)
   }
 
@@ -136,17 +139,18 @@ class FormatUtils {
     }
   }
 
-  applyFormatIfCopied(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
+  applyFormatIfCopied(pageIndex: number, layerIndex: number, subLayerIndex = -1, onClick = true) {
+    if (onClick && generalUtils.isTouchDevice()) return
     if (!this.copiedFormat) return
     const type = this.copiedFormat.type
     const layer = store.getters.getLayer(pageIndex, layerIndex)
-    if (layer.type === 'group') { // subController or whole-group controller
+    if (['group', 'tmp'].includes(layer.type)) { // subController or whole-group controller or tmp controller
       const subLayers = (layer as IGroup).layers
       const isSubController = subLayerIndex >= 0
       let layers: AllLayerTypes[]
       if (isSubController) {
         const subLayer = subLayers[subLayerIndex]
-        if (!this.isApplicableType(type, subLayer.type)) return
+        if (!this.isApplicableType(subLayer.type, type)) return
         layers = [subLayer]
       } else {
         layers = subLayers
@@ -158,6 +162,9 @@ class FormatUtils {
           const targetLayer = layers[targetLayerIndex]
           if (targetLayer.type !== 'text') continue
           this.applyTextStyles(textFormat, targetLayer, pageIndex, layerIndex, idx)
+        }
+        if (isSubController) {
+          tiptapUtils.updateHtml()
         }
         textUtils.updateGroupLayerSize(pageIndex, layerIndex)
       }
@@ -179,10 +186,11 @@ class FormatUtils {
       }
       stepsUtils.record()
     } else { // non-group controller
-      if (!this.isApplicableType(type, layer.type)) return
+      if (!this.isApplicableType(layer.type, type)) return
       if (type === 'text') {
         const textFormat = this.copiedFormat.content as ITextFormat
         this.applyTextStyles(textFormat, layer, pageIndex, layerIndex)
+        tiptapUtils.updateHtml()
       }
       if (type === 'image') {
         const adjust = this.copiedFormat.content as IImageFormat
@@ -200,7 +208,8 @@ class FormatUtils {
     }
   }
 
-  clearCopiedFormat() {
+  clearCopiedFormat(onClick = true) {
+    if (onClick && generalUtils.isTouchDevice()) return
     store.commit('SET_hasCopiedFormat', false)
     this.copiedFormat = undefined
   }

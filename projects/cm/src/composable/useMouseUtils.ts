@@ -1,3 +1,4 @@
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { useStore } from 'vuex'
 
 const useMouseUtils = () => {
@@ -72,10 +73,10 @@ const useMouseUtils = () => {
     target: HTMLElement,
   ): { x: number; y: number; xPercentage: number; yPercentage: number } => {
     const mouseRelPos = getMouseRelPoint(e, target)
-    
+
     return {
-      x: mouseRelPos.x / contentScaleRatio.value,
-      y: mouseRelPos.y / contentScaleRatio.value,
+      x: (mouseRelPos.x - pageUtils.getCurrPage.x) / (contentScaleRatio.value * pageUtils.scaleRatio * 0.01),
+      y: (mouseRelPos.y - pageUtils.getCurrPage.y) / (contentScaleRatio.value * pageUtils.scaleRatio * 0.01),
       xPercentage: mouseRelPos.x / target.clientWidth,
       yPercentage: mouseRelPos.y / target.clientHeight,
     }

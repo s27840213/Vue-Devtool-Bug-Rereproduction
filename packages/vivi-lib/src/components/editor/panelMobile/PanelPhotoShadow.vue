@@ -33,8 +33,7 @@ div(class="panel-shadow")
     div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
       nubtn(class="photo-shadow__reset"
             theme="icon_pill"
-            :icon="['reset', 'white']"
-            size="sm"
+            icon="reset"
             @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
 </template>
 
@@ -43,7 +42,7 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
@@ -80,6 +79,7 @@ export default defineComponent({
         }
       }, 300)
     }
+    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },
   computed: {
     ...mapGetters({

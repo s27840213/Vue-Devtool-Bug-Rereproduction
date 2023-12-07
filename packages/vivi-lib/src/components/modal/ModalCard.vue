@@ -14,13 +14,21 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : show"
         :iconName="'photo'"
         :iconColor="'white'"
         :iconWidth="'48px'")
-  div(v-if="modalInfo.content" class="modal-card__text" :class="classes.desc")
+  div(v-if="modalInfo.content || modalInfo.ulContent" class="modal-card__text" :class="classes.desc")
     template(v-if="!pending")
       span(v-for="text in modalInfo.content"
       :key="text"
       @keydown.ctrl.c.exact.stop
         @keydown.meta.c.exact.stop
         v-html="text")
+      ul(
+        v-if="modalInfo.ulContent.length"
+        class="m-0 pl-30")
+        li(
+          v-for="(text, idx) in modalInfo.ulContent"
+          :key="idx"
+          class="text-left"
+          v-html="text")
       div(v-if="modalInfo.checkboxText !== ''" class="modal-card__checkbox-container")
         div(class="modal-card__checkbox"
             :class="{checked: modalInfo.checked}"
@@ -85,7 +93,7 @@ export default defineComponent({
 
       return {
         bg: 'bg-white',
-        title: 'text-H6 text-gray-2 text-app-tab-active',
+        title: 'text-H6 text-gray-2',
         desc: 'body-SM text-gray-2',
         btn: 'btn-primary-mid',
       }
@@ -125,13 +133,20 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .modal-card {
+  // dont't apply left and right padding to img
   @include not(cm) {
-    padding: 16px 30px;
+    padding: 16px 0px;
     border-radius: 10px;
+    &__row, &__text {
+      padding: 0px 30px;
+    }
   }
   @include cm {
-    padding: 24px;
+    padding: 24px 0px;
     border-radius: 20px;
+    &__row, &__text {
+      padding: 0px 24px;
+    }
   }
   position: relative;
   display: flex;

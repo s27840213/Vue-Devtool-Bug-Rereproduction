@@ -1,17 +1,18 @@
-import { defineStore } from 'pinia'
+import type { GenImageParams } from '@/types/api';
+import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', () => {
-  const userId = ref('')
-  const setUserId = (id: string) => {
-    userId.value = id
-  }
   const prevGenParams = reactive({
     requestId: '',
-    prompt: '',
+    params: {} as GenImageParams,
   })
 
-  const setPrevGenParams = (params: { requestId: string; prompt: string }) => {
+  const setPrevGenParams = (params: { requestId: string; params: GenImageParams }) => {
     Object.assign(prevGenParams, params)
   }
-  return { userId, prevGenParams, setUserId, setPrevGenParams }
+
+  return {
+    prevGenParams,
+    setPrevGenParams,
+  }
 })

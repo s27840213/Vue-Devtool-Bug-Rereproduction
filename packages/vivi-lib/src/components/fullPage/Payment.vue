@@ -82,11 +82,10 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
 
 <script lang="ts">
 import Carousel from '@/components/global/Carousel.vue'
-import ToggleBtn from '@/components/global/ToggleBtn.vue'
+import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
 import { IPaymentPending, IPrices, IStkProFeatures, ICmProFeatures, IPayment } from '@/interfaces/payment'
 import networkUtils from '@/utils/networkUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
-import constantData from '@/utils/constantData'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'

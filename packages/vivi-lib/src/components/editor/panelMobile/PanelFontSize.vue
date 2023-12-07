@@ -1,8 +1,9 @@
 <template lang="pug">
 div(class="panel-font-size")
-  font-size-selector
+  font-size-selector(v-if="!$isCm")
+  //- TODO: Convert inline style to tailwind.
+  div(v-else class="text-white" style="width: 26px") {{ fontSize }}
   input(class="panel-font-size__range-input input__slider--range"
-    :class="{light: $isStk || $isCm}"
     v-progress
     v-model.number="fontSize"
     :max="fieldRange.fontSize.max"
@@ -20,10 +21,9 @@ import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 
 export default defineComponent({
-  emits: [],
   components: {
     FontSizeSelector
   },
@@ -35,10 +35,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      layerIndex: 'getCurrSelectedIndex'
-    }),
-    ...mapState('text', ['sel', 'props']),
+    ...mapState('text', ['props']),
     fontSize: {
       get(): number | string {
         return this.props.fontSize === '--' ? this.props.fontSize : _.round(this.props.fontSize, 2)
@@ -66,7 +63,12 @@ export default defineComponent({
   width: 100%;
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: 3fr 7fr;
+  @include not(cm) {
+    grid-template-columns: 3fr 7fr;
+  }
+  @include cm {
+    grid-template-columns: auto 1fr;
+  }
   column-gap: 20px;
   align-items: center;
 

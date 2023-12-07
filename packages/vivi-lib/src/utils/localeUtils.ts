@@ -8,12 +8,14 @@ export interface ILocale {
 }
 
 class LocaleUtils {
-  SUPPORTED_LOCALES: Array<ILocale>
-  localeMap: { [index: string]: string }
-  nativeLocaleMap: { [index: string]: string }
   defaultLocale: string
+  NEED_FALLBACK_LOCALES = ['pt' as const]
   constructor() {
-    this.SUPPORTED_LOCALES = [{
+    this.defaultLocale = 'us'
+  }
+
+  get SUPPORTED_LOCALES(): ILocale[] {
+    return [{
       abbreviation: 'us',
       code: 'us',
       base: '',
@@ -30,21 +32,31 @@ class LocaleUtils {
       code: 'jp',
       base: '/jp',
       name: '日本語'
-    }]
+    },
+    ...generalUtils.isStk ? [{
+      abbreviation: 'pt',
+      code: 'pt',
+      base: '/pt',
+      name: 'Português',
+    }] : []]
+  }
 
-    this.localeMap = {
+  get localeMap() {
+    return {
       tw: 'tw',
       us: 'us',
-      jp: 'jp'
+      jp: 'jp',
+      pt: 'pt',
     }
+  }
 
-    this.nativeLocaleMap = {
+  get nativeLocaleMap(): Record<string, string> {
+    return {
       'zh-Hant': 'tw',
       en: 'us',
-      ja: 'jp'
+      ja: 'jp',
+      pt: 'pt',
     }
-
-    this.defaultLocale = 'us'
   }
 
   isDefaultLocale(): boolean {
@@ -53,6 +65,12 @@ class LocaleUtils {
 
   currLocale(): string {
     return i18n.global.locale
+  }
+
+  get localeWithFallback() {
+    return (this.NEED_FALLBACK_LOCALES as string[]).includes(i18n.global.locale)
+      ? 'us'
+      : i18n.global.locale as Exclude<LocaleName, typeof this.NEED_FALLBACK_LOCALES[number]>
   }
 
   getLocaleRegex(): string {

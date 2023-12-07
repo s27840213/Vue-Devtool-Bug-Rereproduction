@@ -56,7 +56,7 @@ div(class="pricing")
 </template>
 
 <script lang="ts">
-import CollapseTitle from '@nu/vivi-lib/components/global/CollapseTitle.vue'
+import CollapseTitle from '@nu/shared-lib/components/CollapseTitle.vue'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'

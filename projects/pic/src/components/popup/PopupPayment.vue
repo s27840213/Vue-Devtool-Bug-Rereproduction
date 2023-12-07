@@ -142,7 +142,7 @@ div(class="popup-window")
 import Animation from '@/components/Animation.vue'
 import { INubtnThemes } from '@nu/vivi-lib/components/global/Nubtn.vue'
 import Carousel from '@nu/vivi-lib/components/global/Carousel.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
+import RadioBtn from '@nu/shared-lib/components/RadioBtn.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import CouponInput from '@/components/payment/CouponInput.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
@@ -155,7 +155,7 @@ import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 
 interface CarouselItem {
   key: IPaymentWarningView

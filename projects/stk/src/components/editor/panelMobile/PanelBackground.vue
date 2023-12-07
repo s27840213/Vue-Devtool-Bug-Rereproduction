@@ -312,7 +312,6 @@ export default defineComponent({
         await this.getRecAndCate({ reset, key: 'background' })
         await stkWVUtils.listAsset('backgroundColor')
       })
-    colorUtils.setCurrEvent(ColorEventType.background)
   },
   activated() {
     this.$nextTick(() => {
@@ -508,6 +507,7 @@ export default defineComponent({
       }
     },
     handleOpenColorPicker() {
+      colorUtils.setCurrEvent(ColorEventType.background)
       if (this.isInEditor) return this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
       this.$emit('openColorPicker')
       stkWVUtils.setHasNewBgColor(true)

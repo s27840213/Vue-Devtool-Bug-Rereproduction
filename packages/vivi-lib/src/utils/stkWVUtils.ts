@@ -4,7 +4,7 @@ import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFullPagePaymentConfigParams, IFullPageVideoConfigParams } from '@/interfaces/fullPage'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import { IPrices, IStkProFeatures } from '@/interfaces/payment'
@@ -211,6 +211,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.35'))
   }
 
+  get isPromoteCountry(): boolean {
+    return store.getters['payment/getPromote'].includes(this.getUserInfoFromStore().storeCountry ?? '')
+  }
+
+  get isPromoteLanguage(): boolean {
+    const promoteLanguages = [...new Set(store.getters['payment/getPromote'].map(this.getLanguageByCountry))]
+    return promoteLanguages.includes(this.getUserInfoFromStore().locale)
+  }
+
+  get isPromote(): boolean {
+    return this.isPromoteCountry && this.isPromoteLanguage
+  }
+
   getUserInfoFromStore(): IUserInfo {
     return store.getters['vivisticker/getUserInfo']
   }
@@ -246,14 +259,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
   }
 
-  addFontForEmoji() {
-    const defaultEmoji = this.userSettings.emojiSetting
-    if (SYSTEM_FONTS.includes(defaultEmoji)) return
+  addFontForEmoji(emoji?: string) {
+    emoji = emoji ?? this.userSettings.emojiSetting
+    if (SYSTEM_FONTS.includes(emoji)) return
     store.dispatch('text/addFont', {
-      face: defaultEmoji,
+      face: emoji,
       type: 'public',
       ver: store.getters['user/getVerUni']
     })
+  }
+
+  addFontForEmojis() {
+    for (const emojiConfig of USER_SETTINGS_LIST_CONFIG.emojiSetting) {
+      this.addFontForEmoji(emojiConfig.val)
+    }
   }
 
   getMyDesignTags(): IMyDesignTag[] {
@@ -289,7 +308,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['payment/getPayment'].defaultPrices as { [key: string]: IPrices }
     const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
-    store.commit('payment/UPDATE_payment', { prices: Object.assign(defaultPrices[locale], localPrices) })
+    const prices = localPrices ?? defaultPrices[locale]
+    if (!prices) return
+    store.commit('payment/UPDATE_payment', { prices })
     store.commit('payment/SET_paymentPending', { info: false })
   }
 
@@ -1237,6 +1258,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
     if (missingClips.length) {
+      logUtils.setLog(`Error occurs in handleFrameClipError with config: ${generalUtils.deepCopy(missingClips)}`)
+
       const action = missingClips.length !== 1 ? undefined : () => {
         let subLayerIdx = -1
         let layerIndex = -1
@@ -1348,7 +1371,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       monthly: monthlyPrice,
       annually: annuallyPrice,
       annuallyOriginal: annuallyPriceOriginal
-    } = store.getters['payment/getPayment'].prices
+    } = store.getters['payment/getPayment'].prices as IPrices
     const params = {
       target: target ?? 'frame',
       theme: 'stk',
@@ -1405,7 +1428,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       termsOfServiceUrl: i18n.global.t('STK0053'),
       privacyPolicyUrl: i18n.global.t('STK0052'),
       defaultTrialToggled: store.getters['payment/getPayment'].trialCountry.includes(userInfo.storeCountry),
-      isPromote: store.getters['payment/getPromote'].includes(userInfo.storeCountry)
+      isPromote: store.getters['payment/getIsPromoteCountry'].includes(userInfo.storeCountry)
     } as IFullPagePaymentConfigParams
     store.commit('SET_fullPageConfig', { type: 'payment', params })
   }
@@ -1489,6 +1512,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           }})
         })
         store.commit('payment/UPDATE_payment', { prices })
+        store.commit('payment/SET_paymentPending', { info: false })
         this.setState('prices', prices)
       }
       else if (isCheckState(data)) {
@@ -1706,6 +1730,13 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     } as { [key: string]: (value: string) => string }
     if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
     return currencyFormatters[currency](price.toString())
+  }
+
+  getLanguageByCountry(country: string) {
+    if (['CHN', 'MAC', 'HKG', 'TWN'].includes(country)) return 'tw'
+    if (['JPN'].includes(country)) return 'jp'
+    if (['BRA', 'PRT'].includes(country)) return 'pt'
+    return 'us'
   }
 }
 

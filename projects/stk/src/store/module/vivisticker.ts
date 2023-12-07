@@ -216,6 +216,11 @@ const getters: GetterTree<IViviStickerState, unknown> = {
 }
 
 const actions: ActionTree<IViviStickerState, unknown> = {
+  async fetchUserSettings({ commit }) {
+    const userSettings = await stkWVUtils.getState('userSettings')
+    if (!userSettings) return
+    commit('UPDATE_userSettings', userSettings)
+  },
   async updateUserSettings({ commit, getters }, settings: Partial<IUserSettings>) {
     commit('UPDATE_userSettings', settings)
     await stkWVUtils.setState('userSettings', getters.getUserSettings)

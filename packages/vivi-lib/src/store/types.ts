@@ -11,6 +11,12 @@ import { Itheme } from '@/interfaces/theme'
    @param assetId: for user upload asset used,
    @param groupId: for template group used (only for admin),
  */
+
+export interface ILayerInfo {
+  pageIndex: number,
+  layerIndex: number,
+  subLayerIdx?: number
+}
 export interface IEditorState {
   sessionId: string,
   pages: Array<IPageState>
@@ -42,6 +48,15 @@ export interface IEditorState {
   currSubSelectedInfo: ICurrSubSelectedInfo,
   isColorPanelOpened: boolean,
   isMoving: boolean,
+  /**
+   * controlState indicates the type of control for current layer
+   */
+  controlState: {
+    layerInfo?: ILayerInfo,
+    type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | '',
+    phase?: 'moving' | 'pinching'
+    id?: string
+  }
   currSelectedResInfo: Record<string, never> | {
     userName: string,
     userLink: string,
@@ -104,6 +119,7 @@ export interface IEditorState {
   newTemplateShownMode: boolean,
   modalInfo: { [key: string]: any },
   fullPageConfig: IFullPageConfig,
+  disableLayerAction: boolean,
 }
 
 export enum SidebarPanelType {
@@ -167,12 +183,6 @@ export enum LayerProcessType {
   bgRemove = 'bgRemove',
   none = ''
 }
-export interface ILayerInfo {
-  pageIndex: number,
-  layerIndex: number,
-  subLayerIdx?: number
-}
-
 export interface IExtendLayerInfo extends ILayerInfo {
   prePrimaryLayerIndex?: number
 }

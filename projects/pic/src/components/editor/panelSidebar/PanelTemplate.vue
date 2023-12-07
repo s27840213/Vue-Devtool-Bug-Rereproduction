@@ -82,7 +82,7 @@ import CategoryList, { CCategoryList } from '@nu/vivi-lib/components/category/Ca
 import CategoryListRows from '@nu/vivi-lib/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@nu/vivi-lib/components/category/CategoryTemplateItem.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
-import Url from '@/components/global/Url.vue'
+import Url from '@nu/shared-lib/components/Url.vue'
 import PopupTheme from '@/components/popup/PopupTheme.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import { IAssetTemplate, ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@nu/vivi-lib/interfaces/api'

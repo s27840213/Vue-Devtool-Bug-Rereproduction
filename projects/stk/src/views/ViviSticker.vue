@@ -53,6 +53,7 @@ import Tutorial from '@/components/tutorial/Tutorial.vue'
 import { IPage } from '@/interfaces/page'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
@@ -86,7 +87,6 @@ export default defineComponent({
   },
   data() {
     return {
-      currColorEvent: '',
       headerOffset: 0,
       isKeyboardAnimation: 0,
       showMobilePanelAfterTransitoin: false,
@@ -194,7 +194,6 @@ export default defineComponent({
       debugMode: 'vivisticker/getDebugMode',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
       modalOpen: 'modal/getModalOpen',
-      promote: 'payment/getPromote'
     }),
     prices(): IPrices {
       return this.$store.getters['payment/getPrices'] as IPrices
@@ -207,9 +206,6 @@ export default defineComponent({
     },
     showVConsole(): boolean {
       return false
-    },
-    isPromote(): boolean {
-      return this.promote.includes(this.userInfo.storeCountry)
     }
   },
   watch: {
@@ -267,15 +263,15 @@ export default defineComponent({
     switchTab(panelType: string, props?: IFooterTabProps) {
       // Switch between color and text-color panel without close panel
       if (this.currActivePanel === panelType && panelType === 'color' &&
-        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
-        this.currColorEvent = props.currColorEvent
+        props?.currColorEvent && colorUtils.currEvent !== props.currColorEvent) {
+          colorUtils.setCurrEvent(props.currColorEvent as string)
       // Close panel if re-click
       } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
       } else {
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
-          this.currColorEvent = props.currColorEvent
+          colorUtils.setCurrEvent(props.currColorEvent as string)
         }
       }
     },
@@ -359,11 +355,7 @@ export default defineComponent({
     },
     async showPushModalInfo(): Promise<boolean> {
       // parse modal info
-      let locale = this.userInfo.locale
-      if (!['us', 'tw', 'jp'].includes(locale)) {
-        locale = 'us'
-      }
-      const prefix = locale + '_'
+      const prefix = this.userInfo.locale + '_'
       const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
         ([k, v]) => {
           if (k.startsWith(prefix)) k = k.replace(prefix, '')
@@ -374,12 +366,14 @@ export default defineComponent({
       // show popup
       const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
       const price = stkWVUtils.formatPrice(this.prices.annually.value, this.prices.currency, this.prices.annually.text, 'modal')
-      const priceOriginal = stkWVUtils.formatPrice(this.prices.annuallyOriginal.value, this.prices.currency, this.prices.annuallyOriginal.text, 'modal')
-      const isCloseBtnOnly = this.isPromote && subscribed
+      const priceOriginal = this.prices.annuallyOriginal ? stkWVUtils.formatPrice(this.prices.annuallyOriginal.value, this.prices.currency, this.prices.annuallyOriginal.text, 'modal') : ''
+      const isCloseBtnOnly = stkWVUtils.isPromote && subscribed
       const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
+      const isPromoteToBeHide = stkWVUtils.isPromoteLanguage && (!stkWVUtils.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== this.userInfo.locale)
       const btn_txt = modalInfo.btn_txt
       if (!btn_txt || shown) return false
+      if (isPromoteToBeHide) return false
 
       const options = {
         imgSrc: modalInfo.img_url,
@@ -396,7 +390,7 @@ export default defineComponent({
       }
       modalUtils.setModalInfo(
         modalInfo.title,
-        this.isPromote ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
+        stkWVUtils.isPromote && priceOriginal ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
         {
           msg: isCloseBtnOnly ? modalInfo.btn2_txt : btn_txt,
           class: 'btn-black-mid',
@@ -447,7 +441,7 @@ export default defineComponent({
       const isPushModalShown = await this.showPushModalInfo()
       if (isPushModalShown) {
         stkWVUtils.sendAppLoaded()
-        if (this.isPromote && !subscribed) {
+        if (stkWVUtils.isPromote && !subscribed) {
           isShowPaymentView = true
         }
         const unwatch = this.$watch('modalOpen', (newVal) => {
