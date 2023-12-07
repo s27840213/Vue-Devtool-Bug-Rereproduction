@@ -11,6 +11,7 @@ import logUtils from '@nu/vivi-lib/utils/logUtils'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
+import { editorRouteHandler } from './handler'
 
 const routes = [
   {
@@ -18,6 +19,7 @@ const routes = [
     name: 'Home',
     meta: {
       transition: 'fade-top-in',
+      scrollPos: { top: 0, left: 0 },
     },
     component: HomeView,
   },
@@ -42,6 +44,15 @@ const routes = [
     // this generates a separate chunk (About.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import('@/views/EditorView.vue'),
+    beforeEnter: editorRouteHandler,
+  },
+  {
+    path: '/description',
+    name: 'Description',
+    meta: {
+      transition: 'fade-bottom-in',
+    },
+    component: () => import('@/views/DescriptionView.vue'),
   },
   {
     path: '/settings',
@@ -101,9 +112,7 @@ router.addRoute({
     cmWVUtils.setupAPIInterface()
     cmWVUtils.setupAppActiveInterface()
     cmWVUtils.detectIfInApp()
-    const { setIosLaunchInfo } = useUserStore()
-    const iosLaunchInfo = await cmWVUtils.getUserInfo()
-    setIosLaunchInfo(iosLaunchInfo)
+    await cmWVUtils.getUserInfo()
     cmWVUtils.fetchTutorialFlags()
     let argoError = false
     try {
@@ -138,6 +147,14 @@ router.beforeEach(async (to, from, next) => {
 
   loginUtils.checkToken()
 
+  // store scroll position
+  const elScrollable = document.getElementsByClassName('overflow-scroll')[0] as HTMLElement
+  const scrollPos = from.meta.scrollPos as { top: number; left: number } | undefined
+  if (scrollPos) {
+    scrollPos.top = elScrollable?.scrollTop ?? 0
+    scrollPos.left = elScrollable?.scrollLeft ?? 0
+  }
+
   if (from.name === 'MyDesign' && to.name === 'Home') {
     to.meta.transition = 'fade-left-in'
   }
@@ -167,5 +184,12 @@ router.beforeEach(async (to, from, next) => {
   }
   next()
 })
+
+// restore scroll position
+router.options.scrollBehavior = (to, from, savedPosition) => {
+  const scrollPos = to.meta.scrollPos as { top: number; left: number } | undefined
+  const elScrollable = document.getElementsByClassName('overflow-scroll')[0] as HTMLElement
+  if(elScrollable) elScrollable.scrollTop = scrollPos?.top ?? 0
+}
 
 export default router

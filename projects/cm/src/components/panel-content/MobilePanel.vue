@@ -1,9 +1,12 @@
 <script lang="ts">
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
+import useBiColorEditor from '@/composable/useBiColorEditor'
+import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@nu/vivi-lib/components/editor/panelMobile/PanelAdjust.vue'
 import PanelFlip from '@nu/vivi-lib/components/editor/panelMobile/PanelFlip.vue'
+import PanelFontCurve from '@nu/vivi-lib/components/editor/panelMobile/PanelFontCurve.vue'
 import PanelFontFormat from '@nu/vivi-lib/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSize from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontSpacing from '@nu/vivi-lib/components/editor/panelMobile/PanelFontSpacing.vue'
@@ -15,12 +18,10 @@ import PanelPhotoShadow from '@nu/vivi-lib/components/editor/panelMobile/PanelPh
 import PanelPosition from '@nu/vivi-lib/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
-import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -29,7 +30,7 @@ import { replaceImgInject } from '@nu/vivi-lib/utils/textFillUtils'
 import { computed, defineComponent, provide } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default defineComponent({
+const component = defineComponent({
   extends: MobilePanel,
   components: {
     PanelColor,
@@ -40,6 +41,7 @@ export default defineComponent({
     PanelFonts,
     PanelFontSize,
     PanelFontFormat,
+    PanelFontCurve,
     PanelFontSpacing,
     PanelNudge,
     PanelAdjust,
@@ -49,6 +51,12 @@ export default defineComponent({
     PanelRemoveBg,
     Tabs,
   },
+  setup() {
+    const { isBiColorEditor } = useBiColorEditor()
+    return {
+      isBiColorEditor,
+    }
+  },
   data() {
     return {
       // Used in extended vivi-lib MobilePanel
@@ -56,25 +64,48 @@ export default defineComponent({
       noPaddingPanels: ['text-effect'],
       // eslint-disable-next-line vue/no-unused-properties
       fixSizePanels: [
-        'crop', 'bgRemove', 'position', 'flip', 'opacity',
-        'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust',
-        'copy-style', 'multiple-select', 'remove-bg', 'nudge'],
+        'crop-flip',
+        'bgRemove',
+        'position',
+        'flip',
+        'opacity',
+        'order',
+        'font-size',
+        'font-format',
+        'font-curve',
+        'font-spacing',
+        'download',
+        'more',
+        'object-adjust',
+        'multiple-select',
+        'remove-bg',
+        'nudge',
+        'adjust',
+      ],
       // eslint-disable-next-line vue/no-unused-properties
-      hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
+      hideDynamicCompPanels: ['crop-flip', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      noRowGapPanels: ['crop', 'color', 'copy-style', 'multiple-select'],
+      noRowGapPanels: ['crop-flip', 'color', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['remove-bg'],
+      // eslint-disable-next-line vue/no-unused-properties
+      hideMobilePanelPanels: ['crop-flip'],
     }
   },
   created() {
     // Provide props to descendant component, https://vuejs.org/guide/components/provide-inject.html
-    provide(replaceImgInject, computed(() => this.extraPanel === 'replace' ? (img: IAssetPhoto | IPhotoItem) => {
-      this.replaceImg(img)
-      this.extraPanel = ''
-      this.panelHistory.pop()
-    } : null))
+    provide(
+      replaceImgInject,
+      computed(() =>
+        this.extraPanel === 'replace'
+          ? (img: IAssetPhoto | IPhotoItem) => {
+              this.replaceImg(img)
+              this.extraPanel = ''
+              this.panelHistory.pop()
+            }
+          : null,
+      ),
+    )
   },
   computed: {
     ...mapGetters({
@@ -97,26 +128,18 @@ export default defineComponent({
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
-        case 'crop': {
-          return `${this.$t('NN0496')}`
-        }
-        case 'copy-style': {
-          return `${this.$t('NN0809')}`
-        }
-        case 'multiple-select': {
-          return `${this.$t('NN0657')}`
-        }
-        case 'none': {
-          return ''
-        }
         default: {
           return ''
         }
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
+    hideTopSection(): boolean {
+      return this.hideDragBar && !this.showLeftBtn && !this.showRightBtn && this.panelTitle === ''
+    },
+    // eslint-disable-next-line vue/no-unused-properties
     showRightBtn(): boolean {
-      return this.currActivePanel !== 'none' && this.currActivePanel !== 'remove-bg'
+      return ['fonts', 'color', 'text-effect', 'photo-shadow'].includes(this.currActivePanel)
     },
     // eslint-disable-next-line vue/no-unused-properties
     showLeftBtn(): boolean {
@@ -130,7 +153,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     specialPanelStyle(): { [index: string]: string } {
       return {
-        ...(this.isDuringCopy && { maxHeight: '0', padding: '0'}),
+        ...(this.isDuringCopy && { maxHeight: '0', padding: '0' }),
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
@@ -157,24 +180,29 @@ export default defineComponent({
       if (this.extraPanel === 'color') {
         return {
           currEvent: this.extraColorEvent,
-          panelHistory: this.panelHistory
+          panelHistory: this.panelHistory,
         }
       }
 
       switch (this.currActivePanel) {
         case 'fonts': {
           return {
-            showTitle: false
+            showTitle: false,
           }
         }
         case 'text-effect': {
           return {
-            panelHistory: this.panelHistory
+            panelHistory: this.panelHistory,
           }
         }
         case 'color': {
           return {
-            panelHistory: this.panelHistory
+            panelHistory: this.panelHistory,
+          }
+        }
+        case 'adjust': { 
+          return {
+            isBiColorEditor: this.isBiColorEditor,
           }
         }
         default: {
@@ -184,7 +212,8 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     dynamicBindMethod(): { [index: string]: any } {
-      const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } = this.getBasicBindMethods()
+      const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } =
+        this.getBasicBindMethods()
       switch (this.currActivePanel) {
         case 'color':
           return { pushHistory }
@@ -236,7 +265,7 @@ export default defineComponent({
     rightButtonAction(): () => void {
       return () => {
         switch (this.currActivePanel) {
-          case 'crop': {
+          case 'crop-flip': {
             if (this.selectedLayerNum > 0) {
               if (imageUtils.isImgControl()) {
                 imageUtils.setImgControlDefault()
@@ -244,12 +273,21 @@ export default defineComponent({
                 let index
                 switch (layerUtils.getCurrLayer.type) {
                   case 'image':
-                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
+                      imgControl: true,
+                    })
                     break
                   case 'frame':
-                    index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                    index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(
+                      (l) => l.type === 'image',
+                    )
                     if (index >= 0) {
-                      frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                      frameUtils.updateFrameLayerProps(
+                        layerUtils.pageIndex,
+                        layerUtils.layerIndex,
+                        index,
+                        { imgControl: true },
+                      )
                     }
                     break
                 }
@@ -258,7 +296,7 @@ export default defineComponent({
               if (this.backgroundLocked) return this.handleLockedNotify()
               this.setBgImageControl({
                 pageIndex: pageUtils.currFocusPageIndex,
-                imgControl: false
+                imgControl: false,
               })
             }
             break
@@ -270,22 +308,14 @@ export default defineComponent({
             }
             break
           }
-
-          case 'copy-style': {
-            formatUtils.clearCopiedFormat()
-            break
-          }
-
-          case 'multiple-select': {
-            if (this.inMultiSelectionMode) {
-              editorUtils.setInMultiSelectionMode(false)
-            }
-            break
-          }
         }
-        this.closeMobilePanel()
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
+        } else {
+          this.closeMobilePanel()
+        }
       }
-    }
+    },
   },
   methods: {
     ...mapMutations({
@@ -293,16 +323,40 @@ export default defineComponent({
     }),
     // eslint-disable-next-line vue/no-unused-properties
     notKeepPanel(): boolean {
-      return !(this.bgRemoveMode || this.isBgImgCtrl || this.isProcessing || this.inMultiSelectionMode)
+      return !(
+        this.isImgCtrl ||
+        this.bgRemoveMode ||
+        this.isBgImgCtrl ||
+        this.isProcessing ||
+        this.inMultiSelectionMode
+      )
     },
     // eslint-disable-next-line vue/no-unused-properties
     headerbarHeight() {
-      return (document.querySelector('.editor-header')?.clientHeight ?? 0) + (document.querySelector('.footer-tabs-row')?.clientHeight ?? 0) + 40
+      return (
+        (document.querySelector('.editor-header')?.clientHeight ?? 0) +
+        (document.querySelector('.footer-tabs-row')?.clientHeight ?? 0) +
+        40
+      )
     },
     // eslint-disable-next-line vue/no-unused-properties
     _panelParentHeight() {
       return document.querySelector('#app')?.clientHeight ?? 0
     },
-  }
+    checkLayerAction(target: HTMLElement | SVGElement): boolean {
+      if (target.nodeName === 'body') return false
+      const isSvg = target.nodeName === 'svg'
+      const isLayerAction = isSvg
+        ? (target as SVGElement).classList.contains('layer-action')
+        : (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
+      return isLayerAction ? true : (target.parentElement ? this.checkLayerAction(target.parentElement) : false)
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    middlewareCondition(target: HTMLElement | SVGElement): boolean {
+      return this.checkLayerAction(target)
+    },
+  },
 })
+export default component
+export type CMobilePanel = InstanceType<typeof component>
 </script>

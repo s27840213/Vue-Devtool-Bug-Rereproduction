@@ -26,6 +26,7 @@ class StepsUtils {
   // pageSteps: Array<number>
   currStep: number
   MAX_STORAGE_COUNT: number
+  checkpointStep: number
   get isPopupOpen(): boolean {
     return popupUtils.isPopupOpen
   }
@@ -45,6 +46,7 @@ class StepsUtils {
     this.currStep = -1
     this.MAX_STORAGE_COUNT = 30
     this.timers = {}
+    this.checkpointStep = -1
   }
 
   filterDataForLayer(layer: ILayer): any {
@@ -277,6 +279,10 @@ class StepsUtils {
     // console.warn(generalUtils.deepCopy(this.steps))
   }
 
+  setCheckpoint() {
+    this.checkpointStep = this.currStep
+  }
+
   async undo() {
     if (this.steps.length === 0 || this.currStep === 0 || textUtils.isFontLoading) {
       return
@@ -285,6 +291,33 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep--
+    await this.goToCurrStep()
+  }
+
+  async redo() {
+    if (this.currStep === this.steps.length - 1 || textUtils.isFontLoading) {
+      return
+    }
+    if (this.isPopupOpen) {
+      popupUtils.closePopup()
+    }
+    this.currStep++
+    await this.goToCurrStep()
+  }
+
+  async goToCheckpoint() {
+    if (this.checkpointStep === -1) {
+      return
+    }
+    if (this.isPopupOpen) {
+      popupUtils.closePopup()
+    }
+    this.currStep = this.checkpointStep
+    this.checkpointStep = -1
+    await this.goToCurrStep()
+  }
+
+  async goToCurrStep() {
     const activePageIndex = pageUtils.currActivePageIndex
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
@@ -327,67 +360,6 @@ class StepsUtils {
         }
       })
     }
-
-    if (uploadUtils.isLogin) {
-      uploadUtils.uploadDesign()
-    }
-  }
-
-  delayedRecord(key = generalUtils.generateRandomString(4), interval = 300) {
-    if (this.timers[key]) {
-      clearTimeout(this.timers[key])
-      delete this.timers[key]
-    }
-    this.timers[key] = window.setTimeout(() => {
-      this.record()
-    }, interval)
-  }
-
-  async redo() {
-    if (this.currStep === this.steps.length - 1 || textUtils.isFontLoading) {
-      return
-    }
-    if (this.isPopupOpen) {
-      popupUtils.closePopup()
-    }
-    this.currStep++
-    const activePageIndex = pageUtils.currActivePageIndex
-    const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
-    store.commit('SET_pages', pages)
-    store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    if (generalUtils.isPic) {
-      const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
-      let layers: (IShape | IText | IImage | IGroup | IFrame)[]
-      if (pages[pageIndex]) {
-        const selectedLayer = pages[pageIndex].layers[index]
-        if (selectedLayer) {
-          if (selectedLayer.type === 'tmp') {
-            layers = (selectedLayer as ITmp).layers
-          } else {
-            layers = [selectedLayer]
-          }
-        } else {
-          layers = []
-        }
-      } else {
-        layers = []
-      }
-
-      if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
-        store.commit('SET_currActivePageIndex', pageIndex)
-        pageUtils.scrollIntoPage(pageIndex)
-      } else if (pageIndex === -1) {
-        store.commit('SET_currActivePageIndex', activePageIndex)
-      }
-      GroupUtils.set(pageIndex, index, layers)
-    } else {
-      GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
-    }
-    nextTick(() => {
-      if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
-        TextPropUtils.updateTextPropsState()
-      }
-    })
 
     if (generalUtils.isPic) {
       if (uploadUtils.isLogin) {
@@ -734,16 +706,6 @@ export default reactive(stepsUtils)
 //     }
 //   }
 
-//   function delayedRecord(key: string, interval = 300) {
-//     if (timers[key]) {
-//       clearTimeout(timers[key])
-//       delete timers[key]
-//     }
-//     timers[key] = window.setTimeout(() => {
-//       record()
-//     }, interval)
-//   }
-
 //   async function redo() {
 //     if (currStep.value === steps.value.length - 1 || textUtils.isFontLoading) {
 //       return
@@ -824,7 +786,6 @@ export default reactive(stepsUtils)
 //     reset,
 //     record,
 //     asyncRecord,
-//     delayedRecord,
 //     undo,
 //     redo,
 //     getPrevPages,

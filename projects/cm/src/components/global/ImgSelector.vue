@@ -1,5 +1,6 @@
 <template lang="pug">
 div(
+  v-if="!srcPreprocessImg"
   class="image-selector bg-app-bg text-app-tab-default \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
   div(class="box-border px-24 py-8 flex justify-between items-center")
@@ -132,6 +133,44 @@ div(
           class="absolute -right-12 -top-12"
           iconName="close-btn"
           @click="pull(targetImgs, img)")
+//- Preprocess view
+div(v-else class="preprocess w-full h-full bg-app-bg text-app-text-secondary")
+  div(class="w-full h-[74%] pt-37 pb-20 flex justify-center items-center box-border")
+    img(
+      class="w-full h-full object-cover object-center filter"
+      :class="{'grayscale': editorType === 'hidden-message', invert: isInvert}"
+      :src="srcPreprocessImg")
+  div(class="p-24 pb-37 flex flex-col gap-16")
+    div(class="flex justify-between items-center typo-h5 py-8")
+      div(class="flex gap-8")
+        span {{ $t('CM0080') }}
+        svg-icon(
+          iconName="information-circle"
+          iconWidth="24px"
+          @click="() => editorStore.setDescriptionPanel('hidden-message-invert')")
+      toggle-btn(class="payment__trial__toggle" v-model="isInvert" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+    div(class="flex justify-between items-center typo-h5 py-8")
+      div(class="flex gap-8")
+        svg-icon(
+          class="bg-app-tab-active text-app-bg rounded-full"
+          iconName="crown"
+          iconWidth="24px"
+        )
+        span {{ $t('CM0082') }}
+        svg-icon(
+          iconName="information-circle"
+          iconWidth="24px"
+          @click="() => editorStore.setDescriptionPanel('hidden-message-bgrm')")
+      toggle-btn(class="payment__trial__toggle" v-model="isBgRemove" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+    div(class="flex justify-between items-center typo-h6")
+      nubtn(
+        theme="secondary"
+        size="sm"
+        @click="cancelPreprocess") {{ $t('NN0203') }}
+      span {{ $t('CM0083') }}
+      nubtn(
+        size="sm"
+        @click="applyPreprocess") {{ $t('CM0061') }}
 </template>
 
 <script lang="ts" setup>
@@ -139,6 +178,8 @@ import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import vuex from '@/vuex'
+import { notify } from '@kyvg/vue3-notification'
+import ToggleBtn from '@nu/shared-lib/components/ToggleBtn.vue'
 import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
@@ -154,7 +195,7 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import { find, pull } from 'lodash'
-import { notify } from '@kyvg/vue3-notification'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 
 const router = useRouter()
 
@@ -196,14 +237,14 @@ const albums = computed(() => [
   ...smartAlbum,
   ...(myAlbum.length > 0
     ? [
-        {
-          // 'My album' text
-          albumId: 'myAlbum',
-          albumSize: 0,
-          title: 'myAlbum',
-          thumbId: 'myAlbum',
-        },
-      ]
+      {
+        // 'My album' text
+        albumId: 'myAlbum',
+        albumSize: 0,
+        title: 'myAlbum',
+        thumbId: 'myAlbum',
+      },
+    ]
     : []),
   ...myAlbum,
 ])
@@ -226,8 +267,9 @@ const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
+const { editorType } = storeToRefs(editorStore)
 const { setPageSize, setImgAspectRatio } = editorStore
-const { setRequireImgNum, replaceImgFlag } = useImgSelectorStore()
+const { replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
   isAlbumOpened.value = !isAlbumOpened.value
@@ -309,6 +351,9 @@ vuex.dispatch('unsplash/init')
 // #endregion
 
 // #region common method
+const imgSelectorStore = useImgSelectorStore()
+const { targetEditorType } = storeToRefs(imgSelectorStore)
+const { closeImageSelector } = imgSelectorStore
 const selected = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
   return find(targetImgs, ['assetId', (type === 'ios' ? 'cameraroll/' : '') + img.id])
 }
@@ -350,21 +395,39 @@ const sendToEditor = async () => {
       targetImgs[0].ratio,
     )
   } else {
-    setImgAspectRatio(targetImgs[0].ratio)
     const initAtEditor = atEditor.value
-    if (!atEditor.value) await router.push({ name: 'Editor' })
+    if (initAtEditor && editorType.value === 'hidden-message' && !srcPreprocessImg.value) {
+      srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
+      return
+    }
+    setImgAspectRatio(targetImgs[0].ratio)
+    if (!atEditor.value && targetEditorType.value) await router.push({ name: 'Editor', query: { type: targetEditorType.value } })
     setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
-        assetUtils.addImage(img, img.ratio, { fit: initAtEditor ? 0.8 : 1, record: initAtEditor })
+        assetUtils.addImage(
+          img,
+          img.ratio,
+          {
+            fit: initAtEditor ? 0.8 : 1,
+            record: initAtEditor,
+            styles: {
+              adjust: {
+                ...(editorType.value === 'hidden-message' && { saturate: -100 }),
+                invert: +isInvert.value
+              }
+            }
+          })
       })
-      if (!initAtEditor) {
+      if (!initAtEditor) stepsUtils.reset()
+      if (!initAtEditor || editorType.value === 'hidden-message') {
         groupUtils.deselect()
       }
     })
   }
-  setRequireImgNum(0)
+  closeImageSelector()
+  srcPreprocessImg.value = null
 }
 // #endregion
 
@@ -401,6 +464,23 @@ cmWVUtils
     isLoadingContent.value = false
   })
 // #endregion
+
+// #region preprocess
+const srcPreprocessImg = ref(null) as Ref<string | null>
+const isInvert = ref(false)
+const isBgRemove = ref(false)
+const cancelPreprocess = () => {
+  srcPreprocessImg.value = null
+  targetImgs = []
+}
+const applyPreprocess = () => {
+  sendToEditor()
+  if (isBgRemove.value) {
+    // TODO: remove bg
+  }
+}
+// #endregion
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+</style>

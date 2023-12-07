@@ -233,6 +233,11 @@ const mutations: MutationTree<IFileState> = {
   CLEAR_CHECKED_ASSETS(state: IFileState) {
     state.checkedAssets = []
   },
+  SELECT_ALL_ASSETS(state: IFileState) {
+    state.checkedAssets = state.myfileImages.map(
+      img => img.assetIndex!
+    )
+  },
   ADD_PREVIEW(state: IFileState, { width, height, src, assetId }) {
     const previewImage = {
       width: width,

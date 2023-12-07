@@ -22,3 +22,19 @@ export type StaticResponse = ApiResponse<{
 export type GenImageResult = ApiResponse<{
   url: string
 }>
+
+export type GenPowerfulFillParams = {
+  action: 'powerful-fill'
+  prompt?: string
+}
+
+export type GenHiddenMessageParams = {
+  action: 'hidden-light' | 'hidden-blend'
+  prompt?: string
+  guidance_scale?: number
+  weight?: number
+  guidance_start?: number
+  guidance_end?: number
+}
+
+export type GenImageParams = GenPowerfulFillParams | GenHiddenMessageParams

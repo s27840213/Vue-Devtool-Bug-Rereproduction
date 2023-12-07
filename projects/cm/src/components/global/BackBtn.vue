@@ -4,9 +4,9 @@ router-link(
   :to="toTarget"
   v-slot="{ navigate }")
   svg-icon(
-    icon-color="app-icon-light"
-    icon-name="arrow-left"
-    icon-width="24px"
+    iconColor="app-icon-light"
+    iconName="cm_arrow-left"
+    iconWidth="24px"
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
@@ -43,7 +43,7 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 
 // #region img selector
 const imgSelectorStore = useImgSelectorStore()
-const { setRequireImgNum } = imgSelectorStore
+const { closeImageSelector } = imgSelectorStore
 const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #endregion
 
@@ -70,7 +70,7 @@ const handleBackAction = (navagate: () => void) => {
   }
 
   if (showImgSelector.value) {
-    setRequireImgNum(0)
+    closeImageSelector()
     return
   }
 
@@ -114,4 +114,5 @@ const handleBackAction = (navagate: () => void) => {
   }
 }
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+</style>

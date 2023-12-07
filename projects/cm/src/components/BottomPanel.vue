@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="bottom-panel tutorial-powerful-fill-4--highlight" ref="bottomPanelRef")
+div(class="bottom-panel" ref="bottomPanelRef")
   slot(
     name="content"
     :setSlotRef="setSlotRef")
@@ -11,8 +11,9 @@ div(class="bottom-panel tutorial-powerful-fill-4--highlight" ref="bottomPanelRef
  * Here pass setSlotRef to the parent
  * and parent use setSlotRef to pass the ref here
  */
-import { useUserStore } from '@/stores/user'
-import { useElementBounding } from '@vueuse/core'
+import vuex from '@/vuex';
+import type { IUserInfo } from '@nu/vivi-lib/utils/cmWVUtils';
+import { useElementBounding } from '@vueuse/core';
 
 const bottomPanelRef = ref<HTMLElement | null>(null)
 const slotRef = ref<HTMLElement | null>(null)
@@ -22,11 +23,10 @@ const setSlotRef = (ref: HTMLElement) => {
   slotRef.value = ref
 }
 
-const userStore = useUserStore()
-const { homeIndicatorHeight } = storeToRefs(userStore)
+const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'] as IUserInfo)
 
 watch(
-  [height, homeIndicatorHeight],
+  [height, () => userInfo.value.homeIndicatorHeight],
   ([newHeight, newHomeIndicatorHeight], [oldHeight, oldHomeIndicatorHeight]) => {
     // 32 is not important, modify it to make a good transition
     const tmpNewHeight = newHeight === 0 ? oldHeight * 0.6 : newHeight

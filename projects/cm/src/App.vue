@@ -1,13 +1,13 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
-  :class="{'bg-app-bg': !isDuringCopy}"
-  :style="{paddingTop: `${statusBarHeight}px`}")
+  :class="{'bg-app-bg': !isDuringCopy}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
   transition(name="fade-in-only")
-    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16 h-72")
+    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16"
+      :style="{paddingTop: `${statusBarHeight}px`}")
       router-link(
         custom
         :to="'/'"
@@ -22,7 +22,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
               custom
               to="/settings"
               v-slot="{ navigate }")
-              svg-icon(iconName="settings"
+              svg-icon(iconName="cm_settings"
                 :iconColor="'app-tab-default'" @click="navigate")
         nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
@@ -32,8 +32,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(v-if="!atEventTester && !(isDuringCopy && !isAutoFilling)"
-    class="z-bottom-panel row-start-3 row-end-4"
+  bottom-panel(v-if="bottomPanelComponent && !atEventTester && !(isDuringCopy && !isAutoFilling)"
+    class="z-bottom-panel row-start-3 row-end-4 tutorial-powerful-fill-4--highlight tutorial-hidden-message-4--highlight"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
     :style="disableBtmPanelTransition ? 'transition: none' : ''")
     template(#content="{setSlotRef}")
@@ -56,38 +56,63 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
-  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container"
+  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-start box-border"
     :style="{paddingTop: `${statusBarHeight}px`}")
     transition(name="bottom-up-down")
       img-selector(
         v-if="showImgSelector"
         class="w-full h-full z-img-selector pointer-events-auto"
         :requireNum="requireImgNum")
+    transition(name="fade-in-out")
+      div(v-if="showDescriptionPanel"
+      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-neutral-dark bg-opacity-70")
+    transition(name="bottom-up-down")
+      bottom-panel(
+        v-if="showDescriptionPanel"
+        class="absolute bottom-0 z-desciption-panel pointer-events-auto")
+        template(#content="{setSlotRef}")
+          transition(
+            name="bottom-panel-transition"
+            mode="out-in")
+            panel-description(:ref="(el: any) => setSlotRef(el)")
     div(class="popup-area")
       popup(class="pointer-events-auto")
     div(class="modal-container" v-if="isModalOpen")
       modal-card(class="pointer-events-auto")
     spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
     notifications(
-      class="notification flex justify-center items-center"
+      class="notification flex justify-center items-center "
       position="center center"
       group="success"
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content")
+        div(class="notification__content bg-app-toast-success")
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
-    //- notifications(
-    //-   group="error"
-    //-   position="top center"
-    //-   width="300px"
-    //-   :max="1"
-    //-   :duration="5000")
-    //-   template(v-slot:body="{ item }")
-    //-     div(class="notification error " v-html="item.text")
+    notifications(
+      class="notification flex justify-center items-center "
+      position="center center"
+      group="error"
+      :max="2"
+      :duration="2000")
+      template(v-slot:body="{ item }")
+        div(class="notification__content bg-app-toast-fail text-primary-white")
+          svg-icon(iconName="ok-hand")
+          span( v-html="item.text")
+    notifications(
+      class="notification flex justify-center items-center "
+      position="center center"
+      group="warn"
+      :max="2"
+      :duration="2000")
+      template(v-slot:body="{ item }")
+        div(class="notification__content bg-primary-light-hover bg-opacity-80 text-app-text-primary")
+          svg-icon(iconName="red-exclamation-mark")
+          span( v-html="item.text")
     transition(name="bottom-up-down")
-      div(v-if="isActionSheetOpen" class="w-full absolute bottom-32 left-0 z-action-sheet px-16 box-border")
+      div(v-if="isActionSheetOpen" class="w-full h-full flex items-end z-action-sheet px-16 box-border "
+      :style="{paddingBottom: `${homeIndicatorHeight}px`}")
           action-sheet(
             :primaryActions="primaryActions"
             :secondaryActions="secondaryActions")
@@ -95,7 +120,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
 
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
+import { useGlobalStore } from '@/stores/global'
+import type { IUserInfo } from '@/utils/cmWVUtils'
 import vuex from '@/vuex'
+import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
 import type { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
@@ -103,8 +131,8 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
-import { useGlobalStore } from '@/stores/global'
-import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
@@ -112,15 +140,17 @@ import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
+import PanelDescription from './components/panel-content/PanelDescription.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
+import router from './router'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
-import { useUserStore } from './stores/user'
+
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
 // #region state info
@@ -133,20 +163,18 @@ const {
   atMyDesign,
   atSettings,
   atMainPage,
+  atDescription,
   atEventTester,
   showImgSelector,
   inGenResultState,
   inSavingState,
+  showDescriptionPanel
 } = useStateInfo()
 
 const globalStore = useGlobalStore()
 const { showSpinner, spinnerText } = storeToRefs(globalStore)
 const canvasStore = useCanvasStore()
 const { isAutoFilling } = storeToRefs(canvasStore)
-// #endregion
-
-// #region function panel
-const layerIndex = computed(() => layerUtils.layerIndex)
 // #endregion
 
 // #region bottom panel warning modal
@@ -157,6 +185,8 @@ const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean
 
 const bottomPanelComponent = computed(() => {
   switch (true) {
+    case atDescription.value:
+      return null
     case wantToQuit.value:
       return ModalTemplate
     case vuex.state.user.showForceLogin:
@@ -190,10 +220,11 @@ const closeModal = () => {
 // #region mobile panel
 const store = useStore()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
-const currColorEvent = ref('')
 const disableBtmPanelTransition = ref(false)
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+const layerIndex = computed(() => layerUtils.layerIndex)
+const selectedLayerNum = computed(() => store.getters.getCurrSelectedInfo.layers.length)
 
 const currPage = computed(() => {
   return pageUtils.getPage(pageUtils.currFocusPageIndex)
@@ -208,17 +239,19 @@ const switchTab = (panelType: string, props?: IFooterTabProps) => {
     currActivePanel.value === panelType &&
     panelType === 'color' &&
     props?.currColorEvent &&
-    currColorEvent.value !== props.currColorEvent
+    colorUtils.currEvent !== props.currColorEvent
   ) {
-    currColorEvent.value = props.currColorEvent
+    colorUtils.setCurrEvent(props.currColorEvent as string)
     // Close panel if re-click
   } else if (currActivePanel.value === panelType || panelType === 'none') {
     editorUtils.setShowMobilePanel(false)
-    editorUtils.setInMultiSelectionMode(false)
+    if (panelType === 'none') {
+      editorUtils.setInMultiSelectionMode(false)
+    }
   } else {
     editorUtils.setCurrActivePanel(panelType)
     if (panelType === 'color' && props?.currColorEvent) {
-      currColorEvent.value = props.currColorEvent
+      colorUtils.setCurrEvent(props.currColorEvent as string)
     }
   }
 }
@@ -233,6 +266,14 @@ watch(
     }
   },
 )
+
+watch(selectedLayerNum, (newVal) => {
+  if (newVal === 0) {
+    editorUtils.setCurrActivePanel('none')
+    editorUtils.setInMultiSelectionMode(false)
+    editorUtils.setShowMobilePanel(false)
+  }
+})
 
 const afterEnter = () => {
   if (layerIndex.value !== -1) {
@@ -268,8 +309,15 @@ onBeforeUnmount(() => {
 const { primaryActions, secondaryActions, isActionSheetOpen } = useActionSheetCm()
 // #endregion
 
-const userStore = useUserStore()
-const { statusBarHeight, homeIndicatorHeight } = storeToRefs(userStore)
+// #region webview
+const userInfo = computed(() => store.getters['cmWV/getUserInfo'] as IUserInfo)
+const statusBarHeight = computed(() => userInfo.value.statusBarHeight)
+const homeIndicatorHeight = computed(() => userInfo.value.homeIndicatorHeight)
+
+router.isReady().then(() => {
+  cmWVUtils.sendAppLoaded()
+})
+// #endregion
 </script>
 
 <style lang="scss">
@@ -312,7 +360,7 @@ const { statusBarHeight, homeIndicatorHeight } = storeToRefs(userStore)
   // to diable vue-notification's default style(display: block)
   display: flex !important;
   &__content {
-    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8 bg-app-toast-success;
+    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8;
   }
 }
 

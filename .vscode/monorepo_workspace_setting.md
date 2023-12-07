@@ -15,6 +15,10 @@ To solve problem that i18n alley will not work when *Monorepo Workspace* enable,
           "packages/vivi-lib": true,
           "packages/shared-lib": true
         },
+        "search.exclude": {
+          "**/dist": true,
+          "**/prerender": true
+        },
         "i18n-ally.localesPaths": [
           "tools/i18n-tool/result",
           "../../tools/i18n-tool/result"

@@ -13,28 +13,41 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      template(v-else-if="isCropping")
+        svg-icon(
+          class="layer-action"
+          iconName="cm_flip-h"
+          iconColor="app-btn-primary-text"
+          iconWidth="20px"
+          @click="mappingUtils.mappingIconAction('flip-h')")
+        svg-icon(
+          class="layer-action"
+          iconName="cm_flip-v"
+          iconColor="app-btn-primary-text"
+          iconWidth="20px"
+          @click="mappingUtils.mappingIconAction('flip-v')")
+      template(v-else-if="currActivePanel === 'adjust'")
+        div(id='header-reset')
       template(v-else)
         svg-icon(
-          iconName="undo"
-          :iconColor="isInFirstStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-          iconWidth="20px"
-          @click="undo")
-        svg-icon(
-          iconName="redo"
-          :iconColor="isInLastStep ? 'app-tab-disable' : 'app-btn-primary-text'"
-          iconWidth="20px"
-          @click="redo")
+          v-for="btn in centerBtns"
+          :key="btn.icon"
+          :iconName="btn.icon"
+          :iconColor="btn.disabled ? 'app-tab-disable' : 'app-btn-primary-text'"
+          :iconWidth="`${btn.width}px`"
+          @click="btn.action")
     template(#right)
       nubtn(
-        v-if="inAspectRatioState || inGenResultState"
+        v-if="inGenResultState"
         @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
     ref="editorContainerRef"
+    id="mobile-editor__content"
     @pointerdown="selectStart"
     @pointerup="selectEnd"
-    @pinch="onPinch"
+    @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
     div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
@@ -46,7 +59,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         img(
           v-if="inGenResultState"
           class="h-full object-cover"
-          :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+          :src="currImgSrc")
         template(v-else)
           nu-page(
             class="z-page"
@@ -66,10 +79,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         div(
           v-if="isChangingBrushSize"
           class="demo-brush"
+          :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions"
-      class="absolute top-1/2 right-0 -translate-y-1/2"
+      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
+      class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
   div(v-else class="editor-view__saving-state")
@@ -79,7 +93,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
           :class="{ 'is-flipped': !showVideo }"
-          :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+          :src="currImgSrc")
         img(
           class="result-showcase__card result-showcase__card--front"
           :class="{ 'is-flipped': showVideo }"
@@ -87,7 +101,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //- img(
         //-   class="result-showcase__card result-showcase__card--front"
         //-   :class="{ 'is-flipped': !showVideo }"
-        //-   :src="currGenResultIndex === -1 ? initImgSrc : generatedResults[currGenResultIndex].url")
+        //-   :src="currImgSrc")
         //- div(class="result-showcase__card result-showcase__card--back" :class="{ 'is-flipped': showVideo }")
         //-   img(
         //-     v-if="!isVideoGened"
@@ -151,16 +165,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
       class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
-      :style="assetPanelStyles")
+      :style="assetPanelStyles"
+      v-bind="assetPanelProps")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import PixiRecorder from '@/utils/pixiRecorder'
-import tutorialUtils from '@/utils/tutorialUtils'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
@@ -179,7 +194,9 @@ import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
+import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
@@ -194,18 +211,21 @@ import { useStore } from 'vuex'
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
-const sidebarTabsRef = ref<HTMLElement | null>(null)
+// const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
-const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
+// const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementBounding(editorContainerRef)
-const editorContainerAR = computed(() => editorContainerWidth.value / editorContainerHeight.value)
 
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
+const isCropping = computed(() => {
+  return store.getters.getPages.length > 0 && imageUtils.isImgControl()
+})
+const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
@@ -231,7 +251,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult } = editorStore
+const { changeEditorState, updateGenResult, editorType } = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -240,14 +260,15 @@ const {
   currGenResultIndex,
   initImgSrc,
 } = storeToRefs(editorStore)
-const isManipulatingCanvas = computed(() => currActiveFeature.value === 'brush')
+const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
+
+watch(() => isManipulatingCanvas.value, (val) => {
+  store.commit('SET_disableLayerAction', val)
+})
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
-  if (inAspectRatioState.value) {
-    changeEditorState('next')
-    tutorialUtils.runTutorial('powerful-fill')
-  } else if (inGenResultState.value) {
+  if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
     const currGenResult = generatedResults.value[currGenResultIndex.value]
@@ -259,7 +280,6 @@ const handleNextAction = function () {
         )
         const pixiRecorder = new PixiRecorder(src, res)
         pixiRecorder.genVideo().then((data) => {
-          console.log('gen video', data)
           if (data) {
             isVideoGened.value = true
             updateGenResult(currGenResult.id, { video: data })
@@ -272,8 +292,32 @@ const handleNextAction = function () {
   }
 }
 
+const currImgSrc = computed(() => {
+  return currGenResultIndex.value === -1
+    ? initImgSrc.value
+    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+})
+
 const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep
+
+type centerBtn = {
+  icon: string,
+  disabled: boolean,
+  width: number,
+  action?: () => void
+}
+const centerBtns = computed<centerBtn[]>(() => {
+  const retTabs = []
+  const stepBtns = [
+    { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
+    { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo }
+  ]
+  if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20, action: () => editorStore.setDescriptionPanel('hidden-message') })
+  retTabs.push(...stepBtns)
+  if (currEditorTheme.value && editorType === 'hidden-message') retTabs.push({ icon: currEditorTheme.value.toggleIcon, disabled: false, width: 20, action: toggleEditorTheme })
+  return retTabs
+})
 // #endregion
 
 // #region page related
@@ -294,10 +338,11 @@ const fitScaleRatio = computed(() => {
   const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
   const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
 
-  const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
+  // const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
+  const widthRatio = (editorContainerWidth.value - 8) / newWidth
   const heightRatio = editorContainerHeight.value / newHeight
 
-  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 0.95
+  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
   return ratio
 })
@@ -312,11 +357,22 @@ const wrapperStyles = computed(() => {
 
 const fitPage = (ratio: number) => {
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
+  // editorUtils.handleContentScaleRatio(0)
+  // const { hasBleed } = pageUtils
+  // const page = pageUtils.getPage(0)
+  // const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
+  // const pos = {
+  //   x: (editorUtils.mobileSize.width - width * ratio) * 0.5,
+  //   y: (editorUtils.mobileSize.height - height * ratio) * 0.5
+  // }
+  // test
+  // pageUtils.updatePagePos(0, pos)
+  // pageUtils.updatePageInitPos(0, pos)
 }
 
-watch(sidebarTabsWidth, () => {
-  fitPage(fitScaleRatio.value)
-})
+// watch(sidebarTabsWidth, () => {
+//   fitPage(fitScaleRatio.value)
+// })
 /**
  * fitPage
  */
@@ -333,6 +389,7 @@ watch(isDuringCopy, () => {
   fitPage(fitScaleRatio.value)
 })
 
+let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
 onMounted(() => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
@@ -349,6 +406,7 @@ onMounted(() => {
       y: rect.top,
     },
   })
+  pagePinchHandler = (new PagePinchUtils(editorWrapperRef.value as HTMLElement)).pinchHandler
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
@@ -359,41 +417,71 @@ const outerClick = () => {
 }
 
 const pointerEvent = ref({
-  initPos: null as { x: number, y: number } | null
+  initPos: null as { x: number; y: number } | null,
 })
-let movingUtils = null as MovingUtils | null
+const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
   recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
-  if (isImgCtrl.value) {
-    const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
-      groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[Math.max(layerUtils.subLayerIdx, 0)] : layerUtils.getCurrLayer
-    if (!controlUtils.isClickOnController(e, layer)) {
-      const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      switch (currLayer.type) {
-        case LayerType.image:
-        case LayerType.group:
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-          break
-        case LayerType.frame:
-          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
-            imgControl: false,
-          })
-          break
-      }
-      return
+
+  const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
+    ? groupUtils.mapLayersToPage(
+        [layerUtils.getCurrConfig as IImage],
+        layerUtils.getCurrLayer as IGroup,
+      )[0]
+    : layerUtils.getCurrLayer
+  const isClickOnController = controlUtils.isClickOnController(e, layer)
+
+  if (isImgCtrl.value && !isClickOnController) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+    switch (currLayer.type) {
+      case LayerType.image:
+      case LayerType.group:
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+        break
+      case LayerType.frame:
+        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+          imgControl: false,
+        })
+        break
     }
+    return
   }
-  if (layerUtils.layerIndex !== -1) {
-    // when there is an layer being active, the moving logic applied to the EditorView
-    movingUtils = new MovingUtils({
+
+  const movingUtils = new MovingUtils({
+    _config: { config: layerUtils.getCurrLayer },
+    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+    body: document.getElementById(
+      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+    ) as HTMLElement,
+  })
+
+  if (isClickOnController) {
+    movingUtils.removeListener()
+    movingUtils.updateProps({
       _config: { config: layerUtils.getCurrLayer },
-      snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
       body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
     })
     movingUtils.moveStart(e)
-    pointerEvent.value.initPos = { x: e.x, y: e.y }
+  } else {
+    movingUtils.removeListener()
+    movingUtils.pageMoveStart(e)
   }
+  pointerEvent.value.initPos = { x: e.x, y: e.y }
+
+  // layer pinch logic
+  // if (layerUtils.layerIndex !== -1) {
+  //   // when there is an layer being active, the moving logic applied to the EditorView
+  //   movingUtils = new MovingUtils({
+  //     _config: { config: layerUtils.getCurrLayer },
+  //     snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+  //     body: document.getElementById(
+  //       `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+  //     ) as HTMLElement,
+  //   })
+  //   movingUtils.moveStart(e)
+  //   pointerEvent.value.initPos = { x: e.x, y: e.y }
+  // }
 }
 
 // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
@@ -402,7 +490,9 @@ const selectStart = (e: PointerEvent) => {
 const selectEnd = (e: PointerEvent) => {
   if (pointerEvent.value.initPos) {
     const isSingleTouch = pointerEvtUtils.pointers.length === 1
-    const isConsiderNotMoved = Math.abs(e.x - pointerEvent.value.initPos.x) < 5 && Math.abs(e.y - pointerEvent.value.initPos.y) < 5
+    const isConsiderNotMoved =
+      Math.abs(e.x - pointerEvent.value.initPos.x) < 5 &&
+      Math.abs(e.y - pointerEvent.value.initPos.y) < 5
     if (isSingleTouch && isConsiderNotMoved && !store.getters['imgControl/isImgCtrl']) {
       // the moveingEnd would consider the layer to be selected,
       // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
@@ -423,10 +513,11 @@ const selectEnd = (e: PointerEvent) => {
 
 const isPinchInit = ref<null | boolean>(false)
 let pinchControlUtils = null as null | PinchControlUtils
-const onPinch = (e: AnyTouchEvent) => {
+
+const onLayerPinch = (e: AnyTouchEvent) => {
   if (e.phase === 'end' && isPinchInit.value) {
     // pinch end handling
-    pinchHandler(e)
+    layerPinchHandler(e)
     isPinchInit.value = false
     pinchControlUtils = null
   } else {
@@ -435,46 +526,53 @@ const onPinch = (e: AnyTouchEvent) => {
     if (!isPinchInit.value) {
       // first pinch initialization
       isPinchInit.value = true
-      return pinchStart(e)
+      return layerPinchStart(e)
     } else {
       // pinch move handling
-      pinchHandler(e)
+      layerPinchHandler(e)
     }
   }
 }
 
-const pinchHandler = (e: AnyTouchEvent) => {
+const layerPinchHandler = (e: AnyTouchEvent) => {
   pinchControlUtils?.pinch(e)
 }
 
-const pinchStart = (e: AnyTouchEvent) => {
+const layerPinchStart = (e: AnyTouchEvent) => {
   if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
   if (store.getters['bgRemove/getInBgRemoveMode']) return
 
-  const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
+  const _config = {
+    config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex),
+  } as unknown as { config: ILayer }
 
   if (_config.config.locked) return
   if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
 
-  const  layerInfo = new Proxy({
-    pageIndex: layerUtils.pageIndex,
-    layerIndex: layerUtils.layerIndex
-  }, {
-    get(_, key) {
-      if (key === 'pageIndex') return layerUtils.pageIndex
-      else if (key === 'layerIndex') return layerUtils.layerIndex
-    }
-  }) as ILayerInfo
+  const layerInfo = new Proxy(
+    {
+      pageIndex: layerUtils.pageIndex,
+      layerIndex: layerUtils.layerIndex,
+    },
+    {
+      get(_, key) {
+        if (key === 'pageIndex') return layerUtils.pageIndex
+        else if (key === 'layerIndex') return layerUtils.layerIndex
+      },
+    },
+  ) as ILayerInfo
   const movingUtils = new MovingUtils({
     _config,
     layerInfo,
     snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-    body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+    body: document.getElementById(
+      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+    ) as HTMLElement,
   })
   const data = {
     layerInfo,
     config: undefined,
-    movingUtils: movingUtils as MovingUtils
+    movingUtils: movingUtils as MovingUtils,
   }
   pinchControlUtils = new PinchControlUtils(data)
 }
@@ -485,16 +583,27 @@ const recordPointer = (e: PointerEvent) => {
 const removePointer = (e: PointerEvent) => {
   pointerEvtUtils.removePointer(e.pointerId)
 }
+
+// toggle editor theme
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor()
 // #endregion
 
 // #region demo brush size section
 const canvasStore = useCanvasStore()
-const { brushSize, isChangingBrushSize, isAutoFilling } = storeToRefs(canvasStore)
+const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToRefs(canvasStore)
 
 const demoBrushSizeStyles = computed(() => {
   return {
-    width: `${brushSize.value * contentScaleRatio.value}px`,
-    height: `${brushSize.value * contentScaleRatio.value}px`,
+    width: `${brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    backgroundColor: `${drawingColor.value}4C`, // 30% opacity
+  }
+})
+
+const demoBrushSizeOutline = computed(() => {
+  return {
+    'outline-primary-white': !isBiColorEditor.value,
+    'outline-neutral-light-hover': isBiColorEditor.value
   }
 })
 // #endregion
@@ -569,6 +678,24 @@ const assetPanelComponent = computed(() => {
       return PanelObject
     default:
       return PanelText
+  }
+})
+
+const assetPanelProps = computed((): { [index: string]: any } => {
+  const monoColor = currEditorTheme.value?.fgColor
+  switch (currActiveTab.value) {
+    case 'text': {
+      return {
+        monoColor
+      }
+    }
+    case 'object':
+      return {
+        monoColor
+      }
+    default: {
+      return {}
+    }
   }
 })
 
@@ -663,8 +790,8 @@ const handleSwipe = (dir: string) => {
 @use '@/assets/scss/transitions.scss';
 
 .demo-brush {
-  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-selection bg-opacity-30;
-  @apply pointer-events-none rounded-full outline-4 outline-primary-white z-highest;
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  @apply pointer-events-none rounded-full outline-4 z-highest;
   outline-style: solid;
 }
 
@@ -673,16 +800,18 @@ const handleSwipe = (dir: string) => {
     @apply grid grid-rows-[minmax(0,1fr),auto,auto] grid-cols-1 justify-items-center items-center h-full w-full gap-16;
   }
 }
+
 // @TODO discuss with allen
 //@apply max-w-full max-h-full object-contain;
 .result-showcase {
   transform-style: preserve-3d;
+
   &__card {
     @apply max-h-full object-contain;
     backface-visibility: hidden;
     transition: transform 0.6s;
-    &--back {
-    }
+
+    &--back {}
   }
 }
 

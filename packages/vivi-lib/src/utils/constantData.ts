@@ -4,13 +4,13 @@ import { Itheme } from '@/interfaces/theme'
 import router from '@/router'
 import store from '@/store'
 import letterBgData from '@/utils/letterBgData'
+import localeUtils from '@/utils/localeUtils'
 import { minMaxHash } from '@/utils/mappingUtils'
 import textFillUtils from '@/utils/textFillUtils'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
 import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
-import localeUtils from '@/utils/localeUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -106,7 +106,7 @@ export enum DeviceType {
   Other
 }
 
-const NO_TUTORIAL_LOCALES = ['pt']
+const NO_TUTORIAL_LOCALES = [] as string[]
 class ConstantData {
   get isLogin(): boolean {
     return store.getters['user/isLogin']
@@ -1210,7 +1210,7 @@ class ConstantData {
   }
 
   checkIfUseNewLogic(): boolean {
-    return ['us', 'jp', ...NO_TUTORIAL_LOCALES].includes(i18n.global.locale)
+    return ['us', 'jp', 'pt', ...NO_TUTORIAL_LOCALES].includes(i18n.global.locale)
   }
 
   stickerVideoUrls(): IStickerVideoUrls {
@@ -1231,7 +1231,7 @@ class ConstantData {
     }
     const res = {} as IStickerVideoUrls
     for (const [key, value] of Object.entries(seeds) as [keyof typeof seeds, string][]) {
-      if (['us', 'jp'].includes(locale)) {
+      if (['us', 'jp', 'pt'].includes(locale)) {
         res[key] = {
           video: `${value}${key === 'iOS' ? '_v2' : '-v2'}${videoFileName}?ver=${verUni}`,
           thumbnail: `${value}${key === 'iOS' ? '_v2' : '-v2'}${thumbnailFileName}?ver=${verUni}`
@@ -1278,6 +1278,71 @@ class ConstantData {
       annually: 'com.nuphototw.vivisticker.annually',
       annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
     }
+  }
+
+  // charmix gen image options
+  getGenImageOptions = (editorType: string) => {
+    return new Map([
+      ['hidden-message', [
+        {
+          type: 'group',
+          key: 'type',
+          group: [
+            {
+              key: 'hidden-blend',
+              text: i18n.global.t('CM0109'),
+              img: 'hidden-message-blend.png',
+            },
+            {
+              key: 'hidden-light',
+              text: i18n.global.t('CM0110'),
+              img: 'hidden-message.png',
+            }
+          ],
+          value: 0,
+        },
+        {
+          type: 'range',
+          key: 'guidance_scale',
+          title: i18n.global.t('CM0111'),
+          subTitle: i18n.global.t('CM0112'),
+          minDescription: i18n.global.t('CM0113'),
+          maxDescription: i18n.global.t('CM0114'),
+          min: 0,
+          max: 10,
+          step: 1,
+          value: 5,
+          icon: 'information-circle-solid',
+        },
+        {
+          type: 'range',
+          key: 'weight',
+          title: i18n.global.t('CM0115'),
+          min: 0,
+          max: 2,
+          step: 0.1,
+          value: 0,
+        },
+        {
+          type: 'range',
+          key: 'guidance_start',
+          title: i18n.global.t('CM0116'),
+          min: 0,
+          max: 1,
+          step: 0.1,
+          value: 0,
+        },
+        {
+          type: 'range',
+          key: 'guidance_end',
+          title: i18n.global.t('CM0117'),
+          min: 0,
+          max: 1,
+          step: 0.1,
+          value: 1,
+        },
+      ]]
+    ]).get(editorType)
   }
 }
 

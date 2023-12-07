@@ -9,17 +9,13 @@ import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
     EditorContent
   },
   props: {
-    initText: {
-      type: Object,
-      required: true
-    },
     pageIndex: {
       type: Number,
       required: true
@@ -70,9 +66,7 @@ export default defineComponent({
       subLayerIdx: this.subLayerIndex
     }
 
-    const contentEditable = this.config.contentEditable
-
-    tiptapUtils.init(this.initText, contentEditable)
+    tiptapUtils.init(this.config)
     // tiptapUtils.applyDivStyle()
     /**
      * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
@@ -125,15 +119,16 @@ export default defineComponent({
           } else {
             currLayerInPrevStep = currLayerInPrevStep as IText
           }
-          if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
+          if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor.getJSON())) { // record only when the updated text has not been recorded yet
             toRecord = true
           }
-          this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()) })
+          const res = tiptapUtils.toIParagraph(editor.getJSON())
+          this.$emit('update', { ...res })
           this.$emit('compositionend', toRecord)
           tiptapUtils.agent(editor => {
             // setContent will be skipped while composing even when isSetContentRequired is true in NuController/NuSubController.
             // So do it here. (the JSON created by toJSON(.) is probably different from editor.getJSON(.))
-            editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
+            editor.chain().setContent(tiptapUtils.toJSON(res.paragraphs)).selectPrevious().run()
           })
         })
       }

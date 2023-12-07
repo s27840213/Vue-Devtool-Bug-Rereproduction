@@ -2,29 +2,114 @@ import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
-import type { GenImageResult } from '@/types/api'
+import type { GenImageResult, GenImageParams } from '@/types/api'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { useEventBus } from '@vueuse/core'
 import { useStore } from 'vuex'
 
-const RECORD_TIMING = true
+export const RECORD_TIMING = true
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
   const { setPrevGenParams } = userStore
   const { prevGenParams } = storeToRefs(useUserStore())
   const editorStore = useEditorStore()
-  const { setInitImgSrc } = editorStore
-  const { editorType, pageSize, contentScaleRatio } = storeToRefs(useEditorStore())
+  const {
+    setInitImgSrc,
+    setGenResultIndex,
+    unshiftGenResults,
+    removeGenResult,
+    updateGenResult,
+    changeEditorState,
+  } = editorStore
+  const { editorType, pageSize, contentScaleRatio, inGenResultState, generatedResultsNum } =
+    storeToRefs(useEditorStore())
+  const { uploadImage, polling, getPollingController } = useUploadUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
+  const { t } = useI18n()
 
-  const { uploadImage, polling } = useUploadUtils()
+  const genImageFlow = async (
+    params: GenImageParams,
+    showMore: boolean,
+    num: number,
+    {
+      onSuccess = undefined,
+      onError = undefined,
+      onApiResponded = undefined,
+    }: {
+      onSuccess?: (index: number, url: string) => void
+      onError?: (index: number, url: string, reason: string) => void
+      onApiResponded?: () => void
+    } = {},
+  ): Promise<void> => {
+    const ids: string[] = []
+    for (let i = 0; i < num; i++) {
+      ids.push(generalUtils.generateRandomString(4))
+      unshiftGenResults('', ids[i])
+    }
+    try {
+      await genImage(params, showMore, num, {
+        onApiResponded,
+        onSuccess: (index, imgSrc) => {
+          updateGenResult(ids[index], { url: imgSrc })
+          onSuccess && onSuccess(index, imgSrc)
+        },
+        onError: (index, url, reason) => {
+          const errorId = generalUtils.generateRandomString(6)
+          logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
+          modalUtils.setModalInfo(
+            `${t('CM0087')} ${t('CM0089')}`,
+            `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
+            { msg: t('STK0023') },
+          )
+          removeGenResult(ids[index])
+          if (generatedResultsNum.value === 0 && inGenResultState.value) {
+            changeEditorState('prev')
+          }
+          onError && onError(index, url, reason)
+        },
+      })
+    } catch (error) {
+      const errorId = generalUtils.generateRandomString(6)
+      logUtils.setLog(errorId)
+      logUtils.setLogForError(error as Error)
+      modalUtils.setModalInfo(
+        t('CM0087'),
+        `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
+        { msg: t('STK0023') },
+      )
+      for (const id of ids) {
+        removeGenResult(id)
+      }
+      if (generatedResultsNum.value === 0 && inGenResultState.value) {
+        changeEditorState('prev')
+      }
+      onError && onError(-1, '', (error as Error).message)
+    }
+  }
 
-  const genImage = async (prompt: string, showMore = false): Promise<string> => {
+  const genImage = async (
+    params: GenImageParams,
+    showMore: boolean,
+    num: number,
+    {
+      onSuccess = undefined,
+      onError = undefined,
+      onApiResponded = undefined,
+    }: {
+      onSuccess?: (index: number, url: string) => void
+      onError?: (index: number, url: string, reason: string) => void
+      onApiResponded?: () => void
+    } = {},
+  ): Promise<string[]> => {
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
 
     if (!showMore) {
@@ -38,24 +123,60 @@ const useGenImageUtils = () => {
         throw new Error('Upload Images For /gen-image Failed')
       }
     } else {
-      prompt = prevGenParams.value.prompt
+      params = prevGenParams.value.params
     }
     RECORD_TIMING && testUtils.start('call API', false)
-    const res = (await genImageApis.genImage(userId.value, requestId, prompt, editorType.value)).data
+    const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
-    RECORD_TIMING && testUtils.start('polling', false)
-    await polling<GenImageResult>(res.url.url, { isJson: false })
-    RECORD_TIMING && testUtils.log('polling', '')
-    // if (json.flag !== 0) {
-    //   throw new Error('Run /gen-image Failed,' + json.msg ?? '')
-    // }
 
-    setPrevGenParams({ requestId, prompt })
-    return res.url.url
+    onApiResponded && onApiResponded()
+
+    setPrevGenParams({ requestId, params })
+    const urls = res.urls.map((urlMap) => urlMap.url)
+    const pollingController = getPollingController()
+    await Promise.all([
+      (async () => {
+        const json = await polling<GenImageResult>(
+          `https://template.vivipic.com/charmix/${userId.value}/result/${requestId}.json`,
+        )
+        if (json.flag !== 0) {
+          pollingController.cancelAll()
+          throw new Error('Call /gen-image Failed, ' + json.msg ?? '')
+        }
+      })(),
+      ...urls.map(async (url, index) => {
+        RECORD_TIMING && testUtils.start(`polling ${index}`, false)
+        try {
+          await polling(url, { isJson: false, useVer: false, pollingController })
+        } catch (error: any) {
+          logUtils.setLogForError(error)
+          if (!error.message.includes('Cancelled')) {
+            onError && onError(index, url, error.message)
+          }
+          return
+        }
+        RECORD_TIMING && testUtils.log(`polling ${index}`, '')
+        const data = (await cmWVUtils.saveAssetFromUrl('png', url)) ?? { flag: '1', fileId: '' }
+        const { flag, fileId } = data
+        if (flag === '0' && fileId) {
+          const srcObj: SrcObj = {
+            type: 'ios',
+            assetId: `cameraroll/${fileId}`,
+            userId: '',
+          }
+
+          const imgSrc = imageUtils.getSrc(srcObj)
+          onSuccess && onSuccess(index, imgSrc)
+        } else {
+          onError && onError(index, url, 'saveAssetFromUrl failed')
+        }
+      }),
+    ])
+    return urls
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
@@ -94,6 +215,8 @@ const useGenImageUtils = () => {
   }
 
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
+    if (editorType.value === 'hidden-message') return
+    
     const bus = useEventBus('editor')
     RECORD_TIMING && testUtils.start('mask to dataUrl', false)
     return new Promise<void>((resolve, reject) => {
@@ -116,6 +239,7 @@ const useGenImageUtils = () => {
   }
 
   return {
+    genImageFlow,
     genImage,
     uploadEditorAsImage,
     uploadMaskAsImage,

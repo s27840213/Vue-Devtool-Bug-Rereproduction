@@ -35,7 +35,7 @@ div(:layer-index="`${layerIndex}`"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
         div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
+          nu-text-editor(:id="`text-${layerIndex}`"
             class="text__body"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
@@ -500,9 +500,6 @@ export default defineComponent({
     },
     needAutoRescale(): boolean {
       return this.config.inAutoRescaleMode && this.getLayerRotate() === 0 && !textShapeUtils.isCurvedText(this.config.styles.textShape)
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
     },
     tooSmall(): boolean {
       const { tooShort, tooNarrow } = this.checkLimits(this.$isTouchDevice(), !this.resizerProfile.hasHorizontal && !this.resizerProfile.hasVertical)
@@ -1024,6 +1021,7 @@ export default defineComponent({
       this.isControlling = false
       if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
         const newLayer = TextUtils.resetScaleForLayer(this.config as AllLayerTypes)
+        LayerUtils.setAutoResizeNeededForLayer(newLayer, false)
         LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
         if (newLayer.type === 'tmp') {
           groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
@@ -1343,6 +1341,16 @@ export default defineComponent({
       }
       if (this.config.type === 'shape' && this.config.category === 'E') {
         ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, shapeUtils.clipCorRad(this.config.shapeType, this.config.vSize, this.config.size))
+      }
+      if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
+        const newLayer = generalUtils.deepCopy(this.config as AllLayerTypes)
+        LayerUtils.setAutoResizeNeededForLayer(newLayer, false)
+        LayerUtils.replaceLayer(this.pageIndex, this.layerIndex, newLayer)
+        if (newLayer.type === 'tmp') {
+          groupUtils.set(this.pageIndex, this.layerIndex, newLayer.layers)
+        } else {
+          groupUtils.set(this.pageIndex, this.layerIndex, [newLayer])
+        }
       }
       this.isControlling = false
       stepsUtils.record()

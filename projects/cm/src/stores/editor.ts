@@ -1,6 +1,7 @@
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
-import type { EditorFeature, EditorStates, EditorType, PowerfulfillStates } from '@/types/editor'
+import type { DescriptionPanel, EditorFeature, EditorStates, EditorType, GenImageOptions, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
@@ -10,7 +11,8 @@ import { defineStore } from 'pinia'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
-}
+  'hidden-message': ['aspectRatio', 'editing', 'genResult', 'saving'] as HiddenMessageStates[],
+} as { [key in EditorType]: EditorStates }
 
 export interface IGenResult {
   id: string
@@ -32,6 +34,10 @@ interface IEditorStore {
   currStepTypeIndex: number
   initImgSrc: string
   useTmpSteps: boolean
+  currPrompt: string,
+  currGenOptions: GenImageOptions,
+  editorTheme: null | string,
+  descriptionPanel: null | DescriptionPanel,
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -49,6 +55,10 @@ export const useEditorStore = defineStore('editor', {
     currStepTypeIndex: -1,
     initImgSrc: '',
     useTmpSteps: false,
+    currPrompt: '',
+    currGenOptions: [],
+    editorTheme: null,
+    descriptionPanel: null,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -64,7 +74,7 @@ export const useEditorStore = defineStore('editor', {
       return pageUtils.contentScaleRatio
     },
     showBrushOptions(): boolean {
-      return this.currActiveFeature === 'brush'
+      return this.currActiveFeature === 'cm_brush'
     },
     showSelectionOptions(): boolean {
       return this.currActiveFeature === 'selection'
@@ -96,6 +106,12 @@ export const useEditorStore = defineStore('editor', {
     currGeneratedResults(): { id: string; url: string; video?: string } {
       return this.generatedResults[this.currGenResultIndex]
     },
+    generatedResultsNum(): number {
+      return this.generatedResults.length
+    },
+    showDescriptionPanel(): boolean {
+      return this.descriptionPanel !== null
+    }
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -109,6 +125,11 @@ export const useEditorStore = defineStore('editor', {
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
     },
+    startEditing(type: EditorType) {
+      this.currStateIndex = 0
+      this.editorType = type
+      this.editorStates = editorStatesMap[this.editorType]
+    },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
       const toNext = dir === 'next'
@@ -121,26 +142,44 @@ export const useEditorStore = defineStore('editor', {
     setCurrActiveFeature(feature: EditorFeature) {
       this.currActiveFeature = feature
     },
-    setEditorType(type: EditorType) {
-      this.editorType = type
-    },
     setIsGenerating(isGenerating: boolean) {
       this.isGenerating = isGenerating
     },
     unshiftGenResults(url: string, id: string) {
+      if (this.generatedResults.length > 0) {
+        this.currGenResultIndex += 1
+      }
       this.generatedResults.unshift({
         url,
         id,
       })
     },
-    updateGenResult(id: string, data: { url?: string; video?: string }) {
+    updateGenResult(id: string, data: { url?: string; video?: string; updateIndex?: boolean }) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
-      const { url, video } = data
+      if (index === -1) return
+      const { url, video, updateIndex } = data
       if (url) {
         this.generatedResults[index].url = url
       }
       if (video) {
         this.generatedResults[index].video = video
+      }
+      if (updateIndex && this.currGenResultIndex === -1) {
+        this.currGenResultIndex = index
+      }
+    },
+    removeGenResult(id: string) {
+      const index = this.generatedResults.findIndex((item) => item.id === id)
+      if (index === -1) return
+      this.generatedResults.splice(index, 1)
+      if (
+        this.currGenResultIndex === index &&
+        this.currGenResultIndex >= this.generatedResults.length
+      ) {
+        this.currGenResultIndex -= 1
+        if (this.currGenResultIndex < 0) {
+          this.currGenResultIndex = 0
+        }
       }
     },
     clearGeneratedResults() {
@@ -149,14 +188,17 @@ export const useEditorStore = defineStore('editor', {
     setGenResultIndex(index: number) {
       this.currGenResultIndex = index
     },
-    undo() {
-      stepsUtils.undo()
+    async undo() {
+      await stepsUtils.undo()
+
+      const { currEditorTheme, applyEditorTheme } = useBiColorEditor()
+      if (currEditorTheme.value) applyEditorTheme(currEditorTheme.value)
     },
-    redo() {
-      stepsUtils.redo()
-    },
-    delayedRecord() {
-      stepsUtils.delayedRecord()
+    async redo() {
+      await stepsUtils.redo()
+
+      const { currEditorTheme, applyEditorTheme } = useBiColorEditor()
+      if (currEditorTheme.value) applyEditorTheme(currEditorTheme.value)
     },
     stepsReset() {
       stepsUtils.reset()
@@ -178,6 +220,12 @@ export const useEditorStore = defineStore('editor', {
     setInitImgSrc(src: string) {
       this.initImgSrc = src
     },
+    setCurrPrompt(prompt: string) {
+      this.currPrompt = prompt
+    },
+    setCurrGenOptions(options: GenImageOptions) {
+      this.currGenOptions = options
+    },
     keepEditingInit() {
       this.changeEditorState('prev')
       this.createNewPage(this.pageSize.width, this.pageSize.height)
@@ -195,5 +243,11 @@ export const useEditorStore = defineStore('editor', {
 
       useSteps().reset()
     },
+    setEditorTheme(theme: string | null) {
+      this.editorTheme = theme
+    },
+    setDescriptionPanel(panel: DescriptionPanel | null) {
+      this.descriptionPanel = panel
+    }
   },
 })
