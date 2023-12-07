@@ -101,6 +101,7 @@ export default function (this: any) {
     if (isTextUs()) return store.state.isTablet ? 3 : 2
     return undefined
   }
+  const isHm = (): boolean => store.getters['assetPanel/getIsHm']
 
   const actions: ActionTree<IListModuleState, unknown> = {
     // For panel template, object, bg, text, only get recently used.
@@ -163,7 +164,8 @@ export default function (this: any) {
           listAll: 0,
           listCategory: 1,
           pageIndex: state.nextCategory,
-          cache: !isAdmin
+          cache: !isAdmin,
+          isHm: isHm()
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentTitle = [${data.data.content.map((l: { title: string }) => l.title)}]`)
@@ -218,7 +220,8 @@ export default function (this: any) {
           listAll: 1,
           listCategory: 0,
           cache: needCache,
-          colNum: getColNum()
+          colNum: getColNum(),
+          isHm: isHm()
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
@@ -278,7 +281,8 @@ export default function (this: any) {
           listAll: 1,
           listCategory: 0,
           cache: !isAdmin,
-          colNum: getColNum()
+          colNum: getColNum(),
+          isHm: isHm()
         }
         const { data } = await this.api(apiParams)
         logUtils.setLog(`api(${JSON.stringify(apiParams)}): contentId = [${data.data.content[0].list.slice(0, 3).map((l: { id: string }) => l.id)}...], amount: ${data.data.content[0].list.length}`)
@@ -779,7 +783,8 @@ export default function (this: any) {
         listCategory: 0,
         pageIndex: keyword ? nextSearch : nextPage,
         cache: needCache,
-        colNum: getColNum()
+        colNum: getColNum(),
+        isHm: isHm()
       }
     },
     hasNextPage(state) {

@@ -17,4 +17,5 @@ export interface IModalInfo {
   checkboxText: string,
   checked: boolean,
   onCheckedChange: (checked: boolean) => void,
+  ulContent: Array<string>
 }

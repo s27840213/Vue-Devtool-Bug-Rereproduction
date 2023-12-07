@@ -2,7 +2,8 @@ import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
-import type { GenImageResult } from '@/types/api'
+import type { GenImageResult, GenImageParams } from '@/types/api'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -12,7 +13,6 @@ import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { useEventBus } from '@vueuse/core'
 import { useStore } from 'vuex'
-import useI18n from '@nu/vivi-lib/i18n/useI18n'
 
 export const RECORD_TIMING = true
 
@@ -29,19 +29,24 @@ const useGenImageUtils = () => {
     updateGenResult,
     changeEditorState,
   } = editorStore
-  const { editorType, pageSize, contentScaleRatio, inGenResultState, generatedResultsNum } = storeToRefs(useEditorStore())
+  const { editorType, pageSize, contentScaleRatio, inGenResultState, generatedResultsNum } =
+    storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const { t } = useI18n()
 
   const genImageFlow = async (
-    prompt: string,
+    params: GenImageParams,
     showMore: boolean,
     num: number,
     {
+      onSuccess = undefined,
+      onError = undefined,
       onApiResponded = undefined,
     }: {
+      onSuccess?: (index: number, url: string) => void
+      onError?: (index: number, url: string, reason: string) => void
       onApiResponded?: () => void
     } = {},
   ): Promise<void> => {
@@ -50,14 +55,12 @@ const useGenImageUtils = () => {
       ids.push(generalUtils.generateRandomString(4))
       unshiftGenResults('', ids[i])
     }
-    if (!showMore) {
-      setGenResultIndex(-1)
-    }
     try {
-      await genImage(prompt, showMore, num, {
+      await genImage(params, showMore, num, {
         onApiResponded,
         onSuccess: (index, imgSrc) => {
-          updateGenResult(ids[index], { url: imgSrc, updateIndex: !showMore })
+          updateGenResult(ids[index], { url: imgSrc })
+          onSuccess && onSuccess(index, imgSrc)
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
@@ -71,6 +74,7 @@ const useGenImageUtils = () => {
           if (generatedResultsNum.value === 0 && inGenResultState.value) {
             changeEditorState('prev')
           }
+          onError && onError(index, url, reason)
         },
       })
     } catch (error) {
@@ -88,11 +92,12 @@ const useGenImageUtils = () => {
       if (generatedResultsNum.value === 0 && inGenResultState.value) {
         changeEditorState('prev')
       }
+      onError && onError(-1, '', (error as Error).message)
     }
   }
 
   const genImage = async (
-    prompt: string,
+    params: GenImageParams,
     showMore: boolean,
     num: number,
     {
@@ -118,12 +123,10 @@ const useGenImageUtils = () => {
         throw new Error('Upload Images For /gen-image Failed')
       }
     } else {
-      prompt = prevGenParams.value.prompt
+      params = prevGenParams.value.params
     }
     RECORD_TIMING && testUtils.start('call API', false)
-    const res = (
-      await genImageApis.genImage(userId.value, requestId, prompt, editorType.value, num)
-    ).data
+    const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
@@ -132,7 +135,7 @@ const useGenImageUtils = () => {
 
     onApiResponded && onApiResponded()
 
-    setPrevGenParams({ requestId, prompt })
+    setPrevGenParams({ requestId, params })
     const urls = res.urls.map((urlMap) => urlMap.url)
     const pollingController = getPollingController()
     await Promise.all([
@@ -212,6 +215,8 @@ const useGenImageUtils = () => {
   }
 
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
+    if (editorType.value === 'hidden-message') return
+    
     const bus = useEventBus('editor')
     RECORD_TIMING && testUtils.start('mask to dataUrl', false)
     return new Promise<void>((resolve, reject) => {

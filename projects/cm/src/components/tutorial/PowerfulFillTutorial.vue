@@ -1,6 +1,6 @@
 
 <template lang="pug">
-div(class="w-screen h-screen")
+div(class="powerful-fill-tutorial w-screen h-screen")
   div(class="w-full h-full grid")
     div(v-if="[1, 2, 4].includes(step)" class="relative w-fit flex flex-col items-center" :style="tutorialStyles")
       span(class="text-primary-white typo-h6") {{ tutorialDescription }}

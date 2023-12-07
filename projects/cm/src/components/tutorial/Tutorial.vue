@@ -11,12 +11,14 @@ import { useTutorialStore } from '@/stores/tutorial';
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { storeToRefs } from 'pinia';
 import PowerfulFillTutorial from './PowerfulFillTutorial.vue';
+import HiddenMessageTutorial from './HiddenMessageTutorial.vue';
 
 const DEV = false // set to visualize clickable area
 const tutorialComponent = computed(() => {
   // add new tutorial components here
   const tutorials = [
-    PowerfulFillTutorial
+    PowerfulFillTutorial,
+    HiddenMessageTutorial
   ]
   return tutorials.find((t) => t.name === name.value + '-tutorial')
 })
@@ -104,7 +106,8 @@ const stopTrackingClickableArea = () => {
 type IBackdrop = {
   elBackdrop: HTMLElement,
   elClip: HTMLElement,
-  elTarget: HTMLElement
+  elTarget: HTMLElement,
+  backupStylesForElClip: {[key: string]: string}
 }
 const backdrops = ref<IBackdrop[]>([])
 const updateBackdropPosition = (backdrop: IBackdrop) => {
@@ -139,13 +142,18 @@ const insertBackdrops = (elTargets = highlightRefs.value) => {
           continue
         }
         const elBackdrop = document.createElement('div')
-        const backdrop = { elBackdrop, elClip: currElement, elTarget }
+        const backdrop = { elBackdrop, elClip: currElement, elTarget, backupStylesForElClip: {} as {[key: string]: string} }
         backdrop.elBackdrop.classList.add('tutorial-backdrop', 'z-tutorial-highlight')
         backdrop.elBackdrop.style.pointerEvents = 'none'
         backdrop.elBackdrop.style.position = 'absolute'
         backdrop.elBackdrop.style.outline = 'solid 9999px rgba(18, 18, 18, 0.7)'
         updateBackdropPosition(backdrop)
         currElement.insertAdjacentElement('beforebegin', backdrop.elBackdrop)
+
+        // backup & remove conflict css styles from elClip
+        backdrop.backupStylesForElClip.filter = currElement.style.filter
+        currElement.style.filter = 'none'
+        
         backdrops.value.push(backdrop)
       }
       currElement = currElement.parentElement;
@@ -164,6 +172,9 @@ const updateBackdrops = () => {
 
 const removeBackdrops = () => {
   while (backdrops.value.length > 0) {
+    // restore css styles for elClip
+    backdrops.value[0].elClip.style.filter = backdrops.value[0].backupStylesForElClip.filter
+
     backdrops.value[0].elBackdrop.remove()
     backdrops.value.shift();
   }
