@@ -14,7 +14,7 @@ div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-bord
       div(v-for="(item, idx) in hiddenMessageStep1Items" :key="idx" class="flex gap-8")
         div(class="w-full flex flex-col gap-11 items-end")
           img(
-            class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
+            class="w-100 h-100 rounded-full border-solid border-3 border-white object-cover object-center"
             :src="item.imgA")
           svg-icon(
             iconName="tutorial-arrow-right-primary"
@@ -35,7 +35,7 @@ div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-bord
               iconName="tutorial-highlight-tr"
               iconWidth="18px")
           img(
-            class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
+            class="w-100 h-100 rounded-full border-solid border-3 border-white object-cover object-center"
             :src="item.imgB")
       div(class="w-full typo-body-md text-left") {{ t('CM0095') }}
       prompt-area(preview)

@@ -5,7 +5,7 @@ div(class="hidden-message-tutorial w-screen h-screen")
     div(class="flex gap-8")
       div(class="w-full flex flex-col gap-8 items-end")
         img(
-          class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
+          class="w-100 h-100 rounded-full border-solid border-3 border-white object-cover object-center"
           :src="imgA")
         svg-icon(
           iconName="tutorial-arrow-right-primary"
@@ -13,7 +13,7 @@ div(class="hidden-message-tutorial w-screen h-screen")
       div(class="flex flex-col items-end")
         div(class="h-79")
         img(
-          class="w-100 h-100 rounded-full border-solid border-[3px] border-white object-cover object-center"
+          class="w-100 h-100 rounded-full border-solid border-3 border-white object-cover object-center"
           :src="imgB")
     span(class="text-white typo-h6 text-left") {{ text }}
     nubtn(

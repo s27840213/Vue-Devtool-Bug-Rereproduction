@@ -260,7 +260,7 @@ const debugOptions: Array<IOptionConfig> = [
   },
 ]
 
-const segmentTitleStyle = 'py-4 border-0 border-b-[1px] border-solid border-lighter/80'
+const segmentTitleStyle = 'py-4 border-0 border-b-1 border-solid border-lighter/80'
 const initOptions = computed(
   () =>
     [

@@ -13,6 +13,12 @@ for (let i = 0; i <= 500; i++) {
 }
 spacingMap.full = '100%'
 spacingMap.half = '50%'
+const spacingMapWithPoint = {}
+for (let i = 0; i <= 10; i+=0.5) {
+  spacingMapWithPoint[i] = `${i}px`
+}
+spacingMapWithPoint['.5'] = '0.5px'
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   corePlugins: {
@@ -37,6 +43,7 @@ module.exports = {
     // this project only for mobile, no need to add to much spacing
     spacing: spacingMap,
     borderRadius: spacingMap,
+    borderWidth: spacingMapWithPoint,
     maxWidth: {
       min: 'min-content',
       max: 'max-content',
