@@ -28,6 +28,9 @@
       "@i18n/*": [
         "./src/i18n/shaked/*"
       ],
+      "@nu/tailwind-lib/*": [
+        "../../packages/tailwind-lib/*"
+      ],
       "@nu/shared-lib/*": [
         "../../packages/shared-lib/src/*"
       ],

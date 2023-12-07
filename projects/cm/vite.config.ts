@@ -56,6 +56,10 @@ export default defineConfig({
         replacement: resolve('../../packages/vivi-lib/src'),
       },
       {
+        find: '@nu/tailwind-lib',
+        replacement: resolve('../../packages/tailwind-lib'),
+      },
+      {
         find: '@i18n',
         replacement: resolve(
           process.env.NODE_ENV === 'production'
@@ -106,7 +110,7 @@ export default defineConfig({
       },
     },
     // Specific post css config file folder.
-    postcss: '../../packages/vivi-lib',
+    postcss: '../../packages/tailwind-lib',
   },
   server: {
     port: 8082,

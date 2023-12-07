@@ -51,7 +51,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve('src'),
-      '@nu/vivi-lib': resolve('../../packages/vivi-lib/src'),
+      '@nu/vivi-lib': resolve('../vivi-lib/src'),
+      '@nu/tailwind-lib': resolve('../tailwind-lib'),
     },
   },
   css: {

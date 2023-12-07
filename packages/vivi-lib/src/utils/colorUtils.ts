@@ -5,7 +5,7 @@ import layerUtils from '@/utils/layerUtils'
 import { EventEmitter } from 'events'
 import { clamp, filter, flatten, uniq } from 'lodash'
 import pageUtils from './pageUtils'
-import colorTable from '@/assets/json/colors.json'
+import colorTable from '@nu/tailwind-lib/colors.json'
 import textPropUtils from './textPropUtils'
 import tiptapUtils from './tiptapUtils'
 

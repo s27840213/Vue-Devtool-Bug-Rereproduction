@@ -1,5 +1,5 @@
-const colors = require('./src/assets/json/colors.json')
-const zIndex = require('./src/assets/json/zIndex.json')
+const colors = require('./colors.json')
+const zIndex = require('./zIndex.json')
 const plugin = require('tailwindcss/plugin')
 const joinedColor = Object.keys(colors).join('|')
 const bgPattern = new RegExp(`bg-(${joinedColor})`)
@@ -14,7 +14,7 @@ for (let i = 0; i <= 500; i++) {
 spacingMap.full = '100%'
 spacingMap.half = '50%'
 const spacingMapWithPoint = {}
-for (let i = 0; i <= 10; i+=0.5) {
+for (let i = 0; i <= 10; i += 0.5) {
   spacingMapWithPoint[i] = `${i}px`
 }
 spacingMapWithPoint['.5'] = '0.5px'
@@ -22,12 +22,9 @@ spacingMapWithPoint['.5'] = '0.5px'
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   corePlugins: {
-    preflight: false
+    preflight: false,
   },
-  content: [
-    './src/**/*.{vue,js,ts}',
-    '../../packages/vivi-lib/src/**/*.{vue,js,ts}',
-  ],
+  content: ['./src/**/*.{vue,js,ts}', '../../packages/vivi-lib/src/**/*.{vue,js,ts}'],
   // purge: ['./src/**/*.html', './src/**/*.vue', './src/**/*.ts'],
   theme: {
     extend: {
@@ -39,7 +36,10 @@ module.exports = {
     },
 
     colors,
-    zIndex: zIndex.reduce((prevVal, currVal, idx) => ({ ...prevVal, [currVal]: (idx + 1).toString()}), {}) ,
+    zIndex: zIndex.reduce(
+      (prevVal, currVal, idx) => ({ ...prevVal, [currVal]: (idx + 1).toString() }),
+      {},
+    ),
     // this project only for mobile, no need to add to much spacing
     spacing: spacingMap,
     borderRadius: spacingMap,
@@ -51,7 +51,7 @@ module.exports = {
       none: 'none',
       screen: '100vw',
       ...spacingMap,
-    }
+    },
   },
   safelist: [
     {

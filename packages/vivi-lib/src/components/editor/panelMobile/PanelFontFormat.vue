@@ -16,6 +16,7 @@ div(class="panel-font-format")
 </template>
 
 <script lang="ts">
+import { IColorKeys } from '@/interfaces/color'
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -40,9 +41,9 @@ export default defineComponent({
   emits: [],
   data() {
     return {
-      activeColor: this.$isStk || this.$isCm ? 'white' : 'blue-1',
-      inactiveColor: this.$isStk || this.$isCm ? 'black-5' : 'gray-2',
-      disabledColor: this.$isStk || this.$isCm ? 'black-3-5' : 'gray-4',
+      activeColor: (this.$isStk || this.$isCm ? 'white' : 'blue-1') as IColorKeys,
+      inactiveColor: (this.$isStk || this.$isCm ? 'black-5' : 'gray-2') as IColorKeys,
+      disabledColor: (this.$isStk || this.$isCm ? 'black-3-5' : 'gray-4') as IColorKeys,
     }
   },
   computed: {

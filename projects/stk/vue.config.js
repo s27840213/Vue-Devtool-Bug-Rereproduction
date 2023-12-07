@@ -351,6 +351,7 @@ module.exports = defineConfig({
         '@img': resolve('../../packages/vivi-lib/src/assets/img'),
         '@json': resolve('../../packages/vivi-lib/src/assets/json'),
         '@nu/vivi-lib': resolve('../../packages/vivi-lib/src'),
+        '@nu/tailwind-lib': resolve('../../packages/tailwind-lib'),
       },
       plugins: [
         new DynamicAliasResolvePlugin({

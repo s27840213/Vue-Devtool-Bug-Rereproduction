@@ -1,4 +1,4 @@
-// import '@/assets/css/main.css'
+// import '@nu/tailwind-lib/index.css'
 import { createApp } from 'vue'
 import App from './App.vue'; // Use relative path to avoid build alias error
 
