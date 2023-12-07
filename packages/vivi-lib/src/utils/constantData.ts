@@ -1319,7 +1319,7 @@ class ConstantData {
           key: 'weight',
           title: i18n.global.t('CM0115'),
           min: 0,
-          max: 1,
+          max: 2,
           step: 0.1,
           value: 0,
         },
