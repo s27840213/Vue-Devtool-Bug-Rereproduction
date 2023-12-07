@@ -998,30 +998,37 @@ class TextBg {
         content: pos.map(p => {
           // Scale will let width be (scale-1)*p.height times larger than before,
           // So -(scale-1)*p.height/2 to justify it to center.
-          let x = p.x - (scale - 1) * p.height / 2
-          let y = p.y - (scale - 1) * p.height / 2
-          const offset = (vertical && !needRotate)
-            ? `translate(${p.height * yOffset / 100}px, ${p.width * xOffset / 100}px)`
-            : `translate(${p.width * xOffset / 100}px, ${p.height * yOffset / 100}px)`
-          if (vertical && !needRotate) [x, y] = [y, x]
+          const x = p.x - (scale - 1) * p.height / 2
+          const y = p.y - (scale - 1) * p.height / 2
+          const size = p.height * scale
+          // `transform` comes from Rect rotate base on the top-left corner, not center,
+          // So translate it 50% top left first and then translate it back.
+          const verticalTransform = vertical ? `
+            translate(${-size / 2}px, ${-size / 2}px)
+            ${transform}
+            translate(${size / 2}px, ${size / 2}px)
+          ` : ''
+          const offset = `translate(${p.width * xOffset / 100}px, ${p.height * yOffset / 100}px)`
+
           const colorChangeable = letterBgData.isColorChangeable(p.href)
           return {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
               href: colorChangeable ? `#${p.href}`
                 : require(`@img/text-effect/LetterBG/${p.href}.svg`),
-              width: p.height * scale,
-              height: p.height * scale,
+              width: size,
+              height: size,
             },
             style: {
               color: p.color,
-              ...withShape ? { // Transform for TextShape
-                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[p.i] + offset,
-                // For rotate svg component against its center.
-                transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
-              } : { // If needRotate cancel xy exchange and add transform on it.
-                transform: (needRotate ? transform : '') + `translate(${x}px, ${y}px) ` +  offset
-              },
+              transform: `
+                ${verticalTransform}
+                translate(${x}px, ${y}px)
+                ${withShape ? textShapeStyle[p.i] : ''}
+                ${offset}
+                ${vertical && !needRotate ? 'rotate(-90deg)' : ''}`,
+              // For rotate svg component against its center.
+              transformOrigin: `${size / 2}px ${size / 2}px`,
             }
           }
         })
