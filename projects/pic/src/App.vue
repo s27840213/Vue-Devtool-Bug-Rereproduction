@@ -92,7 +92,7 @@ export default defineComponent({
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
 
-    if ((window as any).__PRERENDER_INJECTED !== undefined) {
+    if (window.__PRERENDER_INJECTED !== undefined) {
       document.dispatchEvent(new Event('render-event'))
       window.dispatchEvent(new Event('render-event'))
     }

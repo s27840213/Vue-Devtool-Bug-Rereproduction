@@ -51,10 +51,10 @@ div(class="panel-more")
 </template>
 
 <script lang="ts">
-import loginUtils from '@/utils/loginUtils'
 import { IUserInfo } from '@nu/vivi-lib/interfaces/webView'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import shortcutHandler from '@nu/vivi-lib/utils/shortcutUtils'

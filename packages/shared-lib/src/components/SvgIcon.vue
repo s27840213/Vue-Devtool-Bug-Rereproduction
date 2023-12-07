@@ -5,20 +5,27 @@ svg(
   :class="`text-${iconColor} svg-${iconName}` + (strokeColor ? `stroke-${strokeColor}` : '')"
   viewBox="0 0 120 30"
   :style="iconStyles"
-  v-html="loadingSvg"
-  ref="svgIconRef")
+  v-html="loadingSvg")
 svg(
   v-else
   class="svg-icon"
   :class="`text-${iconColor} svg-${iconName} ` + (strokeColor ? `stroke-${strokeColor}` : '')"
-  :style="iconStyles"
-  ref="svgIconRef")
+  :style="iconStyles")
   use(
     :xlink:href="`#${iconName}`"
     ref="useRef")
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import self from './SvgIcon.vue'
+
+declare module 'vue' {
+  export interface GlobalComponents {
+    SvgIcon: typeof self
+  }
+}
+
 const props = withDefaults(
   defineProps<{
     iconName: string
@@ -76,27 +83,34 @@ const iconStyles = computed(() => {
     }
 
     if (props.iconWidth && !props.iconHeight) {
-      height = `${parseInt(props.iconWidth?.split('px')[0]) * iconAspectRatio.value}px`
+      height = `${parseInt(props.iconWidth?.split('px')[0]) / iconAspectRatio.value}px`
     }
   }
   return {
     width: width || (props.sameSize && height) || '40px',
     height: height || (props.sameSize && width) || '40px',
+    // For debug, to find missing svg icon files.
+    ...missingUse.value && { background: 'red' },
   }
 })
 
 const iconAspectRatio = computed(() => {
   if (props.sameSize) return 1
 
-  if (useRef && useRef.value) {
+  if (useRef.value) {
     const { width, height } = useRef.value.getBoundingClientRect()
     return width / height
   }
 
   return 1
 })
-const svgIconRef = ref<HTMLElement | null>(null)
-const useRef = ref<HTMLElement | null>(null)
+const useRef = ref<SVGGraphicsElement | null>(null)
+const missingUse = computed(() => {
+  if (!useRef.value) return
+  const missing = !document.querySelector(`symbol#${props.iconName}`)
+  if (missing) console.error(`Missing svg icon: ${props.iconName}.`)
+  return missing
+})
 </script>
 
 <style lang="scss" scoped>

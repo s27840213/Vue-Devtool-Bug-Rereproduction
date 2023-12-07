@@ -1,7 +1,6 @@
 import { PowerfulFillCanvasMode } from '@/types/editor'
 import { defineStore } from 'pinia'
 export interface ICanvasState {
-  inCanvasMode: boolean
   canvasMode: PowerfulFillCanvasMode
   brushSize: number
   resultCanvas: HTMLCanvasElement
@@ -12,20 +11,19 @@ export interface ICanvasState {
   currStep: number
   isProcessingCanvas: boolean
   isChangingBrushSize: boolean
-  canvasWidth: number
-  canvasHeight: number
   isDrawing: boolean
   maskCanvas: HTMLCanvasElement | null
   canvas: HTMLCanvasElement | null
   canvasCtx: CanvasRenderingContext2D | null
   currCanvasImageElement: HTMLImageElement
+  isAutoFilling: boolean
+  drawingColor: string
 }
 
 const MAX_STEP_COUNT = 20
 
 export const useCanvasStore = defineStore('canvas', {
   state: (): ICanvasState => ({
-    inCanvasMode: false,
     canvasMode: 'brush',
     brushSize: 16,
     resultCanvas: null as unknown as HTMLCanvasElement,
@@ -36,21 +34,15 @@ export const useCanvasStore = defineStore('canvas', {
     currStep: -1,
     isProcessingCanvas: false,
     isChangingBrushSize: false,
-    canvasWidth: 900,
-    canvasHeight: 1600,
     isDrawing: false,
     maskCanvas: null as unknown as HTMLCanvasElement,
     canvas: null as unknown as HTMLCanvasElement,
     canvasCtx: null as unknown as CanvasRenderingContext2D,
     currCanvasImageElement: new Image(),
+    isAutoFilling: false,
+    drawingColor: '#FF7262',
   }),
   getters: {
-    canvasSize(): { width: number; height: number } {
-      return {
-        width: this.canvasWidth,
-        height: this.canvasHeight,
-      }
-    },
     isInCanvasFirstStep(): boolean {
       return this.currStep === 0
     },

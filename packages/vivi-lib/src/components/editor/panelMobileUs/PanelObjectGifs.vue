@@ -43,7 +43,7 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
         span(class="text-black-5") {{$t('NN0764')}}
       //- Empty recently used view
       div(v-if="showAllRecently && !item.content.length && !pending" class="panel-gifs__recent-empty")
-        svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+        svg-icon(iconName="empty-folder" iconWidth="42px" iconColor="white")
         div(class="panel-gifs__recent-empty--title") No content in Recently Used
     template(v-slot:category-list-rows="{ list, title, isFavorite }")
       category-list-rows(
@@ -84,10 +84,10 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
+import PanelObjectGifs from '@/components/editor/panelMobile/PanelObjectGifs.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-import PanelObjectGifs from '@/components/editor/panelMobile/PanelObjectGifs.vue'
 
 export default defineComponent({
   extends: PanelObjectGifs,

@@ -114,13 +114,14 @@ import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceCont
 import { IAsset } from '@nu/vivi-lib/interfaces/module'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@nu/vivi-lib/store/types'
+import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
-import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -311,7 +312,6 @@ export default defineComponent({
         await this.getRecAndCate({ reset, key: 'background' })
         await stkWVUtils.listAsset('backgroundColor')
       })
-    colorUtils.setCurrEvent(ColorEventType.background)
   },
   activated() {
     this.$nextTick(() => {
@@ -413,6 +413,7 @@ export default defineComponent({
           pageIndex: pageUtils.currFocusPageIndex,
           color: color
         })
+        stepsUtils.record()
       } else stkWVUtils.sendScreenshotUrl(this.getColorUrl(color, false))
       stkWVUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
       this.addRecentlyBgColor(color)
@@ -506,6 +507,7 @@ export default defineComponent({
       }
     },
     handleOpenColorPicker() {
+      colorUtils.setCurrEvent(ColorEventType.background)
       if (this.isInEditor) return this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
       this.$emit('openColorPicker')
       stkWVUtils.setHasNewBgColor(true)

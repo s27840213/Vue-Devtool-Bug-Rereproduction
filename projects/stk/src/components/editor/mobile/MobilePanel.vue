@@ -33,7 +33,6 @@ import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
-import formatUtils from '@nu/vivi-lib/utils/formatUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -90,11 +89,11 @@ export default defineComponent({
         'order', 'font-size', 'font-format', 'color-picker', 
         'font-spacing', 'download', 'more', 'object-adjust',
         'vvstk-more', 'giphy-more', 'my-design-more', 'select-design',
-        'copy-style', 'multiple-select', 'remove-bg', 'nudge'],
+        'multiple-select', 'remove-bg', 'nudge'],
       // eslint-disable-next-line vue/no-unused-properties
-      hideDynamicCompPanels: ['crop', 'copy-style', 'multiple-select'],
+      hideDynamicCompPanels: ['crop', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      noRowGapPanels: ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'],
+      noRowGapPanels: ['crop', 'color', 'vvstk-more', 'select-design', 'add-template', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       hideFooterPanels: ['remove-bg'],
     }
@@ -127,8 +126,8 @@ export default defineComponent({
       currActiveObjectFavTab: 'assetPanel/getCurrActiveObjectFavTab',
       isInGroupTemplate: 'vivisticker/getIsInGroupTemplate'
     }),
-    isUs(): boolean {
-      return this.$i18n.locale === 'us'
+    useUsPanel(): boolean {
+      return ['us', 'pt'].includes(this.$i18n.locale)
     },
     isTextInCategory(): boolean {
       return this.isInCategory('text')
@@ -152,7 +151,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideDragBar(): boolean {
-      return (!this.insertTheme && !this.isUs && this.panelTitle !== '') || this.fixSize || this.extraFixSizeCondition
+      return (!this.insertTheme && !this.useUsPanel && this.panelTitle !== '') || this.fixSize || this.extraFixSizeCondition
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideTopSection(): boolean {
@@ -174,14 +173,11 @@ export default defineComponent({
         case 'crop': {
           return `${this.$t('NN0496')}`
         }
-        case 'copy-style': {
-          return `${this.$t('NN0809')}`
-        }
         case 'multiple-select': {
           return `${this.$t('NN0657')}`
         }
         case 'text': {
-          return this.isTextShowAllRecently && this.isUs ? `${this.$t('NN0024')}` : ''
+          return this.isTextShowAllRecently && this.useUsPanel ? `${this.$t('NN0024')}` : ''
         }
         case 'none': {
           return ''
@@ -234,7 +230,7 @@ export default defineComponent({
           return 'popup-download'
         }
         case 'text': {
-          return 'panel-text' + (this.isUs ? '-us' : '')
+          return 'panel-text' + (this.useUsPanel ? '-us' : '')
         }
         case 'none':
           return ''
@@ -418,11 +414,6 @@ export default defineComponent({
             if (this.bgRemoveMode && !this.isProcessing) {
               bgRemoveUtils.setInBgRemoveMode(false)
             }
-            break
-          }
-
-          case 'copy-style': {
-            formatUtils.clearCopiedFormat()
             break
           }
 

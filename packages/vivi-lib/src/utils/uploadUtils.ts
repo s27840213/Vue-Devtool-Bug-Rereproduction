@@ -87,7 +87,7 @@ class UploadUtils {
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
-  get hostId(): string { return store.getters['vivisticker/getUserInfo'].hostId }
+  get hostId(): string { return generalUtils.isStk ? store.getters['vivisticker/getUserInfo'].hostId : store.getters['cmWV/getUserInfo'].hostId }
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
@@ -362,6 +362,7 @@ class UploadUtils {
       }
     }
 
+
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
@@ -413,6 +414,7 @@ class UploadUtils {
       formData.append('x-amz-meta-tn', needCompressed ? this.userId : (isShadow ? `${this.userId},2` : `${this.userId},1`))
 
       const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
+
       if (formData.has('file')) {
         formData.set('file', file)
       } else {
@@ -506,6 +508,11 @@ class UploadUtils {
                           if (pollingCallback) {
                             pollingCallback(json)
                           }
+
+                          notify({
+                            group: 'copy',
+                            text: `${i18n.global.t('NN0918')}`,
+                          })
                         }
                       } else {
                         store.commit('file/DEL_PREVIEW', { assetId })
@@ -619,10 +626,13 @@ class UploadUtils {
             }, 2000)
           }
         } else if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+          console.time('xhr created')
           xhr.open('POST', this.loginOutput.ul_removebg_map.url, true)
           xhr.send(formData)
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
+            console.timeEnd('xhr created')
+            console.timeEnd('upload IOS image')
             imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
               bgRemoveUtils.removeBgStk(
                 uuid,

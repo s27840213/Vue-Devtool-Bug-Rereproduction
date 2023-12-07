@@ -44,7 +44,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
           span(class="text-black-5") {{$t('NN0764')}}
       //- Empty recently used view
       div(v-if="showAllRecently && !item.content.length && !pending" class="panel-static__recent-empty")
-          svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+          svg-icon(iconName="empty-folder" iconWidth="42px" iconColor="white")
           div(class="panel-static__recent-empty--title") No content in Recently Used
     template(v-slot:category-list-rows="{ list, title, isFavorite }")
       category-list-rows(

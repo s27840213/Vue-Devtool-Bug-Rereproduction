@@ -39,6 +39,9 @@ export default defineComponent({
     item: {
       type: Object as PropType<IAsset>,
       required: true
+    },
+    monoColor: {
+      type: String,
     }
   },
   computed: {
@@ -105,7 +108,7 @@ export default defineComponent({
           fit: this.item.fit ?? 0,
         }, stkWVUtils.getAssetInitiator(this.item, { db: 'svg', has_frame: this.item.has_frame }, 'objects'), stkWVUtils.getAssetCallback(this.item))
       } else {
-        if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg' })
+        if (this.isInEditor) return assetUtils.addAsset(this.item, { db: 'svg', monoColor: this.monoColor })
         stkWVUtils.startEditing('object', {
           plan: this.item.plan,
           isFrame: this.item.type === 8,

@@ -211,5 +211,11 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
   async recordLoadedFont(face: string): Promise<void> { /* only interface */ }
 
   async checkFontLoaded(face: string): Promise<boolean> { return false /* only interface */ }
+
+  async listAsset(key: string, ...args: any[]): Promise<void> { /* only interface */ }
+
+  async listMoreAsset(key: string, nextPage: number, ...args: any[]): Promise<void> { /* only interface */ }
+
+  async addAsset(key: string, asset: any, limit = 100, ...args: any[]): Promise<void> { /* only interface */ }
   //
 }

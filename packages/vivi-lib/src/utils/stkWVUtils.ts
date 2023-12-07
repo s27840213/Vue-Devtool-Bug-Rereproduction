@@ -3,7 +3,7 @@ import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
@@ -250,14 +250,20 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return options.find(option => option.queryFunc ? option.queryFunc(query) : option[by] === query) ?? options[0]
   }
 
-  addFontForEmoji() {
-    const defaultEmoji = this.userSettings.emojiSetting
-    if (SYSTEM_FONTS.includes(defaultEmoji)) return
+  addFontForEmoji(emoji?: string) {
+    emoji = emoji ?? this.userSettings.emojiSetting
+    if (SYSTEM_FONTS.includes(emoji)) return
     store.dispatch('text/addFont', {
-      face: defaultEmoji,
+      face: emoji,
       type: 'public',
       ver: store.getters['user/getVerUni']
     })
+  }
+
+  addFontForEmojis() {
+    for (const emojiConfig of USER_SETTINGS_LIST_CONFIG.emojiSetting) {
+      this.addFontForEmoji(emojiConfig.val)
+    }
   }
 
   getMyDesignTags(): IMyDesignTag[] {
@@ -290,10 +296,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   async setDefaultPrices() {
     const userInfo = this.getUserInfoFromStore()
-    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap.get(i18n.global.locale) ?? 'USA'
+    const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(i18n.global.locale) ?? 'USA'
     const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
     const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
-    store.commit('vivisticker/UPDATE_payment', { prices: localPrices ?? defaultPrices[locale] })
+    const prices = localPrices ?? defaultPrices[locale]
+    if (!prices) return
+    store.commit('vivisticker/UPDATE_payment', { prices })
     store.commit('vivisticker/SET_paymentPending', { info: false })
   }
 
@@ -1241,6 +1249,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
     if (missingClips.length) {
+      logUtils.setLog(`Error occurs in handleFrameClipError with config: ${generalUtils.deepCopy(missingClips)}`)
+
       const action = missingClips.length !== 1 ? undefined : () => {
         let subLayerIdx = -1
         let layerIndex = -1
@@ -1374,7 +1384,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       Object.assign(prices, {
         [plan]: {
           value: parseFloat(p.priceValue),
-          text: this.formatPrice(p.priceValue, priceCurrency, p.priceText)
+          text: p.priceText
         }
       })
     })
@@ -1392,9 +1402,9 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getSubscribeInfo() {
-    const planIds = store.getters['vivisticker/getPayment'].planId
+    const planIds = Object.values(store.getters['vivisticker/getPayment'].planId).concat(Object.values(constantData.planId))
     this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
-    this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: Object.values(planIds) })
+    this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: planIds })
   }
 
   subscribeResult(data: ISubscribeResult | ISubscribeResultV1_45) {
@@ -1405,19 +1415,30 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (isGetProducts(data)) {
         const { planInfo, priceCurrency } = data
         const planIds = store.getters['vivisticker/getPayment'].planId
-        if (planInfo.length !== Object.keys(planIds).length) return
         const prices = { currency: priceCurrency }
         planInfo.forEach(p => {
           const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
-          if (!plan) return
-          Object.assign(prices, {
+          plan && Object.assign(prices, {
             [plan]: {
               value: parseFloat(p.priceValue),
-              text: this.formatPrice(p.priceValue, priceCurrency, p.priceText)
+              text: p.priceText
             }
           })
         })
+        const annuallyPriceOriginal = planInfo.find(p => p.planId === constantData.planId.annually)
+        const annuallyFree0PriceOriginal = planInfo.find(p => p.planId === constantData.planId.annuallyFree0)
+        Object.assign(prices, {
+          ...(annuallyPriceOriginal && { annuallyOriginal: {
+            value: parseFloat(annuallyPriceOriginal.priceValue),
+            text: annuallyPriceOriginal.priceText
+          }}),
+          ...(annuallyFree0PriceOriginal && { annuallyFree0Original: {
+            value: parseFloat(annuallyFree0PriceOriginal.priceValue),
+            text: annuallyFree0PriceOriginal.priceText
+          }})
+        })
         store.commit('vivisticker/UPDATE_payment', { prices })
+        store.commit('vivisticker/SET_paymentPending', { info: false })
         this.setState('prices', prices)
       }
       else if (isCheckState(data)) {
@@ -1443,6 +1464,14 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       this.getState('subscribeInfo').then(subscribeInfo => {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
+    } else if (data.reason === 'IAP_DISABLED'){
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [i18n.global.t('STK0096')],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
     }
     store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
   }
@@ -1615,14 +1644,25 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.setLoadingOverlayShow(true)
   }
 
-  formatPrice(price: number | string, currency: string, fallbackText?: string) {
+  formatPrice(price: number | string, currency: string, fallbackText?: string, theme?: 'modal' | 'original') {
     const currencyFormatters = {
       TWD: (value: string) => `${value}元`,
       USD: (value: string) => `$${(+value).toFixed(2)}`,
-      JPY: (value: string) => `¥${value}円(税込)`
+      JPY: (value: string) => {
+        if (theme === 'modal') return `¥${value}`
+        if (theme === 'original') return `¥${value}円`
+        return `¥${value}円(税込)`
+      }
     } as { [key: string]: (value: string) => string }
     if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
     return currencyFormatters[currency](price.toString())
+  }
+
+  getLanguageByCountry(country: string) {
+    if (['CHN', 'MAC', 'HKG', 'TWN'].includes(country)) return 'tw'
+    if (['JPN'].includes(country)) return 'jp'
+    if (['BRA', 'PRT'].includes(country)) return 'pt'
+    return 'us'
   }
 }
 

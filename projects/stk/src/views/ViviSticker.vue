@@ -53,6 +53,8 @@ import Tutorial from '@/components/tutorial/Tutorial.vue'
 import { IPage } from '@/interfaces/page'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
+import { IPayment } from '@nu/vivi-lib/interfaces/vivisticker'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@nu/vivi-lib/utils/eventUtils'
@@ -85,7 +87,6 @@ export default defineComponent({
   },
   data() {
     return {
-      currColorEvent: '',
       headerOffset: 0,
       isKeyboardAnimation: 0,
       showMobilePanelAfterTransitoin: false,
@@ -193,7 +194,13 @@ export default defineComponent({
       debugMode: 'vivisticker/getDebugMode',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
       modalOpen: 'modal/getModalOpen',
+      isPromote: 'vivisticker/getIsPromote',
+      isPromoteCountry: 'vivisticker/getIsPromoteCountry',
+      isPromoteLanguage: 'vivisticker/getIsPromoteLanguage',
     }),
+    payment(): IPayment {
+      return this.$store.state.vivisticker.payment as IPayment
+    },
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
     },
@@ -259,15 +266,15 @@ export default defineComponent({
     switchTab(panelType: string, props?: IFooterTabProps) {
       // Switch between color and text-color panel without close panel
       if (this.currActivePanel === panelType && panelType === 'color' &&
-        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
-        this.currColorEvent = props.currColorEvent
+        props?.currColorEvent && colorUtils.currEvent !== props.currColorEvent) {
+          colorUtils.setCurrEvent(props.currColorEvent as string)
       // Close panel if re-click
       } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
       } else {
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
-          this.currColorEvent = props.currColorEvent
+          colorUtils.setCurrEvent(props.currColorEvent as string)
         }
       }
     },
@@ -351,11 +358,7 @@ export default defineComponent({
     },
     async showPushModalInfo(): Promise<boolean> {
       // parse modal info
-      let locale = this.userInfo.locale
-      if (!['us', 'tw', 'jp'].includes(locale)) {
-        locale = 'us'
-      }
-      const prefix = locale + '_'
+      const prefix = this.userInfo.locale + '_'
       const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
         ([k, v]) => {
           if (k.startsWith(prefix)) k = k.replace(prefix, '')
@@ -364,10 +367,16 @@ export default defineComponent({
       )
 
       // show popup
+      const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
+      const price = stkWVUtils.formatPrice(this.payment.prices.annually.value, this.payment.prices.currency, this.payment.prices.annually.text, 'modal')
+      const priceOriginal = this.payment.prices.annuallyOriginal ? stkWVUtils.formatPrice(this.payment.prices.annuallyOriginal.value, this.payment.prices.currency, this.payment.prices.annuallyOriginal.text, 'modal') : ''
+      const isCloseBtnOnly = this.isPromote && subscribed
       const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
+      const isPromoteToBeHide = this.isPromoteLanguage && (!this.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== this.userInfo.locale)
       const btn_txt = modalInfo.btn_txt
       if (!btn_txt || shown) return false
+      if (isPromoteToBeHide) return false
 
       const options = {
         imgSrc: modalInfo.img_url,
@@ -384,19 +393,20 @@ export default defineComponent({
       }
       modalUtils.setModalInfo(
         modalInfo.title,
-        [modalInfo.msg],
+        this.isPromote && priceOriginal ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
         {
-          msg: btn_txt,
+          msg: isCloseBtnOnly ? modalInfo.btn2_txt : btn_txt,
           class: 'btn-black-mid',
           style: {
             color: '#F8F8F8'
           },
           action: () => {
+            if(isCloseBtnOnly) return
             const url = modalInfo.btn_url
             if (url) { window.open(url, '_blank') }
           }
         },
-        {
+        isCloseBtnOnly ? undefined : {
           msg: modalInfo.btn2_txt || '',
           class: 'btn-light-mid',
           style: {
@@ -411,18 +421,18 @@ export default defineComponent({
       return true
     },
     async showInitPopups() {
-      const isFirstOpen = this.userInfo.isFirstOpen
+      const showPaymentInfo = await stkWVUtils.getState('showPaymentInfo')
+      const isFirstOpen = this.userInfo.isFirstOpen && showPaymentInfo === undefined
       const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
       const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
       const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
-      const showPaymentInfo = await stkWVUtils.getState('showPaymentInfo')
       const showPaymentTime = showPaymentInfo?.timestamp ?? 0
       const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
       const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
-      const isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
+      let isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
         : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
       const isShowTutorial = isFirstOpen && this.$i18n.locale !== 'us'
-      const show = () =>{
+      const show = () => {
         if (isShowPaymentView) {
           stkWVUtils.openPayment()
           stkWVUtils.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
@@ -434,6 +444,9 @@ export default defineComponent({
       const isPushModalShown = await this.showPushModalInfo()
       if (isPushModalShown) {
         stkWVUtils.sendAppLoaded()
+        if (this.isPromote && !subscribed) {
+          isShowPaymentView = true
+        }
         const unwatch = this.$watch('modalOpen', (newVal) => {
           if(!newVal) show()
           unwatch()

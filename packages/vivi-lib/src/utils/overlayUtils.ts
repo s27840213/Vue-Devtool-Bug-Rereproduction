@@ -2,10 +2,10 @@ import i18n from '@/i18n'
 import { IImage, IShape } from '@/interfaces/layer'
 import { IAssetObject } from '@/interfaces/shape'
 import backgroundUtils from '@/utils/backgroundUtils'
-import constantData from '@/utils/constantData'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { cloneDeep, find } from 'lodash'
+import localeUtils from './localeUtils'
 
 // Overlay data that store in design config file.
 export interface IOverlay {
@@ -80,12 +80,12 @@ class Overlay {
     return overlays.map(category => {
       return {
         id: category.id,
-        label: category[`title_${constantData.localeWithFallback}`],
+        label: category[`title_${localeUtils.localeWithFallback}`],
         baseImg: category.cover_url + (category.id !== 0 ? '/prev' : ''),
         items: category.list.map(item => {
           return item ? {
             id: item.id,
-            label: item[`title_${constantData.localeWithFallback}`],
+            label: item[`title_${localeUtils.localeWithFallback}`],
             svg: {
               id: item.id,
               plan: item.plan,

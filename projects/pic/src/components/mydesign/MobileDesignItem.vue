@@ -46,7 +46,7 @@ div(class="mobile-design-item" :data-index="config.asset_index")
 </template>
 
 <script lang="ts">
-import ImageCarousel from '@nu/vivi-lib/components/global/ImageCarousel.vue'
+import ImageCarousel from '@nu/shared-lib/components/ImageCarousel.vue'
 import { IDesign } from '@nu/vivi-lib/interfaces/design'
 import designUtils from '@nu/vivi-lib/utils/designUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'

@@ -98,8 +98,8 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
 
 <script lang="ts">
 import listApi from '@nu/vivi-lib/apis/list'
-import Checkbox from '@nu/vivi-lib/components/global/Checkbox.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
+import Checkbox from '@nu/shared-lib/components/Checkbox.vue'
+import RadioBtn from '@nu/shared-lib/components/RadioBtn.vue'
 import { IListServiceContentData } from '@nu/vivi-lib/interfaces/api'
 import { ILayout } from '@nu/vivi-lib/interfaces/layout'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'

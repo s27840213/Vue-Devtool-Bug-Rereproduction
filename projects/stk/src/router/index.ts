@@ -49,11 +49,8 @@ const routes: Array<RouteRecordRaw> = [
           if (recentPanel === 'none') { // prevent panel being 'none' for stk
             recentPanel = 'object'
           }
-          const userSettings = await stkWVUtils.getState('userSettings')
-          if (userSettings) {
-            store.commit('vivisticker/UPDATE_userSettings', userSettings)
-            stkWVUtils.addFontForEmoji()
-          }
+          await store.dispatch('vivisticker/fetchUserSettings')
+          stkWVUtils.addFontForEmoji()
           const hasCopied = await stkWVUtils.getState('hasCopied')
           stkWVUtils.hasCopied = hasCopied?.data ?? false
           stkWVUtils.setState('hasCopied', { data: stkWVUtils.hasCopied })
@@ -72,6 +69,8 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: async (to, from, next) => {
       try {
         store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        await store.dispatch('vivisticker/fetchUserSettings')
+        stkWVUtils.addFontForEmojis()
         stkWVUtils.hideController()
         next()
       } catch (error) {
@@ -267,6 +266,7 @@ router.beforeEach(async (to, from, next) => {
       })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
+    store.commit('vivisticker/SET_promote', json.promote)
 
     if (json.default_price && Object.keys(json.default_price).length) {
       const planPostfix = json.default_price.plan_id ? '_' + json.default_price.plan_id : ''
@@ -276,6 +276,7 @@ router.beforeEach(async (to, from, next) => {
             json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
           ).map(([locale, prices]) => {
             const currency = constantData.currencyMap.get(locale) ?? 'USD'
+            const defaultAnnuallyPriceOriginal = json.default_price.original_prices?.[locale]?.annually ?? NaN
             return [
               locale,
               {
@@ -285,13 +286,21 @@ router.beforeEach(async (to, from, next) => {
                     plan,
                     {
                       value: price,
-                      text: stkWVUtils.formatPrice(price, currency)
+                      text: price.toString()
                     },
                   ]),
                 ),
                 annuallyFree0: {
                   value: prices.annually,
-                  text: stkWVUtils.formatPrice(prices.annually, currency)
+                  text: prices.annually.toString()
+                },
+                annuallyOriginal: {
+                  value: defaultAnnuallyPriceOriginal,
+                  text: defaultAnnuallyPriceOriginal.toString()
+                },
+                annuallyFree0Original: {
+                  value: defaultAnnuallyPriceOriginal,
+                  text: defaultAnnuallyPriceOriginal.toString()
                 }
               },
             ]
@@ -302,7 +311,9 @@ router.beforeEach(async (to, from, next) => {
         planId: {
           monthly: constantData.planId.monthly,
           annually: constantData.planId.annually + planPostfix,
-          annuallyFree0: constantData.planId.annuallyFree0 + planPostfix
+          annuallyFree0: constantData.planId.annuallyFree0 + planPostfix,
+          annuallyOriginal: constantData.planId.annually,
+          annuallyFree0Original: constantData.planId.annuallyFree0
         }
       })
     }

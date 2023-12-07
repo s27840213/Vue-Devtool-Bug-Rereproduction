@@ -44,14 +44,14 @@ div(class="function-panel"
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import PanelBackgroundSetting from '@/components/editor/panelFunction/PanelBackgroundSetting.vue'
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
-import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
 import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
-import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
 import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
 import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
-import PanelTextEffectSetting from '@nu/vivi-lib/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
+import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
+import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
+import PanelTextEffectSetting from '@nu/vivi-lib/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import { IFrame, IGroup } from '@nu/vivi-lib/interfaces/layer'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { LayerType } from '@nu/vivi-lib/store/types'
@@ -60,7 +60,7 @@ import LayerUtils from '@nu/vivi-lib/utils/layerUtils'
 import popupUtils from '@nu/vivi-lib/utils/popupUtils'
 import shotcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import { defineComponent, PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -238,18 +238,6 @@ export default defineComponent({
         window.dispatchEvent(event)
       } else {
         shotcutUtils.undo()
-        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-        //   this.$nextTick(() => {
-        //     tiptapUtils.agent(editor => {
-        //       const currLayer = LayerUtils.getCurrLayer as IText
-        //       if (!currLayer.active || currLayer.type !== 'text') return
-        //       editor.chain().sync().focus().run()
-        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-        //       textPropUtils.updateTextPropsState()
-        //     })
-        //   })
-        // }
       }
     },
     redo() {
@@ -264,18 +252,6 @@ export default defineComponent({
         window.dispatchEvent(event)
       } else {
         shotcutUtils.redo()
-        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-        //   this.$nextTick(() => {
-        //     tiptapUtils.agent(editor => {
-        //       const currLayer = LayerUtils.getCurrLayer as IText
-        //       if (!currLayer.active || currLayer.type !== 'text') return
-        //       editor.chain().sync().focus().run()
-        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-        //       textPropUtils.updateTextPropsState()
-        //     })
-        //   })
-        // }
       }
     }
   }

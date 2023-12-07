@@ -113,7 +113,9 @@ export interface IPrices {
   currency: string,
   monthly: IPrice,
   annually: IPrice,
-  annuallyFree0: IPrice
+  annuallyFree0: IPrice,
+  annuallyOriginal: IPrice,
+  annuallyFree0Original: IPrice
 }
 
 export interface IPaymentPending {
@@ -132,7 +134,9 @@ export interface IPayment {
   planId: {
     monthly: string,
     annually: string,
-    annuallyFree0: string
+    annuallyFree0: string,
+    annuallyOriginal: string,
+    annuallyFree0Original: string
   },
 }
 

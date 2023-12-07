@@ -2,14 +2,14 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-  IFrame,
-  IGroup,
-  IImage,
-  IImageStyle,
-  IParagraph,
-  IShape,
-  IText,
-  ITmp,
+IFrame,
+IGroup,
+IImage,
+IImageStyle,
+IParagraph,
+IShape,
+IText,
+ITmp,
 } from '@/interfaces/layer'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
@@ -17,8 +17,8 @@ import { Itheme } from '@/interfaces/theme'
 import assetPanel from '@/store/module/assetPanel'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
-import color from '@/store/module/color'
 import cmWV from '@/store/module/cmWV'
+import color from '@/store/module/color'
 import font from '@/store/module/font'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
@@ -48,11 +48,11 @@ import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import {
-  FunctionPanelType,
-  IEditorState,
-  ISpecLayerData,
-  LayerType,
-  SidebarPanelType,
+FunctionPanelType,
+IEditorState,
+ISpecLayerData,
+LayerType,
+SidebarPanelType,
 } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -155,6 +155,8 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
+  disableLayerAction: false,
+  controlState: { type: '' }
 })
 
 const state = getDefaultState()
@@ -382,6 +384,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   getModalInfo(state: IEditorState): { [key: string]: string } {
     return state.modalInfo
   },
+  getDisableLayerAction(state: IEditorState): boolean {
+    return state.disableLayerAction
+  },
+  getControlState(state: IEditorState) {
+    return state.controlState
+  }
 }
 
 const mutations: MutationTree<IEditorState> = {
@@ -1238,7 +1246,7 @@ const mutations: MutationTree<IEditorState> = {
   ) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const groupLayer = state.pages[pageIndex].config.layers[primaryLayerIndex] as IGroup
-    if (groupLayer.type === 'group') {
+    if (['group', 'tmp'].includes(groupLayer.type)) {
       const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
       for (const clip of clipsLayer) {
         Object.assign(clip.styles, generalUtils.deepCopy(styles))
@@ -1321,7 +1329,22 @@ const mutations: MutationTree<IEditorState> = {
       }
     }
     state.pages.forEach((page) => {
+      // handle layer
       page.config.layers.forEach((l) => handler(l))
+
+      // handle bg-img
+      const bg = page.config.backgroundImage.config
+      if (((bg as IImage).srcObj.assetId === assetId || forSticker) && bg.previewSrc) {
+        Object.assign((bg as IImage).srcObj, {
+          type,
+          userId,
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex,
+        })
+        Object.assign(bg, { previewSrc: '' })
+        if (!forSticker) {
+          uploadUtils.uploadDesign()
+        }
+      }
     })
   },
   ADD_guideline(
@@ -1538,6 +1561,7 @@ const mutations: MutationTree<IEditorState> = {
     payload: { pageIndex: number; contentScaleRatio: number },
   ) {
     const { pageIndex, contentScaleRatio } = payload
+    console.warn('contentScaleRatio4 page', pageIndex, contentScaleRatio)
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
   UPDATE_RWD(state: IEditorState) {
@@ -1567,6 +1591,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_modalInfo(state: IEditorState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
+  SET_disableLayerAction(state: IEditorState, disableLayerAction: boolean) {
+    state.disableLayerAction = disableLayerAction
+  }
 }
 window.addEventListener(
   'resize',

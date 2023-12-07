@@ -32,7 +32,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
-      svg(v-if="isAdjustImage"
+      svg(v-if="isAdjustImage && (!forRender || !$isTouchDevice())"
         :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
@@ -40,7 +40,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(:id="filterId"
+          filter(v-if="!isCurrLayerPinched" :id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -70,6 +70,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
 
 <script lang="ts">
 import i18n from '@/i18n'
+import { SrcObj } from '@/interfaces/gallery'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -288,40 +289,40 @@ export default defineComponent({
           this.setImgConfig(this.layerInfo())
         }
       } else {
-        groupUtils.deselect()
+        // groupUtils.deselect()
         this.setImgConfig(undefined)
-        this.$nextTick(() => {
-          const reSelecting = () => {
-            const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
-            const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
-            groupUtils.deselect()
-            groupUtils.select(this.pageIndex, [targetIdx])
-            if (isSubLayer) {
-              const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
-              if (this.primaryLayerType() === LayerType.group) {
-                layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
-              } else if (this.primaryLayerType() === LayerType.frame) {
-                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
-              }
-            }
-          }
-          if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
-            reSelecting()
-          }
-          if (this.isDuringCopy) {
-            const start = Date.now()
-            const timer = setInterval(() => {
-              if (Date.now() - start > 10000) {
-                clearInterval(timer)
-              }
-              if (!this.isDuringCopy) {
-                reSelecting()
-                clearInterval(timer)
-              }
-            }, 300)
-          }
-        })
-        this.handleDimensionUpdate()
+        // this.$nextTick(() => {
+        //   const reSelecting = () => {
+        //     const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
+        //     const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
+        //     groupUtils.deselect()
+        //     groupUtils.select(this.pageIndex, [targetIdx])
+        //     if (isSubLayer) {
+        //       const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        //       if (this.primaryLayerType() === LayerType.group) {
+        //         layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
+        //       } else if (this.primaryLayerType() === LayerType.frame) {
+        //         frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
+        //       }
+        //     }
+        //   }
+        //   if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
+        //     reSelecting()
+        //   }
+        //   if (this.isDuringCopy) {
+        //     const start = Date.now()
+        //     const timer = setInterval(() => {
+        //       if (Date.now() - start > 10000) {
+        //         clearInterval(timer)
+        //       }
+        //       if (!this.isDuringCopy) {
+        //         reSelecting()
+        //         clearInterval(timer)
+        //       }
+        //     }, 300)
+        //   }
+        // })
+        // this.handleDimensionUpdate()
       }
       if (this.forRender) {
         return
@@ -340,7 +341,7 @@ export default defineComponent({
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
         }
-        this.handleUploadShadowImg()
+        // this.handleUploadShadowImg()
         this.isShadowImgLoaded = false
       },
       deep: true
@@ -353,8 +354,8 @@ export default defineComponent({
           const { pageIndex, layerIndex, subLayerIndex: subLayerIdx } = this
           const srcObj = latest.srcObj
           const shadowImgStyles = latest.styles
-          imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-          imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+          imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj as SrcObj)
+          imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles as IImageStyle)
         }
       },
       deep: true
@@ -371,15 +372,8 @@ export default defineComponent({
       }, {
         crossOrigin: true,
         error: () => {
-          if (this.config.srcObj.type === 'private' && newSize === 'xtra') {
-            imageUtils.handlePrivateXtraErr(this.config as IImage)
-              .then((newSrc) => {
-                imageUtils.imgLoadHandler(newSrc, (img) => {
-                  this.imgNaturalSize.width = img.width
-                  this.imgNaturalSize.height = img.height
-                  this.src = newSrc
-                })
-              })
+          if (newSize === 'xtra') {
+            this.handleXtraErr()
           }
         }
       })
@@ -395,6 +389,7 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing',
       isShowPagePreview: 'page/getIsShowPagePreview',
+      controlState: 'getControlState'
     }),
     ...vuexUtils.mapState('stk', {
       isDuringCopy: false,
@@ -414,6 +409,12 @@ export default defineComponent({
         (this.$isTouchDevice() && this.showCanvas) // Wait for mobile shadow process/upload/download/load, for imageShadow command.
       ) return false
       return true
+    },
+    isCurrLayerPinched(): boolean {
+      const { controlState } = this
+      if (controlState.layerInfo) {
+        return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+      } else return false
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -582,6 +583,31 @@ export default defineComponent({
     onError() {
       this._onError()
     },
+    handleXtraErr() {
+      const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
+      if (this.config.srcObj.type === 'private') {
+        imageUtils.handlePrivateXtraErr(this.config as IImage)
+          .then((newSrc) => {
+            imageUtils.imgLoadHandler(newSrc, (img) => {
+              if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+                this.imgNaturalSize.width = img.width
+                this.imgNaturalSize.height = img.height
+                this.src = newSrc
+              }
+            })
+          })
+      } else if (this.config.srcObj.type === 'public') {
+        imageUtils.imgLoadHandler(imageUtils.getSrc(this.config, 'xtra'),
+          (img) => {
+            if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+              this.imgNaturalSize.width = img.width
+              this.imgNaturalSize.height = img.height
+              this.src = img.src
+            }
+          }
+        )
+      }
+    },
     _onError(imgLoadHandlerError = false) {
       if (!this.src && !imgLoadHandlerError && this.userId !== 'backendRendering') return
       if (this.errorSrcIdentifier.identifier === this.getErrorSrcIdentifier(this.config as IImage)) {
@@ -593,18 +619,9 @@ export default defineComponent({
         this.errorSrcIdentifier.identifier = this.getErrorSrcIdentifier(this.config as IImage)
         this.errorSrcIdentifier.retry = 1
       }
-      const { srcObj, styles: { width, height } } = this.config
+      const { srcObj } = this.config
       this.isOnError = true
       let updater
-      if (imageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          srcObj: {
-            ...srcObj,
-            maxSize: 'larg'
-          }
-        })
-        return
-      }
       switch (srcObj.type) {
         case 'private':
           updater = async () => await this.updateImages({ assetSet: new Set<string>([srcObj.assetId]) })
@@ -613,6 +630,7 @@ export default defineComponent({
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([srcObj.assetId]) })
           break
         case 'ios': {
+          this.logImgError(new Error('srcObj type ios error'))
           if (this.primaryLayer?.type === LayerType.frame) {
             frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
               {
@@ -805,18 +823,8 @@ export default defineComponent({
           }
         }, {
           error: () => {
-            if (this.config.srcObj.type === 'private' && srcSize === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
-              return
+            if (srcSize === 'xtra') {
+              return this.handleXtraErr()
             }
 
             reject(new Error(`cannot load the current image, src: ${this.src}`))
@@ -850,17 +858,8 @@ export default defineComponent({
         }, {
           crossOrigin: true,
           error: () => {
-            if (this.config.srcObj.type === 'private' && newVal === 'xtra') {
-              imageUtils.handlePrivateXtraErr(this.config as IImage)
-                .then((newSrc) => {
-                  imageUtils.imgLoadHandler(newSrc, (img) => {
-                    if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
-                      this.imgNaturalSize.width = img.width
-                      this.imgNaturalSize.height = img.height
-                      this.src = newSrc
-                    }
-                  })
-                })
+            if (newVal === 'xtra') {
+              this.handleXtraErr()
             }
           }
         })
@@ -919,7 +918,8 @@ export default defineComponent({
           this.imgNaturalSize.height = img.height
           this.src = src
         }, {
-          crossOrigin: false,
+          // stk screenshot need the cross-origin as UI
+          crossOrigin: this.$isStk,
           error: () => {
             this._onError()
         } })
@@ -951,9 +951,17 @@ export default defineComponent({
       if (srcObj.type === 'upload' && srcObj.assetId) {
         const uploadData = (this.uploadShadowImgs as Array<IUploadShadowImg>)
           .find((data: IUploadShadowImg) => data.id === srcObj.assetId)
-        if (uploadData) {
+        if (uploadData && uploadData.srcObj && uploadData.styles) {
           imageShadowUtils.updateShadowSrc(this.layerInfo(), uploadData.srcObj)
           imageShadowUtils.updateShadowStyles(this.layerInfo(), uploadData.styles)
+        } else {
+          const primarylayerId = layerUtils.getLayer(this.layerInfo().pageIndex, this.layerInfo().layerIndex).id
+          const layerData = {
+            primarylayerId,
+            config: this.config,
+            layerInfo: this.layerInfo
+          }
+          imageShadowPanelUtils.handleShadowUpload(layerData)
         }
       }
     },

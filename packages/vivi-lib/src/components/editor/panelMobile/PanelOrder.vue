@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="panel-order")
-  div(v-for="(data,index) in orderDatas()"
+div(v-if="!$isCm" class="panel-order")
+  div(v-for="(data,index) in orderDatas"
       :key="`popup-${index}`"
       class="panel-order__item"
       @click="data.action && data.action()")
@@ -10,43 +10,47 @@ div(class="panel-order")
       :iconWidth="'16px'"
       :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
     span(class="ml-5 body-2") {{data.text}}
+div(v-else class="panel-order")
+  div(
+    v-for="order in orderDatas"
+    :key="order.icon"
+    class="grid gap-4 justify-center justify-items-center no-wrap"
+    @click="order.action")
+    svg-icon(
+      class="pointer"
+      :iconName="'cm_' + order.icon"
+      iconWidth="24px"
+      :iconColor="$isStk || $isCm ? 'white' : 'gray-1'")
+    span(class="text-white") {{ order.text }}
 </template>
 
 <script lang="ts">
 import MappingUtils from '@/utils/mappingUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
 
 export default defineComponent({
-  emits: [],
-  data() {
-    return {
-    }
-  },
   computed: {
-    ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo'
-    }),
-  },
-  methods: {
     orderDatas() {
       const orderSet = [
         {
           icon: 'layers-forward',
-          text: this.$t('NN0232')
+          text: this.$tc('NN0232', this.$isCm ? 2 : 1)
         },
         {
           icon: 'layers-front',
-          text: this.$t('NN0231')
+          text: this.$tc('NN0231', this.$isCm ? 2 : 1)
         },
         {
           icon: 'layers-backward',
-          text: this.$t('NN0233')
+          text: this.$tc('NN0233', this.$isCm ? 2 : 1)
         },
         {
           icon: 'layers-back',
-          text: this.$t('NN0234')
+          text: this.$tc('NN0234', this.$isCm ? 2 : 1)
         }]
+      if (this.$isCm) {
+        [orderSet[1], orderSet[2]] = [orderSet[2], orderSet[1]]
+      }
       return orderSet.map((data) => {
         return {
           icon: data.icon,
@@ -54,8 +58,8 @@ export default defineComponent({
           action: MappingUtils.mappingIconAction(data.icon)
         }
       })
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -71,5 +75,16 @@ export default defineComponent({
   &__item {
     @include btn-action-mobile;
   }
+
+  @include cm {
+    @apply typo-body-sm;
+    display: grid;
+    grid-template-columns: repeat(4, 44px);
+    grid-template-rows: initial;
+    justify-content: space-between;
+    padding: 8px;
+    background-color: setColor(app-tab-slider-bg-raw, 0.2);
+    border-radius: 8px;
+  };
 }
 </style>

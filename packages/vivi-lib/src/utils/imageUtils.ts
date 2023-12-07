@@ -1,10 +1,10 @@
 import imageApi from '@/apis/image-api'
 import {
-IAssetPhoto,
-IImageSize,
-IPhotoItem,
-IUserImageContentData,
-isIAssetPhoto,
+  IAssetPhoto,
+  IImageSize,
+  IPhotoItem,
+  IUserImageContentData,
+  isIAssetPhoto,
 } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -17,7 +17,7 @@ import { LayerType } from '@/store/types'
 import { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
-import LayerUtils from '@/utils/layerUtils'
+import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -25,7 +25,7 @@ import frameDefaultImg from '@img/svg/frame.svg'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v785'
+const APP_VER_FOR_REFRESH_CACHE = 'v922'
 
 class ImageUtils {
   get imageSizeMap(): { [key: string]: number } {
@@ -60,9 +60,9 @@ class ImageUtils {
     return [srcObj.type, srcObj.userId, srcObj.assetId, ...attrs].join(',')
   }
 
-  isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
-    if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
-      const currLayer = LayerUtils.getCurrLayer
+  isImgControl(pageIndex: number = layerUtils.pageIndex): boolean {
+    if (pageIndex === layerUtils.pageIndex && layerUtils.getCurrLayer) {
+      const currLayer = layerUtils.getCurrLayer
       switch (currLayer.type) {
         case 'image':
           return (currLayer as IImage).imgControl
@@ -100,14 +100,14 @@ class ImageUtils {
     forBgRemove?: boolean,
   ): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
-    let { type, userId, assetId, brandId, updateQuery, maxSize } = {} as SrcObj
+    let { type, userId, assetId, brandId, querys, maxSize } = {} as SrcObj
     let ratio = 1
     if (this.isSrcObj(config)) {
       ; ({ type, userId, assetId, brandId, maxSize } = config)
     } else {
       if (!config.srcObj && !config.src_obj) return ''
       const srcObj = config.srcObj || (config.src_obj as SrcObj)
-        ; ({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
+        ; ({ type, userId, assetId, brandId, querys, maxSize } = srcObj)
       if (typeof size === 'undefined' && config.styles) {
         const { imgWidth, imgHeight } = config.styles
         size = this.getSrcSize(
@@ -139,7 +139,7 @@ class ImageUtils {
             ? `?rand_ver=${generalUtils.generateRandomString(6)}`
             : '?origin=true'
           res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'
-            }${query + (updateQuery || '')}`
+            }${query}`
         }
         break
       }
@@ -197,7 +197,7 @@ class ImageUtils {
         break
       case 'ios':
         if (generalUtils.isCm) {
-          res = `chmix://${assetId}`
+          res = `chmix://${assetId}?lsize=1600`
         } else if (generalUtils.isStk) {
           res = `vvstk://${assetId}`
         }
@@ -207,6 +207,13 @@ class ImageUtils {
       }
       default:
         res = ''
+    }
+
+
+    if (querys) {
+      querys.forEach((q) => {
+        res = this.appendQuery(res, q.key, q.val)
+      })
     }
 
     if (!res && !this.isSrcObj(config) && (config as IImage).previewSrc) {
@@ -319,7 +326,7 @@ class ImageUtils {
       case 'logo-private':
       case 'logo-public': {
         const type = _type.includes('logo') ? 'logo' : 'image'
-        if (!userId && typeof assetId === 'number') {
+        if (typeof assetId === 'number') {
           return imageApi.getImgSize({
             token: '',
             type,
@@ -384,11 +391,11 @@ class ImageUtils {
   }
 
   setImgControlDefault(deselect = true) {
-    const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
+    const { pageIndex, layerIndex, getCurrLayer: currLayer } = layerUtils
     if (currLayer) {
       switch (currLayer.type) {
         case 'image':
-          LayerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false })
           break
         case 'group': {
           const primaryLayer = currLayer as IGroup
@@ -400,7 +407,7 @@ class ImageUtils {
             if (deselect) {
               props.active = false
             }
-            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
+            layerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
           }
           break
         }
@@ -519,7 +526,7 @@ class ImageUtils {
     updatePos = null as any,
     updateSize = null as any,
   ) {
-    // ControlUtils.updateLayerInitSize(LayerUtils.pageIndex, LayerUtils.layerIndex, layerWidth, layerHeight, 1)
+    // ControlUtils.updateLayerInitSize(layerUtils.pageIndex, layerUtils.layerIndex, layerWidth, layerHeight, 1)
     let imgWidth = this.initImgSize.width
     let imgHeight = this.initImgSize.height
     const imgPos = {
@@ -567,8 +574,8 @@ class ImageUtils {
       updatePos(imgPos.x > 0 ? 0 : imgPos.x, imgPos.y > 0 ? 0 : imgPos.y)
     } else {
       this.updateImgPos(
-        LayerUtils.pageIndex,
-        LayerUtils.layerIndex,
+        layerUtils.pageIndex,
+        layerUtils.layerIndex,
         imgPos.x > 0 ? 0 : imgPos.x,
         imgPos.y > 0 ? 0 : imgPos.y,
       )
@@ -577,7 +584,7 @@ class ImageUtils {
     if (updateSize) {
       updateSize(imgWidth, imgHeight)
     } else {
-      this.updateImgSize(LayerUtils.pageIndex, LayerUtils.layerIndex, imgWidth, imgHeight)
+      this.updateImgSize(layerUtils.pageIndex, layerUtils.layerIndex, imgWidth, imgHeight)
     }
   }
 
@@ -589,7 +596,7 @@ class ImageUtils {
     updatePos = null as any,
     updateSize = null as any,
   ) {
-    // ControlUtils.updateLayerInitSize(LayerUtils.pageIndex, LayerUtils.layerIndex, width, height, 1)
+    // ControlUtils.updateLayerInitSize(layerUtils.pageIndex, layerUtils.layerIndex, width, height, 1)
     const imgX = this.initImgPos.x
     const imgY = this.initImgPos.y
 
@@ -597,8 +604,8 @@ class ImageUtils {
       updatePos((offsetX ?? 0) + imgX, (offsetY ?? 0) + imgY)
     } else {
       this.updateImgPos(
-        LayerUtils.pageIndex,
-        LayerUtils.layerIndex,
+        layerUtils.pageIndex,
+        layerUtils.layerIndex,
         (offsetX ?? 0) + imgX,
         (offsetY ?? 0) + imgY,
       )
@@ -608,8 +615,8 @@ class ImageUtils {
       updateSize(this.initImgSize.width, this.initImgSize.height)
     } else {
       this.updateImgSize(
-        LayerUtils.pageIndex,
-        LayerUtils.layerIndex,
+        layerUtils.pageIndex,
+        layerUtils.layerIndex,
         this.initImgSize.width,
         this.initImgSize.height,
       )
@@ -731,7 +738,7 @@ class ImageUtils {
       height: image.height,
       id: image.id,
       assetIndex: image.asset_index,
-      teamId: image.team_id,
+      teamId: teamId,
       urls: {
         prev: isAdmin
           ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev`
@@ -827,6 +834,37 @@ class ImageUtils {
     return src
   }
 
+  async handlePublicXtraErr(config: IImage, pageId: string, isBgImg = false) {
+    const src = this.getSrc(config, 'xtra')
+    const id = config.id
+    return new Promise<string>((resolve) => {
+      this.imgLoadHandler(src, () => {
+        const pageIndex = pageUtils.getPages.findIndex((page) => page.id === pageId)
+        const querys = config.srcObj.querys ?
+          [...config.srcObj.querys, { key: 'xtraVer', val: generalUtils.generateRandomString(4)}]
+          : [{ key: 'xtraVer', val: generalUtils.generateRandomString(4)}]
+        if (isBgImg) {
+          store.commit('SET_backgroundImageSrc', {
+            pageIndex: pageIndex,
+            srcObj: {
+              ...config.srcObj,
+              querys
+            }
+          })
+        } else {
+          const layerIndex = pageUtils.getPages[pageIndex].layers.findIndex(l => l.id === id)
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {
+            srcObj: {
+              ...config.srcObj,
+              querys
+            }
+          })
+        }
+        resolve(this.getSrc(config, 'xtra'))
+      })
+    })
+  }
+
   async handlePrivateXtraErr(config: IImage) {
     const editorImg = store.getters['file/getEditorViewImages']
     const src = editorImg(config.srcObj.assetId).xtra
@@ -881,7 +919,7 @@ class ImageUtils {
       pageIndex,
       layerIndex,
       subLayerIdx,
-    } = LayerUtils
+    } = layerUtils
     if (_config.type !== LayerType.image && _config.type !== LayerType.frame) return
 
     const resizeRatio = RESIZE_RATIO_IMAGE
@@ -926,8 +964,8 @@ class ImageUtils {
         previewSrc,
       })
     } else {
-      LayerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-      LayerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: photo, previewSrc }, subLayerIdx)
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: photo, previewSrc }, subLayerIdx)
     }
     store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
     stepsUtils.record()

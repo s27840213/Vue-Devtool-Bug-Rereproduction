@@ -1,25 +1,24 @@
 
 <template lang="pug">
-div(class="w-screen h-screen")
+div(class="powerful-fill-tutorial w-screen h-screen")
   div(class="w-full h-full grid")
     div(v-if="[1, 2, 4].includes(step)" class="relative w-fit flex flex-col items-center" :style="tutorialStyles")
       span(class="text-primary-white typo-h6") {{ tutorialDescription }}
       div(:class="`grid grid-flow-col grid-cols-${hasNextBtn ? 3 : 2} w-full`")
         div(class="justify-self-center")
-          cm-svg-icon(
+          svg-icon(
             v-if="leftIconName"
             :iconName="leftIconName"
             :iconWidth="iconSize.width"
             :iconHeight="iconSize.height"
           )
-        cm-btn(
+        nubtn(
           v-if="hasNextBtn"
-          class="self-start justify-self-center"
-          theme="primary"
-          size="md"
+          class="self-start justify-self-center max-w-[96px]"
+          size="sm-full"
           @click="emit('nextStep')") {{ nextBtnText }}
         div(class="justify-self-end")
-          cm-svg-icon(
+          svg-icon(
             v-if="rightIconName"
             :iconName="rightIconName"
             :iconWidth="iconSize.width"
@@ -31,6 +30,7 @@ div(class="w-screen h-screen")
 
 <script setup lang="ts">
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-plugin-vue/issues/2322
 
 defineOptions({ name: 'powerful-fill-tutorial' })
 const emit = defineEmits(['nextStep'])

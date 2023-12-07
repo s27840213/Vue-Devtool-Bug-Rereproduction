@@ -43,6 +43,9 @@ export default defineComponent({
     itemWidth: {
       type: Number,
       default: NaN
+    },
+    monoColor: {
+      type: String,
     }
   },
   data() {
@@ -88,7 +91,7 @@ export default defineComponent({
     addText() {
       if (!paymentUtils.checkProApp(this.item, 'pro-text', 'text')) return
       if (this.isInEditor) {
-        AssetUtils.addAsset(this.item)
+        AssetUtils.addAsset(this.item, { monoColor: this.monoColor })
           .then(() => {
             textPropUtils.updateTextPropsState()
           })

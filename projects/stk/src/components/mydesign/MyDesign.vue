@@ -8,7 +8,7 @@ div(class="my-design")
       span(class="my-design__tag-name") {{ $tc(tag.name, tag.name === 'NN0001' ? 1 : 2) /* TODO: fix wrong usage of i18n.tc() */ }}
   div(v-show="list.length === 0" class="my-design__content center")
     div(class="my-design__empty-icon")
-      svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+      svg-icon(iconName="empty-folder" iconWidth="42px" iconColor="white")
     div(class="my-design__empty-title") {{ $t('STK0020') }}
     div(class="my-design__empty-description") {{ $t('STK0021') }}
   div(v-show="list.length !== 0" class="my-design__content")

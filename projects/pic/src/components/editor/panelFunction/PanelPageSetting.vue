@@ -47,9 +47,7 @@ div(class="page-setting")
   div(v-if="showAdminTool"
     class="template-information")
     div(class="template-information__divider pb-10")
-    btn(:type="'primary-sm'" class="rounded my-5"
-        style="padding: 8px 0; margin-left: 6%; width: 88%;"
-        @click="getDataClicked()") 取 得 群 組 / 模 板 資 料
+    nubtn(size="sm-center" @click="getDataClicked()") 取 得 群 組 / 模 板 資 料
     div(v-if="groupId.length > 0"
       class="pt-10")
       span(class="text-gray-1 label-lg") 群 組 資 訊
@@ -96,9 +94,7 @@ div(class="page-setting")
               v-model="item.coverIndex")
               option(v-for="option in item.options" :key="option.key_id" :value="option.index") 第{{option.index+1}}頁
         div(class="pt-10")
-          btn(:type="'primary-sm'" class="rounded my-5"
-            style="padding: 8px 0; margin: 0 auto; width: 70%;"
-            @click="updateGroupClicked()") 更新
+          nubtn(size="sm-center" @click="updateGroupClicked()") 更新
     div(class="template-information__divider2")
     span(class="text-gray-1 label-lg") 模 板 資 訊
     div(class="template-information__content")
@@ -177,9 +173,7 @@ div(class="page-setting")
             input(class="body-2 text-gray-2" min="0"
               v-model="templateInfo.tags_jp")
         div(class="pt-10")
-          btn(:type="'primary-sm'" class="rounded my-5"
-            style="padding: 8px 0; margin: 0 auto; width: 70%;"
-            @click="updateDataClicked()") 更新
+          nubtn(size="sm-center" @click="updateDataClicked()") 更新
         div(class="template-information__divider")
         div(class="template-information__line bg-blue")
           span(class="body-1") 父
@@ -220,15 +214,14 @@ div(class="page-setting")
               class="template-information__check"
               v-model="updateParentIdChecked")
             label 確定修改
-          btn(:type="'primary-sm'" class="rounded my-5"
-            style="padding: 5px 40px;"
-            @click="updateParentIdClicked()") 修改
+          nubtn(@click="updateParentIdClicked()") 修改
 </template>
 
 <script lang="ts">
-import designApis from '@nu/vivi-lib/apis/design-info'
 import BleedSettings from '@/components/editor/BleedSettings.vue'
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
+import { notify } from '@kyvg/vue3-notification'
+import designApis from '@nu/vivi-lib/apis/design-info'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import { ICoverTheme, Itheme, IThemeTemplate } from '@nu/vivi-lib/interfaces/theme'
 import GeneralUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -236,7 +229,6 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
 import { PRECISION } from '@nu/vivi-lib/utils/unitUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
-import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { round } from 'lodash'
 import { defineComponent, PropType } from 'vue'

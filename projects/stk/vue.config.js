@@ -361,6 +361,9 @@ module.exports = defineConfig({
           extensions: ['.ts', '/index.ts'],
         })
       ]
+    },
+    devServer: {
+      port: 8081
     }
   }
 })

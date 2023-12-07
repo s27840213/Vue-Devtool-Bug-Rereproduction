@@ -6,6 +6,8 @@ import localeUtils from '@/utils/localeUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import authToken from './auth-token'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -28,15 +30,14 @@ class ListService {
       // [2022.01.19] uncached: font, layout
       all_theme: params.all_theme,
       ...(params.shuffle === 1 && { shuffle: params.shuffle }),
-      // app: 0: vivipic (default), 1: vivisticker
-      // If admin and url have 'app=1', bring app:1 to api.
-      ...generalUtils.isStk || generalUtils.isCm || 
-        (store.getters['user/isAdmin'] && /app=1/.test(window.location.href))
-        ? { app: 1 } : {},
+      // app: 0: vivipic (default), 1: vivisticker, 2: charmix
+      ...this.app,
       // for vivisticker text panel of US version
       col_num: params.colNum,
       // for vivisticker template
-      ig_layout: params.igLayout
+      ig_layout: params.igLayout,
+      // for charmix hidden message
+      is_hm: params.isHm
     }
 
     return axios.request<IListServiceResponse>({
@@ -44,6 +45,17 @@ class ListService {
       method: 'GET',
       params: searchParams
     })
+  }
+  
+  get app() {
+    // If admin and url have 'app', bring app to api.
+    if (store.getters['user/isAdmin']) {
+      const app = /app=(?<value>\d+)/.exec(window.location.href)?.groups?.value
+      if (app) return { app }
+    }
+    if (generalUtils.isStk) return { app: 1 }
+    if (generalUtils.isCm) return { app: 2 }
+    return {}
   }
 
   getInfoList(type: string, designIds: string[], igLayout?: 'story' | 'post') {
@@ -157,23 +169,25 @@ class ListService {
         locale: localeUtils.currLocale(),
         type: 'color'
       })
-    } else if (generalUtils.isStk) {
-      stkWVUtils.listAsset('color')
+    } else if (generalUtils.isStk || generalUtils.isCm) {
+      getAutoWVUtils().listAsset('color')
     }
   }
 
   addRecentlyUsedColor(color: string) {
-    generalUtils.isStk && stkWVUtils.addAsset('color', { id: color })
+    (generalUtils.isStk || generalUtils.isCm) && getAutoWVUtils().addAsset('color', { id: color })
     if (generalUtils.isStk && stkWVUtils.addDesignDisabled()) return
+    if (generalUtils.isCm && cmWVUtils.addDesignDisabled()) return
     axios.request<IListServiceResponse>({
       url: '/add-design',
       method: 'POST',
       data: {
-        token: generalUtils.isPic ? (authToken().token || '') : '1',
+        token: (generalUtils.isPic || generalUtils.isCm) ? (authToken().token || '') : '1',
         type: 'color',
         design_id: color,
         locale: localeUtils.currLocale(),
-        ...generalUtils.isStk && { host_id: uploadUtils.hostId },
+        app: generalUtils.isPic ? '0' : (generalUtils.isStk ? '1' : '2'), // 2 for charmix
+        ...(generalUtils.isStk || generalUtils.isCm) && { host_id: uploadUtils.hostId },
       }
     })
   }

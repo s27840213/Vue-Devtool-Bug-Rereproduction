@@ -928,19 +928,42 @@ class TextBg {
     } else if (isITextLetterBg(textBg)) {
       const scale = textBg.size / 100
       const needRotate = letterBgData.bgNeedRotate(textBg.name)
-      const textShapeStyle = textShapeUtils.convertTextShape(textShapeData.textWidth, bend, mainFontSize)
+
+      const textWidth = textShapeData.textWidth
+      if (letterBgData.extraHeadTail(textBg.name)) {
+        textWidth.push(textWidth[textWidth.length - 1])
+        textWidth.unshift(textWidth[0])
+      }
+      const textShapeStyle = textShapeUtils.convertTextShape(textWidth, bend, mainFontSize)
+
       let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
       const pos = [] as (Record<'i' | 'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let [i, spaceCount] = [0, 0]
-      rows.forEach((row) => {
-        row.spanData.forEach((span, spanIndex) => {
+      const spanDatas = withShape 
+        ? [rows.flatMap(row => row.spanData)]
+        : rows.map(row => row.spanData)
+      spanDatas.forEach(spanData => {
+        if (letterBgData.extraHeadTail(textBg.name) && spanData.length) {
+          let last = spanData.length - 1
+          spanData.push(cloneDeep(spanData[last]))
+          spanData.unshift(cloneDeep(spanData[0]))
+          last = spanData.length - 1
+          spanData[last].x = spanData[last].x + spanData[last].width
+          spanData[0].x = spanData[0].x - spanData[0].width
+        }
+
+        spanData.forEach((span, spanIndex) => {
           const { x, y, width, height, text } = span
           if (text === ' ' && !letterBgData.fixedHeadTail(textBg.name)) spaceCount += 1
           else {
             pos.push({
-              ...letterBgData.getLetterBgSetting(textBg, i - spaceCount, spanIndex === 0, spanIndex === row.spanData.length - 1),
+              ...letterBgData.getLetterBgSetting(textBg,
+                i - spaceCount,
+                spanIndex === 0,
+                spanIndex === spanData.length - 1
+              ),
               // 1. Because all letter svg width = height, so need to -(h-w)/2
               // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
               // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
@@ -1068,6 +1091,11 @@ class TextBg {
       const currSubLayerIndex = targetLayer.layers ? +idx : subLayerIndex
       const oldTextBg = layer.styles.textBg
       const newTextBg = {} as ITextBg
+
+      // Send splitSpan to toIParagraph.
+      tiptapUtils.agent(editor => {
+        editor.storage.nuTextStyle.splitSpan = textBgUtils.isSplitSpan(layer.styles)
+      })
 
       // Set lineHeight and fontSpacing by call tiptap
       for (const [key, val] of Object.entries(attrs ?? {})) {
