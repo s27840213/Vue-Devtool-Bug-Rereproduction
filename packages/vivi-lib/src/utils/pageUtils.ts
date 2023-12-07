@@ -425,6 +425,9 @@ class PageUtils {
   ) {
     store.commit('SET_pageSize', { index, width, height, physicalWidth, physicalHeight, unit })
     const page = this.getPage(index)
+    if (generalUtils.isCm) {
+      editorUtils.handleContentScaleRatio(index)
+    }
     if (!page.isEnableBleed) this.resetBleeds(page, index)
   }
 

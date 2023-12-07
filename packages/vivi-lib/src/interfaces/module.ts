@@ -151,5 +151,6 @@ export interface IAssetProps {
   fit?: number,
   record?: boolean,
   hideResizer?: boolean,
-  ctrlUnmountCb?: (pageIndex: number ,layerIndex:number, config?: AllLayerTypes) => void
+  ctrlUnmountCb?: (pageIndex: number, layerIndex: number, config?: AllLayerTypes) => void,
+  monoColor?: string,
 }

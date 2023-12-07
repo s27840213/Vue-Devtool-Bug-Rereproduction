@@ -1,6 +1,7 @@
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
-import type { EditorFeature, EditorStates, EditorType, PowerfulfillStates } from '@/types/editor'
+import type { DescriptionPanel, EditorFeature, EditorStates, EditorType, GenImageOptions, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
@@ -10,7 +11,8 @@ import { defineStore } from 'pinia'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
-}
+  'hidden-message': ['aspectRatio', 'editing', 'genResult', 'saving'] as HiddenMessageStates[],
+} as { [key in EditorType]: EditorStates }
 
 export interface IGenResult {
   id: string
@@ -32,7 +34,10 @@ interface IEditorStore {
   currStepTypeIndex: number
   initImgSrc: string
   useTmpSteps: boolean
-  currPrompt: string
+  currPrompt: string,
+  currGenOptions: GenImageOptions,
+  editorTheme: null | string,
+  descriptionPanel: null | DescriptionPanel,
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -51,6 +56,9 @@ export const useEditorStore = defineStore('editor', {
     initImgSrc: '',
     useTmpSteps: false,
     currPrompt: '',
+    currGenOptions: [],
+    editorTheme: null,
+    descriptionPanel: null,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -101,6 +109,9 @@ export const useEditorStore = defineStore('editor', {
     generatedResultsNum(): number {
       return this.generatedResults.length
     },
+    showDescriptionPanel(): boolean {
+      return this.descriptionPanel !== null
+    }
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -114,6 +125,11 @@ export const useEditorStore = defineStore('editor', {
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
     },
+    startEditing(type: EditorType) {
+      this.currStateIndex = 0
+      this.editorType = type
+      this.editorStates = editorStatesMap[this.editorType]
+    },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
       const toNext = dir === 'next'
@@ -125,9 +141,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrActiveFeature(feature: EditorFeature) {
       this.currActiveFeature = feature
-    },
-    setEditorType(type: EditorType) {
-      this.editorType = type
     },
     setIsGenerating(isGenerating: boolean) {
       this.isGenerating = isGenerating
@@ -151,7 +164,7 @@ export const useEditorStore = defineStore('editor', {
       if (video) {
         this.generatedResults[index].video = video
       }
-      if (data.updateIndex && this.currGenResultIndex === -1) {
+      if (updateIndex && this.currGenResultIndex === -1) {
         this.currGenResultIndex = index
       }
     },
@@ -175,11 +188,17 @@ export const useEditorStore = defineStore('editor', {
     setGenResultIndex(index: number) {
       this.currGenResultIndex = index
     },
-    undo() {
-      stepsUtils.undo()
+    async undo() {
+      await stepsUtils.undo()
+
+      const { currEditorTheme, applyEditorTheme } = useBiColorEditor()
+      if (currEditorTheme.value) applyEditorTheme(currEditorTheme.value)
     },
-    redo() {
-      stepsUtils.redo()
+    async redo() {
+      await stepsUtils.redo()
+
+      const { currEditorTheme, applyEditorTheme } = useBiColorEditor()
+      if (currEditorTheme.value) applyEditorTheme(currEditorTheme.value)
     },
     stepsReset() {
       stepsUtils.reset()
@@ -204,6 +223,9 @@ export const useEditorStore = defineStore('editor', {
     setCurrPrompt(prompt: string) {
       this.currPrompt = prompt
     },
+    setCurrGenOptions(options: GenImageOptions) {
+      this.currGenOptions = options
+    },
     keepEditingInit() {
       this.changeEditorState('prev')
       this.createNewPage(this.pageSize.width, this.pageSize.height)
@@ -221,5 +243,11 @@ export const useEditorStore = defineStore('editor', {
 
       useSteps().reset()
     },
+    setEditorTheme(theme: string | null) {
+      this.editorTheme = theme
+    },
+    setDescriptionPanel(panel: DescriptionPanel | null) {
+      this.descriptionPanel = panel
+    }
   },
 })

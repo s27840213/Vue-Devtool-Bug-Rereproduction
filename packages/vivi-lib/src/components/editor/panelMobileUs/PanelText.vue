@@ -76,15 +76,22 @@ export default defineComponent({
     CategoryTextPreview,
     ProItem
   },
+  props: {
+    monoColor: {
+      type: String,
+    }
+  },
   mounted() {
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
       async ({ reset }: {reset: boolean}) => {
-        await this.getCategories({
-          writeBack: false,
-          key: this.$isStk || this.$isCm ? 'textStock' : undefined
-        })
+        if (!(this.$isCm && this.rawContent.list)) { // prevent duplicate request
+          await this.getCategories({
+            writeBack: false,
+            key: this.$isStk || this.$isCm ? 'textStock' : undefined
+          })
+        }
         await this.getRecently({
           writeBack: true,
           key: this.$isStk || this.$isCm ? 'textStock' : undefined
@@ -185,7 +192,7 @@ export default defineComponent({
     addText(item: any) {
       if (!paymentUtils.checkProApp(item, undefined, 'text')) return
       if (this.isInEditor) {
-        AssetUtils.addAsset(item).then(() => {
+        AssetUtils.addAsset(item, { monoColor: this.monoColor }).then(() => {
           textPropUtils.updateTextPropsState()
         })
       } else {

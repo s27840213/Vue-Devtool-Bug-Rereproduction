@@ -19,7 +19,8 @@ div(class="panel-adjust")
               iconWidth="24px"
               @click="resetField(selectedField)")
     div(class="grid gap-24 overflow-scroll no-scrollbar"
-        :style="fieldsStyle")
+        :style="fieldsStyle"
+        ref="cmFields")
       template(v-for="field in fields" :key="field.name")
         div(
           class="flex flex-col items-center justify-center h-52 gap-4 px-4"
@@ -67,18 +68,31 @@ export default defineComponent({
   components: {
     MobileSlider
   },
+  props: {
+    isBiColorEditor: {
+      type: Boolean,
+      deafut: false
+    }
+  },
   data() {
     const fields = imageAdjustUtil.getFields()
     const defaultProps = imageAdjustUtil.getDefaultProps()
     return {
-      fields,
+      fields: this.isBiColorEditor ? fields.filter(field => field.name === 'brightness' || field.name === 'contrast') : fields,
       defaultProps,
       adjustVal: generalUtils.deepCopy(defaultProps),
       selectedField: fields[0],
+      isFieldOverflow: false
     }
   },
   created() {
     Object.assign(this.adjustVal, this.defaultProps, backgroundUtils.inBgSettingMode ? this.backgroundAdjust : this.currLayerAdjust)
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const elCmFields = this.$refs.cmFields as HTMLElement
+      if (elCmFields && elCmFields.scrollWidth > elCmFields.clientWidth) this.isFieldOverflow = true
+    })
   },
   computed: {
     ...mapState('imgControl', {
@@ -91,9 +105,10 @@ export default defineComponent({
       currSelectedLayers: 'getCurrSelectedLayers',
       controllerHidden: 'webView/getControllerHidden'
     }),
-    fieldsStyle(): {[key: string]: string} {
+    fieldsStyle(): { [key: string]: string } {
       return {
-        'grid-template-columns': `repeat(${this.fields.length}, minmax(50px, 1fr))`
+        'grid-template-columns': `repeat(${this.fields.length}, minmax(50px, ${ this.isFieldOverflow ? '1fr' : 'auto' }))`,
+        ...(!this.isFieldOverflow && {justifyContent: 'center'})
       }
     },
     currLayer(): any {
