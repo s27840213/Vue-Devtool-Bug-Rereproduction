@@ -115,8 +115,6 @@ router.addRoute({
     const userStore = useUserStore()
     const { listDesigns } = userStore
 
-    cmWVUtils.setupAPIInterface()
-    cmWVUtils.setupAppActiveInterface()
     cmWVUtils.detectIfInApp()
     await cmWVUtils.getUserInfo()
     const appLoadedTimeout = store.getters['cmWV/getAppLoadedTimeout']
@@ -165,7 +163,8 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  store.commit('user/SET_STATE', { userId: generalUtils.generateRandomString(20) })
+  cmWVUtils.setupAPIInterface()
+  cmWVUtils.setupAppActiveInterface()
   useUploadUtils().getUrlMap()
 
   loginUtils.checkToken()

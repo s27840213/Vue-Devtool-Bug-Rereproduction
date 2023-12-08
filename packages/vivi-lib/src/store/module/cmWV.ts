@@ -53,6 +53,9 @@ const mutations: MutationTree<ICmWVState> = {
   SET_userInfo(state: ICmWVState, userInfo: IUserInfo) {
     state.userInfo = userInfo
   },
+  UPDATE_userInfo(state: ICmWVState, userInfo: Partial<IUserInfo>) {
+    Object.assign(state.userInfo, userInfo)
+  },
   SET_inBrowserMode(state: ICmWVState, inBrowserMode: boolean) {
     state.inBrowserMode = inBrowserMode
   },
