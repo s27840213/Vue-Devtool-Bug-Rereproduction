@@ -1,0 +1,198 @@
+{
+  // Snippets for old cm color to new color name.
+  "app-bg": {
+    "scope": "jade",
+    "prefix": "app-bg",
+    "body": "dark-6",
+  },
+  "app-btn-primary-bg": {
+    "scope": "jade",
+    "prefix": "app-btn-primary-bg",
+    "body": "yellow-cm",
+  },
+  "app-btn-primary-pressed": {
+    "scope": "jade",
+    "prefix": "app-btn-primary-pressed",
+    "body": "yellow-3",
+  },
+  "app-btn-primary-text": {
+    "scope": "jade",
+    "prefix": "app-btn-primary-text",
+    "body": "white",
+  },
+  "app-btn-secondary-bg": {
+    "scope": "jade",
+    "prefix": "app-btn-secondary-bg",
+    "body": "yellow-2",
+  },
+  "app-btn-secondary-pressed": {
+    "scope": "jade",
+    "prefix": "app-btn-secondary-pressed",
+    "body": "yellow-4",
+  },
+  "app-icon-dark": {
+    "scope": "jade",
+    "prefix": "app-icon-dark",
+    "body": "dark",
+  },
+  "app-icon-light": {
+    "scope": "jade",
+    "prefix": "app-icon-light",
+    "body": "yellow-0",
+  },
+  "app-placeholder": {
+    "scope": "jade",
+    "prefix": "app-placeholder",
+    "body": "dark-0",
+  },
+  "app-selection": {
+    "scope": "jade",
+    "prefix": "app-selection",
+    "body": "red-cm",
+  },
+  "app-slider-bg": {
+    "scope": "jade",
+    "prefix": "app-slider-bg",
+    "body": "lighter80",
+  },
+  "app-tab-active": {
+    "scope": "jade",
+    "prefix": "app-tab-active",
+    "body": "yellow-cm",
+  },
+  "app-tab-bg": {
+    "scope": "jade",
+    "prefix": "app-tab-bg",
+    "body": "dark-3",
+  },
+  "app-tab-default": {
+    "scope": "jade",
+    "prefix": "app-tab-default",
+    "body": "#fffbeb",
+  },
+  "app-tab-disable": {
+    "scope": "jade",
+    "prefix": "app-tab-disable",
+    "body": "lighter",
+  },
+  "app-text-primary": {
+    "scope": "jade",
+    "prefix": "app-text-primary",
+    "body": "dark",
+  },
+  "app-text-secondary": {
+    "scope": "jade",
+    "prefix": "app-text-secondary",
+    "body": "white",
+  },
+  "app-toast-success": {
+    "scope": "jade",
+    "prefix": "app-toast-success",
+    "body": "yellow-180",
+  },
+  "app-toast-fail": {
+    "scope": "jade",
+    "prefix": "app-toast-fail",
+    "body": "red-cmcc",
+  },
+  "neutral-dark-active": {
+    "scope": "jade",
+    "prefix": "neutral-dark-active",
+    "body": "dark-6",
+  },
+  "neutral-dark-hover": {
+    "scope": "jade",
+    "prefix": "neutral-dark-hover",
+    "body": "dark-5",
+  },
+  "neutral-dark": {
+    "scope": "jade",
+    "prefix": "neutral-dark",
+    "body": "dark-4",
+  },
+  "neutral-light-active": {
+    "scope": "jade",
+    "prefix": "neutral-light-active",
+    "body": "dark-1",
+  },
+  "neutral-light-hover": {
+    "scope": "jade",
+    "prefix": "neutral-light-hover",
+    "body": "dark-0",
+  },
+  "neutral-normal-active": {
+    "scope": "jade",
+    "prefix": "neutral-normal-active",
+    "body": "dark-3",
+  },
+  "neutral-normal-hover": {
+    "scope": "jade",
+    "prefix": "neutral-normal-hover",
+    "body": "dark-2",
+  },
+  "neutral-normal": {
+    "scope": "jade",
+    "prefix": "neutral-normal",
+    "body": "dark",
+  },
+  "primary-dark-active": {
+    "scope": "jade",
+    "prefix": "primary-dark-active",
+    "body": "yellow-7",
+  },
+  "primary-dark-hover": {
+    "scope": "jade",
+    "prefix": "primary-dark-hover",
+    "body": "yellow-6",
+  },
+  "primary-dark": {
+    "scope": "jade",
+    "prefix": "primary-dark",
+    "body": "yellow-5",
+  },
+  "primary-darker": {
+    "scope": "jade",
+    "prefix": "primary-darker",
+    "body": "yellow-8",
+  },
+  "primary-light-active": {
+    "scope": "jade",
+    "prefix": "primary-light-active",
+    "body": "yellow-2",
+  },
+  "primary-light-hover": {
+    "scope": "jade",
+    "prefix": "primary-light-hover",
+    "body": "yellow-1",
+  },
+  "primary-light": {
+    "scope": "jade",
+    "prefix": "primary-light",
+    "body": "yellow-0",
+  },
+  "primary-lighter": {
+    "scope": "jade",
+    "prefix": "primary-lighter",
+    "body": "lighter",
+  },
+  "primary-normal-active": {
+    "scope": "jade",
+    "prefix": "primary-normal-active",
+    "body": "yellow-4",
+  },
+  "primary-normal-hover": {
+    "scope": "jade",
+    "prefix": "primary-normal-hover",
+    "body": "yellow-3",
+  },
+  "primary-normal": {
+    "scope": "jade",
+    "prefix": "primary-normal",
+    "body": "yellow-cm",
+  },
+  "primary-white": {
+    "scope": "jade",
+    "prefix": "primary-white",
+    "body": "white",
+  },
+}
