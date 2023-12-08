@@ -185,8 +185,10 @@ class MouseUtils {
       clipperStyles.initHeight = clipperStyles.height / clipperStyles.scale
     }
     const img = {
-      width: layer.styles.width,
-      height: layer.styles.height
+      width: layer.styles.imgWidth,
+      height: layer.styles.imgHeight
+      // width: layer.styles.width,
+      // height: layer.styles.height
     }
     /**
      * Below determines the img's initial width/height
@@ -219,6 +221,7 @@ class MouseUtils {
     Object.assign(layer.styles, newStyles)
     clipPath = clipPath ?? ''
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
+    console.log('result', generalUtils.deepCopy(layer.styles))
     return layer
   }
 }
