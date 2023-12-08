@@ -221,7 +221,6 @@ class MouseUtils {
     Object.assign(layer.styles, newStyles)
     clipPath = clipPath ?? ''
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
-    console.log('result', generalUtils.deepCopy(layer.styles))
     return layer
   }
 }

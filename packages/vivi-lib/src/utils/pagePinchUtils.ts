@@ -204,7 +204,7 @@ class pagePinchUtils {
     this.handleEdging(e)
     this.pointerIds.length = 0
 
-    console.log('pinch end', e.scale)
+    console.log('pinch end')
   }
 
   private resetState() {
@@ -212,6 +212,14 @@ class pagePinchUtils {
     store.commit('mobileEditor/UPDATE_pinchScale', 1)
     store.commit('SET_isPageScaling', false)
     this.isPinchInit = false
+  }
+
+  static resetPageScale() {
+    store.commit('SET_pageScaleRatio', 100)
+    pageUtils.updatePagePos(layerUtils.pageIndex, {
+      x: 0,
+      y: 0
+    })
   }
 
   pinchHandler(e: AnyTouchEvent) {
@@ -223,6 +231,14 @@ class pagePinchUtils {
     if (this.pointerIds.length === 2 && touches.length === 2 &&
       (!this.pointerIds.includes(touches[0].identifier) ||
       !this.pointerIds.includes(touches[1].identifier))) return this.pinchInit(e)
+
+    // if (store.getters.getDisableLayerAction) {
+    //   if (this.isPinchInit) {
+    //     return this.pinchEnd(e)
+    //   } else {
+    //     return
+    //   }
+    // }
 
     switch (e.phase) {
       case 'move': {
