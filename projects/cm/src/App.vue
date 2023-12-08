@@ -47,8 +47,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
                   :currActivePanel="currActivePanel"
                   :currPage="currPage"
                   :currTab="currActivePanel"
-                  @switchTab="(switchTab as Function)"
-                  @disableBtmPanelTransition="(disableTransition as Function)")
+                  @switchTab="switchTab"
+                  @disableBtmPanelTransition="disableTransition")
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
@@ -70,7 +70,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     transition(name="bottom-up-down")
       bottom-panel(
         v-if="showDescriptionPanel"
-        class="absolute bottom-0 z-desciption-panel pointer-events-auto")
+        class="absolute bottom-0 z-desciption-panel pointer-events-auto"
+        :gap="statusBarHeight + 150"
+        ignoreHomeIndicator)
         template(#content="{setSlotRef}")
           transition(
             name="bottom-panel-transition"

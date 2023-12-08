@@ -1,13 +1,13 @@
 <template lang="pug">
-div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-border relative text-app-text-secondary")
+div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt-24 box-border flex flex-col gap-16 text-app-text-secondary")
   svg-icon(
-    class="absolute -top-6 right-16"
+    class="absolute top-10 right-16"
     iconName="close"
     iconColor="app-icon-light"
     iconWidth="24px"
     @click="closePanel")
-  div(class="typo-h5 mb-16") {{ title }}
-  div(class="flex flex-col justify-start items-center gap-16 overflow-scroll max-h-[590px] pb-45")
+  div(class="typo-h5") {{ title }}
+  div(class="flex flex-col justify-start items-center gap-16 overflow-scroll pb-[37px]")
     //- hidden message help
     template(v-if="descriptionPanel === 'hidden-message'")
       div(class="w-full typo-body-md text-left") {{ t('CM0094') }}
@@ -39,6 +39,7 @@ div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-bord
             :src="item.imgB")
       div(class="w-full typo-body-md text-left") {{ t('CM0095') }}
       prompt-area(preview)
+      div(class="w-full")
     //- img preprocess info
     template(v-if="['hidden-message-invert', 'hidden-message-bgrm'].includes(descriptionPanel)")
       div(class="w-full typo-body-md text-left") {{ hiddenMessageImgPreprocessDescription }}
@@ -148,6 +149,10 @@ const hiddenMessageImgPreprocessItems = computed(() => Array.from(Array(2), (_, 
   })()
 })))
 // #endregion
+
+const maxHeight = computed(() => {
+  const instance = getCurrentInstance();
+})
 </script>
 <style lang="scss">
 </style>
