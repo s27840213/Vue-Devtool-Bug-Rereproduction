@@ -1,3 +1,4 @@
+import listApis from '@/apis/list'
 import { IListServiceContentDataItem, ILoginResult } from '@/interfaces/api'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
@@ -5,7 +6,6 @@ import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
-import listApis from '@/apis/list'
 
 export interface IGeneralSuccessResponse {
   flag: '0'
@@ -80,9 +80,11 @@ export interface ISaveAssetFromUrlResponse {
 }
 
 export interface IListAssetResponse {
+  flag: string,
   key: string
   assets: any[]
   nextPage: string
+  group?: string
 }
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
@@ -368,18 +370,27 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     await this.setState('everEntersDebugMode', { value: this.everEntersDebugMode })
   }
 
-  async listAsset(key: string, group?: string): Promise<void> {
-    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
-    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group })
-    if (!res) return
-    this.handleListAssetResult(res as IListAssetResponse)
-  }
+  async listAsset(key: string, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
+    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group });
 
-  async listMoreAsset(key: string, nextPage: number, group?: string): Promise<void> {
+    if(returnResponse) {
+      return res as IListAssetResponse
+    }
+    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return;
+    if (!res) return;
+
+    this.handleListAssetResult(res as IListAssetResponse);
+}
+
+  async listMoreAsset(key: string, nextPage: number, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
     if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
     if (nextPage < 0) return
     const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group, pageIndex: nextPage })
     if (!res) return
+
+    if(returnResponse) {
+      return res as IListAssetResponse
+    }
     this.handleListAssetResult(res as IListAssetResponse)
   }
 
@@ -426,10 +437,30 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return resList
   }
 
+  async isValidJson(data: object): Promise<boolean> {
+    if (!this.checkVersion('1.42')) return true
+    const valid = ((await this.callIOSAsHTTPAPI('IS_VALID_JSON', { object: data}))?.valid ?? '0')
+    return valid === '1'
+  }
+
   async addAsset(key: string, asset: any, limit = 100, group?: string) {
     if (this.inBrowserMode) return
     if (this.checkVersion('1.0.14')) {
       await this.callIOSAsHTTPAPI('ADD_ASSET', { key, asset, limit, group })
+    }
+  }
+
+  async addJson(path: string ,name: string, content: {[index: string]: any}) {
+    if (this.inBrowserMode) return
+    if (this.checkVersion('1.0.14')) {
+      return await this.callIOSAsHTTPAPI('ADD_JSON', { path, name, content })
+    }
+  }
+
+  async getJson(path: string ,name: string) {
+    if (this.inBrowserMode) return
+    if (this.checkVersion('1.0.14')) {
+      return await this.callIOSAsHTTPAPI('GET_JSON', { path, name })
     }
   }
 }

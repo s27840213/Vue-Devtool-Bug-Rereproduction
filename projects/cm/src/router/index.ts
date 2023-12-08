@@ -109,11 +109,16 @@ router.addRoute({
   async beforeEnter(to, from, next) {
     useI18n() // prevent import being removed
     // useI18n().locale = 'tw'
+
+    const userStore = useUserStore()
+    const { listDesigns } = userStore
+
     cmWVUtils.setupAPIInterface()
     cmWVUtils.setupAppActiveInterface()
     cmWVUtils.detectIfInApp()
     await cmWVUtils.getUserInfo()
     cmWVUtils.fetchTutorialFlags()
+    listDesigns('all')
     let argoError = false
     try {
       const status = (
@@ -189,7 +194,7 @@ router.beforeEach(async (to, from, next) => {
 router.options.scrollBehavior = (to, from, savedPosition) => {
   const scrollPos = to.meta.scrollPos as { top: number; left: number } | undefined
   const elScrollable = document.getElementsByClassName('overflow-scroll')[0] as HTMLElement
-  if(elScrollable) elScrollable.scrollTop = scrollPos?.top ?? 0
+  if (elScrollable) elScrollable.scrollTop = scrollPos?.top ?? 0
 }
 
 export default router

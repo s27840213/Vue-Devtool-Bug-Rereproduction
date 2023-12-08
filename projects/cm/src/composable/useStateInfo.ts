@@ -1,5 +1,6 @@
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 
 const useStateInfo = () => {
@@ -31,6 +32,9 @@ const useStateInfo = () => {
 
   // #endregion
 
+  const userStore = useUserStore()
+  const { isDesignOpen, isSubDesignOpen } = storeToRefs(userStore)
+
   // #region img selector state
   const imgSelectorStore = useImgSelectorStore()
   const { showImgSelector } = storeToRefs(imgSelectorStore)
@@ -53,6 +57,8 @@ const useStateInfo = () => {
     showSelectionOptions,
     showImgSelector,
     showDescriptionPanel,
+    isDesignOpen,
+    isSubDesignOpen,
   }
 }
 

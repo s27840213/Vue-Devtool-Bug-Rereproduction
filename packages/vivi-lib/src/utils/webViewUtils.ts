@@ -1,5 +1,6 @@
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
+import { IListAssetResponse } from './cmWVUtils'
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'
 
@@ -212,9 +213,9 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
 
   async checkFontLoaded(face: string): Promise<boolean> { return false /* only interface */ }
 
-  async listAsset(key: string, ...args: any[]): Promise<void> { /* only interface */ }
+  async listAsset(key: string, ...args: any[]): Promise<void |IListAssetResponse> { /* only interface */ }
 
-  async listMoreAsset(key: string, nextPage: number, ...args: any[]): Promise<void> { /* only interface */ }
+  async listMoreAsset(key: string, nextPage: number, ...args: any[]): Promise<void |IListAssetResponse> { /* only interface */ }
 
   async addAsset(key: string, asset: any, limit = 100, ...args: any[]): Promise<void> { /* only interface */ }
   //

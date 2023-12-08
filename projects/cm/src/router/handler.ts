@@ -7,9 +7,13 @@ import constantData from '@nu/vivi-lib/utils/constantData'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import VueRouter from 'vue-router'
 
-const isValidType = (x: any): x is EditorType => editorTypes.includes(x);
+const isValidType = (x: any): x is EditorType => editorTypes.includes(x)
 
-export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized, from: VueRouter.RouteLocationNormalized, next: VueRouter.NavigationGuardNext) {
+export async function editorRouteHandler(
+  _to: VueRouter.RouteLocationNormalized,
+  from: VueRouter.RouteLocationNormalized,
+  next: VueRouter.NavigationGuardNext,
+) {
   try {
     next()
     const { query } = _to
@@ -18,13 +22,14 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     Object.entries(query).forEach(([key, val]) => {
       urlParams.append(key, val as string)
     })
-    
+
     const type = urlParams.get('type')
     if (!isValidType(type)) throw new Error('Invalid editor type.')
 
     const editorStore = useEditorStore()
     const { editorType } = storeToRefs(editorStore)
-    const { startEditing, setPageSize, setCurrActiveFeature, stepsReset, setCurrGenOptions } = editorStore
+    const { startEditing, setPageSize, setCurrActiveFeature, stepsReset, setCurrGenOptions } =
+      editorStore
     const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     startEditing(type)
     setPageSize(900, 1600)
@@ -33,14 +38,15 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
     switch (type) {
       case 'powerful-fill':
-
-        break;
+        break
       case 'hidden-message':
         setCurrActiveFeature('add')
-        setCurrGenOptions(constantData.getGenImageOptions('hidden-message') as GenImageOptions ?? [])
-        break;
+        setCurrGenOptions(
+          (constantData.getGenImageOptions('hidden-message') as GenImageOptions) ?? [],
+        )
+        break
       default:
-        break;
+        break
     }
   } catch (error) {
     logUtils.setLogForError(error as Error)
