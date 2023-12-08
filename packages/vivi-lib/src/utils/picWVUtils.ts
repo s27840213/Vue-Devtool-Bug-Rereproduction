@@ -121,6 +121,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<void> {
+    if (!generalUtils.isPic) return
     store.commit('webView/UPDATE_userInfo', userInfo)
     await this.callIOSAsAPI('UPDATE_USER_INFO', userInfo, 'update-user-info')
   }

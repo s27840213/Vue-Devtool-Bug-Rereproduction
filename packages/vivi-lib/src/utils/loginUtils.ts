@@ -1,5 +1,6 @@
 import store from '@/store'
 import picWVUtils from '@/utils/picWVUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 
 class LoginUtils {
   async checkToken(redirect = () => { /**/ }) {
@@ -60,6 +61,7 @@ class LoginUtils {
 
   logout() {
     picWVUtils.updateUserInfo({ userId: '' })
+    cmWVUtils.updateUserInfo({ userId: '' })
     localStorage.setItem('token', '')
     window.location.href = '/'
   }
