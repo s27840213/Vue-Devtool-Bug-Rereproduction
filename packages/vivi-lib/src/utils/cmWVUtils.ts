@@ -29,6 +29,7 @@ export type IUserInfo = {
   modelName: string,
   flag: string,
   locale: string,
+  userId: string
 }
 
 export interface IAlbum {
@@ -106,6 +107,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     flag: '0',
     locale: 'en',
     modelName: 'web',
+    userId: '',
   }
 
   CALLBACK_MAPS = {}
@@ -176,6 +178,13 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       // logUtils.setLogAndConsoleLog('Apple login failed')
       notify({ group: 'error', text: loginResult.msg })
     }
+  }
+
+  // Like picWVUtils, need merge.
+  async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<void> {
+    if (!generalUtils.isCm) return
+    store.commit('cmWV/UPDATE_userInfo', userInfo)
+    await this.callIOSAsHTTPAPI('UPDATE_USER_INFO', userInfo)
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {

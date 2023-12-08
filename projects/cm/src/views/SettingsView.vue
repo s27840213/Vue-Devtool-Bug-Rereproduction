@@ -68,6 +68,7 @@ const buildNumber = computed(() => {
   return buildNumber ? `v.${buildNumber}` : 'local'
 })
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'])
+const userId = computed(() => vuex.getters['user/getUserId'])
 
 const domainOptions = computed((): IOptionConfig[] => [
   {
@@ -271,7 +272,7 @@ const initOptions = computed(
       { title: t('CM0043'), class: segmentTitleStyle },
       ...aboutOptions,
       {
-        title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}`, // Debug info
+        title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}:${userId.value}`, // Debug info
         class: 'typo-body-sm text-center text-primary-lighter py-10',
         callback: handleDebugMode,
       },
