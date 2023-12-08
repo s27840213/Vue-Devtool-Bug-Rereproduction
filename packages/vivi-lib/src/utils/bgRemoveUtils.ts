@@ -267,47 +267,45 @@ class BgRemoveUtils {
     })
     console.log(cropJSON)
     try{
-      uploadUtils.uploadCropJSON(cropJSON, id ?? privateId).then(() => {
-        uploadUtils.uploadAsset('image', [previewSrc], {
-          addToPage: false,
-          pollingCallback: (json: IUploadAssetResponse) => {
-            const targetPageIndex = pageUtils.getPageIndexById(pageId)
-            const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-            const srcObj = {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index
-            }
-            layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-              srcObj,
-              trace: 1
-            })
-            store.commit('DELETE_previewSrc', {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index,
-              assetIndex: json.data.asset_index
-            })
-            const image = layerUtils.getLayer(pageIndex, index) as IImage
-            if (image.type === LayerType.image) {
-              if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
-                const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
-                const layerData = {
-                  config: image,
-                  layerInfo
-                }
-                imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+      uploadUtils.uploadAsset('image', [previewSrc], {
+        addToPage: false,
+        pollingCallback: (json: IUploadAssetResponse) => {
+          const targetPageIndex = pageUtils.getPageIndexById(pageId)
+          const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+          const srcObj = {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: teamId,
+            assetId: this.isAdmin ? json.data.id : json.data.asset_index
+          }
+          layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+            srcObj,
+            trace: 1
+          })
+          store.commit('DELETE_previewSrc', {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: teamId,
+            assetId: this.isAdmin ? json.data.id : json.data.asset_index,
+            assetIndex: json.data.asset_index
+          })
+          const image = layerUtils.getLayer(pageIndex, index) as IImage
+          if (image.type === LayerType.image) {
+            if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
+              const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
+              const layerData = {
+                config: image,
+                layerInfo
               }
+              imageShadowPanelUtils.handleShadowUpload(layerData, true)
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             }
-            stepsUtils.record()
-            this.setLoading(false)
-            this.setIsProcessing(false)
-          },
-          id: id ?? privateId,
-          needCompressed: false,
-          pollingJsonName: 'result2.json'
-        })
+          }
+          stepsUtils.record()
+          this.setLoading(false)
+          this.setIsProcessing(false)
+        },
+        id: id ?? privateId,
+        needCompressed: false,
+        pollingJsonName: 'result2.json'
       })
     } catch (error) {
       console.log(error)
