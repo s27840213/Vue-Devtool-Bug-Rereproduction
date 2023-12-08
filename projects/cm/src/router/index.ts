@@ -8,6 +8,8 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
+import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
@@ -116,6 +118,22 @@ router.addRoute({
     cmWVUtils.setupAppActiveInterface()
     cmWVUtils.detectIfInApp()
     await cmWVUtils.getUserInfo()
+    const appLoadedTimeout = store.getters['cmWV/getAppLoadedTimeout']
+    if (appLoadedTimeout > 0) {
+      window.setTimeout(() => {
+        if (!cmWVUtils.appLoadedSent) {
+          logUtils.setLogAndConsoleLog(
+            `Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`,
+          )
+        }
+        cmWVUtils.sendAppLoaded()
+      }, appLoadedTimeout)
+    }
+    if (logUtils.getLog()) {
+      // hostId for uploading log is obtained after getUserInfo
+      await logUtils.uploadLog()
+    }
+    logUtils.setLog('App Start')
     cmWVUtils.fetchTutorialFlags()
     listDesigns('all')
     let argoError = false
@@ -171,10 +189,23 @@ router.beforeEach(async (to, from, next) => {
      * @MobileDebug - comment the following two line, and use const json = appJSON, or the request will be blocked by CORS
      */
     const response = await fetch(
-      `https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`,
+      `https://template.vivipic.com/static/app_charmix.json?ver=${generalUtils.generateRandomString(
+        6,
+      )}`,
     )
     const json = await response.json()
 
+    store.commit('cmWV/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
+
+    store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
+
+    store.commit('user/SET_STATE', {
+      verUni: json.ver_uni,
+      verApi: json.ver_api,
+      imgSizeMap: json.image_size_map,
+      imgSizeMapExtra: json.image_size_map_extra,
+    })
+    textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     const defaultFontsJson = json.default_font as Array<{ id: string; ver: number }>
 
     defaultFontsJson.forEach((_font) => {
@@ -184,6 +215,12 @@ router.beforeEach(async (to, from, next) => {
         ver: _font.ver,
       }
       store.commit('text/UPDATE_DEFAULT_FONT', { font })
+    })
+
+    store.commit('cmWV/SET_modalInfo', json.modal)
+
+    uploadUtils.setLoginOutput({
+      upload_log_map: json.ul_log_map,
     })
   }
   next()

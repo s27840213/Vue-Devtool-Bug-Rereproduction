@@ -797,7 +797,10 @@ class UploadUtils {
     })
 
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
-    formData.append('key', `${this.loginOutput.upload_log_map.path}${generalUtils.isStk ? this.hostId : this.userId}/${logName}`)
+    const folder = generalUtils.isCm ? (
+      this.isLogin ? `${this.hostId}/${this.userId}` : this.hostId
+    ) : (generalUtils.isStk ? this.hostId : this.userId)
+    formData.append('key', `${this.loginOutput.upload_log_map.path}${folder}/${logName}`)
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
     formData.append('x-amz-meta-tn', generalUtils.isStk || generalUtils.isCm ? this.hostId : this.userId)
     const xhr = new XMLHttpRequest()
@@ -1397,6 +1400,15 @@ class UploadUtils {
       if (generalUtils.isStk) {
         const response = await fetch(
           `https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(
+            6
+          )}`
+        )
+        const json = await response.json()
+        this.setLoginOutput({ upload_log_map: json.ul_log_map })
+      }
+      if (generalUtils.isCm) {
+        const response = await fetch(
+          `https://template.vivipic.com/static/app_charmix.json?ver=${generalUtils.generateRandomString(
             6
           )}`
         )
