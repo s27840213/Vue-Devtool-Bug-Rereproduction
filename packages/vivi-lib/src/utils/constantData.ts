@@ -1312,7 +1312,8 @@ class ConstantData {
           max: 10,
           step: 1,
           value: 5,
-          icon: 'information-circle-solid',
+          icon: 'information-circle',
+          iconActive: 'information-circle-solid',
         },
         {
           type: 'range',

@@ -2,7 +2,8 @@
 div(class="bottom-panel" ref="bottomPanelRef")
   slot(
     name="content"
-    :setSlotRef="setSlotRef")
+    :setSlotRef="setSlotRef"
+    :disableTransition="(value: boolean) => { noTransition = value }")
 </template>
 <script setup lang="ts">
 /**
@@ -25,6 +26,17 @@ const setSlotRef = (ref: HTMLElement) => {
 
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'] as IUserInfo)
 
+const noTransition = ref(false)
+const props = defineProps({
+  disableTransition: {
+    type: Boolean,
+    default: false,
+  },
+})
+watch(() => props.disableTransition, value => {
+  noTransition.value = value
+})
+
 watch(
   [height, () => userInfo.value.homeIndicatorHeight],
   ([newHeight, newHomeIndicatorHeight], [oldHeight, oldHomeIndicatorHeight]) => {
@@ -40,6 +52,6 @@ watch(
 <style lang="scss" scoped>
 .bottom-panel {
   @apply bg-app-tab-bg w-full rounded-t-[24px] box-border pt-16;
-  transition: all 0.3s;
+  transition: v-bind("noTransition ? 'none' : 'all 0.3s'");
 }
 </style>

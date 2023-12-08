@@ -35,8 +35,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
   bottom-panel(v-if="bottomPanelComponent && !atEventTester && !(isDuringCopy && !isAutoFilling)"
     class="z-bottom-panel row-start-3 row-end-4 tutorial-powerful-fill-4--highlight tutorial-hidden-message-4--highlight"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
-    :style="disableBtmPanelTransition ? 'transition: none' : ''")
-    template(#content="{setSlotRef}")
+    :disableTransition="disableBtmPanelTransition")
+    template(#content="{setSlotRef, disableTransition}")
       transition(
         name="bottom-panel-transition"
         mode="out-in"
@@ -47,7 +47,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
                   :currActivePanel="currActivePanel"
                   :currPage="currPage"
                   :currTab="currActivePanel"
-                  @switchTab="switchTab")
+                  @switchTab="(switchTab as Function)"
+                  @disableBtmPanelTransition="(disableTransition as Function)")
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
