@@ -797,9 +797,17 @@ class UploadUtils {
     })
 
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
-    const folder = generalUtils.isCm ? (
-      this.isLogin ? `${this.hostId}/${this.userId}` : this.hostId
-    ) : (generalUtils.isStk ? this.hostId : this.userId)
+    let folder = ''
+    if (generalUtils.isCm) {
+      const userId = store.getters['cmWV/getUserInfo'].userId || this.userId
+      folder = userId ? `${this.hostId}/${userId}` : this.hostId
+    }
+    if (generalUtils.isStk) {
+      folder = this.hostId
+    }
+    if (generalUtils.isPic) {
+      folder = this.userId
+    }
     formData.append('key', `${this.loginOutput.upload_log_map.path}${folder}/${logName}`)
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
     formData.append('x-amz-meta-tn', generalUtils.isStk || generalUtils.isCm ? this.hostId : this.userId)

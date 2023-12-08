@@ -407,6 +407,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   async loginSetup({ commit, dispatch }, { data }: { data: ILoginResponse }) {
     if (data.flag === 0) {
       logUtils.setLogAndConsoleLog('login success (loginSetup)')
+      logUtils.setLogAndConsoleLog(`login as ${data.data.user_id}`)
       const newToken = data.data.token // token may be refreshed
       const complete = data.data.complete
       const uname = data.data.user_name
