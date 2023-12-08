@@ -220,7 +220,6 @@ class BgRemoveUtils {
     const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
     const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
     const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles as IImageStyle
-    // const { width, height } = targetLayerStyle
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
     const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
     console.log(trimCanvas(this.canvas))
@@ -328,7 +327,6 @@ class BgRemoveUtils {
     const imgHeight = height / percentage.h
     const imgX = -bound.left / originSize.w * imgWidth
     const imgY = -bound.top / originSize.h * imgHeight
-    console.warn({ width: styles.width, height: styles.height, imgWidth, imgHeight, imgX, imgY })
     return { width, height, imgWidth, imgHeight, imgX, imgY }
   }
 
