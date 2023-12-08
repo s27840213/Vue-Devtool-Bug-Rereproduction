@@ -253,6 +253,7 @@ export const useUserStore = defineStore('user', () => {
     if (!currDesignId.value) {
       throw new Error('Design ID is empty')
     }
+
     const { subDesignId, type = 'png', thumbIndex } = props ?? {}
     if (thumbIndex !== undefined) {
       setCurrDesignThumbIndex(thumbIndex)

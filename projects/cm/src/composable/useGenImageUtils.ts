@@ -164,16 +164,22 @@ const useGenImageUtils = () => {
         RECORD_TIMING && testUtils.start(`polling ${index}`, false)
         try {
           const subDesignId = ids[index]
-          await Promise.all([
+          const promises = [
             saveDesignImageToDocument(initImgSrc.value, 'original', {
-              subDesignId,
-            }),
-            saveDesignImageToDocument(maskDataUrl.value, 'mask', {
               subDesignId,
             }),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
             polling(url, { isJson: false, useVer: false, pollingController }),
-          ])
+          ]
+          if (editorType.value !== 'hidden-message') {
+            promises.push(
+              saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+                subDesignId,
+              }),
+            )
+          }
+
+          await Promise.all(promises)
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message.includes('Cancelled')) {
