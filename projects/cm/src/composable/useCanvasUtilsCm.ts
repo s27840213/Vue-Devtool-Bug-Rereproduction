@@ -26,7 +26,8 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { showBrushOptions } = storeToRefs(editorStore)
+  const { showBrushOptions, maskDataUrl } = storeToRefs(editorStore)
+
   const { isBiColorEditor } = useBiColorEditor()
   // #endregion
 
@@ -51,7 +52,7 @@ const useCanvasUtils = (
     stepsQueue,
     isInCanvasFirstStep,
     isInCanvasLastStep,
-    drawingColor
+    drawingColor,
   } = storeToRefs(canvasStore)
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
@@ -98,20 +99,19 @@ const useCanvasUtils = (
   // #endregion
 
   const getBrushColor = (color: string) => {
-    const mapColorDrawingToBrush = new Map([
-      ['#FF7262', '#fcaea9'],
-    ])
+    const mapColorDrawingToBrush = new Map([['#FF7262', '#fcaea9']])
 
     // darken or lighten color
-    const adjustColor = (color: string) => { // #FFF not supportet rather use #FFFFFF
-      const clamp = (val: number) => Math.min(Math.max(val, 0), 0xFF)
+    const adjustColor = (color: string) => {
+      // #FFF not supportet rather use #FFFFFF
+      const clamp = (val: number) => Math.min(Math.max(val, 0), 0xff)
       const fill = (str: string) => ('00' + str).slice(-2)
       let offset = 100
 
       const num = parseInt(color.replace(/^#/, ''), 16)
       let red = num >> 16
-      let green = (num >> 8) & 0x00FF
-      let blue = num & 0x0000FF
+      let green = (num >> 8) & 0x00ff
+      let blue = num & 0x0000ff
       if (red * 0.299 + green * 0.587 + blue * 0.114 > 186) offset = -offset // https://stackoverflow.com/a/3943023/112731
       red = clamp(red + offset)
       green = clamp(green + offset)
@@ -182,7 +182,7 @@ const useCanvasUtils = (
     if (canvas && canvas.value && canvasCtx && canvasCtx.value) {
       canvasCtx.value.globalCompositeOperation = 'source-atop'
       canvasCtx.value.fillStyle = color
-      canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height);
+      canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height)
     }
   }
 
@@ -376,7 +376,7 @@ const useCanvasUtils = (
   // #endregion
 
   onMounted(() => {
-    if (wrapperRef && wrapperRef.value && editorContainerRef && editorContainerRef.value) {
+    if (wrapperRef && editorContainerRef) {
       createInitCanvas(pageSize.value.width, pageSize.value.height)
       clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
@@ -567,6 +567,22 @@ const useCanvasUtils = (
     return url
   }
 
+  const restoreCanvas = () => {
+    if (maskDataUrl.value) {
+      const img = new Image()
+
+      img.crossOrigin = 'Anonymous'
+      img.src = maskDataUrl.value
+      img.onload = () => {
+        clearCtx()
+        drawImageToCtx(img, {
+          width: pageSize.value.width,
+          height: pageSize.value.height,
+        })
+      }
+    }
+  }
+
   const record = () => {
     /**
      * DataUrl for png is TOO slow for the project, so I change to use the toBlob method
@@ -627,6 +643,7 @@ const useCanvasUtils = (
     drawImageToCtx,
     updateCanvasSize,
     checkCanvasIsEmpty,
+    restoreCanvas,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,

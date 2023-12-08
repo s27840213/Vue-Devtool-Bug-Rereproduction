@@ -27,7 +27,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-v')")
       template(v-else-if="currActivePanel === 'adjust'")
-        div(id='header-reset')
+        div(id="header-reset")
       template(v-else)
         svg-icon(
           v-for="btn in centerBtns"
@@ -38,8 +38,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="btn.action")
     template(#right)
       nubtn(
-        v-if="inGenResultState"
-        @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+        v-if="inAspectRatioState || inGenResultState || hasGeneratedResults"
+        @click="handleNextAction") {{ inAspectRatioState || inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
@@ -82,7 +82,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
+      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
@@ -171,8 +171,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
+import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
+import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import PixiRecorder from '@/utils/pixiRecorder'
@@ -211,6 +213,7 @@ import { useStore } from 'vuex'
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
+
 // const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
@@ -227,6 +230,8 @@ const isCropping = computed(() => {
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 
+const { ids } = useGenImageUtils()
+
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
 // #endregion
@@ -234,6 +239,7 @@ const highResolutionPhoto = ref(false)
 // #region hooks related
 onBeforeRouteLeave((to, from) => {
   if (from.name === 'Editor') {
+    ids.length = 0
     setTimeout(() => {
       /**
        * @NOTE - if we reset immediately, will see the editor from editing state to initial state bcz transition time
@@ -251,7 +257,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, editorType } = editorStore
+const { changeEditorState, updateGenResult, setDescriptionPanel, editorType } = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -259,16 +265,25 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
+  hasGeneratedResults,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
-watch(() => isManipulatingCanvas.value, (val) => {
-  store.commit('SET_disableLayerAction', val)
-})
+watch(
+  () => isManipulatingCanvas.value,
+  (val) => {
+    store.commit('SET_disableLayerAction', val)
+  },
+)
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
-  if (inGenResultState.value) {
+  if (inAspectRatioState.value) {
+    changeEditorState('next')
+    useTutorial().runTutorial(editorType)
+  } else if (inEditingState.value) {
+    changeEditorState('next')
+  } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
     const currGenResult = generatedResults.value[currGenResultIndex.value]
@@ -302,20 +317,32 @@ const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep
 
 type centerBtn = {
-  icon: string,
-  disabled: boolean,
-  width: number,
+  icon: string
+  disabled: boolean
+  width: number
   action?: () => void
 }
 const centerBtns = computed<centerBtn[]>(() => {
   const retTabs = []
   const stepBtns = [
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
-    { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo }
+    { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo },
   ]
-  if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20, action: () => editorStore.setDescriptionPanel('hidden-message') })
+  if (editorType === 'hidden-message')
+    retTabs.push({
+      icon: 'question-mark-circle',
+      disabled: false,
+      width: 20,
+      action: () => setDescriptionPanel('hidden-message'),
+    })
   retTabs.push(...stepBtns)
-  if (currEditorTheme.value && editorType === 'hidden-message') retTabs.push({ icon: currEditorTheme.value.toggleIcon, disabled: false, width: 20, action: toggleEditorTheme })
+  if (currEditorTheme.value && editorType === 'hidden-message')
+    retTabs.push({
+      icon: currEditorTheme.value.toggleIcon,
+      disabled: false,
+      width: 20,
+      action: toggleEditorTheme,
+    })
   return retTabs
 })
 // #endregion
@@ -406,7 +433,7 @@ onMounted(() => {
       y: rect.top,
     },
   })
-  pagePinchHandler = (new PagePinchUtils(editorWrapperRef.value as HTMLElement)).pinchHandler
+  pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
@@ -460,7 +487,9 @@ const selectStart = (e: PointerEvent) => {
     movingUtils.removeListener()
     movingUtils.updateProps({
       _config: { config: layerUtils.getCurrLayer },
-      body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+      body: document.getElementById(
+        `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+      ) as HTMLElement,
     })
     movingUtils.moveStart(e)
   } else {
@@ -603,7 +632,7 @@ const demoBrushSizeStyles = computed(() => {
 const demoBrushSizeOutline = computed(() => {
   return {
     'outline-primary-white': !isBiColorEditor.value,
-    'outline-neutral-light-hover': isBiColorEditor.value
+    'outline-neutral-light-hover': isBiColorEditor.value,
   }
 })
 // #endregion
@@ -686,12 +715,12 @@ const assetPanelProps = computed((): { [index: string]: any } => {
   switch (currActiveTab.value) {
     case 'text': {
       return {
-        monoColor
+        monoColor,
       }
     }
     case 'object':
       return {
-        monoColor
+        monoColor,
       }
     default: {
       return {}
@@ -811,7 +840,8 @@ const handleSwipe = (dir: string) => {
     backface-visibility: hidden;
     transition: transform 0.6s;
 
-    &--back {}
+    &--back {
+    }
   }
 }
 

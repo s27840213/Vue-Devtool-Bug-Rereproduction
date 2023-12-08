@@ -1169,5 +1169,7 @@
   "CM0122": "Delete Project?",
   "CM0123": "The project will be permanently deleted. Are you sure?",
   "CM0124": "All results",
-  "CM0125": "Describe the scene you're imaging."
+  "CM0125": "Describe the scene you're imaging.",
+  "CM0126": "Prompt",
+  "CM0127": "Re-create"
 }

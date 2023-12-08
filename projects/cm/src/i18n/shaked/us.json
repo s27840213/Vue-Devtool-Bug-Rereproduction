@@ -151,6 +151,7 @@
   "NN0430": "Outline",
   "NN0431": "Distance",
   "NN0432": "Angle",
+  "NN0445": "Yes",
   "NN0454": "Loading",
   "NN0457": "Something went wrong...",
   "NN0463": "Uploaded Font",
@@ -478,6 +479,9 @@
   "CM0087": "Image Generation Failed",
   "CM0088": "Sorry, we could not generate the image this time. Please try again.",
   "CM0089": "for Some Image",
+  "CM0090": "Fill by myself",
+  "CM0091": "Auto fill blank area?",
+  "CM0092": "We can populate vacant areas as defaults for creation.<newline>Confirm?",
   "CM0093": "How to Create a Hidden Message Image?",
   "CM0094": "Step 1. You can add images, stickers or text as hidden messages in the photo.",
   "CM0095": "Step 2. After adding elements, type in your ideal scene.",
@@ -507,5 +511,10 @@
   "CM0119": "The edit area cannot be blank. Please add an element.",
   "CM0120": "Please type a scene.",
   "CM0121": "Please add an element.",
-  "CM0125": "Describe the scene you're imaging."
+  "CM0122": "Delete Project?",
+  "CM0123": "The project will be permanently deleted. Are you sure?",
+  "CM0124": "All results",
+  "CM0125": "Describe the scene you're imaging.",
+  "CM0126": "Prompt",
+  "CM0127": "Re-create"
 }

@@ -1,7 +1,16 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
-import type { DescriptionPanel, EditorFeature, EditorStates, EditorType, GenImageOptions, HiddenMessageStates, PowerfulfillStates } from '@/types/editor'
+import router from '@/router'
+import type {
+  DescriptionPanel,
+  EditorFeature,
+  EditorStates,
+  EditorType,
+  GenImageOptions,
+  HiddenMessageStates,
+  PowerfulfillStates,
+} from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
@@ -27,17 +36,22 @@ interface IEditorStore {
   currActiveFeature: EditorFeature
   editorType: EditorType
   maskDataUrl: string
-  isGenerating: boolean
+  isSendingGenImgReq: boolean
   generatedResults: Array<IGenResult>
   currGenResultIndex: number
   stepsTypesArr: Array<'canvas' | 'editor'>
   currStepTypeIndex: number
   initImgSrc: string
   useTmpSteps: boolean
-  currPrompt: string,
-  currGenOptions: GenImageOptions,
-  editorTheme: null | string,
-  descriptionPanel: null | DescriptionPanel,
+  // for my design
+  currDesignId: string
+  currSubDesignId: string
+  // for saving to document and show more results
+  currPrompt: string
+  currGenOptions: GenImageOptions
+  editorTheme: null | string
+  descriptionPanel: null | DescriptionPanel
+  currDesignThumbIndex: number
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -47,18 +61,21 @@ export const useEditorStore = defineStore('editor', {
     editorStates: editorStatesMap['powerful-fill'],
     currStateIndex: 0,
     currActiveFeature: 'none',
-    maskDataUrl: '',
-    isGenerating: false,
+    isSendingGenImgReq: false,
     generatedResults: [],
     currGenResultIndex: 0,
     stepsTypesArr: [],
     currStepTypeIndex: -1,
     initImgSrc: '',
+    maskDataUrl: '',
     useTmpSteps: false,
     currPrompt: '',
     currGenOptions: [],
+    currDesignId: '',
+    currSubDesignId: '',
     editorTheme: null,
     descriptionPanel: null,
+    currDesignThumbIndex: 0,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -109,9 +126,17 @@ export const useEditorStore = defineStore('editor', {
     generatedResultsNum(): number {
       return this.generatedResults.length
     },
+    isGenerating(): boolean {
+      return this.generatedResults.some((item) => item.url === '')
+    },
+    hasGeneratedResults(): boolean {
+      return (
+        this.generatedResults.length > 0 && this.generatedResults.some((item) => item.url !== '')
+      )
+    },
     showDescriptionPanel(): boolean {
       return this.descriptionPanel !== null
-    }
+    },
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -125,10 +150,23 @@ export const useEditorStore = defineStore('editor', {
     setImgAspectRatio(ratio: number) {
       this.imgAspectRatio = ratio
     },
-    startEditing(type: EditorType) {
+    startEditing(
+      type: EditorType,
+      props?: { stateTarget?: string; designId?: string; generatedResults?: Array<IGenResult> },
+    ) {
+      const { stateTarget, designId, generatedResults } = props || {}
       this.currStateIndex = 0
       this.editorType = type
+      if (designId) this.currDesignId = designId
       this.editorStates = editorStatesMap[this.editorType]
+      if (stateTarget && this.editorStates.findIndex((item) => item === stateTarget) !== -1) {
+        this.changeToSpecificEditorState(type, stateTarget)
+      }
+      if (generatedResults) {
+        this.generatedResults = generatedResults
+      }
+
+      router.push({ name: 'Editor' })
     },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
@@ -139,11 +177,18 @@ export const useEditorStore = defineStore('editor', {
         this.currStateIndex--
       }
     },
+    changeToSpecificEditorState(type: EditorType, state: string) {
+      this.editorStates = editorStatesMap[this.editorType]
+      this.currStateIndex = this.editorStates.findIndex((item) => item === state)
+    },
     setCurrActiveFeature(feature: EditorFeature) {
       this.currActiveFeature = feature
     },
-    setIsGenerating(isGenerating: boolean) {
-      this.isGenerating = isGenerating
+    setEditorType(type: EditorType) {
+      this.editorType = type
+    },
+    setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
+      this.isSendingGenImgReq = isSendingGenImgReq
     },
     unshiftGenResults(url: string, id: string) {
       if (this.generatedResults.length > 0) {
@@ -154,7 +199,16 @@ export const useEditorStore = defineStore('editor', {
         id,
       })
     },
-    updateGenResult(id: string, data: { url?: string; video?: string; updateIndex?: boolean }) {
+    updateGenResult(
+      id: string,
+      data: {
+        url?: string
+        video?: string
+        updateIndex?: boolean
+        saveToDocument?: boolean
+        saveMask?: boolean
+      },
+    ) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
       if (index === -1) return
       const { url, video, updateIndex } = data
@@ -220,6 +274,9 @@ export const useEditorStore = defineStore('editor', {
     setInitImgSrc(src: string) {
       this.initImgSrc = src
     },
+    setMaskDataUrl(url: string) {
+      this.maskDataUrl = url
+    },
     setCurrPrompt(prompt: string) {
       this.currPrompt = prompt
     },
@@ -227,27 +284,39 @@ export const useEditorStore = defineStore('editor', {
       this.currGenOptions = options
     },
     keepEditingInit() {
-      this.changeEditorState('prev')
+      this.changeToSpecificEditorState(this.editorType, 'editing')
       this.createNewPage(this.pageSize.width, this.pageSize.height)
-
-      assetUtils.addImage(
+      const targetUrl =
         this.currGenResultIndex === -1
           ? this.initImgSrc
-          : this.generatedResults[this.currGenResultIndex].url,
-        this.pageAspectRatio,
-        {
-          fit: 1,
-        },
-      )
+          : this.generatedResults[this.currGenResultIndex].url
+
+      assetUtils.addImage(targetUrl, this.pageAspectRatio, {
+        record: false,
+        fit: 1,
+      })
       groupUtils.deselect()
+      this.maskDataUrl = ''
+      this.initImgSrc = targetUrl
+      this.currPrompt = ''
+      useCanvasUtils().clearCtx()
 
       useSteps().reset()
+    },
+    setCurrDesignId(id: string) {
+      this.currDesignId = id
+    },
+    setCurrSubDesignId(id: string) {
+      this.currSubDesignId = id
     },
     setEditorTheme(theme: string | null) {
       this.editorTheme = theme
     },
     setDescriptionPanel(panel: DescriptionPanel | null) {
       this.descriptionPanel = panel
-    }
+    },
+    setCurrDesignThumbIndex(index: number) {
+      this.currDesignThumbIndex = index
+    },
   },
 })
