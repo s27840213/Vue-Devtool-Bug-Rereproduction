@@ -232,14 +232,6 @@ class pagePinchUtils {
       (!this.pointerIds.includes(touches[0].identifier) ||
       !this.pointerIds.includes(touches[1].identifier))) return this.pinchInit(e)
 
-    // if (store.getters.getDisableLayerAction) {
-    //   if (this.isPinchInit) {
-    //     return this.pinchEnd(e)
-    //   } else {
-    //     return
-    //   }
-    // }
-
     switch (e.phase) {
       case 'move': {
         if (!this.isPinchInit) {

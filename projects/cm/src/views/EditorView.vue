@@ -451,7 +451,7 @@ const selectStart = (e: PointerEvent) => {
   recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
 
-  const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
+  const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
     ? groupUtils.mapLayersToPage(
         [layerUtils.getCurrConfig as IImage],
         layerUtils.getCurrLayer as IGroup,
