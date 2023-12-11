@@ -1,13 +1,14 @@
 <template lang="pug">
 div(class="prompt-area w-full box-border px-24")
-  div(
-    class="flex flex-col justify-center items-center relative"
-    :class="{ 'pointer-events-none': preview }")
+  div(class="flex flex-col justify-center items-center relative" :class="{ 'pointer-events-none': preview }")
     //- placeholder for absolute contents
-    div(class="w-full" :style="{height: `${mainHeight}px`}")
+    div(class="w-full" :style="{ height: `${mainHeight}px` }")
     //- main
     transition(:name="`fade-${isTypeSettings ? 'right' : 'left'}-in`")
-      div(v-if="!isTypeSettings" class="absolute w-full flex flex-col gap-16" ref="elMain")
+      div(
+        v-if="!isTypeSettings"
+        class="absolute w-full flex flex-col gap-16"
+        ref="elMain")
         //- header bar
         div(class="w-full grid grid-cols-3 justify-between relative")
           div(class="w-fit")
@@ -47,7 +48,8 @@ div(class="prompt-area w-full box-border px-24")
           :disabled="isSendingGenImgReq"
           @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
       //- type settings
-      div(v-else-if="genTypes"
+      div(
+        v-else-if="genTypes"
         class="absolute w-full flex flex-col gap-16"
         :style="fixHeightStyles")
         //- header bar
@@ -68,7 +70,7 @@ div(class="prompt-area w-full box-border px-24")
             :key="idx"
             class="flex flex-col gap-8 bg-app-tab-disable bg-opacity-20 rounded-2xl p-12 aspect-square w-full"
             :class="{ 'outline outline-4 outline-primary-normal': idx === genTypes.value }"
-            @click="() => (genTypes && (genTypes.value = idx))")
+            @click="() => genTypes && (genTypes.value = idx)")
             img(
               v-if="genType.img"
               class="w-full object-cover object-center rounded-2xl aspect-[148/116]"
@@ -98,7 +100,8 @@ div(class="prompt-area w-full box-border px-24")
                 @click="() => (option.active = !option.active)")
               span {{ option.title }}
             span(class="justify-self-end") {{ option.value }}
-          Collapse(:when="!!option.active"
+          Collapse(
+            :when="!!option.active"
             @collapse="currTransitions.add(`collapse-sub-title-${idx}`)"
             @expand="currTransitions.add(`expand-sub-title-${idx}`)"
             @collapsed="currTransitions.delete(`collapse-sub-title-${idx}`)"

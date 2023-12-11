@@ -38,8 +38,18 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="btn.action")
     template(#right)
       nubtn(
-        v-if="inAspectRatioState || inGenResultState || hasGeneratedResults"
+        v-if="inAspectRatioState || inGenResultState"
         @click="handleNextAction") {{ inAspectRatioState || inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+      router-link(
+        v-if="inSavingState"
+        custom
+        :to="'/'"
+        v-slot="{ navigate }")
+        svg-icon(
+          iconColor="app-btn-primary-text"
+          iconName="home"
+          iconWidth="22px"
+          @click="handleHomeBtnAction(navigate)")
   div(
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
@@ -177,6 +187,7 @@ import useSteps from '@/composable/useSteps'
 import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
 import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -814,6 +825,14 @@ const handleSwipe = (dir: string) => {
   showVideo.value = !showVideo.value
 }
 // #endregion
+
+const { setCurrOpenDesign, setCurrOpenSubDesign } = useUserStore()
+
+const handleHomeBtnAction = (navagate: () => void) => {
+  setCurrOpenDesign(undefined)
+  setCurrOpenSubDesign(undefined)
+  navagate()
+}
 </script>
 <style lang="scss" scoped>
 @use '@/assets/scss/transitions.scss';
