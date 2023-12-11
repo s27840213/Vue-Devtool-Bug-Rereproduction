@@ -342,25 +342,29 @@ export default defineComponent({
         formatUtils.clearCopiedFormat()
       }
 
-      if (this.isImgCtrl) {
-        const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
-          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[0] : layerUtils.getCurrLayer
-        if (!controlUtils.isClickOnController(e, layer)) {
-          const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-          switch (currLayer.type) {
-            case LayerType.image:
-            case LayerType.group:
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-              break
-            case LayerType.frame:
-              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
-              break
-          }
-          return
+      const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
+        ? groupUtils.mapLayersToPage(
+          [layerUtils.getCurrConfig as IImage],
+          layerUtils.getCurrLayer as IGroup,
+        )[0]
+      : layerUtils.getCurrLayer
+      const isClickOnController = controlUtils.isClickOnController(e, layer)
+
+      if (this.isImgCtrl && !isClickOnController) {
+        const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+        switch (currLayer.type) {
+          case LayerType.image:
+          case LayerType.group:
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+            break
+          case LayerType.frame:
+            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+            break
         }
+        return
       }
 
-      if (controlUtils.isClickOnController(e)) {
+      if (isClickOnController) {
         this.movingUtils.removeListener()
         this.movingUtils.updateProps({
           _config: { config: layerUtils.getCurrLayer },

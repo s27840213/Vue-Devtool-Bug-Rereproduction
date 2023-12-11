@@ -342,6 +342,7 @@ export default defineComponent({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
+      isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
       controlState: 'getControlState',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -369,19 +370,12 @@ export default defineComponent({
       return this.isActive && !this.controllerHidden
     },
     showControlPtrs(): boolean {
-      return !['pinch', 'move'].includes(this.controlState.type)
+      return !['pinch', 'move'].includes(this.controlState.type) && !this.isPinchingEditor
       // return !this.isMoving && this.controlState.type !== 'pinch'
     },
     ctrlPtrStyles(): Record<string, number | string> {
-      if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
-        return {
-          outline: this.outlineStyles().outline,
-          opacity: 0
-        }
-      } else {
-        return {
-          outline: this.outlineStyles().outline
-        }
+      return {
+        outline: this.outlineStyles().outline
       }
     },
     resizerProfile() {
@@ -735,7 +729,7 @@ export default defineComponent({
       const checkTextFill = isTextFill(this.config.styles.textFill)
       // To fix tiptap focus issue that opacity 0 need one more tap to focus, set opacity to 0.0001.
       const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
-        !this.contentEditable ? 0.0001 : 1
+        !this.contentEditable && !this.isPinchingEditor ? 0.0001 : 1
       return {
         width: '100%',
         height: '100%',
@@ -1824,7 +1818,7 @@ export default defineComponent({
     },
     ctrlMiddleware(): boolean {
       if (this.$isTouchDevice()) {
-        if (this.$store.getters['mobileEditor/getIsPinchingEditor']) return true
+        if (this.isPinchingEditor) return true
       }
       return false
     }

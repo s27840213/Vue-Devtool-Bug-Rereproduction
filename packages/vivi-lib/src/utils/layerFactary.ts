@@ -666,7 +666,6 @@ class LayerFactary {
       }
     }
     config.backgroundImage.config = this.newImage(config.backgroundImage.config)
-    console.log('genenaaa', generalUtils.deepCopy(config))
     config.jsonVer = latestJsonVer
     textUtils.resetScale(config, true)
     return config
