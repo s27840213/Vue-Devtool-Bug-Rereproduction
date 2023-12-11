@@ -12,36 +12,36 @@ div(class="prompt-area w-full box-border px-24")
         //- header bar
         div(class="w-full grid grid-cols-3 justify-between relative")
           div(class="w-fit")
-          span(class="text-app-tab-default typo-btn-lg") {{ title }}
+          span(class="text-yellow-0 typo-btn-lg") {{ title }}
           div(class="w-fit")
             svg-icon(
               v-if="showSettingsIcon"
               :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
-              class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2"
+              class="text-yellow-0 absolute right-0 top-1/2 -translate-y-1/2"
               @click="isGenSettings = !isGenSettings")
         //- content
         div(class="w-full relative")
           textarea(
-            class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+            class="w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
             :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
             :autofocus="!isDuringTutorial"
             v-model="promptText")
           transition(name="clear-btn-transition")
             div(
               v-if="promptLen > 0"
-              class="absolute bottom-10 right-10 text-app-text-primary typo-body-sm"
+              class="absolute bottom-10 right-10 text-dark typo-body-sm"
               @click="clearPromt")
               span {{ $t('CM0029') }}
         div(
           v-if="showTypeSelector && genTypes"
-          class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-app-tab-disable bg-opacity-20 rounded-[10px] p-8 gap-8 text-left typo-h5"
+          class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-lighter/20 rounded-10 p-8 gap-8 text-left typo-h5"
           @click="isTypeSettings = true")
-          span(class="text-app-tab-default") {{ $t('CM0108') }}
-          span(class="text-app-tab-disable") {{ genTypes.group[genTypes.value].text }}
+          span(class="text-yellow-0") {{ $t('CM0108') }}
+          span(class="text-lighter") {{ genTypes.group[genTypes.value].text }}
           svg-icon(
             iconName="cm_chevron-right"
             iconWidth="24px"
-            iconColor="app-text-secondary")
+            iconColor="white")
         nubtn(
           v-if="!preview"
           size="mid-full"
@@ -56,24 +56,24 @@ div(class="prompt-area w-full box-border px-24")
         div(class="w-full grid grid-cols-3 justify-between relative")
           div(class="flex w-fit")
             svg-icon(
-              iconColor="app-icon-light"
+              iconColor="yellow-0"
               iconName="cm_arrow-left"
               iconWidth="24px"
-              class="text-app-tab-default absolute left-0 top-1/2 -translate-y-1/2"
+              class="text-yellow-0 absolute left-0 top-1/2 -translate-y-1/2"
               @click="isSettings = false")
-          span(class="text-app-tab-default typo-btn-lg") {{ title }}
+          span(class="text-yellow-0 typo-btn-lg") {{ title }}
           div(class="w-fit")
         //- content
-        div(class="w-full flex justify-center items-center gap-16 typo-h5 text-app-text-secondary")
+        div(class="w-full flex justify-center items-center gap-16 typo-h5 text-white")
           div(
             v-for="(genType, idx) in genTypes.group"
             :key="idx"
-            class="flex flex-col gap-8 bg-app-tab-disable bg-opacity-20 rounded-2xl p-12 aspect-square w-full"
-            :class="{ 'outline outline-4 outline-primary-normal': idx === genTypes.value }"
+            class="flex flex-col gap-8 bg-lighter/20 rounded-16 p-12 aspect-square w-full"
+            :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
             @click="() => genTypes && (genTypes.value = idx)")
             img(
               v-if="genType.img"
-              class="w-full object-cover object-center rounded-2xl aspect-[148/116]"
+              class="w-full object-cover object-center rounded-16 aspect-[148/116]"
               :src="require(genType.img)")
             span {{ genType.text }}
   //- gen options
@@ -85,7 +85,7 @@ div(class="prompt-area w-full box-border px-24")
     @collapsed="currTransitions.delete('collapse-gen-options')"
     @expanded="currTransitions.delete('expand-gen-options')")
     div(
-      class="w-full bg-app-tab-disable bg-opacity-20 rounded-[10px] px-8 py-16 flex flex-col text-left text-app-text-secondary box-border mt-16")
+      class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white box-border mt-16")
       div(
         v-for="(option, idx) in genRangeOptions"
         :key="idx")
@@ -96,7 +96,7 @@ div(class="prompt-area w-full box-border px-24")
                 v-if="option.icon"
                 :iconName="option.active && option.iconActive ? option.iconActive : option.icon"
                 iconWidth="24px"
-                iconColor="primary-light-active"
+                iconColor="yellow-2"
                 @click="() => (option.active = !option.active)")
               span {{ option.title }}
             span(class="justify-self-end") {{ option.value }}
@@ -108,7 +108,7 @@ div(class="prompt-area w-full box-border px-24")
             @expanded="currTransitions.delete(`expand-sub-title-${idx}`)")
             div(
               v-if="option.subTitle"
-              class="w-full text-app-tab-disable typo-body-sm mt-8"
+              class="w-full text-lighter typo-body-sm mt-8"
               v-html="option.subTitle")
           div(class="mt-8")
             input(
@@ -121,11 +121,11 @@ div(class="prompt-area w-full box-border px-24")
               type="range")
           div(
             v-if="option.minDescription || option.maxDescription"
-            class="w-full flex justify-between items-center text-app-text-secondary typo-btn-sm mt-8")
+            class="w-full flex justify-between items-center text-white typo-btn-sm mt-8")
             span(class="typo-body-sm text-left" v-html="option.minDescription")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
-          div(class="w-full h-1 bg-app-tab-disable bg-opacity-50")
+          div(class="w-full h-1 bg-lighter/50")
 </template>
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'

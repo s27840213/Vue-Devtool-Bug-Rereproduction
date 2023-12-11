@@ -65,7 +65,7 @@ watch(
 </script>
 <style lang="scss" scoped>
 .bottom-panel {
-  @apply bg-app-tab-bg w-full rounded-t-[24px] box-border pt-16;
+  @apply bg-dark-3 w-full rounded-t-24 box-border pt-16;
   transition: v-bind("noTransition ? 'none' : 'all 0.3s'");
   max-height: v-bind("`calc(100% - ${gap}px)`");
 }

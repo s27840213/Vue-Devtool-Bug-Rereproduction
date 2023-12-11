@@ -57,6 +57,7 @@ div(class="footer-tabs")
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import i18n from '@/i18n'
+import { IColorKeys } from '@/interfaces/color'
 import { ICurrSelectedInfo, IFooterTab } from '@/interfaces/editor'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
@@ -89,7 +90,7 @@ export default defineComponent({
     }
   },
   data() {
-    const mainMenu = { icon: 'unfold', color: 'blue-1' }
+    const mainMenu = { icon: 'unfold', color: 'blue-1' as IColorKeys }
 
     return {
       mainMenu,
@@ -258,6 +259,7 @@ export default defineComponent({
     isGroup(): boolean {
       return layerUtils.getCurrLayer.type === LayerType.group
     },
+    // eslint-disable-next-line vue/no-unused-properties
     isUploadingImg(): boolean {
       const currLayer = layerUtils.getCurrLayer
       if(currLayer.type === LayerType.image) {
@@ -448,11 +450,11 @@ export default defineComponent({
         }
       }
     },
-    homeTabColor(icon: IFooterTab): string {
-      return ''
+    homeTabColor(icon: IFooterTab): IColorKeys | undefined {
+      return undefined
     },
-    settingTabColor(icon: IFooterTab): string {
-      return ''
+    settingTabColor(icon: IFooterTab): IColorKeys | undefined {
+      return undefined
     },
     customContainerStyles(isSubContainer: boolean): { [index: string]: string } {
       // used by extending class for their custom styles

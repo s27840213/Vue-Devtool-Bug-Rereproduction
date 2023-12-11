@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class='aspect-ratio-selector')
-  div(class="typo-btn-lg text-app-text-secondary") {{ $t('CM0013') }}
+  div(class="typo-btn-lg text-white") {{ $t('CM0013') }}
   div(class="w-full box-border pl-24")
     scrollable-container(:px="0" :py="16")
       div(
@@ -9,14 +9,14 @@ div(class='aspect-ratio-selector')
         class="w-56 flex flex-col justify-center items-center gap-4"
         @click="selectAspectRatio(aspectRatio)")
         svg-icon(
-          :iconColor="selectedType === aspectRatio ? 'primary-light-active' : aspectRatio === 'original' ? 'app-text-secondary' : 'transparent'"
-          :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'app-tab-active' : 'app-text-secondary'"
+          :iconColor="selectedType === aspectRatio ? 'yellow-2' : aspectRatio === 'original' ? 'white' : 'transparent'"
+          :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'yellow-cm' : 'white'"
           iconWidth="32px"
           iconHeight="32px"
           :iconName="'ratio-' + aspectRatio.replace(':', '-')")
         span(
           class="typo-btn-sm transition-colors duration-300 capitalize"
-          :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
+          :class="selectedType === aspectRatio ? 'text-yellow-cm' : 'text-yellow-0'") {{ aspectRatio }}
   div(class="w-full box-border px-24")
     nubtn(
       size="mid-full"

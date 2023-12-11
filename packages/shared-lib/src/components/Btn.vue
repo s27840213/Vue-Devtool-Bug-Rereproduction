@@ -18,6 +18,7 @@ button(
 <script lang="ts">
 import type { PropType } from 'vue'
 import { defineComponent } from 'vue'
+import colorTable from '@nu/tailwind-lib/colors.json'
 
 const component = defineComponent({
   emits: [],
@@ -33,7 +34,7 @@ const component = defineComponent({
       default: 'menu',
     },
     iconColor: {
-      type: String,
+      type: String as PropType<keyof typeof colorTable>,
       default: '#fff',
     },
     iconWidth: {

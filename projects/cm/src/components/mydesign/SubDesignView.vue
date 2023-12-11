@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-app-bg box-border z-median")
+div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-border z-median")
   headerbar(
     class="editor-header box-border px-24"
     :middGap="32"
@@ -15,7 +15,7 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-app-bg box-borde
         :to="'/'"
         v-slot="{ navigate }")
         svg-icon(
-          iconColor="app-btn-primary-text"
+          iconColor="white"
           iconName="home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
@@ -30,26 +30,26 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-app-bg box-borde
         class="relative"
         @click="selectDesign(design)")
         img(
-          class="w-full rounded-[20px]"
+          class="w-full rounded-20"
           :src="imageUtils.appendQuery(getSubDesignThumbUrl(design.type, design.id, design.subId), 'lsize', '300')")
         //- svg-icon(
-        //-   class="absolute right-10 top-10 bg-app-btn-primary-text rounded-[10px] m-1"
+        //-   class="absolute right-10 top-10 bg-white rounded-10 m-1"
         //-   iconName="more_horizontal"
         //-   iconWidth="22px"
-        //-   @click.stop="editDesign(design)")
+        //-   @click="editDesign(design)")
     div(
       v-show="currOpenSubDesign && subDesignThumbLoaded"
-      class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-app-bg z-5 px-24 box-border py-8 overflow-hidden")
+      class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-8 overflow-hidden")
       div(
         v-if="currOpenSubDesign"
         class="max-h-[60%]"
         :style="{ aspectRatio: currOpenSubDesign.width / currOpenSubDesign.height }")
         img(
-          class="h-full w-full object-contain rounded-[20px]"
+          class="h-full w-full object-contain rounded-20"
           v-if="currOpenSubDesign"
           @load="handleThumbLoaded"
           :src="imageUtils.appendQuery(getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId), 'lsize', '900')")
-      div(class="flex flex-col gap-8 text-primary-white w-full h-full overflow-scroll")
+      div(class="flex flex-col gap-8 text-white w-full h-full overflow-scroll")
         div(class="flex items-center gap-4 w-full")
           svg-icon(
             iconName="prompt"

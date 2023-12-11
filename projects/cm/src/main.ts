@@ -1,5 +1,5 @@
 import '@/_require' // Must be import first.
-import '@/assets/css/main.css'
+import '@nu/tailwind-lib/index.css'
 import { initApp } from '@nu/vivi-lib/main'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="action-sheet" ref="actionSheetRef")
-  div(class="bg-app-tab-bg flex flex-col rounded-lg")
+  div(class="bg-dark-3 flex flex-col rounded-10")
     div(
       v-for="(action, index) in primaryActions"
       :key="index"
@@ -11,7 +11,7 @@ div(class="action-sheet" ref="actionSheetRef")
         v-for="(label, index) in action.labels"
         :key="index"
         :class="`text-${label.labelColor} ${label.labelSize}`") {{ label.label }}
-  div(class="bg-app-tab-bg flex flex-col rounded-lg")
+  div(class="bg-dark-3 flex flex-col rounded-10")
     div(
       v-for="(action, index) in secondaryActions"
       :key="index"
@@ -45,7 +45,7 @@ onClickOutside(actionSheetRef, () => toggleActionSheet())
 }
 
 .border-style {
-  @apply border-b-app-tab-disable border-solid border-0 border-b-[0.5px] border-opacity-50;
+  @apply border-b-lighter/50 border-solid border-0 border-b-.5;
   @apply last:border-b-0;
 }
 </style>

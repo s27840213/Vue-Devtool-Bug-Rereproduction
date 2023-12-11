@@ -5,7 +5,7 @@ div(
     div(
       v-for="tag in myDesignTags"
       class="px-8 py-4 box-border rounded-full typo-body-md whitespace-nowrap"
-      :class="[currMyDesignType === tag.type ? 'bg-primary-light-hover text-app-text-primary' : 'bg-app-setting-bg-lighter text-primary-light']"
+      :class="[currMyDesignType === tag.type ? 'bg-yellow-1 text-dark' : 'bg-lighter/33 text-yellow-0']"
       :key="tag.type"
       @click="selectMyDesignType(tag)")
       span(class="") {{ tag.label }}
@@ -22,11 +22,11 @@ div(
         :key="design.id"
         class="relative")
         img(
-          class="w-full rounded-[20px]"
+          class="w-full rounded-20"
           :src="imageUtils.appendQuery(getDesignThumbUrl(design), 'lsize', '300')"
           @click="selectDesign(design)")
         svg-icon(
-          class="absolute right-10 top-10 bg-app-btn-primary-text rounded-[10px] m-1"
+          class="absolute right-10 top-10 bg-white rounded-10 m-1"
           iconName="more_horizontal"
           iconWidth="22px"
           @click="editDesign(design)")
@@ -39,10 +39,10 @@ div(
         svg-icon(
           class="mb-10"
           :iconName="'loading'"
-          iconColor="app-text-secondary")
+          iconColor="white")
   div(v-else class="flex flex-col justify-center items-center gap-32")
     img(src="@/assets/img/img-empty.png" class="w-240")
-    span(class="text-app-tab-default typo-h5") {{ $t('CM0031') }}
+    span(class="text-yellow-0 typo-h5") {{ $t('CM0031') }}
   sub-design-view(
     v-if="currOpenDesign && isDesignOpen"
     :currOpenDesign="currOpenDesign"

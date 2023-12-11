@@ -15,12 +15,13 @@ template(v-for="(tab, index) in tablist" :key="`${tab.icon}-${index}`")
 </template>
 
 <script lang="ts">
+import { IColorKeys } from '@/interfaces/color'
 import { PropType, defineComponent } from 'vue'
 
 export type TabColor = {
-  normal?: string
-  active?: string
-  disabled?: string
+  normal?: IColorKeys
+  active?: IColorKeys
+  disabled?: IColorKeys
 }
 
 export type TabConfig = {
@@ -53,7 +54,7 @@ export default defineComponent({
         action()
       }
     },
-    iconColor(tab: TabConfig) {
+    iconColor(tab: TabConfig): IColorKeys {
       const { normal = 'white', active = 'white', disabled = 'gray-2' } = tab.color ?? {}
       return tab.disabled ? disabled
         : (tab.isActive && tab.isActive(tab.icon) ? active : normal)

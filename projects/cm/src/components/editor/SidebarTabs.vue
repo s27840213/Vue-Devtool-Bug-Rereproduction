@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide")
+div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll scrollbar-hide")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
       v-if="!tab.hidden"
@@ -14,14 +14,14 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
           class="pointer-events-none"
           :style="tab.styles"
           :iconName="tab.icon"
-          :iconColor="tab.disabled ? 'app-icon-dark' : currActiveFeature === tab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+          :iconColor="tab.disabled ? 'dark' : currActiveFeature === tab.icon ? 'yellow-cm' : 'white'"
           iconWidth="20px")
         span(
           class="typo-btn-sm whitespace-nowrap pointer-events-none"
-          :class="tab.disabled ? 'text-app-icon-dark' : 'text-app-btn-primary-text'") {{ tab.text }}
+          :class="tab.disabled ? 'text-dark' : 'text-white'") {{ tab.text }}
       div(
         v-if="tab.icon === currActiveFeature && tab.subTabs"
-        class="flex flex-col items-center justify-center gap-2 bg-neutral-light-active/50 rounded-full")
+        class="flex flex-col items-center justify-center gap-2 bg-dark-1/50 rounded-full")
         div(
           v-for="(subTab, index) in tab.subTabs"
           :key="`${subTab.icon}-${index}`"
@@ -32,11 +32,11 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scro
           svg-icon(
             :style="subTab.styles"
             :iconName="subTab.icon"
-            :iconColor="currActiveFeature === subTab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+            :iconColor="currActiveFeature === subTab.icon ? 'yellow-cm' : 'white'"
             iconWidth="20px")
           span(
             class="typo-btn-sm whitespace-nowrap"
-            :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
+            :class="true ? 'text-yellow-0' : 'text-lighter'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'

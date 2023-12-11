@@ -15,7 +15,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
   //-   class="my-10"
   //-   icon="crown"
   //-   @click="exportVedio") Test video Selector
-  div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0004') }}
+  div(class="w-full my-20 typo-h4 text-yellow-cm text-left") {{ $t('CM0004') }}
   div(class="feature-section")
     feature-card(
       v-for="feature in quickStartFeatures"
@@ -23,7 +23,7 @@ div(class="box-border px-16 h-full w-full overflow-scroll scrollbar-hide pt-12")
       :bgImg="feature.bgImg"
       :title="feature.title"
       :target="feature.target")
-  div(class="w-full my-20 typo-h4 text-app-btn-primary-bg text-left") {{ $t('CM0009') }}
+  div(class="w-full my-20 typo-h4 text-yellow-cm text-left") {{ $t('CM0009') }}
   div(class="feature-section mb-20")
     feature-card(
       v-for="feature in aiArtFeatures"

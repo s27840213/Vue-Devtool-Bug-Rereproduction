@@ -187,8 +187,6 @@ class MouseUtils {
     const img = {
       width: layer.styles.imgWidth,
       height: layer.styles.imgHeight
-      // width: layer.styles.width,
-      // height: layer.styles.height
     }
     /**
      * Below determines the img's initial width/height

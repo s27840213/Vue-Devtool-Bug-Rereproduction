@@ -169,7 +169,7 @@ export const useEditorStore = defineStore('editor', {
         this.generatedResults = generatedResults
       }
 
-      router.push({ name: 'Editor' })
+      router.push({ name: 'Editor', query: { type } })
     },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length

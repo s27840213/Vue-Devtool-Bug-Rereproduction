@@ -34,6 +34,9 @@
         "./src/*",
         "../../packages/vivi-lib/src/*"
       ],
+      "@nu/tailwind-lib/*": [
+        "../../packages/tailwind-lib/*"
+      ],
       "@nu/shared-lib/*": [
         "../../packages/shared-lib/src/*"
       ],
