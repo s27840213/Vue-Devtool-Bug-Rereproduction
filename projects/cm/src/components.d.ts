@@ -37,8 +37,6 @@ declare module 'vue' {
     ScrollableContainer: typeof import('./components/global/ScrollableContainer.vue')['default']
     SelectionOptions: typeof import('./components/panel-content/SelectionOptions.vue')['default']
     SidebarTabs: typeof import('./components/editor/SidebarTabs.vue')['default']
-    SubDesign: typeof import('./components/mydesign/SubDesign.vue')['default']
-    SubDesignList: typeof import('./components/mydesign/SubDesignList.vue')['default']
     SubDesignView: typeof import('./components/mydesign/SubDesignView.vue')['default']
     SvgIconTest: typeof import('./components/global/SvgIconTest.vue')['default']
     Tutorial: typeof import('./components/tutorial/Tutorial.vue')['default']

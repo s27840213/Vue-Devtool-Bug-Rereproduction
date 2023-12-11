@@ -233,9 +233,54 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const appendNewDesign = (design: ICmMyDesign) => {
-    myDesignFilesMap.all.unshift(design)
-    myDesignFilesMap[editorType.value].unshift(design)
+  const updateDesignsInStore = (design: ICmMyDesign) => {
+    // first find if the design id exsit in the store
+    const indexInAll = myDesignFilesMap.all.findIndex((item) => item.id === design.id)
+    const indexInType = myDesignFilesMap[design.type].findIndex((item) => item.id === design.id)
+    if (indexInAll !== -1) {
+      // remove the old one
+      myDesignFilesMap.all.splice(indexInAll, 1)
+      // unshift the new one
+      myDesignFilesMap.all.unshift(design)
+    }
+    if (indexInType !== -1) {
+      // remove the old one
+      myDesignFilesMap[design.type].splice(indexInType, 1)
+      // unshift the new one
+      myDesignFilesMap[design.type].unshift(design)
+    }
+
+    if (indexInAll === -1 && indexInType === -1) {
+      myDesignFilesMap.all.unshift(design)
+      myDesignFilesMap[design.type].unshift(design)
+    }
+  }
+
+  const deleteDesignFromStore = (design: ICmMyDesign) => {
+    const indexInAll = myDesignFilesMap.all.findIndex((item) => item.id === design.id)
+    const indexInType = myDesignFilesMap[design.type].findIndex((item) => item.id === design.id)
+
+    if (indexInAll !== -1) {
+      myDesignFilesMap.all.splice(indexInAll, 1)
+    }
+    if (indexInType !== -1) {
+      myDesignFilesMap[design.type].splice(indexInAll, 1)
+    }
+  }
+
+  const deleteDesign = async (design: ICmMyDesign) => {
+    const { type, id } = design
+    const data = await cmWVUtils.deleteAsset(`mydesign-${type}`, id, 'mydesign')
+    const { flag } = data ?? { flag: '1' }
+    if (flag === '1') {
+      throw new Error('delete design failed')
+    } else {
+      deleteDesignFromStore(design)
+      // notify({
+      //   group: 'success',
+      //   text: `${t('NN0889')}`,
+      // })
+    }
   }
 
   /**
@@ -319,8 +364,7 @@ export const useUserStore = defineStore('user', () => {
       } as ICmMyDesign
 
       await cmWVUtils.addAsset(`mydesign-${editorType.value}`, newDesign, undefined, 'mydesign')
-
-      appendNewDesign(newDesign)
+      updateDesignsInStore(newDesign)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
@@ -379,7 +423,7 @@ export const useUserStore = defineStore('user', () => {
     saveDesignImageToDocument,
     saveSubDesign,
     listDesigns,
-    appendNewDesign,
+    updateDesignsInStore,
     getTargetImageUrl,
     getDesignThumbUrl,
     getSubDesignThumbUrl,
@@ -395,6 +439,7 @@ export const useUserStore = defineStore('user', () => {
     isSubDesignOpen,
     currOpenSubDesign,
     setCurrOpenSubDesign,
+    deleteDesign,
     // #endregion
   }
 })

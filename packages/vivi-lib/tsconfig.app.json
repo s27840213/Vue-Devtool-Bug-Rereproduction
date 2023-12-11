@@ -4,7 +4,8 @@
     "src/**/*.vue",
     "src/**/*.json",
     "../shared-lib/src/**/*.vue",
-    "../shared-lib/src/**/*.ts"
+    "../shared-lib/src/**/*.ts",
+    "../tailwind-lib/colors.json"
   ],
   "exclude": [
     "src/**/__tests__/*"
@@ -25,6 +26,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@nu/tailwind-lib/*": [
+        "../tailwind-lib/*"
       ],
       "@nu/shared-lib/*": [
         "../shared-lib/src/*"

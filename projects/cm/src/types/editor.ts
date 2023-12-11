@@ -32,6 +32,8 @@ export type GenImageRangeOption = {
   max: number
   step: number
   icon?: string
+  iconActive?: string
+  active?: boolean
   value: number
 }
 export type GenImageOptions = Array<GenImageGroupOption | GenImageRangeOption>

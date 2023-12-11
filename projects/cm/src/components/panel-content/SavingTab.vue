@@ -3,27 +3,27 @@ div(class="w-full flex items-center justify-center gap-64 py-12 box-border")
   div(class="flex flex-col gap-4 items-center justify-center" @click="save")
     svg-icon(
       :iconName="'download'"
-      :iconColor="'app-tab-default'"
+      :iconColor="'yellow-0'"
       :iconWidth="'24px'")
-    span(class="text-app-tab-default typo-body-sm") {{ $t('STK0004') }}
+    span(class="text-yellow-0 typo-body-sm") {{ $t('STK0004') }}
   div(class="flex flex-col gap-4 items-center justify-center" @click="share")
     svg-icon(
       :iconName="'share'"
-      :iconColor="'app-tab-default'"
+      :iconColor="'yellow-0'"
       :iconWidth="'24px'")
-    span(class="text-app-tab-default typo-body-sm") {{ $t('NN0214') }}
+    span(class="text-yellow-0 typo-body-sm") {{ $t('NN0214') }}
   div(class="flex flex-col gap-4 items-center justify-center" @click="recreate")
     svg-icon(
       :iconName="'recreate'"
-      :iconColor="'app-tab-default'"
+      :iconColor="'yellow-0'"
       :iconWidth="'24px'")
-    span(class="text-app-tab-default typo-body-sm") {{ $t('CM0127') }}
+    span(class="text-yellow-0 typo-body-sm") {{ $t('CM0127') }}
   div(class="flex flex-col gap-4 items-center justify-center" @click="edit")
     svg-icon(
       :iconName="'pencil'"
-      :iconColor="'app-tab-default'"
+      :iconColor="'yellow-0'"
       :iconWidth="'24px'")
-    span(class="text-app-tab-default typo-body-sm") {{ $t('NN0504') }}
+    span(class="text-yellow-0 typo-body-sm") {{ $t('NN0504') }}
 </template>
 <script setup lang="ts">
 import useActionSheetCm from '@/composable/useActionSheetCm'

@@ -42,7 +42,7 @@ div(ref="body"
                 @search="handleSearch")
       nubtn(class="template-center__mobile-search__options"
           theme="icon2" size="mid"
-          :icon="['advanced', 'none']"
+          :icon="['advanced', 'white']"
           :active="isShowOptions"
           style="border-color: #d9dbe1"
           @click="isShowOptions = !isShowOptions")

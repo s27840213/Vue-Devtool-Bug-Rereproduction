@@ -150,7 +150,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   sendAppLoaded() {
-    if (!this.appLoadedSent) {
+    if (!this.inBrowserMode && !this.appLoadedSent) {
       this.sendToIOS('REQUEST', this.makeAPIRequest('APP_LOADED', {}), true)
       this.appLoadedSent = true
     }
@@ -380,12 +380,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async listAsset(key: string, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
+    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return;
     const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group });
 
     if(returnResponse) {
       return res as IListAssetResponse
     }
-    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return;
     if (!res) return;
 
     this.handleListAssetResult(res as IListAssetResponse);
@@ -471,6 +471,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (this.checkVersion('1.0.14')) {
       return await this.callIOSAsHTTPAPI('GET_JSON', { path, name })
     }
+  }
+
+  async deleteAsset(key: string, id: string, group?: string, updateList = true) {
+      return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
   }
 }
 

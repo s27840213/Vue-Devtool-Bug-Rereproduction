@@ -2,6 +2,7 @@
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
+import { IColorKeys } from '@nu/vivi-lib/interfaces/color'
 import { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
@@ -762,7 +763,7 @@ export default defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    homeTabColor(icon: IFooterTab): string {
+    homeTabColor(icon: IFooterTab): IColorKeys {
       return this.tabActive(icon) ? 'blue-1' : 'white'
     },
     // eslint-disable-next-line vue/no-unused-properties

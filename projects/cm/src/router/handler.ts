@@ -31,7 +31,6 @@ export async function editorRouteHandler(
     const { startEditing, setPageSize, setCurrActiveFeature, stepsReset, setCurrGenOptions } =
       editorStore
     const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
-    startEditing(type)
     setPageSize(900, 1600)
     stepsReset()
     if (isBiColorEditor.value) initBiColorEditor(editorType.value)

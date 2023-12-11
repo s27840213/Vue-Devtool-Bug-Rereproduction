@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="bg-app-btn-primary-bg") Task
+div(class="bg-yellow-cm") Task
 </template>
 
 <script lang="ts">

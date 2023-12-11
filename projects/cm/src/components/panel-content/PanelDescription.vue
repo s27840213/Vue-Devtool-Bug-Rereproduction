@@ -1,44 +1,45 @@
 <template lang="pug">
-div(v-if="descriptionPanel" class="panel-description w-full px-16 pt-24 box-border relative text-app-text-secondary")
+div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt-24 box-border flex flex-col gap-16 text-white")
   svg-icon(
-    class="absolute -top-6 right-16"
+    class="absolute top-10 right-16"
     iconName="close"
-    iconColor="app-icon-light"
+    iconColor="yellow-0"
     iconWidth="24px"
     @click="closePanel")
-  div(class="typo-h5 mb-16") {{ title }}
-  div(class="flex flex-col justify-start items-center gap-16 overflow-scroll max-h-[590px] pb-45")
+  div(class="typo-h5") {{ title }}
+  div(class="flex flex-col justify-start items-center gap-16 overflow-scroll pb-37")
     //- hidden message help
     template(v-if="descriptionPanel === 'hidden-message'")
       div(class="w-full typo-body-md text-left") {{ t('CM0094') }}
       div(v-for="(item, idx) in hiddenMessageStep1Items" :key="idx" class="flex gap-8")
         div(class="w-full flex flex-col gap-11 items-end")
           img(
-            class="w-100 h-100 rounded-full border-solid border-[3px] border-primary-white object-cover object-center"
+            class="w-100 h-100 rounded-full border-solid border-3 border-white object-cover object-center"
             :src="item.imgA")
           svg-icon(
             iconName="tutorial-arrow-right-primary"
             iconWidth="55px")
         div(class="w-full flex flex-col gap-6 items-end")
-          div(class="relative top-22 w-44 h-[66px] flex flex-col gap-4 items-center")
+          div(class="relative top-22 w-44 h-66 flex flex-col gap-4 items-center")
             svg-icon(
               :iconName="item.iconName"
-              iconColor="app-icon-light"
+              iconColor="yellow-0"
               iconWidth="20px")
             span(class="typo-btn-xs") {{ item.iconText }}
             svg-icon(
-              class="absolute top-[17px] left-[-5px]"
+              class="absolute top-17 -left-5"
               iconName="tutorial-highlight-bl"
               iconWidth="11px")
             svg-icon(
-              class="absolute top-[-22px] left-[22px]"
+              class="absolute -top-22 left-22"
               iconName="tutorial-highlight-tr"
               iconWidth="18px")
           img(
-            class="w-100 h-100 rounded-full border-solid border-[3px] border-primary-white object-cover object-center"
+            class="w-100 h-100 rounded-full border-solid border-3 border-white object-cover object-center"
             :src="item.imgB")
       div(class="w-full typo-body-md text-left") {{ t('CM0095') }}
       prompt-area(preview)
+      div(class="w-full")
     //- img preprocess info
     template(v-if="['hidden-message-invert', 'hidden-message-bgrm'].includes(descriptionPanel)")
       div(class="w-full typo-body-md text-left") {{ hiddenMessageImgPreprocessDescription }}
@@ -148,6 +149,10 @@ const hiddenMessageImgPreprocessItems = computed(() => Array.from(Array(2), (_, 
   })()
 })))
 // #endregion
+
+const maxHeight = computed(() => {
+  const instance = getCurrentInstance();
+})
 </script>
 <style lang="scss">
 </style>

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
-  :class="{'bg-app-bg': !isDuringCopy}")
+  :class="{'bg-dark-6': !isDuringCopy}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
@@ -22,7 +22,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
             to="/settings"
             v-slot="{ navigate }")
             svg-icon(iconName="cm_settings"
-              :iconColor="'app-tab-default'" @click="navigate")
+              :iconColor="'yellow-0'" @click="navigate")
       nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="router-view box-border pb-12 min-h-full row-start-2 row-end-3"
@@ -34,8 +34,8 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
   bottom-panel(v-if="bottomPanelComponent && !atEventTester && !(isDuringCopy && !isAutoFilling)"
     class="z-bottom-panel row-start-3 row-end-4 tutorial-powerful-fill-4--highlight tutorial-hidden-message-4--highlight"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
-    :style="disableBtmPanelTransition ? 'transition: none' : ''")
-    template(#content="{setSlotRef}")
+    :disableTransition="disableBtmPanelTransition")
+    template(#content="{setSlotRef, disableTransition}")
       transition(
         name="bottom-panel-transition"
         mode="out-in"
@@ -46,7 +46,8 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
                   :currActivePanel="currActivePanel"
                   :currPage="currPage"
                   :currTab="currActivePanel"
-                  @switchTab="switchTab")
+                  @switchTab="switchTab"
+                  @disableBtmPanelTransition="disableTransition")
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
@@ -64,11 +65,13 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
         :requireNum="requireImgNum")
     transition(name="fade-in-out")
       div(v-if="showDescriptionPanel"
-      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-neutral-dark bg-opacity-70")
+      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-dark-4/70")
     transition(name="bottom-up-down")
       bottom-panel(
         v-if="showDescriptionPanel"
-        class="absolute bottom-0 z-desciption-panel pointer-events-auto")
+        class="absolute bottom-0 z-desciption-panel pointer-events-auto"
+        :gap="statusBarHeight + 150"
+        ignoreHomeIndicator)
         template(#content="{setSlotRef}")
           transition(
             name="bottom-panel-transition"
@@ -86,7 +89,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content bg-app-toast-success")
+        div(class="notification__content bg-yellow-1/80")
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
     notifications(
@@ -96,7 +99,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content bg-app-toast-fail text-primary-white")
+        div(class="notification__content bg-red-cm/80 text-white")
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
     notifications(
@@ -106,7 +109,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content bg-primary-light-hover bg-opacity-80 text-app-text-primary")
+        div(class="notification__content bg-yellow-1/80 text-dark")
           svg-icon(iconName="red-exclamation-mark")
           span( v-html="item.text")
     transition(name="bottom-up-down")

@@ -9,11 +9,11 @@ export default {
 
 const baseArgs = {
   iconName: 'erase',
-  iconColor: 'app-selection',
+  iconColor: 'red-cm',
   iconWidth: '24px',
   iconHeight: '24px',
   // only used for those who alread has stroke
-  strokeColor: 'bg-app-btn-primary-bg',
+  strokeColor: 'bg-yellow-cm',
   sameSize: true,
 }
 export const Test = {
