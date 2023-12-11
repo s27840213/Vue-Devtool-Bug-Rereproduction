@@ -38,9 +38,9 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
               :iconName="tab.icon"
               :iconColor="settingTabColor(tab)"
               :iconWidth="'24px'"
-              :style="textIconStyle")
+              :style="{...textIconStyle, transition: 'background-color 0.2s, color 0.2s, stroke 0.2s'}")
             span(
-              class="no-wrap click-disabled transition ease-linear delay-200 typo-body-sm"
+              class="no-wrap click-disabled transition ease-linear delay-100 typo-body-sm"
               :class="`text-${settingTabColor(tab)}`") {{ tab.text }}
             //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
     div(v-if="hasBottomTitle" class="footer-tabs-row flex items-center justify-between")
@@ -885,7 +885,7 @@ export default defineComponent({
       this.clickedTab = tab.icon
       this.clickedTabTimer = window.setTimeout(() => {
         this.clickedTab = ''
-      }, 400)
+      }, 200)
       
       if (['copy', 'paste'].includes(tab.icon)) {
         notify({

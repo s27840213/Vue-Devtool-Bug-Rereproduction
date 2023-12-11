@@ -19,7 +19,7 @@ div(class='aspect-ratio-selector')
           :class="selectedType === aspectRatio ? 'text-app-tab-active' : 'text-app-tab-default'") {{ aspectRatio }}
   div(class="w-full box-border px-24")
     nubtn(
-      size="sm-full"
+      size="mid-full"
       @click="handleNextAction") {{ $t('CM0012') }}
 </template>
 <script setup lang="ts">
