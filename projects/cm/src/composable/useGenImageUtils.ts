@@ -3,6 +3,7 @@ import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import type { GenImageParams, GenImageResult } from '@/types/api'
+import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
@@ -11,8 +12,8 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
-import { useEventBus } from '@vueuse/core'
 import { useStore } from 'vuex'
+import useCanvasUtils from './useCanvasUtilsCm'
 
 export const RECORD_TIMING = true
 
@@ -45,6 +46,7 @@ const useGenImageUtils = () => {
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
+  const { prepareMaskToUpload } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const { t } = useI18n()
@@ -172,11 +174,19 @@ const useGenImageUtils = () => {
             polling(url, { isJson: false, useVer: false, pollingController }),
           ]
           if (editorType.value !== 'hidden-message') {
-            promises.push(
-              saveDesignImageToDocument(maskDataUrl.value, 'mask', {
-                subDesignId,
-              }),
-            )
+            const prepareMask = prepareMaskToUpload()
+            if (prepareMask) {
+              promises.push(
+                saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+                  subDesignId,
+                }),
+              )
+            } else {
+              notify({
+                group: 'error',
+                text: 'save mask to document failed',
+              })
+            }
           }
 
           await Promise.all(promises)
@@ -248,27 +258,25 @@ const useGenImageUtils = () => {
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
     if (editorType.value === 'hidden-message') return
 
-    const bus = useEventBus('editor')
-
     RECORD_TIMING && testUtils.start('mask to dataUrl', false)
     return new Promise<void>((resolve, reject) => {
-      bus.emit('genMaskUrl', {
-        callback: async (maskUrl: string) => {
+      try {
+        const maskUrl = prepareMaskToUpload()
+        if (maskUrl !== undefined) {
           RECORD_TIMING && testUtils.log('mask to dataUrl', '')
-          try {
-            RECORD_TIMING && testUtils.start('upload mask', false)
-            await uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`)
+          RECORD_TIMING && testUtils.start('upload mask', false)
+          uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
-            console.log('mask:', new Date().getTime())
-
             setMaskDataUrl(maskUrl)
             resolve()
-          } catch (error) {
-            logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
-            reject(error)
-          }
-        },
-      })
+          })
+        } else {
+          throw new Error('Upload Mask Image Failed')
+        }
+      } catch (error) {
+        logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
+        reject(error)
+      }
     })
   }
 
