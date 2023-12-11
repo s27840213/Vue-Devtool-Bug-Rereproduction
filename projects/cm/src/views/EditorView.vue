@@ -344,7 +344,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       icon: 'question-mark-circle',
       disabled: false,
       width: 20,
-      action: () => setDescriptionPanel('hidden-message'),
+      action: () => setDescriptionPanel('hidden-message-help'),
     })
   retTabs.push(...stepBtns)
   if (currEditorTheme.value && editorType === 'hidden-message')

@@ -9,7 +9,7 @@ div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt
   div(class="typo-h5") {{ title }}
   div(class="flex flex-col justify-start items-center gap-16 overflow-scroll pb-37")
     //- hidden message help
-    template(v-if="descriptionPanel === 'hidden-message'")
+    template(v-if="descriptionPanel === 'hidden-message-help'")
       div(class="w-full typo-body-md text-left") {{ t('CM0094') }}
       div(v-for="(item, idx) in hiddenMessageStep1Items" :key="idx" class="flex gap-8")
         div(class="w-full flex flex-col gap-11 items-end")
@@ -73,7 +73,7 @@ const closePanel = () => {
 
 const title = computed(() => {
   switch (descriptionPanel) {
-    case 'hidden-message':
+    case 'hidden-message-help':
       return t('CM0093')
     case 'hidden-message-invert':
       return t('CM0096')
@@ -85,8 +85,8 @@ const title = computed(() => {
 
 // #region hidden-message help
 const hiddenMessageStep1Items = computed(() => Array.from(Array(3), (_, index) => ({
-  imgA: require(`demo/hidden-message-demo-${index}a.jpeg`),
-  imgB: require(`demo/hidden-message-demo-${index}b.png`),
+  imgA: require(`demo/${descriptionPanel}-demo-${index}a.jpeg`),
+  imgB: require(`demo/${descriptionPanel}-demo-${index}b.png`),
   iconName: (() => {
     switch (index) {
       case 0:
@@ -149,10 +149,6 @@ const hiddenMessageImgPreprocessItems = computed(() => Array.from(Array(2), (_, 
   })()
 })))
 // #endregion
-
-const maxHeight = computed(() => {
-  const instance = getCurrentInstance();
-})
 </script>
 <style lang="scss">
 </style>
