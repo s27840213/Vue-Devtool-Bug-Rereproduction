@@ -132,6 +132,7 @@ const {
   setCurrPrompt,
   setCurrDesignId,
   setGenResultIndex,
+  setShowEmptyPromptWarning,
 } = editorStore
 const {
   isSendingGenImgReq,
@@ -142,6 +143,7 @@ const {
   editorType,
   currGenOptions,
   generatedResults,
+  showEmptyPromptWarning,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -221,7 +223,7 @@ const getIsReadyToGen = () => {
       }
       break
     default:
-      if (checkCanvasIsEmpty()) {
+      if (checkCanvasIsEmpty() && showEmptyPromptWarning.value) {
         setNormalModalInfo({
           title: t('CM0091'),
           content: t('CM0092'),
@@ -237,6 +239,7 @@ const getIsReadyToGen = () => {
         })
 
         openModal()
+        setShowEmptyPromptWarning(false)
         return false
       }
       break
@@ -245,7 +248,8 @@ const getIsReadyToGen = () => {
 }
 
 const handleGenerate = async () => {
-  if (vuex.state.user.token === '' && !debugMode) {
+  // if (vuex.state.user.token === '' && !debugMode) {
+  if (vuex.state.user.token === '') {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
     return

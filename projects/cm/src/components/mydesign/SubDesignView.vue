@@ -48,7 +48,7 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-app-bg box-borde
           class="h-full w-full object-contain rounded-[20px]"
           v-if="currOpenSubDesign"
           @load="handleThumbLoaded"
-          :src="imageUtils.appendQuery(getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId), 'lsize', '600')")
+          :src="imageUtils.appendQuery(getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId), 'lsize', '900')")
       div(class="flex flex-col gap-8 text-primary-white w-full h-full overflow-scroll")
         div(class="flex items-center gap-4 w-full")
           svg-icon(

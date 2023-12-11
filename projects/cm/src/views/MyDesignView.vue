@@ -9,7 +9,10 @@ div(
       :key="tag.type"
       @click="selectMyDesignType(tag)")
       span(class="") {{ tag.label }}
-  div(v-if="currDesigns.length" class="grid grid-cols-2 gap-20 overflow-scroll h-full")
+  div(
+    v-if="currDesigns.length"
+    class="grid grid-cols-2 gap-20 overflow-scroll h-full"
+    ref="designsContainer")
     div(
       v-for="(col, i) in myDesignCols"
       :key="i"
@@ -60,6 +63,10 @@ onBeforeRouteLeave((to, from) => {
   setCurrOpenSubDesign(undefined)
 })
 // #endregion
+
+// #region vars
+const designsContainer = ref<HTMLElement | null>(null)
+
 const userStore = useUserStore()
 const {
   setCurrMyDesignType,
@@ -75,10 +82,17 @@ const { myDesignTags, currMyDesignType, currDesigns, currOpenDesign, myDesignNex
 const isDesignOpen = computed(() => {
   return currOpenDesign.value && currOpenDesign.value.id
 })
+// #endregion
 
 const selectMyDesignType = async (tag: { label: string; type: IMyDesignType }) => {
   if (getDesignsByType(tag.type).length === 0) {
     await listDesigns(tag.type)
+  }
+
+  if (designsContainer.value) {
+    designsContainer.value.scrollTo({
+      top: 0,
+    })
   }
   setCurrMyDesignType(tag.type as IMyDesignType)
 }

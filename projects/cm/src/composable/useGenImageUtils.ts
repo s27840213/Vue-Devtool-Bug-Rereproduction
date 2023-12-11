@@ -22,7 +22,7 @@ const ids: string[] = []
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
-  const { setPrevGenParams, listDesigns, appendNewDesign } = userStore
+  const { setPrevGenParams } = userStore
   const { prevGenParams } = storeToRefs(useUserStore())
   const editorStore = useEditorStore()
   const {
