@@ -1,8 +1,9 @@
 <template lang="pug">
 div(class="canvas-section absolute top-0 left-0 z-canvas")
   canvas(
-    v-show="!isDuringCopy"
-    class="canvas-section"
+    v-show="showCanvas"
+    id="canvas-section-canvas"
+    class="canvas-section absolute top-0 left-0"
     :class="isBiColorEditor ? 'opacity-100' : 'opacity-30'"
     ref="canvasRef"
     :style="canvasStyle")
@@ -16,6 +17,7 @@ import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-plugin-vue/issues/2322
 import { useStore } from 'vuex'
 
@@ -29,12 +31,22 @@ const { containerDOM, wrapperDOM } = toRefs(props)
 
 const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
-const { pageSize } = storeToRefs(editorStore)
+const { pageSize, maskDataUrl } = storeToRefs(editorStore)
 
 const canvasStyle = computed(() => {
+  const { pinchScale, isPinchingEditor } = store.state.mobileEditor
+  const page = pageUtils.getCurrPage
+  let transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px)`
+  if (isPinchingEditor && pinchScale !== 1) {
+    transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
+  }
   return {
-    width: `${pageSize.value.width * contentScaleRatio.value}px`,
-    height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    // width: `${pageSize.value.width * contentScaleRatio.value}px`,
+    // height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    transformOrigin: '0 0',
+    transform,
   }
 })
 
@@ -43,13 +55,26 @@ const { isBiColorEditor } = useBiColorEditor()
 
 // #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const { brushStyle, showBrush } = useCanvasUtilsCm(canvasRef, wrapperDOM, containerDOM)
+const { brushStyle, showBrush, restoreCanvas } = useCanvasUtilsCm(
+  canvasRef,
+  wrapperDOM,
+  containerDOM,
+)
+
 // #endregion
 
 // #region WebView feature section
 const store = useStore()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
+const showCanvas = computed(() => {
+  if (editorStore.editorType === 'hidden-message') return true
+  return !isDuringCopy.value
+})
 // #endregion
+
+onMounted(() => {
+  restoreCanvas()
+})
 
 const getCanvasDataUrl = () => {
   if (!canvasRef.value) return ''

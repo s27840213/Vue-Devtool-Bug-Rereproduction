@@ -2,6 +2,7 @@
 import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IGroupDesignInputParams, ILoginResponse, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
+import cmWVUtils from '@/utils/cmWVUtils'
 import { DeviceType } from '@/utils/constantData'
 import generalUtils from '@/utils/generalUtils'
 // import apiUtils from '@/utils/apiUtils'
@@ -406,6 +407,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   async loginSetup({ commit, dispatch }, { data }: { data: ILoginResponse }) {
     if (data.flag === 0) {
       logUtils.setLogAndConsoleLog('login success (loginSetup)')
+      logUtils.setLogAndConsoleLog(`login as ${data.data.user_id}`)
       const newToken = data.data.token // token may be refreshed
       const complete = data.data.complete
       const uname = data.data.user_name
@@ -443,12 +445,15 @@ const actions: ActionTree<IUserModule, unknown> = {
         i18n.global.locale = data.data.locale
         localStorage.setItem('locale', data.data.locale)
       }
-      if (generalUtils.isPic) {
-        picWVUtils.updateUserInfo({
-          locale: data.data.locale,
-          userId: data.data.user_id,
-        })
+
+      // Send log data to native
+      const userInfo = {
+        locale: data.data.locale,
+        userId: data.data.user_id,
       }
+      picWVUtils.updateUserInfo(userInfo)
+      cmWVUtils.updateUserInfo(userInfo)
+
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       if (generalUtils.isPic) {

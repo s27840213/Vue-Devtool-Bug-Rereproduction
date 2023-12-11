@@ -1,14 +1,17 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import store from '@nu/vivi-lib/store'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import useMouseUtils from './useMouseUtils'
 import useBiColorEditor from './useBiColorEditor'
+import useMouseUtils from './useMouseUtils'
 
 export interface ICanvasParams {
   width: number
@@ -23,7 +26,8 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { showBrushOptions } = storeToRefs(editorStore)
+  const { showBrushOptions, maskDataUrl } = storeToRefs(editorStore)
+
   const { isBiColorEditor } = useBiColorEditor()
   // #endregion
 
@@ -48,7 +52,7 @@ const useCanvasUtils = (
     stepsQueue,
     isInCanvasFirstStep,
     isInCanvasLastStep,
-    drawingColor
+    drawingColor,
   } = storeToRefs(canvasStore)
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
@@ -95,20 +99,19 @@ const useCanvasUtils = (
   // #endregion
 
   const getBrushColor = (color: string) => {
-    const mapColorDrawingToBrush = new Map([
-      ['#FF7262', '#fcaea9'],
-    ])
+    const mapColorDrawingToBrush = new Map([['#FF7262', '#fcaea9']])
 
     // darken or lighten color
-    const adjustColor = (color: string) => { // #FFF not supportet rather use #FFFFFF
-      const clamp = (val: number) => Math.min(Math.max(val, 0), 0xFF)
+    const adjustColor = (color: string) => {
+      // #FFF not supportet rather use #FFFFFF
+      const clamp = (val: number) => Math.min(Math.max(val, 0), 0xff)
       const fill = (str: string) => ('00' + str).slice(-2)
       let offset = 100
 
       const num = parseInt(color.replace(/^#/, ''), 16)
       let red = num >> 16
-      let green = (num >> 8) & 0x00FF
-      let blue = num & 0x0000FF
+      let green = (num >> 8) & 0x00ff
+      let blue = num & 0x0000ff
       if (red * 0.299 + green * 0.587 + blue * 0.114 > 186) offset = -offset // https://stackoverflow.com/a/3943023/112731
       red = clamp(red + offset)
       green = clamp(green + offset)
@@ -129,12 +132,14 @@ const useCanvasUtils = (
     transform: 'translate(0,0)',
   })
 
-  watch(brushSize, (newVal) => {
-    brushStyle.width = `${newVal * contentScaleRatio.value}px`
-    brushStyle.height = `${newVal * contentScaleRatio.value}px`
+  const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
+
+  watch([brushSize, pageScaleRatio], ([newBrushSize, newScaleRatio]) => {
+    brushStyle.width = `${newBrushSize * contentScaleRatio.value * newScaleRatio * 0.01}px`
+    brushStyle.height = `${newBrushSize * contentScaleRatio.value * newScaleRatio * 0.01}px`
 
     if (canvasCtx && canvasCtx.value) {
-      canvasCtx.value.lineWidth = newVal
+      canvasCtx.value.lineWidth = newBrushSize
     }
   })
 
@@ -147,7 +152,7 @@ const useCanvasUtils = (
   })
 
   const isMovingMode = computed(() => {
-    return canvasMode.value === 'erase'
+    return canvasMode.value === 'move'
   })
 
   const brushColor = computed(() => {
@@ -177,7 +182,7 @@ const useCanvasUtils = (
     if (canvas && canvas.value && canvasCtx && canvasCtx.value) {
       canvasCtx.value.globalCompositeOperation = 'source-atop'
       canvasCtx.value.fillStyle = color
-      canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height);
+      canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height)
     }
   }
 
@@ -221,8 +226,11 @@ const useCanvasUtils = (
     if (wrapperRef && wrapperRef.value) {
       const { x, y } = getMousePosInTarget(e, wrapperRef.value)
       brushStyle.transform = `translate(${
-        x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
-      }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
+        x * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 - (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 + pageUtils.getCurrPage.x
+      }px, ${y * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 - (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 + pageUtils.getCurrPage.y}px)`
+      // brushStyle.transform = `translate(${
+      //   x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
+      // }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
     }
   }
 
@@ -237,6 +245,7 @@ const useCanvasUtils = (
   }
 
   const drawStart = (e: PointerEvent) => {
+    if (pointerEvtUtils.pointerIds.length !== 1) return
     console.log('drawStart')
     console.log(
       showBrushOptions.value,
@@ -267,6 +276,10 @@ const useCanvasUtils = (
     }
   }
   const drawing = (e: PointerEvent) => {
+    if (pointerEvtUtils.pointerIds.length !== 1) {
+      showBrush.value = false
+      return
+    }
     if (isBrushMode.value || isEraseMode.value) {
       const pointerCurrentX = e.clientX
       const pointerCurrentY = e.clientY
@@ -363,7 +376,7 @@ const useCanvasUtils = (
   // #endregion
 
   onMounted(() => {
-    if (wrapperRef && wrapperRef.value && editorContainerRef && editorContainerRef.value) {
+    if (wrapperRef && editorContainerRef) {
       createInitCanvas(pageSize.value.width, pageSize.value.height)
       clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
@@ -554,6 +567,22 @@ const useCanvasUtils = (
     return url
   }
 
+  const restoreCanvas = () => {
+    if (maskDataUrl.value) {
+      const img = new Image()
+
+      img.crossOrigin = 'Anonymous'
+      img.src = maskDataUrl.value
+      img.onload = () => {
+        clearCtx()
+        drawImageToCtx(img, {
+          width: pageSize.value.width,
+          height: pageSize.value.height,
+        })
+      }
+    }
+  }
+
   const record = () => {
     /**
      * DataUrl for png is TOO slow for the project, so I change to use the toBlob method
@@ -614,6 +643,7 @@ const useCanvasUtils = (
     drawImageToCtx,
     updateCanvasSize,
     checkCanvasIsEmpty,
+    restoreCanvas,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,

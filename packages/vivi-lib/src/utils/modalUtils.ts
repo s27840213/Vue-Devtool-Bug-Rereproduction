@@ -10,6 +10,7 @@ interface ModalOptions {
   checkboxText?: string,
   checked?: boolean,
   onCheckedChange?: (checked: boolean) => void
+  ulContent?: string[]
 }
 class ModalUtils {
   setModalInfo(
@@ -26,7 +27,8 @@ class ModalUtils {
       cardStyle = {},
       checkboxText = '',
       checked = false,
-      onCheckedChange = undefined
+      onCheckedChange = undefined,
+      ulContent = []
     } = options || {}
 
     if (typeof content === 'string') content = [content]
@@ -42,7 +44,8 @@ class ModalUtils {
       cardStyle,
       checkboxText,
       checked,
-      onCheckedChange: onCheckedChange === undefined ? this.generateOnCheckedChangeTemplate() : onCheckedChange
+      onCheckedChange: onCheckedChange === undefined ? this.generateOnCheckedChangeTemplate() : onCheckedChange,
+      ulContent
     })
     store.commit('modal/SET_MODAL_OPEN', true)
   }
@@ -82,7 +85,8 @@ class ModalUtils {
       imgSrc: '',
       noClose: false,
       backdropStyle: {},
-      cardStyle: {}
+      cardStyle: {},
+      ulContent: [],
     })
   }
 

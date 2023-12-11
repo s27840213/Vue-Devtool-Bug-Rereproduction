@@ -53,7 +53,12 @@
   "app-slider-bg": {
     "scope": "jade",
     "prefix": "app-slider-bg",
-    "body": "lighter80",
+    "body": "lighter/80",
+  },
+  "app-setting-bg-lighter": {
+    "scope": "jade",
+    "prefix": "app-setting-bg-lighter",
+    "body": "lighter/33",
   },
   "app-tab-active": {
     "scope": "jade",
@@ -68,7 +73,7 @@
   "app-tab-default": {
     "scope": "jade",
     "prefix": "app-tab-default",
-    "body": "#fffbeb",
+    "body": "yellow-0",
   },
   "app-tab-disable": {
     "scope": "jade",
@@ -88,12 +93,12 @@
   "app-toast-success": {
     "scope": "jade",
     "prefix": "app-toast-success",
-    "body": "yellow-180",
+    "body": "yellow-1/80",
   },
   "app-toast-fail": {
     "scope": "jade",
     "prefix": "app-toast-fail",
-    "body": "red-cmcc",
+    "body": "red-cm",
   },
   "neutral-dark-active": {
     "scope": "jade",

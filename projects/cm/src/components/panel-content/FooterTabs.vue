@@ -196,7 +196,7 @@ export default defineComponent({
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
-          hidden: layerUtils.getCurrLayer.type === LayerType.frame,
+          hidden: layerUtils.getCurrLayer.type === LayerType.frame || this.isBiColorEditor,
           disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
         },
         {
@@ -882,15 +882,11 @@ export default defineComponent({
         this.$emit('switchTab', tab.panelType, tab.props)
       }
 
-      if (
-        ['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page', 'copy-edits'].includes(tab.icon)
-      ) {
-        this.clickedTab = tab.icon
-        this.clickedTabTimer = window.setTimeout(() => {
-          this.clickedTab = ''
-        }, 400)
-      }
-
+      this.clickedTab = tab.icon
+      this.clickedTabTimer = window.setTimeout(() => {
+        this.clickedTab = ''
+      }, 400)
+      
       if (['copy', 'paste'].includes(tab.icon)) {
         notify({
           group: 'copy',

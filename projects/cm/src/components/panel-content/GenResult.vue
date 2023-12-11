@@ -13,12 +13,15 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       :py="4")
       div(
         class="gen-result__block rounded-8 bg-dark-6 flex flex-col justify-center items-center"
+        :class="{ 'pointer-events-none': isGenerating }"
         @click="showMoreRes")
         svg-icon(
           iconName="crown"
-          iconColor="yellow-cm"
+          :iconColor="isGenerating ? 'lighter' : 'yellow-cm'"
           iconWidth="24px")
-        span(class="text-white typo-btn-sm") {{ $t('CM0068') }}
+        span(
+          class="typo-btn-sm transition-colors duration-[0.4s]"
+          :class="[isGenerating ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
       //- div(
       //-   v-for="(genResult, index) in 10"
       //-   :key="index"
@@ -37,7 +40,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
           @click="genResult.url.length && setGenResultIndex(index)")
           div(
             class="box-border outline-2 outline rounded-8 w-full h-full transition-all duration-300 z-2"
-            :class="[index === currGenResultIndex ? 'outline-yellow-cm' : 'outline-transparent']")
+            :class="[index === currGenResultIndex && genResult.url.length ? 'outline-yellow-cm' : 'outline-transparent']")
             div(class="overflow-hidden rounded-8 w-full h-full")
               img(
                 v-if="genResult.url.length"
@@ -48,8 +51,8 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
   div(class="flex flex-col gap-8 justify-between items-center")
     nubtn(
       size="mid-full"
-      @clickBtn="handleKeepEditing"
-      :disabled="true") {{ $t('CM0067') }}
+      :disabled="!generatedResults[currGenResultIndex] || generatedResults[currGenResultIndex].url.length === 0"
+      @click="handleKeepEditing") {{ $t('CM0067') }}
     span(class="text-white typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}
 </template>
 <script setup lang="ts">
@@ -58,17 +61,12 @@ import { useEditorStore } from '@/stores/editor'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const editorStore = useEditorStore()
-const {
-  setGenResultIndex,
-  keepEditingInit,
-} = editorStore
-const { generatedResults, currGenResultIndex, initImgSrc } =
-  storeToRefs(editorStore)
-
+const { setGenResultIndex, keepEditingInit } = editorStore
+const { generatedResults, currGenResultIndex, initImgSrc, isGenerating } = storeToRefs(editorStore)
 const { genImageFlow } = useGenImageUtils()
 
 const showMoreRes = async () => {
-  await genImageFlow('', true, 2)
+  await genImageFlow({ prompt: '', action: 'powerful-fill' }, true, 2)
 }
 
 const appendSizeQuery = (url: string, size = 200) => {
@@ -97,7 +95,7 @@ $loading-padding: 4px;
     left: 50%;
     height: 100%;
     aspect-ratio: 1/1;
-    background: linear-gradient(0deg, #ffffff 40%, #e4b61f 100%);
+    background: linear-gradient(0deg, rgba(255, 255, 255, 0.4) 40%, #e4b61f 100%);
     transform: translateX(-50%) rotate(90deg) scale(1.2);
     animation: rotate 1.2s linear infinite;
     // bcz loading-block has transform, so the stacking context is different, make z-index won't work

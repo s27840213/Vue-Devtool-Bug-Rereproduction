@@ -1,34 +1,40 @@
 <template lang="pug">
-div(class="w-full box-border pl-24")
+div(class='aspect-ratio-selector')
   div(class="typo-btn-lg text-white") {{ $t('CM0013') }}
-  scrollable-container(:px="0")
-    div(
-      v-for="aspectRatio in aspectRatioTypes"
-      :key="aspectRatio"
-      class="w-56 flex flex-col justify-center items-center gap-4"
-      @click="selectAspectRatio(aspectRatio)")
-      svg-icon(
-        :iconColor="selectedType === aspectRatio ? 'yellow-2' : aspectRatio === 'original' ? 'white' : 'transparent'"
-        :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'yellow-cm' : 'white'"
-        iconWidth="32px"
-        iconHeight="32px"
-        :iconName="'ratio-' + aspectRatio.replace(':', '-')")
-      span(
-        class="typo-btn-sm transition-colors duration-300 capitalize"
-        :class="selectedType === aspectRatio ? 'text-yellow-cm' : 'text-yellow-0'") {{ aspectRatio }}
+  div(class="w-full box-border pl-24")
+    scrollable-container(:px="0" :py="16")
+      div(
+        v-for="aspectRatio in aspectRatioTypes"
+        :key="aspectRatio"
+        class="w-56 flex flex-col justify-center items-center gap-4"
+        @click="selectAspectRatio(aspectRatio)")
+        svg-icon(
+          :iconColor="selectedType === aspectRatio ? 'yellow-2' : aspectRatio === 'original' ? 'white' : 'transparent'"
+          :strokeColor="aspectRatio === 'original' ? undefined : selectedType === aspectRatio ? 'yellow-cm' : 'white'"
+          iconWidth="32px"
+          iconHeight="32px"
+          :iconName="'ratio-' + aspectRatio.replace(':', '-')")
+        span(
+          class="typo-btn-sm transition-colors duration-300 capitalize"
+          :class="selectedType === aspectRatio ? 'text-yellow-cm' : 'text-yellow-0'") {{ aspectRatio }}
+  div(class="w-full box-border px-24")
+    nubtn(
+      size="sm-full"
+      @click="handleNextAction") {{ $t('CM0012') }}
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 const editorStore = useEditorStore()
-const { imgAspectRatio, pageAspectRatio, pageSize } = storeToRefs(editorStore)
+const { imgAspectRatio, pageAspectRatio, pageSize, editorType } = storeToRefs(editorStore)
 const { updateCanvasSize } = useCanvasUtilsCm()
 
-const aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4']
+const aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4'].filter(r => editorType.value === 'hidden-message' ? r !== 'original' : true)
 const selectedType = ref('9:16')
 
 const bus = useEventBus('editor')
@@ -79,6 +85,7 @@ const selectAspectRatio = (type: string) => {
 }
 
 const updateLayerStyleToFitPage = () => {
+  if (!layerUtils.getCurrPage.layers.length) return
   if (imgAspectRatio.value > pageAspectRatio.value) {
     layerUtils.updateLayerStyles(0, 0, {
       width: pageSize.value.width,
@@ -104,6 +111,11 @@ const updateLayerStyleToFitPage = () => {
       y: (pageSize.value.height - pageSize.value.height) / 2,
     })
   }
+}
+
+const handleNextAction = function () { 
+  editorStore.changeEditorState('next')
+  useTutorial().runTutorial(editorType.value)
 }
 
 onMounted(() => {

@@ -1,11 +1,16 @@
 import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
+import { ICmMyDesign } from '@/types/user'
 import { saveToCameraRoll } from '@/utils/pixiRecorder'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
-
 const useActionSheetCm = () => {
+  const userStore = useUserStore()
+  const { getSubDesignImage, listDesigns } = userStore
+  const { currOpenSubDesign, isSubDesignOpen } = storeToRefs(userStore)
   const { t } = useI18n()
   const {
     isActionSheetOpen,
@@ -18,10 +23,16 @@ const useActionSheetCm = () => {
   } = useActionSheet()
 
   const editorStore = useEditorStore()
-  const { currGeneratedResults } = storeToRefs(editorStore)
+  const { currGeneratedResults, editorType } = storeToRefs(editorStore)
 
-  const savePhotoCb = () => {
-    return cmWVUtils.saveAssetFromUrl('png', currGeneratedResults.value.url)
+  const savePhotoCb = async () => {
+    let targetUrl = ''
+    if (isSubDesignOpen.value && currOpenSubDesign.value) {
+      targetUrl = await generalUtils.toDataUrlNew(getSubDesignImage(currOpenSubDesign.value))
+    } else {
+      targetUrl = await generalUtils.toDataUrlNew(currGeneratedResults.value.url)
+    }
+    return cmWVUtils.saveAssetFromUrl('png', targetUrl)
   }
   const saveVideoCb = () => {
     if (currGeneratedResults.value.video) {
@@ -60,7 +71,11 @@ const useActionSheetCm = () => {
         ],
         cb: () => {
           savePhotoCb()
-            .then(() => {
+            .then((data) => {
+              const { flag, msg } = data
+              if (flag === '1') {
+                throw new Error(msg)
+              }
               notify({
                 group: 'success',
                 text: `${t('NN0889')}`,
@@ -69,10 +84,9 @@ const useActionSheetCm = () => {
             })
             .catch((e) => {
               console.log(e)
-              // @TODO
               notify({
                 group: 'error',
-                text: 'gen photo error',
+                text: e,
               })
             })
         },
@@ -147,11 +161,76 @@ const useActionSheetCm = () => {
     ])
   }
 
+  const setMyDesignActions = (design: ICmMyDesign) => {
+    setPrimaryActions([
+      {
+        labels: [
+          {
+            label: `${t('CM0122')}`,
+            labelColor: 'app-tab-active',
+            labelSize: 'typo-h6',
+          },
+          {
+            label: t('CM0123'),
+            labelColor: 'app-text-secondary',
+            labelSize: 'typo-body-sm',
+          },
+        ],
+        cb: () => {
+          console.log(design)
+        },
+      },
+      {
+        labels: [
+          {
+            label: t('NN0034'),
+            labelColor: 'app-text-secondary',
+            labelSize: 'typo-btn-lg',
+          },
+        ],
+        cb: () => {
+          savePhotoCb()
+            .then(() => {
+              notify({
+                group: 'success',
+                text: `${t('NN0889')}`,
+              })
+              toggleActionSheet()
+            })
+            .catch((e) => {
+              console.log(e)
+              // @TODO
+              notify({
+                group: 'error',
+                text: 'gen photo error',
+              })
+            })
+        },
+      },
+    ])
+
+    setSecondaryActions([
+      {
+        labels: [
+          {
+            label: t('NN0203'),
+            labelColor: 'app-text-secondary',
+            labelSize: 'typo-btn-lg',
+          },
+        ],
+        cb: () => {
+          toggleActionSheet()
+        },
+      },
+    ])
+  }
+
   return {
     isActionSheetOpen,
     primaryActions,
     secondaryActions,
     setSavingActions,
+    setMyDesignActions,
     reset,
     toggleActionSheet,
   }

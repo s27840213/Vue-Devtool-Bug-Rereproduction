@@ -14,13 +14,21 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : show"
         :iconName="'photo'"
         :iconColor="'white'"
         :iconWidth="'48px'")
-  div(v-if="modalInfo.content" class="modal-card__text" :class="classes.desc")
+  div(v-if="modalInfo.content || modalInfo.ulContent" class="modal-card__text" :class="classes.desc")
     template(v-if="!pending")
       span(v-for="text in modalInfo.content"
       :key="text"
       @keydown.ctrl.c.exact.stop
         @keydown.meta.c.exact.stop
         v-html="text")
+      ul(
+        v-if="modalInfo.ulContent.length"
+        class="m-0 pl-30")
+        li(
+          v-for="(text, idx) in modalInfo.ulContent"
+          :key="idx"
+          class="text-left"
+          v-html="text")
       div(v-if="modalInfo.checkboxText !== ''" class="modal-card__checkbox-container")
         div(class="modal-card__checkbox"
             :class="{checked: modalInfo.checked}"

@@ -37,7 +37,8 @@ const getDefaultState = (): IModalState => ({
     checked: false,
     onCheckedChange: (checked) => {
       return false
-    }
+    },
+    ulContent: [],
   },
   modalOpen: false,
   pending: false

@@ -710,12 +710,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('login')
   }
 
+  async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<WEBVIEW_API_RESULT> {
+    if (!generalUtils.isStk) return
+    store.commit('vivisticker/UPDATE_userInfo', userInfo)
+    return await this.callIOSAsAPI('UPDATE_USER_INFO', userInfo, 'update-user-info')
+  }
+
   async updateLocale(locale: string): Promise<boolean> {
     localStorage.setItem('locale', locale) // set locale to localStorage whether browser mode or not
     if (this.inBrowserMode) {
       return true
     }
-    const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    const data = await this.updateUserInfo({ locale }) as null | undefined | { flag: string }
     return data?.flag === '0'
   }
 

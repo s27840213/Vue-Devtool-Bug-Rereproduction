@@ -97,8 +97,8 @@ const handleBackAction = (navagate: () => void) => {
     setNormalModalInfo({
       title: t('CM0025'),
       content: t('CM0026'),
-      confirmText: t('CM0027'),
-      cancelText: t('CM0028'),
+      confirmText: t('CM0028'),
+      cancelText: t('NN0203'),
       confirm: () => {
         navagate()
         closeModal()
