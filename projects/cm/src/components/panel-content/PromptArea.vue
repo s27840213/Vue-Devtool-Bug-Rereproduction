@@ -6,40 +6,40 @@ div(
     div(class="w-fit")
       svg-icon(
         v-if="isTypeSettings"
-        iconColor="app-icon-light"
+        iconColor="yellow-0"
         iconName="cm_arrow-left"
         iconWidth="24px"
         @click="() => (isSettings = false)")
-    span(class="text-app-tab-default typo-btn-lg") {{ title }}
+    span(class="text-yellow-0 typo-btn-lg") {{ title }}
     div(class="w-fit")
       svg-icon(
         v-if="showSettingsIcon"
         :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
-        class="text-app-tab-default absolute right-0 top-1/2 -translate-y-1/2"
+        class="text-yellow-0 absolute right-0 top-1/2 -translate-y-1/2"
         @click="isGenSettings = !isGenSettings")
   template(v-if="!isTypeSettings")
     div(class="w-full relative")
       textarea(
-        class="w-full box-border p-10 rounded-[10px] bg-primary-light-active typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+        class="w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
         :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
         :autofocus="!isDuringTutorial"
         v-model="promptText")
       transition(name="clear-btn-transition")
         div(
           v-if="promptLen > 0"
-          class="absolute bottom-10 right-10 text-app-text-primary typo-body-sm"
+          class="absolute bottom-10 right-10 text-dark typo-body-sm"
           @click="clearPromt")
           span {{ $t('CM0029') }}
     div(
       v-if="showTypeSelector && genTypes"
-      class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-app-tab-disable bg-opacity-20 rounded-[10px] p-8 gap-8 text-left typo-h5"
+      class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-lighter bg-opacity-20 rounded-10 p-8 gap-8 text-left typo-h5"
       @click="() => (isTypeSettings = true)")
-      span(class="text-app-tab-default") {{ $t('CM0108') }}
-      span(class="text-app-tab-disable") {{ genTypes.group[genTypes.value].text }}
+      span(class="text-yellow-0") {{ $t('CM0108') }}
+      span(class="text-lighter") {{ genTypes.group[genTypes.value].text }}
       svg-icon(
         iconName="cm_chevron-right"
         iconWidth="24px"
-        iconColor="app-text-secondary")
+        iconColor="white")
     nubtn(
       v-if="!preview"
       size="mid-full"
@@ -47,7 +47,7 @@ div(
       @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
     div(
       v-if="isGenSettings"
-      class="w-full bg-app-tab-disable bg-opacity-20 rounded-[10px] px-8 py-16 flex flex-col text-left text-app-text-secondary")
+      class="w-full bg-lighter bg-opacity-20 rounded-10 px-8 py-16 flex flex-col text-left text-white")
       div(
         v-for="(option, idx) in genRangeOptions"
         :key="idx")
@@ -58,12 +58,12 @@ div(
                 v-if="option.icon"
                 :iconName="option.icon"
                 iconWidth="24px"
-                iconColor="primary-light-active")
+                iconColor="yellow-2")
               span {{ option.title }}
             span(class="justify-self-end") {{ option.value }}
           span(
             v-if="option.subTitle"
-            class="w-full text-app-tab-disable typo-body-sm"
+            class="w-full text-lighter typo-body-sm"
             v-html="option.subTitle")
           input(
             class="panel-font-curve__range-input input__slider--range"
@@ -75,19 +75,19 @@ div(
             type="range")
           div(
             v-if="option.minDescription || option.maxDescription"
-            class="w-full flex justify-between items-center text-app-text-secondary typo-btn-sm")
+            class="w-full flex justify-between items-center text-white typo-btn-sm")
             span(class="typo-body-sm text-left" v-html="option.minDescription")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
-          div(class="w-full h-1 bg-app-tab-disable bg-opacity-50")
+          div(class="w-full h-1 bg-lighter bg-opacity-50")
   div(
     v-if="isTypeSettings && genTypes"
-    class="w-full flex justify-center gap-16 typo-h5 text-app-text-secondary p-4")
+    class="w-full flex justify-center gap-16 typo-h5 text-white p-4")
     div(
       v-for="(genType, idx) in genTypes.group"
       :key="idx"
-      class="flex flex-col gap-8 bg-app-tab-disable bg-opacity-20 rounded-2xl p-12 aspect-square w-full"
-      :class="{ 'outline outline-4 outline-primary-normal': idx === genTypes.value }"
+      class="flex flex-col gap-8 bg-lighter bg-opacity-20 rounded-2xl p-12 aspect-square w-full"
+      :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
       @click="() => genTypes && (genTypes.value = idx)")
       img(
         v-if="genType.img"

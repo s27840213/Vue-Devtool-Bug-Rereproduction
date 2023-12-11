@@ -10,7 +10,7 @@ div(
     :style="{ gap: `${leftGap}px` }")
     slot(name="left")
   div(
-    class="flex justify-center items-center whitespace-nowrap typo-h5 text-app-text-secondary"
+    class="flex justify-center items-center whitespace-nowrap typo-h5 text-white"
     :style="{ gap: `${middGap}px` }")
     slot(name="middle")
   div(

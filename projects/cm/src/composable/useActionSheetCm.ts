@@ -167,12 +167,12 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: `${t('CM0122')}`,
-            labelColor: 'app-tab-active',
+            labelColor: 'yellow-cm',
             labelSize: 'typo-h6',
           },
           {
             label: t('CM0123'),
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-body-sm',
           },
         ],
@@ -184,7 +184,7 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: t('NN0034'),
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],
@@ -214,7 +214,7 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: t('NN0203'),
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],
