@@ -7,7 +7,7 @@ div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt
     iconWidth="24px"
     @click="closePanel")
   div(class="typo-h5") {{ title }}
-  div(class="flex flex-col justify-start items-center gap-16 overflow-scroll pb-[37px]")
+  div(class="flex flex-col justify-start items-center gap-16 overflow-scroll pb-37")
     //- hidden message help
     template(v-if="descriptionPanel === 'hidden-message'")
       div(class="w-full typo-body-md text-left") {{ t('CM0094') }}
