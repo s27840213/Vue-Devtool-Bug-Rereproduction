@@ -43,7 +43,7 @@ onClickOutside(actionSheetRef, () => toggleActionSheet())
 }
 
 .border-style {
-  @apply border-b-lighter border-solid border-0 border-b-.5 border-opacity-50;
+  @apply border-b-lighter/50 border-solid border-0 border-b-.5;
   @apply last:border-b-0;
 }
 </style>

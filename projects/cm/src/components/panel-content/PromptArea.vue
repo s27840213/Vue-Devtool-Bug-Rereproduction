@@ -32,7 +32,7 @@ div(
           span {{ $t('CM0029') }}
     div(
       v-if="showTypeSelector && genTypes"
-      class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-lighter bg-opacity-20 rounded-10 p-8 gap-8 text-left typo-h5"
+      class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-lighter/20 rounded-10 p-8 gap-8 text-left typo-h5"
       @click="() => (isTypeSettings = true)")
       span(class="text-yellow-0") {{ $t('CM0108') }}
       span(class="text-lighter") {{ genTypes.group[genTypes.value].text }}
@@ -47,7 +47,7 @@ div(
       @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
     div(
       v-if="isGenSettings"
-      class="w-full bg-lighter bg-opacity-20 rounded-10 px-8 py-16 flex flex-col text-left text-white")
+      class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white")
       div(
         v-for="(option, idx) in genRangeOptions"
         :key="idx")
@@ -79,14 +79,14 @@ div(
             span(class="typo-body-sm text-left" v-html="option.minDescription")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
-          div(class="w-full h-1 bg-lighter bg-opacity-50")
+          div(class="w-full h-1 bg-lighter/50")
   div(
     v-if="isTypeSettings && genTypes"
     class="w-full flex justify-center gap-16 typo-h5 text-white p-4")
     div(
       v-for="(genType, idx) in genTypes.group"
       :key="idx"
-      class="flex flex-col gap-8 bg-lighter bg-opacity-20 rounded-2xl p-12 aspect-square w-full"
+      class="flex flex-col gap-8 bg-lighter/20 rounded-2xl p-12 aspect-square w-full"
       :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
       @click="() => genTypes && (genTypes.value = idx)")
       img(
