@@ -472,6 +472,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       return await this.callIOSAsHTTPAPI('GET_JSON', { path, name })
     }
   }
+
+  async deleteAsset(key: string, id: string, group?: string, updateList = true) {
+      return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+  }
 }
 
 export default new CmWVUtils()

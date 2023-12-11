@@ -413,8 +413,9 @@ const sendToEditor = async () => {
     }
 
     setImgAspectRatio(targetImgs[0].ratio)
-    if (!atEditor.value && targetEditorType.value)
-      await router.push({ name: 'Editor', query: { type: targetEditorType.value } })
+    if (!atEditor.value && targetEditorType.value) {
+      editorStore.startEditing(targetEditorType.value)
+    }
     setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {

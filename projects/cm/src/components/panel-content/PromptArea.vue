@@ -1,99 +1,131 @@
 <template lang="pug">
-div(
-  class="flex flex-col justify-center items-center w-full box-border px-24 gap-16"
-  :class="{ 'pointer-events-none': preview }")
-  div(class="w-full grid grid-cols-3 justify-between relative")
-    div(class="w-fit")
-      svg-icon(
-        v-if="isTypeSettings"
-        iconColor="yellow-0"
-        iconName="cm_arrow-left"
-        iconWidth="24px"
-        @click="() => (isSettings = false)")
-    span(class="text-yellow-0 typo-btn-lg") {{ title }}
-    div(class="w-fit")
-      svg-icon(
-        v-if="showSettingsIcon"
-        :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
-        class="text-yellow-0 absolute right-0 top-1/2 -translate-y-1/2"
-        @click="isGenSettings = !isGenSettings")
-  template(v-if="!isTypeSettings")
-    div(class="w-full relative")
-      textarea(
-        class="w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
-        :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
-        :autofocus="!isDuringTutorial"
-        v-model="promptText")
-      transition(name="clear-btn-transition")
+div(class="prompt-area w-full box-border px-24")
+  div(class="flex flex-col justify-center items-center relative" :class="{ 'pointer-events-none': preview }")
+    //- placeholder for absolute contents
+    div(class="w-full" :style="{ height: `${mainHeight}px` }")
+    //- main
+    transition(:name="`fade-${isTypeSettings ? 'right' : 'left'}-in`")
+      div(
+        v-if="!isTypeSettings"
+        class="absolute w-full flex flex-col gap-16"
+        ref="elMain")
+        //- header bar
+        div(class="w-full grid grid-cols-3 justify-between relative")
+          div(class="w-fit")
+          span(class="text-yellow-0 typo-btn-lg") {{ title }}
+          div(class="w-fit")
+            svg-icon(
+              v-if="showSettingsIcon"
+              :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
+              class="text-yellow-0 absolute right-0 top-1/2 -translate-y-1/2"
+              @click="isGenSettings = !isGenSettings")
+        //- content
+        div(class="w-full relative")
+          textarea(
+            class="w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+            :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
+            :autofocus="!isDuringTutorial"
+            v-model="promptText")
+          transition(name="clear-btn-transition")
+            div(
+              v-if="promptLen > 0"
+              class="absolute bottom-10 right-10 text-dark typo-body-sm"
+              @click="clearPromt")
+              span {{ $t('CM0029') }}
         div(
-          v-if="promptLen > 0"
-          class="absolute bottom-10 right-10 text-dark typo-body-sm"
-          @click="clearPromt")
-          span {{ $t('CM0029') }}
+          v-if="showTypeSelector && genTypes"
+          class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-lighter/20 rounded-10 p-8 gap-8 text-left typo-h5"
+          @click="isTypeSettings = true")
+          span(class="text-yellow-0") {{ $t('CM0108') }}
+          span(class="text-lighter") {{ genTypes.group[genTypes.value].text }}
+          svg-icon(
+            iconName="cm_chevron-right"
+            iconWidth="24px"
+            iconColor="white")
+        nubtn(
+          v-if="!preview"
+          size="mid-full"
+          :disabled="isSendingGenImgReq"
+          @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
+      //- type settings
+      div(
+        v-else-if="genTypes"
+        class="absolute w-full flex flex-col gap-16"
+        :style="fixHeightStyles")
+        //- header bar
+        div(class="w-full grid grid-cols-3 justify-between relative")
+          div(class="flex w-fit")
+            svg-icon(
+              iconColor="yellow-0"
+              iconName="cm_arrow-left"
+              iconWidth="24px"
+              class="text-yellow-0 absolute left-0 top-1/2 -translate-y-1/2"
+              @click="isSettings = false")
+          span(class="text-yellow-0 typo-btn-lg") {{ title }}
+          div(class="w-fit")
+        //- content
+        div(class="w-full flex justify-center items-center gap-16 typo-h5 text-white")
+          div(
+            v-for="(genType, idx) in genTypes.group"
+            :key="idx"
+            class="flex flex-col gap-8 bg-lighter/20 rounded-2xl p-12 aspect-square w-full"
+            :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
+            @click="() => genTypes && (genTypes.value = idx)")
+            img(
+              v-if="genType.img"
+              class="w-full object-cover object-center rounded-2xl aspect-[148/116]"
+              :src="require(genType.img)")
+            span {{ genType.text }}
+  //- gen options
+  Collapse(
+    class="w-full"
+    :when="isGenSettings && !isTypeSettings"
+    @collapse="currTransitions.add('collapse-gen-options')"
+    @expand="currTransitions.add('expand-gen-options')"
+    @collapsed="currTransitions.delete('collapse-gen-options')"
+    @expanded="currTransitions.delete('expand-gen-options')")
     div(
-      v-if="showTypeSelector && genTypes"
-      class="w-full box-border grid grid-cols-[minmax(0,1fr),auto,auto] bg-lighter/20 rounded-10 p-8 gap-8 text-left typo-h5"
-      @click="() => (isTypeSettings = true)")
-      span(class="text-yellow-0") {{ $t('CM0108') }}
-      span(class="text-lighter") {{ genTypes.group[genTypes.value].text }}
-      svg-icon(
-        iconName="cm_chevron-right"
-        iconWidth="24px"
-        iconColor="white")
-    nubtn(
-      v-if="!preview"
-      size="mid-full"
-      :disabled="isSendingGenImgReq"
-      @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
-    div(
-      v-if="isGenSettings"
-      class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white")
+      class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white box-border mt-16")
       div(
         v-for="(option, idx) in genRangeOptions"
         :key="idx")
-        div(class="w-full flex flex-col gap-8")
+        div(class="w-full flex flex-col")
           div(class="w-full flex items-center justify-between typo-h6")
             div(class="flex items-center gap-4")
               svg-icon(
                 v-if="option.icon"
-                :iconName="option.icon"
+                :iconName="option.active && option.iconActive ? option.iconActive : option.icon"
                 iconWidth="24px"
-                iconColor="yellow-2")
+                iconColor="yellow-2"
+                @click="() => (option.active = !option.active)")
               span {{ option.title }}
             span(class="justify-self-end") {{ option.value }}
-          span(
-            v-if="option.subTitle"
-            class="w-full text-lighter typo-body-sm"
-            v-html="option.subTitle")
-          input(
-            class="panel-font-curve__range-input input__slider--range"
-            v-progress
-            v-model.number="option.value"
-            :max="option.max"
-            :min="option.min"
-            :step="option.step"
-            type="range")
+          Collapse(
+            :when="!!option.active"
+            @collapse="currTransitions.add(`collapse-sub-title-${idx}`)"
+            @expand="currTransitions.add(`expand-sub-title-${idx}`)"
+            @collapsed="currTransitions.delete(`collapse-sub-title-${idx}`)"
+            @expanded="currTransitions.delete(`expand-sub-title-${idx}`)")
+            div(
+              v-if="option.subTitle"
+              class="w-full text-lighter typo-body-sm mt-8"
+              v-html="option.subTitle")
+          div(class="mt-8")
+            input(
+              class="input__slider--range"
+              v-progress
+              v-model.number="option.value"
+              :max="option.max"
+              :min="option.min"
+              :step="option.step"
+              type="range")
           div(
             v-if="option.minDescription || option.maxDescription"
-            class="w-full flex justify-between items-center text-white typo-btn-sm")
+            class="w-full flex justify-between items-center text-white typo-btn-sm mt-8")
             span(class="typo-body-sm text-left" v-html="option.minDescription")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
-  div(
-    v-if="isTypeSettings && genTypes"
-    class="w-full flex justify-center gap-16 typo-h5 text-white p-4")
-    div(
-      v-for="(genType, idx) in genTypes.group"
-      :key="idx"
-      class="flex flex-col gap-8 bg-lighter/20 rounded-2xl p-12 aspect-square w-full"
-      :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
-      @click="() => genTypes && (genTypes.value = idx)")
-      img(
-        v-if="genType.img"
-        class="w-full object-cover object-center rounded-2xl aspect-[148/116]"
-        :src="require(genType.img)")
-      span {{ genType.text }}
 </template>
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
@@ -110,7 +142,9 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import { Collapse } from 'vue-collapsed'
 
+const emit = defineEmits(['disableBtmPanelTransition'])
 const props = defineProps({
   // for panelDescription
   preview: {
@@ -132,6 +166,7 @@ const {
   setCurrPrompt,
   setCurrDesignId,
   setGenResultIndex,
+  setShowEmptyPromptWarning,
 } = editorStore
 const {
   isSendingGenImgReq,
@@ -142,6 +177,7 @@ const {
   editorType,
   currGenOptions,
   generatedResults,
+  showEmptyPromptWarning,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -221,7 +257,7 @@ const getIsReadyToGen = () => {
       }
       break
     default:
-      if (checkCanvasIsEmpty()) {
+      if (checkCanvasIsEmpty() && showEmptyPromptWarning.value) {
         setNormalModalInfo({
           title: t('CM0091'),
           content: t('CM0092'),
@@ -237,6 +273,7 @@ const getIsReadyToGen = () => {
         })
 
         openModal()
+        setShowEmptyPromptWarning(false)
         return false
       }
       break
@@ -245,7 +282,8 @@ const getIsReadyToGen = () => {
 }
 
 const handleGenerate = async () => {
-  if (vuex.state.user.token === '' && !debugMode) {
+  // if (vuex.state.user.token === '' && !debugMode) {
+  if (vuex.state.user.token === '') {
     // Open PanelLogin
     vuex.commit('user/setShowForceLogin', true)
     return
@@ -303,7 +341,6 @@ const clearPromt = () => {
 // #region settings
 const isGenSettings = ref(false)
 const isTypeSettings = ref(false)
-
 const isSettings = computed({
   get() {
     return isGenSettings.value || isTypeSettings.value
@@ -332,6 +369,27 @@ const genRangeOptions = computed(() => {
 })
 const genTypes = computed(() => {
   return genGroupOptions.value.find((o) => o.key === 'type')
+})
+// #endregion
+
+// #region styles
+const elMain = ref(null)
+const mainHeight = ref(0)
+onMounted(() => {
+  nextTick(() => {
+    mainHeight.value = useElementBounding(elMain.value).height.value
+  })
+})
+const fixHeightStyles = computed(() => {
+  return {
+    height: `${mainHeight.value}px`,
+  }
+})
+
+// disable bottom panel transition during expand or collapse
+const currTransitions = ref(new Set<string>())
+watch(currTransitions.value, (val) => {
+  emit('disableBtmPanelTransition', val.size > 0)
 })
 // #endregion
 </script>

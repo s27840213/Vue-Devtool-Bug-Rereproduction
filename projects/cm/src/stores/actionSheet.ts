@@ -7,7 +7,8 @@ export interface IActionSheetBtn {
     labelColor: IColorKeys
     labelSize: string
   }>
-  cb: () => void
+  cb?: () => void
+  clickable?: boolean
 }
 
 export const useActionSheetStore = defineStore('actionSheet', () => {
@@ -68,8 +69,6 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
       },
     },
   ])
-
-  console.log(primaryActions, secondaryActions)
 
   const setPrimaryActions = (newActions: Array<IActionSheetBtn>) => {
     Object.assign(primaryActions, newActions)

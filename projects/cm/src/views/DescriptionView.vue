@@ -31,11 +31,13 @@ div(class="description-page w-full h-full text-white px-24")
 </template>
 <script setup lang="ts">
 import i18n from '@/i18n'
+import { useEditorStore } from '@/stores/editor'
 import type { EditorType } from '@/types/editor'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+const editorStore = useEditorStore()
 const target: Ref<EditorType> = ref(route.query.target as EditorType)
 const idxCurrImg = ref(0)
 const getImg = (idx: number) => {
@@ -53,7 +55,7 @@ switch (target.value) {
 }
 
 const handleNext = () => {
-  router.push({ name: 'Editor', query: { type: target.value } })
+  editorStore.startEditing(target.value)
 }
 </script>
 <style lang="scss">

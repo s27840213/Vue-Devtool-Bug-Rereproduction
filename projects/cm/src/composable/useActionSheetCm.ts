@@ -9,7 +9,7 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
 const useActionSheetCm = () => {
   const userStore = useUserStore()
-  const { getSubDesignImage, listDesigns } = userStore
+  const { getSubDesignImage, deleteDesign } = userStore
   const { currOpenSubDesign, isSubDesignOpen } = storeToRefs(userStore)
   const { t } = useI18n()
   const {
@@ -23,7 +23,7 @@ const useActionSheetCm = () => {
   } = useActionSheet()
 
   const editorStore = useEditorStore()
-  const { currGeneratedResults, editorType } = storeToRefs(editorStore)
+  const { currGeneratedResults } = storeToRefs(editorStore)
 
   const savePhotoCb = async () => {
     let targetUrl = ''
@@ -179,6 +179,7 @@ const useActionSheetCm = () => {
         cb: () => {
           console.log(design)
         },
+        clickable: false,
       },
       {
         labels: [
@@ -189,22 +190,8 @@ const useActionSheetCm = () => {
           },
         ],
         cb: () => {
-          savePhotoCb()
-            .then(() => {
-              notify({
-                group: 'success',
-                text: `${t('NN0889')}`,
-              })
-              toggleActionSheet()
-            })
-            .catch((e) => {
-              console.log(e)
-              // @TODO
-              notify({
-                group: 'error',
-                text: 'gen photo error',
-              })
-            })
+          deleteDesign(design)
+          toggleActionSheet()
         },
       },
     ])

@@ -52,6 +52,7 @@ interface IEditorStore {
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
+  showEmptyPromptWarning: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -76,6 +77,8 @@ export const useEditorStore = defineStore('editor', {
     editorTheme: null,
     descriptionPanel: null,
     currDesignThumbIndex: 0,
+    // if the user send empty prompt, show warning at fisrt time
+    showEmptyPromptWarning: true,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -166,7 +169,7 @@ export const useEditorStore = defineStore('editor', {
         this.generatedResults = generatedResults
       }
 
-      router.push({ name: 'Editor' })
+      router.push({ name: 'Editor', query: { type } })
     },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
@@ -317,6 +320,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
+    },
+    setShowEmptyPromptWarning(show: boolean) {
+      this.showEmptyPromptWarning = show
     },
   },
 })
