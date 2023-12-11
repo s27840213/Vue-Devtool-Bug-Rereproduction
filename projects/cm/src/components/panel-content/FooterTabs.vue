@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
+div(class="cm-footer-tabs flex flex-col pt-8 px-24")
   transition(
     name="panel-up"
     @after-leave="afterLeave")
