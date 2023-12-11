@@ -94,7 +94,7 @@ class LayerFactary {
     }
     const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth + 1 < Math.abs(imgX) + width || imgHeight + 1 < Math.abs(imgY) + height
     if (isImgSizeWrong) {
-      const layer = { styles: { width: basicConfig.styles.imgWidth, height: basicConfig.styles.imgHeight } } as unknown as IImage
+      const layer = { styles: { imgWidth: basicConfig.styles.imgWidth, imgHeight: basicConfig.styles.imgHeight } } as unknown as IImage
       const clipperStyles = { width: basicConfig.styles.width, height: basicConfig.styles.height, scale: 1 } as IStyle
       const data = mouseUtils.clipperHandler(layer, '', clipperStyles)
       const { styles: { imgWidth, imgHeight, imgX, imgY } } = data
@@ -657,6 +657,8 @@ class LayerFactary {
     // which it's background.config.styles.imgHeight gets a string type instead of a number type
     config.backgroundImage.config.styles.imgWidth = +config.backgroundImage.config.styles.imgWidth
     config.backgroundImage.config.styles.imgHeight = +config.backgroundImage.config.styles.imgHeight
+    config.backgroundImage.config.styles.imgX = config.backgroundImage.config.posX
+    config.backgroundImage.config.styles.imgY = config.backgroundImage.config.posY
     bgImgConfig.id = generalUtils.generateRandomString(8)
     if (bgImgConfig.srcObj.type) {
       if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
@@ -664,6 +666,7 @@ class LayerFactary {
       }
     }
     config.backgroundImage.config = this.newImage(config.backgroundImage.config)
+    console.log('genenaaa', generalUtils.deepCopy(config))
     config.jsonVer = latestJsonVer
     textUtils.resetScale(config, true)
     return config
