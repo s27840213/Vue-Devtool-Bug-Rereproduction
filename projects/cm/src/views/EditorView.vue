@@ -38,8 +38,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="btn.action")
     template(#right)
       nubtn(
-        v-if="inAspectRatioState || inGenResultState || hasGeneratedResults"
-        @click="handleNextAction") {{ inAspectRatioState || inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+        v-if="inGenResultState || hasGeneratedResults"
+        @click="handleNextAction") {{ inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
   div(
     v-if="!inSavingState"
     class="editor-container flex justify-center items-center relative"
