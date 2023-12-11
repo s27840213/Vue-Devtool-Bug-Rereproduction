@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="mobile-type-selector flex flex-between items-center py-5")
   div(class="full-width flex flex-between items-center")
-    span(v-if="title" :class="`${textColor} ${textSize}`") {{ title }}
+    span(v-if="title" :class="`text-${textColor} ${textSize}`") {{ title }}
     span(v-if="description" class="text-gray-3 mr-10" :class="textSize") {{ description }}
     slot
   svg-icon(:iconName="iconName"
@@ -10,7 +10,8 @@ div(class="mobile-type-selector flex flex-between items-center py-5")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { IColorKeys } from '@nu/vivi-lib/interfaces/color';
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
@@ -25,8 +26,8 @@ export default defineComponent({
       type: String
     },
     textColor: {
-      type: String,
-      default: 'text-gray-1'
+      type: String as PropType<IColorKeys>,
+      default: 'gray-1'
     },
     textSize: {
       type: String,

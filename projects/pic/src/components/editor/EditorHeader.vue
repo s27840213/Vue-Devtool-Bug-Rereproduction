@@ -30,6 +30,7 @@ div(class="editor-header" ref="header"
 
 <script lang="ts">
 import store from '@/store'
+import { IColorKeys } from '@nu/vivi-lib/interfaces/color'
 import networkUtils from '@nu/vivi-lib/utils/networkUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import rulerUtils from '@nu/vivi-lib/utils/rulerUtils'
@@ -80,7 +81,7 @@ export default defineComponent({
         top
       }
     },
-    statusColor(): string {
+    statusColor(): IColorKeys {
       if (!networkUtils.check()) {
         return 'red'
       }

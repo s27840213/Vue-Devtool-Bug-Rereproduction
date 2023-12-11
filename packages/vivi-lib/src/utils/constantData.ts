@@ -608,7 +608,9 @@ class ConstantData {
       label: i18n.global.tc('NN0166', 1),
       icon: 'lock'
     }, ...!picWVUtils.inReviewMode ? [{
-      name: 'hr'
+      name: 'hr',
+      label: '',
+      icon: '',
     }, {
       name: 'payment',
       label: i18n.global.t('NN0585'),
