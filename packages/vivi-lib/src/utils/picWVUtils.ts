@@ -121,6 +121,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<void> {
+    if (!generalUtils.isPic) return
     store.commit('webView/UPDATE_userInfo', userInfo)
     await this.callIOSAsAPI('UPDATE_USER_INFO', userInfo, 'update-user-info')
   }
@@ -163,7 +164,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   async changeStatusBarTextColor(routeName: string): Promise<any> {
     const statusBarColor = WHITE_STATUS_BAR_ROUTES.includes(routeName) ? 'white' : 'black'
-    await this.callIOSAsAPI('UPDATE_USER_INFO', { statusBarColor }, 'update-user-info')
+    await this.updateUserInfo({ statusBarColor })
   }
 
   switchDomain(domain: string): void {

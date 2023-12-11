@@ -219,28 +219,34 @@ class BgRemoveUtils {
 
     const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
     const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
-    const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles
-    const { width, height } = targetLayerStyle
+    const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles as IImageStyle
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
-    const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON } = trimCanvas(this.canvas)
-    const previewSrc = trimedCanvas.toDataURL('image/png;base64')
+    const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
+    console.log(trimCanvas(this.canvas))
+    // const previewSrc = trimedCanvas.toDataURL('image/png;base64')
+    const previewSrc = this.canvas.toDataURL('image/png;base64')
 
     const { pageId, layerId } = this.bgRemoveIdInfo
     layerUtils.updateLayerProps(pageIndex, index, {
       previewSrc,
       trace: 1
     })
-    const newImageWidth = width * remainingWidthPercentage
-    const newImageHeight = height * remainingHeightPercentage
+    const newImageWidth = targetLayerStyle.width * remainingWidthPercentage
+    const newImageHeight = targetLayerStyle.height * remainingHeightPercentage
     layerUtils.updateLayerStyles(pageIndex, index, {
       x: targetLayerStyle.x + xShift,
       y: targetLayerStyle.y + yShift,
-      width: newImageWidth,
-      height: newImageHeight,
-      imgWidth: newImageWidth,
-      imgHeight: newImageHeight,
-      imgX: 0,
-      imgY: 0
+      ...this.getTrimmedCropStyles(targetLayerStyle, {
+        percentage: { w: remainingWidthPercentage, h: remainingHeightPercentage },
+        bound,
+        originSize: { w: this.canvas.width, h: this.canvas.height },
+      })
+      // width: newImageWidth,
+      // height: newImageHeight,
+      // imgWidth: newImageWidth,
+      // imgHeight: newImageHeight,
+      // imgX: 0,
+      // imgY: 0
     })
     this.setInBgRemoveMode(false)
     pageUtils.setScaleRatio(this.prevPageScaleRatio)
@@ -261,51 +267,65 @@ class BgRemoveUtils {
     })
     console.log(cropJSON)
     try{
-      uploadUtils.uploadCropJSON(cropJSON, id ?? privateId).then(() => {
-        uploadUtils.uploadAsset('image', [previewSrc], {
-          addToPage: false,
-          pollingCallback: (json: IUploadAssetResponse) => {
-            const targetPageIndex = pageUtils.getPageIndexById(pageId)
-            const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-            const srcObj = {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index
-            }
-            layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-              srcObj,
-              trace: 1
-            })
-            store.commit('DELETE_previewSrc', {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index,
-              assetIndex: json.data.asset_index
-            })
-            const image = layerUtils.getLayer(pageIndex, index) as IImage
-            if (image.type === LayerType.image) {
-              if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
-                const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
-                const layerData = {
-                  config: image,
-                  layerInfo
-                }
-                imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+      uploadUtils.uploadAsset('image', [previewSrc], {
+        addToPage: false,
+        pollingCallback: (json: IUploadAssetResponse) => {
+          const targetPageIndex = pageUtils.getPageIndexById(pageId)
+          const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+          const srcObj = {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: teamId,
+            assetId: this.isAdmin ? json.data.id : json.data.asset_index
+          }
+          layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+            srcObj,
+            trace: 1
+          })
+          store.commit('DELETE_previewSrc', {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: teamId,
+            assetId: this.isAdmin ? json.data.id : json.data.asset_index,
+            assetIndex: json.data.asset_index
+          })
+          const image = layerUtils.getLayer(pageIndex, index) as IImage
+          if (image.type === LayerType.image) {
+            if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
+              const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
+              const layerData = {
+                config: image,
+                layerInfo
               }
+              imageShadowPanelUtils.handleShadowUpload(layerData, true)
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             }
-            stepsUtils.record()
-            this.setLoading(false)
-            this.setIsProcessing(false)
-          },
-          id: id ?? privateId,
-          needCompressed: false,
-          pollingJsonName: 'result2.json'
-        })
+          }
+          stepsUtils.record()
+          this.setLoading(false)
+          this.setIsProcessing(false)
+        },
+        id: id ?? privateId,
+        needCompressed: false,
+        pollingJsonName: 'result2.json'
       })
     } catch (error) {
       console.log(error)
     }
+  }
+
+  getTrimmedCropStyles(styles: IImageStyle, data: {
+    percentage: { w: number, h: number },
+    bound: { top: number, left: number, right: number, bottom: number }
+    originSize: { w: number, h: number }
+  }) {
+    const { percentage, bound, originSize } = data
+    const trimmedSizeRatio = (bound.right - bound.left) / (bound.bottom - bound.top)
+    const width = styles.width * percentage.w
+    const height = width / trimmedSizeRatio
+    const imgWidth = width / percentage.w
+    const imgHeight = height / percentage.h
+    const imgX = -bound.left / originSize.w * imgWidth
+    const imgY = -bound.top / originSize.h * imgHeight
+    return { width, height, imgWidth, imgHeight, imgX, imgY }
   }
 
   downloadCanvas() {

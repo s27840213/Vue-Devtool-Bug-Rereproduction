@@ -44,8 +44,8 @@ div(class="prompt-area w-full box-border px-24")
         nubtn(
           v-if="!preview"
           size="mid-full"
-          :disabled="isGenerating"
-          @click="handleGenerate") {{ isGenerating ? 'Generating...' : $t('CM0023') }}
+          :disabled="isSendingGenImgReq"
+          @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
       //- type settings
       div(v-else-if="genTypes"
         class="absolute w-full flex flex-col gap-16"
@@ -130,6 +130,7 @@ import useGenImageUtils from '@/composable/useGenImageUtils'
 import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
+import { useModalStore } from '@/stores/modal'
 import type { GenHiddenMessageParams, GenImageParams, GenPowerfulFillParams } from '@/types/api'
 import type { GenImageGroupOption, GenImageRangeOption } from '@/types/editor'
 import vuex from '@/vuex'
@@ -155,10 +156,24 @@ const globalStore = useGlobalStore()
 const { setShowSpinner, setSpinnerText, debugMode } = globalStore
 
 const editorStore = useEditorStore()
-const { setIsGenerating, unshiftGenResults, changeEditorState, setCurrPrompt, setGenResultIndex } =
-  editorStore
-const { isGenerating, currPrompt, inEditingState, generatedResults, editorType, currGenOptions } =
-  storeToRefs(editorStore)
+const {
+  setIsSendingGenImgReq,
+  unshiftGenResults,
+  changeEditorState,
+  setCurrPrompt,
+  setCurrDesignId,
+  setGenResultIndex,
+} = editorStore
+const {
+  isSendingGenImgReq,
+  currPrompt,
+  currDesignId,
+  inEditingState,
+  isGenerating,
+  editorType,
+  currGenOptions,
+  generatedResults,
+} = storeToRefs(editorStore)
 const promptText = computed({
   // getter
   get() {
@@ -172,9 +187,29 @@ const promptText = computed({
 const promptLen = computed(() => currPrompt.value.length)
 const { isDuringTutorial } = useTutorial()
 const { genImageFlow } = useGenImageUtils()
-const { checkCanvasIsEmpty } = useCanvasUtils()
+const { checkCanvasIsEmpty, autoFill } = useCanvasUtils()
 const { t } = useI18n()
 // #endregion
+
+// #region modal
+const modalStore = useModalStore()
+const { closeModal, openModal, setNormalModalInfo } = modalStore
+// #endregion
+
+const checkIsGenerating = () => {
+  return new Promise<void>((resolve) => {
+    const check = () => {
+      if (isGenerating.value) {
+        setTimeout(() => {
+          check()
+        }, 200)
+      } else {
+        resolve()
+      }
+    }
+    check()
+  })
+}
 
 const getGenParams = (): GenImageParams => {
   const params = {
@@ -185,9 +220,7 @@ const getGenParams = (): GenImageParams => {
     case 'hidden-message':
       Object.assign(params, {
         action: genTypes.value?.group[genTypes.value.value].key,
-        ...Object.fromEntries(
-          genRangeOptions.value.map((setting) => [setting.key, setting.value]),
-        ),
+        ...Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
       } as GenHiddenMessageParams)
       break
   }
@@ -198,16 +231,12 @@ const getIsReadyToGen = () => {
   switch (editorType.value) {
     case 'hidden-message':
       if (!promptText.value && checkCanvasIsEmpty() && !pageUtils.getCurrPage.layers.length) {
-        modalUtils.setModalInfo(
-          t('CM0118'),
-          undefined,
-          { msg: t('STK0023') },
-          undefined,
-          { ulContent: [t('CM0119'), t('CM0120')] },
-        )
+        modalUtils.setModalInfo(t('CM0118'), undefined, { msg: t('STK0023') }, undefined, {
+          ulContent: [t('CM0119'), t('CM0120')],
+        })
         return false
       }
-      if(!promptText.value) {
+      if (!promptText.value) {
         notify({
           group: 'warn',
           text: `${t('CM0120')}`,
@@ -224,10 +253,21 @@ const getIsReadyToGen = () => {
       break
     default:
       if (checkCanvasIsEmpty()) {
-        notify({
-          group: 'error',
-          text: `${t('CM0085')}`,
+        setNormalModalInfo({
+          title: t('CM0091'),
+          content: t('CM0092'),
+          confirmText: t('NN0445'),
+          cancelText: t('CM0090'),
+          confirm: () => {
+            autoFill()
+            closeModal()
+          },
+          cancel: () => {
+            closeModal()
+          },
         })
+
+        openModal()
         return false
       }
       break
@@ -251,15 +291,24 @@ const handleGenerate = async () => {
     )
     changeEditorState('next')
   } else {
-    if(!getIsReadyToGen()) return
+    if (!getIsReadyToGen()) return
     setSpinnerText(`${t('CM0086')}`)
     setShowSpinner(true)
-    setIsGenerating(true)
+    setIsSendingGenImgReq(true)
+    const hasDesignId = currDesignId.value !== ''
+    if (!hasDesignId) {
+      setCurrDesignId(generalUtils.generateAssetId())
+    }
+
+    if (isGenerating.value) {
+      await checkIsGenerating()
+    }
+
     await genImageFlow(getGenParams(), false, 2, {
       onApiResponded: () => {
         if (generatedResults.value.filter((r) => r.url.length).length > 0 && inEditingState.value) {
           changeEditorState('next')
-          setIsGenerating(false)
+          setIsSendingGenImgReq(false)
           setShowSpinner(false)
         }
       },
@@ -267,14 +316,14 @@ const handleGenerate = async () => {
         if (inEditingState.value) {
           setGenResultIndex(index)
           changeEditorState('next')
-          setIsGenerating(false)
+          setIsSendingGenImgReq(false)
           setShowSpinner(false)
         }
       },
       onError: () => {
-        setIsGenerating(false)
+        setIsSendingGenImgReq(false)
         setShowSpinner(false)
-      }
+      },
     })
   }
 }

@@ -10,7 +10,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
     :optionWidth="'80px'"
     :optionHeight="'32px'"
     textSize="caption-SM")
-  div(class="w-full box-border px-24") 
+  div(class="w-full box-border px-24")
     props-slider(
       :title="`${$t('NN0815')}`"
       :borderTouchArea="true"
@@ -36,6 +36,7 @@ import type { PowerfulFillCanvasMode } from '@/types/editor'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import { storeToRefs } from 'pinia'
 
 /**
@@ -97,8 +98,10 @@ const cancel = () => {
   groupUtils.deselect()
 }
 
+
 const apply = () => {
   setCurrActiveFeature('none')
+  PagePinchUtils.resetPageScale()
   groupUtils.deselect()
 }
 </script>

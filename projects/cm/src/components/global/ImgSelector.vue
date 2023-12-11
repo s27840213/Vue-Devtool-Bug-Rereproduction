@@ -138,7 +138,7 @@ div(v-else class="preprocess w-full h-full bg-app-bg text-app-text-secondary")
   div(class="w-full h-[74%] pt-37 pb-20 flex justify-center items-center box-border")
     img(
       class="w-full h-full object-cover object-center filter"
-      :class="{'grayscale': editorType === 'hidden-message', invert: isInvert}"
+      :class="{ grayscale: editorType === 'hidden-message', invert: isInvert }"
       :src="srcPreprocessImg")
   div(class="p-24 pb-37 flex flex-col gap-16")
     div(class="flex justify-between items-center typo-h5 py-8")
@@ -148,20 +148,31 @@ div(v-else class="preprocess w-full h-full bg-app-bg text-app-text-secondary")
           iconName="information-circle"
           iconWidth="24px"
           @click="() => editorStore.setDescriptionPanel('hidden-message-invert')")
-      toggle-btn(class="payment__trial__toggle" v-model="isInvert" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+      toggle-btn(
+        class="payment__trial__toggle"
+        v-model="isInvert"
+        :width="36"
+        :height="22"
+        colorInactive="app-tab-slider-bg-raw"
+        colorActive="app-tab-active")
     div(class="flex justify-between items-center typo-h5 py-8")
       div(class="flex gap-8")
         svg-icon(
           class="bg-app-tab-active text-app-bg rounded-full"
           iconName="crown"
-          iconWidth="24px"
-        )
+          iconWidth="24px")
         span {{ $t('CM0082') }}
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
           @click="() => editorStore.setDescriptionPanel('hidden-message-bgrm')")
-      toggle-btn(class="payment__trial__toggle" v-model="isBgRemove" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+      toggle-btn(
+        class="payment__trial__toggle"
+        v-model="isBgRemove"
+        :width="36"
+        :height="22"
+        colorInactive="app-tab-slider-bg-raw"
+        colorActive="app-tab-active")
     div(class="flex justify-between items-center typo-h6")
       nubtn(
         theme="secondary"
@@ -194,8 +205,8 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
-import { find, pull } from 'lodash'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import { find, pull } from 'lodash'
 
 const router = useRouter()
 
@@ -237,14 +248,14 @@ const albums = computed(() => [
   ...smartAlbum,
   ...(myAlbum.length > 0
     ? [
-      {
-        // 'My album' text
-        albumId: 'myAlbum',
-        albumSize: 0,
-        title: 'myAlbum',
-        thumbId: 'myAlbum',
-      },
-    ]
+        {
+          // 'My album' text
+          albumId: 'myAlbum',
+          albumSize: 0,
+          title: 'myAlbum',
+          thumbId: 'myAlbum',
+        },
+      ]
     : []),
   ...myAlbum,
 ])
@@ -400,25 +411,24 @@ const sendToEditor = async () => {
       srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
       return
     }
+
     setImgAspectRatio(targetImgs[0].ratio)
-    if (!atEditor.value && targetEditorType.value) await router.push({ name: 'Editor', query: { type: targetEditorType.value } })
+    if (!atEditor.value && targetEditorType.value)
+      await router.push({ name: 'Editor', query: { type: targetEditorType.value } })
     setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
-        assetUtils.addImage(
-          img,
-          img.ratio,
-          {
-            fit: initAtEditor ? 0.8 : 1,
-            record: initAtEditor,
-            styles: {
-              adjust: {
-                ...(editorType.value === 'hidden-message' && { saturate: -100 }),
-                invert: +isInvert.value
-              }
-            }
-          })
+        assetUtils.addImage(img, img.ratio, {
+          fit: initAtEditor ? 0.8 : 1,
+          record: initAtEditor,
+          styles: {
+            adjust: {
+              ...(editorType.value === 'hidden-message' && { saturate: -100 }),
+              invert: +isInvert.value,
+            },
+          },
+        })
       })
       if (!initAtEditor) stepsUtils.reset()
       if (!initAtEditor || editorType.value === 'hidden-message') {
@@ -482,5 +492,4 @@ const applyPreprocess = () => {
 // #endregion
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>
