@@ -44,6 +44,8 @@ module.exports = {
     spacing: spacingMap,
     borderRadius: spacingMap,
     borderWidth: spacingMapWithPoint,
+    outlineWidth: spacingMapWithPoint,
+    outlineOffset: spacingMapWithPoint,
     maxWidth: {
       min: 'min-content',
       max: 'max-content',
