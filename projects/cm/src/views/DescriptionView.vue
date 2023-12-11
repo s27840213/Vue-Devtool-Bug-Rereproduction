@@ -32,7 +32,7 @@ div(class="description-page w-full h-full text-white px-24")
         :key="idx"
         :src="getImgs(idx).imgB"
         class="w-32 h-32 overflow-hidden rounded-4 object-cover object-center"
-        :class="{ 'outline-solid outline-2 -outline-offset-2 outline-yellow-cm': idx === idxCurrImg }"
+        :class="{ 'outline outline-2 -outline-offset-2 outline-yellow-cm': idx === idxCurrImg }"
         @click="idxCurrImg = idx")
     div(class="typo-body-md") {{ description }}
     nubtn(
