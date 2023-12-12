@@ -52,7 +52,7 @@ const target: Ref<EditorType> = ref(route.query.target as EditorType)
 const idxCurrImg = ref(0)
 const getImgs = (idx: number) => {
   return {
-    imgA: require(`demo/${target.value}-demo-${0}a.png`),
+    imgA: require(`demo/${target.value}-demo-${idx}a.png`),
     imgB: require(`demo/${target.value}-demo-${idx}b.png`),
   }
 }
