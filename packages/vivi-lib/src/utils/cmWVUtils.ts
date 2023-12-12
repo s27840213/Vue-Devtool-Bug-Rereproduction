@@ -1,11 +1,19 @@
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem, ILoginResult } from '@/interfaces/api'
+import { CustomWindow } from '@/interfaces/customWindow'
+import { IAsset } from '@/interfaces/module'
+import { IPage } from '@/interfaces/page'
+import router from '@/router'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
+import pageUtils from './pageUtils'
+import uploadUtils from './uploadUtils'
+
+declare let window: CustomWindow
 
 export interface IGeneralSuccessResponse {
   flag: '0'
@@ -110,10 +118,36 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     userId: '',
   }
 
-  CALLBACK_MAPS = {}
+  CALLBACK_MAPS = {
+    base: [
+      'appBecomeActive',
+      'informWebResult'
+    ]
+  }
+
+  screenshotMap = {} as { [key: string]: (status: string) => void }
+
   everEntersDebugMode = false
   appLoadedSent = false
   tutorialFlags = {} as { [key: string]: boolean }
+  isAnyIOSImgOnError = false
+
+  appBecomeActive() {
+    console.log('app become active!')
+  }
+
+  informWebResult(data: { info: ({ event: string } & Record<string, unknown>) }) {
+    const { info } = data
+    const { event } = info
+    switch (event) {
+      case 'screenshot':
+        window.fetchDesign(info.query, info.imageId)
+        break
+      case 'screenshot-result':
+        this.screenshotMap[info.options as string](info.status as string)
+        break
+    }
+  }
 
   get inBrowserMode() {
     return store.getters['cmWV/getInBrowserMode']
@@ -298,31 +332,109 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
+  createUrl(item: IAsset): string {
+    switch (item.type) {
+      case 5:
+      case 11:
+      case 10:
+        return `type=svg&id=${item.id}&ver=${item.ver}`
+      case 14:
+        return `type=svgImage2&id=${item.id}&ver=${item.ver}`
+      case 15:
+        return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
+      // case 7: deprecated
+      //   return `type=text&id=${item.id}&ver=${item.ver}`
+      case 1:
+        return `type=background&id=${item.id}&ver=${item.ver}`
+      default:
+        return ''
+    }
+  }
+
+  createUrlForJSON({ page = undefined, noBg = true }: { page?: IPage, noBg?: boolean } = {}): string {
+    page = page ?? pageUtils.currFocusPage
+    // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
+    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
+  }
+
+  async sendScreenshotUrl(query: string): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
+    if (this.inBrowserMode) {
+      const url = `${window.location.origin}/screenshot/?${query}`
+      window.open(url, '_blank')
+      return {
+        flag: '0',
+        imageId: '',
+        cleanup: () => { console.log('empty cleanup') }
+      }
+    }
+    const imageId = generalUtils.generateAssetId()
+    await this.callIOSAsHTTPAPI('INFORM_WEB', {
+      info: {
+        event: 'screenshot',
+        query,
+        imageId,
+      },
+      to: 'Shot',
+    })
+    const status = await Promise.race([
+      new Promise<string>(resolve => {
+        this.screenshotMap[imageId] = resolve
+      }),
+      new Promise<string>(resolve => {
+        setTimeout(() => {
+          resolve('timeout')
+        }, 20000)
+      })
+    ])
+    switch (status) {
+      case 'error':
+      case 'timeout':
+        console.log(`Screenshot Failed at ShotWeb with status: ${status}`)
+        return {
+          flag: '1',
+          imageId,
+          cleanup: () => { console.log('empty cleanup') }
+        }
+      // case 'completed': pass
+    }
+    return {
+      flag: '0',
+      imageId,
+      cleanup: () => {
+        this.deleteFile('screenshot', imageId, 'png')
+      }
+    }
+  }
+
   getEditorDimensions(pageSize: { width: number, height: number }): { x: number; y: number; width: number; height: number } {
-    const editorEle = document.getElementById('screenshot-target') as HTMLElement
-    const defaultDimensions = {
-      x: 0,
-      y: 0,
-      width: pageSize.width,
-      height: pageSize.height
+    if (router.currentRoute.value.name === 'Screenshot') {
+      return { x: 0, y: 0, width: pageSize.width, height: pageSize.height }
+    } else {
+      const editorEle = document.getElementById('screenshot-target') as HTMLElement
+      const defaultDimensions = {
+        x: 0,
+        y: 0,
+        width: pageSize.width,
+        height: pageSize.height
+      }
+      if (!editorEle) {
+        return defaultDimensions
+      }
+      let { width, height, x, y } = editorEle.getBoundingClientRect()
+      if (width <= 0) {
+        width = defaultDimensions.width
+      }
+      if (height <= 0) {
+        height = defaultDimensions.height
+      }
+      if (x <= 0) {
+        x = defaultDimensions.x
+      }
+      if (y <= 0) {
+        y = defaultDimensions.y
+      }
+      return { x, y, width, height }
     }
-    if (!editorEle) {
-      return defaultDimensions
-    }
-    let { width, height, x, y } = editorEle.getBoundingClientRect()
-    if (width <= 0) {
-      width = defaultDimensions.width
-    }
-    if (height <= 0) {
-      height = defaultDimensions.height
-    }
-    if (x <= 0) {
-      x = defaultDimensions.x
-    }
-    if (y <= 0) {
-      y = defaultDimensions.y
-    }
-    return { x, y, width, height }
   }
 
   async getState(key: string): Promise<any | undefined> {

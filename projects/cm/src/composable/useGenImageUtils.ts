@@ -214,10 +214,8 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('copy editor', false)
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor({
-      width: pageWidth * contentScaleRatio.value,
-      height: pageHeight * contentScaleRatio.value,
-    })
+    const query = cmWVUtils.createUrlForJSON({ noBg: false })
+    const { flag, imageId, cleanup } = await cmWVUtils.sendScreenshotUrl(query)
     RECORD_TIMING && testUtils.log('copy editor', '')
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
