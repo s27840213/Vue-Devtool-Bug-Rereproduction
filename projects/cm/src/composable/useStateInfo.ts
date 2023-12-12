@@ -15,6 +15,8 @@ const useStateInfo = () => {
   const atDescription = computed(() => path.value === '/description')
   const atEditor = computed(() => path.value === '/editor')
   const atEventTester = computed(() => path.value === '/nativeevttest')
+  const atScreenshot = computed(() => path.value.startsWith('/screenshot'))
+  const atNonUI = computed(() => atScreenshot.value || atEventTester.value)
   // #endregion
 
   // #region editor state
@@ -48,6 +50,8 @@ const useStateInfo = () => {
     atMainPage,
     atDescription,
     atEventTester,
+    atScreenshot,
+    atNonUI,
     showHomeTabs,
     inGenResultState,
     inAspectRatioState,
