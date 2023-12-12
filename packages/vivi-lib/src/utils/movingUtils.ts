@@ -41,7 +41,6 @@ export class MovingUtils {
   private isFollowByPinch = false
 
   private isTouchDevice = generalUtils.isTouchDevice()
-  private isClickOnController = false
 
   private get isBgImgCtrl(): boolean { return store.getters['imgControl/isBgImgCtrl'] }
   private get config(): ILayer { return this._config.config }
@@ -270,7 +269,6 @@ export class MovingUtils {
     }
 
     if (this.isTouchDevice && !this.config.locked) {
-      this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
     }
     if (eventType === 'pointer') {
@@ -441,7 +439,8 @@ export class MovingUtils {
     if (!this.isDragging) {
       updateConfigData.dragging = true
     }
-    if (this.isControllerShown) {
+
+    if (this.isControllerShown || controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) {
       if (generalUtils.getEventType(e) !== 'touch') {
         e.preventDefault()
       }
