@@ -93,7 +93,7 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor']) return
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || layerUtils.getCurrLayer.isTyping) return
 
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
@@ -114,7 +114,8 @@ export class MovingUtils {
   pageMoving(e: PointerEvent) {
     if (store.getters['mobileEditor/getIsPinchingEditor'] ||
       store.getters.getControlState.type === 'pinch' ||
-      pointerEvtUtils.pointers.length > 1) {
+      pointerEvtUtils.pointers.length > 1 ||
+      (layerUtils.getCurrLayer.isTyping)) {
       this.removeListener()
       return
     }
@@ -474,21 +475,12 @@ export class MovingUtils {
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
       }
       if (this.isTouchDevice && !this.isLocked) {
-        // if (posDiff.x > 1 || posDiff.y > 1) {
-        //   window.requestAnimationFrame(() => {
-        //     this.movingHandler(e)
-        //     this.isHandleMovingHandler = false
-        //   })
-        //   return
-        // }
         const { mobileSize } = editorUtils
         const { getCurrPage: page, scaleRatio } = pageUtils
         const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
           page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
         if (!isPageFullyInsideEditor) {
-          window.requestAnimationFrame(() => {
-            this.pageMovingHandler(e)
-          })
+          this.pageMoving(e)
         }
       } else {
         if (posDiff.x < 1 && posDiff.y < 1) {

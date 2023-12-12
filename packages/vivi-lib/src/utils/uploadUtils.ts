@@ -948,7 +948,6 @@ class UploadUtils {
       exportIds: this.exportIds,
     }
 
-    console.log('upload', pagesJSON)
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_map.fields[key])

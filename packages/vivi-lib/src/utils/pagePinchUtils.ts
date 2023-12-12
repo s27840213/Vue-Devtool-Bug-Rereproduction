@@ -1,6 +1,8 @@
 import { IPage } from "@/interfaces/page"
 import store from "@/store"
 import { AnyTouchEvent } from "any-touch"
+import editorUtils from "./editorUtils"
+import generalUtils from "./generalUtils"
 import layerUtils from "./layerUtils"
 import mathUtils from "./mathUtils"
 import { MovingUtils } from "./movingUtils"
@@ -56,9 +58,23 @@ class pagePinchUtils {
 
   private getTranslationRatio(e: AnyTouchEvent, windowEl: HTMLElement) {
     const rect = windowEl.getBoundingClientRect()
-    return {
-      x: ((e.x - rect.left) - this.page.x) / (this.page.width * this.pageScaleRatio * this.contentScaleRatio * 0.01),
-      y: ((e.y - rect.top) - this.page.y) / (this.page.height * this.pageScaleRatio * this.contentScaleRatio * 0.01)
+    if (generalUtils.isCm) {
+      return {
+        x: ((e.x - rect.left) - this.page.x) / (this.page.width * this.pageScaleRatio * this.contentScaleRatio * 0.01),
+        y: ((e.y - rect.top) - this.page.y) / (this.page.height * this.pageScaleRatio * this.contentScaleRatio * 0.01)
+      }
+    } else {
+      const { page, pageScaleRatio, contentScaleRatio } = this
+      const translationRatio_ori_pos = {
+        x: ((page.initPos.x - this.initPagePos.x) / (page.width * this.pageScaleRatio * 0.01 * contentScaleRatio)),
+        y: ((page.initPos.y - this.initPagePos.y) / (page.height * this.pageScaleRatio * 0.01 * contentScaleRatio))
+      }
+
+      // actual translation ratio equals to current pinch-in-current-window plus current-window-pos
+      return {
+        x: ((this.initPinchPos.x - editorUtils.mobileCenterPos.x) / (page.width * contentScaleRatio) + 0.5) / (pageScaleRatio * 0.01) + translationRatio_ori_pos.x,
+        y: ((this.initPinchPos.y - editorUtils.mobileCenterPos.y) / (page.height * contentScaleRatio) + 0.5) / (pageScaleRatio * 0.01) + translationRatio_ori_pos.y
+      }
     }
   }
 
@@ -87,36 +103,71 @@ class pagePinchUtils {
 
   private getEdgeLimit(pageScaleRatio: number) {
     const { page, contentScaleRatio } = this
-    return {
-      left: 0,
-      right: -(pageScaleRatio - 100) * page.width * contentScaleRatio * 0.01,
-      top: 0,
-      bottom: -(pageScaleRatio - 100) * page.height * contentScaleRatio * 0.01
+    if (generalUtils.isCm) {
+      return {
+        left: 0,
+        right: -(pageScaleRatio - 100) * page.width * contentScaleRatio * 0.01,
+        top: 0,
+        bottom: -(pageScaleRatio - 100) * page.height * contentScaleRatio * 0.01
+      }
+    } else {
+      // isPic
+      const EDGE_WIDTH = {
+        x: (editorUtils.mobileSize.width - pageUtils.getCurrPage.width * contentScaleRatio) * 0.5,
+        y: (editorUtils.mobileSize.height - pageUtils.getCurrPage.height * contentScaleRatio) * 0.5
+      }
+      return {
+        left: EDGE_WIDTH.x,
+        right: (editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio * 0.01 - EDGE_WIDTH.x),
+        top: EDGE_WIDTH.y,
+        bottom: (editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio * 0.01 - EDGE_WIDTH.y)
+      }
     }
   }
 
   private addEdgingTransition() {
     const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-    const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
     currPageEl.classList.add(...TRANSITION_CLASS)
-    canvasSection.classList.add(...TRANSITION_CLASS)
+    if (generalUtils.isCm) {
+      const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
+      canvasSection.classList.add(...TRANSITION_CLASS)
+    }
   }
 
   private removeEdgingTransition() {
     const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-    const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
     currPageEl.classList.remove(...TRANSITION_CLASS)
-    canvasSection.classList.remove(...TRANSITION_CLASS)
+    if (generalUtils.isCm) {
+      const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
+      canvasSection.classList.remove(...TRANSITION_CLASS)
+    }
+  }
+
+  private pageEdgeLimitHandler(pageScaleRatio: number) {
+    const { page } = this
+    const edgeLimit = this.getEdgeLimit(pageScaleRatio)
+    if (generalUtils.isCm) {
+      return {
+        isReachLeftEdge: page.x > edgeLimit.left,
+        isReachRightEdge: edgeLimit.right > page.x,
+        isReachTopEdge: page.y > edgeLimit.top,
+        isReachBottomEdge: edgeLimit.bottom > page.y
+      }
+    }
+    // isPic
+    return {
+      isReachLeftEdge: page.x >= edgeLimit.left,
+      isReachRightEdge: page.x <= edgeLimit.right,
+      isReachTopEdge: page.y >= edgeLimit.top,
+      isReachBottomEdge: page.y <= edgeLimit.bottom
+    }
   }
 
   private handleEdging(e: AnyTouchEvent) {
     const { page, initPageScale, contentScaleRatio } = this
     const newPageScaleRatio = store.state.mobileEditor.pinchScale * initPageScale
     const edgeLimit = this.getEdgeLimit(newPageScaleRatio)
-    const isReachLeft = page.x > edgeLimit.left
-    const isReachRight = edgeLimit.right > page.x
-    const isReachTop = page.y > edgeLimit.top
-    const isReachBottom = edgeLimit.bottom > page.y
+    const { isReachLeftEdge, isReachRightEdge, isReachTopEdge, isReachBottomEdge } = this.pageEdgeLimitHandler(newPageScaleRatio)
 
     // case 1: page smaller than default size
     if (newPageScaleRatio < 100) {
@@ -161,21 +212,21 @@ class pagePinchUtils {
         this.addPageMoveEvt(e)
       }, TRANSITION_TIME)
     // case 3: page size proper but reach edges
-    } else if (isReachLeft || isReachRight || isReachTop || isReachBottom) {
+    } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
       console.warn('case 3')
       this.addEdgingTransition()
       const newPos = {
         x: page.x,
         y: page.y
       }
-      if (isReachLeft) {
-        newPos.x = 0
-      } else if (isReachRight) {
+      if (isReachLeftEdge) {
+        newPos.x = edgeLimit.left
+      } else if (isReachRightEdge) {
         newPos.x = edgeLimit.right
       }
-      if (isReachTop) {
-        newPos.y = 0
-      } else if (isReachBottom) {
+      if (isReachTopEdge) {
+        newPos.y = edgeLimit.top
+      } else if (isReachBottomEdge) {
         newPos.y = edgeLimit.bottom
       }
       pageUtils.updatePagePos(layerUtils.pageIndex, newPos)
@@ -217,8 +268,8 @@ class pagePinchUtils {
   static resetPageScale() {
     store.commit('SET_pageScaleRatio', 100)
     pageUtils.updatePagePos(layerUtils.pageIndex, {
-      x: 0,
-      y: 0
+      x: layerUtils.getCurrPage.initPos.x || 0,
+      y: layerUtils.getCurrPage.initPos.y || 0
     })
   }
 
