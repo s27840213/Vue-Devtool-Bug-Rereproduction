@@ -12,7 +12,6 @@ export interface ICanvasState {
   isProcessingCanvas: boolean
   isChangingBrushSize: boolean
   isDrawing: boolean
-  maskCanvas: HTMLCanvasElement | null
   canvas: HTMLCanvasElement | null
   canvasCtx: CanvasRenderingContext2D | null
   currCanvasImageElement: HTMLImageElement
@@ -35,7 +34,6 @@ export const useCanvasStore = defineStore('canvas', {
     isProcessingCanvas: false,
     isChangingBrushSize: false,
     isDrawing: false,
-    maskCanvas: null as unknown as HTMLCanvasElement,
     canvas: null as unknown as HTMLCanvasElement,
     canvasCtx: null as unknown as CanvasRenderingContext2D,
     currCanvasImageElement: new Image(),

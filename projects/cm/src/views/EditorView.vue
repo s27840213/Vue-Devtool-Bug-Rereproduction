@@ -217,7 +217,6 @@ import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useEventBus } from '@vueuse/core'
 import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
-import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
 
 // #region refs & vars
@@ -651,10 +650,6 @@ const demoBrushSizeOutline = computed(() => {
 // #region event bus
 const bus = useEventBus<string>('editor')
 const unsubcribe = bus.on((event: string, { callback }) => {
-  if (event === 'genMaskUrl') {
-    callback(getCanvasDataUrl())
-  }
-
   if (event === 'fitPage') {
     fitPage(fitScaleRatio.value)
   }
@@ -662,21 +657,6 @@ const unsubcribe = bus.on((event: string, { callback }) => {
 onBeforeUnmount(() => {
   unsubcribe()
 })
-// #endregion
-
-// #region Canvas functions
-const canvasRef = ref<VNodeRef | null>(null)
-const downloadCanvas = () => {
-  if (!canvasRef.value) return
-
-  canvasRef.value.downloadCanvas()
-}
-
-const getCanvasDataUrl = () => {
-  if (!canvasRef.value) return
-
-  return canvasRef.value.getCanvasDataUrl()
-}
 // #endregion
 
 // #region asset panel
