@@ -74,8 +74,9 @@ module.exports = {
   ],
   plugins: [
     require('tailwind-scrollbar-hide'),
-    // why we should use this plugin? bcz if we add custom class using @layer, they won't be change in tailwind intellsense
+    // Add classes here, and Tailwind Intellisense will do auto complete for them.
     plugin(function ({ addUtilities }) {
+      // TODO: typo for pic/stk
       const textStyles = {
         '.typo-h1': {
           fontFamily: 'Lato',
@@ -158,6 +159,34 @@ module.exports = {
         },
       }
       addUtilities(textStyles, ['responsive'])
+
+      const justifyContent = [
+        ['center', 'center'],
+        ['start', 'flex-start'],
+        ['end', 'flex-end'],
+        ['between', 'space-between'],
+        ['around', 'space-around'],
+        ['evenly', 'space-evenly'],
+        ['ini', 'initial'],
+      ]
+      const alignItems = [
+        ['center', 'center'],
+        ['start', 'flex-start'],
+        ['end', 'flex-end'],
+        ['ini', 'initial'],
+      ]
+      const flex = {}
+      for (const [juKey, juVal] of justifyContent) {
+        for (const [alKey, alVal] of alignItems) {
+          const key = juKey === alKey ? juKey : `${juKey}-${alKey}`
+          flex[`.flex-${key}`] = {
+            display: 'flex',
+            justifyContent: juVal,
+            alignItems: alVal,
+          }
+        }
+      }
+      addUtilities(flex)
     }),
   ],
 }
