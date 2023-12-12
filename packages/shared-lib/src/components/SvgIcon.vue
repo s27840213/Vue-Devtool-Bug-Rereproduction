@@ -32,7 +32,7 @@ const props = withDefaults(
     iconColor?: keyof typeof colorTable
     iconHeight?: string
     // only used for those who alread has stroke
-    strokeColor?: string
+    strokeColor?: keyof typeof colorTable
     sameSize?: boolean
   }>(),
   {
