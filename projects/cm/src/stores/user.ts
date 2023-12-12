@@ -150,6 +150,8 @@ export const useUserStore = defineStore('user', () => {
             url: getSubDesignThumbUrl(type, id, subDesign.id),
           }
         }),
+        designWidth: width,
+        designHeight: height,
       })
     } catch (error) {
       logUtils.setLogForError(error as Error)
@@ -163,7 +165,7 @@ export const useUserStore = defineStore('user', () => {
   ) => {
     // const { callback, type = 'opacity' } = option || {}
     try {
-      const { pages, type, prompt, id, subId } = subDesign
+      const { pages, type, prompt, id, subId, width, height } = subDesign
       setCurrPrompt(prompt)
       pageUtils.setPages(pages)
       setMaskDataUrl(getTargetImageUrl(type, id, subId, 'mask'))
@@ -176,6 +178,8 @@ export const useUserStore = defineStore('user', () => {
             url: getSubDesignThumbUrl(type, id, subDesign.id),
           }
         }),
+        designWidth: width,
+        designHeight: height,
       })
     } catch (error) {
       logUtils.setLogForError(error as Error)

@@ -155,9 +155,21 @@ export const useEditorStore = defineStore('editor', {
     },
     startEditing(
       type: EditorType,
-      props?: { stateTarget?: string; designId?: string; generatedResults?: Array<IGenResult> },
+      props?: {
+        stateTarget?: string
+        designId?: string
+        generatedResults?: Array<IGenResult>
+        designWidth?: number
+        designHeight?: number
+      },
     ) {
-      const { stateTarget, designId, generatedResults } = props || {}
+      const {
+        stateTarget,
+        designId,
+        generatedResults,
+        designWidth = 900,
+        designHeight = 1600,
+      } = props || {}
       this.currStateIndex = 0
       this.editorType = type
       if (designId) this.currDesignId = designId
@@ -169,7 +181,7 @@ export const useEditorStore = defineStore('editor', {
         this.generatedResults = generatedResults
       }
 
-      router.push({ name: 'Editor', query: { type } })
+      router.push({ name: 'Editor', query: { type, width: designWidth, height: designHeight } })
     },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
