@@ -11,6 +11,7 @@ const spacingMap = {}
 for (let i = 0; i <= 500; i++) {
   spacingMap[i] = `${i}px`
 }
+const spacingMapPxOnly = { ...spacingMap }
 spacingMap.full = '100%'
 spacingMap.half = '50%'
 const spacingMapWithPoint = {}
@@ -42,7 +43,10 @@ module.exports = {
     ),
     // this project only for mobile, no need to add to much spacing
     spacing: spacingMap,
-    borderRadius: spacingMap,
+    borderRadius: {
+      ...spacingMapPxOnly,
+      full: '9999px',
+    },
     borderWidth: spacingMapWithPoint,
     outlineWidth: spacingMapWithPoint,
     outlineOffset: spacingMapWithPoint,
