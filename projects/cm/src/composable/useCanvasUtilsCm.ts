@@ -26,7 +26,8 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { showBrushOptions } = storeToRefs(editorStore)
+  const { showBrushOptions, maskDataUrl } = storeToRefs(editorStore)
+
   const { isBiColorEditor } = useBiColorEditor()
   // #endregion
 
@@ -42,7 +43,6 @@ const useCanvasUtils = (
     loading,
     isChangingBrushSize,
     isDrawing,
-    maskCanvas,
     canvas,
     canvasCtx,
     currCanvasImageElement,
@@ -51,7 +51,7 @@ const useCanvasUtils = (
     stepsQueue,
     isInCanvasFirstStep,
     isInCanvasLastStep,
-    drawingColor
+    drawingColor,
   } = storeToRefs(canvasStore)
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
@@ -98,20 +98,19 @@ const useCanvasUtils = (
   // #endregion
 
   const getBrushColor = (color: string) => {
-    const mapColorDrawingToBrush = new Map([
-      ['#FF7262', '#fcaea9'],
-    ])
+    const mapColorDrawingToBrush = new Map([['#FF7262', '#fcaea9']])
 
     // darken or lighten color
-    const adjustColor = (color: string) => { // #FFF not supportet rather use #FFFFFF
-      const clamp = (val: number) => Math.min(Math.max(val, 0), 0xFF)
+    const adjustColor = (color: string) => {
+      // #FFF not supportet rather use #FFFFFF
+      const clamp = (val: number) => Math.min(Math.max(val, 0), 0xff)
       const fill = (str: string) => ('00' + str).slice(-2)
       let offset = 100
 
       const num = parseInt(color.replace(/^#/, ''), 16)
       let red = num >> 16
-      let green = (num >> 8) & 0x00FF
-      let blue = num & 0x0000FF
+      let green = (num >> 8) & 0x00ff
+      let blue = num & 0x0000ff
       if (red * 0.299 + green * 0.587 + blue * 0.114 > 186) offset = -offset // https://stackoverflow.com/a/3943023/112731
       red = clamp(red + offset)
       green = clamp(green + offset)
@@ -182,7 +181,7 @@ const useCanvasUtils = (
     if (canvas && canvas.value && canvasCtx && canvasCtx.value) {
       canvasCtx.value.globalCompositeOperation = 'source-atop'
       canvasCtx.value.fillStyle = color
-      canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height);
+      canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height)
     }
   }
 
@@ -226,8 +225,14 @@ const useCanvasUtils = (
     if (wrapperRef && wrapperRef.value) {
       const { x, y } = getMousePosInTarget(e, wrapperRef.value)
       brushStyle.transform = `translate(${
-        x * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 - (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 + pageUtils.getCurrPage.x
-      }px, ${y * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 - (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 + pageUtils.getCurrPage.y}px)`
+        x * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 -
+        (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 +
+        pageUtils.getCurrPage.x
+      }px, ${
+        y * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 -
+        (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 +
+        pageUtils.getCurrPage.y
+      }px)`
       // brushStyle.transform = `translate(${
       //   x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
       // }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
@@ -376,7 +381,7 @@ const useCanvasUtils = (
   // #endregion
 
   onMounted(() => {
-    if (wrapperRef && wrapperRef.value && editorContainerRef && editorContainerRef.value) {
+    if (wrapperRef && editorContainerRef) {
       createInitCanvas(pageSize.value.width, pageSize.value.height)
       clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
@@ -495,16 +500,55 @@ const useCanvasUtils = (
     })
   }
 
-  const downloadMaskCanvas = () => {
-    if (maskCanvas && maskCanvas.value) {
-      const dataUrl = maskCanvas.value.toDataURL('image/png')
+  const prepareMaskToUpload = () => {
+    if (canvas && canvas.value) {
+      const canvasCopy = document.createElement('canvas')
+      canvasCopy.width = canvas.value.width
+      canvasCopy.height = canvas.value.height
+      const maskCtxCopy = canvasCopy.getContext('2d')
+      if (maskCtxCopy) {
+        maskCtxCopy.drawImage(canvas.value, 0, 0)
+        const pixels = maskCtxCopy.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
+        const result = new ImageData(
+          new Uint8ClampedArray(pixels.data),
+          pageSize.value.width,
+          pageSize.value.height,
+        )
+        // The total number of pixels (RGBA values).
+        const bufferSize = pixels.data.length
+
+        // Iterate over every pixel to find the boundaries of the non-transparent content.
+        for (let i = 0; i < bufferSize; i += 4) {
+          // Check the alpha (transparency) value of each pixel.
+          if (pixels.data[i + 3] === 0) {
+            result.data[i] = 0
+            result.data[i + 1] = 0
+            result.data[i + 2] = 0
+            result.data[i + 3] = 255
+          } else {
+            // If the pixel is not transparent, set it to white.
+            result.data[i] = 255
+            result.data[i + 1] = 255
+            result.data[i + 2] = 255
+            result.data[i + 3] = 255
+          }
+        }
+        maskCtxCopy.putImageData(result, 0, 0)
+        return canvasCopy.toDataURL('image/png')
+      }
+    }
+  }
+
+  const downloadCanvas = () => {
+    if (canvas && canvas.value) {
+      const dataUrl = canvas.value.toDataURL('image/png')
       generalUtils.downloadImage(dataUrl, 'mask.png')
     }
   }
 
-  const getMaskDaraUrl = () => {
-    if (maskCanvas && maskCanvas.value) {
-      return maskCanvas.value.toDataURL('image/png')
+  const getCanvasDataUrl = () => {
+    if (canvas && canvas.value) {
+      return canvas.value.toDataURL('image/png')
     }
   }
 
@@ -567,6 +611,22 @@ const useCanvasUtils = (
     return url
   }
 
+  const restoreCanvas = () => {
+    if (maskDataUrl.value) {
+      const img = new Image()
+
+      img.crossOrigin = 'Anonymous'
+      img.src = maskDataUrl.value
+      img.onload = () => {
+        clearCtx()
+        drawImageToCtx(img, {
+          width: pageSize.value.width,
+          height: pageSize.value.height,
+        })
+      }
+    }
+  }
+
   const record = () => {
     /**
      * DataUrl for png is TOO slow for the project, so I change to use the toBlob method
@@ -615,8 +675,8 @@ const useCanvasUtils = (
   return {
     setCanvasStoreState,
     reverseSelection,
-    downloadMaskCanvas,
-    getMaskDaraUrl,
+    downloadCanvas,
+    getCanvasDataUrl,
     clearCtx,
     autoFill,
     getCanvasBlob,
@@ -627,6 +687,8 @@ const useCanvasUtils = (
     drawImageToCtx,
     updateCanvasSize,
     checkCanvasIsEmpty,
+    restoreCanvas,
+    prepareMaskToUpload,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,

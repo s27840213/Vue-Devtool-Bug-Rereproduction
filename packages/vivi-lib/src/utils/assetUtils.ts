@@ -2,14 +2,14 @@ import listApi from '@/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-IGroup,
-IImage,
-IImageStyle,
-IShape,
-ISpanStyle,
-IStyle,
-IText,
-ITmp,
+  IGroup,
+  IImage,
+  IImageStyle,
+  IShape,
+  ISpanStyle,
+  IStyle,
+  IText,
+  ITmp,
 } from '@/interfaces/layer'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
@@ -249,7 +249,7 @@ class AssetUtils {
         if (json.bleeds && json.physicalBleeds)
           pageUtils.setBleeds(finalPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
       } else pageUtils.setIsEnableBleed(false, finalPageIndex)
-    } else if (attrs && attrs.width && attrs.height) {
+    } else if (attrs && attrs.width && attrs.height && generalUtils.isPic) { // skip if not pic, because others has no bleed function
       // use page size
       let physicalBleeds
       if (refPage.bleeds && refPage.physicalBleeds) {
@@ -816,7 +816,7 @@ class AssetUtils {
   ) {
 
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb, record = true } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, previewSrc, hideResizer, ctrlUnmountCb, record = true, select = true } = attrs
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const resizeRatio =
       attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_IMAGE
@@ -953,8 +953,10 @@ class AssetUtils {
     GroupUtils.deselect()
     layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newImage(config)], index)
     ZindexUtils.reassignZindex(targetPageIndex)
-    GroupUtils.select(targetPageIndex, [index])
-    console.log(record)
+
+    if(select) {
+      GroupUtils.select(targetPageIndex, [index])
+    }
     if(record) {
       stepsUtils.record()
     }

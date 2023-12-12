@@ -47,7 +47,7 @@ div(class="overflow-container full-size rwd-container")
                   @click="handleCategorySearch($t('NN0024'))")
               svg-icon(class="pointer"
                 iconName="clock"
-                iconColor="balck-1"
+                iconColor="black-1"
                 iconWidth="24px")
               div(class="overline-SM") RECENTLY USED
             CategoryTextPreview(v-else :item="item" @click="addText(item)")

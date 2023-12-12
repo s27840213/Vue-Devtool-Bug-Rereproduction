@@ -1,19 +1,19 @@
 <template lang="pug">
 div(
   v-if="!srcPreprocessImg"
-  class="image-selector bg-app-bg text-app-tab-default \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
+  class="image-selector bg-dark-6 text-yellow-0 \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
   div(class="box-border px-24 py-8 flex justify-between items-center")
     back-btn
-    span(class="text-app-btn-primary-text") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
+    span(class="text-white") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
     div(class="w-24")
   //- 2. Tabs for photo & stock
   tabs(
-    class="bg-app-tab-bg min-h-[52px] rounded-t-[24px]"
+    class="bg-dark-3 min-h-52 rounded-t-24"
     :tabs="[$t('STK0067'), $t('STK0069')]"
     v-model="tabIndex")
   //- 3. (Album bar or search bar) + demo img
-  div(class="bg-app-tab-bg box-border px-12 py-8 h-60 \ grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
+  div(class="bg-dark-3 box-border px-12 py-8 h-60 \ grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
     div(
       v-if="inPhoto"
       class="flex items-center gap-10"
@@ -27,7 +27,7 @@ div(
           :iconWidth="'12px'")
     search-bar(
       v-if="inStock"
-      class="text-app-text-primary"
+      class="text-dark"
       @search="searchUnsplash")
     //- Demo img
     div(
@@ -35,16 +35,16 @@ div(
       :key="img.assetId"
       class="relative flex justify-center"
       @click="selectDemo(i)")
-      img(class="w-44 h-44 object-cover rounded-[10px]" :src="img.assetId")
+      img(class="w-44 h-44 object-cover rounded-10" :src="img.assetId")
       span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
   //- 4-1. Photo
   div(
     v-if="inPhoto"
-    class="bg-app-tab-bg w-full h-full box-border grid \ grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
+    class="bg-dark-3 w-full h-full box-border grid \ grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
     //- Photo selector
     div(
       v-if="isAlbumOpened"
-      class="img-selector__img-grid bg-app-bg overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
+      class="img-selector__img-grid bg-dark-6 overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
       div(class="aspect-square flex flex-col items-center justify-center" @click="useCamera")
         svg-icon(class="mb-10" iconName="camera")
         span {{ $t('CM0060') }}
@@ -62,7 +62,7 @@ div(
           v-if="selected(img, 'ios')"
           class="absolute right-0 top-0"
           iconName="item-check"
-          iconColor="app-tab-active")
+          iconColor="yellow-cm")
       observer-sentinel(
         class="flex justify-center box-border py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
@@ -72,7 +72,7 @@ div(
         svg-icon(
           class="mb-10"
           :iconName="'loading'"
-          iconColor="app-text-secondary")
+          iconColor="white")
     //- Album selector
     div(v-else class="flex flex-col gap-8 mx-10")
       div(
@@ -107,7 +107,7 @@ div(
           v-if="selected(img, 'unsplash')"
           class="absolute right-0 top-0"
           iconName="item-check"
-          iconColor="app-tab-active")
+          iconColor="yellow-cm")
     observer-sentinel(
       class="flex justify-center box-border py-12 col-span-2"
       :target="'.img-selector__img-grid'"
@@ -117,7 +117,7 @@ div(
         v-if="unsplashLoading"
         class="mb-10"
         :iconName="'loading'"
-        iconColor="app-text-secondary")
+        iconColor="white")
   //- 5. Multi-select candidate UI
   div(v-if="requireNum > 1 && targetImgs.length" class="mx-16 mt-10 mb-20 grid gap-20")
     div(class="flex justify-between items-center h-32")
@@ -134,11 +134,11 @@ div(
           iconName="close-btn"
           @click="pull(targetImgs, img)")
 //- Preprocess view
-div(v-else class="preprocess w-full h-full bg-app-bg text-app-text-secondary")
+div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
   div(class="w-full h-[74%] pt-37 pb-20 flex justify-center items-center box-border")
     img(
       class="w-full h-full object-cover object-center filter"
-      :class="{'grayscale': editorType === 'hidden-message', invert: isInvert}"
+      :class="{ grayscale: editorType === 'hidden-message', invert: isInvert }"
       :src="srcPreprocessImg")
   div(class="p-24 pb-37 flex flex-col gap-16")
     div(class="flex justify-between items-center typo-h5 py-8")
@@ -148,20 +148,31 @@ div(v-else class="preprocess w-full h-full bg-app-bg text-app-text-secondary")
           iconName="information-circle"
           iconWidth="24px"
           @click="() => editorStore.setDescriptionPanel('hidden-message-invert')")
-      toggle-btn(class="payment__trial__toggle" v-model="isInvert" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+      toggle-btn(
+        class="payment__trial__toggle"
+        v-model="isInvert"
+        :width="36"
+        :height="22"
+        colorInactive="lighter"
+        colorActive="yellow-cm")
     div(class="flex justify-between items-center typo-h5 py-8")
       div(class="flex gap-8")
         svg-icon(
-          class="bg-app-tab-active text-app-bg rounded-full"
+          class="bg-yellow-cm text-dark-6 rounded-full"
           iconName="crown"
-          iconWidth="24px"
-        )
+          iconWidth="24px")
         span {{ $t('CM0082') }}
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
           @click="() => editorStore.setDescriptionPanel('hidden-message-bgrm')")
-      toggle-btn(class="payment__trial__toggle" v-model="isBgRemove" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
+      toggle-btn(
+        class="payment__trial__toggle"
+        v-model="isBgRemove"
+        :width="36"
+        :height="22"
+        colorInactive="lighter"
+        colorActive="yellow-cm")
     div(class="flex justify-between items-center typo-h6")
       nubtn(
         theme="secondary"
@@ -194,8 +205,8 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
-import { find, pull } from 'lodash'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import { find, pull } from 'lodash'
 
 const router = useRouter()
 
@@ -237,14 +248,14 @@ const albums = computed(() => [
   ...smartAlbum,
   ...(myAlbum.length > 0
     ? [
-      {
-        // 'My album' text
-        albumId: 'myAlbum',
-        albumSize: 0,
-        title: 'myAlbum',
-        thumbId: 'myAlbum',
-      },
-    ]
+        {
+          // 'My album' text
+          albumId: 'myAlbum',
+          albumSize: 0,
+          title: 'myAlbum',
+          thumbId: 'myAlbum',
+        },
+      ]
     : []),
   ...myAlbum,
 ])
@@ -400,25 +411,25 @@ const sendToEditor = async () => {
       srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
       return
     }
+
     setImgAspectRatio(targetImgs[0].ratio)
-    if (!atEditor.value && targetEditorType.value) await router.push({ name: 'Editor', query: { type: targetEditorType.value } })
+    if (!atEditor.value && targetEditorType.value) {
+      editorStore.startEditing(targetEditorType.value)
+    }
     setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
-        assetUtils.addImage(
-          img,
-          img.ratio,
-          {
-            fit: initAtEditor ? 0.8 : 1,
-            record: initAtEditor,
-            styles: {
-              adjust: {
-                ...(editorType.value === 'hidden-message' && { saturate: -100 }),
-                invert: +isInvert.value
-              }
-            }
-          })
+        assetUtils.addImage(img, img.ratio, {
+          fit: initAtEditor ? 0.8 : 1,
+          record: initAtEditor,
+          styles: {
+            adjust: {
+              ...(editorType.value === 'hidden-message' && { saturate: -100 }),
+              invert: +isInvert.value,
+            },
+          },
+        })
       })
       if (!initAtEditor) stepsUtils.reset()
       if (!initAtEditor || editorType.value === 'hidden-message') {
@@ -482,5 +493,4 @@ const applyPreprocess = () => {
 // #endregion
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

@@ -1,3 +1,4 @@
+import '@nu/tailwind-lib/index.css'
 import router from '@/router'
 import store from '@/store'
 import { initApp } from '@nu/vivi-lib/main'

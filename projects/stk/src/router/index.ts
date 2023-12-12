@@ -39,14 +39,22 @@ const routes: Array<RouteRecordRaw> = [
           const appVer = stkWVUtils.getUserInfoFromStore().appVer
           const lastAppVer = (await stkWVUtils.getState('lastAppVer'))?.value ?? '0.0'
           const targetVer = '1.34'
-          if (isTargetLocale && stkWVUtils.checkVersion(targetVer) && !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })) {
-            if (stkWVUtils.isTemplateSupported) await stkWVUtils.setState('recentPanel', { value: 'template' })
+          if (
+            isTargetLocale &&
+            stkWVUtils.checkVersion(targetVer) &&
+            !generalUtils.versionCheck({ greaterThan: targetVer, version: lastAppVer })
+          ) {
+            if (stkWVUtils.isTemplateSupported)
+              await stkWVUtils.setState('recentPanel', { value: 'template' })
           }
           if (appVer !== lastAppVer) await stkWVUtils.setState('lastAppVer', { value: appVer })
 
-          const recentPanelRes = await stkWVUtils.getState('recentPanel') as { value: string } | undefined
+          const recentPanelRes = (await stkWVUtils.getState('recentPanel')) as
+            | { value: string }
+            | undefined
           let recentPanel = recentPanelRes?.value ?? 'object'
-          if (recentPanel === 'none') { // prevent panel being 'none' for stk
+          if (recentPanel === 'none') {
+            // prevent panel being 'none' for stk
             recentPanel = 'object'
           }
           await store.dispatch('vivisticker/fetchUserSettings')
@@ -60,7 +68,7 @@ const routes: Array<RouteRecordRaw> = [
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
+    },
   },
   {
     path: 'screenshot',
@@ -76,7 +84,7 @@ const routes: Array<RouteRecordRaw> = [
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
+    },
   },
   {
     path: '*',
@@ -88,15 +96,15 @@ const routes: Array<RouteRecordRaw> = [
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
-  }
+    },
+  },
 ]
 
 if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue'),
   })
   // routes.push({
   //   path: 'copytool',
@@ -111,12 +119,12 @@ if (window.location.host !== 'sticker.vivipic.com') {
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
-    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue'),
   })
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue'),
   })
 }
 
@@ -124,7 +132,9 @@ router.addRoute({
   // Include the locales you support between ()
   path: `/:locale${localeUtils.getLocaleRegex()}?`,
   component: {
-    render() { return h(resolveComponent('router-view')) }
+    render() {
+      return h(resolveComponent('router-view'))
+    },
   },
   async beforeEnter(to, from, next) {
     if (to.name === 'NativeEventTester') {
@@ -144,12 +154,15 @@ router.addRoute({
     if (appLoadedTimeout > 0) {
       window.setTimeout(() => {
         if (!stkWVUtils.appLoadedSent) {
-          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`)
+          logUtils.setLogAndConsoleLog(
+            `Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`,
+          )
         }
         stkWVUtils.sendAppLoaded()
       }, appLoadedTimeout)
     }
-    if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
+    if (logUtils.getLog()) {
+      // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
     logUtils.setLog('App Start')
@@ -158,12 +171,16 @@ router.addRoute({
       const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
       if (status !== 200) {
         argoError = true
-        logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+        logUtils.setLog(
+          `Cannot connect to argo, use non-argo domain instead, status code: ${status}`,
+        )
       }
     } catch (error) {
       argoError = true
       logUtils.setLogForError(error as Error)
-      logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+      logUtils.setLog(
+        `Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`,
+      )
     } finally {
       store.commit('text/SET_isArgoAvailable', !argoError)
     }
@@ -179,9 +196,8 @@ router.addRoute({
       locale = userInfo.locale
     }
     logUtils.setLog(`LOCALE: ${localeUtils.getBrowserLang()} ${navigator.language}`)
-    // locale = 'pt' // TODO: remove this line since it's only for testing
     i18n.global.locale = locale as LocaleName
-    localStorage.setItem('locale', locale) // TODO: uncomment this line since it's only disabled for testing
+    localStorage.setItem('locale', locale)
     const editorBg = userInfo.editorBg
     if (editorBg) {
       store.commit('vivisticker/SET_editorBg', editorBg)
@@ -191,13 +207,19 @@ router.addRoute({
 
     // document.title = to.meta?.title as string || i18n.global.t('SE0001')
     next()
-    if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
+    if (
+      (window as any).__PRERENDER_INJECTED === undefined &&
+      router.currentRoute.value.params.locale
+    ) {
       // Delete locale in url, will be ignore by prerender.
       delete router.currentRoute.value.params.locale
-      router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
+      router.replace({
+        query: router.currentRoute.value.query,
+        params: router.currentRoute.value.params,
+      })
     }
   },
-  children: routes
+  children: routes,
 })
 
 router.beforeEach(async (to, from, next) => {
@@ -218,11 +240,18 @@ router.beforeEach(async (to, from, next) => {
     localStorage.setItem('campaign', campaign)
   }
 
-  if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
+  if (
+    store.getters['user/getImgSizeMap'].length === 0 &&
+    (window as any).__PRERENDER_INJECTED === undefined
+  ) {
     /**
      * @MobileDebug - comment the following two line, and use const json = appJSON, or the request will be blocked by CORS
      */
-    const response = await fetch(`https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
+    const response = await fetch(
+      `https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(
+        6,
+      )}`,
+    )
     const json = await response.json()
 
     // eslint-disable-next-line unused-imports/no-unused-vars
@@ -240,11 +269,11 @@ router.beforeEach(async (to, from, next) => {
       verApi: json.ver_api,
       imgSizeMap: json.image_size_map,
       imgSizeMapExtra: json.image_size_map_extra,
-      dimensionMap: json.dimension_map
+      dimensionMap: json.dimension_map,
     })
     textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     overlayUtils.updateOverlayCategory(json.overlay)
-    let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+    let defaultFontsJson = json.default_font as Array<{ id: string; ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.
     // if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
@@ -253,17 +282,16 @@ router.beforeEach(async (to, from, next) => {
 
     // Vivisticker doesn't use Noto Color Emoji font, but iPhone default font.
     // So remove it from the default fonts.
-    defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
+    defaultFontsJson = defaultFontsJson.filter((font) => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
 
-    defaultFontsJson
-      .forEach(_font => {
-        const font = {
-          type: 'public',
-          face: _font.id,
-          ver: _font.ver
-        }
-        store.commit('text/UPDATE_DEFAULT_FONT', { font })
-      })
+    defaultFontsJson.forEach((_font) => {
+      const font = {
+        type: 'public',
+        face: _font.id,
+        ver: _font.ver,
+      }
+      store.commit('text/UPDATE_DEFAULT_FONT', { font })
+    })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
     store.commit('vivisticker/SET_promote', json.promote)
@@ -276,7 +304,8 @@ router.beforeEach(async (to, from, next) => {
             json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
           ).map(([locale, prices]) => {
             const currency = constantData.currencyMap.get(locale) ?? 'USD'
-            const defaultAnnuallyPriceOriginal = json.default_price.original_prices?.[locale]?.annually ?? NaN
+            const defaultAnnuallyPriceOriginal =
+              json.default_price.original_prices?.[locale]?.annually ?? NaN
             return [
               locale,
               {
@@ -286,22 +315,22 @@ router.beforeEach(async (to, from, next) => {
                     plan,
                     {
                       value: price,
-                      text: price.toString()
+                      text: price.toString(),
                     },
                   ]),
                 ),
                 annuallyFree0: {
                   value: prices.annually,
-                  text: prices.annually.toString()
+                  text: prices.annually.toString(),
                 },
                 annuallyOriginal: {
                   value: defaultAnnuallyPriceOriginal,
-                  text: defaultAnnuallyPriceOriginal.toString()
+                  text: defaultAnnuallyPriceOriginal.toString(),
                 },
                 annuallyFree0Original: {
                   value: defaultAnnuallyPriceOriginal,
-                  text: defaultAnnuallyPriceOriginal.toString()
-                }
+                  text: defaultAnnuallyPriceOriginal.toString(),
+                },
               },
             ]
           }),
@@ -313,14 +342,14 @@ router.beforeEach(async (to, from, next) => {
           annually: constantData.planId.annually + planPostfix,
           annuallyFree0: constantData.planId.annuallyFree0 + planPostfix,
           annuallyOriginal: constantData.planId.annually,
-          annuallyFree0Original: constantData.planId.annuallyFree0
-        }
+          annuallyFree0Original: constantData.planId.annuallyFree0,
+        },
       })
     }
 
     uploadUtils.setLoginOutput({
       upload_log_map: json.ul_log_map,
-      ul_removebg_map: json.ul_removebg_map
+      ul_removebg_map: json.ul_removebg_map,
     })
   }
   next()

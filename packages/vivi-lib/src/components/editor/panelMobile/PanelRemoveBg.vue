@@ -36,6 +36,7 @@ div(class="panel-remove-bg")
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
+import { IColorKeys } from '@/interfaces/color'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -62,8 +63,8 @@ export default defineComponent({
         value: ControlMode.Move as string
       }] : [])],
       currMode: ControlMode.Clear as string,
-      activeColor: this.$isStk || this.$isCm ? 'white' : 'gray-2',
-      disabledColor: this.$isStk || this.$isCm ? 'black-3-5' : 'gray-4',
+      activeColor: (this.$isStk || this.$isCm ? 'white' : 'gray-2') as IColorKeys,
+      disabledColor: (this.$isStk || this.$isCm ? 'black-3-5' : 'gray-4') as IColorKeys,
     }
   },
   components: {

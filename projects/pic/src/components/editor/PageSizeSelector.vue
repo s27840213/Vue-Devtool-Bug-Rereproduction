@@ -782,10 +782,6 @@ export default defineComponent({
   opacity: 0;
 }
 
-.border-blue-1 {
-  border: 1px solid setColor(blue-1);
-}
-
 .input-invalid {
   border: 1px solid setColor(red) !important;
   > * {

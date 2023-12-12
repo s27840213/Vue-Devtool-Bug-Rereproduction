@@ -6,9 +6,9 @@ div(class="w-full flex items-center justify-around")
     to="/")
     svg-icon(
       :iconName="'home-solid'"
-      :iconColor="atHome ? 'app-tab-active' : 'transparent'"
+      :iconColor="atHome ? 'yellow-cm' : 'transparent'"
       :iconWidth="'32px'"
-      :strokeColor="'app-tab-active'"
+      :strokeColor="'yellow-cm'"
       @click="navigate")
   router-link(
     custom
@@ -16,8 +16,8 @@ div(class="w-full flex items-center justify-around")
     to="/mydesign")
     svg-icon(
       :iconName="'grid-solid'"
-      :iconColor="atMyDesign ? 'app-tab-active' : 'transparent'"
-      :strokeColor="'app-tab-active'"
+      :iconColor="atMyDesign ? 'yellow-cm' : 'transparent'"
+      :strokeColor="'yellow-cm'"
       :iconWidth="'32px'"
       @click="navigate")
 </template>

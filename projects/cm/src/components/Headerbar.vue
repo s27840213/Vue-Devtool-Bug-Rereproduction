@@ -1,8 +1,7 @@
 <template lang="pug">
 div(
-  
   ref="headerbarRef"
-  class="bg-app-bg box-border pt-10 pb-8 grid grid-rows-1 grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)] min-h-[56px] w-full"
+  class="bg-dark-6 box-border pt-10 pb-8 grid grid-rows-1 grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)] min-h-56 w-full"
   :class="hide ? 'invisible pointer-events-none' : ''"
   :style="{ paddingTop: `${userInfo.statusBarHeight}px` }")
   div(
@@ -11,7 +10,7 @@ div(
     :style="{ gap: `${leftGap}px` }")
     slot(name="left")
   div(
-    class="flex justify-center items-center whitespace-nowrap"
+    class="flex justify-center items-center whitespace-nowrap typo-h5 text-white"
     :style="{ gap: `${middGap}px` }")
     slot(name="middle")
   div(
@@ -21,7 +20,7 @@ div(
     slot(name="right")
 </template>
 <script setup lang="ts">
-import { useStore } from 'vuex';
+import { useStore } from 'vuex'
 
 withDefaults(
   defineProps<{

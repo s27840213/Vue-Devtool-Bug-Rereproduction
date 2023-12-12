@@ -96,6 +96,7 @@ import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
+import cmWVUtils from '@/utils/cmWVUtils'
 
 export default defineComponent({
   emits: ['onload'],
@@ -649,7 +650,11 @@ export default defineComponent({
             })
             this.src = imageUtils.getSrc(this.config)
             window.requestAnimationFrame(() => {
-              stkWVUtils.isAnyIOSImgOnError = true
+              if (this.$isStk) {
+                stkWVUtils.isAnyIOSImgOnError = true
+              } else if (this.$isCm) {
+                cmWVUtils.isAnyIOSImgOnError = true
+              }
               if (this.prePrimaryLayerIndex !== -1) {
                 layerUtils.setLoadingFlag(this.prePrimaryLayerIndex, this.layerIndex, { k: 'c', v: this.subLayerIndex })
               } else {

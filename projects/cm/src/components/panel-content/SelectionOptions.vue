@@ -1,12 +1,12 @@
 <template lang="pug">
 div(class="editing-options w-full")
   div(class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 box-border pl-24 pr-8")
-    span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
+    span(class="typo-btn-sm text-white mr-12") {{ $t('CM0015') }}
     scrollable-container(:gap="20")
       svg-icon(
         v-for="shape in shapeTypes"
         :key="shape"
-        iconColor="primary-light-active"
+        iconColor="yellow-2"
         :iconName="shape"
         iconHeight="32px"
         :sameSize="false"
@@ -15,7 +15,7 @@ div(class="editing-options w-full")
     nubtn(
       theme="secondary"
       @click="cancel") {{ $t('NN0203') }}
-    span(class="typo-h6 text-app-text-secondary") {{ $t('CM0051') }}
+    span(class="typo-h6 text-white") {{ $t('CM0051') }}
     nubtn(@click="apply") {{ $t('CM0061') }}
 </template>
 <script setup lang="ts">

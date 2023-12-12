@@ -281,6 +281,31 @@ class GeneralUtils {
     image.src = src
   }
 
+  async toDataUrlNew(src: string) {
+    return new Promise<string>((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = 'Anonymous';
+
+        image.onload = () => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.height = image.naturalHeight;
+            canvas.width = image.naturalWidth;
+
+            context?.drawImage(image, 0, 0);
+            const dataURL = canvas.toDataURL('image/png');
+            resolve(dataURL);
+        };
+
+        image.onerror = (error) => {
+            reject(error);
+        };
+
+        image.src = src;
+    });
+  }
+
   fbq(type: string, action: string, params?: { [index: string]: any }) {
     params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
   }

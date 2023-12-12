@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template lang="pug">
-div(class="bg-app-selection w-84 h-84")
+div(class="bg-red-cm w-84 h-84")
 </template>
 
 <style scoped>

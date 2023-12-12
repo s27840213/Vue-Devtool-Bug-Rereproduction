@@ -2,7 +2,8 @@ import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
-import type { GenImageResult, GenImageParams } from '@/types/api'
+import type { GenImageParams, GenImageResult } from '@/types/api'
+import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
@@ -11,10 +12,14 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
-import { useEventBus } from '@vueuse/core'
 import { useStore } from 'vuex'
+import useCanvasUtils from './useCanvasUtilsCm'
 
 export const RECORD_TIMING = true
+
+// #region some variable we need to use for saving design
+const ids: string[] = []
+// #endregion
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
@@ -23,15 +28,25 @@ const useGenImageUtils = () => {
   const editorStore = useEditorStore()
   const {
     setInitImgSrc,
-    setGenResultIndex,
+    setMaskDataUrl,
     unshiftGenResults,
     removeGenResult,
     updateGenResult,
     changeEditorState,
   } = editorStore
-  const { editorType, pageSize, contentScaleRatio, inGenResultState, generatedResultsNum } =
-    storeToRefs(useEditorStore())
+  const {
+    editorType,
+    pageSize,
+    contentScaleRatio,
+    inGenResultState,
+    generatedResultsNum,
+    currDesignId,
+    initImgSrc,
+    maskDataUrl,
+  } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
+  const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
+  const { prepareMaskToUpload } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const { t } = useI18n()
@@ -50,10 +65,9 @@ const useGenImageUtils = () => {
       onApiResponded?: () => void
     } = {},
   ): Promise<void> => {
-    const ids: string[] = []
     for (let i = 0; i < num; i++) {
-      ids.push(generalUtils.generateRandomString(4))
-      unshiftGenResults('', ids[i])
+      ids.unshift(generalUtils.generateRandomString(8))
+      unshiftGenResults('', ids[0])
     }
     try {
       await genImage(params, showMore, num, {
@@ -151,7 +165,31 @@ const useGenImageUtils = () => {
       ...urls.map(async (url, index) => {
         RECORD_TIMING && testUtils.start(`polling ${index}`, false)
         try {
-          await polling(url, { isJson: false, useVer: false, pollingController })
+          const subDesignId = ids[index]
+          const promises = [
+            saveDesignImageToDocument(initImgSrc.value, 'original', {
+              subDesignId,
+            }),
+            saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
+            polling(url, { isJson: false, useVer: false, pollingController }),
+          ]
+          if (editorType.value !== 'hidden-message') {
+            const prepareMask = prepareMaskToUpload()
+            if (prepareMask) {
+              promises.push(
+                saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+                  subDesignId,
+                }),
+              )
+            } else {
+              notify({
+                group: 'error',
+                text: 'save mask to document failed',
+              })
+            }
+          }
+
+          await Promise.all(promises)
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message.includes('Cancelled')) {
@@ -160,18 +198,21 @@ const useGenImageUtils = () => {
           return
         }
         RECORD_TIMING && testUtils.log(`polling ${index}`, '')
-        const data = (await cmWVUtils.saveAssetFromUrl('png', url)) ?? { flag: '1', fileId: '' }
-        const { flag, fileId } = data
-        if (flag === '0' && fileId) {
+        // save result image to document
+        try {
+          await saveDesignImageToDocument(url, 'result', {
+            subDesignId: ids[index],
+            thumbIndex: index,
+          })
           const srcObj: SrcObj = {
             type: 'ios',
-            assetId: `cameraroll/${fileId}`,
+            assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/result`,
             userId: '',
           }
 
           const imgSrc = imageUtils.getSrc(srcObj)
           onSuccess && onSuccess(index, imgSrc)
-        } else {
+        } catch (error) {
           onError && onError(index, url, 'saveAssetFromUrl failed')
         }
       }),
@@ -183,10 +224,8 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('copy editor', false)
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor({
-      width: pageWidth * contentScaleRatio.value,
-      height: pageHeight * contentScaleRatio.value,
-    })
+    const query = cmWVUtils.createUrlForJSON({ noBg: false })
+    const { flag, imageId, cleanup } = await cmWVUtils.sendScreenshotUrl(query)
     RECORD_TIMING && testUtils.log('copy editor', '')
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
@@ -194,13 +233,13 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('screenshot to blob', false)
     return new Promise<void>((resolve) => {
-      generalUtils.toDataURL(`chmix://screenshot/${imageId}?lsize=${size}`, (dataUrl) => {
+      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?lsize=${size}`).then((dataUrl) => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         RECORD_TIMING && testUtils.log('screenshot to blob', '')
         RECORD_TIMING && testUtils.start('upload screenshot', false)
         uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
-          .then(() => {
+          .then(async () => {
             RECORD_TIMING && testUtils.log('upload screenshot', '')
             console.log('screenshot:', new Date().getTime())
             cleanup()
@@ -216,29 +255,31 @@ const useGenImageUtils = () => {
 
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
     if (editorType.value === 'hidden-message') return
-    
-    const bus = useEventBus('editor')
+
     RECORD_TIMING && testUtils.start('mask to dataUrl', false)
     return new Promise<void>((resolve, reject) => {
-      bus.emit('genMaskUrl', {
-        callback: async (maskUrl: string) => {
+      try {
+        const maskUrl = prepareMaskToUpload()
+        if (maskUrl !== undefined) {
           RECORD_TIMING && testUtils.log('mask to dataUrl', '')
-          try {
-            RECORD_TIMING && testUtils.start('upload mask', false)
-            await uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`)
+          RECORD_TIMING && testUtils.start('upload mask', false)
+          uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
-            console.log('mask:', new Date().getTime())
+            setMaskDataUrl(maskUrl)
             resolve()
-          } catch (error) {
-            logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
-            reject(error)
-          }
-        },
-      })
+          })
+        } else {
+          throw new Error('Upload Mask Image Failed')
+        }
+      } catch (error) {
+        logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
+        reject(error)
+      }
     })
   }
 
   return {
+    ids,
     genImageFlow,
     genImage,
     uploadEditorAsImage,

@@ -1,6 +1,7 @@
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useUserStore } from '@/stores/user'
 import HomeView from '@/views/HomeView.vue'
+import Screenshot from '@/views/ScreenshotView.vue'
 import store from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import router from '@nu/vivi-lib/router'
@@ -9,6 +10,8 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
+import textFillUtils from '@nu/vivi-lib/utils/textFillUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { h, resolveComponent } from 'vue'
 import { RouteRecordRaw } from 'vue-router'
 import { editorRouteHandler } from './handler'
@@ -63,6 +66,19 @@ const routes = [
     component: () => import('@/views/SettingsView.vue'),
   },
   {
+    path: 'screenshot',
+    name: 'Screenshot',
+    component: Screenshot,
+    beforeEnter: (to, from, next) => {
+      try {
+        store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        next()
+      } catch (error) {
+        logUtils.setLogForError(error as Error)
+      }
+    },
+  },
+  {
     path: '/test',
     name: 'Test',
     meta: {
@@ -109,11 +125,32 @@ router.addRoute({
   async beforeEnter(to, from, next) {
     useI18n() // prevent import being removed
     // useI18n().locale = 'tw'
-    cmWVUtils.setupAPIInterface()
-    cmWVUtils.setupAppActiveInterface()
+
+    const userStore = useUserStore()
+    const { listDesigns } = userStore
+
     cmWVUtils.detectIfInApp()
     await cmWVUtils.getUserInfo()
+    const appLoadedTimeout = store.getters['cmWV/getAppLoadedTimeout']
+    if (appLoadedTimeout > 0) {
+      window.setTimeout(() => {
+        if (!cmWVUtils.appLoadedSent) {
+          logUtils.setLogAndConsoleLog(
+            `Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`,
+          )
+        }
+        cmWVUtils.sendAppLoaded()
+      }, appLoadedTimeout)
+    }
+    if (logUtils.getLog()) {
+      // hostId for uploading log is obtained after getUserInfo
+      await logUtils.uploadLog()
+    }
+    logUtils.setLog('App Start')
     cmWVUtils.fetchTutorialFlags()
+    if (to.name !== 'Screenshot') {
+      listDesigns('all')
+    }
     let argoError = false
     try {
       const status = (
@@ -142,7 +179,8 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  store.commit('user/SET_STATE', { userId: generalUtils.generateRandomString(20) })
+  cmWVUtils.setupAPIInterface()
+  cmWVUtils.registerCallbacks('base')
   useUploadUtils().getUrlMap()
 
   loginUtils.checkToken()
@@ -167,10 +205,23 @@ router.beforeEach(async (to, from, next) => {
      * @MobileDebug - comment the following two line, and use const json = appJSON, or the request will be blocked by CORS
      */
     const response = await fetch(
-      `https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`,
+      `https://template.vivipic.com/static/app_charmix.json?ver=${generalUtils.generateRandomString(
+        6,
+      )}`,
     )
     const json = await response.json()
 
+    store.commit('cmWV/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
+
+    store.commit('SET_showGlobalErrorModal', json.show_error_modal === 1)
+
+    store.commit('user/SET_STATE', {
+      verUni: json.ver_uni,
+      verApi: json.ver_api,
+      imgSizeMap: json.image_size_map,
+      imgSizeMapExtra: json.image_size_map_extra,
+    })
+    textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     const defaultFontsJson = json.default_font as Array<{ id: string; ver: number }>
 
     defaultFontsJson.forEach((_font) => {
@@ -181,6 +232,12 @@ router.beforeEach(async (to, from, next) => {
       }
       store.commit('text/UPDATE_DEFAULT_FONT', { font })
     })
+
+    store.commit('cmWV/SET_modalInfo', json.modal)
+
+    uploadUtils.setLoginOutput({
+      upload_log_map: json.ul_log_map,
+    })
   }
   next()
 })
@@ -189,7 +246,7 @@ router.beforeEach(async (to, from, next) => {
 router.options.scrollBehavior = (to, from, savedPosition) => {
   const scrollPos = to.meta.scrollPos as { top: number; left: number } | undefined
   const elScrollable = document.getElementsByClassName('overflow-scroll')[0] as HTMLElement
-  if(elScrollable) elScrollable.scrollTop = scrollPos?.top ?? 0
+  if (elScrollable) elScrollable.scrollTop = scrollPos?.top ?? 0
 }
 
 export default router

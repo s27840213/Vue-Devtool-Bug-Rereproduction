@@ -1,5 +1,7 @@
 import store from '@/store'
+import cmWVUtils from '@/utils/cmWVUtils'
 import picWVUtils from '@/utils/picWVUtils'
+import logUtils from './logUtils'
 
 class LoginUtils {
   async checkToken(redirect = () => { /**/ }) {
@@ -59,7 +61,9 @@ class LoginUtils {
   }
 
   logout() {
+    logUtils.setLogAndConsoleLog(`logout from ${store.getters['user/getUserId']}`)
     picWVUtils.updateUserInfo({ userId: '' })
+    cmWVUtils.updateUserInfo({ userId: '' })
     localStorage.setItem('token', '')
     window.location.href = '/'
   }
