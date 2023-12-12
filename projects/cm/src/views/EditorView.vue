@@ -181,6 +181,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
@@ -275,7 +276,6 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
-  hasGeneratedResults,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
@@ -631,6 +631,7 @@ const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor
 // #region demo brush size section
 const canvasStore = useCanvasStore()
 const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToRefs(canvasStore)
+const { downloadCanvas } = useCanvasUtils()
 
 const demoBrushSizeStyles = computed(() => {
   return {
