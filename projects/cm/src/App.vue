@@ -25,13 +25,14 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
               :iconColor="'yellow-0'" @click="navigate")
       nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
-    class="router-view box-border pb-12 min-h-full row-start-2 row-end-3"
+    class="router-view box-border min-h-full row-start-2 row-end-3"
+    :class="{ 'pb-12': !atNonUI }"
     v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(v-if="bottomPanelComponent && !atEventTester && !(isDuringCopy && !isAutoFilling)"
+  bottom-panel(v-if="bottomPanelComponent && !atNonUI && !(isDuringCopy && !isAutoFilling)"
     class="z-bottom-panel row-start-3 row-end-4 tutorial-powerful-fill-4--highlight tutorial-hidden-message-4--highlight"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
     :disableTransition="disableBtmPanelTransition")
@@ -46,8 +47,8 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
                   :currActivePanel="currActivePanel"
                   :currPage="currPage"
                   :currTab="currActivePanel"
-                  @switchTab="switchTab"
-                  @disableBtmPanelTransition="disableTransition")
+                  @switchTab="(switchTab)"
+                  @disableBtmPanelTransition="(disableTransition)")
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
@@ -166,7 +167,7 @@ const {
   atSettings,
   atMainPage,
   atDescription,
-  atEventTester,
+  atNonUI,
   showImgSelector,
   inGenResultState,
   inSavingState,

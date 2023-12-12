@@ -1,6 +1,7 @@
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useUserStore } from '@/stores/user'
 import HomeView from '@/views/HomeView.vue'
+import Screenshot from '@/views/ScreenshotView.vue'
 import store from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import router from '@nu/vivi-lib/router'
@@ -63,6 +64,19 @@ const routes = [
       transition: 'fade-bottom-in',
     },
     component: () => import('@/views/SettingsView.vue'),
+  },
+  {
+    path: 'screenshot',
+    name: 'Screenshot',
+    component: Screenshot,
+    beforeEnter: (to, from, next) => {
+      try {
+        store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        next()
+      } catch (error) {
+        logUtils.setLogForError(error as Error)
+      }
+    },
   },
   {
     path: '/test',
@@ -134,7 +148,9 @@ router.addRoute({
     }
     logUtils.setLog('App Start')
     cmWVUtils.fetchTutorialFlags()
-    listDesigns('all')
+    if (to.name !== 'Screenshot') {
+      listDesigns('all')
+    }
     let argoError = false
     try {
       const status = (
@@ -164,7 +180,7 @@ router.addRoute({
 
 router.beforeEach(async (to, from, next) => {
   cmWVUtils.setupAPIInterface()
-  cmWVUtils.setupAppActiveInterface()
+  cmWVUtils.registerCallbacks('base')
   useUploadUtils().getUrlMap()
 
   loginUtils.checkToken()

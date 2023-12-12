@@ -284,6 +284,8 @@ const getIsReadyToGen = () => {
 }
 
 const handleGenerate = async () => {
+  // const query = cmWVUtils.createUrlForJSON({ noBg: false })
+  // const { flag, imageId, cleanup } = await cmWVUtils.sendScreenshotUrl(query)
   // if (vuex.state.user.token === '' && !debugMode) {
   if (vuex.state.user.token === '') {
     // Open PanelLogin
