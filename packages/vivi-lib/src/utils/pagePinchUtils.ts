@@ -1,3 +1,4 @@
+import { ICoordinate } from "@/interfaces/frame"
 import { IPage } from "@/interfaces/page"
 import store from "@/store"
 import { AnyTouchEvent } from "any-touch"
@@ -18,6 +19,7 @@ class pagePinchUtils {
   private initPagePos = { x: 0, y: 0 }
   private initPinchPos = { x: 0, y: 0 }
   private initPageScale = -1
+  private initPosLength = -1
   private editorView: HTMLElement
   private pointerIds: Array<number> = []
   private translationRatio = { x: 0, y: 0 }
@@ -47,6 +49,14 @@ class pagePinchUtils {
     this.initPagePos.y = this.page.y
     this.initPinchPos = { x: e.x, y: e.y }
     this.initPageScale = this.pageScaleRatio
+    this.initPosLength = this.getLength({
+      x: (e.nativeEvent as TouchEvent).touches[0].clientX,
+       y: (e.nativeEvent as TouchEvent).touches[0].clientY
+    }, {
+      x: (e.nativeEvent as TouchEvent).touches[1].clientX,
+      y: (e.nativeEvent as TouchEvent).touches[1].clientY
+    })
+
     this.translationRatio = this.getTranslationRatio(e, this.editorView)
     store.commit('SET_isPageScaling', true)
     store.commit('mobileEditor/SET_isPinchingEditor', true)
@@ -78,9 +88,23 @@ class pagePinchUtils {
     }
   }
 
+  private getLength(p1: ICoordinate, p2: ICoordinate) {
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
+  }
+
+  private getScale(p1: ICoordinate, p2: ICoordinate) {
+    return this.getLength(p1, p2) / this.initPosLength
+  }
+
   private pinchMove(e: AnyTouchEvent) {
     const { page, contentScaleRatio } = this
-    const newScaleRatio = e.scale
+    const newScaleRatio = this.getScale({
+        x: (e.nativeEvent as TouchEvent).touches[0].clientX,
+         y: (e.nativeEvent as TouchEvent).touches[0].clientY
+      }, {
+        x: (e.nativeEvent as TouchEvent).touches[1].clientX,
+        y: (e.nativeEvent as TouchEvent).touches[1].clientY
+    })
 
     // size difference via pinching
     const sizeDiff = {
@@ -98,7 +122,7 @@ class pagePinchUtils {
       y: this.initPagePos.y - this.translationRatio.y * sizeDiff.height + movingTranslate.y
     })
 
-    store.commit('mobileEditor/UPDATE_pinchScale', e.scale)
+    store.commit('mobileEditor/UPDATE_pinchScale', newScaleRatio)
   }
 
   private getEdgeLimit(pageScaleRatio: number) {
@@ -251,7 +275,10 @@ class pagePinchUtils {
     }
   }
 
-  private pinchEnd(e: AnyTouchEvent) {
+  pinchEnd(e: AnyTouchEvent) {
+    console.log(this.pointerIds)
+    // pointerIds.length equals to 0 means the pinchEnd has been called
+    if (this.pointerIds.length === 0) return
     this.handleEdging(e)
     this.pointerIds.length = 0
 

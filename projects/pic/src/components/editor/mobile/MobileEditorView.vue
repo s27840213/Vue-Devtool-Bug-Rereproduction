@@ -8,7 +8,7 @@ div(class="editor-view" v-touch
     @pointerleave="removePointer"
     @pointerup="selectEnd"
     @mousewheel="handleWheel"
-    @pinch="!inBgRemoveMode ? pinchHandler($event) : null"
+    @pinch="!inBgRemoveMode ? pinchUtils.pinchHandler($event) : null"
     ref="editorView")
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
@@ -107,7 +107,8 @@ export default defineComponent({
       // isHandlingEdgeReach: false,
       movingUtils: null as unknown as MovingUtils,
       // translationRatio: null as null | ICoordinate,
-      pinchHandler: null as unknown as any,
+      // pinchHandler: null as unknown as any,
+      pinchUtils: null as unknown as PagePinchUtils,
       pointerEvent: {
         initPos: null as null | ICoordinate
       }
@@ -214,7 +215,7 @@ export default defineComponent({
       body: this.$refs.editorView as HTMLElement,
       layerInfo
     })
-    this.pinchHandler = new PagePinchUtils(this.$refs.editorView as HTMLElement).pinchHandler
+    this.pinchUtils = new PagePinchUtils(this.$refs.editorView as HTMLElement)
   },
   beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
@@ -334,6 +335,10 @@ export default defineComponent({
       }
     },
     selectStart(e: PointerEvent) {
+      console.warn('select start', pointerEvtUtils.pointerIds.length)
+      if (pointerEvtUtils.pointerIds.length >= 3) {
+        return this.pinchUtils.pinchEnd(e as any)
+      }
       pointerEvtUtils.addPointer(e)
       if (!e.isPrimary) return
       if (this.inBgRemoveMode) return
@@ -349,7 +354,6 @@ export default defineComponent({
         )[0]
       : layerUtils.getCurrLayer
       const isClickOnController = controlUtils.isClickOnController(e, layer)
-      console.log('isclickonContorl', isClickOnController)
 
       if (this.isImgCtrl && !isClickOnController) {
         const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
