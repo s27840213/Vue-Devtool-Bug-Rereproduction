@@ -70,7 +70,7 @@ div(class="prompt-area w-full box-border px-24")
             :key="idx"
             class="flex flex-col gap-8 bg-lighter/20 rounded-16 p-12 aspect-square w-full"
             :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
-            @click="() => genTypes && (genTypes.value = idx)")
+            @click="() => setGenType(idx)")
             img(
               v-if="genType.img"
               class="w-full object-cover object-center rounded-16 aspect-[148/116]"
@@ -135,10 +135,11 @@ import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import { useModalStore } from '@/stores/modal'
 import type { GenHiddenMessageParams, GenImageParams, GenPowerfulFillParams } from '@/types/api'
-import type { GenImageGroupOption, GenImageRangeOption } from '@/types/editor'
+import type { GenImageGroupOption, GenImageOptions, GenImageRangeOption } from '@/types/editor'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -167,6 +168,7 @@ const {
   setCurrDesignId,
   setGenResultIndex,
   setShowEmptyPromptWarning,
+  setCurrGenOptions
 } = editorStore
 const {
   isSendingGenImgReq,
@@ -370,6 +372,34 @@ const genRangeOptions = computed(() => {
 const genTypes = computed(() => {
   return genGroupOptions.value.find((o) => o.key === 'type')
 })
+
+const setGenType = (idxGenType: number) => {
+  const preset = [
+    // blend
+    new Map([
+      ['guidance_scale', 7],
+      ['weight', 2],
+      ['guidance_start', 0],
+      ['guidance_end', 1],
+    ]),
+    // light
+    new Map([
+      ['guidance_scale', 7],
+      ['weight', 0.7],
+      ['guidance_start', 0.1],
+      ['guidance_end', 0.7],
+    ])
+  ][idxGenType]
+
+  const newGenOptions = constantData.getGenImageOptions('hidden-message') as GenImageOptions
+  newGenOptions.forEach((option) => {
+    if (option.key === 'type') option.value = idxGenType
+
+    const newVal = preset.get(option.key)
+    if (newVal) option.value = newVal
+  })
+  setCurrGenOptions(newGenOptions)
+}
 // #endregion
 
 // #region styles
