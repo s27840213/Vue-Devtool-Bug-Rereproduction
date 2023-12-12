@@ -249,7 +249,7 @@ class AssetUtils {
         if (json.bleeds && json.physicalBleeds)
           pageUtils.setBleeds(finalPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
       } else pageUtils.setIsEnableBleed(false, finalPageIndex)
-    } else if (attrs && attrs.width && attrs.height) {
+    } else if (attrs && attrs.width && attrs.height && generalUtils.isPic) { // skip if not pic, because others has no bleed function
       // use page size
       let physicalBleeds
       if (refPage.bleeds && refPage.physicalBleeds) {

@@ -485,17 +485,17 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (editorType === 'story') {
       const targetAspectRatio = 9 / 16
       const footerHeight = 60
-      const maxPageWidth = Math.round(editorWidth * 0.9)
-      const maxPageHeight = Math.round(editorHeight - shortEdge * 0.05 - footerHeight)
+      const maxPageWidth = editorWidth * 0.9
+      const maxPageHeight = editorHeight - shortEdge * 0.05 - footerHeight
       const aspectRatio = maxPageWidth / maxPageHeight
       if (aspectRatio > targetAspectRatio) {
         return {
           width: Math.round(maxPageHeight * targetAspectRatio),
-          height: maxPageHeight,
+          height: Math.round(maxPageHeight),
         }
       } else {
         return {
-          width: maxPageWidth,
+          width: Math.round(maxPageWidth),
           height: Math.round(maxPageWidth / targetAspectRatio),
         }
       }
