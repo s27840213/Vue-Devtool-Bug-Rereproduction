@@ -40,7 +40,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(v-if="!isCurrLayerPinched && !isPinchingEditor" :id="filterId"
+          filter(v-if="!isLayerCtrlled && !isPinchingEditor" :id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -412,11 +412,15 @@ export default defineComponent({
       ) return false
       return true
     },
-    isCurrLayerPinched(): boolean {
+    // isCurrLayerPinched(): boolean {
+    //   const { controlState } = this
+    //   if (controlState.layerInfo) {
+    //     return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+    //   } else return false
+    // },
+    isLayerCtrlled(): boolean {
       const { controlState } = this
-      if (controlState.layerInfo) {
-        return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
-      } else return false
+      return controlState.type !== ''
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config

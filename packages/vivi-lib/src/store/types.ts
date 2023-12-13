@@ -52,7 +52,7 @@ export interface IEditorState {
    */
   controlState: {
     layerInfo?: ILayerInfo,
-    type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | '',
+    type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | 'pageMove' | '',
     phase?: 'moving' | 'pinching'
     id?: string
   }

@@ -1361,6 +1361,16 @@ export default defineComponent({
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
+      this.setState({
+        controlState: {
+          layerInfo: {
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex
+          },
+          type: 'rotate',
+          id: this.config.id
+        }
+      })
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       if (this.tooSmall) {
         index = 2
@@ -1435,6 +1445,9 @@ export default defineComponent({
       }
     },
     rotateEnd(event: PointerEvent) {
+      if (this.controlState.type === 'rotate' && this.controlState.id === this.config.id) {
+        this.setState({ controlState: { type: '' } })
+      }
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1

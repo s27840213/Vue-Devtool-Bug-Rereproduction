@@ -16,7 +16,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
       preserveAspectRatio="none"
       role="image")
       defs
-        filter(v-if="!isPinchingEditor" :id="filterId"
+        filter(v-if="!isLayerCtrlled && !isPinchingEditor" :id="filterId"
           color-interpolation-filters="sRGB")
           component(v-for="(elm, idx) in svgFilterElms"
             :key="`${filterId + idx}`"
@@ -189,6 +189,7 @@ export default defineComponent({
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
       isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
       isBgCtrlImgLoaded: 'imgControl/isBgCtrlImgLoaded',
+      controlState: 'getControlState'
     }),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
@@ -206,6 +207,10 @@ export default defineComponent({
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
       return !srcObj || srcObj.type === ''
+    },
+    isLayerCtrlled(): boolean {
+      const { controlState } = this
+      return controlState.type !== ''
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
