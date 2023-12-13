@@ -792,10 +792,11 @@ export default function (this: any) {
       else return (state.nextPage !== undefined && state.nextPage >= 0) || (!isTextUs() && state.nextCategory > 0)
     },
     // TagsBar
-    tagsBar(state, getters) {
-      const showSearchTag = getters.searchingCategory as boolean
-      const target = (showSearchTag ? state.searchCategoryInfo.tags : state.tags) ?? []
-      return target.map(processTags)
+    contentTags(state) {
+      return state.tags.map(processTags)
+    },
+    searchTags(state) {
+      return state.searchCategoryInfo.tags.map(processTags)
     },
     favoritesTagsBar(state, getters) {
       const fsr = getters.favoritesSearchResult// as IFavoritesSearchResult

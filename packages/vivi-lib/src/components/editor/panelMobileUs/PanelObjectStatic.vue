@@ -18,15 +18,16 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
         :ref="!hideCategoryIconList && item.title === keyword ? 'selectedCategoryIcon' : undefined"
         @click="handleCategorySearch(item.title)")
           div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list, item.coverId)")
-  Tags(v-show="tags && tags.length"
+  tags(
+      v-for="(tag, i) in tagsContent"
+      :key="i"
+      v-show="tag.show"
       class="panel-static__tags"
       :class="{fav: showFav}"
-      :tags="tags"
-      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+      :tags="tag.content"
       ref="tags"
       theme="dark"
-      @search="handleSearch"
-      @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+      @search="handleSearch")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
                 :ref="item.key" :key="item.key"
@@ -115,7 +116,6 @@ export default defineComponent({
     return {
       mainContentScrollTop: 0,
       elCategoryCardList: undefined as HTMLElement | undefined,
-      tagScrollLeft: 0,
     }
   },
   activated() {
