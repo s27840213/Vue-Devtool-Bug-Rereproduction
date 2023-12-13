@@ -212,7 +212,7 @@ class LetterBGData {
       key: 'rectangle-flag-custom',
       label: i18n.global.tc('NN0903'),
       options: withColor,
-    }, ...store.getters['user/isAdmin'] ? [{
+    }, {
       key: 'stretch-dog',
       label: i18n.global.tc('NN0914'),
       plan: 1,
@@ -231,7 +231,7 @@ class LetterBGData {
       key: 'stretch-dragon',
       label: i18n.global.tc('NN0917'),
       options: noColor,
-    }] as IEffectRaw[] : []]
+    }]
   }
 
   getLetterBgSetting(textBg: ITextLetterBg, index: number, head: boolean, tail: boolean) {
