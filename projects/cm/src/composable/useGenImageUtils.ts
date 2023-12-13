@@ -139,7 +139,7 @@ const useGenImageUtils = () => {
     } else {
       params = prevGenParams.value.params
     }
-    RECORD_TIMING && testUtils.start('call API', false)
+    RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
@@ -163,7 +163,7 @@ const useGenImageUtils = () => {
         }
       })(),
       ...urls.map(async (url, index) => {
-        RECORD_TIMING && testUtils.start(`polling ${index}`, false)
+        RECORD_TIMING && testUtils.start(`polling ${index}`, { notify: false, setToLog: true })
         try {
           const subDesignId = ids[index]
           const promises = [
@@ -221,7 +221,7 @@ const useGenImageUtils = () => {
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
-    RECORD_TIMING && testUtils.start('copy editor', false)
+    RECORD_TIMING && testUtils.start('copy editor', { notify: false, setToLog: true })
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
@@ -235,13 +235,13 @@ const useGenImageUtils = () => {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
-    RECORD_TIMING && testUtils.start('screenshot to blob', false)
+    RECORD_TIMING && testUtils.start('screenshot to blob', { notify: false, setToLog: true })
     return new Promise<void>((resolve) => {
       generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?lsize=${size}`).then((dataUrl) => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         RECORD_TIMING && testUtils.log('screenshot to blob', '')
-        RECORD_TIMING && testUtils.start('upload screenshot', false)
+        RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
         uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
           .then(async () => {
             RECORD_TIMING && testUtils.log('upload screenshot', '')
@@ -260,13 +260,13 @@ const useGenImageUtils = () => {
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
     if (editorType.value === 'hidden-message') return
 
-    RECORD_TIMING && testUtils.start('mask to dataUrl', false)
+    RECORD_TIMING && testUtils.start('mask to dataUrl', { notify: false, setToLog: true })
     return new Promise<void>((resolve, reject) => {
       try {
         const maskUrl = prepareMaskToUpload()
         if (maskUrl !== undefined) {
           RECORD_TIMING && testUtils.log('mask to dataUrl', '')
-          RECORD_TIMING && testUtils.start('upload mask', false)
+          RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
           uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
             setMaskDataUrl(maskUrl)
