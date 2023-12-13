@@ -66,14 +66,16 @@ class TextFill {
       ...this.normalFills,
     ]
 
-    return fills.map(fill => {
+    return fills.map((fill): IEffect => {
       const firstImg = fill.list[0]?.param.img
       return {
         key: `${fill.id}`,
         label: fill[`title_${localeUtils.localeWithFallback}`],
         plan: fill.plan,
-        img: firstImg ? `https://template.vivipic.com/admin/${firstImg.teamId}/asset/image/${firstImg.id}/tiny`
+        icon: firstImg 
+          ? `https://template.vivipic.com/admin/${firstImg.teamId}/asset/image/${firstImg.id}/tiny`
           : imagePreview,
+        size: '56',
         options: [{
           type: 'select' as const,
           key: 'img',
