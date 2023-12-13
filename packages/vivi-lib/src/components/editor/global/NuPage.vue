@@ -319,8 +319,8 @@ export default defineComponent({
       }
     },
     lazyloadSize(): unknown {
-      // @TODO discuss with allen, the *5 prevent zooming bug
-      if (generalUtils.isCm && generalUtils.isTouchDevice() && layerUtils.pageIndex === this.pageIndex) {
+      // the following code is a workaround for page-zooming flickering bug
+      if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
         return {
           minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5,
           maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5

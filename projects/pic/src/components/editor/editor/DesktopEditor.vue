@@ -25,7 +25,7 @@ div(class="desktop-editor"
               svg-icon(
                 iconName="vivisticker_logo"
                 iconWidth="20px"
-                :iconColor="stkMode ? 'black' : 'blue-1'"
+                :iconColor="stkMode ? 'black-1' : 'blue-1'"
                 @click="switchApp")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")

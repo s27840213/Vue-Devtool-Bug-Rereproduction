@@ -23,7 +23,7 @@ div(class="panel-adjust")
         ref="cmFields")
       template(v-for="field in fields" :key="field.name")
         div(
-          class="flex flex-col items-center justify-center h-52 gap-4 px-4"
+          class="flex-center flex-col h-52 gap-4 px-4"
           @click="selectedField = field")
           div(class="panel-adjust__modified" :class="`bg-${isFieldModified(field) ? (isFieldSelected(field) ? 'yellow-cm' : 'yellow-0') : 'transparent'}`")
           svg-icon(

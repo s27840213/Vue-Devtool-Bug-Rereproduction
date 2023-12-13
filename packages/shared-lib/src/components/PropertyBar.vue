@@ -4,14 +4,14 @@ div(class="property-bar px-5 py-10" :class="borderStyle")
 </template>
 
 <script lang="ts">
-
-import { defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
+import colorTable from '@nu/tailwind-lib/colors.json'
 
 export default defineComponent({
   emits: [],
   props: {
     borderColor: {
-      type: String,
+    type: String as PropType<keyof typeof colorTable>,
       default: 'gray-4'
     }
   },

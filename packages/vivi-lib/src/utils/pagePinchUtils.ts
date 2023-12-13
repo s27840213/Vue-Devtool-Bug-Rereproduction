@@ -191,7 +191,7 @@ class pagePinchUtils {
   }
 
   private resetState() {
-    console.warn('reset state')
+    // console.warn('reset state')
     store.commit('mobileEditor/SET_isPinchingEditor', false)
     store.commit('mobileEditor/UPDATE_pinchScale', 1)
     store.commit('SET_isPageScaling', false)

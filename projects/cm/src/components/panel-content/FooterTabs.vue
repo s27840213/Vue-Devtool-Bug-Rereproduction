@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
+div(class="cm-footer-tabs flex flex-col pt-8 px-24")
   transition(
     name="panel-up"
     @after-leave="afterLeave")
@@ -11,9 +11,9 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
         :currActivePanel="currActivePanel")
   div(class="flex flex-col gap-24 bg-dark-3 shadow-[0_100px_0_100px_black] shadow-dark-3 z-[1]")
     div(v-if="!hideTabs" ref="footerTabs" class="footer-tabs-row flex gap-24")
-      div(class="cm-footer-tabs flex items-center justify-center h-44")
+      div(class="cm-footer-tabs flex-center h-44")
         div(
-          class="flex items-center justify-center bg-white/[.65] rounded-full w-22 h-22"
+          class="flex-center bg-white/[.65] rounded-full w-22 h-22"
           @click="handleBack")
           svg-icon(
             iconName="chevron-down"
@@ -24,7 +24,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
           div(
             v-if="!tab.hidden"
             :key="tab.icon"
-            class="cm-footer-tabs flex flex-col items-center justify-center h-44 gap-4 px-4"
+            class="cm-footer-tabs flex-center flex-col h-44 gap-4 px-4"
             :class="{ 'click-disabled': tab.disabled || isLocked || extraDisableCondition(tab) }"
             @click="handleTabAction(tab)")
             color-btn(
@@ -43,17 +43,16 @@ div(class="cm-footer-tabs flex flex-col pt-8 pl-24 pr-24")
               class="no-wrap click-disabled transition ease-linear delay-100 typo-body-sm"
               :class="`text-${settingTabColor(tab)}`") {{ tab.text }}
             //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
-    div(v-if="hasBottomTitle" class="footer-tabs-row flex items-center justify-between")
-      nubtn(
-        class="layer-action"
-        theme="secondary"
-        @click="handleBottomCancel") {{ $t('NN0203') }}
-      div(class="typo-h6 text-white") {{ bottomTitle }}
-      nubtn(class="layer-action" @click="handleBottomApply") {{ $t('CM0061') }}
+    footer-bar(v-if="hasBottomTitle"
+      class="footer-tabs-row"
+      :title="bottomTitle"
+      @cancel="handleBottomCancel"
+      @apply="handleBottomApply")
 //- className cm-footer-tabs is for v-click-outside middleware
 </template>
 
 <script lang="ts">
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'

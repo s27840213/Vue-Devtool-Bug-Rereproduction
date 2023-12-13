@@ -6,16 +6,16 @@ div(
   :style="{ paddingTop: `${userInfo.statusBarHeight}px` }")
   div(
     v-if="$slots.left"
-    class="flex justify-start items-center"
+    class="flex-start-center"
     :style="{ gap: `${leftGap}px` }")
     slot(name="left")
   div(
-    class="flex justify-center items-center whitespace-nowrap typo-h5 text-white"
+    class="flex-center whitespace-nowrap typo-h5 text-white"
     :style="{ gap: `${middGap}px` }")
     slot(name="middle")
   div(
     v-if="$slots.right"
-    class="flex justify-end items-center"
+    class="flex-end-center"
     :style="{ gap: `${rightGap}px` }")
     slot(name="right")
 </template>
