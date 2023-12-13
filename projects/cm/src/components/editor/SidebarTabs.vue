@@ -7,7 +7,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll s
       class="w-44"
       :class="getTabTutorialClasses(tab.text)")
       div(
-        class="sidebar__tab flex flex-col items-center justify-center gap-2 box-border p-4"
+        class="sidebar__tab flex-center flex-col gap-2 box-border p-4"
         @click.stop="handleTabAction(tab)"
         @pointerdown.stop)
         svg-icon(
@@ -21,11 +21,11 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll s
           :class="tab.disabled ? 'text-dark' : 'text-white'") {{ tab.text }}
       div(
         v-if="tab.icon === currActiveFeature && tab.subTabs"
-        class="flex flex-col items-center justify-center gap-2 bg-dark-1/50 rounded-full")
+        class="flex-center flex-col gap-2 bg-dark-1/50 rounded-full")
         div(
           v-for="(subTab, index) in tab.subTabs"
           :key="`${subTab.icon}-${index}`"
-          class="flex flex-col items-center justify-center gap-2 box-border p-4"
+          class="flex-center flex-col gap-2 box-border p-4"
           :class="getTabTutorialClasses(subTab.text)"
           @click.stop="handleTabAction(subTab)"
           @pointerdown.stop)

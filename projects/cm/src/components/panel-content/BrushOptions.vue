@@ -22,7 +22,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
       @update="setBrushSize"
       @pointer-down="setIsChangingBrushSize(true)"
       @pointer-up="setIsChangingBrushSize(false)")
-  div(class="w-full flex justify-between items-center box-border px-24")
+  div(class="w-full flex-between-center box-border px-24")
     nubtn(
       theme="secondary"
       @click="cancel") {{ $t('NN0203') }}

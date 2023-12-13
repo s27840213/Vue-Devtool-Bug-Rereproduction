@@ -3,7 +3,7 @@ div(
   v-if="!srcPreprocessImg"
   class="image-selector bg-dark-6 text-yellow-0 \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
-  div(class="box-border px-24 py-8 flex justify-between items-center")
+  div(class="box-border px-24 py-8 flex-between-center")
     back-btn
     span(class="text-white") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
     div(class="w-24")
@@ -45,7 +45,7 @@ div(
     div(
       v-if="isAlbumOpened"
       class="img-selector__img-grid bg-dark-6 overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
-      div(class="aspect-square flex flex-col items-center justify-center" @click="useCamera")
+      div(class="aspect-square flex-center flex-col" @click="useCamera")
         svg-icon(class="mb-10" iconName="camera")
         span {{ $t('CM0060') }}
       div(
@@ -85,7 +85,7 @@ div(
           img(
             class="object-cover aspect-square w-80"
             :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-          div(class="flex flex-col items-start justify-center gap-4")
+          div(class="flex-center-start flex-col gap-4")
             span {{ album.title }}
             span {{ album.albumSize }}
   //- 4-2. Stock
@@ -120,7 +120,7 @@ div(
         iconColor="white")
   //- 5. Multi-select candidate UI
   div(v-if="requireNum > 1 && targetImgs.length" class="mx-16 mt-10 mb-20 grid gap-20")
-    div(class="flex justify-between items-center h-32")
+    div(class="flex-between-center h-32")
       span {{ $t('CM0062', { num: requireNum }) }}
       nubtn(@click="sendToEditor") {{ $t('NN0744') }}
     div(class="flex flex-row gap-20")
@@ -135,13 +135,13 @@ div(
           @click="pull(targetImgs, img)")
 //- Preprocess view
 div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
-  div(class="w-full h-[74%] pt-37 pb-20 flex justify-center items-center box-border")
+  div(class="w-full h-[74%] pt-37 pb-20 flex-center box-border")
     img(
       class="w-full h-full object-cover object-center"
       :class="{ grayscale: editorType === 'hidden-message', invert: isInvert }"
       :src="srcPreprocessImg")
   div(class="p-24 pb-37 flex flex-col gap-16")
-    div(class="flex justify-between items-center typo-h5 py-8")
+    div(class="flex-between-center typo-h5 py-8")
       div(class="flex gap-8")
         span {{ $t('CM0080') }}
         svg-icon(
@@ -155,7 +155,7 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         :height="22"
         colorInactive="lighter"
         colorActive="yellow-cm")
-    div(class="flex justify-between items-center typo-h5 py-8")
+    div(class="flex-between-center typo-h5 py-8")
       div(class="flex gap-8")
         svg-icon(
           class="bg-yellow-cm text-dark-6 rounded-full"
@@ -173,7 +173,7 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         :height="22"
         colorInactive="lighter"
         colorActive="yellow-cm")
-    div(class="flex justify-between items-center typo-h6")
+    div(class="flex-between-center typo-h6")
       nubtn(
         theme="secondary"
         size="sm"

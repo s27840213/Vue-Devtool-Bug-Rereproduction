@@ -7,7 +7,7 @@ div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt
     iconWidth="24px"
     @click="closePanel")
   div(class="typo-h5") {{ title }}
-  div(class="flex flex-col justify-start items-center gap-16 overflow-scroll pb-37")
+  div(class="flex-start-center flex-col gap-16 overflow-scroll pb-37")
     //- hidden message help
     template(v-if="descriptionPanel === 'hidden-message-help'")
       div(class="w-full typo-body-md text-left") {{ t('CM0094') }}
@@ -47,7 +47,7 @@ div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt
         v-for="(item, idx) in hiddenMessageImgPreprocessItems"
         :key="idx"
         class="w-full flex flex-col gap-8")
-        div(class="flex justify-between items-center")
+        div(class="flex-between-center")
           img(
             class="w-100 h-100 object-cover object-center"
             :src="item.imgA" )

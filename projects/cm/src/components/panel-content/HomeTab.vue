@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full flex items-center justify-around")
+div(class="w-full flex-around-center")
   router-link(
     custom
     v-slot="{ navigate }"

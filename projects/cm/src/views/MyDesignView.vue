@@ -40,7 +40,7 @@ div(
           class="mb-10"
           :iconName="'loading'"
           iconColor="white")
-  div(v-else class="flex flex-col justify-center items-center gap-32")
+  div(v-else class="flex-center flex-col gap-32")
     img(src="@/assets/img/img-empty.png" class="w-240")
     span(class="text-yellow-0 typo-h5") {{ $t('CM0031') }}
   sub-design-view(
