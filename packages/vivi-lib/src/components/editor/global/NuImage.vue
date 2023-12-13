@@ -40,7 +40,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(v-if="!isCurrLayerPinched" :id="filterId"
+          filter(v-if="!isCurrLayerPinched && !isPinchingEditor" :id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -78,6 +78,7 @@ import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -96,7 +97,6 @@ import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import cmWVUtils from '@/utils/cmWVUtils'
 
 export default defineComponent({
   emits: ['onload'],
@@ -390,6 +390,7 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing',
       isShowPagePreview: 'page/getIsShowPagePreview',
+      isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
       controlState: 'getControlState'
     }),
     ...vuexUtils.mapState('stk', {
