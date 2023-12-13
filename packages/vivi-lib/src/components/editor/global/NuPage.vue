@@ -320,7 +320,7 @@ export default defineComponent({
     },
     lazyloadSize(): unknown {
       // @TODO discuss with allen, the *5 prevent zooming bug
-      if (generalUtils.isTouchDevice() && layerUtils.pageIndex === this.pageIndex) {
+      if (generalUtils.isCm && generalUtils.isTouchDevice() && layerUtils.pageIndex === this.pageIndex) {
         return {
           minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5,
           maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5
