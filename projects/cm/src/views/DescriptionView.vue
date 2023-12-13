@@ -30,16 +30,18 @@ div(class="description-page w-full h-full text-white px-24")
       img(
         v-for="(n, idx) in 3"
         :key="idx"
-        :src="getImgs(idx).imgB"
-        class="w-32 h-32 overflow-hidden rounded-4 object-cover object-center"
-        :class="{ 'outline outline-2 -outline-offset-2 outline-yellow-cm': idx === idxCurrImg }"
-        @click="idxCurrImg = idx")
+        :src="getThumbImgs(idx)"
+        class="w-40 h-40 overflow-hidden rounded-4 object-cover object-center"
+        :class="{ 'thumb outline outline-2 -outline-offset-2 outline-yellow-cm': idx === idxCurrImg }"
+        @click="idxCurrImg = idx"
+        @error="(evt) => fallbackThumb(evt, idx)")
     div(class="typo-body-md") {{ description }}
     nubtn(
       size="mid-full"
       @click="handleNext") {{ $t('CM0055') }}
 </template>
 <script setup lang="ts">
+import useImageUtils from '@/composable/useImageUtils';
 import i18n from '@/i18n'
 import { useEditorStore } from '@/stores/editor'
 import type { EditorType } from '@/types/editor'
@@ -56,6 +58,9 @@ const getImgs = (idx: number) => {
     imgB: require(`demo/${target.value}-demo-${idx}b.png`),
   }
 }
+const getThumbImgs = (idx: number) => {
+  return require(`demo/${target.value}-demo-${idx}b-thumb.png`)
+}
 
 const title = ref('')
 const description = ref('')
@@ -70,14 +75,22 @@ switch (target.value) {
 const handleNext = () => {
   editorStore.startEditing(target.value)
 }
-</script>
-<style lang="scss">
-.feature-card {
-  background-repeat: no-repeat;
-  background-size: cover;
-  height: 230px;
+
+const fallbackThumb = (evt: Event, idx: number) => {
+  const el = evt.target as HTMLImageElement
+  if (el.src !== getImgs(idx).imgB) el.src = getImgs(idx).imgB
 }
 
+onMounted(() => {
+  // preload images
+  const imageUtils = useImageUtils()
+  for (let i = 0; i < 3; i++) {
+    imageUtils.imgLoadHandler(getImgs(i).imgA, () => { /* do nothing */ })
+    imageUtils.imgLoadHandler(getImgs(i).imgB, () => { /* do nothing */ })
+  }
+})
+</script>
+<style lang="scss">
 @keyframes zoom {
   0%,
   25% {
