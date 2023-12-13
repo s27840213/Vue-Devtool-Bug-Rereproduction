@@ -81,7 +81,8 @@
     "@laynezh/vite-plugin-lib-assets": "0.5.5",
     "vite-plugin-svg-sprite": "^0.5.0",
     "vite-plugin-replace": "~0.1.1",
-    "node-sass-json-importer": "^4.3.0"
+    "node-sass-json-importer": "^4.3.0",
+    "eslint-plugin-tailwindcss": "^3.13.0"
   },
   "config": {
     "commitizen": {

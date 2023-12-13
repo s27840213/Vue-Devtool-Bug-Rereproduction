@@ -137,7 +137,7 @@ div(
 div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
   div(class="w-full h-[74%] pt-37 pb-20 flex justify-center items-center box-border")
     img(
-      class="w-full h-full object-cover object-center filter"
+      class="w-full h-full object-cover object-center"
       :class="{ grayscale: editorType === 'hidden-message', invert: isInvert }"
       :src="srcPreprocessImg")
   div(class="p-24 pb-37 flex flex-col gap-16")

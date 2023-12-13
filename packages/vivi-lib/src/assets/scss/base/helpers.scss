@@ -11,10 +11,6 @@
   height: 100%;
 }
 
-.flex {
-  display: flex
-}
-
 .flex-column {
   flex-direction: column;
 }
@@ -31,99 +27,8 @@
   justify-content: space-evenly;
 }
 
-.justify-center {
-  justify-content: center;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .pointer {
   cursor: pointer;
-}
-
-.p-2 {
-  padding: 2px;
-}
-
-.px-2 {
-  padding-left: 2px;
-  padding-right: 2px;
-}
-
-// padding and margin
-$spacer: 5;
-
-@for $i from 0 through 24 {
-  $space: ($spacer * $i);
-
-  .mt-#{$space} {
-    margin-top: $space*1px;
-  }
-
-  .mr-#{$space} {
-    margin-right: $space*1px;
-  }
-
-  .ml-#{$space} {
-    margin-left: $space*1px;
-  }
-
-  .mb-#{$space} {
-    margin-bottom: $space*1px;
-  }
-
-  .mx-#{$space} {
-    margin-left: $space*1px;
-    margin-right: $space*1px;
-  }
-
-  .my-#{$space} {
-    margin-top: $space*1px;
-    margin-bottom: $space*1px;
-  }
-
-  .m-#{$space} {
-    margin: $space*1px;
-  }
-
-  // padding
-  .pt-#{$space} {
-    padding-top: $space*1px;
-  }
-
-  .pr-#{$space} {
-    padding-right: $space*1px;
-  }
-
-  .pl-#{$space} {
-    padding-left: $space*1px;
-  }
-
-  .pb-#{$space} {
-    padding-bottom: $space*1px;
-  }
-
-  .px-#{$space} {
-    padding-left: $space*1px;
-    padding-right: $space*1px;
-  }
-
-  .py-#{$space} {
-    padding-top: $space*1px;
-    padding-bottom: $space*1px;
-  }
-
-  .p-#{$space} {
-    padding: $space*1px;
-  }
 }
 
 .rounded-none {
@@ -146,40 +51,8 @@ $spacer: 5;
   border-radius: 0.5rem;
 }
 
-.text-left {
-  text-align: left;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-justify {
-  text-align: justify;
-}
-
 .text-bold {
   font-weight: bold;
-}
-
-.align-top {
-  vertical-align: top;
-}
-
-.align-bottom {
-  vertical-align: bottom;
-}
-
-.align-middle {
-  vertical-align: middle;
-}
-
-.align-baseline {
-  vertical-align: baseline;
 }
 
 .border-box {
@@ -190,24 +63,12 @@ $spacer: 5;
   box-sizing: content-box;
 }
 
-.overflow-hidden {
-  overflow: hidden;
-}
-
 .cover {
   background-size: cover;
 }
 
 .contain {
   background-size: contain;
-}
-
-.relative {
-  position: relative;
-}
-
-.absolute {
-  position: absolute;
 }
 
 .rotate-hr {
