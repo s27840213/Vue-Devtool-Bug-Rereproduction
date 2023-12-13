@@ -74,12 +74,12 @@ const updateStyles = () => {
 
 const imgA = computed(() => {
   if (step.value === 4) return ''
-  return require(`demo/hidden-message-demo-${step.value - 1}a.jpeg`)
+  return require(`demo/hidden-message-help-demo-${step.value - 1}a.jpeg`)
 })
 
 const imgB = computed(() => {
   if (step.value === 4) return ''
-  return require(`demo/hidden-message-demo-${step.value - 1}b.png`)
+  return require(`demo/hidden-message-help-demo-${step.value - 1}b.png`)
 })
 
 const text = computed(() => {
