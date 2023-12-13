@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="flex flex-col items-center justify-center box-border px-24")
+div(class="flex-center flex-col box-border px-24")
   div(class="text-yellow-cm typo-h4") {{ title }}
   div(class="text-white typo-btn-sm my-24 flex flex-col justify-center")
     span(v-html="content")

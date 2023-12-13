@@ -12,6 +12,7 @@ div(class="toggle"
 </template>
 
 <script lang="ts">
+import { IColorKeys } from '@/interfaces/color'
 import _ from 'lodash'
 import { PropType, defineComponent } from 'vue'
 /**
@@ -26,7 +27,7 @@ import { PropType, defineComponent } from 'vue'
       label: i18n.global.t('?'),
       value: '?'
     }]
- * slide-toggle(:options="options" v-model="test" bgColor="#F4F5F7")
+ * slide-toggle(:options="options" v-model="test" bgColor="gray-6")
  *
  * Usage2: Non-text slide toggle, need optionWidth === optionHeight
  * options: [{
@@ -66,11 +67,11 @@ export default defineComponent({
       default: '4px'
     },
     bgColor: {
-      type: String,
+      type: String as PropType<IColorKeys>,
       default: 'blue-1'
     },
     switchColor: {
-      type: String,
+      type: String as PropType<IColorKeys>,
       default: 'white'
     },
     textSize: {
@@ -78,11 +79,11 @@ export default defineComponent({
       default: 'body-XS'
     },
     activeColor: {
-      type: String,
+      type: String as PropType<IColorKeys>,
       default: 'blue-1'
     },
     inActiveColor: {
-      type: String,
+      type: String as PropType<IColorKeys>,
       default: 'gray-2'
     },
     toggleMode: {

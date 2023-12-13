@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="w-full flex justify-between items-center box-border py-10" :class="{ 'bg-dark': active }")
+div(class="w-full flex-between-center box-border py-10" :class="{ 'bg-dark': active }")
   div(class="flex items-center gap-10" :class="`${textColor} ${textSize}`")
     svg-icon(
       :iconName="iconName"

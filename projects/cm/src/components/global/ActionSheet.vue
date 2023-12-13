@@ -4,7 +4,7 @@ div(class="action-sheet" ref="actionSheetRef")
     div(
       v-for="(action, index) in primaryActions"
       :key="index"
-      class="flex flex-col justify-center items-center p-16 box-border border-style gap-8"
+      class="flex-center flex-col p-16 box-border border-style gap-8"
       :class="{ 'pointer-events-none': action.clickable === false }"
       @click="action.cb")
       span(
@@ -15,7 +15,7 @@ div(class="action-sheet" ref="actionSheetRef")
     div(
       v-for="(action, index) in secondaryActions"
       :key="index"
-      class="flex flex-col justify-center items-center p-16 box-border"
+      class="flex-center flex-col p-16 box-border"
       :class="{ 'pointer-events-none': action.clickable === false }"
       @click="action.cb")
       span(
