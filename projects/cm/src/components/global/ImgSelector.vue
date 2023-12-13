@@ -322,8 +322,13 @@ const selectAlbum = (album: IAlbum) => {
 }
 const useCamera = () => {
   cmWVUtils.callIOSAsHTTPAPI('USE_CAMERA', undefined, { timeout: -1 }).then((img) => {
+    if (img && img.flag && img.msg === 'User canceled.') {
+      // The user didn't take a photo, do nothing.
+      return
+    }
     if (!img || img.flag) {
-      notify({ group: 'error', text: 'Camera img select error' })
+      notify({ group: 'error', text: `Camera img select error: ${img?.msg}` })
+      return
     }
     selectImage(img as IAlbumContent, 'ios')
   })
