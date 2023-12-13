@@ -47,8 +47,8 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
                   :currActivePanel="currActivePanel"
                   :currPage="currPage"
                   :currTab="currActivePanel"
-                  @switchTab="switchTab"
-                  @disableBtmPanelTransition="disableTransition")
+                  @switchTab="(switchTab)"
+                  @disableBtmPanelTransition="(disableTransition)")
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(

@@ -16,16 +16,16 @@ div(class="description-page w-full h-full text-white px-24")
             :src="getImgs(idxCurrImg).imgB"
             class="w-full h-full object-cover object-center absolute top-0 left-0"
             ref="elImgA"
-            :style="{ animation: 'zoom 4s ease-in-out both infinite' }")
+            :style="{ animation: 'zoom 3s ease-in-out both infinite' }")
           img(
             :src="getImgs(idxCurrImg).imgA"
             class="w-full h-full object-cover object-center absolute top-0 left-0"
             ref="elImgB"
-            :style="{ animation: 'clip-path-scan-x 4s ease-in-out both infinite' }")
+            :style="{ animation: 'clip-path-scan-x 3s ease-in-out both infinite' }")
           div(
             class="w-6 h-full bg-yellow-cm absolute top-0"
             ref="elSplitter"
-            :style="{ animation: 'move-scan-x 4s ease-in-out both infinite' }")
+            :style="{ animation: 'move-scan-x 3s ease-in-out both infinite' }")
     div(class="flex justify-center gap-16")
       img(
         v-for="(n, idx) in 3"
@@ -52,7 +52,7 @@ const target: Ref<EditorType> = ref(route.query.target as EditorType)
 const idxCurrImg = ref(0)
 const getImgs = (idx: number) => {
   return {
-    imgA: require(`demo/${target.value}-demo-${0}a.png`),
+    imgA: require(`demo/${target.value}-demo-${idx}a.png`),
     imgB: require(`demo/${target.value}-demo-${idx}b.png`),
   }
 }
