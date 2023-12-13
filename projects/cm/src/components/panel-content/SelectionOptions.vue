@@ -11,7 +11,7 @@ div(class="editing-options w-full")
         iconHeight="32px"
         :sameSize="false"
         @click="chooseSelectionOption(shape)")
-  div(class="flex justify-between items-center box-border px-24")
+  div(class="flex-between-center box-border px-24")
     nubtn(
       theme="secondary"
       @click="cancel") {{ $t('NN0203') }}

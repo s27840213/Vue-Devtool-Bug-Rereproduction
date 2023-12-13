@@ -13,6 +13,7 @@ import layerUtils from './layerUtils'
 import textEffectUtils from './textEffectUtils'
 import textUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
+import textBgUtils from './textBgUtils'
 
 const fontPropsMap: { [key: string]: string } = {
   fontSize: 'size',
@@ -59,6 +60,10 @@ class TextPropUtils {
     if (!currLayer) return
 
     const { layerIndex, subLayerIdx: subLayerIndex } = layerUtils
+
+    if (propName === 'font-vertical') {
+      textBgUtils.exchangeXY()
+    }
 
     if (currLayer.type === 'group' || currLayer.type === 'tmp') {
       switch (this.propTypeSorter(propName)) {

@@ -29,7 +29,10 @@ import textEffectUtils, { isFocusState } from '@/utils/textEffectUtils'
 export default defineComponent({
   data() {
     return {
-      option: constantData.textEffects().find((category) => category.name === 'shape')?.effects2d[0].find((effect) => effect.key === 'curve')?.options.find((option) => option.key === 'bend') as IEffectOptionRange,
+      option: constantData.textEffects().content
+        .find((category) => category.name === 'shape')
+          ?.effects2d[0].find((effect) => effect.key === 'curve')
+            ?.options.find((option) => option.key === 'bend') as IEffectOptionRange,
     }
   },
   computed: {

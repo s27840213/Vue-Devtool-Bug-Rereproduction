@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="prompt-area w-full box-border px-24")
-  div(class="flex flex-col justify-center items-center relative" :class="{ 'pointer-events-none': preview }")
+  div(class="flex-center flex-col relative" :class="{ 'pointer-events-none': preview }")
     //- placeholder for absolute contents
     div(class="w-full" :style="{ height: `${mainHeight}px` }")
     //- main
@@ -64,7 +64,7 @@ div(class="prompt-area w-full box-border px-24")
           span(class="text-yellow-0 typo-btn-lg") {{ title }}
           div(class="w-fit")
         //- content
-        div(class="w-full flex justify-center items-center gap-16 typo-h5 text-white")
+        div(class="w-full flex-center gap-16 typo-h5 text-white")
           div(
             v-for="(genType, idx) in genTypes.group"
             :key="idx"
@@ -90,7 +90,7 @@ div(class="prompt-area w-full box-border px-24")
         v-for="(option, idx) in genRangeOptions"
         :key="idx")
         div(class="w-full flex flex-col")
-          div(class="w-full flex items-center justify-between typo-h6")
+          div(class="w-full flex-between-center typo-h6")
             div(class="flex items-center gap-4")
               svg-icon(
                 v-if="option.icon"
@@ -121,7 +121,7 @@ div(class="prompt-area w-full box-border px-24")
               type="range")
           div(
             v-if="option.minDescription || option.maxDescription"
-            class="w-full flex justify-between items-center text-white typo-btn-sm mt-8")
+            class="w-full flex-between-center text-white typo-btn-sm mt-8")
             span(class="typo-body-sm text-left" v-html="option.minDescription")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")

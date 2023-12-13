@@ -66,7 +66,7 @@ div(class="page-size-selector")
   div(class="page-size-selector__container"
     @touchmove="handleTouchMove")
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="'text-gray-3'")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-3")
       div(v-if="isLayoutReady && recentlyUsed.length > 0" class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title caption-LG text-black") {{$t('NN0024')}}
       div(v-for="(format, index) in recentlyUsed"

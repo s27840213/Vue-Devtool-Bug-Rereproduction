@@ -1,24 +1,24 @@
 <template lang="pug">
-div(class="w-full flex items-center justify-center gap-64 py-12 box-border")
-  div(class="flex flex-col gap-4 items-center justify-center" @click="save")
+div(class="w-full flex-center gap-64 py-12 box-border")
+  div(class="flex-center flex-col gap-4" @click="save")
     svg-icon(
       :iconName="'download'"
       :iconColor="'yellow-0'"
       :iconWidth="'24px'")
     span(class="text-yellow-0 typo-body-sm") {{ $t('STK0004') }}
-  div(class="flex flex-col gap-4 items-center justify-center" @click="share")
+  div(class="flex-center flex-col gap-4" @click="share")
     svg-icon(
       :iconName="'share'"
       :iconColor="'yellow-0'"
       :iconWidth="'24px'")
     span(class="text-yellow-0 typo-body-sm") {{ $t('NN0214') }}
-  div(class="flex flex-col gap-4 items-center justify-center" @click="recreate")
+  div(class="flex-center flex-col gap-4" @click="recreate")
     svg-icon(
       :iconName="'recreate'"
       :iconColor="'yellow-0'"
       :iconWidth="'24px'")
     span(class="text-yellow-0 typo-body-sm") {{ $t('CM0127') }}
-  div(class="flex flex-col gap-4 items-center justify-center" @click="edit")
+  div(class="flex-center flex-col gap-4" @click="edit")
     svg-icon(
       :iconName="'pencil'"
       :iconColor="'yellow-0'"

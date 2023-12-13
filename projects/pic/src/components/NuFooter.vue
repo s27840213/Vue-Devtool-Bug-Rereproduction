@@ -12,7 +12,7 @@ div(class="nu-footer text-black" :style="rootStyles")
           span LEARN
           svg-icon(class="nu-footer__feature-icon"
             :iconName="featureExpand[0] ? 'minus-origin' : 'plus-origin'"
-            :iconColor="'black'"
+            iconColor="gray-0"
             :iconWidth="'15px'")
         div(class="nu-footer__feature-items"
           :class="featureExpand[0] ? 'expand' : ''")
@@ -25,7 +25,7 @@ div(class="nu-footer text-black" :style="rootStyles")
           span DISCOVER
           svg-icon(class="nu-footer__feature-icon"
             :iconName="featureExpand[1] ? 'minus-origin' : 'plus-origin'"
-            :iconColor="'black'"
+            iconColor="gray-0"
             :iconWidth="'15px'")
         div(class="nu-footer__feature-items"
           :class="featureExpand[1] ? 'expand' : ''")
@@ -39,7 +39,7 @@ div(class="nu-footer text-black" :style="rootStyles")
           span CREATE
           svg-icon(class="nu-footer__feature-icon"
             :iconName="featureExpand[2] ? 'minus-origin' : 'plus-origin'"
-            :iconColor="'black'"
+            iconColor="gray-0"
             :iconWidth="'15px'")
         div(class="nu-footer__feature-items"
           :class="featureExpand[2] ? 'expand' : ''")
@@ -54,7 +54,7 @@ div(class="nu-footer text-black" :style="rootStyles")
           span LEGAL
           svg-icon(class="nu-footer__feature-icon"
             :iconName="featureExpand[3] ? 'minus-origin' : 'plus-origin'"
-            :iconColor="'black'"
+            iconColor="gray-0"
             :iconWidth="'15px'")
         div(class="nu-footer__feature-items"
           :class="featureExpand[3] ? 'expand' : ''")

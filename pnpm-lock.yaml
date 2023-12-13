@@ -120,6 +120,9 @@ importers:
       eslint-plugin-cypress:
         specifier: 2.12.1
         version: 2.12.1(eslint@8.46.0)
+      eslint-plugin-tailwindcss:
+        specifier: ^3.13.0
+        version: 3.13.0(tailwindcss@3.3.3)
       eslint-plugin-vue:
         specifier: ^9.17.0
         version: 9.17.0(eslint@8.46.0)
@@ -7000,7 +7003,7 @@ packages:
       ts-dedent: 2.2.0
       type-fest: 2.19.0
       vue: 3.3.4
-      vue-component-type-helpers: 1.8.24
+      vue-component-type-helpers: 1.8.25
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -12659,6 +12662,17 @@ packages:
       eslint: '>=5.0.0'
     dependencies:
       eslint: 8.46.0
+    dev: true
+
+  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.3):
+    resolution: {integrity: sha512-Fcep4KDRLWaK3KmkQbdyKHG0P4GdXFmXdDaweTIPcgOP60OOuWFbh1++dufRT28Q4zpKTKaHwTsXPJ4O/EjU2Q==}
+    engines: {node: '>=12.13.0'}
+    peerDependencies:
+      tailwindcss: ^3.3.2
+    dependencies:
+      fast-glob: 3.3.1
+      postcss: 8.4.27
+      tailwindcss: 3.3.3(ts-node@10.9.1)
     dev: true
 
   /eslint-plugin-unused-imports@2.0.0(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.46.0):
@@ -21785,8 +21799,8 @@ packages:
     resolution: {integrity: sha512-N9sEPAkH04DZ3K8f2augLTaox/2qSwSvQivguzBjLVeQAXYKe/u1lfms+xNnwULtuxgaPo+Ufnb2WK9lav2CJQ==}
     dev: false
 
-  /vue-component-type-helpers@1.8.24:
-    resolution: {integrity: sha512-lqWs/7fdRXoSBAlbouHBX+LNuaY6gI9xWW34m/ZIz9zVPYHEyw0b2/zaCBwlKx0NtKTeF/6pOpvrxVkh7nhIYg==}
+  /vue-component-type-helpers@1.8.25:
+    resolution: {integrity: sha512-NCA6sekiJIMnMs4DdORxATXD+/NRkQpS32UC+I1KQJUasx+Z7MZUb3Y+MsKsFmX+PgyTYSteb73JW77AibaCCw==}
     dev: true
 
   /vue-demi@0.13.11(@vue/composition-api@1.7.2)(vue@3.3.4):

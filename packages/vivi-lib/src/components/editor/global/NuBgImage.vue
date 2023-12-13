@@ -16,7 +16,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
       preserveAspectRatio="none"
       role="image")
       defs
-        filter(:id="filterId"
+        filter(v-if="!isPinchingEditor" :id="filterId"
           color-interpolation-filters="sRGB")
           component(v-for="(elm, idx) in svgFilterElms"
             :key="`${filterId + idx}`"
@@ -187,6 +187,7 @@ export default defineComponent({
       getEditorViewImages: 'file/getEditorViewImages',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
       isBgCtrlImgLoaded: 'imgControl/isBgCtrlImgLoaded',
     }),
     ...mapState('mobileEditor', {

@@ -6,7 +6,7 @@ div(class='aspect-ratio-selector')
       div(
         v-for="aspectRatio in aspectRatioTypes"
         :key="aspectRatio"
-        class="w-56 flex flex-col justify-center items-center gap-4"
+        class="w-56 flex-center flex-col gap-4"
         @click="selectAspectRatio(aspectRatio)")
         svg-icon(
           :iconColor="selectedType === aspectRatio ? 'yellow-2' : aspectRatio === 'original' ? 'white' : 'transparent'"
