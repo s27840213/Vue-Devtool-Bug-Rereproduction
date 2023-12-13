@@ -18,15 +18,25 @@
     "outDir": "dist",
     "declarationDir": "dist",
     "baseUrl": ".",
+    "rootDir": "../",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@nu/tailwind-lib/*": [
+        "../tailwind-lib/*"
+      ]
     },
     "types": ["vite/client"]
   },
   "vueCompilerOptions": {
     "plugins": ["@vue/language-plugin-pug"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "../tailwind-lib/colors.json"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

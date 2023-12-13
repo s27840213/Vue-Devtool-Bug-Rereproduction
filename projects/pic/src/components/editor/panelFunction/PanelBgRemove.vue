@@ -4,13 +4,13 @@ div(class="panel-background-remove")
     nubtn(
       theme="edit"
       size="mid-full"
-      :icon="['clear', '', '20px']"
+      :icon="['clear', , '20px']"
       :active="clearMode"
       @click="setClearMode(true)") {{ $t('NN0385') }}
     nubtn(
       theme="edit"
       size="mid-full"
-      :icon="['preserve', '', '20px']"
+      :icon="['preserve', , '20px']"
       :active="!clearMode"
       @click="setClearMode(false)") {{ $t('NN0386') }}
     div(class="panel-background-remove__slider full-row")

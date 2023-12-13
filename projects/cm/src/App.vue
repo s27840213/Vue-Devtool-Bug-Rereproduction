@@ -1,42 +1,42 @@
 <template lang="pug">
-div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
-  :class="{'bg-app-bg': !isDuringCopy}")
+div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
+  :class="{'bg-dark-6': !isDuringCopy}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
-  transition(name="fade-in-only")
-    div(v-if="atMainPage" class="w-full flex justify-between items-center box-border px-16"
-      :style="{paddingTop: `${statusBarHeight}px`}")
-      router-link(
-        custom
-        :to="'/'"
-        v-slot="{ navigate }")
-        img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
-      div(class="flex justify-center items-center gap-18")
-        transition(
-            name="rotate-right-in"
-            mode="out-in")
-          div(v-if="atMyDesign" )
-            router-link(
-              custom
-              to="/settings"
-              v-slot="{ navigate }")
-              svg-icon(iconName="cm_settings"
-                :iconColor="'app-tab-default'" @click="navigate")
-        nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+  div(v-if="atMainPage && !isDesignOpen" class="w-full flex justify-between items-center box-border px-16"
+    :style="{paddingTop: `${statusBarHeight}px`}")
+    router-link(
+      custom
+      :to="'/'"
+      v-slot="{ navigate }")
+      img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
+    div(class="flex justify-center items-center gap-18")
+      transition(
+          name="rotate-right-in"
+          mode="out-in")
+        div(v-if="atMyDesign" )
+          router-link(
+            custom
+            to="/settings"
+            v-slot="{ navigate }")
+            svg-icon(iconName="cm_settings"
+              :iconColor="'yellow-0'" @click="navigate")
+      nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
-    class="box-border pb-12 min-h-full row-start-2 row-end-3"
+    class="router-view box-border min-h-full row-start-2 row-end-3"
+    :class="{ 'pb-12': !atNonUI }"
     v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
       mode="out-in")
       component(:is="Component")
-  bottom-panel(v-if="bottomPanelComponent && !atEventTester && !(isDuringCopy && !isAutoFilling)"
+  bottom-panel(v-if="bottomPanelComponent && !atNonUI && !(isDuringCopy && !isAutoFilling)"
     class="z-bottom-panel row-start-3 row-end-4 tutorial-powerful-fill-4--highlight tutorial-hidden-message-4--highlight"
     :class="{'translate-y-full pointer-events-none': isActionSheetOpen}"
-    :style="disableBtmPanelTransition ? 'transition: none' : ''")
-    template(#content="{setSlotRef}")
+    :disableTransition="disableBtmPanelTransition")
+    template(#content="{setSlotRef, disableTransition}")
       transition(
         name="bottom-panel-transition"
         mode="out-in"
@@ -47,7 +47,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
                   :currActivePanel="currActivePanel"
                   :currPage="currPage"
                   :currTab="currActivePanel"
-                  @switchTab="switchTab")
+                  @switchTab="(switchTab)"
+                  @disableBtmPanelTransition="(disableTransition)")
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
@@ -56,7 +57,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
-  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-start box-border"
+  div(class="absolute-container w-full h-full absolute top-0 left-0 z-abs-container flex flex-col justify-start box-border pointer-events-none"
     :style="{paddingTop: `${statusBarHeight}px`}")
     transition(name="bottom-up-down")
       img-selector(
@@ -65,11 +66,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
         :requireNum="requireImgNum")
     transition(name="fade-in-out")
       div(v-if="showDescriptionPanel"
-      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-neutral-dark bg-opacity-70")
+      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-dark-4/70")
     transition(name="bottom-up-down")
       bottom-panel(
         v-if="showDescriptionPanel"
-        class="absolute bottom-0 z-desciption-panel pointer-events-auto")
+        class="absolute bottom-0 z-desciption-panel pointer-events-auto"
+        :gap="statusBarHeight + 150"
+        ignoreHomeIndicator)
         template(#content="{setSlotRef}")
           transition(
             name="bottom-panel-transition"
@@ -89,7 +92,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content bg-app-toast-success")
+        div(class="notification__content bg-yellow-1/80")
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
     notifications(
@@ -99,7 +102,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content bg-app-toast-fail text-primary-white")
+        div(class="notification__content bg-red-cm/80 text-white")
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
     notifications(
@@ -109,13 +112,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] re
       :max="2"
       :duration="2000")
       template(v-slot:body="{ item }")
-        div(class="notification__content bg-primary-light-hover bg-opacity-80 text-app-text-primary")
+        div(class="notification__content bg-yellow-1/80 text-dark")
           svg-icon(iconName="red-exclamation-mark")
           span( v-html="item.text")
     transition(name="bottom-up-down")
       div(v-if="isActionSheetOpen" class="w-full h-full flex items-end z-action-sheet px-16 box-border "
       :style="{paddingBottom: `${homeIndicatorHeight}px`}")
-          action-sheet(
+          action-sheet(class="pointer-events-auto "
             :primaryActions="primaryActions"
             :secondaryActions="secondaryActions")
 </template>
@@ -167,11 +170,13 @@ const {
   atSettings,
   atMainPage,
   atDescription,
-  atEventTester,
+  atNonUI,
   showImgSelector,
   inGenResultState,
   inSavingState,
-  showDescriptionPanel
+  showDescriptionPanel,
+  isDesignOpen,
+  isSubDesignOpen,
 } = useStateInfo()
 
 const globalStore = useGlobalStore()
@@ -196,6 +201,8 @@ const bottomPanelComponent = computed(() => {
       return ModalTemplate
     case vuex.state.user.showForceLogin:
       return PanelLogin
+    case isSubDesignOpen.value:
+      return SavingTab
     case showHomeTabs.value:
     case atSettings.value:
       return HomeTab
@@ -364,12 +371,16 @@ router.isReady().then(() => {
 .notification {
   // to diable vue-notification's default style(display: block)
   display: flex !important;
+  .vue-notification-wrapper {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+  }
+  // its a little bit confused, so if you want to know why, just ask me in person
+  // and I will demo the problem to you - Alan
+  position: absolute !important;
   &__content {
     @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8;
   }
-}
-
-.absolute-container {
-  pointer-events: none;
 }
 </style>

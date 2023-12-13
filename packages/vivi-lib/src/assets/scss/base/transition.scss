@@ -107,6 +107,16 @@
   }
 }
 
+.rotate-infinite {
+  animation: rotate 0.5s infinite linear;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .bottom-up-down {
   &-enter-active,
   &-leave-active {

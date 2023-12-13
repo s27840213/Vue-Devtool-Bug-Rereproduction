@@ -1,11 +1,16 @@
 import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
+import { ICmMyDesign } from '@/types/user'
 import { saveToCameraRoll } from '@/utils/pixiRecorder'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
-
 const useActionSheetCm = () => {
+  const userStore = useUserStore()
+  const { getSubDesignImage, deleteDesign } = userStore
+  const { currOpenSubDesign, isSubDesignOpen } = storeToRefs(userStore)
   const { t } = useI18n()
   const {
     isActionSheetOpen,
@@ -20,8 +25,14 @@ const useActionSheetCm = () => {
   const editorStore = useEditorStore()
   const { currGeneratedResults } = storeToRefs(editorStore)
 
-  const savePhotoCb = () => {
-    return cmWVUtils.saveAssetFromUrl('png', currGeneratedResults.value.url)
+  const savePhotoCb = async () => {
+    let targetUrl = ''
+    if (isSubDesignOpen.value && currOpenSubDesign.value) {
+      targetUrl = await generalUtils.toDataUrlNew(getSubDesignImage(currOpenSubDesign.value))
+    } else {
+      targetUrl = await generalUtils.toDataUrlNew(currGeneratedResults.value.url)
+    }
+    return cmWVUtils.saveAssetFromUrl('png', targetUrl)
   }
   const saveVideoCb = () => {
     if (currGeneratedResults.value.video) {
@@ -37,12 +48,12 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: `${t('CM0075')}:`,
-            labelColor: 'app-tab-active',
+            labelColor: 'yellow-cm',
             labelSize: 'typo-h6',
           },
           {
             label: t('CM0076'),
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-body-sm',
           },
         ],
@@ -54,13 +65,17 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: t('NN0416'),
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],
         cb: () => {
           savePhotoCb()
-            .then(() => {
+            .then((data) => {
+              const { flag, msg } = data
+              if (flag === '1') {
+                throw new Error(msg)
+              }
               notify({
                 group: 'success',
                 text: `${t('NN0889')}`,
@@ -69,10 +84,9 @@ const useActionSheetCm = () => {
             })
             .catch((e) => {
               console.log(e)
-              // @TODO
               notify({
                 group: 'error',
-                text: 'gen photo error',
+                text: e,
               })
             })
         },
@@ -81,7 +95,7 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: t('CM0077'),
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],
@@ -108,7 +122,7 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: `${t('NN0416')} & ${t('CM0077')}`,
-            labelColor: 'app-tab-active',
+            labelColor: 'yellow-cm',
             labelSize: 'typo-btn-lg',
           },
         ],
@@ -136,7 +150,58 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: t('NN0203'),
-            labelColor: 'app-text-secondary',
+            labelColor: 'white',
+            labelSize: 'typo-btn-lg',
+          },
+        ],
+        cb: () => {
+          toggleActionSheet()
+        },
+      },
+    ])
+  }
+
+  const setMyDesignActions = (design: ICmMyDesign) => {
+    setPrimaryActions([
+      {
+        labels: [
+          {
+            label: `${t('CM0122')}`,
+            labelColor: 'yellow-cm',
+            labelSize: 'typo-h6',
+          },
+          {
+            label: t('CM0123'),
+            labelColor: 'white',
+            labelSize: 'typo-body-sm',
+          },
+        ],
+        cb: () => {
+          console.log(design)
+        },
+        clickable: false,
+      },
+      {
+        labels: [
+          {
+            label: t('NN0034'),
+            labelColor: 'white',
+            labelSize: 'typo-btn-lg',
+          },
+        ],
+        cb: () => {
+          deleteDesign(design)
+          toggleActionSheet()
+        },
+      },
+    ])
+
+    setSecondaryActions([
+      {
+        labels: [
+          {
+            label: t('NN0203'),
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],
@@ -152,6 +217,7 @@ const useActionSheetCm = () => {
     primaryActions,
     secondaryActions,
     setSavingActions,
+    setMyDesignActions,
     reset,
     toggleActionSheet,
   }

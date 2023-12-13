@@ -86,6 +86,11 @@ class ImageUtils {
   appendQuery(src: string, name: string, value: string) {
     if (src === '') return ''
     if (src.includes('data:image/')) return src
+    // check the src is already has the query or not
+    const reg = new RegExp(`(${name}=)([^&]+)`)
+    if(reg.test(src)) {
+      return src.replace(reg, `$1${value}`)
+    }
     if (src.includes('?')) {
       return src + `&${name}=${value}`
     } else {
@@ -197,6 +202,7 @@ class ImageUtils {
         break
       case 'ios':
         if (generalUtils.isCm) {
+          // make default size to 1600(logner side)
           res = `chmix://${assetId}?lsize=1600`
         } else if (generalUtils.isStk) {
           res = `vvstk://${assetId}`

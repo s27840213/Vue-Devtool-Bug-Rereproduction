@@ -2,7 +2,8 @@
 div(class="bottom-panel" ref="bottomPanelRef")
   slot(
     name="content"
-    :setSlotRef="setSlotRef")
+    :setSlotRef="setSlotRef"
+    :disableTransition="(value: boolean) => { noTransition = value }")
 </template>
 <script setup lang="ts">
 /**
@@ -25,9 +26,34 @@ const setSlotRef = (ref: HTMLElement) => {
 
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'] as IUserInfo)
 
+const noTransition = ref(false)
+const props = defineProps({
+  disableTransition: {
+    type: Boolean,
+    default: false,
+  },
+  gap: {
+    type: Number,
+    default: 0
+  },
+  ignoreHomeIndicator: {
+    type: Boolean,
+    default: false
+  }
+})
+watch(() => props.disableTransition, value => {
+  noTransition.value = value
+})
+
 watch(
   [height, () => userInfo.value.homeIndicatorHeight],
   ([newHeight, newHomeIndicatorHeight], [oldHeight, oldHomeIndicatorHeight]) => {
+    if (props.ignoreHomeIndicator && bottomPanelRef.value) {
+      const { height } = useElementBounding(bottomPanelRef)
+      bottomPanelRef.value.style.height = `${height.value}px`
+      return
+    }
+
     // 32 is not important, modify it to make a good transition
     const tmpNewHeight = newHeight === 0 ? oldHeight * 0.6 : newHeight
 
@@ -39,7 +65,8 @@ watch(
 </script>
 <style lang="scss" scoped>
 .bottom-panel {
-  @apply bg-app-tab-bg w-full rounded-t-[24px] box-border pt-16;
-  transition: all 0.3s;
+  @apply bg-dark-3 w-full rounded-t-24 box-border pt-16;
+  transition: v-bind("noTransition ? 'none' : 'all 0.3s'");
+  max-height: v-bind("`calc(100% - ${gap}px)`");
 }
 </style>

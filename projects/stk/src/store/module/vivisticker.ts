@@ -324,6 +324,9 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_debugMode(state: IViviStickerState, debugMode: boolean) {
     state.debugMode = debugMode
   },
+  UPDATE_userInfo(state: IViviStickerState, userInfo: Partial<IUserInfo>) {
+    Object.assign(state.userInfo, userInfo)
+  },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {
       (state.userSettings as any)[key] = value

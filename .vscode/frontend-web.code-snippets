@@ -114,6 +114,20 @@
       "},"
     ],
   },
+  "console.log":{
+    "scope": "vue,javascript,typescript",
+    "prefix": ["console.log", "cc"],
+    "body":[
+      "console.log('$TM_FILENAME:$TM_LINE_NUMBER'$0)",
+    ]
+  },
+  "logUtils.setLogAndConsoleLog()":{
+    "scope": "vue,javascript,typescript",
+    "prefix": ["logUtils.setLogAndConsoleLog", "vv"],
+    "body":[
+      "logUtils.setLogAndConsoleLog('$TM_FILENAME:$TM_LINE_NUMBER'$0)",
+    ]
+  },
   "Record" :{
     "scope": "vue,javascript,typescript",
     "prefix": "record",

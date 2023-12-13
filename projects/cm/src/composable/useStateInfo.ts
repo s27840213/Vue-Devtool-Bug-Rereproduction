@@ -1,5 +1,6 @@
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 
 const useStateInfo = () => {
@@ -14,6 +15,8 @@ const useStateInfo = () => {
   const atDescription = computed(() => path.value === '/description')
   const atEditor = computed(() => path.value === '/editor')
   const atEventTester = computed(() => path.value === '/nativeevttest')
+  const atScreenshot = computed(() => path.value.startsWith('/screenshot'))
+  const atNonUI = computed(() => atScreenshot.value || atEventTester.value)
   // #endregion
 
   // #region editor state
@@ -31,6 +34,9 @@ const useStateInfo = () => {
 
   // #endregion
 
+  const userStore = useUserStore()
+  const { isDesignOpen, isSubDesignOpen } = storeToRefs(userStore)
+
   // #region img selector state
   const imgSelectorStore = useImgSelectorStore()
   const { showImgSelector } = storeToRefs(imgSelectorStore)
@@ -44,6 +50,8 @@ const useStateInfo = () => {
     atMainPage,
     atDescription,
     atEventTester,
+    atScreenshot,
+    atNonUI,
     showHomeTabs,
     inGenResultState,
     inAspectRatioState,
@@ -53,6 +61,8 @@ const useStateInfo = () => {
     showSelectionOptions,
     showImgSelector,
     showDescriptionPanel,
+    isDesignOpen,
+    isSubDesignOpen,
   }
 }
 

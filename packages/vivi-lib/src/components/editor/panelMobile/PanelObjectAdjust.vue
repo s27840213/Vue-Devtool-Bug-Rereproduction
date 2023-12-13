@@ -130,6 +130,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { IColorKeys } from '@/interfaces/color'
 
 interface IThemeStyles {
   bgActiveColor: string
@@ -139,9 +140,9 @@ interface IThemeStyles {
   optionInactiveClass: string
   markerActiveClass: string
   markerInactiveClass: string
-  iconActiveColor: string
-  iconInactiveColor: string
-  iconDisabledColor: string
+  iconActiveColor: IColorKeys
+  iconInactiveColor: IColorKeys
+  iconDisabledColor: IColorKeys
   markerActiveColor: string
   markerInactiveColor: string
 }

@@ -11,6 +11,7 @@ div(class="control-point__action-icon")
 </template>
 
 <script setup lang="ts">
+import type { IColorKeys } from '@/interfaces/color';
 import generalUtils from '@/utils/generalUtils'
 import pointerEvtUtils from '@/utils/pointerEvtUtils'
 import type { PropType } from 'vue'
@@ -25,7 +26,7 @@ defineProps({
     default: () => '24px',
   },
   iconColor: {
-    type: String,
+    type: String as PropType<IColorKeys>,
     default: () => generalUtils.isPic ? 'blue-2' : 'black-1',
   },
   theme: {

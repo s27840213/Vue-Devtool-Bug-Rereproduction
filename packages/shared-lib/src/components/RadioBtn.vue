@@ -9,7 +9,9 @@ div(class="radio-btn relative pointer"
 </template>
 
 <script lang="ts">
+import type { PropType } from 'vue'
 import { defineComponent } from 'vue'
+import colorTable from '@nu/tailwind-lib/colors.json'
 
 export default defineComponent({
   props: {
@@ -22,7 +24,7 @@ export default defineComponent({
       required: true
     },
     circleColor: {
-      type: String,
+      type: String as PropType<keyof typeof colorTable>,
       required: true
     }
   },

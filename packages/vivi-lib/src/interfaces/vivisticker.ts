@@ -41,11 +41,19 @@ export interface IUserSettings {
   emojiSetting: string
 }
 
+export interface IAssetInfo {
+  plan?: number,
+  assetId?: string,
+  isFrame?: boolean,
+  fit?: number
+  pageNum?: number,
+}
+
 export interface ITempDesign {
   pages: Array<IPage>,
   editorType: string,
   id: string,
-  assetInfo: { [key: string]: any }
+  assetInfo: IAssetInfo
 }
 
 export interface IMyDesign {
@@ -54,7 +62,7 @@ export interface IMyDesign {
   id: string,
   updateTime: string,
   ver: string,
-  assetInfo: { [key: string]: any }
+  assetInfo: IAssetInfo
 }
 
 export interface IMyDesignTag {

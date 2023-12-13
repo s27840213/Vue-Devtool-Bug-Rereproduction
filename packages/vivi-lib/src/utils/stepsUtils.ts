@@ -9,6 +9,7 @@ import GroupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import { nextTick, reactive } from 'vue'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
+import layerUtils from './layerUtils'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import shapeUtils from './shapeUtils'
@@ -221,6 +222,10 @@ class StepsUtils {
   async fillDataForLayersInPages(pages: IPage[]): Promise<IPage[]> {
     const pagePromises = []
     for (const [pageIndex, page] of pages.entries()) {
+      if ((generalUtils.isPic || generalUtils.isCm) && pageIndex === layerUtils.pageIndex) {
+        page.x = pageUtils.getCurrPage.x
+        page.y = pageUtils.getCurrPage.y
+      }
       if (pageUtils.isOutOfBound(pageIndex)) continue
       pagePromises.push(new Promise((resolve, reject) => {
         try {

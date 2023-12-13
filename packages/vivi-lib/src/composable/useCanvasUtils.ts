@@ -81,7 +81,7 @@ const useCanvasUtils = (targetLayerStyle?: IStyle) => {
     const remainingHeightPercentage = (trimHeight / canvas.height)
 
     const imgScaleRatio = targetLayerStyle ? targetLayerStyle.width / canvas.width : 1
-    
+
     const cropJSON =  {
       t: bound.top,
       l: bound.left,

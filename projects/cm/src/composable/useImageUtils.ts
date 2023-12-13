@@ -2,7 +2,7 @@ const useImageUtils = () => {
   const imgLoadHandler = async <T>(
     src: string,
     cb: (img: HTMLImageElement) => T,
-    options?: { error?: (img?: HTMLImageElement) => void; crossOrigin?: boolean }
+    options?: { error?: (img?: HTMLImageElement) => void; crossOrigin?: boolean },
   ) => {
     const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {

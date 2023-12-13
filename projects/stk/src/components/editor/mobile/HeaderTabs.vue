@@ -410,7 +410,7 @@ export default defineComponent({
     },
     handleSwitchBg() {
       this.switchBg()
-      stkWVUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
+      stkWVUtils.updateUserInfo({ editorBg: this.editorBg })
     },
     async handleEndEditing(forceModal = false) {
       if (this.currActivePanel === 'photo-shadow') {

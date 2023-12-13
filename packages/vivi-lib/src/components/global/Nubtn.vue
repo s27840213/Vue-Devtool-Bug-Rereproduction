@@ -11,6 +11,7 @@ div(:class="`nubtn ${proj} ${theme} ${sizeClass} ${status} ${device}`"
 
 <script lang="ts">
 import useTapTransition from '@/composable/useTapTransition'
+import { IColorKeys } from '@/interfaces/color'
 import { defineComponent, PropType, ref } from 'vue'
 
 declare module '@vue/runtime-core' {
@@ -50,7 +51,8 @@ const component = defineComponent({
     // Case 1: Only specify iconName, ex: icon="sliders"
     // Case 2: Specify iconName and iconColor, ex :icon="['pro', 'alarm']"
     icon: {
-      type: [String, Array] as PropType<string | string[]>,
+      type: [String, Array] as
+        PropType<string | [string, IColorKeys] | [string, IColorKeys | undefined, string]>,
     },
     hint: {
       type: String,
@@ -90,12 +92,12 @@ const component = defineComponent({
       } 
       return this.theme === 'icon_pill' && this.size.includes('sm') ? '20px' : '24px'
     },
-    iconColor(): string {
+    iconColor() {
       if (Array.isArray(this.icon) && this.icon[1]) { // Case 2
         return this.icon[1]
       } 
-      // Empty string means the same color with text.
-      return ''
+      // undefined means the same color with text.
+      return undefined
     },
   },
   methods: {
