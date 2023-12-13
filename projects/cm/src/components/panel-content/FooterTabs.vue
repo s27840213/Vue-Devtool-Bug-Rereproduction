@@ -107,6 +107,9 @@ export default defineComponent({
       required: true,
     },
   },
+  components: {
+    FooterBar
+  },
   computed: {
     ...mapGetters({
       inEffectEditingMode: 'bgRemove/getInEffectEditingMode',
