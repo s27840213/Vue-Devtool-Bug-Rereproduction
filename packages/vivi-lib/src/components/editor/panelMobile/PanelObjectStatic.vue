@@ -24,7 +24,7 @@ div(class="panel-static" :class="{'in-category': isInCategory, 'with-search-bar'
       @search="handleSearch")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
-                :class="{invisible: !item.show, collapsed: tags && tags.length && !isSearchBarExpanded}"
+                :class="{invisible: !item.show, collapsed: contentTags?.length && !isSearchBarExpanded}"
                 :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
