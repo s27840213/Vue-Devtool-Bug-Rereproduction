@@ -5,6 +5,7 @@ import layerUtils from '@/utils/layerUtils'
 import { EventEmitter } from 'events'
 import { clamp, filter, flatten, uniq } from 'lodash'
 import pageUtils from './pageUtils'
+import colorTable from '@nu/tailwind-lib/colors.json'
 import textPropUtils from './textPropUtils'
 import tiptapUtils from './tiptapUtils'
 
@@ -23,58 +24,7 @@ class ColorUtils {
   constructor() {
     this.event = new EventEmitter()
     this.eventHash = {}
-    this.colorMap = new Map([
-      ['blue-1', '#4EABE6'],
-      ['blue-2', '#7190CC'],
-      ['blue-3', '#C9DBFF'],
-      ['blue-4', '#E7EFFF'],
-      ['blue-5', '#ebf4fa'],
-      ['blue-hover', '#2DB3FF'],
-      ['blue-active', '#4279CC'],
-      ['blue-tutorial', '#749AC6'],
-      ['dark-blue', '#113251'],
-      ['dark-blue-2', '#09467E'],
-      ['bu', '#3C64B1'],
-      ['gray-0', '#000000'],
-      ['gray-1', '#18191F'],
-      ['gray-1-5', '#2C2F43'],
-      ['gray-2-7', '#828282'],
-      ['gray-2-5', '#7f8186'],
-      ['gray-2', '#474A57'],
-      ['gray-3', '#969BAB'],
-      ['gray-4', '#D9DBE1'],
-      ['gray-5', '#EEEFF4'],
-      ['gray-6', '#F4F5F7'],
-      ['gray-7', '#F8F8F8'],
-      ['light-gray', '#C3CBCD'],
-      ['black-1', '#141414'],
-      ['black-1-5', '#151515'],
-      ['black-2', '#1F1F1F'],
-      ['black-3', '#2E2E2E'],
-      ['black-3-5', '#474747'],
-      ['black-4', '#7E7E7E'],
-      ['black-5', '#9C9C9C'],
-      ['black-6', '#E8E8E8'],
-      ['white', '#FFFFFF'],
-      ['nav', '#14182A'],
-      ['nav-design', '#373B53'],
-      ['nav-active', '#2C2F43'],
-      ['nav-input', '#2D3143'],
-      ['sidebar-panel', '#2C2F43'],
-      ['dark-bg', '#3D4256'],
-      ['dark-bg-active', '#323647'],
-      ['light-bg', '#F4F5F7'],
-      ['// nav', '#373B53'],
-      ['red', '#EB5757'],
-      ['red-1', '#C74848'],
-      ['red-2', '#F05B5B'],
-      ['green-1', '#4DB433'],
-      ['green-2', '#27ae60'],
-      ['yellow', '#FFECA8'],
-      ['orange', '#F28606'],
-      ['transparent', 'transparent'],
-      ['alarm', '#FFBA4'],
-    ])
+    this.colorMap = new Map(Object.entries(colorTable))
   }
 
   get currEvent(): string { return store.getters['color/currEvent'] }

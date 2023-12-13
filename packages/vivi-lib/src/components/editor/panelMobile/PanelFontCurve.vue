@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="panel-font-curve")
-  div(class="overflow-hidden text-app-tab-default body-SM") {{ bend }}
+  div(class="overflow-hidden text-yellow-0 body-SM") {{ bend }}
   input(class="panel-font-curve__range-input input__slider--range"
     v-progress
     v-model.number="bend"
@@ -13,7 +13,7 @@ div(class="panel-font-curve")
     @pointercancel="handleChangeStop")
   svg-icon(
     iconName="cm_reset"
-    iconColor="app-tab-default"
+    iconColor="yellow-0"
     iconWidth="24px"
     @click="reset")
 </template>
