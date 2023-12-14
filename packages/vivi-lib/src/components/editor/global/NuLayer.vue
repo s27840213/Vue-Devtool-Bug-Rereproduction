@@ -920,10 +920,6 @@ export default defineComponent({
   left: 0;
 }
 
-.spiner {
-  animation: rotation 0.5s infinite linear;
-}
-
 @keyframes rotation {
   0% {
     transform: rotate(0deg);
