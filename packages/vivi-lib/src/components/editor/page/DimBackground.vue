@@ -135,11 +135,6 @@ export default defineComponent({
         right: this.config.bleeds.right * this.contentScaleRatio + 'px'
       }
     }
-  },
-  methods: {
-    bgImgOnload() {
-      this.$store.commit('imgControl/SET_IsBgCtrlImgLoaded', true)
-    }
   }
 })
 </script>
