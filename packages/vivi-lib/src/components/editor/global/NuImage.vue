@@ -32,7 +32,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
-      svg(v-if="finalSrc" v-show="isShowAdjustImg"
+      svg(v-if="isAdjustImage && finalSrc" v-show="isShowAdjustImg"
         :style="flipStyles"
         class="nu-image__svg pointer-events-none"
         :class="{'layer-flip': flippedAnimation() }"

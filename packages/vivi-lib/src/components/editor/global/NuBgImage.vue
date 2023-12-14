@@ -11,7 +11,7 @@ div(class="nu-background-image" draggable="false" :style="mainStyles"
         @load="onLoad"
         :src="finalSrc")
     //- svg(v-if="isAdjustImage"
-    svg(v-if="finalSrc" v-show="isShowAdjustImg"
+    svg(v-if="isAdjustImage && finalSrc" v-show="isShowAdjustImg"
       class="nu-background-image__svg"
       :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
       preserveAspectRatio="none"
