@@ -151,6 +151,7 @@ const useGenImageUtils = () => {
       params = prevGenParams.value.params
     }
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
+    logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
     const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
