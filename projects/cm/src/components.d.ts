@@ -13,6 +13,7 @@ declare module 'vue' {
     BottomPanel: typeof import('./components/BottomPanel.vue')['default']
     BrushOptions: typeof import('./components/panel-content/BrushOptions.vue')['default']
     CanvasOptions: typeof import('./components/panel-content/CanvasOptions.vue')['default']
+    CanvasResizer: typeof import('./components/editor/CanvasResizer.vue')['default']
     CanvasSection: typeof import('./components/editor/CanvasSection.vue')['default']
     FeatureCard: typeof import('./components/home/FeatureCard.vue')['default']
     FooterBar: typeof import('./components/panel-content/FooterBar.vue')['default']

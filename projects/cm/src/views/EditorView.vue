@@ -52,7 +52,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           iconName="home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
-  div(v-if="isResizingCanvas") test
+  canvas-resizer(v-if="isResizingCanvas"
+                :pageIndex="0"
+                :pageState="pageState[0]"
+                :noBg="isDuringCopy && isNoBg")
   div(
     v-else-if="!inSavingState"
     class="editor-container flex-center relative"
@@ -183,6 +186,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import CanvasResizer from '@/components/editor/CanvasResizer.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
@@ -420,7 +424,7 @@ const fitPage = (ratio: number) => {
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value) return
+    if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
     fitPage(newVal)
   },
 )
