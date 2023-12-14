@@ -270,7 +270,9 @@ const useGenImageUtils = () => {
           RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
           uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
-            setMaskDataUrl(originalMaskDataUrl)
+            if (originalMaskDataUrl) {
+              setMaskDataUrl(originalMaskDataUrl)
+            }
             resolve()
           })
         } else {
