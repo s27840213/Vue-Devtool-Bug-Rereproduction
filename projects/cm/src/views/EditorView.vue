@@ -49,7 +49,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         v-slot="{ navigate }")
         svg-icon(
           iconColor="white"
-          iconName="home"
+          iconName="cm_home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
   canvas-resizer(v-if="isResizingCanvas"

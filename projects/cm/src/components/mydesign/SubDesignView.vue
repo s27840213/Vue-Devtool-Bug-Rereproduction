@@ -16,7 +16,7 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
         v-slot="{ navigate }")
         svg-icon(
           iconColor="white"
-          iconName="home"
+          iconName="cm_home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
   div(class="relative grid grid-cols-2 gap-20 overflow-scroll h-full px-16 box-border py-8")
