@@ -428,15 +428,15 @@ export default defineComponent({
       if (this.forRender) return false
 
       if (this.$isTouchDevice()) {
-        return this.isAdjustImage && !this.isLayerCtrlled && !this.isPinchingEditor &&
+        return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
           !this.isImgCtrl && !this.isBgImgCtrl
       } else {
         return this.isAdjustImage
       }
     },
-    isLayerCtrlled(): boolean {
+    isLayerCtrlling(): boolean {
       const { controlState } = this
-      return controlState.type !== ''
+      return controlState.type !== '' && controlState.phase === 'moving'
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config

@@ -2,14 +2,14 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-IFrame,
-IGroup,
-IImage,
-IImageStyle,
-IParagraph,
-IShape,
-IText,
-ITmp,
+  IFrame,
+  IGroup,
+  IImage,
+  IImageStyle,
+  IParagraph,
+  IShape,
+  IText,
+  ITmp,
 } from '@/interfaces/layer'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
@@ -48,11 +48,11 @@ import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import {
-FunctionPanelType,
-IEditorState,
-ISpecLayerData,
-LayerType,
-SidebarPanelType,
+  FunctionPanelType,
+  IEditorState,
+  ISpecLayerData,
+  LayerType,
+  SidebarPanelType,
 } from './types'
 
 const getDefaultState = (): IEditorState => ({
@@ -1561,7 +1561,6 @@ const mutations: MutationTree<IEditorState> = {
     payload: { pageIndex: number; contentScaleRatio: number },
   ) {
     const { pageIndex, contentScaleRatio } = payload
-    console.warn('contentScaleRatio4 page', pageIndex, contentScaleRatio)
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
   UPDATE_RWD(state: IEditorState) {

@@ -213,7 +213,7 @@ export default defineComponent({
     isShowAdjustImg(): boolean {
       // forRender img not apply filter
       if (this.$isTouchDevice()) {
-        return this.isAdjustImage && !this.isLayerCtrlled && !this.isPinchingEditor &&
+        return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
           !this.isImgCtrl && !this.isBgImgCtrl
       } else {
         return this.isAdjustImage
@@ -223,9 +223,9 @@ export default defineComponent({
       const { srcObj } = this.image.config
       return !srcObj || srcObj.type === ''
     },
-    isLayerCtrlled(): boolean {
+    isLayerCtrlling(): boolean {
       const { controlState } = this
-      return controlState.type !== ''
+      return controlState.type !== '' && controlState.phase === 'moving'
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage

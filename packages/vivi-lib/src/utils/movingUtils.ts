@@ -101,6 +101,7 @@ export class MovingUtils {
           layerIndex: this.layerIndex
         },
         type: 'pageMove',
+        phase: 'start',
         id: 'pageMove-' + this.config.id
       }
     })
@@ -128,6 +129,14 @@ export class MovingUtils {
       (layerUtils.getCurrLayer.isTyping)) {
       this.removeListener()
       return
+    }
+    if (store.state.controlState.type === 'pageMove' && store.state.controlState.phase !== 'moving') {
+      store.commit('SET_STATE', {
+        controlState: {
+          ...store.state.controlState,
+          phase: 'moving'
+        }
+      })
     }
     window.requestAnimationFrame(() => {
       this.pageMovingHandler(e)
@@ -231,6 +240,7 @@ export class MovingUtils {
       controlState: {
         layerInfo: this.layerInfo,
         type: 'move',
+        phase: 'start',
         id: 'move-' + this.id
       }
     })
@@ -440,7 +450,7 @@ export class MovingUtils {
       return
     }
 
-    if (store.state.controlState.phase !== 'moving') {
+    if (store.state.controlState.type === 'move' && store.state.controlState.phase !== 'moving') {
       store.commit('SET_STATE', {
         controlState: {
           ...store.state.controlState,
