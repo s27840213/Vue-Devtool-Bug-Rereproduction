@@ -79,12 +79,22 @@ const useGenImageUtils = () => {
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
+          const hint = `${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId}`
           logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
-          modalUtils.setModalInfo(
-            `${t('CM0087')} ${t('CM0089')}`,
-            `${t('CM0088')}<br/>(${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
-            { msg: t('STK0023') },
-          )
+          logUtils.uploadLog().then(() => {
+            modalUtils.setModalInfo(
+              `${t('CM0087')} ${t('CM0089')}`,
+              `${t('CM0088')}<br/>(${hint})`,
+              {
+                msg: t('STK0023'),
+                action() {
+                  generalUtils.copyText(hint).then(() => {
+                    notify({ group: 'copy', text: '已複製' })
+                  })
+                }
+              }
+            )
+          })
           removeGenResult(ids[index])
           if (generatedResultsNum.value === 0 && inGenResultState.value) {
             changeEditorState('prev')
