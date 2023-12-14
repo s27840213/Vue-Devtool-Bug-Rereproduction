@@ -49,6 +49,7 @@ const useGenImageUtils = () => {
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
+  const hostId = computed(() => store.getters['cmWV/getUserInfo'].hostId)
   const { t } = useI18n()
 
   const genImageFlow = async (
@@ -81,7 +82,7 @@ const useGenImageUtils = () => {
           logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
           modalUtils.setModalInfo(
             `${t('CM0087')} ${t('CM0089')}`,
-            `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
+            `${t('CM0088')}<br/>(${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
             { msg: t('STK0023') },
           )
           removeGenResult(ids[index])
