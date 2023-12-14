@@ -22,7 +22,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      img(v-if="finalSrc" ref="img"
+      img(v-if="finalSrc" v-show="isShowImg" ref="img"
         :data-nu-image="`nu-image-${config.id}`"
         :style="flipStyles"
         class="nu-image__img full-size"
@@ -32,15 +32,15 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
-      svg(v-if="isAdjustImage && (!forRender || !$isTouchDevice())"
+      svg(v-if="finalSrc" v-show="isShowAdjustImg"
         :style="flipStyles"
-        class="nu-image__svg"
+        class="nu-image__svg pointer-events-none"
         :class="{'layer-flip': flippedAnimation() }"
         :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(v-if="!isCurrLayerPinched && !isPinchingEditor" :id="filterId"
+          filter(:id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -50,7 +50,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(v-if="finalSrc" ref="adjust-img"
+        image(ref="adjust-img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
@@ -391,7 +391,9 @@ export default defineComponent({
       isProcessing: 'shadow/isProcessing',
       isShowPagePreview: 'page/getIsShowPagePreview',
       isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
-      controlState: 'getControlState'
+      controlState: 'getControlState',
+      isImgCtrl: 'imgControl/isImgCtrl',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
     }),
     ...vuexUtils.mapState('stk', {
       isDuringCopy: false,
@@ -412,11 +414,29 @@ export default defineComponent({
       ) return false
       return true
     },
-    isCurrLayerPinched(): boolean {
+    // isCurrLayerPinched(): boolean {
+    //   const { controlState } = this
+    //   if (controlState.layerInfo) {
+    //     return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+    //   } else return false
+    // },
+    isShowImg(): boolean {
+      return !this.isAdjustImage || !this.isShowAdjustImg
+    },
+    isShowAdjustImg(): boolean {
+      // forRender img not apply filter
+      if (this.forRender) return false
+
+      if (this.$isTouchDevice()) {
+        return this.isAdjustImage && !this.isLayerCtrlled && !this.isPinchingEditor &&
+          !this.isImgCtrl && !this.isBgImgCtrl
+      } else {
+        return this.isAdjustImage
+      }
+    },
+    isLayerCtrlled(): boolean {
       const { controlState } = this
-      if (controlState.layerInfo) {
-        return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
-      } else return false
+      return controlState.type !== ''
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config

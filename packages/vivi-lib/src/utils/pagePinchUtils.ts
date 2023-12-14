@@ -10,7 +10,7 @@ import { MovingUtils } from "./movingUtils"
 import pageUtils from "./pageUtils"
 import pointerEvtUtils from "./pointerEvtUtils"
 
-const MAX_SCALE = 400
+const MAX_SCALE = 200
 const TRANSITION_TIME = 300
 const TRANSITION_CLASS = ['transition-transform', 'duration-300']
 

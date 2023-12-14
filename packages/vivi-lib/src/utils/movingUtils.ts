@@ -94,6 +94,17 @@ export class MovingUtils {
   pageMoveStart(e: PointerEvent) {
     if (store.getters['mobileEditor/getIsPinchingEditor'] || layerUtils.getCurrLayer.isTyping) return
 
+    store.commit('SET_STATE', {
+      controlState: {
+        layerInfo: {
+          pageIndex: this.pageIndex,
+          layerIndex: this.layerIndex
+        },
+        type: 'pageMove',
+        id: 'pageMove-' + this.config.id
+      }
+    })
+
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
 
@@ -124,6 +135,9 @@ export class MovingUtils {
   }
 
   pageMoveEnd(e: PointerEvent) {
+    if (store.getters.getControlState.id === 'pageMove-' + this.id) {
+      store.commit('SET_STATE', { controlState: { type: '' } })
+    }
     this.removeListener()
   }
 
@@ -217,7 +231,7 @@ export class MovingUtils {
       controlState: {
         layerInfo: this.layerInfo,
         type: 'move',
-        id: this.id
+        id: 'move-' + this.id
       }
     })
 
@@ -645,7 +659,7 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    if (store.getters.getControlState.id === this.id) {
+    if (store.getters.getControlState.id === 'move-' + this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
     }
     if (eventUtils.getEventType(e) === 'pointer' && ['pointerup', 'poinerleave'].includes(e.type)) {
