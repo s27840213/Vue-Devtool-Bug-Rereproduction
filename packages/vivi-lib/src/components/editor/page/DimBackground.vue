@@ -38,7 +38,6 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
       :forRender="true"
       :pageIndex="pageIndex"
       :page="config"
-      @onload="bgImgOnload"
       :layerIndex="layerIndex")
     div(class="dim-background__content-area hollow" :style="contentAreaStyles")
       component(v-for="(elm, idx) in getHalation"
