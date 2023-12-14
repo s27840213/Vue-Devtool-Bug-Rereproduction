@@ -46,7 +46,7 @@ const useGenImageUtils = () => {
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
-  const { prepareMaskToUpload } = useCanvasUtils()
+  const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const { t } = useI18n()
@@ -263,13 +263,14 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('mask to dataUrl', { notify: false, setToLog: true })
     return new Promise<void>((resolve, reject) => {
       try {
+        const originalMaskDataUrl = getCanvasDataUrl()
         const maskUrl = prepareMaskToUpload()
         if (maskUrl !== undefined) {
           RECORD_TIMING && testUtils.log('mask to dataUrl', '')
           RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
           uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
-            setMaskDataUrl(maskUrl)
+            setMaskDataUrl(originalMaskDataUrl)
             resolve()
           })
         } else {
