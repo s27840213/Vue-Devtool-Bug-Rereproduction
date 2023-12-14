@@ -139,6 +139,7 @@ import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
+import CanvasOptions from './components/panel-content/CanvasOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
@@ -174,6 +175,7 @@ const {
   showDescriptionPanel,
   isDesignOpen,
   isSubDesignOpen,
+  isResizingCanvas,
 } = useStateInfo()
 
 const globalStore = useGlobalStore()
@@ -203,6 +205,8 @@ const bottomPanelComponent = computed(() => {
       return HomeTab
     case inAspectRatioState.value:
       return AspectRatioSelector
+    case isResizingCanvas.value:
+      return CanvasOptions
     case showBrushOptions.value:
       return BrushOptions
     case showSelectionOptions.value:

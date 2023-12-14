@@ -43,17 +43,16 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
               class="no-wrap click-disabled transition ease-linear delay-100 typo-body-sm"
               :class="`text-${settingTabColor(tab)}`") {{ tab.text }}
             //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
-    div(v-if="hasBottomTitle" class="footer-tabs-row flex-between-center")
-      nubtn(
-        class="layer-action"
-        theme="secondary"
-        @click="handleBottomCancel") {{ $t('NN0203') }}
-      div(class="typo-h6 text-white") {{ bottomTitle }}
-      nubtn(class="layer-action" @click="handleBottomApply") {{ $t('CM0061') }}
+    footer-bar(v-if="hasBottomTitle"
+      class="footer-tabs-row"
+      :title="bottomTitle"
+      @cancel="handleBottomCancel"
+      @apply="handleBottomApply")
 //- className cm-footer-tabs is for v-click-outside middleware
 </template>
 
 <script lang="ts">
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'
@@ -107,6 +106,9 @@ export default defineComponent({
       type: String,
       required: true,
     },
+  },
+  components: {
+    FooterBar
   },
   computed: {
     ...mapGetters({

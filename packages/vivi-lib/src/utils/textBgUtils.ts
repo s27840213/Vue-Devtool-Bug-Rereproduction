@@ -136,7 +136,7 @@ export class Rect {
     this.bodyRect = div.getClientRects()[0]
     this.width = this.bodyRect.width
     this.height = this.bodyRect.height
-    this.transform = this.vertical ? 'rotate(90deg) scale(1,-1)' : ''
+    this.transform = this.vertical ? 'translate(100%, 0) rotate(90deg)' : ''
     this.rows = []
 
     for (let pIndex = 0; pIndex < div.children.length; pIndex++) {
@@ -162,7 +162,7 @@ export class Rect {
             y = cr.y + (cr.height - height) / 2
           }
           this.rows.push({
-            rect: cr,
+            rect: cr.toJSON(),
             spanData: [{
               x,
               y,
@@ -185,7 +185,7 @@ export class Rect {
     const { rows, bodyRect } = this
     Object.assign(bodyRect, {
       x: bodyRect.y,
-      y: bodyRect.x,
+      y: -(bodyRect.x + bodyRect.width),
       width: bodyRect.height,
       height: bodyRect.width
     })
@@ -193,12 +193,17 @@ export class Rect {
       const { rect, spanData } = row
       Object.assign(rect, {
         x: rect.y,
-        y: rect.x,
+        y: -(rect.x + rect.width),
         width: rect.height,
         height: rect.width
       })
       spanData.forEach(data => {
-        [data.x, data.y, data.height, data.width] = [data.y, data.x, data.width, data.height]
+        Object.assign(data, {
+          x: data.y,
+          y: -(data.x + data.width),
+          width: data.height,
+          height: data.width
+        })
       })
     })
   }
@@ -993,30 +998,37 @@ class TextBg {
         content: pos.map(p => {
           // Scale will let width be (scale-1)*p.height times larger than before,
           // So -(scale-1)*p.height/2 to justify it to center.
-          let x = p.x - (scale - 1) * p.height / 2
-          let y = p.y - (scale - 1) * p.height / 2
-          const offset = (vertical && !needRotate)
-            ? `translate(${p.height * yOffset / 100}px, ${p.width * xOffset / 100}px)`
-            : `translate(${p.width * xOffset / 100}px, ${p.height * yOffset / 100}px)`
-          if (vertical && !needRotate) [x, y] = [y, x]
+          const x = p.x - (scale - 1) * p.height / 2
+          const y = p.y - (scale - 1) * p.height / 2
+          const size = p.height * scale
+          // `transform` comes from Rect rotate base on the top-left corner, not center,
+          // So translate it 50% top left first and then translate it back.
+          const verticalTransform = vertical ? `
+            translate(${-size / 2}px, ${-size / 2}px)
+            ${transform}
+            translate(${size / 2}px, ${size / 2}px)
+          ` : ''
+          const offset = `translate(${p.width * xOffset / 100}px, ${p.height * yOffset / 100}px)`
+
           const colorChangeable = letterBgData.isColorChangeable(p.href)
           return {
             tag: colorChangeable ? 'use' : 'image',
             attrs: {
               href: colorChangeable ? `#${p.href}`
                 : require(`@img/text-effect/LetterBG/${p.href}.svg`),
-              width: p.height * scale,
-              height: p.height * scale,
-              ...!withShape && { x, y },
+              width: size,
+              height: size,
             },
             style: {
               color: p.color,
-              ...withShape ? { // Transform for TextShape
-                transform: `translate(${x}px, ${y}px) ` + textShapeStyle[p.i] + offset,
-                // For rotate svg component against its center.
-                transformOrigin: `${p.height * scale / 2}px ${p.height * scale / 2}px 0`,
-              } : needRotate ? { transform: transform + offset } // If needRotate cancel xy exchange and add transform on it.
-                : { transform: offset },
+              transform: `
+                ${verticalTransform}
+                translate(${x}px, ${y}px)
+                ${withShape ? textShapeStyle[p.i] : ''}
+                ${offset}
+                ${vertical && !needRotate ? 'rotate(-90deg)' : ''}`,
+              // For rotate svg component against its center.
+              transformOrigin: `${size / 2}px ${size / 2}px`,
             }
           }
         })
@@ -1076,7 +1088,7 @@ class TextBg {
     }
   }
 
-  async setTextBg(effect: string, attrs?: Record<string, unknown>): Promise<void> {
+  async setTextBg(effect: string, attrs?: Partial<ITextBg>): Promise<void> {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
     const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
@@ -1090,7 +1102,7 @@ class TextBg {
       if (layer.type !== 'text') continue
       const currSubLayerIndex = targetLayer.layers ? +idx : subLayerIndex
       const oldTextBg = layer.styles.textBg
-      const newTextBg = {} as ITextBg
+      let newTextBg = {} as ITextBg
 
       // Send splitSpan to toIParagraph.
       tiptapUtils.agent(editor => {
@@ -1107,13 +1119,19 @@ class TextBg {
 
       if (oldTextBg && oldTextBg.name === effect) { // Adjust effect option.
         Object.assign(newTextBg, oldTextBg, attrs)
-        localStorageUtils.set('textEffectSetting', effect, newTextBg)
+
+        // Un-exchange and store to local storage
+        const dataToLS = this.checkExchange(layer, newTextBg)
+        localStorageUtils.set('textEffectSetting', effect, dataToLS)
         this.syncShareAttrs(newTextBg, null)
       } else { // Switch to other effect.
         this.syncShareAttrs(newTextBg, effect)
         const localAttrs = localStorageUtils.get('textEffectSetting', effect)
         Object.assign(newTextBg, defaultAttrs, localAttrs, attrs, { name: effect })
         await letterBgData.setExtraDefaultAttrs(effect)
+
+        // Exchange the x and y offsets to justify the position for vertical text using bgNeedRotate LetterBg.
+        newTextBg = this.checkExchange(layer, newTextBg)
 
         // Sync setting between different name effect:
         // Bring original effect color to new effect.
@@ -1196,10 +1214,47 @@ class TextBg {
     }
   }
 
+  checkExchange(layer: IText, textBg: ITextBg) {
+    textBg = cloneDeep(textBg)
+    if (layer.styles.writingMode === 'vertical' && 
+      isITextLetterBg(textBg) &&
+      letterBgData.bgNeedRotate(textBg.name)) {
+      [textBg.xOffset200, textBg.yOffset200] = [textBg.yOffset200, textBg.xOffset200]
+    }
+    return textBg
+  }
+
+  exchangeXY() {
+    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
+    const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
+    const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
+    const subLayerIndex = layerUtils.subLayerIdx
+
+    for (const idx in layers) {
+      if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
+
+      const layer = layers[idx]
+      if (layer.type !== 'text') continue
+      const textBg = cloneDeep(layer.styles.textBg)
+      if (!isITextLetterBg(textBg) || !letterBgData.bgNeedRotate(textBg.name)) continue
+      [textBg.xOffset200, textBg.yOffset200] = [textBg.yOffset200, textBg.xOffset200]
+
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex: +idx,
+        styles: { textBg }
+      })
+    }
+  }
+
   async resetCurrTextEffect() {
-    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    await this.setTextBg(effectName, this.effectDefaultOptions[effectName])
-    await letterBgData.setExtraDefaultAttrs(effectName)
+    const layer = textEffectUtils.getCurrentLayer()
+    let textBg = layer.styles.textBg
+    Object.assign(textBg, this.effectDefaultOptions[textBg.name])
+    textBg = this.checkExchange(layer, textBg)
+    await this.setTextBg(textBg.name, textBg)
+    await letterBgData.setExtraDefaultAttrs(textBg.name)
   }
 }
 

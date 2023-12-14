@@ -3,13 +3,13 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import router from '@/router'
 import type {
-  DescriptionPanel,
-  EditorFeature,
-  EditorStates,
-  EditorType,
-  GenImageOptions,
-  HiddenMessageStates,
-  PowerfulfillStates,
+DescriptionPanel,
+EditorFeature,
+EditorStates,
+EditorType,
+GenImageOptions,
+HiddenMessageStates,
+PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
@@ -53,6 +53,7 @@ interface IEditorStore {
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
   showEmptyPromptWarning: boolean
+  isResizingCanvas: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -79,6 +80,7 @@ export const useEditorStore = defineStore('editor', {
     currDesignThumbIndex: 0,
     // if the user send empty prompt, show warning at fisrt time
     showEmptyPromptWarning: true,
+    isResizingCanvas: false,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -336,5 +338,8 @@ export const useEditorStore = defineStore('editor', {
     setShowEmptyPromptWarning(show: boolean) {
       this.showEmptyPromptWarning = show
     },
+    setIsResizingCanvas(isResizing: boolean) {
+      this.isResizingCanvas = isResizing
+    }
   },
 })

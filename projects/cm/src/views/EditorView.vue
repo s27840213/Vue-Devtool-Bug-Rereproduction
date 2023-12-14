@@ -13,6 +13,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      div(v-else-if="isResizingCanvas" class="text-white typo-h5 whitespace-nowrap")
+        span {{ `${pageSize.width} x ${pageSize.height}` }}
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
@@ -50,8 +52,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           iconName="home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
+  div(v-if="isResizingCanvas") test
   div(
-    v-if="!inSavingState"
+    v-else-if="!inSavingState"
     class="editor-container flex-center relative"
     ref="editorContainerRef"
     id="mobile-editor__content"
@@ -265,7 +268,7 @@ onBeforeRouteLeave((to, from) => {
 // #endregion
 
 // #region edtior state related
-const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
+const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions, isResizingCanvas } =
   useStateInfo()
 const editorStore = useEditorStore()
 const { changeEditorState, updateGenResult, setDescriptionPanel, editorType } = editorStore

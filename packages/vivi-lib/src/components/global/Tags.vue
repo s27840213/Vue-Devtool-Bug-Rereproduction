@@ -24,7 +24,8 @@ div(class="tags" v-click-outside="clickOutsideHandler")
 
 <script lang="ts">
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
+import useKeepScrollPosition from '@/composable/useKeepScrollPosition'
 
 export interface ITag {
   label: string
@@ -45,37 +46,19 @@ export default defineComponent({
       type: String,
       default: 'light'
     },
-    scrollLeft: {
-      type: Number,
-      default: 0
-    }
   },
   data() {
     return {
       showMore: false
     }
   },
-  emits: ['search', 'showMore', 'scroll'],
-  mounted() {
-    const elContainer = this.$refs.container as HTMLElement
-    if (!elContainer) return
-    elContainer.scrollLeft = this.scrollLeft
-    elContainer.onscroll = () => {
-      this.$emit('scroll', elContainer.scrollLeft)
-    }
-  },
-  beforeUnmount() {
-    const elContainer = this.$refs.container as HTMLElement
-    if (!elContainer) return
-    elContainer.onscroll = null
-  },
-  watch: {
-    tagsOrScrollLeftChange() {
-      this.$nextTick(() => {
-        const elContainer = this.$refs.container as HTMLElement
-        if (!elContainer) return
-        if (this.scrollLeft >= 0 && this.scrollLeft <= elContainer.scrollWidth - elContainer.clientWidth) elContainer.scrollLeft = this.scrollLeft
-      })
+  emits: ['search', 'showMore'],
+  setup(props) {
+    const { tags } = toRefs(props)
+    const container = ref(null as null | HTMLElement)
+    useKeepScrollPosition(container, computed(() => tags.value.map(tag => tag.value)))
+    return {
+      container,
     }
   },
   computed: {
@@ -92,10 +75,6 @@ export default defineComponent({
         margin: '0 -5px 0 -5px'
       }
     },
-    tagsOrScrollLeftChange() {
-      const { tags, scrollLeft } = this
-      return { tags, scrollLeft }
-    }
   },
   methods: {
     onClick(tag: string) {

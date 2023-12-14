@@ -63,7 +63,7 @@ interface ISidebarTab {
 
 const { t } = useI18n()
 const editorStore = useEditorStore()
-const { setCurrActiveFeature } = editorStore
+const { setCurrActiveFeature , setIsResizingCanvas} = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -165,6 +165,7 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
+      setIsResizingCanvas(true)
       break
     }
     case 'photo-rect':
