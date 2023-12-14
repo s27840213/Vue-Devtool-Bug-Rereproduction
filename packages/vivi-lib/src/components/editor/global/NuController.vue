@@ -182,7 +182,7 @@ div(:layer-index="`${layerIndex}`"
                 svg-icon(class="control-point__action-svg"
                   iconName="move2" iconWidth="24px"
                   :iconColor="actionColor")
-    action-icon(v-if="isActive && isLocked() && (scaleRatio > 20)"
+    action-icon(v-if="isActive && isLocked() && !isPinchingEditor && (scaleRatio > 20)"
                 class="control-point__bottom-right-icon"
                 iconName="lock"
                 iconSize="16px"
@@ -767,7 +767,11 @@ export default defineComponent({
       if ((this.isLine() && !this.$isTouchDevice()) || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
         outline = 'none'
       } else if (this.isShown() || this.isControllerShown) {
-        outline = `2px solid ${outlineColor}`
+        if (this.isPinchingEditor && (generalUtils.isPic || generalUtils.isCm)) {
+          outline = `${2 / this.$store.state.mobileEditor.pinchScale}px solid ${outlineColor}`
+        } else {
+          outline = `2px solid ${outlineColor}`
+        }
       } else {
         outline = 'none'
       }
