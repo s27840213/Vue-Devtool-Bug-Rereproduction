@@ -406,19 +406,33 @@ class AssetUtils {
     const scaleRatio = width > 0 ? svgWidth / width : svgHeight / height
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
-    const newScale = json.size[0] * scaleRatio
+    const newScale = json.size[0] * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const quadrant = ShapeUtils.getLineQuadrant(json.point)
     const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(
       quadrant,
       newScale,
-      svgWidth,
-      svgHeight,
+      this.isShrinkSizeAsPinchPage ? svgWidth / (pageUtils.scaleRatio * 0.01) : svgWidth,
+      this.isShrinkSizeAsPinchPage ? svgHeight / (pageUtils.scaleRatio * 0.01) : svgHeight,
     )
     json.point = point
-    const targetPos = {
-      x: currentPage.width / 2 - realWidth / 2,
-      y: currentPage.height / 2 - realHeight / 2,
-    }
+
+    const targetPos = (() => {
+      const page = pageUtils.getCurrPage
+      if (this.isShrinkSizeAsPinchPage) {
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 - realWidth / 2) / scaleRatio,
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 - realHeight / 2) / scaleRatio
+        }
+      } else {
+        return {
+          x: page.width / 2 - realWidth / 2,
+          y: page.height / 2 - realHeight / 2,
+        }
+      }
+    })()
+
     const trans = ShapeUtils.getTranslateCompensationForLineWidth(
       point,
       targetPos,
@@ -459,14 +473,30 @@ class AssetUtils {
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize[0] / vSize[1]
     const svgWidth =
-      svgAspectRatio > pageAspectRatio
+      ((svgAspectRatio > pageAspectRatio
         ? currentPage.width * resizeRatio
-        : currentPage.height * resizeRatio * svgAspectRatio
+        : currentPage.height * resizeRatio * svgAspectRatio)) * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const svgHeight =
-      svgAspectRatio > pageAspectRatio
+      (svgAspectRatio > pageAspectRatio
         ? (currentPage.width * resizeRatio) / svgAspectRatio
-        : currentPage.height * resizeRatio
+        : currentPage.height * resizeRatio) * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const scaleRatio = svgWidth / vSize[0]
+    const { x, y } = (() => {
+      if (this.isShrinkSizeAsPinchPage) {
+        const page = pageUtils.getCurrPage
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - svgWidth / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - svgHeight / 2)
+        }
+      } else {
+        return {
+          x: this.pageSize.width / 2 - svgWidth / 2,
+          y: this.pageSize.height / 2 - svgHeight / 2
+        }
+      }
+    })()
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
     json.className = ShapeUtils.classGenerator()
@@ -482,8 +512,8 @@ class AssetUtils {
         ),
       ],
       styles: {
-        x: currentPage.width / 2 - svgWidth / 2,
-        y: currentPage.height / 2 - svgHeight / 2,
+        x,
+        y,
         width: svgWidth,
         height: svgHeight,
         initWidth: svgWidth,
@@ -508,19 +538,45 @@ class AssetUtils {
     const currentPage = this.getPage(targetPageIndex)
     const svgRatio = json.width / json.height
     const pageRatio = currentPage.width / currentPage.height
-    const resizeRatio = (generalUtils.isStk || generalUtils.isCm)
-      ? attrs.fit === 1
-        ? Math.min(currentPage.width / json.width, currentPage.height / json.height)
-        : 300 / Math.max(json.width, json.height)
-      : ((svgRatio > pageRatio ? currentPage.width : currentPage.height) * 0.7) /
+    const resizeRatio = (() => {
+      let res = -1
+      if (generalUtils.isStk || generalUtils.isCm) {
+        if (attrs.fit === 1) {
+          res = Math.min(currentPage.width / json.width, currentPage.height / json.height)
+        } else {
+          res = 300 / Math.max(json.width, json.height)
+        }
+      } else {
+        res = ((svgRatio > pageRatio ? currentPage.width : currentPage.height) * 0.7) /
         (svgRatio > pageRatio ? json.width : json.height)
+      }
+      if (this.isShrinkSizeAsPinchPage) {
+        res /= pageUtils.scaleRatio * 0.01
+      }
+      return res
+    })()
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
-
+    const { x, y } = (() => {
+      if (this.isShrinkSizeAsPinchPage) {
+        const page = pageUtils.getCurrPage
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - width / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - height / 2)
+        }
+      } else {
+        return {
+          x: this.pageSize.width / 2 - width / 2,
+          y: this.pageSize.height / 2 - height / 2
+        }
+      }
+    })()
     const config = {
       styles: {
-        x: currentPage.width / 2 - width / 2,
-        y: currentPage.height / 2 - height / 2,
+        x,
+        y,
         width,
         height,
         initWidth: json.width,
@@ -530,6 +586,7 @@ class AssetUtils {
       },
       ...json,
     }
+    console.log(config)
     const index = layerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
     layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newFrame(config)], index)
@@ -908,12 +965,12 @@ class AssetUtils {
           : this.pageSize.height * resizeRatio
 
       newStyles = {
-        width: photoWidth,
-        height: photoHeight,
-        initWidth: photoWidth,
-        initHeight: photoHeight,
-        imgWidth: photoWidth,
-        imgHeight: photoHeight,
+        width: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
+        height: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
+        initWidth: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
+        initHeight: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
+        imgWidth: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
+        imgHeight: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
       }
     }
 
@@ -956,8 +1013,8 @@ class AssetUtils {
           const scaleRatio = pageUtils.scaleRatio * 0.01
           const contentScaleRatio = pageUtils.contentScaleRatio
           return {
-            x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 - newStyles.width / 2) / scaleRatio,
-            y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 - newStyles.height / 2) / scaleRatio
+            x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - newStyles.width / 2),
+            y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - newStyles.height / 2)
           }
         } else {
           return {
@@ -973,10 +1030,6 @@ class AssetUtils {
       }
     })()
 
-    if (this.isShrinkSizeAsPinchPage) {
-      mathUtils.multipy(1 / (pageUtils.scaleRatio * 0.01), newStyles)
-    }
-
     const config = {
       ...(isPreview && { previewSrc: url }),
       ...((categoryType === 14 || categoryType === 15) && { categoryType }),
@@ -988,7 +1041,7 @@ class AssetUtils {
         ...styles,
         x,
         y,
-        ...this.isShrinkSizeAsPinchPage ? mathUtils.multipy(1 / (pageUtils.scaleRatio * 0.01), newStyles) : newStyles
+        ...newStyles
       },
     }
 
