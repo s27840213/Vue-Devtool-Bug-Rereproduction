@@ -17,6 +17,7 @@ import { Itheme } from '@/interfaces/theme'
 import assetPanel from '@/store/module/assetPanel'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
+import canvasResize from '@/store/module/canvasResize'
 import cmWV from '@/store/module/cmWV'
 import color from '@/store/module/color'
 import font from '@/store/module/font'
@@ -1620,6 +1621,7 @@ export type IStoreRoot = IEditorState & {
   fontTag: typeof fontTag.state
   imgControl: typeof imgControl.state
   webView: typeof webView.state
+  canvasResize: typeof canvasResize.state
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1647,6 +1649,7 @@ const store = createStore({
     fontTag,
     imgControl,
     webView,
+    canvasResize,
   },
 })
 export default store

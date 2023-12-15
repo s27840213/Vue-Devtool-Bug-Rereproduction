@@ -840,6 +840,17 @@ class LayerUtils {
       this.timeoutCallback = undefined
     }
   }
+
+  applyLayerOffset(layerOffset: { x: number, y: number }) {
+    const page = pageUtils.getCurrPage
+    const layers = page.layers
+    for (const [index, layer] of layers.entries()) {
+      this.updateLayerStyles(this.pageIndex, index, {
+        x: layer.styles.x + layerOffset.x,
+        y: layer.styles.y + layerOffset.y,
+      })
+    }
+  }
 }
 
 const layerUtils = new LayerUtils()
