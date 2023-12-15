@@ -916,9 +916,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-.no-scrollbar {
-  @include no-scrollbar;
-}
-</style>

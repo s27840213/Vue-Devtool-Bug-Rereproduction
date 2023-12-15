@@ -46,6 +46,8 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import { storeToRefs } from 'pinia'
+import vuex from '@/vuex'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
@@ -166,6 +168,12 @@ const handleTabAction = (tab: ISidebarTab) => {
     }
     case 'canvas': {
       setIsResizingCanvas(true)
+      vuex.commit('mobileEditor/UPDATE_pinchScale', 1)
+      vuex.commit('SET_pageScaleRatio', 100)
+      pageUtils.updatePagePos(0, {
+        x: 0,
+        y: 0
+      })
       break
     }
     case 'photo-rect':

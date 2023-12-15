@@ -30,11 +30,22 @@ import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
+import { without } from 'lodash'
 const editorStore = useEditorStore()
 const { imgAspectRatio, pageAspectRatio, pageSize, editorType } = storeToRefs(editorStore)
 const { updateCanvasSize } = useCanvasUtilsCm()
 
-const aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4'].filter(r => editorType.value === 'hidden-message' ? r !== 'original' : true)
+const _aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4']
+const aspectRatioTypes = computed(() => {
+  switch (editorType.value) {
+    case 'magic-combined':
+      return ['9:16', '16:9']
+    case 'hidden-message':
+      return without(_aspectRatioTypes, 'original')
+    default:
+      return _aspectRatioTypes
+  }
+})
 const selectedType = ref('9:16')
 
 const bus = useEventBus('editor')

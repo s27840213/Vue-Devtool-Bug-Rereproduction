@@ -49,6 +49,7 @@ const useGenImageUtils = () => {
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
+  const hostId = computed(() => store.getters['cmWV/getUserInfo'].hostId)
   const { t } = useI18n()
 
   const genImageFlow = async (
@@ -78,12 +79,22 @@ const useGenImageUtils = () => {
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
+          const hint = `${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId}`
           logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
-          modalUtils.setModalInfo(
-            `${t('CM0087')} ${t('CM0089')}`,
-            `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
-            { msg: t('STK0023') },
-          )
+          logUtils.uploadLog().then(() => {
+            modalUtils.setModalInfo(
+              `${t('CM0087')} ${t('CM0089')}`,
+              `${t('CM0088')}<br/>(${hint})`,
+              {
+                msg: t('STK0023'),
+                action() {
+                  generalUtils.copyText(hint).then(() => {
+                    notify({ group: 'success', text: '已複製' })
+                  })
+                }
+              },
+            )
+          })
           removeGenResult(ids[index])
           if (generatedResultsNum.value === 0 && inGenResultState.value) {
             changeEditorState('prev')
@@ -93,13 +104,23 @@ const useGenImageUtils = () => {
       })
     } catch (error) {
       const errorId = generalUtils.generateRandomString(6)
+      const hint = `${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId}`
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
-      modalUtils.setModalInfo(
-        t('CM0087'),
-        `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
-        { msg: t('STK0023') },
-      )
+      logUtils.uploadLog().then(() => {
+        modalUtils.setModalInfo(
+          t('CM0087'),
+          `${t('CM0088')}<br/>(${hint})`,
+          {
+            msg: t('STK0023'),
+            action() {
+              generalUtils.copyText(hint).then(() => {
+                notify({ group: 'success', text: '已複製' })
+              })
+            }
+          },
+        )
+      })
       for (const id of ids) {
         removeGenResult(id)
       }
@@ -140,6 +161,7 @@ const useGenImageUtils = () => {
       params = prevGenParams.value.params
     }
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
+    logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
     const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
