@@ -60,6 +60,10 @@ class AssetUtils {
   data = 'config.json'
   preview = 'prev'
 
+  // vvpic mobile has page-scale-feature,
+  // the x, y and size should be modified fitting the current editing window
+  get isShrinkSizeAsPinchPage() { return generalUtils.isPic && generalUtils.isTouchDevice() }
+
   get getAsset() {
     return store.getters.getAsset
   }
@@ -332,16 +336,34 @@ class AssetUtils {
     json.ratio = 1
     json.className = ShapeUtils.classGenerator()
 
+
+    const { x, y } = (() => {
+      const page = pageUtils.getCurrPage
+      if (this.isShrinkSizeAsPinchPage) {
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 - svgWidth / 2) / scaleRatio,
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 - svgHeight / 2) / scaleRatio
+        }
+      } else {
+        return {
+          x: page.width / 2 - svgWidth / 2,
+          y: page.height / 2 - svgHeight / 2
+        }
+      }
+    })()
+
     return {
       ...json,
       styles: {
-        x: currentPage.width / 2 - svgWidth / 2,
-        y: currentPage.height / 2 - svgHeight / 2,
-        width: svgWidth,
-        height: svgHeight,
+        x,
+        y,
+        width: this.isShrinkSizeAsPinchPage ? svgWidth / (pageUtils.scaleRatio * 0.01) : svgWidth,
+        height: this.isShrinkSizeAsPinchPage ? svgHeight / (pageUtils.scaleRatio * 0.01) : svgHeight,
         initWidth: (vSize as number[])[0],
         initHeight: (vSize as number[])[1],
-        scale: svgWidth / (vSize as number[])[0],
+        scale: svgWidth / (vSize as number[])[0] * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
         color: json.color,
         vSize,
         ...styles,
@@ -915,23 +937,45 @@ class AssetUtils {
     } else {
       srcObj = url as SrcObj
     }
+
     const allLayers = this.getLayers(targetPageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
       if (layer.type !== 'image') return false
 
+      if (this.isShrinkSizeAsPinchPage) return
+
       return layer.type === 'image' && !layer.moved && (layer as IImage).srcObj.assetId === assetId
     }) as Array<IImage>
 
-    // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
-    const x =
-      imageLayers.length === 0
-        ? this.pageSize.width / 2 - newStyles.width / 2
-        : imageLayers[imageLayers.length - 1].styles.x + 20
-    const y =
-      imageLayers.length === 0
-        ? this.pageSize.height / 2 - newStyles.height / 2
-        : imageLayers[imageLayers.length - 1].styles.y + 20
+    const { x, y } = (() => {
+      // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
+      if (imageLayers.length === 0) {
+        if (this.isShrinkSizeAsPinchPage) {
+          const page = pageUtils.getCurrPage
+          const scaleRatio = pageUtils.scaleRatio * 0.01
+          const contentScaleRatio = pageUtils.contentScaleRatio
+          return {
+            x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 - newStyles.width / 2) / scaleRatio,
+            y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 - newStyles.height / 2) / scaleRatio
+          }
+        } else {
+          return {
+            x: this.pageSize.width / 2 - newStyles.width / 2,
+            y: this.pageSize.height / 2 - newStyles.height / 2
+          }
+        }
+      } else {
+        return {
+          x: imageLayers[imageLayers.length - 1].styles.x + 20,
+          y: imageLayers[imageLayers.length - 1].styles.y + 20
+        }
+      }
+    })()
+
+    if (this.isShrinkSizeAsPinchPage) {
+      mathUtils.multipy(1 / (pageUtils.scaleRatio * 0.01), newStyles)
+    }
 
     const config = {
       ...(isPreview && { previewSrc: url }),
@@ -944,7 +988,7 @@ class AssetUtils {
         ...styles,
         x,
         y,
-        ...newStyles,
+        ...this.isShrinkSizeAsPinchPage ? mathUtils.multipy(1 / (pageUtils.scaleRatio * 0.01), newStyles) : newStyles
       },
     }
 
