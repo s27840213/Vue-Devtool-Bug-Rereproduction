@@ -32,7 +32,6 @@ import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mathUtils from '@nu/vivi-lib/utils/mathUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
 
 const editorStore = useEditorStore()
@@ -170,7 +169,9 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  editorUtils.setDisableLayerAction(false)
+  if (editorType.value !== 'magic-combined') {
+    editorUtils.setDisableLayerAction(false)
+  }
 })
 </script>
 <style lang="scss"></style>
