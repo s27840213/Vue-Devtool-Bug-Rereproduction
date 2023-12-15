@@ -53,7 +53,7 @@ export interface IEditorState {
   controlState: {
     layerInfo?: ILayerInfo,
     type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | 'pageMove' | '',
-    phase?: 'moving' | 'pinching'
+    phase?: 'start' | 'moving' | 'end',
     id?: string
   }
   currSelectedResInfo: Record<string, never> | {

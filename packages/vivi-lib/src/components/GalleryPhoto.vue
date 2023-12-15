@@ -195,7 +195,7 @@ export default defineComponent({
           srcObj: {
             ...srcObj
           },
-          styles: { width: photoWidth, height: photoHeight },
+          styles: { imgWidth: photoWidth, imgHeight: photoHeight },
           isPreview: this.isUploading,
           previewsrc: this.previewSrc
         })

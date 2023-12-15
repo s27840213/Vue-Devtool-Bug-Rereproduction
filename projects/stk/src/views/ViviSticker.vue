@@ -362,7 +362,7 @@ export default defineComponent({
       const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
         ([k, v]) => {
           if (k.startsWith(prefix)) k = k.replace(prefix, '')
-          return [k, v as string]
+          return [k, v as any]
         })
       )
 
@@ -372,11 +372,14 @@ export default defineComponent({
       const priceOriginal = this.payment.prices.annuallyOriginal ? stkWVUtils.formatPrice(this.payment.prices.annuallyOriginal.value, this.payment.prices.currency, this.payment.prices.annuallyOriginal.text, 'modal') : ''
       const isCloseBtnOnly = this.isPromote && subscribed
       const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
-      const shown = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
+      const lastModalTime = await stkWVUtils.getState('lastModalTime')
+      const isDuplicated = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
+      const isCoolDown = (lastModalTime === undefined || lastModalTime === null) ? false : Date.now() - lastModalTime.value < modalInfo.duration * 3600000
+      const shown = modalInfo.duration === -1 ? isDuplicated : isDuplicated && isCoolDown // ignore cool down if duration is set to -1
+      const isInvalidCountry = !!modalInfo.country.length && !modalInfo.country.includes(this.userInfo.storeCountry)
       const isPromoteToBeHide = this.isPromoteLanguage && (!this.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== this.userInfo.locale)
       const btn_txt = modalInfo.btn_txt
-      if (!btn_txt || shown) return false
-      if (isPromoteToBeHide) return false
+      if (!btn_txt || shown || isInvalidCountry || isPromoteToBeHide) return false
 
       const options = {
         imgSrc: modalInfo.img_url,
@@ -418,6 +421,7 @@ export default defineComponent({
         options
       )
       stkWVUtils.setState('lastModalMsg', { value: modalInfo.msg })
+      stkWVUtils.setState('lastModalTime', { value: Date.now() })
       return true
     },
     async showInitPopups() {

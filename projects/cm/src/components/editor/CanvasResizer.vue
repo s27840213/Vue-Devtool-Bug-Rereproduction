@@ -27,7 +27,7 @@ import { useElementBounding } from '@vueuse/core';
 // #region data
 const containerRef = ref<HTMLElement | null>(null)
 const { width: containerWidth, height: containerHeight } = useElementBounding(containerRef)
-const contentScaleRatio = computed(() => vuex.getters['getContentScaleRatio'])
+const contentScaleRatio = computed(() => vuex.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
 const { pageSize } = editorStore
 

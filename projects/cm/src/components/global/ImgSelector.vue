@@ -28,6 +28,7 @@ div(
     search-bar(
       v-if="inStock"
       class="text-dark"
+      :defaultKeyword="unsplash.keyword"
       clear
       @search="searchUnsplash")
     //- Demo img
