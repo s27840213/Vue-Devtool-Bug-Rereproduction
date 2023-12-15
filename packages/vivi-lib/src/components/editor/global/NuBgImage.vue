@@ -264,7 +264,8 @@ export default defineComponent({
     },
     mainStyles(): any {
       return {
-        ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        // not apply to vvpic mobile, bcz vvpic mobile disable the svg filter as controlling
+        ...((!generalUtils.isPic || !generalUtils.isTouchDevice()) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
         margin: this.padding.split(' ').map(val => '-' + val).join(' '),
         padding: this.padding,
         opacity: this.image.config.styles.opacity / 100,
