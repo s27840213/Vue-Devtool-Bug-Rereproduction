@@ -767,7 +767,7 @@ export default defineComponent({
         outline = 'none'
       } else if (this.isShown() || this.isControllerShown) {
         if (this.isPinchingEditor && (generalUtils.isPic || generalUtils.isCm)) {
-          outline = `${2 / this.$store.state.mobileEditor.pinchScale}px solid ${outlineColor}`
+          outline = 'none'
         } else {
           outline = `2px solid ${outlineColor}`
         }

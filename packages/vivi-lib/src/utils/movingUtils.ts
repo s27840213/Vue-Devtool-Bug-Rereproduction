@@ -587,10 +587,10 @@ export class MovingUtils {
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
-    const isReachLeftEdge = page.x >= 0 && offsetPos.x > 0
-    const isReachRightEdge = page.x <= page.width * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.x < 0
-    const isReachTopEdge = page.y >= 0 && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= page.height * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.y < 0
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= 0
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= page.width * contentScaleRatio * (1 - pageScaleRatio)
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= 0
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= page.height * contentScaleRatio * (1 - pageScaleRatio)
 
     let x = -1
     let y = -1
@@ -632,10 +632,10 @@ export class MovingUtils {
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
-    const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
-    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
-    const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= EDGE_WIDTH.x
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= EDGE_WIDTH.y
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
 
     let x = -1
     let y = -1
