@@ -539,6 +539,79 @@ const useCanvasUtils = (
     }
   }
 
+  const convertToPinkBasedMask = (
+    maskUrl: string,
+    width: number,
+    height: number,
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvasCopy = document.createElement('canvas')
+      canvasCopy.width = width
+      canvasCopy.height = height
+      const maskCtxCopy = canvasCopy.getContext('2d')
+
+      if (maskCtxCopy) {
+        const img = new Image()
+        img.src = maskUrl
+        img.crossOrigin = 'Anonymous'
+
+        img.onload = () => {
+          maskCtxCopy.drawImage(img, 0, 0)
+          const pixels = maskCtxCopy.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
+          const result = new ImageData(
+            new Uint8ClampedArray(pixels.data),
+            pageSize.value.width,
+            pageSize.value.height,
+          )
+          // The total number of pixels (RGBA values).
+          const bufferSize = result.data.length
+
+          // Check the alpha (transparency) value of each pixel.
+          for (let i = 0; i < bufferSize; i += 4) {
+            // if the pixel is transparent or pink, don't change it
+            if (
+              result.data[i + 3] === 0 ||
+              (result.data[i] === 255 && result.data[i + 1] === 114 && result.data[i + 2] === 98)
+            ) {
+              break
+            } else {
+              // If the pixel is not transparent or pink, set it We may have 2 cases:
+              // 1. The pixel is white, we set it to pink.
+              // 2. The pixel is black, we set it to transparent.
+              if (
+                // white
+                result.data[i] === 255 &&
+                result.data[i + 1] === 255 &&
+                result.data[i + 2] === 255
+              ) {
+                result.data[i] = 255
+                result.data[i + 1] = 114
+                result.data[i + 2] = 98
+                result.data[i + 3] = 255
+              } else if (
+                // black
+                result.data[i] === 0 &&
+                result.data[i + 1] === 0 &&
+                result.data[i + 2] === 0
+              ) {
+                result.data[i + 3] = 0
+              } else {
+                reject(new Error('Unexpected color'))
+              }
+            }
+          }
+          maskCtxCopy.putImageData(result, 0, 0)
+
+          resolve(canvasCopy.toDataURL('image/png'))
+        }
+
+        img.onerror = (error) => {
+          reject(new Error('Failed to load image'))
+        }
+      }
+    })
+  }
+
   const downloadCanvas = () => {
     if (canvas && canvas.value) {
       const dataUrl = canvas.value.toDataURL('image/png')
@@ -689,6 +762,7 @@ const useCanvasUtils = (
     checkCanvasIsEmpty,
     restoreCanvas,
     prepareMaskToUpload,
+    convertToPinkBasedMask,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,

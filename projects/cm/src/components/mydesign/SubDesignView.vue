@@ -39,26 +39,33 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
         //-   @click="editDesign(design)")
     div(
       v-show="currOpenSubDesign && subDesignThumbLoaded"
-      class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-8 overflow-hidden")
-      div(
-        v-if="currOpenSubDesign"
-        class="max-h-[60%]"
-        :style="{ aspectRatio: currOpenSubDesign.width / currOpenSubDesign.height }")
+      class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
+      div(v-if="currOpenSubDesign" class="w-fit h-fit overflow-hidden rounded-8")
         img(
-          class="h-full w-full object-contain rounded-20"
+          class="bg-blue-active object-contain"
+          :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
+          :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
           v-if="currOpenSubDesign"
           @load="handleThumbLoaded"
           :src="imageUtils.appendQuery(getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId), 'lsize', '900')")
-      div(class="flex flex-col gap-8 text-white w-full h-full overflow-scroll")
+      div(class="flex flex-col gap-8 text-white w-full h-fit flex-1")
         div(class="flex items-center gap-4 w-full")
           svg-icon(
             iconName="prompt"
-            iconWidth="24px")
-          span(class="typo-h6") {{ `${$t('CM0126')}:` }}
-        div(class="h-full w-full overflow-hidden" ref="promptContainerRef")
+            iconWidth="24px"
+            @click="copyPrompt")
+          span(class="typo-h6") {{ `${$t('CM0126')} :` }}
+        div(class="h-full w-full grid grid-rows-1 grid-cols-[auto,auto] box-border" ref="promptContainerRef")
           div(
             class="text-left typo-body-sm line-clamp-base"
-            :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign && currOpenSubDesign.prompt}` }}
+            :ref="'promptRef'"
+            :style="{ '-webkit-line-clamp': isPromptExapnded ? 999 : promptContainerLineClamp }") {{ `${currOpenSubDesign && currOpenSubDesign.prompt}` }}
+          svg-icon(
+            v-if="promptRef?.scrollHeight !== promptRef?.clientHeight"
+            iconColor="white"
+            iconName="chevron-down"
+            iconWidth="24px"
+            @click="togglePrompt")
 </template>
 <script setup lang="ts">
 import useActionSheetCm from '@/composable/useActionSheetCm'
@@ -66,6 +73,8 @@ import { useUserStore } from '@/stores/user'
 import type { ICmMyDesign, ICmSubDesign } from '@/types/user'
 import { notify } from '@kyvg/vue3-notification'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import { useElementSize } from '@vueuse/core'
 
@@ -76,6 +85,8 @@ interface ITmpSubDesign {
   height: number
   type: string
 }
+
+const { t } = useI18n()
 
 // #region props & emits
 const emits = defineEmits(['closeSubDesignList'])
@@ -136,15 +147,24 @@ watch(
 const myDesignCols = computed(() => useWaterfall(subDesignsInfos.value, 2))
 // #endregion
 
-// #region used to dynamically calculate the line-clamp size of the prompt
+// #region prompt related when sub desgin is open
+// used to dynamically calculate the line-clamp size of the prompt
+const isPromptExapnded = ref(false)
+
 const promptContainerRef = ref<HTMLElement | null>(null)
+const promptRef = ref<HTMLElement | null>(null)
+
 const promptContainerSize = useElementSize(promptContainerRef)
 const promptContainerLineClamp = computed(() => {
   if (promptContainerRef.value) {
-    return Math.floor(promptContainerSize.height.value / 16)
+    return Math.max(3, Math.floor(promptContainerSize.height.value / 19.2))
   }
   return 99
 })
+
+const togglePrompt = () => {
+  isPromptExapnded.value = !isPromptExapnded.value
+}
 // #endregion
 
 const handleBackAction = () => {
@@ -177,6 +197,13 @@ const selectDesign = (subDesign: ITmpSubDesign) => {
     } catch (e) {
       console.log(e)
     }
+  })
+}
+
+const copyPrompt = () => {
+  if (currOpenSubDesign.value === undefined) return
+  generalUtils.copyText(currOpenSubDesign.value?.prompt).then(() => {
+    notify({ group: 'success', text: `${t('CM0128')}` })
   })
 }
 

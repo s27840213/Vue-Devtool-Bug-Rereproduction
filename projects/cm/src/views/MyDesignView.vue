@@ -1,7 +1,7 @@
 <template lang="pug">
 div(
   class="my-design w-full h-full grid grid-cols-1 grid-rows-[auto,1fr] justify-center items-center py-20 px-16 relative")
-  scrollable-container
+  scrollable-container(:py="8")
     div(
       v-for="tag in myDesignTags"
       class="px-8 py-4 box-border rounded-full typo-body-md whitespace-nowrap"
@@ -26,7 +26,7 @@ div(
           :src="imageUtils.appendQuery(getDesignThumbUrl(design), 'lsize', '300')"
           @click="selectDesign(design)")
         svg-icon(
-          class="absolute right-10 top-10 bg-white rounded-10 m-1"
+          class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
           iconName="more_horizontal"
           iconWidth="22px"
           @click="editDesign(design)")
