@@ -1173,5 +1173,7 @@
   "CM0125": "Describe the scene you're imaging.",
   "CM0126": "Prompt",
   "CM0127": "Re-create",
-  "CM0128": "Prompt copied"
+  "CM0128": "Prompt copied",
+  "CM0129": "Portrait",
+  "CM0130": "Landscape"
 }

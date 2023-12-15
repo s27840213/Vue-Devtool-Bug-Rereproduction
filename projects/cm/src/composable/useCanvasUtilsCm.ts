@@ -605,7 +605,7 @@ const useCanvasUtils = (
           resolve(canvasCopy.toDataURL('image/png'))
         }
 
-        img.onerror = (error) => {
+        img.onerror = () => {
           reject(new Error('Failed to load image'))
         }
       }
