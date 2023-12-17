@@ -122,7 +122,7 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: `${t('NN0416')} & ${t('CM0077')}`,
-            labelColor: 'yellow-cm',
+            labelColor: 'white',
             labelSize: 'typo-btn-lg',
           },
         ],
@@ -150,7 +150,7 @@ const useActionSheetCm = () => {
         labels: [
           {
             label: t('NN0203'),
-            labelColor: 'white',
+            labelColor: 'yellow-cm',
             labelSize: 'typo-btn-lg',
           },
         ],

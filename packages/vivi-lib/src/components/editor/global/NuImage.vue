@@ -428,15 +428,15 @@ export default defineComponent({
       if (this.forRender) return false
 
       if (this.$isTouchDevice()) {
-        return this.isAdjustImage && !this.isLayerCtrlled && !this.isPinchingEditor &&
+        return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
           !this.isImgCtrl && !this.isBgImgCtrl
       } else {
         return this.isAdjustImage
       }
     },
-    isLayerCtrlled(): boolean {
+    isLayerCtrlling(): boolean {
       const { controlState } = this
-      return controlState.type !== ''
+      return controlState.type !== '' && controlState.phase === 'moving'
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -547,7 +547,9 @@ export default defineComponent({
       const { width, height } = this.scaledConfig()
       const styles = {
         // in vivisticker the following code would lead the non-fluent UX
-        ...(!(this.$isStk || this.$isCm) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        // now the vvpic mobile not apply the code as well,
+        // we disable the svg filter as controlling
+        ...(this.$isPic && this.$isTouchDevice() && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -555,8 +557,6 @@ export default defineComponent({
         height: `${height}px`
       } : {
         ...styles
-        // Fix the safari rendering bug, add the following code can fix it...
-        // transform: 'translate(0,0)'
       }
     },
     getImgDimension(): number | string {

@@ -101,6 +101,7 @@ export class MovingUtils {
           layerIndex: this.layerIndex
         },
         type: 'pageMove',
+        phase: 'start',
         id: 'pageMove-' + this.config.id
       }
     })
@@ -128,6 +129,14 @@ export class MovingUtils {
       (layerUtils.getCurrLayer.isTyping)) {
       this.removeListener()
       return
+    }
+    if (store.state.controlState.type === 'pageMove' && store.state.controlState.phase !== 'moving') {
+      store.commit('SET_STATE', {
+        controlState: {
+          ...store.state.controlState,
+          phase: 'moving'
+        }
+      })
     }
     window.requestAnimationFrame(() => {
       this.pageMovingHandler(e)
@@ -231,6 +240,7 @@ export class MovingUtils {
       controlState: {
         layerInfo: this.layerInfo,
         type: 'move',
+        phase: 'start',
         id: 'move-' + this.id
       }
     })
@@ -440,7 +450,7 @@ export class MovingUtils {
       return
     }
 
-    if (store.state.controlState.phase !== 'moving') {
+    if (store.state.controlState.type === 'move' && store.state.controlState.phase !== 'moving') {
       store.commit('SET_STATE', {
         controlState: {
           ...store.state.controlState,
@@ -577,10 +587,10 @@ export class MovingUtils {
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
-    const isReachLeftEdge = page.x >= 0 && offsetPos.x > 0
-    const isReachRightEdge = page.x <= page.width * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.x < 0
-    const isReachTopEdge = page.y >= 0 && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= page.height * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.y < 0
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= 0
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= page.width * contentScaleRatio * (1 - pageScaleRatio)
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= 0
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= page.height * contentScaleRatio * (1 - pageScaleRatio)
 
     let x = -1
     let y = -1
@@ -622,10 +632,10 @@ export class MovingUtils {
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
-    const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
-    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
-    const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= EDGE_WIDTH.x
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= EDGE_WIDTH.y
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
 
     let x = -1
     let y = -1

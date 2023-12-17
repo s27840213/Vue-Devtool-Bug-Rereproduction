@@ -6,7 +6,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       rel="stylesheet"
       type="text/css")
   div(v-if="atMainPage && !isDesignOpen" class="w-full flex-between-center box-border px-16"
-    :style="{paddingTop: `${statusBarHeight}px`}")
+    :style="{height: `${statusBarHeight + 48}px`, paddingTop: `${statusBarHeight}px`}")
     router-link(
       custom
       :to="'/'"
@@ -26,7 +26,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="router-view box-border min-h-full row-start-2 row-end-3"
-    :class="{ 'pb-12': !atNonUI }"
+    :class="{ 'pb-12': !atNonUI  && !atMyDesign}"
     v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
