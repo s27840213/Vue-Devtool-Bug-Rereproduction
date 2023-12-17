@@ -4,7 +4,7 @@ div(ref="containerRef"
     v-touch
     @panstart.stop="panStart"
     @panmove.stop="panMove")
-  page-content(class="z-page absolute"
+  page-content(class="absolute"
               :style="translateStyles"
               :config="pageState.config"
               :pageIndex="pageIndex"
@@ -32,7 +32,7 @@ import type { AnyTouchEvent } from 'any-touch'
 
 // #region data
 const containerRef = ref<HTMLElement | null>(null)
-const { width: containerWidth, height: containerHeight } = useElementBounding(containerRef)
+const { width: containerWidth, height: containerHeight, x: containerX, y: containerY } = useElementBounding(containerRef)
 const contentScaleRatio = computed(() => vuex.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
 const { pageSize } = storeToRefs(editorStore)
@@ -57,15 +57,17 @@ const renderedSize = computed(() => {
     height: pageSize.value.height * contentScaleRatio.value,
   }
 })
+const MIN_PADDING_X = 16
+const MIN_PADDING_Y = 16
 const paddings = computed(() => {
   return {
-    x: Math.max(pos.x, 16),
-    y: Math.max(pos.y, 16),
+    x: Math.max(pos.x, MIN_PADDING_X),
+    y: Math.max(pos.y, MIN_PADDING_Y),
   }
 })
 // #endregion
 
-const props = defineProps({
+defineProps({
   pageState: {
     type: Object as PropType<IPageState>,
     required: true
@@ -178,8 +180,8 @@ watchEffect(() => {
 // #region offset
 watchEffect(() => {
   const limits = {
-    x: [paddings.value.x, containerWidth.value - paddings.value.x - pageSize.value.width * contentScaleRatio.value],
-    y: [paddings.value.y, containerHeight.value - paddings.value.y - pageSize.value.height * contentScaleRatio.value],
+    x: [paddings.value.x, containerWidth.value - paddings.value.x - renderedSize.value.width],
+    y: [paddings.value.y, containerHeight.value - paddings.value.y - renderedSize.value.height],
   }
   const minTranslates = { x: Math.min(...limits.x), y: Math.min(...limits.y) }
   const maxTranslates = { x: Math.max(...limits.x), y: Math.max(...limits.y) }
@@ -218,6 +220,7 @@ const controllingParams = ref({ vertical: 0, horizontal: 0 } as IControllerConfi
 let initPointerPos = { x: 0, y: 0 }
 let initSize = { width: 0, height: 0 }
 let initLayerOffset = { x: 0, y: 0 }
+let pressingTimer = -1
 
 const resizeStart = (event: PointerEvent, params: IControllerConfig['params']) => {
   controllingParams.value = params
@@ -227,52 +230,101 @@ const resizeStart = (event: PointerEvent, params: IControllerConfig['params']) =
   initLayerOffset = vuex.getters['canvasResize/getLayerOffset']
   window.addEventListener('pointermove', resizing)
   window.addEventListener('pointerup', resizeEnd)
+  pressingTimer = window.setTimeout(() => resizing(event), 100)
 }
 
 const resizing = (event: PointerEvent) => {
+  window.clearTimeout(pressingTimer)
+  const { vertical, horizontal } = controllingParams.value
+
+  // START: special handler for edging
+  const higher = renderedSize.value.height > containerHeight.value - 2 * MIN_PADDING_Y
+  const wider = renderedSize.value.width > containerWidth.value - 2 * MIN_PADDING_X
+  if (higher) {
+    if (vertical < 0) {
+      initPointerPos.y = containerY.value + MIN_PADDING_Y
+      initSize.height = pageSize.value.height
+      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
+    }
+    if (vertical > 0) {
+      initPointerPos.y = containerY.value + containerHeight.value - MIN_PADDING_Y
+      initSize.height = pageSize.value.height
+      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
+    }
+  }
+  if (wider) {
+    if (horizontal < 0) {
+      initPointerPos.x = containerX.value + MIN_PADDING_X
+      initSize.width = pageSize.value.width
+      initLayerOffset.x = vuex.getters['canvasResize/getLayerOffset'].x
+    }
+    if (horizontal > 0) {
+      initPointerPos.x = containerX.value + containerWidth.value - MIN_PADDING_X
+      initSize.width = pageSize.value.width
+      initLayerOffset.x = vuex.getters['canvasResize/getLayerOffset'].x
+    }
+  }
+  // END
+
   const pointerPos = mouseUtils.getMouseAbsPoint(event)
   const diff = {
     x: pointerPos.x - initPointerPos.x,
     y: pointerPos.y - initPointerPos.y,
   }
-  const { vertical, horizontal } = controllingParams.value
   const sizeDiff = { width: 0, height: 0 }
   const layerOffset = { x: 0, y: 0 }
+
   if (vertical !== 0) {
-    const amount = diff.y * vertical
+    let amount = diff.y * vertical
+
+    // START: calculate non-uniform scaling equivalent move amount for
+    //  inconsistent behaviors between size reaching edges or not
+    const distance = Math.abs(renderedSize.value.height - (containerHeight.value - 2 * MIN_PADDING_Y))
+    if (!higher) {
+      if (amount > distance / 2) {
+        const over = amount - (distance / 2)
+        amount = distance + over
+      } else {
+        amount *= 2
+      }
+    } else {
+      if (amount < -distance) {
+        const over = distance + amount
+        amount = -distance + over * 2
+      }
+    }
+    // END
+
     sizeDiff.height = Math.trunc(amount / contentScaleRatio.value)
     if (vertical < 0) {
       layerOffset.y = Math.trunc(amount / contentScaleRatio.value)
-      offset.y -= amount
     }
   }
   if (horizontal !== 0) {
-    const amount = diff.x * horizontal
+    let amount = diff.x * horizontal
+
+    // START: calculate non-uniform scaling equivalent move amount for
+    //  inconsistent behaviors between size reaching edges or not
+    const distance = Math.abs(renderedSize.value.width - (containerWidth.value - 2 * MIN_PADDING_X))
+    if (!wider) {
+      if (amount > distance / 2) {
+        const over = amount - (distance / 2)
+        amount = distance + over
+      } else {
+        amount *= 2
+      }
+    } else {
+      if (amount < -distance) {
+        const over = distance + amount
+        amount = -distance + over * 2
+      }
+    }
+    // END
+
     sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
     if (horizontal < 0) {
       layerOffset.x = Math.trunc(amount / contentScaleRatio.value)
-      offset.x -= amount
     }
-  }
-  if (pointerPos.x < paddings.value.x) {
-    const shift = paddings.value.x - pointerPos.x
-    offset.x += shift
-    // initPointerPos.x -= shift
-  }
-  if (pointerPos.x > containerWidth.value - paddings.value.x) {
-    const shift = pointerPos.x - (containerWidth.value - paddings.value.x)
-    offset.x -= shift
-    // initPointerPos.x += shift
-  }
-  if (pointerPos.y < paddings.value.y) {
-    const shift = paddings.value.y - pointerPos.y
-    offset.y += shift
-    // initPointerPos.y -= shift
-  }
-  if (pointerPos.y > containerHeight.value - paddings.value.y) {
-    const shift = pointerPos.y - (containerHeight.value - paddings.value.y)
-    offset.y -= shift
-    // initPointerPos.y += shift
   }
   pageUtils.updatePageProps({
     width: initSize.width + sizeDiff.width,
@@ -282,9 +334,25 @@ const resizing = (event: PointerEvent) => {
     x: initLayerOffset.x + layerOffset.x,
     y: initLayerOffset.y + layerOffset.y
   })
+  nextTick(() => {
+    if (vertical < 0 && diff.y < 0 && translates.value.y < MIN_PADDING_Y) {
+      offset.y = MIN_PADDING_Y - pos.y
+    }
+    if (horizontal < 0 && diff.x < 0 && translates.value.x < MIN_PADDING_X) {
+      offset.x = MIN_PADDING_X - pos.x
+    }
+    if (vertical > 0 && diff.y > 0 && translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y) {
+      offset.y = containerHeight.value - renderedSize.value.height - MIN_PADDING_Y - pos.y
+    }
+    if (horizontal > 0 && diff.x > 0 && translates.value.x < containerWidth.value - renderedSize.value.width - MIN_PADDING_X) {
+      offset.x = containerWidth.value - renderedSize.value.width - MIN_PADDING_X - pos.x
+    }
+  })
+  pressingTimer = window.setTimeout(() => resizing(event), 100)
 }
 
 const resizeEnd = (event: PointerEvent) => {
+  window.clearTimeout(pressingTimer)
   isResizing.value = false
   window.removeEventListener('pointermove', resizing)
   window.removeEventListener('pointerup', resizeEnd)

@@ -65,7 +65,7 @@ interface ISidebarTab {
 
 const { t } = useI18n()
 const editorStore = useEditorStore()
-const { setCurrActiveFeature , setIsResizingCanvas} = editorStore
+const { setCurrActiveFeature } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -167,7 +167,7 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
-      setIsResizingCanvas(true)
+      vuex.commit('canvasResize/SET_isResizing', true)
       vuex.commit('mobileEditor/UPDATE_pinchScale', 1)
       vuex.commit('SET_pageScaleRatio', 100)
       pageUtils.updatePagePos(0, {

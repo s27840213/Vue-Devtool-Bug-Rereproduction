@@ -55,7 +55,6 @@ interface IEditorStore {
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
   showEmptyPromptWarning: boolean
-  isResizingCanvas: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -82,7 +81,6 @@ export const useEditorStore = defineStore('editor', {
     currDesignThumbIndex: 0,
     // if the user send empty prompt, show warning at fisrt time
     showEmptyPromptWarning: true,
-    isResizingCanvas: false,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -340,8 +338,5 @@ export const useEditorStore = defineStore('editor', {
     setShowEmptyPromptWarning(show: boolean) {
       this.showEmptyPromptWarning = show
     },
-    setIsResizingCanvas(isResizing: boolean) {
-      this.isResizingCanvas = isResizing
-    }
   },
 })

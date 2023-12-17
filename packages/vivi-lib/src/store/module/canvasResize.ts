@@ -1,37 +1,37 @@
-import pageUtils from '@/utils/pageUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 type size = { width: number, height: number }
 type pos = { x: number, y: number }
 
 export interface ICanvasResizeState {
+  isResizing: boolean
   initSize: size
   layerOffset: pos
 }
 
 const getDefaultState = (): ICanvasResizeState => ({
+  isResizing: false,
   initSize: { width: 0, height: 0 },
   layerOffset: { x: 0, y: 0 },
 })
 
 const state = getDefaultState()
 const getters: GetterTree<ICanvasResizeState, unknown> = {
+  getIsResizing(state: ICanvasResizeState): boolean {
+    return state.isResizing
+  },
   getInitSize(state: ICanvasResizeState): size {
     return state.initSize
   },
-  getSizeDiff(state: ICanvasResizeState): { wDiff: number, hDiff: number } {
-    const page = pageUtils.getCurrPage
-    return {
-      wDiff: page.width - state.initSize.width,
-      hDiff: page.height - state.initSize.height,
-    }
-  },
   getLayerOffset(state: ICanvasResizeState): pos {
-    return state.layerOffset
+    return state.isResizing ? state.layerOffset : { x: 0, y: 0 }
   },
 }
 
 const mutations: MutationTree<ICanvasResizeState> = {
+  SET_isResizing(state: ICanvasResizeState, isResizing: boolean) {
+    state.isResizing = isResizing
+  },
   SET_initSize(state: ICanvasResizeState, initSize: size) {
     state.initSize = initSize
     state.layerOffset = { x: 0, y: 0 }
