@@ -4,7 +4,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
     :options="modes"
     v-model="currMode"
     :bgColor="'black-3-5'"
-    :switchColor="'white'"
+    :switchColor="'yellow-1'"
     :activeColor="'black-2'"
     :inActiveColor="'white'"
     :optionWidth="'80px'"
@@ -22,17 +22,18 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
       @update="setBrushSize"
       @pointer-down="setIsChangingBrushSize(true)"
       @pointer-up="setIsChangingBrushSize(false)")
-  footer-bar(class="w-full box-border px-24"
-            :title="$t('CM0017')"
-            @cancel="cancel"
-            @apply="apply")
+  footer-bar(
+    class="w-full box-border px-24"
+    :title="$t('CM0017')"
+    @cancel="cancel"
+    @apply="apply")
 </template>
 <script setup lang="ts">
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { PowerfulFillCanvasMode } from '@/types/editor'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
-import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
@@ -96,7 +97,6 @@ const cancel = () => {
   setCurrActiveFeature('none')
   groupUtils.deselect()
 }
-
 
 const apply = () => {
   setCurrActiveFeature('none')

@@ -22,7 +22,7 @@ div(class="prompt-area w-full box-border px-24")
         //- content
         div(class="w-full relative")
           textarea(
-            class="w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+            class="prompt-text-area tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
             :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
             :autofocus="!isDuringTutorial"
             v-model="promptText")
@@ -84,8 +84,7 @@ div(class="prompt-area w-full box-border px-24")
     @expand="currTransitions.add('expand-gen-options')"
     @collapsed="currTransitions.delete('collapse-gen-options')"
     @expanded="currTransitions.delete('expand-gen-options')")
-    div(
-      class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white box-border mt-16")
+    div(class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white box-border mt-16")
       div(
         v-for="(option, idx) in genRangeOptions"
         :key="idx")
@@ -168,7 +167,7 @@ const {
   setCurrDesignId,
   setGenResultIndex,
   setShowEmptyPromptWarning,
-  setCurrGenOptions
+  setCurrGenOptions,
 } = editorStore
 const {
   isSendingGenImgReq,
@@ -390,7 +389,7 @@ const setGenType = (idxGenType: number) => {
       ['weight', 0.7],
       ['guidance_start', 0.1],
       ['guidance_end', 0.7],
-    ])
+    ]),
   ][idxGenType]
 
   const newGenOptions = constantData.getGenImageOptions('hidden-message') as GenImageOptions
@@ -442,5 +441,10 @@ watch(currTransitions.value, (val) => {
     opacity: 0;
     transform: translateX(-50%);
   }
+}
+
+.prompt-text-area {
+  @apply w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
+  transition: outline-color 0.45s;
 }
 </style>
