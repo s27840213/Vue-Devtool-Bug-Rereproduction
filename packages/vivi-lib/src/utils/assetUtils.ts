@@ -422,8 +422,8 @@ class AssetUtils {
         const scaleRatio = pageUtils.scaleRatio * 0.01
         const contentScaleRatio = pageUtils.contentScaleRatio
         return {
-          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 - realWidth / 2) / scaleRatio,
-          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 - realHeight / 2) / scaleRatio
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - realWidth / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - realHeight / 2)
         }
       } else {
         return {
