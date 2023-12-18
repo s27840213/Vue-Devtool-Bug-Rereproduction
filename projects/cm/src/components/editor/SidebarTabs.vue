@@ -206,14 +206,6 @@ const getTabTutorialClasses = (text: string) => {
 const tabsRef = ref<HTMLElement[] | null>(null)
 const tabsPressed = ref(Array(defaultEditorTabs.value.length).fill(false))
 useTapTransition(tabsRef, tabsPressed)
-
-watch(
-  () => tabsPressed.value,
-  (newVal) => {
-    console.log(newVal)
-  },
-  { deep: true },
-)
 </script>
 <style lang="scss" scoped>
 .sidebar-tabs {
