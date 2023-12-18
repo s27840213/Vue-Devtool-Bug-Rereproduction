@@ -363,7 +363,7 @@ const resizing = (event: PointerEvent) => {
     if (vertical < 0 && diff.y < 0 && translates.value.y < MIN_PADDING_Y) {
       offset.y = MIN_PADDING_Y - pos.y
     }
-    if (horizontal > 0 && diff.x > 0 && translates.value.x < containerWidth.value - renderedSize.value.width - MIN_PADDING_X) {
+    if (horizontal > 0 && diff.x > 0 && translates.value.x > containerWidth.value - renderedSize.value.width - MIN_PADDING_X) {
       offset.x = containerWidth.value - renderedSize.value.width - MIN_PADDING_X - pos.x
     }
     if (vertical > 0 && diff.y > 0 && translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y) {
