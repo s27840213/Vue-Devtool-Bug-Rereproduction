@@ -162,7 +162,7 @@ const handleNextAction = function () {
 }
 
 onMounted(() => {
-  editorUtils.setDisableLayerAction('all')
+  editorUtils.setAllowLayerAction('none')
   if (editorType.value === 'magic-combined') {
     // Init img position.
     updateLayerStyleToFitPage()
@@ -170,9 +170,9 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   if (editorType.value === 'magic-combined') {
-    editorUtils.setDisableLayerAction('moving')
+    editorUtils.setAllowLayerAction('crop-only')
   } else {
-    editorUtils.setDisableLayerAction('')
+    editorUtils.setAllowLayerAction('all')
   }
 })
 </script>

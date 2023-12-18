@@ -117,7 +117,7 @@ export interface IEditorState {
   showGlobalErrorModal: boolean,
   newTemplateShownMode: boolean,
   modalInfo: { [key: string]: any },
-  disableLayerAction: '' | 'all' | 'moving',
+  allowLayerAction: 'all' | 'none' | 'crop-only',
 }
 
 export enum SidebarPanelType {
