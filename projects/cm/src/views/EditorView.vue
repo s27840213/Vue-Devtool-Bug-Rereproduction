@@ -436,7 +436,8 @@ watch(isDuringCopy, () => {
 })
 
 let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
-onMounted(() => {
+const initPagePinchHandler = () => {
+  if (!editorContainerRef.value) return
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
     size: {
@@ -453,6 +454,12 @@ onMounted(() => {
     },
   })
   pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+}
+onMounted(initPagePinchHandler)
+watch(isResizingCanvas, (newVal) => {
+  if (!newVal) {
+    nextTick(initPagePinchHandler)
+  }
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])

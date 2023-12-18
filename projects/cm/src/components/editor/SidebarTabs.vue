@@ -46,6 +46,7 @@ import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 
@@ -172,7 +173,7 @@ const handleTabAction = (tab: ISidebarTab) => {
       vuex.commit('canvasResize/SET_isResizing', true)
       vuex.commit('mobileEditor/UPDATE_pinchScale', 1)
       vuex.commit('SET_pageScaleRatio', 100)
-      pageUtils.updatePagePos(0, {
+      pageUtils.updatePagePos(layerUtils.pageIndex, {
         x: 0,
         y: 0,
       })
