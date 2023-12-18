@@ -26,7 +26,7 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { showBrushOptions, maskDataUrl } = storeToRefs(editorStore)
+  const { showBrushOptions, maskDataUrl, maskParams } = storeToRefs(editorStore)
 
   const { isBiColorEditor } = useBiColorEditor()
   // #endregion
@@ -390,6 +390,7 @@ const useCanvasUtils = (
         canvasCtx.value.fillStyle = drawingColor.value
         record()
       }
+      restoreCanvas()
     }
   })
 
@@ -693,8 +694,10 @@ const useCanvasUtils = (
       img.onload = () => {
         clearCtx()
         drawImageToCtx(img, {
-          width: pageSize.value.width,
-          height: pageSize.value.height,
+          x: maskParams.value.x ?? 0,
+          y: maskParams.value.y ?? 0,
+          width: maskParams.value.width ?? pageSize.value.width,
+          height: maskParams.value.height ?? pageSize.value.height,
         })
       }
     }

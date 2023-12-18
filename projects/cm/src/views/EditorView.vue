@@ -379,14 +379,9 @@ const fitScaleRatio = computed(() => {
     pageSize.value.height === 0
   )
     return 1
-  // make longer side become 1600px
-  const pageAspectRatio = pageSize.value.width / pageSize.value.height
-  const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
-  const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
 
-  // const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
-  const widthRatio = (editorContainerWidth.value - 8) / newWidth
-  const heightRatio = editorContainerHeight.value / newHeight
+  const widthRatio = (editorContainerWidth.value - 8) / pageSize.value.width
+  const heightRatio = editorContainerHeight.value / pageSize.value.height
 
   const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
@@ -436,7 +431,8 @@ watch(isDuringCopy, () => {
 })
 
 let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
-onMounted(() => {
+const initPagePinchHandler = () => {
+  if (!editorContainerRef.value) return
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
     size: {
@@ -453,6 +449,12 @@ onMounted(() => {
     },
   })
   pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+}
+onMounted(initPagePinchHandler)
+watch(isResizingCanvas, (newVal) => {
+  if (!newVal) {
+    nextTick(initPagePinchHandler)
+  }
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
