@@ -66,7 +66,7 @@ interface ISidebarTab {
 
 const { t } = useI18n()
 const editorStore = useEditorStore()
-const { setCurrActiveFeature } = editorStore
+const { setCurrActiveFeature, setMaskDataUrl } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -139,7 +139,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
   ]
 })
 
-const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
+const { clearCtx, reverseSelection, autoFill, getCanvasDataUrl } = useCanvasUtilsCm()
 
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
@@ -168,6 +168,7 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
+      setMaskDataUrl(getCanvasDataUrl() ?? '')
       vuex.commit('canvasResize/SET_isResizing', true)
       vuex.commit('mobileEditor/UPDATE_pinchScale', 1)
       vuex.commit('SET_pageScaleRatio', 100)
