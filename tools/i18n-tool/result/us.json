@@ -1175,5 +1175,7 @@
   "CM0127": "Re-create",
   "CM0128": "Prompt copied",
   "CM0129": "Portrait",
-  "CM0130": "Landscape"
+  "CM0130": "Landscape",
+  "CM0131": "Adjust the selected area",
+  "CM0132": "Move around / adjust the cropping of the photos and filling area."
 }

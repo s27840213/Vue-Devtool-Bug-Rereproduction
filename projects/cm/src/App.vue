@@ -175,7 +175,6 @@ const {
   showDescriptionPanel,
   isDesignOpen,
   isSubDesignOpen,
-  isResizingCanvas,
 } = useStateInfo()
 
 const globalStore = useGlobalStore()
@@ -205,7 +204,7 @@ const bottomPanelComponent = computed(() => {
       return HomeTab
     case inAspectRatioState.value:
       return AspectRatioSelector
-    case isResizingCanvas.value:
+    case vuex.getters['canvasResize/getIsResizing']:
       return CanvasOptions
     case showBrushOptions.value:
       return BrushOptions

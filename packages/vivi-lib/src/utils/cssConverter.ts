@@ -3,9 +3,9 @@
  */
 import { IParagraphStyle, ISpanStyle, IStyle, ITextStyle } from '@/interfaces/layer'
 import store from '@/store'
-import textUtils from '@/utils/textUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import generalUtils from '@/utils/generalUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
+import textUtils from '@/utils/textUtils'
 
 const fontProps = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
@@ -131,13 +131,13 @@ class CssConveter {
     return fontFaces.join(', ')
   }
 
-  convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, factor = 1): { [key: string]: string } {
+  convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, factor = 1, { offset = { x: 0, y: 0 } }: { offset?: { x: number, y: number } } = {}): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     Object.assign(result, {
       width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * factor}px` : 'initial',
       height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * factor}px` : 'initial',
       ...(sourceStyles.opacity !== 100 && { opacity: `${sourceStyles.opacity / 100}` }),
-      ...this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, factor)
+      ...this.convertTransformStyle(sourceStyles.x + offset.x, sourceStyles.y + offset.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, factor)
     })
     return result
   }

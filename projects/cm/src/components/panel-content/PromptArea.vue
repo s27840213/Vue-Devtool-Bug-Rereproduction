@@ -7,22 +7,23 @@ div(class="prompt-area w-full box-border px-24")
     transition(:name="`fade-${isTypeSettings ? 'right' : 'left'}-in`")
       div(
         v-if="!isTypeSettings"
-        class="absolute w-full flex flex-col gap-16"
+        class="absolute w-full flex flex-col"
+        :class="editorType === 'magic-combined' ? 'gap-24' : 'gap-16'"
         ref="elMain")
         //- header bar
-        div(class="w-full grid grid-cols-3 justify-between relative")
-          div(class="w-fit")
-          span(class="text-yellow-0 typo-btn-lg") {{ title }}
-          div(class="w-fit")
-            svg-icon(
-              v-if="showSettingsIcon"
-              :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
-              class="text-yellow-0 absolute right-0 top-1/2 -translate-y-1/2"
-              @click="isGenSettings = !isGenSettings")
+        div(class="w-full relative flex-center")
+          span(:class="title.class") {{ title.label }}
+          svg-icon(
+            v-if="showSettingsIcon"
+            :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
+            class="text-yellow-0 absolute right-0"
+            @click="isGenSettings = !isGenSettings")
         //- content
         div(class="w-full relative")
+          span(v-if="editorType === 'magic-combined'" class="text-white typo-body-md") {{ $t('CM0132') }}
           textarea(
             class="prompt-text-area tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+            v-else
             :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
             :autofocus="!isDuringTutorial"
             v-model="promptText")
@@ -61,7 +62,7 @@ div(class="prompt-area w-full box-border px-24")
               iconWidth="24px"
               class="text-yellow-0 absolute left-0 top-1/2 -translate-y-1/2"
               @click="isSettings = false")
-          span(class="text-yellow-0 typo-btn-lg") {{ title }}
+          span(:class="title.class") {{ title.label }}
           div(class="w-fit")
         //- content
         div(class="w-full flex-center gap-16 typo-h5 text-white")
@@ -360,7 +361,25 @@ const showTypeSelector = computed(() => {
   return editorType.value === 'hidden-message'
 })
 const title = computed(() => {
-  return isTypeSettings.value ? t('CM0108') : t('CM0022')
+  const defaultClass = 'text-white typo-h6'
+  if (isTypeSettings.value)
+    return {
+      class: defaultClass,
+      label: t('CM0108'),
+    }
+
+  switch (editorType.value) {
+    case 'magic-combined':
+      return {
+        class: 'text-yellow-cm typo-h4',
+        label: t('CM0131'),
+      }
+    default:
+      return {
+        class: defaultClass,
+        label: t('CM0022'),
+      }
+  }
 })
 
 // gen options

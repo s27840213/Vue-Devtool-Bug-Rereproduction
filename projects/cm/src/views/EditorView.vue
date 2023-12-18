@@ -247,6 +247,7 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
 
 const { ids } = useGenImageUtils()
 
@@ -272,14 +273,8 @@ onBeforeRouteLeave((to, from) => {
 // #endregion
 
 // #region edtior state related
-const {
-  inEditingState,
-  atEditor,
-  inAspectRatioState,
-  inSavingState,
-  showSelectionOptions,
-  isResizingCanvas,
-} = useStateInfo()
+const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
+  useStateInfo()
 const editorStore = useEditorStore()
 const { changeEditorState, updateGenResult, setDescriptionPanel, editorType } = editorStore
 const {
