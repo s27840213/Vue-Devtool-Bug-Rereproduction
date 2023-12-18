@@ -406,8 +406,10 @@ const beforeSendToEditor = () => {
   }
   sendToEditor()
 
-  //
-  setPageSize(900, 1600)
+  // prevent we adding the image to the editor too early, cause the image position in wrong place
+  if (!atEditor.value) {
+    setPageSize(900, 1600)
+  }
 }
 
 const sendToEditor = async () => {
