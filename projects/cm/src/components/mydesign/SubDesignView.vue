@@ -42,7 +42,7 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
       class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
       div(v-if="currOpenSubDesign" class="w-fit h-fit overflow-hidden rounded-8")
         img(
-          class="bg-blue-active object-contain"
+          class="object-contain"
           :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
           :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
           v-if="currOpenSubDesign"
@@ -59,7 +59,7 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
           div(
             class="text-left typo-body-sm line-clamp-base"
             :ref="'promptRef'"
-            :style="{ '-webkit-line-clamp': isPromptExapnded ? 999 : promptContainerLineClamp }") {{ `${currOpenSubDesign && currOpenSubDesign.prompt}` }}
+            :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}` }}
           svg-icon(
             v-if="promptRef?.scrollHeight !== promptRef?.clientHeight"
             iconColor="white"
@@ -156,6 +156,8 @@ const promptRef = ref<HTMLElement | null>(null)
 
 const promptContainerSize = useElementSize(promptContainerRef)
 const promptContainerLineClamp = computed(() => {
+  if (isPromptExapnded.value) return 999
+
   if (promptContainerRef.value) {
     return Math.max(3, Math.floor(promptContainerSize.height.value / 19.2))
   }

@@ -1,45 +1,47 @@
 import { useEventListener } from '@vueuse/core'
-import { ref, Ref, onMounted, isRef } from 'vue'
+import { Ref, onMounted, ref } from 'vue'
 
 const useTapTransition = (
-  el: HTMLElement | null | Ref<HTMLElement | null> | Array<Ref<HTMLElement | null>>,
-  bool: Ref<boolean> | boolean,
+  el: null | Ref<HTMLElement |  HTMLElement[] |null>,
+  bool: Ref<boolean> | Ref<boolean[]> ,
   delayTime = 200
 ) => {
   const timerId = ref(-1)
 
   const registerEvent = () => {
-    const isArray = Array.isArray(el)
-    if (!isArray) {
-      useEventListener(el, 'touchstart', (e) => {
-        isRef(bool) ? (bool.value = true) : (bool = true)
-        if (timerId.value) {
-          clearTimeout(timerId.value)
-          timerId.value = -1
-        }
-      })
-
-      useEventListener(el, 'touchend', (e) => {
-        timerId.value = window.setTimeout(() => {
-          isRef(bool) ? (bool.value = false) : (bool = false)
-        }, delayTime)
-      })
-    } else {
-      el.forEach((element) => {
-        useEventListener(element, 'touchstart', (e) => {
-          isRef(bool) ? (bool.value = true) : (bool = true)
+    if(el?.value !== null) {
+      const isArray = Array.isArray(el?.value)
+      if (!isArray) {
+        useEventListener(el as Ref<HTMLElement>, 'touchstart', (e) => {
+          bool.value = true
           if (timerId.value) {
             clearTimeout(timerId.value)
             timerId.value = -1
           }
         })
-
-        useEventListener(element, 'touchend', (e) => {
+  
+        useEventListener(el as Ref<HTMLElement>, 'touchend', (e) => {
           timerId.value = window.setTimeout(() => {
-            isRef(bool) ? (bool.value = false) : (bool = false)
+            bool.value = false
           }, delayTime)
         })
-      })
+      } else {
+        (el as Ref<HTMLElement[]>).value.forEach((element, index) => {
+          useEventListener(element, 'touchstart', (e) => {
+            (bool as Ref<boolean[]>).value[index] = true
+            if (timerId.value) {
+              clearTimeout(timerId.value)
+              timerId.value = -1
+            }
+          })
+  
+          useEventListener(element, 'touchend', (e) => {
+            timerId.value = window.setTimeout(() => {
+              (bool as Ref<boolean[]>).value[index] = false
+            }, delayTime)
+          })
+        })
+      }
     }
   }
 

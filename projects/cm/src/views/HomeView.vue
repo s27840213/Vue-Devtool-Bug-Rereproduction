@@ -1,6 +1,5 @@
 <template lang="pug">
-div(class="box-border h-full w-full px-16 pt-12\
-  grid gap-16 overflow-scroll scrollbar-hide")
+div(class="box-border h-full w-full px-16 pt-12\ grid gap-16 overflow-scroll scrollbar-hide")
   highlight-section(
     :title="$t('CM0001')"
     :description="$t('CM0002')"
@@ -14,7 +13,9 @@ div(class="box-border h-full w-full px-16 pt-12\
   //- nubtn(
   //-   icon="crown"
   //-   @click="exportVedio") Test video Selector
-  template(v-for="(cate, i) in featureCategories" :key="i")
+  template(
+    v-for="(cate, i) in featureCategories"
+    :key="i")
     div(class="w-full typo-h4 text-yellow-cm text-left") {{ cate.category }}
     div(class="feature-section")
       feature-card(
@@ -39,9 +40,9 @@ div(class="box-border h-full w-full px-16 pt-12\
     iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
-import i18n from '@/i18n';
-import router from '@/router';
-import { useImgSelectorStore } from '@/stores/imgSelector';
+import i18n from '@/i18n'
+import router from '@/router'
+import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'
 
 const { openImgSelecotr } = useImgSelectorStore()
@@ -55,32 +56,32 @@ type FeatureCard = {
 const quickStartFeatures: FeatureCard[] = [
   {
     bgImg: 'bg-replace',
-    title: i18n.global.t('CM0005')
+    title: i18n.global.t('CM0005'),
   },
   {
     bgImg: 'tmp',
-    title: i18n.global.t('CM0006')
+    title: i18n.global.t('CM0006'),
   },
   {
     bgImg: 'tmp',
-    title: i18n.global.t('CM0007')
+    title: i18n.global.t('CM0007'),
   },
   {
     bgImg: 'tmp',
     title: i18n.global.t('CM0008'),
     action: () => {
       openImgSelecotr({ targetEditorType: 'magic-combined' })
-    }
-  }
+    },
+  },
 ]
 const aiArtFeatures: FeatureCard[] = [
   {
     bgImg: 'surreal',
-    title: i18n.global.t('CM0009')
+    title: i18n.global.t('CM0009'),
   },
   {
     bgImg: 'reflection',
-    title: i18n.global.t('CM0010')
+    title: i18n.global.t('CM0010'),
   },
   {
     bgImg: 'hidden-message',
@@ -91,16 +92,19 @@ const aiArtFeatures: FeatureCard[] = [
   },
   {
     bgImg: 'tmp',
-    title: i18n.global.t('CM0011')
-  }
+    title: i18n.global.t('CM0011'),
+  },
 ]
-const featureCategories = [{
-  category: i18n.global.t('CM0004'),
-  content: quickStartFeatures,
-}, {
-  category: i18n.global.t('CM0009'),
-  content: aiArtFeatures,
-}]
+const featureCategories = [
+  {
+    category: i18n.global.t('CM0004'),
+    content: quickStartFeatures,
+  },
+  {
+    category: i18n.global.t('CM0009'),
+    content: aiArtFeatures,
+  },
+]
 // #endregion
 
 // const exportVedio = () => {

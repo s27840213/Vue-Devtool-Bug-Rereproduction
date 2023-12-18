@@ -175,12 +175,14 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         :height="22"
         colorInactive="lighter"
         colorActive="yellow-cm")
-    footer-bar(:title="$t('CM0083')"
-              @cancel="cancelPreprocess"
-              @apply="applyPreprocess")
+    footer-bar(
+      :title="$t('CM0083')"
+      @cancel="cancelPreprocess"
+      @apply="applyPreprocess")
 </template>
 
 <script lang="ts" setup>
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
@@ -191,7 +193,6 @@ import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
-import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
@@ -418,8 +419,7 @@ const sendToEditor = async () => {
 
     if (!initAtEditor) {
       setImgAspectRatio(targetImgs[0].ratio)
-      targetEditorType.value && 
-        editorStore.startEditing(targetEditorType.value)
+      targetEditorType.value && editorStore.startEditing(targetEditorType.value)
     }
 
     nextTick(() => {

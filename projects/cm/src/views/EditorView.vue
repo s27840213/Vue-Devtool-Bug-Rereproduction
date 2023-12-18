@@ -52,10 +52,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           iconName="cm_home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
-  canvas-resizer(v-if="isResizingCanvas"
-                :pageIndex="0"
-                :pageState="pageState[0]"
-                :noBg="isDuringCopy && isNoBg")
+  canvas-resizer(
+    v-if="isResizingCanvas"
+    :pageIndex="0"
+    :pageState="pageState[0]"
+    :noBg="isDuringCopy && isNoBg")
   div(
     v-else-if="!inSavingState"
     class="editor-container flex-center relative"
@@ -98,13 +99,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
+      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping && !showBrushOptions"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
   div(v-else class="editor-view__saving-state")
-    div(
-      class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
+    div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
       div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
@@ -284,6 +284,7 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
+  showBrushOptions,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 

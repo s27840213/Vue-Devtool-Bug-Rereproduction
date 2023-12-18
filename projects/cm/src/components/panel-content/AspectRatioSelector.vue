@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class='aspect-ratio-selector grid gap-16')
   div(class="typo-btn-lg text-white") {{ $t('CM0013') }}
-  scrollable-container(:px="24" :py="0" :gap="10" class="mx-auto w-fit max-w-[100%] box-border")
+  scrollable-container(:px="24" :py="0" :gap="10" class="mx-auto w-fit max-w-screen box-border")
     div(
       v-for="asp in aspectRatioTypes"
       :key="asp.val"

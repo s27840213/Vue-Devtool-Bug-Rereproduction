@@ -24,7 +24,7 @@ const MAX_STEP_COUNT = 20
 export const useCanvasStore = defineStore('canvas', {
   state: (): ICanvasState => ({
     canvasMode: 'brush',
-    brushSize: 16,
+    brushSize: 125,
     resultCanvas: null as unknown as HTMLCanvasElement,
     loading: false,
     isProcessingStepsQueue: false,
