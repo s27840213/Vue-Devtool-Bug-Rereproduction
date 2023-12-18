@@ -82,6 +82,9 @@ const setBrushSize = (value: number) => {
 }
 const setIsChangingBrushSize = (value: boolean) => {
   setCanvasStoreState({ isChangingBrushSize: value })
+  // if (!value) {
+  //   cmWVUtils.setState('brushSize', brushSize.value)
+  // }
 }
 
 watch(currMode, (newVal) => {
@@ -103,5 +106,12 @@ const apply = () => {
   PagePinchUtils.resetPageScale()
   groupUtils.deselect()
 }
+
+// onMounted(async () => {
+//   const brushSize = await cmWVUtils.getState('brushSize')
+//   if (brushSize !== undefined) {
+//     setBrushSize(brushSize)
+//   }
+// })
 </script>
 <style lang="scss"></style>
