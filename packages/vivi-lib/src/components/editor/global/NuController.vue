@@ -182,7 +182,7 @@ div(:layer-index="`${layerIndex}`"
                 svg-icon(class="control-point__action-svg"
                   iconName="move2" iconWidth="24px"
                   :iconColor="actionColor")
-    action-icon(v-if="isActive && isLocked() && (scaleRatio > 20)"
+    action-icon(v-if="isActive && isLocked() && !isPinchingEditor && (scaleRatio > 20)"
                 class="control-point__bottom-right-icon"
                 iconName="lock"
                 iconSize="16px"
@@ -371,7 +371,6 @@ export default defineComponent({
     },
     showControlPtrs(): boolean {
       return !['pinch', 'move'].includes(this.controlState.type) && !this.isPinchingEditor
-      // return !this.isMoving && this.controlState.type !== 'pinch'
     },
     ctrlPtrStyles(): Record<string, number | string> {
       return {
@@ -767,7 +766,11 @@ export default defineComponent({
       if ((this.isLine() && !this.$isTouchDevice()) || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
         outline = 'none'
       } else if (this.isShown() || this.isControllerShown) {
-        outline = `2px solid ${outlineColor}`
+        if (this.isPinchingEditor && (generalUtils.isPic || generalUtils.isCm)) {
+          outline = 'none'
+        } else {
+          outline = `2px solid ${outlineColor}`
+        }
       } else {
         outline = 'none'
       }
@@ -790,6 +793,7 @@ export default defineComponent({
             layerIndex: this.layerIndex
           },
           type: 'scale',
+          phase: 'start',
           id: this.config.id
         }
       })
@@ -843,6 +847,16 @@ export default defineComponent({
       if (generalUtils.getEventType(event) !== 'touch') {
         event.preventDefault()
       }
+
+      if (this.controlState.type === 'scale' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       const altPressed = generalUtils.exact([event.altKey])
       const isCenterBased = altPressed || this.$isTouchDevice()
 
@@ -1042,6 +1056,7 @@ export default defineComponent({
             layerIndex: this.layerIndex
           },
           type: 'move',
+          phase: 'start',
           id: this.config.id
         }
       })
@@ -1073,6 +1088,16 @@ export default defineComponent({
       if (eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
+
+      if (this.controlState.type === 'move' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       event.preventDefault()
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -1133,6 +1158,7 @@ export default defineComponent({
             layerIndex: this.layerIndex
           },
           type: 'resize',
+          phase: 'start',
           id: this.config.id
         }
       })
@@ -1210,6 +1236,16 @@ export default defineComponent({
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
+
+      if (this.controlState.type === 'resize' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       event.preventDefault()
       const altPressed = generalUtils.exact([event.altKey])
       const isCenterBased = altPressed || this.$isTouchDevice()
@@ -1361,6 +1397,17 @@ export default defineComponent({
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
+      this.setState({
+        controlState: {
+          layerInfo: {
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex
+          },
+          type: 'rotate',
+          phase: 'start',
+          id: this.config.id
+        }
+      })
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       if (this.tooSmall) {
         index = 2
@@ -1391,6 +1438,16 @@ export default defineComponent({
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
+
+      if (this.controlState.type === 'rotate' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
@@ -1435,6 +1492,9 @@ export default defineComponent({
       }
     },
     rotateEnd(event: PointerEvent) {
+      if (this.controlState.type === 'rotate' && this.controlState.id === this.config.id) {
+        this.setState({ controlState: { type: '' } })
+      }
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1

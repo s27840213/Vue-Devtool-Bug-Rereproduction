@@ -8,7 +8,7 @@ div(class="popup-window")
         div(v-if="!isMobileView" class="payment-left-top")
           div(v-if="showStep" class="payment-left-top__step")
             svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
-                    iconColor="gray1" @click="preStep()")
+                    iconColor="gray-1" @click="preStep()")
             span(v-if="totalStep") {{$t('NN0544')}} {{currentStep}} of {{totalStep}}
           div(class="text-H4" v-html="title")
           div(v-if="description" class="mt-15") {{description}}

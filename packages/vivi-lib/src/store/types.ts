@@ -53,8 +53,8 @@ export interface IEditorState {
    */
   controlState: {
     layerInfo?: ILayerInfo,
-    type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | '',
-    phase?: 'moving' | 'pinching'
+    type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | 'pageMove' | '',
+    phase?: 'start' | 'moving' | 'end',
     id?: string
   }
   currSelectedResInfo: Record<string, never> | {
@@ -119,7 +119,7 @@ export interface IEditorState {
   newTemplateShownMode: boolean,
   modalInfo: { [key: string]: any },
   fullPageConfig: IFullPageConfig,
-  disableLayerAction: boolean,
+  disableLayerAction: '' | 'all' | 'moving',
 }
 
 export enum SidebarPanelType {

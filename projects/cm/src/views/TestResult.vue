@@ -7,7 +7,7 @@ div(class="w-full h-full grid-cols-1 grid-rows-[auto,1fr] gap-16]")
       div
     template(#right)
       div
-  div(class="flex justify-center items-center w-full h-full")
+  div(class="flex-center w-full h-full")
     img(:src="generatedResults[currGenResultIndex].url" class="w-240")
 </template>
 <script setup lang="ts">

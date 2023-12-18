@@ -22,7 +22,7 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
             :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
-          iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
+          iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'gray-2'"
           @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
@@ -59,7 +59,7 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
         span(class="page-size-selector__body__title caption-LG"
           :class="defaultTextColor") {{$t('NN0024')}}
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :class="defaultTextColor")
       div(v-for="(format, index) in recentlyUsed"
           :key="format.id"
           class="page-size-selector__body-row item pointer"

@@ -2,14 +2,14 @@ import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-IFrame,
-IGroup,
-IImage,
-IImageStyle,
-IParagraph,
-IShape,
-IText,
-ITmp,
+  IFrame,
+  IGroup,
+  IImage,
+  IImageStyle,
+  IParagraph,
+  IShape,
+  IText,
+  ITmp,
 } from '@/interfaces/layer'
 import { IListModuleState } from '@/interfaces/module'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
@@ -17,6 +17,7 @@ import { Itheme } from '@/interfaces/theme'
 import assetPanel from '@/store/module/assetPanel'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
+import canvasResize from '@/store/module/canvasResize'
 import cmWV from '@/store/module/cmWV'
 import color from '@/store/module/color'
 import font from '@/store/module/font'
@@ -48,11 +49,11 @@ import brushPasteResized from '@img/svg/brush-paste-resized.svg'
 import { throttle } from 'lodash'
 import { GetterTree, MutationTree, createStore } from 'vuex'
 import {
-FunctionPanelType,
-IEditorState,
-ISpecLayerData,
-LayerType,
-SidebarPanelType,
+  FunctionPanelType,
+  IEditorState,
+  ISpecLayerData,
+  LayerType,
+  SidebarPanelType,
 } from './types'
 import { IFullPageConfig } from '@/interfaces/fullPage'
 import payment from '@/store/module/payment'
@@ -161,7 +162,7 @@ const getDefaultState = (): IEditorState => ({
     type: 'none',
     params: {}
   },
-  disableLayerAction: false,
+  disableLayerAction: '',
   controlState: { type: '' }
 })
 
@@ -399,7 +400,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   getFullPageParams(state: IEditorState): IFullPageConfig['params'] {
     return state.fullPageConfig.params
   },
-  getDisableLayerAction(state: IEditorState): boolean {
+  getDisableLayerAction(state: IEditorState) {
     return state.disableLayerAction
   },
   getControlState(state: IEditorState) {
@@ -1576,7 +1577,6 @@ const mutations: MutationTree<IEditorState> = {
     payload: { pageIndex: number; contentScaleRatio: number },
   ) {
     const { pageIndex, contentScaleRatio } = payload
-    console.warn('contentScaleRatio4 page', pageIndex, contentScaleRatio)
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
   UPDATE_RWD(state: IEditorState) {
@@ -1621,7 +1621,7 @@ const mutations: MutationTree<IEditorState> = {
       params: {}
     }
   },
-  SET_disableLayerAction(state: IEditorState, disableLayerAction: boolean) {
+  SET_disableLayerAction(state: IEditorState, disableLayerAction: IEditorState['disableLayerAction']) {
     state.disableLayerAction = disableLayerAction
   }
 }
@@ -1651,6 +1651,7 @@ export type IStoreRoot = IEditorState & {
   imgControl: typeof imgControl.state
   webView: typeof webView.state
   payment: typeof payment.state
+  canvasResize: typeof canvasResize.state
 }
 const store = createStore({
   state: state as IStoreRoot,
@@ -1678,7 +1679,8 @@ const store = createStore({
     fontTag,
     imgControl,
     webView,
-    payment
+    payment,
+    canvasResize,
   },
 })
 export default store

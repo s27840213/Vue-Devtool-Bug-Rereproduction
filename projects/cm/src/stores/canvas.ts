@@ -15,6 +15,7 @@ export interface ICanvasState {
   canvas: HTMLCanvasElement | null
   canvasCtx: CanvasRenderingContext2D | null
   currCanvasImageElement: HTMLImageElement
+  tmpCanvasDataUrl: string
   isAutoFilling: boolean
   drawingColor: string
 }
@@ -24,7 +25,7 @@ const MAX_STEP_COUNT = 20
 export const useCanvasStore = defineStore('canvas', {
   state: (): ICanvasState => ({
     canvasMode: 'brush',
-    brushSize: 16,
+    brushSize: 125,
     resultCanvas: null as unknown as HTMLCanvasElement,
     loading: false,
     isProcessingStepsQueue: false,
@@ -36,6 +37,7 @@ export const useCanvasStore = defineStore('canvas', {
     isDrawing: false,
     canvas: null as unknown as HTMLCanvasElement,
     canvasCtx: null as unknown as CanvasRenderingContext2D,
+    tmpCanvasDataUrl: '',
     currCanvasImageElement: new Image(),
     isAutoFilling: false,
     drawingColor: '#FF7262',
@@ -49,6 +51,7 @@ export const useCanvasStore = defineStore('canvas', {
     },
   },
   actions: {
+    //
     setCanvasStoreState(props: Partial<ICanvasState>) {
       const newState = props
       const keys = Object.keys(newState) as Array<keyof ICanvasState>
@@ -57,6 +60,9 @@ export const useCanvasStore = defineStore('canvas', {
           ;(this[key] as unknown) = newState[key]
         }
       })
+    },
+    setTmpCanvasDataUrl(dataUrl: string) {
+      this.tmpCanvasDataUrl = dataUrl
     },
     pushStep(blob: Blob) {
       this.steps.length = this.currStep + 1

@@ -23,7 +23,8 @@ To solve problem that i18n alley will not work when *Monorepo Workspace* enable,
           "tools/i18n-tool/result",
           "../../tools/i18n-tool/result"
         ],
-        "tailwindCSS.experimental.configFile": "../../packages/tailwind-lib/tailwind.config.cjs"
+        "tailwindCSS.experimental.configFile": "../../packages/tailwind-lib/tailwind.config.cjs",
+        "scss.lint.unknownAtRules": "ignore"
       }
     }
     ```

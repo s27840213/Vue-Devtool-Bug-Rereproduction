@@ -20,7 +20,7 @@ div(class="share-template")
           svg-icon(v-if="selectedPages.size === pagesState.length" iconName="check" iconColor="white" iconWidth="20.7px")
         div(class="share-template__action__select__text text-white body-SM") {{ strToggleSelectAll }}
       div(class="share-template__action__btn" :class="{disabled: selectedPages.size === 0}" @click="() => selectedPages.size > 0 && currAction?.action()")
-        svg-icon(:iconName="currAction?.iconName" iconWidth="24px")
+        svg-icon(v-if="currAction" :iconName="currAction?.iconName" iconWidth="24px")
         div(class="share-template__action__btn__text body-SM no-wrap") {{ currAction?.title }}
   template(v-else)
     div(class="share-template__preview" ref="preview")

@@ -12,13 +12,14 @@ div(class="panel-text-effect")
         @click="onEffectClick(currCategory, effect)")
       div(class="panel-text-effect__effects__icon-bg")
       svg-icon(v-if="['custom-fill-img', 'none'].includes(effect.key)"
-              :iconName="effectIcon(currCategory, effect).name"
-              :iconWidth="effectIcon(currCategory, effect).size"
-              class="panel-text-effect__effects--icon" :iconColor="theme === 'dark' ? 'white' : 'black-2'")
-      img(v-else :src="effectIcon(currCategory, effect).name"
+              class="panel-text-effect__effects--icon"
+              :iconName="effect.icon"
+              :iconWidth="effect.size"
+              :iconColor="theme === 'dark' ? 'white' : 'black-2'")
+      img(v-else :src="effect.icon"
           class="panel-text-effect__effects--icon"
-          :width="effectIcon(currCategory, effect).size"
-          :height="effectIcon(currCategory, effect).size")
+          :width="effect.size"
+          :height="effect.size")
       pro-item(v-if="effect.plan" theme="roundedRect")
       div(v-if="currEffect?.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")

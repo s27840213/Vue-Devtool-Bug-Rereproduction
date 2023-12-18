@@ -270,6 +270,7 @@ export default defineComponent({
       useMobileEditor: 'getUseMobileEditor',
       showPcPagePreivew: 'page/getIsShowPagePreview',
       controllerHidden: 'webView/getControllerHidden',
+      layerOffset: 'canvasResize/getLayerOffset'
     }),
     ...vuexUtils.mapGetters('stk', {
       isDuringCopy: false,
@@ -305,7 +306,7 @@ export default defineComponent({
       const outline = this.outlineStyles()
       const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, _f),
+        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, _f, { offset: this.layerOffset }),
         {
           outline,
           outlineOffset: `-${1 * (100 / this.scaleRatio) * this.contentScaleRatio}px`,
@@ -532,13 +533,15 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          if (this.getLayerType === LayerType.image && this.prePrimaryLayerIndex === -1 && !this.$store.state.disableLayerAction) {
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-            if (generalUtils.isCm) {
-              eventUtils.emit(PanelEvent.switchTab, 'crop-flip')
-            } else {
-              eventUtils.emit(PanelEvent.switchTab, 'crop')
-            }
+          if (this.getLayerType !== LayerType.image ||
+            this.prePrimaryLayerIndex !== -1 ||
+            this.$store.state.disableLayerAction === 'all') return
+          
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+          if (generalUtils.isCm) {
+            eventUtils.emit(PanelEvent.switchTab, 'crop-flip')
+          } else {
+            eventUtils.emit(PanelEvent.switchTab, 'crop')
           }
         }
       })
@@ -918,10 +921,6 @@ export default defineComponent({
 .pos-left {
   position: absolute;
   left: 0;
-}
-
-.spiner {
-  animation: rotation 0.5s infinite linear;
 }
 
 @keyframes rotation {

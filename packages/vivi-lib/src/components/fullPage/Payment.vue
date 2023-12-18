@@ -49,8 +49,8 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
     div(class="payment__trial")
       span(class="payment__trial__text caption-LG") {{ strTrial }}
       toggle-btn(class="payment__trial__toggle" v-model="isTrialToggled" :width="42" :height="24" :colorActive="isTrialDisabled ? 'black-3' : 'alarm'" :colorInactive="isTrialDisabled ? 'black-3' : 'black-4'")
-    div(class="payment__btn-subscribe" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
-      svg-icon(v-if="pending.purchase" class="spinner" iconName="spiner" iconWidth="20px")
+    div(class="payment__btn-subscribe flex-center" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
+      svg-icon(v-if="pending.purchase" class="spinner animate-spin" iconName="spinner" iconWidth="20px")
       div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
     div(class="payment__notice text-black-5" ref="notice")
       div(class="payment__notice__text body-XXS" ref="txtNotice") {{ strNotice }}
@@ -77,7 +77,7 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
           template(v-else) -
   Transition(name="fade")
     div(v-if="pending.info || pending.restore" class="payment__spinner")
-      svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
+      svg-icon(class="spinner animate-spin" iconName="spinner" iconWidth="24px")
 </template>
 
 <script lang="ts">
@@ -640,14 +640,7 @@ export default defineComponent({
     }
     .spinner {
       color: #D9D9D9;
-      animation: translate-rotate 0.5s infinite linear;
       position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      @include app(cm) {
-        color: #050505;
-      }
     }
   }
   &__notice {
@@ -794,7 +787,6 @@ export default defineComponent({
     }
     .spinner {
       color: #D9D9D9;
-      animation: rotate 0.5s infinite linear;
     }
   }
 }
@@ -807,18 +799,6 @@ export default defineComponent({
   &-enter-from,
   &-leave-to {
     opacity: 0;
-  }
-}
-
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes translate-rotate {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 

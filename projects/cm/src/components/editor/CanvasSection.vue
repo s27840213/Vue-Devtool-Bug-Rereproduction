@@ -31,7 +31,7 @@ const { containerDOM, wrapperDOM } = toRefs(props)
 
 const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
-const { pageSize, maskDataUrl } = storeToRefs(editorStore)
+const { pageSize } = storeToRefs(editorStore)
 
 const canvasStyle = computed(() => {
   const { pinchScale, isPinchingEditor } = store.state.mobileEditor
@@ -71,10 +71,6 @@ const showCanvas = computed(() => {
   return !isDuringCopy.value
 })
 // #endregion
-
-onMounted(() => {
-  restoreCanvas()
-})
 
 const getCanvasDataUrl = () => {
   if (!canvasRef.value) return ''
