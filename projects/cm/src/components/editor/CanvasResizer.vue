@@ -1,22 +1,24 @@
 <template lang="pug">
 div(ref="containerRef"
-    class="canvas-resizer overflow-hidden relative"
+    class="canvas-resizer overflow-hidden relative select-none"
     v-touch
     @panstart.stop="panStart"
     @panmove.stop="panMove")
-  page-content(class="absolute"
+  page-content(class="absolute select-none"
               :style="translateStyles"
               :config="pageState.config"
               :pageIndex="pageIndex"
               :contentScaleRatio="contentScaleRatio"
               :noBg="noBg")
-  div(class="absolute"
-      :style="{...sizeStyles, ...translateStyles}")
+  div(class="absolute select-none"
+      :style="{...sizeStyles, ...translateStyles}"
+      @touchstart.prevent)
     div(v-for="controller in controllers"
         :key="controller.key"
-        class="absolute"
-        :class="CONTROLLER_CONFIG.color"
+        class="absolute select-none"
+        :class="controller.color"
         :style="controller.styles"
+        @touchstart.prevent
         @pointerdown.prevent.stop="resizeStart($event, controller.params)")
 </template>
 
@@ -99,59 +101,70 @@ interface IControllerConfig {
     vertical: direction
     horizontal: direction
   }
+  color: string
 }
 
-const controllers = ref<IControllerConfig[]>(Array(12).fill(0).map((_, index) => {
-  const isResizer = index < 4
-  const isScalerX = index < 8 && !isResizer
-  const subIndex = index % 4
-  const equivalentIndex = isScalerX ? (subIndex < 2 ? 0 : 2) : (subIndex < 2 ? 1 : 3)
-  const resizerXs = [50, 100, 50, 0]
-  const resizerYs = [0, 50, 100, 50]
-  const scalerPs = [0, 100, 100, 0]
-  const marginY = (subIndex: number) => (subIndex % 2 === 0 ? (subIndex - 1) : 0)
-  const marginX = (subIndex: number) => (subIndex % 2 !== 0 ? (2 - subIndex) : 0)
-  return isResizer ? {
-    key: `controller-${subIndex}`,
-    styles: {
-      width: `${subIndex % 2 === 0 ? CONTROLLER_CONFIG.length : CONTROLLER_CONFIG.width}px`,
-      height: `${subIndex % 2 === 0 ? CONTROLLER_CONFIG.width : CONTROLLER_CONFIG.length}px`,
-      top: `calc(${resizerYs[subIndex]}% + ${marginY(subIndex) * CONTROLLER_CONFIG.margin}px)`,
-      left: `calc(${resizerXs[subIndex]}% + ${marginX(subIndex) * CONTROLLER_CONFIG.margin}px)`,
-      transform: `translate(${resizerXs[subIndex] - 100}%, ${resizerYs[subIndex] - 100}%)`,
-    },
-    params: {
-      vertical: (subIndex % 2 === 0 ? (subIndex - 1) : 0) as direction,
-      horizontal: (subIndex % 2 !== 0 ? (2 - subIndex) : 0) as direction,
-    },
-  } : isScalerX ? {
-    key: `controller-${subIndex}`,
-    styles: {
-      width: `${CONTROLLER_CONFIG.length}px`,
-      height: `${CONTROLLER_CONFIG.width}px`,
-      top: `calc(${resizerYs[equivalentIndex]}% + ${marginY(equivalentIndex) * CONTROLLER_CONFIG.margin}px)`,
-      left: `calc(${scalerPs[subIndex]}% + ${(scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)}px)`,
-      transform: `translate(-${scalerPs[subIndex]}%, ${resizerYs[equivalentIndex] - 100}%)`,
-    },
-    params: {
-      vertical: (equivalentIndex - 1) as direction,
-      horizontal: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
-    },
-  } : {
-    key: `controller-${subIndex}`,
-    styles: {
-      width: `${CONTROLLER_CONFIG.width}px`,
-      height: `${CONTROLLER_CONFIG.length}px`,
-      top: `calc(${scalerPs[subIndex]}% + ${(scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)}px)`,
-      left: `calc(${resizerXs[equivalentIndex]}% + ${marginX(equivalentIndex) * CONTROLLER_CONFIG.margin}px)`,
-      transform: `translate(${resizerXs[equivalentIndex] - 100}%, -${scalerPs[subIndex]}%)`,
-    },
-    params: {
-      vertical: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
-      horizontal: (2 - equivalentIndex) as direction,
-    },
-  }
-}))
+const getControllers = (isTouchArea = false): IControllerConfig[] => {
+  return Array(12).fill(0).map((_, index) => {
+    const isResizer = index < 4
+    const isScalerX = index < 8 && !isResizer
+    const subIndex = index % 4
+    const equivalentIndex = isScalerX ? (subIndex < 2 ? 0 : 2) : (subIndex < 2 ? 1 : 3)
+    const resizerXs = [50, 100, 50, 0]
+    const resizerYs = [0, 50, 100, 50]
+    const scalerPs = [0, 100, 100, 0]
+    const marginY = (subIndex: number) => (subIndex % 2 === 0 ? (subIndex - 1) : 0)
+    const marginX = (subIndex: number) => (subIndex % 2 !== 0 ? (2 - subIndex) : 0)
+    return isResizer ? {
+      key: `controller-${subIndex}`,
+      styles: {
+        width: `${subIndex % 2 === 0 ? CONTROLLER_CONFIG.length : CONTROLLER_CONFIG.width}px`,
+        height: `${subIndex % 2 === 0 ? CONTROLLER_CONFIG.width : CONTROLLER_CONFIG.length}px`,
+        top: `calc(${resizerYs[subIndex]}% + ${marginY(subIndex) * CONTROLLER_CONFIG.margin}px)`,
+        left: `calc(${resizerXs[subIndex]}% + ${marginX(subIndex) * CONTROLLER_CONFIG.margin}px)`,
+        transform: `translate(${resizerXs[subIndex] - 100}%, ${resizerYs[subIndex] - 100}%)${isTouchArea ? ` scale${subIndex % 2 === 0 ? 'Y' : 'X'}(4)` : ''}`,
+      },
+      color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
+      params: {
+        vertical: (subIndex % 2 === 0 ? (subIndex - 1) : 0) as direction,
+        horizontal: (subIndex % 2 !== 0 ? (2 - subIndex) : 0) as direction,
+      },
+    } : isScalerX ? {
+      key: `controller-${subIndex}`,
+      styles: {
+        width: `${CONTROLLER_CONFIG.length}px`,
+        height: `${CONTROLLER_CONFIG.width}px`,
+        top: `calc(${resizerYs[equivalentIndex]}% + ${marginY(equivalentIndex) * CONTROLLER_CONFIG.margin}px)`,
+        left: `calc(${scalerPs[subIndex]}% + ${(scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)}px)`,
+        transform: `translate(-${scalerPs[subIndex]}%, ${resizerYs[equivalentIndex] - 100}%)${isTouchArea ? ' scaleY(4)' : ''}`,
+      },
+      color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
+      params: {
+        vertical: (equivalentIndex - 1) as direction,
+        horizontal: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
+      },
+    } : {
+      key: `controller-${subIndex}`,
+      styles: {
+        width: `${CONTROLLER_CONFIG.width}px`,
+        height: `${CONTROLLER_CONFIG.length}px`,
+        top: `calc(${scalerPs[subIndex]}% + ${(scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)}px)`,
+        left: `calc(${resizerXs[equivalentIndex]}% + ${marginX(equivalentIndex) * CONTROLLER_CONFIG.margin}px)`,
+        transform: `translate(${resizerXs[equivalentIndex] - 100}%, -${scalerPs[subIndex]}%)${isTouchArea ? ' scaleX(4)' : ''}`,
+      },
+      color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
+      params: {
+        vertical: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
+        horizontal: (2 - equivalentIndex) as direction,
+      },
+    }
+  })
+}
+
+const controllers = ref<IControllerConfig[]>([
+  ...getControllers(),
+  ...getControllers(true)
+])
 // #endregion
 
 // #region styles
@@ -214,6 +227,8 @@ const panMove = (event: AnyTouchEvent) => {
 
 // #region resize
 vuex.commit('canvasResize/SET_initSize', { width: pageSize.value.width, height: pageSize.value.height })
+const MIN_SIZE = 512
+const MAX_SIZE = 2048
 
 const isResizing = ref(false)
 const controllingParams = ref({ vertical: 0, horizontal: 0 } as IControllerConfig['params'])
@@ -235,23 +250,11 @@ const resizeStart = (event: PointerEvent, params: IControllerConfig['params']) =
 
 const resizing = (event: PointerEvent) => {
   window.clearTimeout(pressingTimer)
-  const { vertical, horizontal } = controllingParams.value
+  const { horizontal, vertical } = controllingParams.value
 
   // START: special handler for edging
-  const higher = renderedSize.value.height > containerHeight.value - 2 * MIN_PADDING_Y
   const wider = renderedSize.value.width > containerWidth.value - 2 * MIN_PADDING_X
-  if (higher) {
-    if (vertical < 0) {
-      initPointerPos.y = containerY.value + MIN_PADDING_Y
-      initSize.height = pageSize.value.height
-      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
-    }
-    if (vertical > 0) {
-      initPointerPos.y = containerY.value + containerHeight.value - MIN_PADDING_Y
-      initSize.height = pageSize.value.height
-      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
-    }
-  }
+  const higher = renderedSize.value.height > containerHeight.value - 2 * MIN_PADDING_Y
   if (wider) {
     if (horizontal < 0) {
       initPointerPos.x = containerX.value + MIN_PADDING_X
@@ -264,6 +267,18 @@ const resizing = (event: PointerEvent) => {
       initLayerOffset.x = vuex.getters['canvasResize/getLayerOffset'].x
     }
   }
+  if (higher) {
+    if (vertical < 0) {
+      initPointerPos.y = containerY.value + MIN_PADDING_Y
+      initSize.height = pageSize.value.height
+      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
+    }
+    if (vertical > 0) {
+      initPointerPos.y = containerY.value + containerHeight.value - MIN_PADDING_Y
+      initSize.height = pageSize.value.height
+      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
+    }
+  }
   // END
 
   const pointerPos = mouseUtils.getMouseAbsPoint(event)
@@ -273,6 +288,30 @@ const resizing = (event: PointerEvent) => {
   }
   const sizeDiff = { width: 0, height: 0 }
   const layerOffset = { x: 0, y: 0 }
+
+  if (horizontal !== 0) {
+    let amount = diff.x * horizontal
+
+    // START: calculate non-uniform scaling equivalent move amount for
+    //  inconsistent behaviors between size reaching edges or not
+    const distance = Math.abs(renderedSize.value.width - (containerWidth.value - 2 * MIN_PADDING_X))
+    if (!wider) {
+      if (amount > distance / 2) {
+        const over = amount - (distance / 2)
+        amount = distance + over
+      } else {
+        amount *= 2
+      }
+    } else {
+      if (amount < -distance) {
+        const over = distance + amount
+        amount = -distance + over * 2
+      }
+    }
+    // END
+
+    sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
+  }
 
   if (vertical !== 0) {
     let amount = diff.y * vertical
@@ -296,56 +335,39 @@ const resizing = (event: PointerEvent) => {
     // END
 
     sizeDiff.height = Math.trunc(amount / contentScaleRatio.value)
-    if (vertical < 0) {
-      layerOffset.y = Math.trunc(amount / contentScaleRatio.value)
-    }
   }
-  if (horizontal !== 0) {
-    let amount = diff.x * horizontal
 
-    // START: calculate non-uniform scaling equivalent move amount for
-    //  inconsistent behaviors between size reaching edges or not
-    const distance = Math.abs(renderedSize.value.width - (containerWidth.value - 2 * MIN_PADDING_X))
-    if (!wider) {
-      if (amount > distance / 2) {
-        const over = amount - (distance / 2)
-        amount = distance + over
-      } else {
-        amount *= 2
-      }
-    } else {
-      if (amount < -distance) {
-        const over = distance + amount
-        amount = -distance + over * 2
-      }
-    }
-    // END
-
-    sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
-    if (horizontal < 0) {
-      layerOffset.x = Math.trunc(amount / contentScaleRatio.value)
-    }
+  const newWidth = initSize.width + sizeDiff.width
+  const newHeight = initSize.height + sizeDiff.height
+  const finalWidth = Math.max(Math.min(newWidth, MAX_SIZE), MIN_SIZE)
+  const finalHeight = Math.max(Math.min(newHeight, MAX_SIZE), MIN_SIZE)
+  if (horizontal < 0) {
+    layerOffset.x = finalWidth - initSize.width
   }
+  if (vertical < 0) {
+    layerOffset.y = finalHeight - initSize.height
+  }
+
   pageUtils.updatePageProps({
-    width: initSize.width + sizeDiff.width,
-    height: initSize.height + sizeDiff.height,
+    width: finalWidth,
+    height: finalHeight,
   })
   vuex.commit('canvasResize/SET_layerOffset', {
     x: initLayerOffset.x + layerOffset.x,
     y: initLayerOffset.y + layerOffset.y
   })
   nextTick(() => {
-    if (vertical < 0 && diff.y < 0 && translates.value.y < MIN_PADDING_Y) {
-      offset.y = MIN_PADDING_Y - pos.y
-    }
     if (horizontal < 0 && diff.x < 0 && translates.value.x < MIN_PADDING_X) {
       offset.x = MIN_PADDING_X - pos.x
     }
-    if (vertical > 0 && diff.y > 0 && translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y) {
-      offset.y = containerHeight.value - renderedSize.value.height - MIN_PADDING_Y - pos.y
+    if (vertical < 0 && diff.y < 0 && translates.value.y < MIN_PADDING_Y) {
+      offset.y = MIN_PADDING_Y - pos.y
     }
     if (horizontal > 0 && diff.x > 0 && translates.value.x < containerWidth.value - renderedSize.value.width - MIN_PADDING_X) {
       offset.x = containerWidth.value - renderedSize.value.width - MIN_PADDING_X - pos.x
+    }
+    if (vertical > 0 && diff.y > 0 && translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y) {
+      offset.y = containerHeight.value - renderedSize.value.height - MIN_PADDING_Y - pos.y
     }
   })
   pressingTimer = window.setTimeout(() => resizing(event), 100)
@@ -360,3 +382,11 @@ const resizeEnd = (event: PointerEvent) => {
 // #endregion
 
 </script>
+
+<style lang="scss">
+.canvas-resizer {
+  & * {
+    -webkit-touch-callout: none;
+  }
+}
+</style>
