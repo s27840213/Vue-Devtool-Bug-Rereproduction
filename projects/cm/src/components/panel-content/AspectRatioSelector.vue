@@ -59,7 +59,7 @@ const selectedType = ref('9:16')
 const bus = useEventBus('editor')
 
 const updateEditingSectionSize = (width: number, height: number) => {
-  pageUtils.setPageSize(0, width, height)
+  pageUtils.setPageSize(layerUtils.pageIndex, width, height)
   updateCanvasSize()
 }
 
@@ -71,7 +71,7 @@ const selectAspectRatio = (type: string) => {
       updateEditingSectionSize(1600, 1600 / imgAspectRatio.value)
     } else {
       updateEditingSectionSize(1600 * imgAspectRatio.value, 1600)
-      layerUtils.updateLayerStyles(0, 0, {
+      layerUtils.updateLayerStyles(layerUtils.pageIndex, 0, {
         width: 1600 * imgAspectRatio.value,
         height: 1600,
       })
@@ -108,7 +108,8 @@ const updateLayerStyleToFitPage = () => {
 
   if (editorType.value === 'magic-combined') {
     const imgs = [
-      layerUtils.getLayer(0, 0), layerUtils.getLayer(0, 1)
+      layerUtils.getLayer(layerUtils.pageIndex, 0),
+      layerUtils.getLayer(layerUtils.pageIndex, 1),
     ] as IImage[]
     const portrait = selectedType.value === '9:16'
 
@@ -122,12 +123,12 @@ const updateLayerStyleToFitPage = () => {
         height: img.styles.initHeight,
       }, commonStyles)
 
-      layerUtils.updateLayerStyles(0, i, {
+      layerUtils.updateLayerStyles(layerUtils.pageIndex, i, {
         ...commonStyles,
         imgWidth,
         imgHeight,
-        initWidth: imgWidth,
-        initHeight: imgHeight,
+        initWidth: commonStyles.width,
+        initHeight: commonStyles.height,
         imgX,
         imgY,
         x: i === 1 && !portrait ? pageSize.value.width * (2 / 3) : 0,
@@ -138,12 +139,12 @@ const updateLayerStyleToFitPage = () => {
   }
 
   // For other editor types.
-  const img = layerUtils.getLayer(0, 0) as IImage
+  const img = layerUtils.getLayer(layerUtils.pageIndex, 0) as IImage
   const { width, height } = mathUtils.calcFit('contain', {
     width: img.styles.initWidth,
     height: img.styles.initHeight,
   }, pageSize.value)
-  layerUtils.updateLayerStyles(0, 0, {
+  layerUtils.updateLayerStyles(layerUtils.pageIndex, 0, {
     width,
     height,
     imgWidth: width,
