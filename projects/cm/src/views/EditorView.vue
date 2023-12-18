@@ -13,6 +13,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      div(v-else-if="isResizingCanvas" class="text-white typo-h5 whitespace-nowrap")
+        span {{ `${pageSize.width} x ${pageSize.height}` }}
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
@@ -47,12 +49,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         v-slot="{ navigate }")
         svg-icon(
           iconColor="white"
-          iconName="home"
+          iconName="cm_home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
+  canvas-resizer(
+    v-if="isResizingCanvas"
+    :pageIndex="layerUtils.pageIndex"
+    :pageState="pageState[layerUtils.pageIndex]"
+    :noBg="isDuringCopy && isNoBg")
   div(
-    v-if="!inSavingState"
-    class="editor-container flex justify-center items-center relative"
+    v-else-if="!inSavingState"
+    class="editor-container flex-center relative"
     ref="editorContainerRef"
     id="mobile-editor__content"
     @pointerdown="selectStart"
@@ -60,7 +67,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
-    div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
+    div(class="w-full h-full box-border flex-center" @click.self="outerClick")
       div(
         id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
@@ -74,8 +81,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           nu-page(
             class="z-page"
             v-show="!inGenResultState"
-            :pageIndex="0"
-            :pageState="pageState[0]"
+            :pageIndex="layerUtils.pageIndex"
+            :pageState="pageState[layerUtils.pageIndex]"
             :overflowContainer="editorContainerRef"
             :noBg="isDuringCopy && isNoBg"
             :hideHighlighter="true")
@@ -92,13 +99,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
+      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping && !showBrushOptions"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
   div(v-else class="editor-view__saving-state")
-    div(
-      class="w-full h-full flex flex-col gap-8 justify-center items-center overflow-hidden rounded-8 p-16 box-border")
+    div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
       div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
@@ -127,7 +133,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //-     autoplay
         //-     mutes
         //-     :src="generatedResults[currGenResultIndex].video")
-      div(class="flex justify-between items-center gap-10")
+      div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
           :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
@@ -136,9 +142,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="w-8 h-8 rounded-full transition-colors"
           :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
           @click="() => (showVideo = false)")
-    div(class="flex justify-between items-center w-full px-24 py-8 box-border")
+    div(class="flex-between-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
-        div(class="flex justify-center items-center rounded-full bg-yellow-cm aspect-square p-4")
+        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
           svg-icon(
             iconName="crown"
             :iconColor="'dark-6'"
@@ -153,9 +159,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
-    div(class="flex justify-between items-center w-full px-24 py-8 box-border")
+    div(class="flex-between-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
-        div(class="flex justify-center items-center rounded-full bg-yellow-cm aspect-square p-4")
+        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
           svg-icon(
             iconName="crown"
             :iconColor="'dark-6'"
@@ -180,6 +186,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import CanvasResizer from '@/components/editor/CanvasResizer.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
@@ -240,6 +247,7 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
 
 const { ids } = useGenImageUtils()
 
@@ -276,6 +284,7 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
+  showBrushOptions,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
@@ -417,7 +426,7 @@ const fitPage = (ratio: number) => {
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value) return
+    if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
     fitPage(newVal)
   },
 )

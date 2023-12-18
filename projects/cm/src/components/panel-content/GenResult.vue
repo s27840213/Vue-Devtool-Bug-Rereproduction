@@ -12,7 +12,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       :px="4"
       :py="4")
       div(
-        class="gen-result__block rounded-8 bg-dark-6 flex flex-col justify-center items-center"
+        class="gen-result__block rounded-8 bg-dark-6 flex-center flex-col"
         :class="{ 'pointer-events-none': isGenerating }"
         @click="showMoreRes")
         svg-icon(
@@ -48,7 +48,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
                 :src="appendSizeQuery(genResult.url)")
           div(v-if="!genResult.url.length" class="loading-block")
           div(class="absolute top-0 left-0 rounded-8 w-full h-full bg-dark-3 z-1")
-  div(class="flex flex-col gap-8 justify-between items-center")
+  div(class="flex-between-center flex-col gap-8")
     nubtn(
       size="mid-full"
       :disabled="!generatedResults[currGenResultIndex] || generatedResults[currGenResultIndex].url.length === 0"

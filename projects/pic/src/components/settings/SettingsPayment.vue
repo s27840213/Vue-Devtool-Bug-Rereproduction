@@ -83,6 +83,7 @@ import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
+import { IColorKeys } from '@nu/vivi-lib/interfaces/color'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -128,7 +129,7 @@ export default defineComponent({
       myPrice: 'myPrice'
     }),
     isProIcon(): boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
-    proIconColor(): string { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
+    proIconColor(): IColorKeys { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
     isFail(): boolean { return this.status === 'Fail' },
     isErrorStatus(): boolean { return ['-1', '-2', '-3', '-4', 'Transient'].includes(this.status) },
     showDueDay(): boolean { return ['Deleted', 'Canceled'].includes(this.status) },

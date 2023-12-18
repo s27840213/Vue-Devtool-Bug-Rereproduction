@@ -11,6 +11,7 @@ import textUtils from '@/utils/textUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { cloneDeep } from 'lodash'
 import { nextTick } from 'vue'
+import logUtils from './logUtils'
 
 window.testEvent = () => {
   window.location.pathname = 'nativeevttest'
@@ -21,6 +22,7 @@ class TestUtils {
   timer: Record<string, {
     start: number
     notify: boolean
+    setToLog: boolean
   }>
 
   constructor() {
@@ -28,12 +30,17 @@ class TestUtils {
     this.toShowTouchPoint = false
   }
 
-  start(key: string, notify = true) {
+  start(key: string, { notify = true, setToLog = false } = {}) {
     this.timer[key] = {
       start: (new Date()).getTime(),
-      notify
+      notify,
+      setToLog,
     }
-    console.log(`${key}: start`)
+    const content = `${key}: start`
+    console.log(content)
+    if (setToLog) {
+      logUtils.setLog(content)
+    }
   }
 
   log(key: string, msg: string) {
@@ -46,6 +53,9 @@ class TestUtils {
         group: 'copy',
         text: result
       })
+    }
+    if (timer.setToLog) {
+      logUtils.setLog(result)
     }
   }
 

@@ -11,14 +11,13 @@ div(class="editing-options w-full")
         iconHeight="32px"
         :sameSize="false"
         @click="chooseSelectionOption(shape)")
-  div(class="flex justify-between items-center box-border px-24")
-    nubtn(
-      theme="secondary"
-      @click="cancel") {{ $t('NN0203') }}
-    span(class="typo-h6 text-white") {{ $t('CM0051') }}
-    nubtn(@click="apply") {{ $t('CM0061') }}
+  footer-bar(class="box-border px-24"
+            :title="$t('CM0051')"
+            @cancel="cancel"
+            @apply="apply")
 </template>
 <script setup lang="ts">
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'

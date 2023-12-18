@@ -5,14 +5,14 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
-  div(v-if="atMainPage && !isDesignOpen" class="w-full flex justify-between items-center box-border px-16"
-    :style="{paddingTop: `${statusBarHeight}px`}")
+  div(v-if="atMainPage && !isDesignOpen" class="w-full flex-between-center box-border px-16"
+    :style="{height: `${statusBarHeight + 48}px`, paddingTop: `${statusBarHeight}px`}")
     router-link(
       custom
       :to="'/'"
       v-slot="{ navigate }")
       img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
-    div(class="flex justify-center items-center gap-18")
+    div(class="flex-center gap-18")
       transition(
           name="rotate-right-in"
           mode="out-in")
@@ -26,7 +26,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="router-view box-border min-h-full row-start-2 row-end-3"
-    :class="{ 'pb-12': !atNonUI }"
+    :class="{ 'pb-12': !atNonUI  && !atMyDesign}"
     v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
@@ -84,7 +84,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       modal-card(class="pointer-events-auto")
     spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
     notifications(
-      class="notification flex justify-center items-center "
+      class="notification flex-center "
       position="center center"
       group="success"
       :max="2"
@@ -94,7 +94,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
     notifications(
-      class="notification flex justify-center items-center "
+      class="notification flex-center "
       position="center center"
       group="error"
       :max="2"
@@ -104,7 +104,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           svg-icon(iconName="ok-hand")
           span( v-html="item.text")
     notifications(
-      class="notification flex justify-center items-center "
+      class="notification flex-center "
       position="center center"
       group="warn"
       :max="2"
@@ -139,6 +139,7 @@ import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
+import CanvasOptions from './components/panel-content/CanvasOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
@@ -203,6 +204,8 @@ const bottomPanelComponent = computed(() => {
       return HomeTab
     case inAspectRatioState.value:
       return AspectRatioSelector
+    case vuex.getters['canvasResize/getIsResizing']:
+      return CanvasOptions
     case showBrushOptions.value:
       return BrushOptions
     case showSelectionOptions.value:
@@ -375,7 +378,7 @@ router.isReady().then(() => {
   // and I will demo the problem to you - Alan
   position: absolute !important;
   &__content {
-    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex justify-center items-center gap-8;
+    @apply mt-12 w-fit typo-body-sm px-16 py-10 box-border rounded-full flex-center gap-8;
   }
 }
 </style>

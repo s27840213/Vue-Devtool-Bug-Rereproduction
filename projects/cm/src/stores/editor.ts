@@ -3,13 +3,14 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import router from '@/router'
 import type {
-  DescriptionPanel,
-  EditorFeature,
-  EditorStates,
-  EditorType,
-  GenImageOptions,
-  HiddenMessageStates,
-  PowerfulfillStates,
+DescriptionPanel,
+EditorFeature,
+EditorStates,
+EditorType,
+GenImageOptions,
+HiddenMessageStates,
+MagicCombinedStates,
+PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
@@ -21,6 +22,7 @@ import { defineStore } from 'pinia'
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
   'hidden-message': ['aspectRatio', 'editing', 'genResult', 'saving'] as HiddenMessageStates[],
+  'magic-combined': ['aspectRatio', 'editing', 'genResult', 'saving'] as MagicCombinedStates[],
 } as { [key in EditorType]: EditorStates }
 
 export interface IGenResult {

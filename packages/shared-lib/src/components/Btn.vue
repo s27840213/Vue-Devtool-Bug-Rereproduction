@@ -35,7 +35,7 @@ const component = defineComponent({
     },
     iconColor: {
       type: String as PropType<keyof typeof colorTable>,
-      default: '#fff',
+      default: 'white',
     },
     iconWidth: {
       type: String,

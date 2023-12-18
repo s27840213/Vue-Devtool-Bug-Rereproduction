@@ -22,7 +22,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   div(:class="{'nu-image__clipper': !imgControl}")
     div(class='nu-image__picture'
       :style="imgStyles()")
-      img(v-if="finalSrc" ref="img"
+      img(v-if="finalSrc" v-show="isShowImg" ref="img"
         :data-nu-image="`nu-image-${config.id}`"
         :style="flipStyles"
         class="nu-image__img full-size"
@@ -32,15 +32,15 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
-      svg(v-if="isAdjustImage && (!forRender || !$isTouchDevice())"
+      svg(v-if="isAdjustImage && finalSrc" v-show="isShowAdjustImg"
         :style="flipStyles"
-        class="nu-image__svg"
+        class="nu-image__svg pointer-events-none"
         :class="{'layer-flip': flippedAnimation() }"
         :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
         preserveAspectRatio="none"
         role="image")
         defs
-          filter(v-if="!isCurrLayerPinched" :id="filterId"
+          filter(:id="filterId"
             color-interpolation-filters="sRGB")
             component(v-for="(elm, idx) in svgFilterElms()"
               :key="`${filterId + idx}`"
@@ -50,7 +50,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        image(v-if="finalSrc" ref="adjust-img"
+        image(ref="adjust-img"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
@@ -78,6 +78,7 @@ import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -96,7 +97,6 @@ import { AxiosError } from 'axios'
 import { PropType, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import cmWVUtils from '@/utils/cmWVUtils'
 
 export default defineComponent({
   emits: ['onload'],
@@ -390,7 +390,10 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      controlState: 'getControlState'
+      isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
+      controlState: 'getControlState',
+      isImgCtrl: 'imgControl/isImgCtrl',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
     }),
     ...vuexUtils.mapState('stk', {
       isDuringCopy: false,
@@ -411,11 +414,29 @@ export default defineComponent({
       ) return false
       return true
     },
-    isCurrLayerPinched(): boolean {
+    // isCurrLayerPinched(): boolean {
+    //   const { controlState } = this
+    //   if (controlState.layerInfo) {
+    //     return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+    //   } else return false
+    // },
+    isShowImg(): boolean {
+      return !this.isAdjustImage || !this.isShowAdjustImg
+    },
+    isShowAdjustImg(): boolean {
+      // forRender img not apply filter
+      if (this.forRender) return false
+
+      if (this.$isTouchDevice()) {
+        return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
+          !this.isImgCtrl && !this.isBgImgCtrl
+      } else {
+        return this.isAdjustImage
+      }
+    },
+    isLayerCtrlling(): boolean {
       const { controlState } = this
-      if (controlState.layerInfo) {
-        return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
-      } else return false
+      return controlState.type !== '' && controlState.phase === 'moving'
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -526,7 +547,9 @@ export default defineComponent({
       const { width, height } = this.scaledConfig()
       const styles = {
         // in vivisticker the following code would lead the non-fluent UX
-        ...(!(this.$isStk || this.$isCm) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        // now the vvpic mobile not apply the code as well,
+        // we disable the svg filter as controlling
+        ...(this.$isPic && this.$isTouchDevice() && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,
@@ -534,8 +557,6 @@ export default defineComponent({
         height: `${height}px`
       } : {
         ...styles
-        // Fix the safari rendering bug, add the following code can fix it...
-        // transform: 'translate(0,0)'
       }
     },
     getImgDimension(): number | string {

@@ -1,7 +1,7 @@
 
 <template lang="pug">
 div(class="hidden-message-tutorial w-screen h-screen")
-  div(v-if="step < 4" class="relative w-fit flex flex-col justify-center items-center gap-19 mx-auto top-[20%] self-center")
+  div(v-if="step < 4" class="relative w-fit flex-center flex-col gap-19 mx-auto top-[20%] self-center")
     div(class="flex gap-8")
       div(class="w-full flex flex-col gap-8 items-end")
         img(
@@ -74,12 +74,12 @@ const updateStyles = () => {
 
 const imgA = computed(() => {
   if (step.value === 4) return ''
-  return require(`demo/hidden-message-demo-${step.value - 1}a.jpeg`)
+  return require(`demo/hidden-message-help-demo-${step.value - 1}a.jpeg`)
 })
 
 const imgB = computed(() => {
   if (step.value === 4) return ''
-  return require(`demo/hidden-message-demo-${step.value - 1}b.png`)
+  return require(`demo/hidden-message-help-demo-${step.value - 1}b.png`)
 })
 
 const text = computed(() => {

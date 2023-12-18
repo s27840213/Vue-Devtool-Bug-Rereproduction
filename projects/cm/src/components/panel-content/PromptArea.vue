@@ -1,28 +1,29 @@
 <template lang="pug">
 div(class="prompt-area w-full box-border px-24")
-  div(class="flex flex-col justify-center items-center relative" :class="{ 'pointer-events-none': preview }")
+  div(class="flex-center flex-col relative" :class="{ 'pointer-events-none': preview }")
     //- placeholder for absolute contents
     div(class="w-full" :style="{ height: `${mainHeight}px` }")
     //- main
     transition(:name="`fade-${isTypeSettings ? 'right' : 'left'}-in`")
       div(
         v-if="!isTypeSettings"
-        class="absolute w-full flex flex-col gap-16"
+        class="absolute w-full flex flex-col"
+        :class="editorType === 'magic-combined' ? 'gap-24' : 'gap-16'"
         ref="elMain")
         //- header bar
-        div(class="w-full grid grid-cols-3 justify-between relative")
-          div(class="w-fit")
-          span(class="text-yellow-0 typo-btn-lg") {{ title }}
-          div(class="w-fit")
-            svg-icon(
-              v-if="showSettingsIcon"
-              :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
-              class="text-yellow-0 absolute right-0 top-1/2 -translate-y-1/2"
-              @click="isGenSettings = !isGenSettings")
+        div(class="w-full relative flex-center")
+          span(:class="title.class") {{ title.label }}
+          svg-icon(
+            v-if="showSettingsIcon"
+            :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
+            class="text-yellow-0 absolute right-0"
+            @click="isGenSettings = !isGenSettings")
         //- content
         div(class="w-full relative")
+          span(v-if="editorType === 'magic-combined'" class="text-white typo-body-md") {{ $t('CM0132') }}
           textarea(
-            class="w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64 tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+            class="prompt-text-area tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
+            v-else
             :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
             :autofocus="!isDuringTutorial"
             v-model="promptText")
@@ -61,10 +62,10 @@ div(class="prompt-area w-full box-border px-24")
               iconWidth="24px"
               class="text-yellow-0 absolute left-0 top-1/2 -translate-y-1/2"
               @click="isSettings = false")
-          span(class="text-yellow-0 typo-btn-lg") {{ title }}
+          span(:class="title.class") {{ title.label }}
           div(class="w-fit")
         //- content
-        div(class="w-full flex justify-center items-center gap-16 typo-h5 text-white")
+        div(class="w-full flex-center gap-16 typo-h5 text-white")
           div(
             v-for="(genType, idx) in genTypes.group"
             :key="idx"
@@ -84,13 +85,12 @@ div(class="prompt-area w-full box-border px-24")
     @expand="currTransitions.add('expand-gen-options')"
     @collapsed="currTransitions.delete('collapse-gen-options')"
     @expanded="currTransitions.delete('expand-gen-options')")
-    div(
-      class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white box-border mt-16")
+    div(class="w-full bg-lighter/20 rounded-10 px-8 py-16 flex flex-col text-left text-white box-border mt-16")
       div(
         v-for="(option, idx) in genRangeOptions"
         :key="idx")
         div(class="w-full flex flex-col")
-          div(class="w-full flex items-center justify-between typo-h6")
+          div(class="w-full flex-between-center typo-h6")
             div(class="flex items-center gap-4")
               svg-icon(
                 v-if="option.icon"
@@ -121,7 +121,7 @@ div(class="prompt-area w-full box-border px-24")
               type="range")
           div(
             v-if="option.minDescription || option.maxDescription"
-            class="w-full flex justify-between items-center text-white typo-btn-sm mt-8")
+            class="w-full flex-between-center text-white typo-btn-sm mt-8")
             span(class="typo-body-sm text-left" v-html="option.minDescription")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
@@ -168,7 +168,7 @@ const {
   setCurrDesignId,
   setGenResultIndex,
   setShowEmptyPromptWarning,
-  setCurrGenOptions
+  setCurrGenOptions,
 } = editorStore
 const {
   isSendingGenImgReq,
@@ -361,7 +361,25 @@ const showTypeSelector = computed(() => {
   return editorType.value === 'hidden-message'
 })
 const title = computed(() => {
-  return isTypeSettings.value ? t('CM0108') : t('CM0022')
+  const defaultClass = 'text-white typo-h6'
+  if (isTypeSettings.value)
+    return {
+      class: defaultClass,
+      label: t('CM0108'),
+    }
+
+  switch (editorType.value) {
+    case 'magic-combined':
+      return {
+        class: 'text-yellow-cm typo-h4',
+        label: t('CM0131'),
+      }
+    default:
+      return {
+        class: defaultClass,
+        label: t('CM0022'),
+      }
+  }
 })
 
 // gen options
@@ -390,7 +408,7 @@ const setGenType = (idxGenType: number) => {
       ['weight', 0.7],
       ['guidance_start', 0.1],
       ['guidance_end', 0.7],
-    ])
+    ]),
   ][idxGenType]
 
   const newGenOptions = constantData.getGenImageOptions('hidden-message') as GenImageOptions
@@ -442,5 +460,10 @@ watch(currTransitions.value, (val) => {
     opacity: 0;
     transform: translateX(-50%);
   }
+}
+
+.prompt-text-area {
+  @apply w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
+  transition: outline-color 0.45s;
 }
 </style>

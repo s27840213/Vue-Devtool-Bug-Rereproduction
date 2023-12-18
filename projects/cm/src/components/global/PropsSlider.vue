@@ -1,10 +1,11 @@
 <template lang="pug">
-div(class="mobile-slider grid grid-cols-[auto,1fr] grid-rows-1 gap-12")
+div(class="props-slider grid grid-cols-[auto,1fr] grid-rows-1 gap-12")
   div(class="flex gap-4 text-white typo-btn-sm")
     span(class="") {{ title }}
     span(v-if="showSizeNum" class="w-[3ch]") {{ propsVal }}
   input(
-    class="accent-yellow-cm"
+    class="input__slider--range"
+    v-progress
     v-model.number="propsVal"
     :name="name"
     :max="max"

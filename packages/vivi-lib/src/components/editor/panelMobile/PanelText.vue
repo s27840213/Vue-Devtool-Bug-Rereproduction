@@ -11,18 +11,19 @@ div(class="overflow-container full-size rwd-container")
       :color="{close: 'black-5', search: 'black-5'}"
       v-model:expanded="isSearchBarExpanded"
       @search="handleSearch")
-    Tags(v-show="tags && tags.length"
+    tags(
+        v-for="(tag, i) in tagsContent"
+        :key="i"
+        v-show="tag.show"
         class="panel-text__tags"
         :class="{collapsed: !isSearchBarExpanded, 'in-category': isInCategory}"
-        :tags="tags"
-        :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+        :tags="tag.content"
         ref="tags"
         theme="dark"
-        @search="handleSearch"
-        @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+        @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(v-for="item in categoryListArray"
-      :class="{collapsed: tags && tags.length && !isSearchBarExpanded}"
+      :class="{collapsed: contentTags && contentTags.length && !isSearchBarExpanded}"
       v-show="item.show" :ref="item.key" :key="item.key"
       :list="item.content" @loadMore="handleLoadMore")
       template(#before)
@@ -104,7 +105,6 @@ export default defineComponent({
         searchResult: 0
       },
       isSearchBarExpanded: false,
-      tagScrollLeft: 0
     }
   },
   created() {
@@ -116,6 +116,8 @@ export default defineComponent({
       getLayersNum: 'getLayersNum',
       pending: 'textStock/pending',
       tagsBar: 'textStock/tagsBar',
+      searchTags: 'textStock/searchTags',
+      contentTags: 'textStock/contentTags',
       isTabInCategory: 'assetPanel/getIsInCategory',
       isTabShowAllRecently: 'assetPanel/getShowAllRecently',
     }),
@@ -227,13 +229,19 @@ export default defineComponent({
         columnGap: '10px'
       }
     },
-    tags(): ITag[] {
-      return this.showAllRecently ? [] : this.tagsBar
+    tagsContent(): { show: boolean, content: ITag[] }[] {
+      return [{
+        show: this.isInCategory && this.searchTags.length,
+        content: this.searchTags
+      }, {
+        show: !this.isInCategory && this.contentTags.length,
+        content: this.contentTags
+      }]
     },
   },
   mounted() {
     // skip transitions after tags load
-    const unwatch = this.$watch('tags.length', () => {
+    const unwatch = this.$watch('contentTags.length', () => {
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)

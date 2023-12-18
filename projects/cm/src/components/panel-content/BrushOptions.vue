@@ -4,7 +4,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
     :options="modes"
     v-model="currMode"
     :bgColor="'black-3-5'"
-    :switchColor="'white'"
+    :switchColor="'yellow-1'"
     :activeColor="'black-2'"
     :inActiveColor="'white'"
     :optionWidth="'80px'"
@@ -22,14 +22,14 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
       @update="setBrushSize"
       @pointer-down="setIsChangingBrushSize(true)"
       @pointer-up="setIsChangingBrushSize(false)")
-  div(class="w-full flex justify-between items-center box-border px-24")
-    nubtn(
-      theme="secondary"
-      @click="cancel") {{ $t('NN0203') }}
-    span(class="typo-h6 text-white") {{ $t('CM0017') }}
-    nubtn(@click="apply") {{ $t('CM0061') }}
+  footer-bar(
+    class="w-full box-border px-24"
+    :title="$t('CM0017')"
+    @cancel="cancel"
+    @apply="apply")
 </template>
 <script setup lang="ts">
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { PowerfulFillCanvasMode } from '@/types/editor'
@@ -82,6 +82,9 @@ const setBrushSize = (value: number) => {
 }
 const setIsChangingBrushSize = (value: boolean) => {
   setCanvasStoreState({ isChangingBrushSize: value })
+  // if (!value) {
+  //   cmWVUtils.setState('brushSize', brushSize.value)
+  // }
 }
 
 watch(currMode, (newVal) => {
@@ -98,11 +101,17 @@ const cancel = () => {
   groupUtils.deselect()
 }
 
-
 const apply = () => {
   setCurrActiveFeature('none')
   PagePinchUtils.resetPageScale()
   groupUtils.deselect()
 }
+
+// onMounted(async () => {
+//   const brushSize = await cmWVUtils.getState('brushSize')
+//   if (brushSize !== undefined) {
+//     setBrushSize(brushSize)
+//   }
+// })
 </script>
 <style lang="scss"></style>

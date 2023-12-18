@@ -81,6 +81,10 @@
   scrollbar-width: none !important;
 }
 
+.no-scrollbar {
+  @include no-scrollbar;
+}
+
 // Push scroll bar to outside. Ex: Categorylist
 @mixin push-scrollbar10 {
   box-sizing: border-box;
@@ -96,6 +100,10 @@
       margin-right: 0;
     }
   }
+}
+
+.push-scrollbar10 {
+  @include push-scrollbar10;
 }
 
 @mixin hover-scrollbar($theme: light, $showX: false) {
@@ -320,8 +328,9 @@
 
 @mixin not($notAppName) {
   $appNames : pic, stk, cm;
+
   @for $i from 1 through length($appNames) {
-    @if (nth($appNames, $i) != $notAppName) {
+    @if (nth($appNames, $i) !=$notAppName) {
       *:where(.app-#{nth($appNames, $i)}) & {
         @content;
       }

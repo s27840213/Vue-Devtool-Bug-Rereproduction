@@ -12,15 +12,16 @@ div(class="panel-gifs" :class="{'in-category': isInCategory, 'with-search-bar': 
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch"
     @favorite="toggleFavoritesTag")
-  Tags(v-show="tags && tags.length"
+  tags(
+      v-for="(tag, i) in tagsContent"
+      :key="i"
+      v-show="tag.show"
       class="panel-gifs__tags"
       :class="{collapsed: !isSearchBarExpanded}"
-      :tags="tags"
-      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+      :tags="tag.content"
       ref="tags"
       theme="dark"
-      @search="handleSearch"
-      @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+      @search="handleSearch")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 :class="{invisible: !item.show, collapsed: !isSearchBarExpanded}"
@@ -113,7 +114,6 @@ export default defineComponent({
         favoritesSearchResult: 0
       },
       isSearchBarExpanded: false,
-      tagScrollLeft: 0
     }
   },
   computed: {
@@ -133,7 +133,8 @@ export default defineComponent({
     ...mapGetters('giphy', {
       isSearchingCategory: 'isSearchingCategory',
       isSearchingTag: 'isSearchingTag',
-      tagsBar: 'tagsBar',
+      searchTags: 'searchTags',
+      contentTags: 'contentTags',
       favoritesTagsBar: 'favoritesTagsBar',
       keyword: 'keyword',
       checkCategoryFavorite: 'checkCategoryFavorite',
@@ -258,9 +259,17 @@ export default defineComponent({
         })}`
       } else return ''
     },
-    tags(): ITag[] {
-      return this.showAllRecently ? []
-        : this.showFav ? this.favoritesTagsBar : this.tagsBar
+    tagsContent(): { show: boolean, content: ITag[] }[] {
+      return [{
+        show: this.showFav && this.favoritesTagsBar.length,
+        content: this.favoritesTagsBar
+      }, {
+        show: !this.showFav && this.isInCategory && this.searchTags.length,
+        content: this.searchTags
+      }, {
+        show: !this.showFav && !this.isInCategory && this.contentTags.length,
+        content: this.contentTags
+      }]
     },
     itemHeight(): number {
       return this.isTablet ? 120 : 80
@@ -274,7 +283,7 @@ export default defineComponent({
   },
   mounted() {
     // skip transitions after tags load
-    const unwatch = this.$watch('tags.length', () => {
+    const unwatch = this.$watch('contentTags.length', () => {
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
