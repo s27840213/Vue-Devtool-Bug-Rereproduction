@@ -275,7 +275,7 @@ const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
 const { editorType } = storeToRefs(editorStore)
-const { setImgAspectRatio } = editorStore
+const { setImgAspectRatio, setPageSize } = editorStore
 const { replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
@@ -405,6 +405,9 @@ const beforeSendToEditor = () => {
     return
   }
   sendToEditor()
+
+  //
+  setPageSize(900, 1600)
 }
 
 const sendToEditor = async () => {
@@ -426,7 +429,7 @@ const sendToEditor = async () => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
         assetUtils.addImage(img, img.ratio, {
-          fit: initAtEditor ? 0 : 1,
+          // fit: initAtEditor ? 0 : 1,
           record: initAtEditor,
           styles: {
             adjust: {
