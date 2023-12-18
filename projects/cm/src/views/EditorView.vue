@@ -54,8 +54,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="handleHomeBtnAction(navigate)")
   canvas-resizer(
     v-if="isResizingCanvas"
-    :pageIndex="0"
-    :pageState="pageState[0]"
+    :pageIndex="layerUtils.pageIndex"
+    :pageState="pageState[layerUtils.pageIndex]"
     :noBg="isDuringCopy && isNoBg")
   div(
     v-else-if="!inSavingState"
@@ -81,8 +81,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           nu-page(
             class="z-page"
             v-show="!inGenResultState"
-            :pageIndex="0"
-            :pageState="pageState[0]"
+            :pageIndex="layerUtils.pageIndex"
+            :pageState="pageState[layerUtils.pageIndex]"
             :overflowContainer="editorContainerRef"
             :noBg="isDuringCopy && isNoBg"
             :hideHighlighter="true")
