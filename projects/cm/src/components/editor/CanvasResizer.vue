@@ -290,50 +290,12 @@ const resizing = (event: PointerEvent) => {
   const layerOffset = { x: 0, y: 0 }
 
   if (horizontal !== 0) {
-    let amount = diff.x * horizontal
-
-    // START: calculate non-uniform scaling equivalent move amount for
-    //  inconsistent behaviors between size reaching edges or not
-    const distance = Math.abs(renderedSize.value.width - (containerWidth.value - 2 * MIN_PADDING_X))
-    if (!wider) {
-      if (amount > distance / 2) {
-        const over = amount - (distance / 2)
-        amount = distance + over
-      } else {
-        amount *= 2
-      }
-    } else {
-      if (amount < -distance) {
-        const over = distance + amount
-        amount = -distance + over * 2
-      }
-    }
-    // END
-
+    const amount = diff.x * horizontal * 2
     sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
   }
 
   if (vertical !== 0) {
-    let amount = diff.y * vertical
-
-    // START: calculate non-uniform scaling equivalent move amount for
-    //  inconsistent behaviors between size reaching edges or not
-    const distance = Math.abs(renderedSize.value.height - (containerHeight.value - 2 * MIN_PADDING_Y))
-    if (!higher) {
-      if (amount > distance / 2) {
-        const over = amount - (distance / 2)
-        amount = distance + over
-      } else {
-        amount *= 2
-      }
-    } else {
-      if (amount < -distance) {
-        const over = distance + amount
-        amount = -distance + over * 2
-      }
-    }
-    // END
-
+    const amount = diff.y * vertical * 2
     sizeDiff.height = Math.trunc(amount / contentScaleRatio.value)
   }
 
