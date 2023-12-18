@@ -47,7 +47,7 @@ watch(() => props.disableTransition, value => {
 
 watch(
   [height, () => userInfo.value.homeIndicatorHeight],
-  ([newHeight, newHomeIndicatorHeight], [oldHeight, oldHomeIndicatorHeight]) => {
+  ([newHeight, newHomeIndicatorHeight], [oldHeight]) => {
     if (props.ignoreHomeIndicator && bottomPanelRef.value) {
       const { height } = useElementBounding(bottomPanelRef)
       bottomPanelRef.value.style.height = `${height.value}px`

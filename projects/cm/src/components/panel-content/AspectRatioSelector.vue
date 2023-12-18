@@ -162,15 +162,17 @@ const handleNextAction = function () {
 }
 
 onMounted(() => {
-  editorUtils.setDisableLayerAction(true)
+  editorUtils.setDisableLayerAction('all')
   if (editorType.value === 'magic-combined') {
     // Init img position.
     updateLayerStyleToFitPage()
   }
 })
 onBeforeUnmount(() => {
-  if (editorType.value !== 'magic-combined') {
-    editorUtils.setDisableLayerAction(false)
+  if (editorType.value === 'magic-combined') {
+    editorUtils.setDisableLayerAction('moving')
+  } else {
+    editorUtils.setDisableLayerAction('')
   }
 })
 </script>

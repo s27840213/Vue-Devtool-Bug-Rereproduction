@@ -156,7 +156,7 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
-  disableLayerAction: false,
+  disableLayerAction: '',
   controlState: { type: '' }
 })
 
@@ -385,7 +385,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   getModalInfo(state: IEditorState): { [key: string]: string } {
     return state.modalInfo
   },
-  getDisableLayerAction(state: IEditorState): boolean {
+  getDisableLayerAction(state: IEditorState) {
     return state.disableLayerAction
   },
   getControlState(state: IEditorState) {
@@ -1591,7 +1591,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_modalInfo(state: IEditorState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
-  SET_disableLayerAction(state: IEditorState, disableLayerAction: boolean) {
+  SET_disableLayerAction(state: IEditorState, disableLayerAction: IEditorState['disableLayerAction']) {
     state.disableLayerAction = disableLayerAction
   }
 }
