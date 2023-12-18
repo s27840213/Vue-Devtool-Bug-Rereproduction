@@ -1,7 +1,10 @@
 <template lang="pug">
 div(ref="containerRef"
-    class="canvas-resizer overflow-hidden relative")
-  page-content(class="z-page absolute"
+    class="canvas-resizer overflow-hidden relative"
+    v-touch
+    @panstart.stop="panStart"
+    @panmove.stop="panMove")
+  page-content(class="absolute"
               :style="translateStyles"
               :config="pageState.config"
               :pageIndex="pageIndex"
@@ -14,46 +17,57 @@ div(ref="containerRef"
         class="absolute"
         :class="CONTROLLER_CONFIG.color"
         :style="controller.styles"
-        @click="handleResize(controller.params)")
+        @pointerdown.prevent.stop="resizeStart($event, controller.params)")
 </template>
 
 <script setup lang="ts">
-import { useEditorStore } from '@/stores/editor';
-import vuex from '@/vuex';
-import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue';
-import type { IPageState } from '@nu/vivi-lib/interfaces/page';
-import { useElementBounding } from '@vueuse/core';
+import { useEditorStore } from '@/stores/editor'
+import vuex from '@/vuex'
+import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
+import type { IPageState } from '@nu/vivi-lib/interfaces/page'
+import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import { useElementBounding } from '@vueuse/core'
+import type { AnyTouchEvent } from 'any-touch'
 
 // #region data
 const containerRef = ref<HTMLElement | null>(null)
-const { width: containerWidth, height: containerHeight } = useElementBounding(containerRef)
+const { width: containerWidth, height: containerHeight, x: containerX, y: containerY } = useElementBounding(containerRef)
 const contentScaleRatio = computed(() => vuex.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
-const { pageSize } = editorStore
+const { pageSize } = storeToRefs(editorStore)
 
 const pos = reactive({
   x: 0,
   y: 0,
 })
-const offsets = reactive({
+const offset = reactive({
   x: 0,
   y: 0,
 })
 const translates = computed(() => {
   return {
-    x: pos.x + offsets.x,
-    y: pos.y + offsets.y
+    x: pos.x + offset.x,
+    y: pos.y + offset.y
   }
 })
 const renderedSize = computed(() => {
   return {
-    width: pageSize.width * contentScaleRatio.value,
-    height: pageSize.height * contentScaleRatio.value,
+    width: pageSize.value.width * contentScaleRatio.value,
+    height: pageSize.value.height * contentScaleRatio.value,
+  }
+})
+const MIN_PADDING_X = 16
+const MIN_PADDING_Y = 16
+const paddings = computed(() => {
+  return {
+    x: Math.max(pos.x, MIN_PADDING_X),
+    y: Math.max(pos.y, MIN_PADDING_Y),
   }
 })
 // #endregion
 
-const props = defineProps({
+defineProps({
   pageState: {
     type: Object as PropType<IPageState>,
     required: true
@@ -76,12 +90,14 @@ const CONTROLLER_CONFIG = {
   color: 'bg-white',
 }
 
+type direction = 1 | 0 | -1
+
 interface IControllerConfig {
   key: string
   styles: Record<string, string>
   params: {
-    vertical: 1 | -1
-    horizontal: 1 | -1
+    vertical: direction
+    horizontal: direction
   }
 }
 
@@ -105,8 +121,8 @@ const controllers = ref<IControllerConfig[]>(Array(12).fill(0).map((_, index) =>
       transform: `translate(${resizerXs[subIndex] - 100}%, ${resizerYs[subIndex] - 100}%)`,
     },
     params: {
-      vertical: (subIndex % 2 === 0 ? (subIndex - 1) : 0) as 1 | -1,
-      horizontal: (subIndex % 2 !== 0 ? (2 - subIndex) : 0) as 1 | -1,
+      vertical: (subIndex % 2 === 0 ? (subIndex - 1) : 0) as direction,
+      horizontal: (subIndex % 2 !== 0 ? (2 - subIndex) : 0) as direction,
     },
   } : isScalerX ? {
     key: `controller-${subIndex}`,
@@ -118,8 +134,8 @@ const controllers = ref<IControllerConfig[]>(Array(12).fill(0).map((_, index) =>
       transform: `translate(-${scalerPs[subIndex]}%, ${resizerYs[equivalentIndex] - 100}%)`,
     },
     params: {
-      vertical: (equivalentIndex - 1) as 1 | -1,
-      horizontal: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as 1 | -1,
+      vertical: (equivalentIndex - 1) as direction,
+      horizontal: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
     },
   } : {
     key: `controller-${subIndex}`,
@@ -131,8 +147,8 @@ const controllers = ref<IControllerConfig[]>(Array(12).fill(0).map((_, index) =>
       transform: `translate(${resizerXs[equivalentIndex] - 100}%, -${scalerPs[subIndex]}%)`,
     },
     params: {
-      vertical: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as 1 | -1,
-      horizontal: (2 - equivalentIndex) as 1 | -1,
+      vertical: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
+      horizontal: (2 - equivalentIndex) as direction,
     },
   }
 }))
@@ -154,23 +170,193 @@ const sizeStyles = computed(() => {
 // #endregion
 
 // #region pos
-watch([containerWidth, containerHeight], (_, [newWidth, newHeight]) => {
-  calculatePos(newWidth, newHeight)
+watchEffect(() => {
+  if (containerWidth.value === 0 && containerHeight.value === 0) return
+  pos.x = (containerWidth.value - renderedSize.value.width) / 2
+  pos.y = (containerHeight.value - renderedSize.value.height) / 2
+})
+// #endregion
+
+// #region offset
+watchEffect(() => {
+  const limits = {
+    x: [paddings.value.x, containerWidth.value - paddings.value.x - renderedSize.value.width],
+    y: [paddings.value.y, containerHeight.value - paddings.value.y - renderedSize.value.height],
+  }
+  const minTranslates = { x: Math.min(...limits.x), y: Math.min(...limits.y) }
+  const maxTranslates = { x: Math.max(...limits.x), y: Math.max(...limits.y) }
+  const clampedTranlates = {
+    x: Math.min(Math.max(translates.value.x, minTranslates.x), maxTranslates.x),
+    y: Math.min(Math.max(translates.value.y, minTranslates.y), maxTranslates.y),
+  }
+  offset.x = clampedTranlates.x - pos.x
+  offset.y = clampedTranlates.y - pos.y
 })
 
-onMounted(() => {
-  calculatePos(containerWidth.value, containerHeight.value)
+const lastPointerPos = reactive({
+  x: 0,
+  y: 0,
 })
 
-const calculatePos = (width: number, height: number) => {
-  if (width === 0 && height === 0) return
-  pos.x = (width - renderedSize.value.width) / 2
-  pos.y = (height - renderedSize.value.height) / 2
+const panStart = (event: AnyTouchEvent) => {
+  lastPointerPos.x = event.x
+  lastPointerPos.y = event.y
+}
+
+const panMove = (event: AnyTouchEvent) => {
+  if (isResizing.value) return
+  offset.x += event.x - lastPointerPos.x
+  offset.y += event.y - lastPointerPos.y
+  lastPointerPos.x = event.x
+  lastPointerPos.y = event.y
 }
 // #endregion
 
-const handleResize = ({ vertical, horizontal }: { vertical: (1 | -1), horizontal: (1 | -1) }) => {
-  console.log(vertical, horizontal)
+// #region resize
+vuex.commit('canvasResize/SET_initSize', { width: pageSize.value.width, height: pageSize.value.height })
+
+const isResizing = ref(false)
+const controllingParams = ref({ vertical: 0, horizontal: 0 } as IControllerConfig['params'])
+let initPointerPos = { x: 0, y: 0 }
+let initSize = { width: 0, height: 0 }
+let initLayerOffset = { x: 0, y: 0 }
+let pressingTimer = -1
+
+const resizeStart = (event: PointerEvent, params: IControllerConfig['params']) => {
+  controllingParams.value = params
+  isResizing.value = true
+  initPointerPos = mouseUtils.getMouseAbsPoint(event)
+  initSize = { width: pageSize.value.width, height: pageSize.value.height }
+  initLayerOffset = vuex.getters['canvasResize/getLayerOffset']
+  window.addEventListener('pointermove', resizing)
+  window.addEventListener('pointerup', resizeEnd)
+  pressingTimer = window.setTimeout(() => resizing(event), 100)
 }
+
+const resizing = (event: PointerEvent) => {
+  window.clearTimeout(pressingTimer)
+  const { vertical, horizontal } = controllingParams.value
+
+  // START: special handler for edging
+  const higher = renderedSize.value.height > containerHeight.value - 2 * MIN_PADDING_Y
+  const wider = renderedSize.value.width > containerWidth.value - 2 * MIN_PADDING_X
+  if (higher) {
+    if (vertical < 0) {
+      initPointerPos.y = containerY.value + MIN_PADDING_Y
+      initSize.height = pageSize.value.height
+      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
+    }
+    if (vertical > 0) {
+      initPointerPos.y = containerY.value + containerHeight.value - MIN_PADDING_Y
+      initSize.height = pageSize.value.height
+      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
+    }
+  }
+  if (wider) {
+    if (horizontal < 0) {
+      initPointerPos.x = containerX.value + MIN_PADDING_X
+      initSize.width = pageSize.value.width
+      initLayerOffset.x = vuex.getters['canvasResize/getLayerOffset'].x
+    }
+    if (horizontal > 0) {
+      initPointerPos.x = containerX.value + containerWidth.value - MIN_PADDING_X
+      initSize.width = pageSize.value.width
+      initLayerOffset.x = vuex.getters['canvasResize/getLayerOffset'].x
+    }
+  }
+  // END
+
+  const pointerPos = mouseUtils.getMouseAbsPoint(event)
+  const diff = {
+    x: pointerPos.x - initPointerPos.x,
+    y: pointerPos.y - initPointerPos.y,
+  }
+  const sizeDiff = { width: 0, height: 0 }
+  const layerOffset = { x: 0, y: 0 }
+
+  if (vertical !== 0) {
+    let amount = diff.y * vertical
+
+    // START: calculate non-uniform scaling equivalent move amount for
+    //  inconsistent behaviors between size reaching edges or not
+    const distance = Math.abs(renderedSize.value.height - (containerHeight.value - 2 * MIN_PADDING_Y))
+    if (!higher) {
+      if (amount > distance / 2) {
+        const over = amount - (distance / 2)
+        amount = distance + over
+      } else {
+        amount *= 2
+      }
+    } else {
+      if (amount < -distance) {
+        const over = distance + amount
+        amount = -distance + over * 2
+      }
+    }
+    // END
+
+    sizeDiff.height = Math.trunc(amount / contentScaleRatio.value)
+    if (vertical < 0) {
+      layerOffset.y = Math.trunc(amount / contentScaleRatio.value)
+    }
+  }
+  if (horizontal !== 0) {
+    let amount = diff.x * horizontal
+
+    // START: calculate non-uniform scaling equivalent move amount for
+    //  inconsistent behaviors between size reaching edges or not
+    const distance = Math.abs(renderedSize.value.width - (containerWidth.value - 2 * MIN_PADDING_X))
+    if (!wider) {
+      if (amount > distance / 2) {
+        const over = amount - (distance / 2)
+        amount = distance + over
+      } else {
+        amount *= 2
+      }
+    } else {
+      if (amount < -distance) {
+        const over = distance + amount
+        amount = -distance + over * 2
+      }
+    }
+    // END
+
+    sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
+    if (horizontal < 0) {
+      layerOffset.x = Math.trunc(amount / contentScaleRatio.value)
+    }
+  }
+  pageUtils.updatePageProps({
+    width: initSize.width + sizeDiff.width,
+    height: initSize.height + sizeDiff.height,
+  })
+  vuex.commit('canvasResize/SET_layerOffset', {
+    x: initLayerOffset.x + layerOffset.x,
+    y: initLayerOffset.y + layerOffset.y
+  })
+  nextTick(() => {
+    if (vertical < 0 && diff.y < 0 && translates.value.y < MIN_PADDING_Y) {
+      offset.y = MIN_PADDING_Y - pos.y
+    }
+    if (horizontal < 0 && diff.x < 0 && translates.value.x < MIN_PADDING_X) {
+      offset.x = MIN_PADDING_X - pos.x
+    }
+    if (vertical > 0 && diff.y > 0 && translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y) {
+      offset.y = containerHeight.value - renderedSize.value.height - MIN_PADDING_Y - pos.y
+    }
+    if (horizontal > 0 && diff.x > 0 && translates.value.x < containerWidth.value - renderedSize.value.width - MIN_PADDING_X) {
+      offset.x = containerWidth.value - renderedSize.value.width - MIN_PADDING_X - pos.x
+    }
+  })
+  pressingTimer = window.setTimeout(() => resizing(event), 100)
+}
+
+const resizeEnd = (event: PointerEvent) => {
+  window.clearTimeout(pressingTimer)
+  isResizing.value = false
+  window.removeEventListener('pointermove', resizing)
+  window.removeEventListener('pointerup', resizeEnd)
+}
+// #endregion
 
 </script>

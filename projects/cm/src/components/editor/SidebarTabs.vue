@@ -5,6 +5,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll s
       v-if="!tab.hidden"
       :key="`${tab.icon}-${index}`"
       class="w-44"
+      ref="tabsRef"
       :class="getTabTutorialClasses(tab.text)")
       div(
         class="sidebar__tab flex-center flex-col gap-2 box-border p-4"
@@ -14,11 +15,11 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll s
           class="pointer-events-none"
           :style="tab.styles"
           :iconName="tab.icon"
-          :iconColor="tab.disabled ? 'dark' : currActiveFeature === tab.icon ? 'yellow-cm' : 'white'"
+          :iconColor="tab.disabled ? 'dark' : currActiveFeature === tab.icon || tabsPressed[index] ? 'yellow-cm' : 'white'"
           iconWidth="20px")
         span(
-          class="typo-btn-sm whitespace-nowrap pointer-events-none"
-          :class="tab.disabled ? 'text-dark' : 'text-white'") {{ tab.text }}
+          class="typo-btn-sm whitespace-nowrap pointer-events-none transition-colors duration-200"
+          :class="tab.disabled ? 'text-dark' : currActiveFeature === tab.icon || tabsPressed[index] ? 'text-yellow-cm' : 'text-white'") {{ tab.text }}
       div(
         v-if="tab.icon === currActiveFeature && tab.subTabs"
         class="flex-center flex-col gap-2 bg-dark-1/50 rounded-full")
@@ -32,22 +33,22 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll s
           svg-icon(
             :style="subTab.styles"
             :iconName="subTab.icon"
-            :iconColor="currActiveFeature === subTab.icon ? 'yellow-cm' : 'white'"
+            :iconColor="'white'"
             iconWidth="20px")
-          span(
-            class="typo-btn-sm whitespace-nowrap"
-            :class="true ? 'text-yellow-0' : 'text-lighter'") {{ subTab.text }}
+          span(class="typo-btn-sm whitespace-nowrap" :class="true ? 'text-yellow-0' : 'text-lighter'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import vuex from '@/vuex'
+import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
-import { storeToRefs } from 'pinia'
-import vuex from '@/vuex'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import { storeToRefs } from 'pinia'
+
 const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
@@ -65,7 +66,7 @@ interface ISidebarTab {
 
 const { t } = useI18n()
 const editorStore = useEditorStore()
-const { setCurrActiveFeature , setIsResizingCanvas} = editorStore
+const { setCurrActiveFeature } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -95,10 +96,10 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0048'),
       panelType: '',
       subTabs: addSubTabs.value,
-      styles: {
-        transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
-        transition: 'transform 0.2s ease-in-out',
-      },
+      // styles: {
+      //   transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
+      //   transition: 'transform 0.2s ease-in-out',
+      // },
     },
     {
       icon: 'selection',
@@ -167,12 +168,12 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
-      setIsResizingCanvas(true)
+      vuex.commit('canvasResize/SET_isResizing', true)
       vuex.commit('mobileEditor/UPDATE_pinchScale', 1)
       vuex.commit('SET_pageScaleRatio', 100)
       pageUtils.updatePagePos(0, {
         x: 0,
-        y: 0
+        y: 0,
       })
       break
     }
@@ -199,6 +200,18 @@ const getTabTutorialClasses = (text: string) => {
     'tutorial-hidden-message-3--highlight': text === t('NN0494'),
   }
 }
+
+const tabsRef = ref<HTMLElement[] | null>(null)
+const tabsPressed = ref(Array(defaultEditorTabs.value.length).fill(false))
+useTapTransition(tabsRef, tabsPressed)
+
+watch(
+  () => tabsPressed.value,
+  (newVal) => {
+    console.log(newVal)
+  },
+  { deep: true },
+)
 </script>
 <style lang="scss" scoped>
 .sidebar-tabs {
