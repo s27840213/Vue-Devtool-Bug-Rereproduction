@@ -429,7 +429,6 @@ const sendToEditor = async () => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
         assetUtils.addImage(img, img.ratio, {
-          // fit: initAtEditor ? 0 : 1,
           record: initAtEditor,
           styles: {
             adjust: {
@@ -437,6 +436,7 @@ const sendToEditor = async () => {
               invert: +isInvert.value,
             },
           },
+          ...(!initAtEditor && { fit: 1 }),
         })
       })
       if (!initAtEditor) stepsUtils.reset()
