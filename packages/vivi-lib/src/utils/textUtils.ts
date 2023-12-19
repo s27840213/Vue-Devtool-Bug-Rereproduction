@@ -711,8 +711,24 @@ class TextUtils {
   getAddPosition(width: number, height: number, pageIndex?: number): { x: number, y: number, center: boolean } {
     const targePageIndex = pageIndex || pageUtils.currFocusPageIndex
     const page = layerUtils.getPage(targePageIndex)
-    const x = (page.width - width) / 2
-    const y = (page.height - height) / 2
+    const isShrinkSizeAsPinchPage = generalUtils.isPic && generalUtils.isTouchDevice()
+    const { x, y } = (() => {
+      if (isShrinkSizeAsPinchPage) {
+        const page = pageUtils.getCurrPage
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - width / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - height / 2)
+        }
+      } else {
+        return {
+          x: page.width / 2 - width / 2,
+          y: page.height / 2 - height / 2
+        }
+      }
+    })()
+
 
     if (targePageIndex === pageUtils.currFocusPageIndex) {
       const currLayer = layerUtils.getLayer(targePageIndex, layerUtils.layerIndex)
