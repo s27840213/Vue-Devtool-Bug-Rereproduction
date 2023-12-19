@@ -76,22 +76,11 @@ const modes = [
 
 const currMode = ref<PowerfulFillCanvasMode>(ControlMode.Clear as PowerfulFillCanvasMode)
 const canvasStore = useCanvasStore()
-const { setCanvasStoreState } = canvasStore
+const { setBrushSize, setIsChangingBrushSize, setCanvasMode } = canvasStore
 const { brushSize, canvasMode } = storeToRefs(canvasStore)
-const setBrushSize = (value: number) => {
-  setCanvasStoreState({ brushSize: value })
-}
-const setIsChangingBrushSize = (value: boolean) => {
-  setCanvasStoreState({ isChangingBrushSize: value })
-  if (!value) {
-    cmWVUtils.setState('brushSize', { brushSize: brushSize.value })
-  }
-}
 
 watch(currMode, (newVal) => {
-  setCanvasStoreState({
-    canvasMode: newVal,
-  })
+  setCanvasMode(newVal)
 })
 
 const editorStore = useEditorStore()
