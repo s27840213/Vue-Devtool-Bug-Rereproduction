@@ -29,7 +29,6 @@ const useSteps = () => {
     isInCanvasLastStep,
     steps: canvasSteps,
     currStep: canvasCurrStep,
-    isProcessingCanvas,
     isProcessingStepsQueue,
   } = useCanvasUtils()
 
@@ -40,7 +39,7 @@ const useSteps = () => {
   const isInLastStep = computed(() => isInEditorLastStep.value && isInCanvasLastStep.value)
 
   const undo = () => {
-    if (isInFirstStep.value || isProcessingCanvas.value || isProcessingStepsQueue.value) return
+    if (isInFirstStep.value || isProcessingStepsQueue.value) return
     if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorFirstStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value - 1)
@@ -60,7 +59,7 @@ const useSteps = () => {
   }
 
   const redo = () => {
-    if (isInLastStep.value || isProcessingCanvas.value || isProcessingStepsQueue.value) return
+    if (isInLastStep.value || isProcessingStepsQueue.value) return
     if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorLastStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value + 1)
@@ -85,14 +84,18 @@ const useSteps = () => {
     resetStepsTypesArr()
   }
 
-  watch(editorStepsNum, () => {
+  watch(editorStepsNum, (newVal, oldVal) => {
+    // skip the init state
+    if (oldVal === 0 && newVal === 1) return
     stepsTypesArr.value.length = currStepTypeIndex.value + 1
     pushStepType('editor')
     setCurrStepTypeIndex(currStepTypeIndex.value + 1)
     canvasSteps.value.length = canvasCurrStep.value + 1
   })
 
-  watch(canvasStepsNum, () => {
+  watch(canvasStepsNum, (newVal, oldVal) => {
+    // skip the init state
+    if (oldVal === 0 && newVal === 1) return
     stepsTypesArr.value.length = currStepTypeIndex.value + 1
     pushStepType('canvas')
     setCurrStepTypeIndex(currStepTypeIndex.value + 1)

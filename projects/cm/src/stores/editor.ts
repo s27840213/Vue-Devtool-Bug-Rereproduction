@@ -3,14 +3,14 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import router from '@/router'
 import type {
-DescriptionPanel,
-EditorFeature,
-EditorStates,
-EditorType,
-GenImageOptions,
-HiddenMessageStates,
-MagicCombinedStates,
-PowerfulfillStates,
+  DescriptionPanel,
+  EditorFeature,
+  EditorStates,
+  EditorType,
+  GenImageOptions,
+  HiddenMessageStates,
+  MagicCombinedStates,
+  PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'

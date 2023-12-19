@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="btn-add" ref="btnAdd" :style="`font-family: ${localeFont()}`")
+div(class="btn-add" ref="btnAdd" :style="btnStyles")
   span(ref="txtAdd") {{ text }}
   div(class="btn-add__icon" ref="iconAdd")
     svg-icon(iconName="plus-small" iconWidth="24px" iconColor="white")
@@ -7,6 +7,7 @@ div(class="btn-add" ref="btnAdd" :style="`font-family: ${localeFont()}`")
 
 <script lang="ts">
 import AssetUtils from '@/utils/assetUtils'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
@@ -93,6 +94,12 @@ export default defineComponent({
     ...mapState({
       windowSize: 'windowSize'
     }),
+    btnStyles() {
+      return {
+        bottom: `${(getAutoWVUtils().getUserInfoFromStore().homeIndicatorHeight ?? 0) + 24}px`,
+        fontFamily: this.localeFont()
+      }
+    },
     btnMaxWidth() {
       return Math.min(this.windowSize.width - 80, MAX_BTN_WIDTH)
     },
@@ -231,7 +238,6 @@ export default defineComponent({
   position: absolute;
   right: 40px;
   left: 40px;
-  bottom: 24px;
   max-width: 310px;
   display: flex;
   align-items: center;
