@@ -32,6 +32,7 @@ import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mathUtils from '@nu/vivi-lib/utils/mathUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
 
 const editorStore = useEditorStore()
@@ -175,6 +176,7 @@ onBeforeUnmount(() => {
   } else {
     editorUtils.setAllowLayerAction('all')
   }
+  stepsUtils.reset()
 })
 </script>
 <style lang="scss"></style>

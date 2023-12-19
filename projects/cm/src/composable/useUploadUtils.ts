@@ -22,12 +22,12 @@ class PollingController {
 const useUploadUtils = () => {
   const uploadStore = useUploadStore()
   const { setUploadMap } = uploadStore
-  const { uploadMap } = storeToRefs(uploadStore)
+  const { uploadMap, useUsBucket } = storeToRefs(uploadStore)
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
 
   const getUrlMap = async () => {
-    const res = (await staticApis.getStatic()).data
+    const res = (await staticApis.getStatic(useUsBucket.value)).data
     if (res.flag !== 0) return
     setUploadMap(res.ul_map)
   }
