@@ -83,7 +83,7 @@ export default defineComponent({
   beforeUnmount() {
     // When closing panel, if user has changed the color, add it to recently.
     this.addToRecently()
-    if (colorUtils.currEvent === ColorEventType.photoShadow) {
+    if (colorUtils.currEvent === ColorEventType.photoShadow && this.$store.getters['mobileEditor/getCurrActivePanel'] !== 'photo-shadow') {
       imageShadowPanelUtils.handleShadowUpload()
     }
 
