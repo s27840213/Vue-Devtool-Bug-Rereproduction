@@ -1,6 +1,7 @@
 import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
 import type { GenImageParams, GenImageResult } from '@/types/api'
 import { notify } from '@kyvg/vue3-notification'
@@ -24,7 +25,8 @@ const ids: string[] = []
 const useGenImageUtils = () => {
   const userStore = useUserStore()
   const { setPrevGenParams } = userStore
-  const { prevGenParams } = storeToRefs(useUserStore())
+  const { prevGenParams } = storeToRefs(userStore)
+  const { useUsBucket } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
   const {
     setInitImgSrc,
@@ -162,7 +164,7 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
-    const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
+    const res = (await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
@@ -193,7 +195,7 @@ const useGenImageUtils = () => {
               subDesignId,
             }),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
-            polling(url, { isJson: false, useVer: false, pollingController }),
+            polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
           if (editorType.value !== 'hidden-message') {
             const prepareMask = prepareMaskToUpload()
