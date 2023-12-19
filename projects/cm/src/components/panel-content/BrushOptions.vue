@@ -35,6 +35,7 @@ import { useEditorStore } from '@/stores/editor'
 import type { PowerfulFillCanvasMode } from '@/types/editor'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import { storeToRefs } from 'pinia'
@@ -75,22 +76,11 @@ const modes = [
 
 const currMode = ref<PowerfulFillCanvasMode>(ControlMode.Clear as PowerfulFillCanvasMode)
 const canvasStore = useCanvasStore()
-const { setCanvasStoreState } = canvasStore
+const { setBrushSize, setIsChangingBrushSize, setCanvasMode } = canvasStore
 const { brushSize, canvasMode } = storeToRefs(canvasStore)
-const setBrushSize = (value: number) => {
-  setCanvasStoreState({ brushSize: value })
-}
-const setIsChangingBrushSize = (value: boolean) => {
-  setCanvasStoreState({ isChangingBrushSize: value })
-  // if (!value) {
-  //   cmWVUtils.setState('brushSize', brushSize.value)
-  // }
-}
 
 watch(currMode, (newVal) => {
-  setCanvasStoreState({
-    canvasMode: newVal,
-  })
+  setCanvasMode(newVal)
 })
 
 const editorStore = useEditorStore()
@@ -107,11 +97,11 @@ const apply = () => {
   groupUtils.deselect()
 }
 
-// onMounted(async () => {
-//   const brushSize = await cmWVUtils.getState('brushSize')
-//   if (brushSize !== undefined) {
-//     setBrushSize(brushSize)
-//   }
-// })
+onMounted(async () => {
+  const brushSize = await cmWVUtils.getState('brushSize')
+  if (brushSize !== undefined) {
+    setBrushSize(brushSize.brushSize)
+  }
+})
 </script>
 <style lang="scss"></style>

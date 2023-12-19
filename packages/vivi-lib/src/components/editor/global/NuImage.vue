@@ -549,7 +549,7 @@ export default defineComponent({
         // in vivisticker the following code would lead the non-fluent UX
         // now the vvpic mobile not apply the code as well,
         // we disable the svg filter as controlling
-        ...(this.$isPic && this.$isTouchDevice() && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        ...(this.$isPic && !this.$isTouchDevice() && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
       }
       return this.showCanvas ? {
         ...styles,

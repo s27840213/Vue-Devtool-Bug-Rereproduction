@@ -14,6 +14,7 @@ const ADD_UPLOAD_IMG = 'ADD_UPLOAD_IMG' as const
 const ADD_SHADOW_IMG = 'ADD_SHADOW_IMG' as const
 const SET_UPLOADING_CB = 'SET_UPLOADING_CB' as const
 const UPDATE_UPLOAD_IMG = 'UPDATE_UPLOAD_IMG' as const
+const SET_UPLOAD_IDENTIFIER = 'SET_UPLOAD_IDENTIFIER' as const
 
 export interface IUploadShadowImg {
   id: string,
@@ -36,6 +37,7 @@ export interface IShadowAsset {
 }
 export interface IShadowState {
   uploadId: ILayerIdentifier,
+  uploadIdentifier: string,
   processId: ILayerIdentifier,
   /**
    * handling means the whole image-shadow applied process,
@@ -80,6 +82,7 @@ const state: IShadowState = {
     layerId: '',
     subLayerId: ''
   },
+  uploadIdentifier: '',
   uploadShadowImgs: [],
   shadowImgs: new Map(),
   uploadingCallback: new Map()
@@ -110,6 +113,9 @@ const mutations: MutationTree<IShadowState> = {
     if (index !== -1) {
       state.uploadShadowImgs[index] = data
     }
+  },
+  [SET_UPLOAD_IDENTIFIER] (state, identifier: string) {
+    state.uploadIdentifier = identifier
   }
 }
 

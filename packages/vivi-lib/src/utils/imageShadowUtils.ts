@@ -873,11 +873,12 @@ class ImageShadowUtils {
     store.commit('SET_srcState', { layerInfo, effect, effects, layerSrcObj, shadowSrcObj, layerState })
   }
 
-  setUploadId(id?: ILayerIdentifier) {
-    if (!id) {
-      id = { pageId: '', layerId: '', subLayerId: '' }
-    }
+  setUploadId(id: ILayerIdentifier, identifier?: string) {
+    id = { pageId: '', layerId: '', subLayerId: '' }
     store.commit('shadow/SET_UPLOAD_ID', id)
+    if (typeof identifier !== 'undefined') {
+      store.commit('shadow/SET_UPLOAD_IDENTIFIER', identifier)
+    }
   }
 
   setProcessId(id?: ILayerIdentifier) {

@@ -13,6 +13,7 @@ export default new (class Utils {
     requestId: string,
     params: GenImageParams,
     num: number,
+    us: boolean,
   ): Promise<AxiosResponse<IGenImageV2Response>> {
     return apiUtils.requestWithRetry(() =>
       axios.request<IGenImageV2Response>({
@@ -23,6 +24,7 @@ export default new (class Utils {
           request_id: requestId,
           ...params,
           num,
+          us: us ? '1' : '0',
         },
       }),
     )

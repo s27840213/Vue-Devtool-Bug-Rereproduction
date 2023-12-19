@@ -38,6 +38,7 @@ import { ColorEventType } from '@/store/types'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -82,6 +83,9 @@ export default defineComponent({
   beforeUnmount() {
     // When closing panel, if user has changed the color, add it to recently.
     this.addToRecently()
+    if (colorUtils.currEvent === ColorEventType.photoShadow && this.$store.getters['mobileEditor/getCurrActivePanel'] !== 'photo-shadow') {
+      imageShadowPanelUtils.handleShadowUpload()
+    }
 
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)

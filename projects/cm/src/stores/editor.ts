@@ -3,14 +3,14 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import router from '@/router'
 import type {
-DescriptionPanel,
-EditorFeature,
-EditorStates,
-EditorType,
-GenImageOptions,
-HiddenMessageStates,
-MagicCombinedStates,
-PowerfulfillStates,
+  DescriptionPanel,
+  EditorFeature,
+  EditorStates,
+  EditorType,
+  GenImageOptions,
+  HiddenMessageStates,
+  MagicCombinedStates,
+  PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
@@ -25,6 +25,13 @@ const editorStatesMap = {
   'magic-combined': ['aspectRatio', 'editing', 'genResult', 'saving'] as MagicCombinedStates[],
 } as { [key in EditorType]: EditorStates }
 
+export interface MaskParams {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+}
+
 export interface IGenResult {
   id: string
   url: string
@@ -38,6 +45,7 @@ interface IEditorStore {
   currActiveFeature: EditorFeature
   editorType: EditorType
   maskDataUrl: string
+  maskParams: MaskParams
   isSendingGenImgReq: boolean
   generatedResults: Array<IGenResult>
   currGenResultIndex: number
@@ -71,6 +79,7 @@ export const useEditorStore = defineStore('editor', {
     currStepTypeIndex: -1,
     initImgSrc: '',
     maskDataUrl: '',
+    maskParams: {},
     useTmpSteps: false,
     currPrompt: '',
     currGenOptions: [],
@@ -293,6 +302,10 @@ export const useEditorStore = defineStore('editor', {
     },
     setMaskDataUrl(url: string) {
       this.maskDataUrl = url
+      this.maskParams = {}
+    },
+    updateMaskParams(params: Partial<MaskParams>) {
+      this.maskParams = { ...this.maskParams, ...params }
     },
     setCurrPrompt(prompt: string) {
       this.currPrompt = prompt

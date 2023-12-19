@@ -127,6 +127,7 @@ div(class="prompt-area w-full box-border px-24")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
 </template>
+
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
@@ -141,6 +142,7 @@ import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { Collapse } from 'vue-collapsed'
@@ -336,6 +338,9 @@ const handleGenerate = async () => {
         setShowSpinner(false)
       },
     })
+      .then(() => {
+        pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+      })
   }
 }
 const clearPromt = () => {

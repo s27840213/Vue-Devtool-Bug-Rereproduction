@@ -46,6 +46,7 @@ import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 
@@ -66,7 +67,7 @@ interface ISidebarTab {
 
 const { t } = useI18n()
 const editorStore = useEditorStore()
-const { setCurrActiveFeature } = editorStore
+const { setCurrActiveFeature, setMaskDataUrl } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -139,7 +140,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
   ]
 })
 
-const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
+const { clearCtx, reverseSelection, autoFill, getCanvasDataUrl } = useCanvasUtilsCm()
 
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
@@ -168,10 +169,11 @@ const handleTabAction = (tab: ISidebarTab) => {
       break
     }
     case 'canvas': {
+      setMaskDataUrl(getCanvasDataUrl() ?? '')
       vuex.commit('canvasResize/SET_isResizing', true)
       vuex.commit('mobileEditor/UPDATE_pinchScale', 1)
       vuex.commit('SET_pageScaleRatio', 100)
-      pageUtils.updatePagePos(0, {
+      pageUtils.updatePagePos(layerUtils.pageIndex, {
         x: 0,
         y: 0,
       })
@@ -204,14 +206,6 @@ const getTabTutorialClasses = (text: string) => {
 const tabsRef = ref<HTMLElement[] | null>(null)
 const tabsPressed = ref(Array(defaultEditorTabs.value.length).fill(false))
 useTapTransition(tabsRef, tabsPressed)
-
-watch(
-  () => tabsPressed.value,
-  (newVal) => {
-    console.log(newVal)
-  },
-  { deep: true },
-)
 </script>
 <style lang="scss" scoped>
 .sidebar-tabs {

@@ -11,10 +11,11 @@ div(class="editing-options w-full")
         iconHeight="32px"
         :sameSize="false"
         @click="chooseSelectionOption(shape)")
-  footer-bar(class="box-border px-24"
-            :title="$t('CM0051')"
-            @cancel="cancel"
-            @apply="apply")
+  footer-bar(
+    class="box-border px-24"
+    :title="$t('CM0051')"
+    @cancel="cancel"
+    @apply="apply")
 </template>
 <script setup lang="ts">
 import FooterBar from '@/components/panel-content/FooterBar.vue'
@@ -32,6 +33,7 @@ const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
 
 const shapeTypes = ['square', 'rectangle', 'circle', 'triangle', 'pentagon', 'hexagon']
+const enableResizerTypes = ['square', 'rectangle']
 
 const chooseSelectionOption = (icon: string) => {
   const src = require(`shape/${icon}.svg`)
@@ -66,6 +68,7 @@ const chooseSelectionOption = (icon: string) => {
 
         layerUtils.updateLayerProps(0, layerUtils.currSelectedInfo.index, {
           srcObj,
+          hideResizer: !enableResizerTypes.includes(icon),
         })
 
         layerUtils.updateLayerStyles(0, layerUtils.currSelectedInfo.index, {
@@ -79,12 +82,15 @@ const chooseSelectionOption = (icon: string) => {
         })
       } else {
         groupUtils.deselect()
+        console.log(icon)
+        console.log(enableResizerTypes)
+        console.log(enableResizerTypes.includes(icon))
         assetUtils.addImage(src, photoAspectRatio, {
           styles: {
             opacity: 30,
             ctrlrPadding: 6,
           },
-          hideResizer: true,
+          hideResizer: !enableResizerTypes.includes(icon),
           ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: AllLayerTypes) => {
             if (config) {
               const target = document.querySelector(
