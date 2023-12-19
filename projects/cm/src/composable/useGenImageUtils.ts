@@ -249,7 +249,6 @@ const useGenImageUtils = () => {
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
     RECORD_TIMING && testUtils.start('copy editor', { notify: false, setToLog: true })
     const { width: pageWidth, height: pageHeight } = pageSize.value
-    const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
       ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }))
       : await cmWVUtils.copyEditor({
@@ -263,7 +262,7 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('screenshot to blob', { notify: false, setToLog: true })
     return new Promise<void>((resolve) => {
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?lsize=${size}`).then((dataUrl) => {
+      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?ssize=1080`).then((dataUrl) => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         RECORD_TIMING && testUtils.log('screenshot to blob', '')
