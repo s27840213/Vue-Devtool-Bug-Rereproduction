@@ -148,6 +148,7 @@ const useGenImageUtils = () => {
     } = {},
   ): Promise<string[]> => {
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
+    RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
     if (!showMore) {
       try {
@@ -239,6 +240,7 @@ const useGenImageUtils = () => {
         } catch (error) {
           onError && onError(index, url, 'saveAssetFromUrl failed')
         }
+        RECORD_TIMING && testUtils.log(`gen-image ${requestId}`, '')
       }),
     ])
     return urls
