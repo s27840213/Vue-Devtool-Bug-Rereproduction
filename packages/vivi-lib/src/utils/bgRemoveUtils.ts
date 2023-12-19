@@ -223,7 +223,6 @@ class BgRemoveUtils {
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
     const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
     console.log(trimCanvas(this.canvas))
-    // const previewSrc = trimedCanvas.toDataURL('image/png;base64')
     const previewSrc = this.canvas.toDataURL('image/png;base64')
 
     const { pageId, layerId } = this.bgRemoveIdInfo
@@ -231,8 +230,6 @@ class BgRemoveUtils {
       previewSrc,
       trace: 1
     })
-    const newImageWidth = targetLayerStyle.width * remainingWidthPercentage
-    const newImageHeight = targetLayerStyle.height * remainingHeightPercentage
     layerUtils.updateLayerStyles(pageIndex, index, {
       x: targetLayerStyle.x + xShift,
       y: targetLayerStyle.y + yShift,
@@ -241,12 +238,6 @@ class BgRemoveUtils {
         bound,
         originSize: { w: this.canvas.width, h: this.canvas.height },
       })
-      // width: newImageWidth,
-      // height: newImageHeight,
-      // imgWidth: newImageWidth,
-      // imgHeight: newImageHeight,
-      // imgX: 0,
-      // imgY: 0
     })
     this.setInBgRemoveMode(false)
     pageUtils.setScaleRatio(this.prevPageScaleRatio)
@@ -356,7 +347,7 @@ class BgRemoveUtils {
   saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
-    const { canvas: trimedCanvas, width, height, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+    const { canvas: trimedCanvas, width, height, } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
 
     const assetId = generalUtils.generateAssetId()

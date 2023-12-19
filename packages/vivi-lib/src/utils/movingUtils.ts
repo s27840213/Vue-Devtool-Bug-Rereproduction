@@ -441,7 +441,6 @@ export class MovingUtils {
 
   moving(e: PointerEvent) {
     if(store.state.allowLayerAction === 'crop-only') return
-
     const isStartedPointer = this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
     if (layerUtils.getCurrLayer.locked) return
@@ -466,8 +465,8 @@ export class MovingUtils {
     if (!this.isDragging) {
       updateConfigData.dragging = true
     }
-
-    if (this.isControllerShown || controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) {
+    // stk always moving the layer
+    if (this.isControllerShown || controlUtils.isClickOnController(e, layerUtils.getCurrLayer) || generalUtils.isStk) {
       if (generalUtils.getEventType(e) !== 'touch') {
         e.preventDefault()
       }
@@ -495,7 +494,6 @@ export class MovingUtils {
         }
       }
     } else {
-      // this condition will only happen in Mobile
       const posDiff = {
         x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initMousePos.x),
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
@@ -519,7 +517,7 @@ export class MovingUtils {
 
   movingHandler(e: MouseEvent | PointerEvent) {
     if (this.initMousePos === null) return
-    if (generalUtils.isTouchDevice() &&
+    if (generalUtils.isTouchDevice() && !generalUtils.isStk &&
       this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
 
     const config = layerUtils.getCurrLayer
@@ -578,7 +576,7 @@ export class MovingUtils {
 
   _pageMovingHandler4cm(e: MouseEvent | TouchEvent | PointerEvent) {
     if (['none', 'crop-only'].includes(store.state.allowLayerAction)) return
-    
+
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return
     }
