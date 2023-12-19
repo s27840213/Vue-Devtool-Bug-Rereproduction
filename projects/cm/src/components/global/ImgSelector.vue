@@ -441,7 +441,6 @@ const sendToEditor = async () => {
           ...(!initAtEditor && { fit: 1 }),
         })
       })
-      if (!initAtEditor) stepsUtils.reset()
       if (!initAtEditor || editorType.value === 'hidden-message') {
         groupUtils.deselect()
       }
