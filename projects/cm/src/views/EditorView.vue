@@ -254,10 +254,15 @@ const { ids } = useGenImageUtils()
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
 
-const showSidebarTabs = computed(() => 
-  !isDuringCopy && inEditingState && !inGenResultState &&
-  !showSelectionOptions && !isCropping && !showBrushOptions.value &&
-  editorType.value !== 'magic-combined'
+const showSidebarTabs = computed(
+  () =>
+    !isDuringCopy.value &&
+    inEditingState.value &&
+    !inGenResultState.value &&
+    !showSelectionOptions.value &&
+    !isCropping.value &&
+    !showBrushOptions.value &&
+    editorType.value !== 'magic-combined',
 )
 // #endregion
 
@@ -282,7 +287,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, setDescriptionPanel } =  editorStore
+const { changeEditorState, updateGenResult, setDescriptionPanel } = editorStore
 const {
   pageSize,
   currActiveFeature,
