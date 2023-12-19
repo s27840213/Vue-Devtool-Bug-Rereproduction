@@ -643,10 +643,15 @@ const useCanvasUtils = (
   const mapEditorToCanvas = async (cb?: () => void) => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor(
-      { width: pageWidth * contentScaleRatio.value, height: pageHeight * contentScaleRatio.value },
-      true,
-    )
+    const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }))
+      : await cmWVUtils.copyEditor(
+          {
+            width: pageWidth * contentScaleRatio.value,
+            height: pageHeight * contentScaleRatio.value,
+          },
+          true,
+        )
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
