@@ -33,7 +33,8 @@ const useCanvasUtils = (
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
-  const { setCurrStep, pushStep, clearStep } = canvasStore
+  const { setCanvas, setCanvasCtx, setCurrStep, pushStep, clearStep, setIsAutoFilling } =
+    canvasStore
   const {
     brushSize,
     resultCanvas,
@@ -56,7 +57,7 @@ const useCanvasUtils = (
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
 
-  const { setCanvasStoreState, setTmpCanvasDataUrl } = canvasStore
+  const { setTmpCanvasDataUrl } = canvasStore
   // #endregion
 
   // #region page related
@@ -162,10 +163,9 @@ const useCanvasUtils = (
     if (targetCanvas && targetCanvas.value) {
       targetCanvas.value.width = width
       targetCanvas.value.height = height
-      setCanvasStoreState({
-        canvas: targetCanvas.value,
-        canvasCtx: targetCanvas.value.getContext('2d'),
-      })
+      setCanvas(targetCanvas.value)
+      const targetCtx = targetCanvas.value.getContext('2d')
+      targetCtx && setCanvasCtx(targetCtx)
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.strokeStyle = drawingColor.value
         canvasCtx.value.lineWidth = brushSize.value
@@ -434,9 +434,7 @@ const useCanvasUtils = (
       groupUtils.deselect()
       const copiedCanavs = copyCanvas(canvas.value)
       clearCtx()
-      setCanvasStoreState({
-        isAutoFilling: true,
-      })
+      setIsAutoFilling(true)
       mapEditorToCanvas(() => {
         if (canvasCtx && canvasCtx.value) {
           const pixels = canvasCtx.value.getImageData(
@@ -507,9 +505,7 @@ const useCanvasUtils = (
           copiedCanavs && canvasCtx.value.drawImage(copiedCanavs, 0, 0)
           record()
 
-          setCanvasStoreState({
-            isAutoFilling: false,
-          })
+          setIsAutoFilling(false)
         }
       })
     }
@@ -768,7 +764,6 @@ const useCanvasUtils = (
   }
 
   return {
-    setCanvasStoreState,
     reverseSelection,
     downloadCanvas,
     getCanvasDataUrl,

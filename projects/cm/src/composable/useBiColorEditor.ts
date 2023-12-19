@@ -1,12 +1,12 @@
-import { useCanvasStore } from "@/stores/canvas"
-import { useEditorStore } from "@/stores/editor"
-import { EditorType } from "@/types/editor"
-import colorUtils from "@nu/vivi-lib/utils/colorUtils"
+import { useCanvasStore } from '@/stores/canvas'
+import { useEditorStore } from '@/stores/editor'
+import { EditorType } from '@/types/editor'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 
 type BiColorTheme = {
-  name: string,
-  bgColor: string,
-  fgColor: string,
+  name: string
+  bgColor: string
+  fgColor: string
   toggleIcon: string
 }
 
@@ -16,15 +16,15 @@ const editorThemes: Partial<{ [key in EditorType]: BiColorTheme[] }> = {
       name: 'dark',
       bgColor: '#2B2B2B',
       fgColor: '#FFFFFF',
-      toggleIcon: 'toggle-color-dark'
+      toggleIcon: 'toggle-color-dark',
     },
     {
       name: 'light',
       bgColor: '#FFFFFF',
       fgColor: '#2B2B2B',
-      toggleIcon: 'toggle-color-light'
-    }
-  ]
+      toggleIcon: 'toggle-color-light',
+    },
+  ],
 }
 
 const useBiColorEditor = () => {
@@ -42,16 +42,16 @@ const useBiColorEditor = () => {
 
   // returns undefined if is not bi-color editor
   const currEditorTheme = computed(() => {
-    return currEditorThemes.value?.find(theme => theme.name === editorStore.editorTheme)
+    return currEditorThemes.value?.find((theme) => theme.name === editorStore.editorTheme)
   })
 
   const applyEditorTheme = (theme: BiColorTheme) => {
     editorStore.setEditorTheme(theme.name)
     colorUtils.setCurrPageBackgroundColor(theme.bgColor)
     colorUtils.setAllLayerColor(theme.fgColor)
-    canvasStore.setCanvasStoreState({ drawingColor: theme.fgColor })
+    canvasStore.setDrawingColor(theme.fgColor)
   }
-  
+
   const initBiColorEditor = (editorType: EditorType) => {
     const editorTheme = editorThemes[editorType]?.[0]
     if (!editorTheme) return
@@ -60,8 +60,11 @@ const useBiColorEditor = () => {
 
   const toggleEditorTheme = () => {
     if (!currEditorThemes.value) return
-    const idxCurrEditorTheme = currEditorThemes.value.findIndex(theme => theme.name === editorStore.editorTheme)
-    const nextEditorTheme = currEditorThemes.value[(idxCurrEditorTheme + 1) % currEditorThemes.value.length]
+    const idxCurrEditorTheme = currEditorThemes.value.findIndex(
+      (theme) => theme.name === editorStore.editorTheme,
+    )
+    const nextEditorTheme =
+      currEditorThemes.value[(idxCurrEditorTheme + 1) % currEditorThemes.value.length]
     applyEditorTheme(nextEditorTheme)
   }
 
@@ -73,7 +76,7 @@ const useBiColorEditor = () => {
     currEditorTheme,
     applyEditorTheme,
     initBiColorEditor,
-    toggleEditorTheme
+    toggleEditorTheme,
   }
 }
 
