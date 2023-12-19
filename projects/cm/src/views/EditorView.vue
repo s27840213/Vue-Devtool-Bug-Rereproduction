@@ -99,7 +99,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping && !showBrushOptions"
+      v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
@@ -253,6 +253,12 @@ const { ids } = useGenImageUtils()
 
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
+
+const showSidebarTabs = computed(() => 
+  !isDuringCopy && inEditingState && !inGenResultState &&
+  !showSelectionOptions && !isCropping && !showBrushOptions.value &&
+  editorType.value !== 'magic-combined'
+)
 // #endregion
 
 // #region hooks related
@@ -276,7 +282,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, setDescriptionPanel, editorType } = editorStore
+const { changeEditorState, updateGenResult, setDescriptionPanel } =  editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -285,6 +291,7 @@ const {
   currGenResultIndex,
   initImgSrc,
   showBrushOptions,
+  editorType,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
@@ -299,7 +306,7 @@ const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
-    useTutorial().runTutorial(editorType)
+    useTutorial().runTutorial(editorType.value)
   } else if (inEditingState.value) {
     changeEditorState('next')
   } else if (inGenResultState.value) {
@@ -347,7 +354,7 @@ const centerBtns = computed<centerBtn[]>(() => {
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
     { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo },
   ]
-  if (editorType === 'hidden-message')
+  if (editorType.value === 'hidden-message')
     retTabs.push({
       icon: 'question-mark-circle',
       disabled: false,
@@ -355,7 +362,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       action: () => setDescriptionPanel('hidden-message-help'),
     })
   retTabs.push(...stepBtns)
-  if (currEditorTheme.value && editorType === 'hidden-message')
+  if (currEditorTheme.value && editorType.value === 'hidden-message')
     retTabs.push({
       icon: currEditorTheme.value.toggleIcon,
       disabled: false,

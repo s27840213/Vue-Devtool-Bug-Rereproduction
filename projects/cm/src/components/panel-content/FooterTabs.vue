@@ -11,7 +11,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
         :currActivePanel="currActivePanel")
   div(class="flex flex-col gap-24 bg-dark-3 shadow-[0_100px_0_100px_black] shadow-dark-3 z-[1]")
     div(v-if="!hideTabs" ref="footerTabs" class="footer-tabs-row flex gap-24")
-      div(class="cm-footer-tabs flex-center h-44")
+      div(v-if="showBackBtn" class="cm-footer-tabs flex-center h-44")
         div(
           class="flex-center bg-white/[.65] rounded-full w-22 h-22"
           @click="handleBack")
@@ -19,7 +19,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
             iconName="chevron-down"
             iconWidth="14px"
             iconColor="dark-3")
-      div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar")
+      div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar mx-auto")
         template(v-for="tab in settingTabs")
           div(
             v-if="!tab.hidden"
@@ -645,6 +645,9 @@ export default defineComponent({
     },
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
+    },
+    showBackBtn(): boolean {
+      return useEditorStore().editorType !== 'magic-combined'
     },
   },
   watch: {
