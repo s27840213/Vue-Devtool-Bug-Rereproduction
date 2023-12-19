@@ -60,6 +60,10 @@ class AssetUtils {
   data = 'config.json'
   preview = 'prev'
 
+  // vvpic mobile has page-scale-feature,
+  // the x, y and size should be modified fitting the current editing window
+  get isShrinkSizeAsPinchPage() { return generalUtils.isPic && generalUtils.isTouchDevice() }
+
   get getAsset() {
     return store.getters.getAsset
   }
@@ -332,16 +336,34 @@ class AssetUtils {
     json.ratio = 1
     json.className = ShapeUtils.classGenerator()
 
+
+    const { x, y } = (() => {
+      const page = pageUtils.getCurrPage
+      if (this.isShrinkSizeAsPinchPage) {
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 - svgWidth / 2) / scaleRatio,
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 - svgHeight / 2) / scaleRatio
+        }
+      } else {
+        return {
+          x: page.width / 2 - svgWidth / 2,
+          y: page.height / 2 - svgHeight / 2
+        }
+      }
+    })()
+
     return {
       ...json,
       styles: {
-        x: currentPage.width / 2 - svgWidth / 2,
-        y: currentPage.height / 2 - svgHeight / 2,
-        width: svgWidth,
-        height: svgHeight,
+        x,
+        y,
+        width: this.isShrinkSizeAsPinchPage ? svgWidth / (pageUtils.scaleRatio * 0.01) : svgWidth,
+        height: this.isShrinkSizeAsPinchPage ? svgHeight / (pageUtils.scaleRatio * 0.01) : svgHeight,
         initWidth: (vSize as number[])[0],
         initHeight: (vSize as number[])[1],
-        scale: svgWidth / (vSize as number[])[0],
+        scale: svgWidth / (vSize as number[])[0] * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
         color: json.color,
         vSize,
         ...styles,
@@ -384,19 +406,33 @@ class AssetUtils {
     const scaleRatio = width > 0 ? svgWidth / width : svgHeight / height
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
-    const newScale = json.size[0] * scaleRatio
+    const newScale = json.size[0] * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const quadrant = ShapeUtils.getLineQuadrant(json.point)
     const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(
       quadrant,
       newScale,
-      svgWidth,
-      svgHeight,
+      this.isShrinkSizeAsPinchPage ? svgWidth / (pageUtils.scaleRatio * 0.01) : svgWidth,
+      this.isShrinkSizeAsPinchPage ? svgHeight / (pageUtils.scaleRatio * 0.01) : svgHeight,
     )
     json.point = point
-    const targetPos = {
-      x: currentPage.width / 2 - realWidth / 2,
-      y: currentPage.height / 2 - realHeight / 2,
-    }
+
+    const targetPos = (() => {
+      const page = pageUtils.getCurrPage
+      if (this.isShrinkSizeAsPinchPage) {
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - realWidth / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - realHeight / 2)
+        }
+      } else {
+        return {
+          x: page.width / 2 - realWidth / 2,
+          y: page.height / 2 - realHeight / 2,
+        }
+      }
+    })()
+
     const trans = ShapeUtils.getTranslateCompensationForLineWidth(
       point,
       targetPos,
@@ -437,14 +473,30 @@ class AssetUtils {
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize[0] / vSize[1]
     const svgWidth =
-      svgAspectRatio > pageAspectRatio
+      ((svgAspectRatio > pageAspectRatio
         ? currentPage.width * resizeRatio
-        : currentPage.height * resizeRatio * svgAspectRatio
+        : currentPage.height * resizeRatio * svgAspectRatio)) * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const svgHeight =
-      svgAspectRatio > pageAspectRatio
+      (svgAspectRatio > pageAspectRatio
         ? (currentPage.width * resizeRatio) / svgAspectRatio
-        : currentPage.height * resizeRatio
+        : currentPage.height * resizeRatio) * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const scaleRatio = svgWidth / vSize[0]
+    const { x, y } = (() => {
+      if (this.isShrinkSizeAsPinchPage) {
+        const page = pageUtils.getCurrPage
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - svgWidth / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - svgHeight / 2)
+        }
+      } else {
+        return {
+          x: this.pageSize.width / 2 - svgWidth / 2,
+          y: this.pageSize.height / 2 - svgHeight / 2
+        }
+      }
+    })()
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
     json.className = ShapeUtils.classGenerator()
@@ -460,8 +512,8 @@ class AssetUtils {
         ),
       ],
       styles: {
-        x: currentPage.width / 2 - svgWidth / 2,
-        y: currentPage.height / 2 - svgHeight / 2,
+        x,
+        y,
         width: svgWidth,
         height: svgHeight,
         initWidth: svgWidth,
@@ -486,19 +538,45 @@ class AssetUtils {
     const currentPage = this.getPage(targetPageIndex)
     const svgRatio = json.width / json.height
     const pageRatio = currentPage.width / currentPage.height
-    const resizeRatio = (generalUtils.isStk || generalUtils.isCm)
-      ? attrs.fit === 1
-        ? Math.min(currentPage.width / json.width, currentPage.height / json.height)
-        : 300 / Math.max(json.width, json.height)
-      : ((svgRatio > pageRatio ? currentPage.width : currentPage.height) * 0.7) /
+    const resizeRatio = (() => {
+      let res = -1
+      if (generalUtils.isStk || generalUtils.isCm) {
+        if (attrs.fit === 1) {
+          res = Math.min(currentPage.width / json.width, currentPage.height / json.height)
+        } else {
+          res = 300 / Math.max(json.width, json.height)
+        }
+      } else {
+        res = ((svgRatio > pageRatio ? currentPage.width : currentPage.height) * 0.7) /
         (svgRatio > pageRatio ? json.width : json.height)
+      }
+      if (this.isShrinkSizeAsPinchPage) {
+        res /= pageUtils.scaleRatio * 0.01
+      }
+      return res
+    })()
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
-
+    const { x, y } = (() => {
+      if (this.isShrinkSizeAsPinchPage) {
+        const page = pageUtils.getCurrPage
+        const scaleRatio = pageUtils.scaleRatio * 0.01
+        const contentScaleRatio = pageUtils.contentScaleRatio
+        return {
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - width / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - height / 2)
+        }
+      } else {
+        return {
+          x: this.pageSize.width / 2 - width / 2,
+          y: this.pageSize.height / 2 - height / 2
+        }
+      }
+    })()
     const config = {
       styles: {
-        x: currentPage.width / 2 - width / 2,
-        y: currentPage.height / 2 - height / 2,
+        x,
+        y,
         width,
         height,
         initWidth: json.width,
@@ -610,7 +688,7 @@ class AssetUtils {
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_TEXT
+    const resizeRatio = (attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_TEXT) * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const pageAspectRatio = currentPage.width / currentPage.height
     const textAspectRatio = width / height
     const textWidth =
@@ -719,6 +797,7 @@ class AssetUtils {
         layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
       }
     } else {
+      // isPic
       if (config.type === 'text') {
         Object.assign(config, {
           widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
@@ -886,12 +965,12 @@ class AssetUtils {
           : this.pageSize.height * resizeRatio
 
       newStyles = {
-        width: photoWidth,
-        height: photoHeight,
-        initWidth: photoWidth,
-        initHeight: photoHeight,
-        imgWidth: photoWidth,
-        imgHeight: photoHeight,
+        width: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
+        height: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
+        initWidth: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
+        initHeight: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
+        imgWidth: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
+        imgHeight: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
       }
     }
 
@@ -915,23 +994,40 @@ class AssetUtils {
     } else {
       srcObj = url as SrcObj
     }
+
     const allLayers = this.getLayers(targetPageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
       if (layer.type !== 'image') return false
 
+      if (this.isShrinkSizeAsPinchPage) return
+
       return layer.type === 'image' && !layer.moved && (layer as IImage).srcObj.assetId === assetId
     }) as Array<IImage>
 
-    // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
-    const x =
-      imageLayers.length === 0
-        ? this.pageSize.width / 2 - newStyles.width / 2
-        : imageLayers[imageLayers.length - 1].styles.x + 20
-    const y =
-      imageLayers.length === 0
-        ? this.pageSize.height / 2 - newStyles.height / 2
-        : imageLayers[imageLayers.length - 1].styles.y + 20
+    const { x, y } = (() => {
+      if (imageLayers.length === 0) {
+        if (this.isShrinkSizeAsPinchPage) {
+          const page = pageUtils.getCurrPage
+          const scaleRatio = pageUtils.scaleRatio * 0.01
+          const contentScaleRatio = pageUtils.contentScaleRatio
+          return {
+            x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - newStyles.width / 2),
+            y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - newStyles.height / 2)
+          }
+        } else {
+          return {
+            x: this.pageSize.width / 2 - newStyles.width / 2,
+            y: this.pageSize.height / 2 - newStyles.height / 2
+          }
+        }
+      } else {
+        return {
+          x: imageLayers[imageLayers.length - 1].styles.x + 20,
+          y: imageLayers[imageLayers.length - 1].styles.y + 20
+        }
+      }
+    })()
 
     const config = {
       ...(isPreview && { previewSrc: url }),
@@ -944,7 +1040,7 @@ class AssetUtils {
         ...styles,
         x,
         y,
-        ...newStyles,
+        ...newStyles
       },
     }
 

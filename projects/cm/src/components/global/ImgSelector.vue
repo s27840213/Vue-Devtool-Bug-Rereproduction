@@ -28,6 +28,8 @@ div(
     search-bar(
       v-if="inStock"
       class="text-dark"
+      :defaultKeyword="unsplash.keyword"
+      clear
       @search="searchUnsplash")
     //- Demo img
     div(
@@ -173,18 +175,14 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         :height="22"
         colorInactive="lighter"
         colorActive="yellow-cm")
-    div(class="flex-between-center typo-h6")
-      nubtn(
-        theme="secondary"
-        size="sm"
-        @click="cancelPreprocess") {{ $t('NN0203') }}
-      span {{ $t('CM0083') }}
-      nubtn(
-        size="sm"
-        @click="applyPreprocess") {{ $t('CM0061') }}
+    footer-bar(
+      :title="$t('CM0083')"
+      @cancel="cancelPreprocess"
+      @apply="applyPreprocess")
 </template>
 
 <script lang="ts" setup>
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
@@ -207,8 +205,6 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { find, pull } from 'lodash'
-
-const router = useRouter()
 
 const props = defineProps({
   requireNum: {
@@ -279,7 +275,7 @@ const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
 const { editorType } = storeToRefs(editorStore)
-const { setPageSize, setImgAspectRatio } = editorStore
+const { setImgAspectRatio, setPageSize } = editorStore
 const { replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
@@ -381,7 +377,7 @@ const selectDemo = (i: number) => {
   } else {
     targetImgs.push(demoImgs[i])
   }
-  sendToEditor()
+  beforeSendToEditor()
 }
 
 const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
@@ -400,7 +396,20 @@ const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') 
     userId: '',
     ratio: img.width / img.height,
   })
-  if (props.requireNum === 1) sendToEditor()
+  if (props.requireNum === 1) beforeSendToEditor()
+}
+
+const beforeSendToEditor = () => {
+  if (atEditor.value && editorType.value === 'hidden-message' && !srcPreprocessImg.value) {
+    srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
+    return
+  }
+  sendToEditor()
+
+  // prevent we adding the image to the editor too early, cause the image position in wrong place
+  if (!atEditor.value) {
+    setPageSize(900, 1600)
+  }
 }
 
 const sendToEditor = async () => {
@@ -412,21 +421,16 @@ const sendToEditor = async () => {
     )
   } else {
     const initAtEditor = atEditor.value
-    if (initAtEditor && editorType.value === 'hidden-message' && !srcPreprocessImg.value) {
-      srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
-      return
+
+    if (!initAtEditor) {
+      setImgAspectRatio(targetImgs[0].ratio)
+      targetEditorType.value && editorStore.startEditing(targetEditorType.value)
     }
 
-    setImgAspectRatio(targetImgs[0].ratio)
-    if (!atEditor.value && targetEditorType.value) {
-      editorStore.startEditing(targetEditorType.value)
-    }
-    setPageSize(900, 1600)
     nextTick(() => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
         assetUtils.addImage(img, img.ratio, {
-          fit: initAtEditor ? 0.8 : 1,
           record: initAtEditor,
           styles: {
             adjust: {
@@ -434,9 +438,9 @@ const sendToEditor = async () => {
               invert: +isInvert.value,
             },
           },
+          ...(!initAtEditor && { fit: 1 }),
         })
       })
-      if (!initAtEditor) stepsUtils.reset()
       if (!initAtEditor || editorType.value === 'hidden-message') {
         groupUtils.deselect()
       }
@@ -451,6 +455,7 @@ const sendToEditor = async () => {
 cmWVUtils
   .getAlbumList()
   .then((res) => {
+    if (!res) return // For browser version
     if (res.flag === 1) {
       console.error(res.msg)
     } else {

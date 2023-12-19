@@ -298,7 +298,6 @@ export default defineComponent({
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
-      _contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
       showAllAdminTool: 'user/showAllAdminTool',
       useMobileEditor: 'getUseMobileEditor',

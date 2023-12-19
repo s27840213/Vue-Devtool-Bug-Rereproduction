@@ -10,7 +10,7 @@ import { MovingUtils } from "./movingUtils"
 import pageUtils from "./pageUtils"
 import pointerEvtUtils from "./pointerEvtUtils"
 
-const MAX_SCALE = 400
+const MAX_SCALE = 300
 const TRANSITION_TIME = 300
 const TRANSITION_CLASS = ['transition-transform', 'duration-300']
 
@@ -44,7 +44,6 @@ class pagePinchUtils {
 
   private pinchInit(e: AnyTouchEvent) {
     if (pointerEvtUtils.pointerIds.length !== 2) return
-    console.log('pinch init')
 
     this.isPinchInit = true
     this.initPagePos.x = this.page.x
@@ -109,7 +108,6 @@ class pagePinchUtils {
     // case 1: page smaller than default size
     if (newPageScaleRatio < 100) {
       this.addEdgingTransition()
-      console.warn('case 1')
 
       pageUtils.updatePagePos(layerUtils.pageIndex, {
         x: this.page.initPos.x,
@@ -125,7 +123,6 @@ class pagePinchUtils {
       }, TRANSITION_TIME)
     // case 2: page bigger than maximum size
     } else if (newPageScaleRatio > MAX_SCALE) {
-      console.warn('case 2')
       this.addEdgingTransition()
       const sizeDiff = {
         width: (newPageScaleRatio - MAX_SCALE) * (page.width * contentScaleRatio * 0.01),
@@ -150,7 +147,6 @@ class pagePinchUtils {
       }, TRANSITION_TIME)
     // case 3: page size proper but reach edges
     } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
-      console.warn('case 3')
       this.addEdgingTransition()
       const newPos = {
         x: page.x,
@@ -175,7 +171,6 @@ class pagePinchUtils {
       }, TRANSITION_TIME)
     // no need to edging the page
     } else {
-      console.warn('case 4')
       this.resetState()
       store.commit('SET_pageScaleRatio', newPageScaleRatio)
       this.addPageMoveEvt(e)
@@ -183,7 +178,6 @@ class pagePinchUtils {
   }
 
   pinchEnd(e: AnyTouchEvent) {
-    console.log('pinch end')
     // pointerIds.length equals to 0 means the pinchEnd has been called
     if (this.pointerIds.length === 0) return
     this.handleEdging(e)
@@ -191,7 +185,6 @@ class pagePinchUtils {
   }
 
   private resetState() {
-    // console.warn('reset state')
     store.commit('mobileEditor/SET_isPinchingEditor', false)
     store.commit('mobileEditor/UPDATE_pinchScale', 1)
     store.commit('SET_isPageScaling', false)

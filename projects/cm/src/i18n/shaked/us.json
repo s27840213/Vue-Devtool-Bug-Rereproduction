@@ -416,7 +416,7 @@
   "CM0020": "Move",
   "CM0022": "Text your dream",
   "CM0023": "Generate",
-  "CM0024": "Leave here empty if you want to zoom.",
+  "CM0024": "Leave here empty if you want to expand the image.",
   "CM0025": "Discard your changes?",
   "CM0026": "You have unsaved changes. <newline>Exiting now will lose your recent edits.",
   "CM0028": "Discard",
@@ -482,8 +482,8 @@
   "CM0091": "Auto fill blank area?",
   "CM0092": "We can populate vacant areas as defaults for creation.<newline>Confirm?",
   "CM0093": "How to Create a Hidden Message Image?",
-  "CM0094": "Step 1. You can add images, stickers or text as hidden messages in the photo.",
-  "CM0095": "Step 2. After adding elements, type in your ideal scene.",
+  "CM0094": "Step 1. You can add images, stickers or text as hidden messages.",
+  "CM0095": "Step 2. Type the scene.",
   "CM0096": "Why invert  colors? ",
   "CM0097": "With the same prompt, using inverted colors for hidden message can lead to different results. ",
   "CM0098": "White Heart",
@@ -515,5 +515,11 @@
   "CM0124": "All results",
   "CM0125": "Describe the scene you're imaging.",
   "CM0126": "Prompt",
-  "CM0127": "Re-create"
+  "CM0127": "Re-create",
+  "CM0128": "Prompt copied",
+  "CM0129": "Portrait",
+  "CM0130": "Landscape",
+  "CM0131": "Adjust the selected area",
+  "CM0132": "Move around / adjust the cropping of the photos and filling area.",
+  "CM0133": "Switch"
 }

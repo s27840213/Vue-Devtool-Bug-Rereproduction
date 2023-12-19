@@ -11,7 +11,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
         :currActivePanel="currActivePanel")
   div(class="flex flex-col gap-24 bg-dark-3 shadow-[0_100px_0_100px_black] shadow-dark-3 z-[1]")
     div(v-if="!hideTabs" ref="footerTabs" class="footer-tabs-row flex gap-24")
-      div(class="cm-footer-tabs flex-center h-44")
+      div(v-if="showBackBtn" class="cm-footer-tabs flex-center h-44")
         div(
           class="flex-center bg-white/[.65] rounded-full w-22 h-22"
           @click="handleBack")
@@ -19,7 +19,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
             iconName="chevron-down"
             iconWidth="14px"
             iconColor="dark-3")
-      div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar")
+      div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar mx-auto")
         template(v-for="tab in settingTabs")
           div(
             v-if="!tab.hidden"
@@ -43,17 +43,16 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
               class="no-wrap click-disabled transition ease-linear delay-100 typo-body-sm"
               :class="`text-${settingTabColor(tab)}`") {{ tab.text }}
             //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
-    div(v-if="hasBottomTitle" class="footer-tabs-row flex-between-center")
-      nubtn(
-        class="layer-action"
-        theme="secondary"
-        @click="handleBottomCancel") {{ $t('NN0203') }}
-      div(class="typo-h6 text-white") {{ bottomTitle }}
-      nubtn(class="layer-action" @click="handleBottomApply") {{ $t('CM0061') }}
+    footer-bar(v-if="hasBottomTitle"
+      class="footer-tabs-row"
+      :title="bottomTitle"
+      @cancel="handleBottomCancel"
+      @apply="handleBottomApply")
 //- className cm-footer-tabs is for v-click-outside middleware
 </template>
 
 <script lang="ts">
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'
@@ -81,6 +80,8 @@ import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { CMobilePanel } from './MobilePanel.vue'
+import { useEditorStore } from '@/stores/editor'
+import { pick, cloneDeep } from 'lodash'
 
 export default defineComponent({
   extends: FooterTabs,
@@ -107,6 +108,9 @@ export default defineComponent({
       type: String,
       required: true,
     },
+  },
+  components: {
+    FooterBar
   },
   computed: {
     ...mapGetters({
@@ -468,6 +472,15 @@ export default defineComponent({
     settingTabs(): Array<IFooterTab> {
       return this.tabs
     },
+    magicCombined(): Array<IFooterTab> {
+      return [
+        { icon: 'crop-flip', text: `${this.$t('NN0036')}`, panelType: 'crop-flip' },
+        { icon: 'photo', text: `${this.$t('NN0490')}` },
+        { icon: 'switch', text: this.$t('CM0133') },
+        { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity'},
+      ]
+    },
     tabs(): Array<IFooterTab> {
       const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
       const { controllerHidden } = this
@@ -489,43 +502,36 @@ export default defineComponent({
       }
       if (this.inBgRemoveMode) {
         return this.bgRemoveTabs
+      } else if (useEditorStore().editorType === 'magic-combined') {
+        return this.magicCombined
       } else if (
         this.isGroupOrTmp &&
         this.targetIs('image') &&
         (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)
       ) {
-        console.warn(1)
         /** tmp layer treated as group */
         return this.multiPhotoTabs
       } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
-        console.warn(2)
         return this.photoInGroupTabs
         // text + shape color
       } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
-        console.warn(3)
         return [...this.multiObjectTabs, ...this.fontTabs]
       } else if (this.isGroupOrTmp && this.targetIs('text')) {
-        console.warn(4)
         return this.multiFontTabs
       } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
-        console.warn(5)
         return this.multiObjectTabs
       } else if (
         (this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) &&
         !this.singleTargetType()
       ) {
-        console.warn(6)
         return this.multiGeneralTabs
         // When deselect in object editor with frame
       } else if (this.showFrame) {
-        console.warn(7)
         return [...this.frameTabs, ...this.genearlLayerTabs]
         // When select empty frame in object editor
       } else if (this.showEmptyFrameTabs) {
-        console.warn(8)
         return this.emptyFrameTabs
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
-        console.warn(9)
         return this.photoTabs
       } else if (this.showFontTabs) {
         const res = [{ icon: 'duplicate2', text: `${this.$t('NN0251')}` }, ...this.fontTabs]
@@ -639,6 +645,9 @@ export default defineComponent({
     },
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
+    },
+    showBackBtn(): boolean {
+      return useEditorStore().editorType !== 'magic-combined'
     },
   },
   watch: {
@@ -867,6 +876,14 @@ export default defineComponent({
           })
           break
         }
+        case 'switch': {
+          // Switch first and second layers in page.
+          const first = cloneDeep(layerUtils.getLayer(pageIndex, 0))
+          const second = cloneDeep(layerUtils.getLayer(pageIndex, 1))
+          layerUtils.updateLayerStyles(pageIndex, 0, pick(second.styles, ['x', 'y']))
+          layerUtils.updateLayerStyles(pageIndex, 1, pick(first.styles, ['x', 'y']))
+          break
+        }
         default: {
           break
         }
@@ -914,9 +931,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss" scoped>
-.no-scrollbar {
-  @include no-scrollbar;
-}
-</style>

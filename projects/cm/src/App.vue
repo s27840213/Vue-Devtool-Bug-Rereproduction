@@ -1,12 +1,12 @@
 <template lang="pug">
 div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
-  :class="{'bg-dark-6': !isDuringCopy}")
+  :class="{'bg-dark-6': !isDuringCopy && !atScreenshot}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
       type="text/css")
   div(v-if="atMainPage && !isDesignOpen" class="w-full flex-between-center box-border px-16"
-    :style="{paddingTop: `${statusBarHeight}px`}")
+    :style="{height: `${statusBarHeight + 48}px`, paddingTop: `${statusBarHeight}px`}")
     router-link(
       custom
       :to="'/'"
@@ -26,7 +26,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="router-view box-border min-h-full row-start-2 row-end-3"
-    :class="{ 'pb-12': !atNonUI }"
+    :class="{ 'pb-12': !atNonUI  && !atMyDesign}"
     v-slot="{ Component, route }")
     transition(
       :name="`${route.meta.transition}`"
@@ -139,6 +139,7 @@ import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
 import AspectRatioSelector from './components/panel-content/AspectRatioSelector.vue'
 import BrushOptions from './components/panel-content/BrushOptions.vue'
+import CanvasOptions from './components/panel-content/CanvasOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
@@ -167,6 +168,7 @@ const {
   atSettings,
   atMainPage,
   atDescription,
+  atScreenshot,
   atNonUI,
   showImgSelector,
   inGenResultState,
@@ -203,6 +205,8 @@ const bottomPanelComponent = computed(() => {
       return HomeTab
     case inAspectRatioState.value:
       return AspectRatioSelector
+    case vuex.getters['canvasResize/getIsResizing']:
+      return CanvasOptions
     case showBrushOptions.value:
       return BrushOptions
     case showSelectionOptions.value:

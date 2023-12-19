@@ -1,3 +1,4 @@
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import type { GenImageParams } from '@/types/api'
 import { ICmMyDesign, ICmSubDesign, IMyDesignType } from '@/types/user'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
@@ -165,10 +166,17 @@ export const useUserStore = defineStore('user', () => {
   ) => {
     // const { callback, type = 'opacity' } = option || {}
     try {
+      const { convertToPinkBasedMask } = useCanvasUtils()
       const { pages, type, prompt, id, subId, width, height } = subDesign
       setCurrPrompt(prompt)
       pageUtils.setPages(pages)
-      setMaskDataUrl(getTargetImageUrl(type, id, subId, 'mask'))
+
+      const maskUrl = await convertToPinkBasedMask(
+        getTargetImageUrl(type, id, subId, 'mask'),
+        width,
+        height,
+      )
+      setMaskDataUrl(maskUrl)
       startEditing(type, {
         stateTarget: 'editing',
         designId: id,

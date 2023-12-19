@@ -14,8 +14,8 @@ div(class="bg-remove-area"
     canvas(class="bg-remove-area__canvas" ref="canvas" :cy-ready="cyReady" @pointerdown="moveStart")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
-    svg-icon(class="spiner"
-      :iconName="'spiner'"
+    svg-icon(class="animate-spin"
+      :iconName="'spinner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
 //- teleport(v-if="useMobileEditor || inVivisticker" :to="teleportTarget")
@@ -748,20 +748,6 @@ export default defineComponent({
     box-sizing: border-box;
     border-radius: 50%;
     z-index: setZindex('popup');
-  }
-}
-
-.spiner {
-  animation: rotation 0.5s infinite linear;
-}
-
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
   }
 }
 </style>

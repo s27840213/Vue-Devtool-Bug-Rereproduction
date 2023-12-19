@@ -26,19 +26,27 @@ const useCanvasUtils = (
   const mouseUtils = useMouseUtils()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
-  const { showBrushOptions, maskDataUrl } = storeToRefs(editorStore)
+  const { showBrushOptions, maskDataUrl, maskParams } = storeToRefs(editorStore)
 
   const { isBiColorEditor } = useBiColorEditor()
   // #endregion
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
-  const { setCurrStep, pushStep, clearStep } = canvasStore
+  const {
+    setCanvas,
+    setCanvasCtx,
+    setCurrStep,
+    pushStep,
+    clearStep,
+    setIsAutoFilling,
+    setIsProcessingStepsQueue,
+    pushToStepsQueue,
+  } = canvasStore
   const {
     brushSize,
     resultCanvas,
     canvasMode,
-    isProcessingCanvas,
     isProcessingStepsQueue,
     loading,
     isChangingBrushSize,
@@ -56,7 +64,6 @@ const useCanvasUtils = (
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
 
-  const { setCanvasStoreState } = canvasStore
   // #endregion
 
   // #region page related
@@ -70,14 +77,14 @@ const useCanvasUtils = (
         return
       }
       while (stepsQueue.value.length !== 0) {
-        isProcessingStepsQueue.value = true
+        setIsProcessingStepsQueue(true)
         const blob = await stepsQueue.value.shift()
         if (blob) {
           pushStep(blob)
         }
       }
 
-      isProcessingStepsQueue.value = false
+      setIsProcessingStepsQueue(false)
     },
     {
       deep: true,
@@ -162,10 +169,9 @@ const useCanvasUtils = (
     if (targetCanvas && targetCanvas.value) {
       targetCanvas.value.width = width
       targetCanvas.value.height = height
-      setCanvasStoreState({
-        canvas: targetCanvas.value,
-        canvasCtx: targetCanvas.value.getContext('2d'),
-      })
+      setCanvas(targetCanvas.value)
+      const targetCtx = targetCanvas.value.getContext('2d')
+      targetCtx && setCanvasCtx(targetCtx)
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.strokeStyle = drawingColor.value
         canvasCtx.value.lineWidth = brushSize.value
@@ -183,6 +189,22 @@ const useCanvasUtils = (
       canvasCtx.value.fillStyle = color
       canvasCtx.value.fillRect(0, 0, canvas.value.width, canvas.value.height)
     }
+  }
+
+  const copyCanvas = (originalCanvas: HTMLCanvasElement) => {
+    // Create a new canvas element
+    const copiedCanvas = document.createElement('canvas')
+    copiedCanvas.width = originalCanvas.width
+    copiedCanvas.height = originalCanvas.height
+
+    // Get the 2D context for both canvases
+    const originalContext = originalCanvas.getContext('2d')
+    const copiedContext = copiedCanvas.getContext('2d')
+
+    // Draw the content of the original canvas onto the new canvas
+    copiedContext && copiedContext.drawImage(originalCanvas, 0, 0)
+
+    return copiedCanvas
   }
 
   // update strokeStyle and brush color on drawingColor change
@@ -251,13 +273,7 @@ const useCanvasUtils = (
 
   const drawStart = (e: PointerEvent) => {
     if (pointerEvtUtils.pointerIds.length !== 1) return
-    console.log('drawStart')
-    console.log(
-      showBrushOptions.value,
-      isBrushMode.value || isEraseMode.value,
-      !loading.value,
-      wrapperRef,
-    )
+
     if (
       showBrushOptions.value &&
       (isBrushMode.value || isEraseMode.value) &&
@@ -390,6 +406,7 @@ const useCanvasUtils = (
         canvasCtx.value.fillStyle = drawingColor.value
         record()
       }
+      restoreCanvas()
     }
   })
 
@@ -419,85 +436,85 @@ const useCanvasUtils = (
   }
 
   const autoFill = () => {
-    groupUtils.deselect()
-    clearCtx()
-    setCanvasStoreState({
-      isAutoFilling: true,
-    })
-    mapEditorToCanvas(() => {
-      if (canvasCtx && canvasCtx.value) {
-        const pixels = canvasCtx.value.getImageData(
-          0,
-          0,
-          pageSize.value.width,
-          pageSize.value.height,
-        )
-        const result = new ImageData(
-          new Uint8ClampedArray(pixels.data),
-          pageSize.value.width,
-          pageSize.value.height,
-        )
-        // The total number of pixels (RGBA values).
-        const bufferSize = pixels.data.length
+    if (canvas && canvas.value) {
+      groupUtils.deselect()
+      const copiedCanavs = copyCanvas(canvas.value)
+      clearCtx()
+      setIsAutoFilling(true)
+      mapEditorToCanvas(() => {
+        if (canvasCtx && canvasCtx.value) {
+          const pixels = canvasCtx.value.getImageData(
+            0,
+            0,
+            pageSize.value.width,
+            pageSize.value.height,
+          )
+          const result = new ImageData(
+            new Uint8ClampedArray(pixels.data),
+            pageSize.value.width,
+            pageSize.value.height,
+          )
+          // The total number of pixels (RGBA values).
+          const bufferSize = pixels.data.length
 
-        // Iterate over every pixel to find the boundaries of the non-transparent content.
-        for (let i = 0; i < bufferSize; i += 4) {
-          // Check the alpha (transparency) value of each pixel.
-          if (pixels.data[i + 3] === 0) {
-            // If the pixel is transparent, set it to opaque.
-            // const x = (i / 4) % pageSize.value.width
-            // const y = Math.floor(i / (4 * pageSize.value.width))
+          // Iterate over every pixel to find the boundaries of the non-transparent content.
+          for (let i = 0; i < bufferSize; i += 4) {
+            // Check the alpha (transparency) value of each pixel.
+            if (pixels.data[i + 3] === 0) {
+              // If the pixel is transparent, set it to opaque.
+              // const x = (i / 4) % pageSize.value.width
+              // const y = Math.floor(i / (4 * pageSize.value.width))
 
-            // for (let dx = -8; dx <= 8; dx++) {
-            //   for (let dy = -8; dy <= 8; dy++) {
-            //     setPixelColor(x, y, 255, 114, 98)
-            //   }
-            // }
-            result.data[i] = 255
-            result.data[i + 1] = 114
-            result.data[i + 2] = 98
-            result.data[i + 3] = 255
-          } else {
-            // If the pixel is not transparent, set it to transparent.
-            result.data[i + 3] = 0
+              // for (let dx = -8; dx <= 8; dx++) {
+              //   for (let dy = -8; dy <= 8; dy++) {
+              //     setPixelColor(x, y, 255, 114, 98)
+              //   }
+              // }
+              result.data[i] = 255
+              result.data[i + 1] = 114
+              result.data[i + 2] = 98
+              result.data[i + 3] = 255
+            } else {
+              // If the pixel is not transparent, set it to transparent.
+              result.data[i + 3] = 0
+            }
           }
-        }
-        canvasCtx.value.putImageData(result, 0, 0)
-        const tmpCanvas = document.createElement('canvas')
-        tmpCanvas.width = pageSize.value.width
-        tmpCanvas.height = pageSize.value.height
-        const tmpCtx = tmpCanvas.getContext('2d')
-        canvas.value && tmpCtx?.drawImage(canvas.value, 0, 0)
-        clearCtx()
+          canvasCtx.value.putImageData(result, 0, 0)
+          const tmpCanvas = document.createElement('canvas')
+          tmpCanvas.width = pageSize.value.width
+          tmpCanvas.height = pageSize.value.height
+          const tmpCtx = tmpCanvas.getContext('2d')
+          canvas.value && tmpCtx?.drawImage(canvas.value, 0, 0)
+          clearCtx()
 
-        canvasCtx.value.save()
-        canvasCtx.value.shadowBlur = 0 // Blur level
-        canvasCtx.value.shadowColor = drawingColor.value // Color
-        const shiftDir = [
-          [0, 1],
-          [-1, 0],
-          [0, -1],
-          [1, 0],
-          [1, 1],
-          [-1, 1],
-          [-1, -1],
-          [1, -1],
-        ]
-        // X offset loop
-        for (const dir of shiftDir) {
-          const [xDir, yDir] = dir
-          canvasCtx.value.shadowOffsetX = 5 * xDir // X offset
-          canvasCtx.value.shadowOffsetY = 5 * yDir // Y offset
-          canvasCtx.value.drawImage(tmpCanvas, 0, 0, pageSize.value.width, pageSize.value.height)
-        }
-        canvasCtx.value.restore()
-        record()
+          canvasCtx.value.save()
+          canvasCtx.value.shadowBlur = 0 // Blur level
+          canvasCtx.value.shadowColor = drawingColor.value // Color
+          const shiftDir = [
+            [0, 1],
+            [-1, 0],
+            [0, -1],
+            [1, 0],
+            [1, 1],
+            [-1, 1],
+            [-1, -1],
+            [1, -1],
+          ]
+          // X offset loop
+          for (const dir of shiftDir) {
+            const [xDir, yDir] = dir
+            canvasCtx.value.shadowOffsetX = 5 * xDir // X offset
+            canvasCtx.value.shadowOffsetY = 5 * yDir // Y offset
+            canvasCtx.value.drawImage(tmpCanvas, 0, 0, pageSize.value.width, pageSize.value.height)
+          }
+          canvasCtx.value.restore()
+          copiedCanavs && canvasCtx.value.drawImage(copiedCanavs, 0, 0)
+          record()
 
-        setCanvasStoreState({
-          isAutoFilling: false,
-        })
-      }
-    })
+          setIsAutoFilling(false)
+        }
+      })
+    }
   }
 
   const prepareMaskToUpload = () => {
@@ -539,6 +556,79 @@ const useCanvasUtils = (
     }
   }
 
+  const convertToPinkBasedMask = (
+    maskUrl: string,
+    width: number,
+    height: number,
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvasCopy = document.createElement('canvas')
+      canvasCopy.width = width
+      canvasCopy.height = height
+      const maskCtxCopy = canvasCopy.getContext('2d')
+
+      if (maskCtxCopy) {
+        const img = new Image()
+        img.src = maskUrl
+        img.crossOrigin = 'Anonymous'
+
+        img.onload = () => {
+          maskCtxCopy.drawImage(img, 0, 0)
+          const pixels = maskCtxCopy.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
+          const result = new ImageData(
+            new Uint8ClampedArray(pixels.data),
+            pageSize.value.width,
+            pageSize.value.height,
+          )
+          // The total number of pixels (RGBA values).
+          const bufferSize = result.data.length
+
+          // Check the alpha (transparency) value of each pixel.
+          for (let i = 0; i < bufferSize; i += 4) {
+            // if the pixel is transparent or pink, don't change it
+            if (
+              result.data[i + 3] === 0 ||
+              (result.data[i] === 255 && result.data[i + 1] === 114 && result.data[i + 2] === 98)
+            ) {
+              break
+            } else {
+              // If the pixel is not transparent or pink, set it We may have 2 cases:
+              // 1. The pixel is white, we set it to pink.
+              // 2. The pixel is black, we set it to transparent.
+              if (
+                // white
+                result.data[i] === 255 &&
+                result.data[i + 1] === 255 &&
+                result.data[i + 2] === 255
+              ) {
+                result.data[i] = 255
+                result.data[i + 1] = 114
+                result.data[i + 2] = 98
+                result.data[i + 3] = 255
+              } else if (
+                // black
+                result.data[i] === 0 &&
+                result.data[i + 1] === 0 &&
+                result.data[i + 2] === 0
+              ) {
+                result.data[i + 3] = 0
+              } else {
+                reject(new Error('Unexpected color'))
+              }
+            }
+          }
+          maskCtxCopy.putImageData(result, 0, 0)
+
+          resolve(canvasCopy.toDataURL('image/png'))
+        }
+
+        img.onerror = () => {
+          reject(new Error('Failed to load image'))
+        }
+      }
+    })
+  }
+
   const downloadCanvas = () => {
     if (canvas && canvas.value) {
       const dataUrl = canvas.value.toDataURL('image/png')
@@ -555,10 +645,15 @@ const useCanvasUtils = (
   const mapEditorToCanvas = async (cb?: () => void) => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor(
-      { width: pageWidth * contentScaleRatio.value, height: pageHeight * contentScaleRatio.value },
-      true,
-    )
+    const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }))
+      : await cmWVUtils.copyEditor(
+          {
+            width: pageWidth * contentScaleRatio.value,
+            height: pageHeight * contentScaleRatio.value,
+          },
+          true,
+        )
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
@@ -620,8 +715,10 @@ const useCanvasUtils = (
       img.onload = () => {
         clearCtx()
         drawImageToCtx(img, {
-          width: pageSize.value.width,
-          height: pageSize.value.height,
+          x: maskParams.value.x ?? 0,
+          y: maskParams.value.y ?? 0,
+          width: maskParams.value.width ?? pageSize.value.width,
+          height: maskParams.value.height ?? pageSize.value.height,
         })
       }
     }
@@ -635,7 +732,7 @@ const useCanvasUtils = (
     if (canvas.value) {
       const blobPromise = getCanvasBlob(canvas.value)
       if (blobPromise !== null) {
-        stepsQueue.value.push(blobPromise)
+        pushToStepsQueue(blobPromise)
       }
     }
   }
@@ -658,12 +755,14 @@ const useCanvasUtils = (
   const redo = () => {
     if (!isProcessingStepsQueue.value && !isInCanvasLastStep.value) {
       setCurrStep(currStep.value + 1)
-      updateCurrCanvasImageElement()
+      const url = updateCurrCanvasImageElement()
 
       currCanvasImageElement.value.onload = () => {
         clearCtx()
         drawImageToCtx(currCanvasImageElement.value)
         if (isBiColorEditor) fillNonTransparent(drawingColor.value)
+
+        URL.revokeObjectURL(url)
       }
     }
   }
@@ -673,7 +772,6 @@ const useCanvasUtils = (
   }
 
   return {
-    setCanvasStoreState,
     reverseSelection,
     downloadCanvas,
     getCanvasDataUrl,
@@ -689,6 +787,7 @@ const useCanvasUtils = (
     checkCanvasIsEmpty,
     restoreCanvas,
     prepareMaskToUpload,
+    convertToPinkBasedMask,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,
@@ -698,7 +797,6 @@ const useCanvasUtils = (
     isBrushMode,
     resultCanvas,
     currStep,
-    isProcessingCanvas,
     isProcessingStepsQueue,
     loading,
     steps,

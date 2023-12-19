@@ -17,9 +17,9 @@ div(class="panel-login flex-center mx-24 my-8" v-out="close")
   svg-icon(
     class="absolute animate-spin"
     :class="{ hidden: !waiting }"
-    iconName="spiner"
+    iconName="spinner2"
     iconWidth="24px"
-    iconColor="white")
+    iconColor="yellow-cm")
 </template>
 
 <script lang="ts" setup>

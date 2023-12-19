@@ -13,6 +13,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      div(v-else-if="isResizingCanvas" class="text-white typo-h5 whitespace-nowrap")
+        span {{ `${pageSize.width} x ${pageSize.height}` }}
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
@@ -47,11 +49,16 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         v-slot="{ navigate }")
         svg-icon(
           iconColor="white"
-          iconName="home"
+          iconName="cm_home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
+  canvas-resizer(
+    v-if="isResizingCanvas"
+    :pageIndex="layerUtils.pageIndex"
+    :pageState="pageState[layerUtils.pageIndex]"
+    :noBg="isDuringCopy && isNoBg")
   div(
-    v-if="!inSavingState"
+    v-else-if="!inSavingState"
     class="editor-container flex-center relative"
     ref="editorContainerRef"
     id="mobile-editor__content"
@@ -74,8 +81,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           nu-page(
             class="z-page"
             v-show="!inGenResultState"
-            :pageIndex="0"
-            :pageState="pageState[0]"
+            :pageIndex="layerUtils.pageIndex"
+            :pageState="pageState[layerUtils.pageIndex]"
             :overflowContainer="editorContainerRef"
             :noBg="isDuringCopy && isNoBg"
             :hideHighlighter="true")
@@ -92,13 +99,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!isDuringCopy && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
+      v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef"
       @downloadMask="downloadCanvas")
   div(v-else class="editor-view__saving-state")
-    div(
-      class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
+    div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
       div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
@@ -180,6 +186,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import CanvasResizer from '@/components/editor/CanvasResizer.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
@@ -240,11 +247,18 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
 
 const { ids } = useGenImageUtils()
 
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
+
+const showSidebarTabs = computed(() => 
+  !isDuringCopy && inEditingState && !inGenResultState &&
+  !showSelectionOptions && !isCropping && !showBrushOptions.value &&
+  editorType.value !== 'magic-combined'
+)
 // #endregion
 
 // #region hooks related
@@ -268,7 +282,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, setDescriptionPanel, editorType } = editorStore
+const { changeEditorState, updateGenResult, setDescriptionPanel } =  editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -276,13 +290,15 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
+  showBrushOptions,
+  editorType,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
 watch(
   () => isManipulatingCanvas.value,
   (val) => {
-    store.commit('SET_disableLayerAction', val)
+    store.commit('SET_allowLayerAction', val ? 'none' : 'all')
   },
 )
 
@@ -290,7 +306,7 @@ const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inAspectRatioState.value) {
     changeEditorState('next')
-    useTutorial().runTutorial(editorType)
+    useTutorial().runTutorial(editorType.value)
   } else if (inEditingState.value) {
     changeEditorState('next')
   } else if (inGenResultState.value) {
@@ -338,7 +354,7 @@ const centerBtns = computed<centerBtn[]>(() => {
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
     { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo },
   ]
-  if (editorType === 'hidden-message')
+  if (editorType.value === 'hidden-message')
     retTabs.push({
       icon: 'question-mark-circle',
       disabled: false,
@@ -346,7 +362,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       action: () => setDescriptionPanel('hidden-message-help'),
     })
   retTabs.push(...stepBtns)
-  if (currEditorTheme.value && editorType === 'hidden-message')
+  if (currEditorTheme.value && editorType.value === 'hidden-message')
     retTabs.push({
       icon: currEditorTheme.value.toggleIcon,
       disabled: false,
@@ -370,14 +386,9 @@ const fitScaleRatio = computed(() => {
     pageSize.value.height === 0
   )
     return 1
-  // make longer side become 1600px
-  const pageAspectRatio = pageSize.value.width / pageSize.value.height
-  const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
-  const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
 
-  // const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
-  const widthRatio = (editorContainerWidth.value - 8) / newWidth
-  const heightRatio = editorContainerHeight.value / newHeight
+  const widthRatio = (editorContainerWidth.value - 8) / pageSize.value.width
+  const heightRatio = editorContainerHeight.value / pageSize.value.height
 
   const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
@@ -417,7 +428,7 @@ const fitPage = (ratio: number) => {
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value) return
+    if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
     fitPage(newVal)
   },
 )
@@ -427,7 +438,8 @@ watch(isDuringCopy, () => {
 })
 
 let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
-onMounted(() => {
+const initPagePinchHandler = () => {
+  if (!editorContainerRef.value) return
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
     size: {
@@ -444,6 +456,12 @@ onMounted(() => {
     },
   })
   pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+}
+onMounted(initPagePinchHandler)
+watch(isResizingCanvas, (newVal) => {
+  if (!newVal) {
+    nextTick(initPagePinchHandler)
+  }
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])

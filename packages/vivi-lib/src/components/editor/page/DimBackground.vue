@@ -38,7 +38,6 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
       :forRender="true"
       :pageIndex="pageIndex"
       :page="config"
-      @onload="bgImgOnload"
       :layerIndex="layerIndex")
     div(class="dim-background__content-area hollow" :style="contentAreaStyles")
       component(v-for="(elm, idx) in getHalation"
@@ -134,11 +133,6 @@ export default defineComponent({
         left: this.config.bleeds.left * this.contentScaleRatio + 'px',
         right: this.config.bleeds.right * this.contentScaleRatio + 'px'
       }
-    }
-  },
-  methods: {
-    bgImgOnload() {
-      this.$store.commit('imgControl/SET_IsBgCtrlImgLoaded', true)
     }
   }
 })

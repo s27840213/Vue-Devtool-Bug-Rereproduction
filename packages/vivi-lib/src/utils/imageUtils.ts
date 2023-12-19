@@ -726,8 +726,8 @@ class ImageUtils {
           assetId: this.getAssetId(src),
         },
         styles: {
-          width: img.width,
-          height: img.height,
+          imgWidth: img.width,
+          imgHeight: img.height,
         },
       }
       return mouseUtils.clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
@@ -951,8 +951,8 @@ class ImageUtils {
       ...mouseUtils.clipperHandler(
         {
           styles: {
-            width: photoWidth,
-            height: photoHeight,
+            imgWidth: photoWidth,
+            imgHeight: photoHeight,
           },
         } as unknown as IImage,
         path,

@@ -1,6 +1,7 @@
 import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
 import type { GenImageParams, GenImageResult } from '@/types/api'
 import { notify } from '@kyvg/vue3-notification'
@@ -24,7 +25,8 @@ const ids: string[] = []
 const useGenImageUtils = () => {
   const userStore = useUserStore()
   const { setPrevGenParams } = userStore
-  const { prevGenParams } = storeToRefs(useUserStore())
+  const { prevGenParams } = storeToRefs(userStore)
+  const { useUsBucket } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
   const {
     setInitImgSrc,
@@ -46,9 +48,10 @@ const useGenImageUtils = () => {
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
-  const { prepareMaskToUpload } = useCanvasUtils()
+  const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
+  const hostId = computed(() => store.getters['cmWV/getUserInfo'].hostId)
   const { t } = useI18n()
 
   const genImageFlow = async (
@@ -78,12 +81,22 @@ const useGenImageUtils = () => {
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
+          const hint = `${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId}`
           logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
-          modalUtils.setModalInfo(
-            `${t('CM0087')} ${t('CM0089')}`,
-            `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
-            { msg: t('STK0023') },
-          )
+          logUtils.uploadLog().then(() => {
+            modalUtils.setModalInfo(
+              `${t('CM0087')} ${t('CM0089')}`,
+              `${t('CM0088')}<br/>(${hint})`,
+              {
+                msg: t('STK0023'),
+                action() {
+                  generalUtils.copyText(hint).then(() => {
+                    notify({ group: 'success', text: '已複製' })
+                  })
+                }
+              },
+            )
+          })
           removeGenResult(ids[index])
           if (generatedResultsNum.value === 0 && inGenResultState.value) {
             changeEditorState('prev')
@@ -93,13 +106,23 @@ const useGenImageUtils = () => {
       })
     } catch (error) {
       const errorId = generalUtils.generateRandomString(6)
+      const hint = `${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId}`
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
-      modalUtils.setModalInfo(
-        t('CM0087'),
-        `${t('CM0088')}<br/>(${userId.value},${generalUtils.generateTimeStamp()},${errorId})`,
-        { msg: t('STK0023') },
-      )
+      logUtils.uploadLog().then(() => {
+        modalUtils.setModalInfo(
+          t('CM0087'),
+          `${t('CM0088')}<br/>(${hint})`,
+          {
+            msg: t('STK0023'),
+            action() {
+              generalUtils.copyText(hint).then(() => {
+                notify({ group: 'success', text: '已複製' })
+              })
+            }
+          },
+        )
+      })
       for (const id of ids) {
         removeGenResult(id)
       }
@@ -125,6 +148,7 @@ const useGenImageUtils = () => {
     } = {},
   ): Promise<string[]> => {
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
+    RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
     if (!showMore) {
       try {
@@ -139,8 +163,9 @@ const useGenImageUtils = () => {
     } else {
       params = prevGenParams.value.params
     }
-    RECORD_TIMING && testUtils.start('call API', false)
-    const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
+    RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
+    logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
+    const res = (await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
@@ -163,7 +188,7 @@ const useGenImageUtils = () => {
         }
       })(),
       ...urls.map(async (url, index) => {
-        RECORD_TIMING && testUtils.start(`polling ${index}`, false)
+        RECORD_TIMING && testUtils.start(`polling ${index}`, { notify: false, setToLog: true })
         try {
           const subDesignId = ids[index]
           const promises = [
@@ -171,7 +196,7 @@ const useGenImageUtils = () => {
               subDesignId,
             }),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
-            polling(url, { isJson: false, useVer: false, pollingController }),
+            polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
           if (editorType.value !== 'hidden-message') {
             const prepareMask = prepareMaskToUpload()
@@ -215,15 +240,15 @@ const useGenImageUtils = () => {
         } catch (error) {
           onError && onError(index, url, 'saveAssetFromUrl failed')
         }
+        RECORD_TIMING && testUtils.log(`gen-image ${requestId}`, '')
       }),
     ])
     return urls
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
-    RECORD_TIMING && testUtils.start('copy editor', false)
+    RECORD_TIMING && testUtils.start('copy editor', { notify: false, setToLog: true })
     const { width: pageWidth, height: pageHeight } = pageSize.value
-    const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
       ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }))
       : await cmWVUtils.copyEditor({
@@ -235,13 +260,13 @@ const useGenImageUtils = () => {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
-    RECORD_TIMING && testUtils.start('screenshot to blob', false)
+    RECORD_TIMING && testUtils.start('screenshot to blob', { notify: false, setToLog: true })
     return new Promise<void>((resolve) => {
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?lsize=${size}`).then((dataUrl) => {
+      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?ssize=1080`).then((dataUrl) => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         RECORD_TIMING && testUtils.log('screenshot to blob', '')
-        RECORD_TIMING && testUtils.start('upload screenshot', false)
+        RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
         uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
           .then(async () => {
             RECORD_TIMING && testUtils.log('upload screenshot', '')
@@ -260,16 +285,19 @@ const useGenImageUtils = () => {
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
     if (editorType.value === 'hidden-message') return
 
-    RECORD_TIMING && testUtils.start('mask to dataUrl', false)
+    RECORD_TIMING && testUtils.start('mask to dataUrl', { notify: false, setToLog: true })
     return new Promise<void>((resolve, reject) => {
       try {
+        const originalMaskDataUrl = getCanvasDataUrl()
         const maskUrl = prepareMaskToUpload()
         if (maskUrl !== undefined) {
           RECORD_TIMING && testUtils.log('mask to dataUrl', '')
-          RECORD_TIMING && testUtils.start('upload mask', false)
+          RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
           uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
-            setMaskDataUrl(maskUrl)
+            if (originalMaskDataUrl) {
+              setMaskDataUrl(originalMaskDataUrl)
+            }
             resolve()
           })
         } else {

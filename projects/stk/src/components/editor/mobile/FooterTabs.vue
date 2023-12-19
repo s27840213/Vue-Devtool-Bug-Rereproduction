@@ -706,8 +706,8 @@ export default defineComponent({
                           ...config.styles,
                           ...mouseUtils.clipperHandler({
                             styles: {
-                              width: photoWidth,
-                              height: photoHeight
+                              imgWidth: photoWidth,
+                              imgHeight: photoHeight
                             }
                           } as unknown as IImage, path, config.styles).styles,
                           ...{

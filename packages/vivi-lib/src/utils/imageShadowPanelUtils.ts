@@ -1,5 +1,5 @@
 import { SrcObj } from '@/interfaces/gallery'
-import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import store from '@/store'
@@ -158,6 +158,11 @@ export default new class ImageShadowPanelUtils {
       const shadow = config.styles.shadow
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
 
+      // uploadIdentifier is the same, means the current effect is uploading
+      if (store.state.shadow.uploadIdentifier && store.state.shadow.uploadIdentifier === this.getUploadShadowIdentifier(layerData.config as IImage)) {
+        return
+      }
+
       const isSameSrc = config.styles.shadow.srcState && config.styles.shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
       if (!forceUpload && isSameSrc && this.checkIfSameEffect(config)) {
         /**
@@ -209,7 +214,7 @@ export default new class ImageShadowPanelUtils {
         pageId: pageId,
         layerId: primarylayerId || config.id || '',
         subLayerId: primarylayerId ? config.id || '' : ''
-      })
+      }, this.getUploadShadowIdentifier(layerData.config as IImage))
 
       const updateCanvas = document.createElement('canvas')
       let params = {} as any
@@ -545,6 +550,15 @@ export default new class ImageShadowPanelUtils {
     }
   }
 
+  getUploadShadowIdentifier(config: IImage) {
+    const { styles: { shadow, imgHeight, imgWidth, imgX, imgY }, srcObj } = config
+    if (shadow.currentEffect === 'none') return ''
+    const effect = shadow.effects[shadow.currentEffect] as IShadowEffect | IImageMatchedEffect | IFrameEffect | IFloatingEffect | IBlurEffect
+    const arr = [shadow.currentEffect, srcObj.type, srcObj.userId, srcObj.assetId]
+    Object.entries(effect).forEach(([k, v]) => arr.push(k, v))
+    return arr.join('-')
+  }
+
   setIsUploading(pageId: string, layerId: string, subLayerId: string, isUploading: boolean) {
     const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
     layerUtils.updateLayerProps(pageIndex, layerIndex, {
@@ -564,7 +578,7 @@ export default new class ImageShadowPanelUtils {
 
   resetHandleState() {
     imageShadowUtils.clearLayerData()
-    imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+    imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' }, '')
     imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
     imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
   }

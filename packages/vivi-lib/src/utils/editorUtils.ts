@@ -4,6 +4,7 @@ import store from '@/store'
 import { IMobileEditorState } from '@/store/module/mobileEditor'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
+import { IEditorState } from '@/store/types'
 
 class EditorUtils {
   private _mobileSize = { width: 0, height: 0 }
@@ -210,8 +211,8 @@ class EditorUtils {
     }
   }
 
-  setDisableLayerAction(bool: boolean): void {
-    store.commit('SET_disableLayerAction', bool)
+  setAllowLayerAction(status: IEditorState['allowLayerAction']): void {
+    store.commit('SET_allowLayerAction', status)
   }
 }
 
