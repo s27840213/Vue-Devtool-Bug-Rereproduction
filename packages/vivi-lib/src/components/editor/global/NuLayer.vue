@@ -533,13 +533,15 @@ export default defineComponent({
     dblTap(e: PointerEvent) {
       doubleTapUtils.click(e, {
         doubleClickCallback: () => {
-          if (this.getLayerType === LayerType.image && this.prePrimaryLayerIndex === -1 && !this.$store.state.disableLayerAction) {
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-            if (generalUtils.isCm) {
-              eventUtils.emit(PanelEvent.switchTab, 'crop-flip')
-            } else {
-              eventUtils.emit(PanelEvent.switchTab, 'crop')
-            }
+          if (this.getLayerType !== LayerType.image ||
+            this.prePrimaryLayerIndex !== -1 ||
+            this.$store.state.allowLayerAction === 'none') return
+          
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+          if (generalUtils.isCm) {
+            eventUtils.emit(PanelEvent.switchTab, 'crop-flip')
+          } else {
+            eventUtils.emit(PanelEvent.switchTab, 'crop')
           }
         }
       })

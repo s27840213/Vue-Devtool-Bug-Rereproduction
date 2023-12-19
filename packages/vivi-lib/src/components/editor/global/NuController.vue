@@ -214,12 +214,13 @@ div(:layer-index="`${layerIndex}`"
 <script lang="ts">
 import ActionIcon from '@/components/editor/controlPoint/ActionIcon.vue'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import { IColorKeys } from '@/interfaces/color'
+import { IColorKeys, colorTable } from '@/interfaces/color'
 import { IResizer } from '@/interfaces/controller'
 import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import store from '@/store'
 import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
 import cssConverter from '@/utils/cssConverter'
@@ -370,6 +371,7 @@ export default defineComponent({
       return this.isActive && !this.controllerHidden
     },
     showControlPtrs(): boolean {
+      if (store.state.allowLayerAction !== 'all') return false
       return !['pinch', 'move'].includes(this.controlState.type) && !this.isPinchingEditor
     },
     ctrlPtrStyles(): Record<string, number | string> {
@@ -756,6 +758,8 @@ export default defineComponent({
           return '#F10994'
         } else if (this.isLocked()) {
           return '#EB5757'
+        } else if (store.state.allowLayerAction === 'crop-only') {
+          return colorTable['yellow-cm']
         } else {
           return generalUtils.getOutlineColor()
         }

@@ -56,7 +56,7 @@ const useCanvasUtils = (
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
 
-  const { setCanvasStoreState } = canvasStore
+  const { setCanvasStoreState, setTmpCanvasDataUrl } = canvasStore
   // #endregion
 
   // #region page related
@@ -185,6 +185,22 @@ const useCanvasUtils = (
     }
   }
 
+  const copyCanvas = (originalCanvas: HTMLCanvasElement) => {
+    // Create a new canvas element
+    const copiedCanvas = document.createElement('canvas')
+    copiedCanvas.width = originalCanvas.width
+    copiedCanvas.height = originalCanvas.height
+
+    // Get the 2D context for both canvases
+    const originalContext = originalCanvas.getContext('2d')
+    const copiedContext = copiedCanvas.getContext('2d')
+
+    // Draw the content of the original canvas onto the new canvas
+    copiedContext && copiedContext.drawImage(originalCanvas, 0, 0)
+
+    return copiedCanvas
+  }
+
   // update strokeStyle and brush color on drawingColor change
   watch(drawingColor, (newVal) => {
     if (canvasCtx && canvasCtx.value) {
@@ -251,13 +267,7 @@ const useCanvasUtils = (
 
   const drawStart = (e: PointerEvent) => {
     if (pointerEvtUtils.pointerIds.length !== 1) return
-    console.log('drawStart')
-    console.log(
-      showBrushOptions.value,
-      isBrushMode.value || isEraseMode.value,
-      !loading.value,
-      wrapperRef,
-    )
+
     if (
       showBrushOptions.value &&
       (isBrushMode.value || isEraseMode.value) &&
@@ -420,85 +430,89 @@ const useCanvasUtils = (
   }
 
   const autoFill = () => {
-    groupUtils.deselect()
-    clearCtx()
-    setCanvasStoreState({
-      isAutoFilling: true,
-    })
-    mapEditorToCanvas(() => {
-      if (canvasCtx && canvasCtx.value) {
-        const pixels = canvasCtx.value.getImageData(
-          0,
-          0,
-          pageSize.value.width,
-          pageSize.value.height,
-        )
-        const result = new ImageData(
-          new Uint8ClampedArray(pixels.data),
-          pageSize.value.width,
-          pageSize.value.height,
-        )
-        // The total number of pixels (RGBA values).
-        const bufferSize = pixels.data.length
+    if (canvas && canvas.value) {
+      groupUtils.deselect()
+      const copiedCanavs = copyCanvas(canvas.value)
+      clearCtx()
+      setCanvasStoreState({
+        isAutoFilling: true,
+      })
+      mapEditorToCanvas(() => {
+        if (canvasCtx && canvasCtx.value) {
+          const pixels = canvasCtx.value.getImageData(
+            0,
+            0,
+            pageSize.value.width,
+            pageSize.value.height,
+          )
+          const result = new ImageData(
+            new Uint8ClampedArray(pixels.data),
+            pageSize.value.width,
+            pageSize.value.height,
+          )
+          // The total number of pixels (RGBA values).
+          const bufferSize = pixels.data.length
 
-        // Iterate over every pixel to find the boundaries of the non-transparent content.
-        for (let i = 0; i < bufferSize; i += 4) {
-          // Check the alpha (transparency) value of each pixel.
-          if (pixels.data[i + 3] === 0) {
-            // If the pixel is transparent, set it to opaque.
-            // const x = (i / 4) % pageSize.value.width
-            // const y = Math.floor(i / (4 * pageSize.value.width))
+          // Iterate over every pixel to find the boundaries of the non-transparent content.
+          for (let i = 0; i < bufferSize; i += 4) {
+            // Check the alpha (transparency) value of each pixel.
+            if (pixels.data[i + 3] === 0) {
+              // If the pixel is transparent, set it to opaque.
+              // const x = (i / 4) % pageSize.value.width
+              // const y = Math.floor(i / (4 * pageSize.value.width))
 
-            // for (let dx = -8; dx <= 8; dx++) {
-            //   for (let dy = -8; dy <= 8; dy++) {
-            //     setPixelColor(x, y, 255, 114, 98)
-            //   }
-            // }
-            result.data[i] = 255
-            result.data[i + 1] = 114
-            result.data[i + 2] = 98
-            result.data[i + 3] = 255
-          } else {
-            // If the pixel is not transparent, set it to transparent.
-            result.data[i + 3] = 0
+              // for (let dx = -8; dx <= 8; dx++) {
+              //   for (let dy = -8; dy <= 8; dy++) {
+              //     setPixelColor(x, y, 255, 114, 98)
+              //   }
+              // }
+              result.data[i] = 255
+              result.data[i + 1] = 114
+              result.data[i + 2] = 98
+              result.data[i + 3] = 255
+            } else {
+              // If the pixel is not transparent, set it to transparent.
+              result.data[i + 3] = 0
+            }
           }
-        }
-        canvasCtx.value.putImageData(result, 0, 0)
-        const tmpCanvas = document.createElement('canvas')
-        tmpCanvas.width = pageSize.value.width
-        tmpCanvas.height = pageSize.value.height
-        const tmpCtx = tmpCanvas.getContext('2d')
-        canvas.value && tmpCtx?.drawImage(canvas.value, 0, 0)
-        clearCtx()
+          canvasCtx.value.putImageData(result, 0, 0)
+          const tmpCanvas = document.createElement('canvas')
+          tmpCanvas.width = pageSize.value.width
+          tmpCanvas.height = pageSize.value.height
+          const tmpCtx = tmpCanvas.getContext('2d')
+          canvas.value && tmpCtx?.drawImage(canvas.value, 0, 0)
+          clearCtx()
 
-        canvasCtx.value.save()
-        canvasCtx.value.shadowBlur = 0 // Blur level
-        canvasCtx.value.shadowColor = drawingColor.value // Color
-        const shiftDir = [
-          [0, 1],
-          [-1, 0],
-          [0, -1],
-          [1, 0],
-          [1, 1],
-          [-1, 1],
-          [-1, -1],
-          [1, -1],
-        ]
-        // X offset loop
-        for (const dir of shiftDir) {
-          const [xDir, yDir] = dir
-          canvasCtx.value.shadowOffsetX = 5 * xDir // X offset
-          canvasCtx.value.shadowOffsetY = 5 * yDir // Y offset
-          canvasCtx.value.drawImage(tmpCanvas, 0, 0, pageSize.value.width, pageSize.value.height)
-        }
-        canvasCtx.value.restore()
-        record()
+          canvasCtx.value.save()
+          canvasCtx.value.shadowBlur = 0 // Blur level
+          canvasCtx.value.shadowColor = drawingColor.value // Color
+          const shiftDir = [
+            [0, 1],
+            [-1, 0],
+            [0, -1],
+            [1, 0],
+            [1, 1],
+            [-1, 1],
+            [-1, -1],
+            [1, -1],
+          ]
+          // X offset loop
+          for (const dir of shiftDir) {
+            const [xDir, yDir] = dir
+            canvasCtx.value.shadowOffsetX = 5 * xDir // X offset
+            canvasCtx.value.shadowOffsetY = 5 * yDir // Y offset
+            canvasCtx.value.drawImage(tmpCanvas, 0, 0, pageSize.value.width, pageSize.value.height)
+          }
+          canvasCtx.value.restore()
+          copiedCanavs && canvasCtx.value.drawImage(copiedCanavs, 0, 0)
+          record()
 
-        setCanvasStoreState({
-          isAutoFilling: false,
-        })
-      }
-    })
+          setCanvasStoreState({
+            isAutoFilling: false,
+          })
+        }
+      })
+    }
   }
 
   const prepareMaskToUpload = () => {
