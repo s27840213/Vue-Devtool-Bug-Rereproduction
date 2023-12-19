@@ -33,13 +33,20 @@ const useCanvasUtils = (
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
-  const { setCanvas, setCanvasCtx, setCurrStep, pushStep, clearStep, setIsAutoFilling } =
-    canvasStore
+  const {
+    setCanvas,
+    setCanvasCtx,
+    setCurrStep,
+    pushStep,
+    clearStep,
+    setIsAutoFilling,
+    setIsProcessingStepsQueue,
+    pushToStepsQueue,
+  } = canvasStore
   const {
     brushSize,
     resultCanvas,
     canvasMode,
-    isProcessingCanvas,
     isProcessingStepsQueue,
     loading,
     isChangingBrushSize,
@@ -57,7 +64,6 @@ const useCanvasUtils = (
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
 
-  const { setTmpCanvasDataUrl } = canvasStore
   // #endregion
 
   // #region page related
@@ -71,14 +77,14 @@ const useCanvasUtils = (
         return
       }
       while (stepsQueue.value.length !== 0) {
-        isProcessingStepsQueue.value = true
+        setIsProcessingStepsQueue(true)
         const blob = await stepsQueue.value.shift()
         if (blob) {
           pushStep(blob)
         }
       }
 
-      isProcessingStepsQueue.value = false
+      setIsProcessingStepsQueue(false)
     },
     {
       deep: true,
@@ -726,7 +732,7 @@ const useCanvasUtils = (
     if (canvas.value) {
       const blobPromise = getCanvasBlob(canvas.value)
       if (blobPromise !== null) {
-        stepsQueue.value.push(blobPromise)
+        pushToStepsQueue(blobPromise)
       }
     }
   }
@@ -749,12 +755,14 @@ const useCanvasUtils = (
   const redo = () => {
     if (!isProcessingStepsQueue.value && !isInCanvasLastStep.value) {
       setCurrStep(currStep.value + 1)
-      updateCurrCanvasImageElement()
+      const url = updateCurrCanvasImageElement()
 
       currCanvasImageElement.value.onload = () => {
         clearCtx()
         drawImageToCtx(currCanvasImageElement.value)
         if (isBiColorEditor) fillNonTransparent(drawingColor.value)
+
+        URL.revokeObjectURL(url)
       }
     }
   }
@@ -789,7 +797,6 @@ const useCanvasUtils = (
     isBrushMode,
     resultCanvas,
     currStep,
-    isProcessingCanvas,
     isProcessingStepsQueue,
     loading,
     steps,

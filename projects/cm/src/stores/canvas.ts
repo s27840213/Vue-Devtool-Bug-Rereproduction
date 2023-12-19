@@ -10,13 +10,11 @@ export interface ICanvasState {
   stepsQueue: Array<Promise<Blob | null>>
   steps: Array<Blob>
   currStep: number
-  isProcessingCanvas: boolean
   isChangingBrushSize: boolean
   isDrawing: boolean
   canvas: HTMLCanvasElement | null
   canvasCtx: CanvasRenderingContext2D | null
   currCanvasImageElement: HTMLImageElement
-  tmpCanvasDataUrl: string
   isAutoFilling: boolean
   drawingColor: string
 }
@@ -33,12 +31,10 @@ export const useCanvasStore = defineStore('canvas', {
     stepsQueue: [],
     steps: [],
     currStep: -1,
-    isProcessingCanvas: false,
     isChangingBrushSize: false,
     isDrawing: false,
     canvas: null as unknown as HTMLCanvasElement,
     canvasCtx: null as unknown as CanvasRenderingContext2D,
-    tmpCanvasDataUrl: '',
     currCanvasImageElement: new Image(),
     isAutoFilling: false,
     drawingColor: '#FF7262',
@@ -67,9 +63,6 @@ export const useCanvasStore = defineStore('canvas', {
     setIsProcessingStepsQueue(isProcessing: boolean) {
       this.isProcessingStepsQueue = isProcessing
     },
-    setIsProcessingCanvas(isProcessing: boolean) {
-      this.isProcessingCanvas = isProcessing
-    },
     setIsChangingBrushSize(isChanging: boolean) {
       this.isChangingBrushSize = isChanging
       if (!isChanging) {
@@ -91,9 +84,6 @@ export const useCanvasStore = defineStore('canvas', {
     setIsAutoFilling(isAutoFilling: boolean) {
       this.isAutoFilling = isAutoFilling
     },
-    setTmpCanvasDataUrl(dataUrl: string) {
-      this.tmpCanvasDataUrl = dataUrl
-    },
     setDrawingColor(color: string) {
       this.drawingColor = color
     },
@@ -104,6 +94,9 @@ export const useCanvasStore = defineStore('canvas', {
       }
       this.steps.push(blob)
       this.currStep = this.steps.length - 1
+    },
+    pushToStepsQueue(promise: Promise<Blob | null>) {
+      this.stepsQueue.push(promise)
     },
     setCurrStep(step: number) {
       this.currStep = step
