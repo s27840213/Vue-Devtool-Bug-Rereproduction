@@ -291,7 +291,7 @@ const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brus
 watch(
   () => isManipulatingCanvas.value,
   (val) => {
-    store.commit('SET_disableLayerAction', val ? 'all' : '')
+    store.commit('SET_allowLayerAction', val ? 'none' : 'all')
   },
 )
 

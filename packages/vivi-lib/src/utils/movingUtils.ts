@@ -226,7 +226,7 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent, params?: { pointerId?: number, isFollowByPinch?: boolean }) {
-    if(store.state.disableLayerAction === 'all') return
+    if(store.state.allowLayerAction === 'none') return
 
     const { pointerId, isFollowByPinch = false } = params || {}
     const eventType = eventUtils.getEventType(event)
@@ -440,7 +440,7 @@ export class MovingUtils {
   }
 
   moving(e: PointerEvent) {
-    if(store.state.disableLayerAction === 'moving') return
+    if(store.state.allowLayerAction === 'crop-only') return
 
     const isStartedPointer = this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
@@ -577,7 +577,7 @@ export class MovingUtils {
   }
 
   _pageMovingHandler4cm(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (['all', 'moving'].includes(store.state.disableLayerAction)) return
+    if (['none', 'crop-only'].includes(store.state.allowLayerAction)) return
     
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return

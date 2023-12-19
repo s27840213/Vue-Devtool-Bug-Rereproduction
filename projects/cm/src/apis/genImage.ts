@@ -23,6 +23,7 @@ export default new (class Utils {
           request_id: requestId,
           ...params,
           num,
+          us: '1',
         },
       }),
     )
