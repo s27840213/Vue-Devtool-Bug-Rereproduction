@@ -1,14 +1,15 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll scrollbar-hide")
+//- h-358 = 44 (item height) * 7.5 + 4 (gap) * 7 = show 7.5 items
+div(class="sidebar-tabs flex-center flex-col gap-4 h-358 w-44 overflow-scroll scrollbar-hide")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
       v-if="!tab.hidden"
       :key="`${tab.icon}-${index}`"
-      class="w-44"
+      class="grid gap-4"
       ref="tabsRef"
       :class="getTabTutorialClasses(tab.text)")
       div(
-        class="sidebar__tab flex-center flex-col gap-2 box-border p-4"
+        class="sidebar-tabs__tabs"
         @click.stop="handleTabAction(tab)"
         @pointerdown.stop)
         svg-icon(
@@ -22,11 +23,11 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll s
           :class="tab.disabled ? 'text-dark' : currActiveFeature === tab.icon || tabsPressed[index] ? 'text-yellow-cm' : 'text-white'") {{ tab.text }}
       div(
         v-if="tab.icon === currActiveFeature && tab.subTabs"
-        class="flex-center flex-col gap-2 bg-dark-1/50 rounded-full")
+        class="flex-center flex-col gap-4 bg-dark-1/50 rounded-full")
         div(
           v-for="(subTab, index) in tab.subTabs"
           :key="`${subTab.icon}-${index}`"
-          class="flex-center flex-col gap-2 box-border p-4"
+          class="sidebar-tabs__tabs"
           :class="getTabTutorialClasses(subTab.text)"
           @click.stop="handleTabAction(subTab)"
           @pointerdown.stop)
@@ -50,8 +51,6 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-
-const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
   icon: string
@@ -214,26 +213,8 @@ const tabsPressed = ref(Array(defaultEditorTabs.value.length).fill(false))
 useTapTransition(tabsRef, tabsPressed)
 </script>
 <style lang="scss" scoped>
-.sidebar-tabs {
-  // filter: drop-shadow(0px 0px 0px 20px #4444dd);
-  filter: drop-shadow(1px 1px 0px rgba(32, 32, 32, 0.2))
-    drop-shadow(-1px 1px 0px rgba(32, 32, 32, 0.2)) drop-shadow(1px -1px 0px rgba(32, 32, 32, 0.2))
-    drop-shadow(-1px -1px 0px rgba(32, 32, 32, 0.2));
-}
-
-.sub-tabs {
-  transition:
-    grid-template-rows 0.3s ease-in-out,
-    height 0.3s ease-in-out;
-}
-
-.open {
-  grid-template-rows: 1fr;
-  height: auto;
-}
-
-.close {
-  grid-template-rows: 0fr;
-  height: 0px;
+.sidebar-tabs__tabs {
+  @apply flex-center flex-col gap-4 w-44 h-44;
+  filter: drop-shadow(0px 0px 2px rgba(#202020, 0.8));
 }
 </style>
