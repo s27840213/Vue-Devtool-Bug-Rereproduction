@@ -462,6 +462,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (asset.type === 6) {
         store.commit('vivisticker/SET_isInGroupTemplate', false)
       }
+      if (asset.type === 8) {
+        if (jsonData.clips.length === 1) {
+          frameUtils.updateFrameLayerProps(0, 0, 0, { active: true })
+        }
+      }
     }
   }
 
