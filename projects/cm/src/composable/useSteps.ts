@@ -84,7 +84,13 @@ const useSteps = () => {
     setCurrStepTypeIndex(currStepTypeIndex.value + 1)
   }
 
-  const setCheckpoint = () => {
+  const setCheckpoint = (reset?: boolean) => {
+    if (reset) {
+      stepsUtils.setCheckpoint(-1)
+      setCanvasCheckPointStep(-1)
+      setStepTypeCheckPoint(-1)
+      return
+    }
     stepsUtils.setCheckpoint()
     setCanvasCheckPointStep()
     setStepTypeCheckPoint()

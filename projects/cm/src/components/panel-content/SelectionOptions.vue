@@ -35,7 +35,7 @@ const { steps, checkPointStep } = storeToRefs(canvasStore)
 const { drawImageToCtx, setCheckPointStep } = useCanvasUtilsCm()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
-const { goToCheckpoint, canvasRecord } = useSteps()
+const { goToCheckpoint, canvasRecord, setCheckpoint } = useSteps()
 const shapeTypes = ['square', 'rectangle', 'circle', 'triangle', 'pentagon', 'hexagon']
 const enableResizerTypes = ['square', 'rectangle']
 
@@ -125,8 +125,7 @@ const cancel = () => {
 const apply = () => {
   setCurrActiveFeature('none')
   groupUtils.deselect()
-
-  setCheckPointStep(-1)
+  setCheckpoint(true)
 }
 </script>
 <style lang="scss"></style>

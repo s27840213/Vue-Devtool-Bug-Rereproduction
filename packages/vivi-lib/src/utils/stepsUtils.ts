@@ -284,8 +284,8 @@ class StepsUtils {
     // console.warn(generalUtils.deepCopy(this.steps))
   }
 
-  setCheckpoint() {
-    this.checkpointStep = this.currStep
+  setCheckpoint(step?: number) {
+    this.checkpointStep = step ?? this.currStep
   }
 
   async undo() {
