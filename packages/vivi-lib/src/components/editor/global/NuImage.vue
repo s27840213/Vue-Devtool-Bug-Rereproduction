@@ -414,12 +414,6 @@ export default defineComponent({
       ) return false
       return true
     },
-    // isCurrLayerPinched(): boolean {
-    //   const { controlState } = this
-    //   if (controlState.layerInfo) {
-    //     return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
-    //   } else return false
-    // },
     isShowImg(): boolean {
       return !this.isAdjustImage || !this.isShowAdjustImg
     },
@@ -427,9 +421,16 @@ export default defineComponent({
       // forRender img not apply filter
       if (this.forRender) return false
 
-      if (this.$isTouchDevice()) {
+      if (!this.$isStk && this.$isTouchDevice()) {
         return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
           !this.isImgCtrl && !this.isBgImgCtrl
+      } else if (this.$isStk) {
+        let isCurrLayerPinched = false
+        const { controlState } = this
+        if (controlState.layerInfo) {
+          isCurrLayerPinched = controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+        }
+        return this.isAdjustImage && !isCurrLayerPinched
       } else {
         return this.isAdjustImage
       }
