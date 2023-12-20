@@ -85,7 +85,7 @@ const domainOptions = computed((): IOptionConfig[] => [
     iconName: 'global',
     selected: hostname.includes('cmrd'),
     callback: () => {
-      cmWVUtils.switchDomain('https://cmrd.vivipic.com')
+      cmWVUtils.switchDomain('https://cmrd.vivipic.com/')
     },
   },
   ...Array(3)
@@ -93,9 +93,9 @@ const domainOptions = computed((): IOptionConfig[] => [
     .map((_, index) => ({
       title: `localhost:808${index}`,
       iconName: 'global',
-      selected: hostname.includes(`localhost:808${index}`),
+      selected: hostname.includes(`localhost:808${index}/`),
       callback: () => {
-        cmWVUtils.switchDomain(`localhost:808${index}`)
+        cmWVUtils.switchDomain(`localhost:808${index}/`)
       },
     })),
   ...Array(6)
@@ -105,7 +105,7 @@ const domainOptions = computed((): IOptionConfig[] => [
       iconName: 'global',
       selected: hostname.includes(`dev${index}`),
       callback: () => {
-        cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
+        cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com/`)
       },
     })),
 ])
