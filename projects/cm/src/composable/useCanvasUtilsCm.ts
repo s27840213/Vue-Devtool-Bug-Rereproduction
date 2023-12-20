@@ -42,6 +42,7 @@ const useCanvasUtils = (
     setIsAutoFilling,
     setIsProcessingStepsQueue,
     pushToStepsQueue,
+    setCheckPointStep,
   } = canvasStore
   const {
     brushSize,
@@ -60,6 +61,7 @@ const useCanvasUtils = (
     isInCanvasFirstStep,
     isInCanvasLastStep,
     drawingColor,
+    checkPointStep,
   } = storeToRefs(canvasStore)
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
@@ -646,7 +648,7 @@ const useCanvasUtils = (
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }))
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }), { outputType: 'png' })
       : await cmWVUtils.copyEditor(
           {
             width: pageWidth * contentScaleRatio.value,
@@ -767,6 +769,24 @@ const useCanvasUtils = (
     }
   }
 
+  const goToCheckpoint = () => {
+    if (checkPointStep.value !== -1) {
+      setCurrStep(checkPointStep.value)
+      const url = updateCurrCanvasImageElement()
+
+      currCanvasImageElement.value.onload = () => {
+        clearCtx()
+        drawImageToCtx(currCanvasImageElement.value)
+        if (isBiColorEditor) fillNonTransparent(drawingColor.value)
+
+        URL.revokeObjectURL(url)
+
+        steps.value.length = checkPointStep.value + 1
+        setCheckPointStep(-1)
+      }
+    }
+  }
+
   const reset = () => {
     clearStep()
   }
@@ -788,6 +808,8 @@ const useCanvasUtils = (
     restoreCanvas,
     prepareMaskToUpload,
     convertToPinkBasedMask,
+    goToCheckpoint,
+    setCheckPointStep,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,

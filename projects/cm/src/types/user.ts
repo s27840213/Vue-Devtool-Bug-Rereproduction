@@ -30,3 +30,12 @@ export interface ICmSubDesign extends IMyDesign {
   width: number
   height: number
 }
+
+export interface ITmpSubDesign {
+  id: string
+  subId: string
+  width: number
+  height: number
+  type: string
+  thumbIndex: number
+}

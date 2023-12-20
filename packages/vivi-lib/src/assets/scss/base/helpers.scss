@@ -1,3 +1,5 @@
+@use '../utils/mixins.scss';
+
 .full-width {
   width: 100%;
 }
@@ -102,4 +104,12 @@
 
 .transform-origin-0 {
   transform-origin: 0 0;
+}
+
+.no-scrollbar {
+  @include mixins.no-scrollbar;
+}
+
+.push-scrollbar10 {
+  @include mixins.push-scrollbar10;
 }

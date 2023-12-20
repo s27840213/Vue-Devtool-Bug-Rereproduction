@@ -26,6 +26,7 @@ export type GenImageResult = ApiResponse<{
 export type GenPowerfulFillParams = {
   action: 'powerful-fill'
   prompt?: string
+  guidance_scale?: number
 }
 
 export type GenHiddenMessageParams = {
