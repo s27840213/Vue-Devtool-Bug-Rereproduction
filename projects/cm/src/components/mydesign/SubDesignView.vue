@@ -57,9 +57,10 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
           span(class="typo-h6") {{ `${$t('CM0126')} :` }}
         div(class="h-full w-full grid grid-rows-1 grid-cols-[auto,auto] box-border" ref="promptContainerRef")
           div(
+            v-if="currOpenSubDesign"
             class="text-left typo-body-sm line-clamp-base"
             :ref="'promptRef'"
-            :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}` }}
+            :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign.prompt}` }}
           svg-icon(
             v-if="promptRef?.scrollHeight !== promptRef?.clientHeight"
             iconColor="white"
