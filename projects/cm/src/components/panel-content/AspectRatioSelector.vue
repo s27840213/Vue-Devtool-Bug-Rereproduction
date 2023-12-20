@@ -1,7 +1,11 @@
 <template lang="pug">
-div(class='aspect-ratio-selector grid gap-16')
+div(class="aspect-ratio-selector grid gap-16")
   div(class="typo-btn-lg text-white") {{ $t('CM0013') }}
-  scrollable-container(:px="24" :py="0" :gap="10" class="mx-auto w-fit max-w-screen box-border")
+  scrollable-container(
+    :px="24"
+    :py="0"
+    :gap="10"
+    class="mx-auto w-fit max-w-screen box-border")
     div(
       v-for="asp in aspectRatioTypes"
       :key="asp.val"
@@ -39,18 +43,18 @@ const editorStore = useEditorStore()
 const { imgAspectRatio, pageSize, editorType } = storeToRefs(editorStore)
 const { updateCanvasSize } = useCanvasUtilsCm()
 
-const _aspectRatioTypes = 
-  ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4']
-    .map(asp => ({ label: asp, val: asp }))
+const _aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4'].map(
+  (asp) => ({ label: asp, val: asp }),
+)
 const aspectRatioTypes = computed(() => {
   switch (editorType.value) {
     case 'magic-combined':
       return [
         { val: '9:16', label: i18n.global.t('CM0129') },
-        { val: '16:9', label: i18n.global.t('CM0130') }
+        { val: '16:9', label: i18n.global.t('CM0130') },
       ]
     case 'hidden-message':
-      return _aspectRatioTypes.filter(asp => asp.val !== 'original')
+      return _aspectRatioTypes.filter((asp) => asp.val !== 'original')
     default:
       return _aspectRatioTypes
   }
@@ -118,11 +122,19 @@ const updateLayerStyleToFitPage = () => {
     commonStyles[portrait ? 'height' : 'width'] /= 3 // Img occupy 1/3 editor.
 
     imgs.forEach((img, i) => {
-      const { width: imgWidth, height: imgHeight, x: imgX, y: imgY }
-        = mathUtils.calcFit('cover', {
-        width: img.styles.initWidth,
-        height: img.styles.initHeight,
-      }, commonStyles)
+      const {
+        width: imgWidth,
+        height: imgHeight,
+        x: imgX,
+        y: imgY,
+      } = mathUtils.calcFit(
+        'cover',
+        {
+          width: img.styles.initWidth,
+          height: img.styles.initHeight,
+        },
+        commonStyles,
+      )
 
       layerUtils.updateLayerStyles(layerUtils.pageIndex, i, {
         ...commonStyles,
@@ -141,10 +153,14 @@ const updateLayerStyleToFitPage = () => {
 
   // For other editor types.
   const img = layerUtils.getLayer(layerUtils.pageIndex, 0) as IImage
-  const { width, height } = mathUtils.calcFit('contain', {
-    width: img.styles.initWidth,
-    height: img.styles.initHeight,
-  }, pageSize.value)
+  const { width, height } = mathUtils.calcFit(
+    'contain',
+    {
+      width: img.styles.initWidth,
+      height: img.styles.initHeight,
+    },
+    pageSize.value,
+  )
   layerUtils.updateLayerStyles(layerUtils.pageIndex, 0, {
     width,
     height,
@@ -158,7 +174,7 @@ const updateLayerStyleToFitPage = () => {
   })
 }
 
-const handleNextAction = function () { 
+const handleNextAction = function () {
   editorStore.changeEditorState('next')
   useTutorial().runTutorial(editorType.value)
 }

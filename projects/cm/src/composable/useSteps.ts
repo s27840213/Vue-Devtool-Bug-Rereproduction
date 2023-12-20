@@ -1,4 +1,5 @@
 import { useEditorStore } from '@/stores/editor'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
 import useCanvasUtils from './useCanvasUtilsCm'
 
@@ -11,6 +12,7 @@ const useSteps = () => {
     pushStepType,
     stepsReset,
     resetStepsTypesArr,
+    setStepTypeCheckPoint,
   } = editorStore
   const {
     editorCurrStep,
@@ -19,18 +21,21 @@ const useSteps = () => {
     currStepTypeIndex,
     isInEditorFirstStep,
     isInEditorLastStep,
+    stepTypeCheckPoint,
   } = storeToRefs(editorStore)
 
   const {
     undo: canvasUndo,
     redo: canvasRedo,
     reset: canvasReset,
+    record: canvasRecord,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     steps: canvasSteps,
     currStep: canvasCurrStep,
-    isProcessingCanvas,
     isProcessingStepsQueue,
+    setCheckPointStep: setCanvasCheckPointStep,
+    goToCheckpoint: goToCanvasCheckpoint,
   } = useCanvasUtils()
 
   const editorStepsNum = computed(() => editorSteps.value.length)
@@ -40,7 +45,7 @@ const useSteps = () => {
   const isInLastStep = computed(() => isInEditorLastStep.value && isInCanvasLastStep.value)
 
   const undo = () => {
-    if (isInFirstStep.value || isProcessingCanvas.value || isProcessingStepsQueue.value) return
+    if (isInFirstStep.value || isProcessingStepsQueue.value) return
     if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorFirstStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value - 1)
@@ -60,7 +65,7 @@ const useSteps = () => {
   }
 
   const redo = () => {
-    if (isInLastStep.value || isProcessingCanvas.value || isProcessingStepsQueue.value) return
+    if (isInLastStep.value || isProcessingStepsQueue.value) return
     if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorLastStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value + 1)
@@ -79,20 +84,50 @@ const useSteps = () => {
     setCurrStepTypeIndex(currStepTypeIndex.value + 1)
   }
 
+  const setCheckpoint = (reset?: boolean) => {
+    if (reset) {
+      stepsUtils.setCheckpoint(-1)
+      setCanvasCheckPointStep(-1)
+      setStepTypeCheckPoint(-1)
+      return
+    }
+    stepsUtils.setCheckpoint()
+    setCanvasCheckPointStep()
+    setStepTypeCheckPoint()
+  }
+
+  const goToCheckpoint = () => {
+    stepsUtils.goToCheckpoint()
+    goToCanvasCheckpoint()
+
+    setCurrStepTypeIndex(stepTypeCheckPoint.value)
+    stepsTypesArr.value.length = stepTypeCheckPoint.value + 1
+  }
+
+  // const clearStepsBetweenCheckpointAndResult = () => {
+  //   stepsUtils.steps.splice(stepTypeCheckPoint.value + 1, stepsUtils.steps.length - stepTypeCheckPoint.value - 1)
+  //   canvasSteps.value.splice(stepTypeCheckPoint.value + 1, canvasSteps.value.length - stepTypeCheckPoint.value - 1)
+  //   stepsTypesArr.value.splice(stepTypeCheckPoint.value + 1, stepsTypesArr.value.length - stepTypeCheckPoint.value - 1)
+  // }
+
   const reset = () => {
     stepsReset()
     canvasReset()
     resetStepsTypesArr()
   }
 
-  watch(editorStepsNum, () => {
+  watch(editorStepsNum, (newVal, oldVal) => {
+    // skip the init state
+    if (oldVal === 0 && newVal === 1) return
     stepsTypesArr.value.length = currStepTypeIndex.value + 1
     pushStepType('editor')
     setCurrStepTypeIndex(currStepTypeIndex.value + 1)
     canvasSteps.value.length = canvasCurrStep.value + 1
   })
 
-  watch(canvasStepsNum, () => {
+  watch(canvasStepsNum, (newVal, oldVal) => {
+    // skip the init state
+    if (oldVal === 0 && newVal === 1) return
     stepsTypesArr.value.length = currStepTypeIndex.value + 1
     pushStepType('canvas')
     setCurrStepTypeIndex(currStepTypeIndex.value + 1)
@@ -105,6 +140,9 @@ const useSteps = () => {
     reset,
     isInFirstStep,
     isInLastStep,
+    setCheckpoint,
+    goToCheckpoint,
+    canvasRecord,
   }
 }
 

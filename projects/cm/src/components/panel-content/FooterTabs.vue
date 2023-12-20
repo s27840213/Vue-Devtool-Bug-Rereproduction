@@ -10,16 +10,17 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
         :currPage="currPage"
         :currActivePanel="currActivePanel")
   div(class="flex flex-col gap-24 bg-dark-3 shadow-[0_100px_0_100px_black] shadow-dark-3 z-[1]")
-    div(v-if="!hideTabs" ref="footerTabs" class="footer-tabs-row flex gap-24")
-      div(class="cm-footer-tabs flex-center h-44")
-        div(
-          class="flex-center bg-white/[.65] rounded-full w-22 h-22"
-          @click="handleBack")
+    div(
+      v-if="!hideTabs"
+      ref="footerTabs"
+      class="footer-tabs-row flex gap-24")
+      div(v-if="showBackBtn" class="cm-footer-tabs flex-center h-44")
+        div(class="flex-center bg-white/[.65] rounded-full w-22 h-22" @click="handleBack")
           svg-icon(
             iconName="chevron-down"
             iconWidth="14px"
             iconColor="dark-3")
-      div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar")
+      div(class="cm-footer-tabs flex gap-24 overflow-scroll no-scrollbar mx-auto")
         template(v-for="tab in settingTabs")
           div(
             v-if="!tab.hidden"
@@ -38,12 +39,13 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
               :iconName="tab.icon"
               :iconColor="settingTabColor(tab)"
               :iconWidth="'24px'"
-              :style="{...textIconStyle, transition: 'background-color 0.2s, color 0.2s, stroke 0.2s'}")
+              :style="{ ...textIconStyle, transition: 'background-color 0.2s, color 0.2s, stroke 0.2s' }")
             span(
               class="no-wrap click-disabled transition ease-linear delay-100 typo-body-sm"
               :class="`text-${settingTabColor(tab)}`") {{ tab.text }}
             //- pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false")
-    footer-bar(v-if="hasBottomTitle"
+    footer-bar(
+      v-if="hasBottomTitle"
       class="footer-tabs-row"
       :title="bottomTitle"
       @cancel="handleBottomCancel"
@@ -54,6 +56,7 @@ div(class="cm-footer-tabs flex flex-col pt-8 px-24")
 <script lang="ts">
 import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
+import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
@@ -78,10 +81,9 @@ import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
+import { cloneDeep, pick } from 'lodash'
 import { mapGetters, mapMutations } from 'vuex'
 import { CMobilePanel } from './MobilePanel.vue'
-import { useEditorStore } from '@/stores/editor'
-import { pick, cloneDeep } from 'lodash'
 
 export default defineComponent({
   extends: FooterTabs,
@@ -90,7 +92,7 @@ export default defineComponent({
     const { openImgSelecotr } = useImgSelectorStore()
     return {
       isBiColorEditor,
-      openImgSelecotr
+      openImgSelecotr,
     }
   },
   data() {
@@ -110,7 +112,7 @@ export default defineComponent({
     },
   },
   components: {
-    FooterBar
+    FooterBar,
   },
   computed: {
     ...mapGetters({
@@ -201,7 +203,7 @@ export default defineComponent({
           text: `${this.$t('NN0429')}`,
           panelType: 'photo-shadow',
           hidden: layerUtils.getCurrLayer.type === LayerType.frame || this.isBiColorEditor,
-          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow',
         },
         {
           icon: 'cm_sliders',
@@ -248,7 +250,12 @@ export default defineComponent({
         },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'font-curve', text: `${this.$t('NN0118')}`, panelType: 'font-curve', hidden: !this.isBiColorEditor },
+        {
+          icon: 'font-curve',
+          text: `${this.$t('NN0118')}`,
+          panelType: 'font-curve',
+          hidden: !this.isBiColorEditor,
+        },
         {
           icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
@@ -258,7 +265,12 @@ export default defineComponent({
           },
           hidden: this.isBiColorEditor,
         },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect', hidden: this.isBiColorEditor },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0491')}`,
+          panelType: 'text-effect',
+          hidden: this.isBiColorEditor,
+        },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         {
           icon: 'copy-edits',
@@ -452,7 +464,11 @@ export default defineComponent({
       return [
         { icon: 'duplicate2', text: `${this.$t('NN0251')}` },
         this.groupTab,
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, hidden: this.inMultiSelectionMode },
+        {
+          icon: 'multiple-select',
+          text: `${this.$t('NN0807')}`,
+          hidden: this.inMultiSelectionMode,
+        },
         { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         {
           icon: 'layers-alt',
@@ -478,7 +494,7 @@ export default defineComponent({
         { icon: 'photo', text: `${this.$t('NN0490')}` },
         { icon: 'switch', text: this.$t('CM0133') },
         { icon: 'cm_sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity'},
+        { icon: 'cm_opacity', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
       ]
     },
     tabs(): Array<IFooterTab> {
@@ -646,17 +662,20 @@ export default defineComponent({
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
     },
+    showBackBtn(): boolean {
+      return useEditorStore().editorType !== 'magic-combined'
+    },
   },
   watch: {
     hasBottomTitle(newVal) {
       if (newVal) {
         stepsUtils.setCheckpoint()
       }
-    }
+    },
   },
   methods: {
     ...mapMutations({
-      setImgConfig: 'imgControl/SET_CONFIG'
+      setImgConfig: 'imgControl/SET_CONFIG',
     }),
     settingTabColor(tab: IFooterTab): string {
       return tab.disabled || this.isLocked
@@ -819,7 +838,12 @@ export default defineComponent({
           break
         }
         case 'paste-edits': {
-          formatUtils.applyFormatIfCopied(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, false)
+          formatUtils.applyFormatIfCopied(
+            layerUtils.pageIndex,
+            layerUtils.layerIndex,
+            layerUtils.subLayerIdx,
+            false,
+          )
           break
         }
         case 'cm_remove-bg': {
@@ -869,7 +893,7 @@ export default defineComponent({
             adjust: { ...adjust, invert: +!adjust?.invert },
             pageIndex,
             layerIndex,
-            subLayerIndex: subLayerIdx >= 0 ? subLayerIdx : undefined
+            subLayerIndex: subLayerIdx >= 0 ? subLayerIdx : undefined,
           })
           break
         }
@@ -900,7 +924,7 @@ export default defineComponent({
       this.clickedTabTimer = window.setTimeout(() => {
         this.clickedTab = ''
       }, 200)
-      
+
       if (['copy', 'paste'].includes(tab.icon)) {
         notify({
           group: 'copy',
@@ -920,7 +944,7 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false)
     },
     handleBottomApply() {
-      (this.$refs['mobile-panel'] as CMobilePanel).rightButtonAction()
+      ;(this.$refs['mobile-panel'] as CMobilePanel).rightButtonAction()
     },
     afterLeave() {
       editorUtils.setCurrActivePanel('none')

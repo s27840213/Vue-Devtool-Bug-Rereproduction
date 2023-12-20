@@ -127,6 +127,7 @@ div(class="prompt-area w-full box-border px-24")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
 </template>
+
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'

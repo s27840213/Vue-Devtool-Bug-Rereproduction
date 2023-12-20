@@ -3,14 +3,14 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import router from '@/router'
 import type {
-DescriptionPanel,
-EditorFeature,
-EditorStates,
-EditorType,
-GenImageOptions,
-HiddenMessageStates,
-MagicCombinedStates,
-PowerfulfillStates,
+  DescriptionPanel,
+  EditorFeature,
+  EditorStates,
+  EditorType,
+  GenImageOptions,
+  HiddenMessageStates,
+  MagicCombinedStates,
+  PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
@@ -51,6 +51,7 @@ interface IEditorStore {
   currGenResultIndex: number
   stepsTypesArr: Array<'canvas' | 'editor'>
   currStepTypeIndex: number
+  stepTypeCheckPoint: number
   initImgSrc: string
   useTmpSteps: boolean
   // for my design
@@ -77,6 +78,7 @@ export const useEditorStore = defineStore('editor', {
     currGenResultIndex: 0,
     stepsTypesArr: [],
     currStepTypeIndex: -1,
+    stepTypeCheckPoint: -1,
     initImgSrc: '',
     maskDataUrl: '',
     maskParams: {},
@@ -292,6 +294,9 @@ export const useEditorStore = defineStore('editor', {
     setCurrStepTypeIndex(index: number) {
       if (index < 0 || index >= this.stepsTypesArr.length) return
       this.currStepTypeIndex = index
+    },
+    setStepTypeCheckPoint(index?: number) {
+      this.stepTypeCheckPoint = index ?? this.currStepTypeIndex
     },
     resetStepsTypesArr() {
       this.stepsTypesArr = []

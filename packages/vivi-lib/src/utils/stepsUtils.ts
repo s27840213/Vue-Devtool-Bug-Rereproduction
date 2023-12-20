@@ -284,8 +284,8 @@ class StepsUtils {
     // console.warn(generalUtils.deepCopy(this.steps))
   }
 
-  setCheckpoint() {
-    this.checkpointStep = this.currStep
+  setCheckpoint(step?: number) {
+    this.checkpointStep = step ?? this.currStep
   }
 
   async undo() {
@@ -318,17 +318,19 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep = this.checkpointStep
+    this.steps.length = this.currStep + 1
+    // @TODO: need to review with Daniel
     this.checkpointStep = -1
     await this.goToCurrStep()
   }
 
   async goToCurrStep() {
-    const activePageIndex = pageUtils.currActivePageIndex
+    const activePageIndex = this.steps[this.currStep].currActivePageIndex
+    // const activePageIndex = pageUtils.currActivePageIndex
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     if (generalUtils.isPic) {
-      // console.warn(generalUtils.deepCopy(this.steps[this.currStep]))
       const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
       let layers: (IShape | IText | IImage | IGroup | IFrame)[]
       if (pages[pageIndex]) {

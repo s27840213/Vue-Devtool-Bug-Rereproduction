@@ -36,6 +36,7 @@ export async function editorRouteHandler(
     setEditorType(type)
     setPageSize(width, height)
     stepsReset()
+
     if (isBiColorEditor.value) initBiColorEditor(editorType.value)
     store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
     switch (type) {
