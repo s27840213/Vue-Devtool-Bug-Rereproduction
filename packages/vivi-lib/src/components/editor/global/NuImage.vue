@@ -1319,11 +1319,21 @@ export default defineComponent({
       if (this.isBgImgControl) {
         imgX = 0
         imgY = 0
-      } else if ((this.$isPic || this.$isCm) && this.$isTouchDevice() && this.config.isFrameImg) {
-        imgX *= this.pageScaleRatio * 0.01
-        imgY *= this.pageScaleRatio * 0.01
-        imgWidth *= this.pageScaleRatio * 0.01
-        imgHeight *= this.pageScaleRatio * 0.01
+      } else if ((this.$isPic || this.$isCm) && this.$isTouchDevice() && this.primaryLayer?.type === 'frame') {
+        const scale = this.pageScaleRatio * 0.01
+        if (this.config.isFrameImg) {
+          imgX *= scale
+          imgY *= scale
+          imgWidth *= scale
+          imgHeight *= scale
+        } else {
+          return {
+            transform: `translate(${imgX * scale}px, ${imgY * scale}px) scale(${scale})`,
+            transformOrigin: '0 0',
+            width: `${imgWidth}px`,
+            height: `${imgHeight}px`
+          }
+        }
       }
       return {
         transform: `translate(${imgX}px, ${imgY}px)`,
