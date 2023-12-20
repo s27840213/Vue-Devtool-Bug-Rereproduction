@@ -211,8 +211,8 @@ class EditorUtils {
     }
   }
 
-  setDisableLayerAction(status: IEditorState['disableLayerAction']): void {
-    store.commit('SET_disableLayerAction', status)
+  setAllowLayerAction(status: IEditorState['allowLayerAction']): void {
+    store.commit('SET_allowLayerAction', status)
   }
 }
 

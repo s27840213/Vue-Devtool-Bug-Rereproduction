@@ -353,6 +353,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       y,
       ...(imageId && { imageId }),
       ...(imagePath && { imagePath }),
+      snapshotWidth: width,
     }, { timeout: -1 }) as IGeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',

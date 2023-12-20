@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr),auto] relative font-[Lato] box-border"
-  :class="{'bg-dark-6': !isDuringCopy}")
+  :class="{'bg-dark-6': !isDuringCopy && !atScreenshot}")
   link(
       href="https://fonts.googleapis.com/css?family=Poppins:400,600,700"
       rel="stylesheet"
@@ -171,6 +171,7 @@ const {
   atSettings,
   atMainPage,
   atDescription,
+  atScreenshot,
   atNonUI,
   showImgSelector,
   inGenResultState,

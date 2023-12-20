@@ -9,7 +9,7 @@ div(class="footer-bar flex-between-center" name='main')
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   title: {
     type: String,
     required: true

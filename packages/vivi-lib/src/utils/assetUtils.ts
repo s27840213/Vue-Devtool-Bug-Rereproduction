@@ -422,8 +422,8 @@ class AssetUtils {
         const scaleRatio = pageUtils.scaleRatio * 0.01
         const contentScaleRatio = pageUtils.contentScaleRatio
         return {
-          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 - realWidth / 2) / scaleRatio,
-          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 - realHeight / 2) / scaleRatio
+          x: -(page.x - page.initPos.x) / (scaleRatio * contentScaleRatio) + (page.width * 0.5 / scaleRatio - realWidth / 2),
+          y: -(page.y - page.initPos.y) / (scaleRatio * contentScaleRatio) + (page.height * 0.5 / scaleRatio - realHeight / 2)
         }
       } else {
         return {
@@ -586,7 +586,6 @@ class AssetUtils {
       },
       ...json,
     }
-    console.log(config)
     const index = layerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
     layerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newFrame(config)], index)
@@ -689,7 +688,7 @@ class AssetUtils {
     const { width, height, scale } = json.styles
     const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const currentPage = this.getPage(targetPageIndex)
-    const resizeRatio = attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_TEXT
+    const resizeRatio = (attrs.fit === 1 && (generalUtils.isStk || generalUtils.isCm) ? 1 : RESIZE_RATIO_TEXT) * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1)
     const pageAspectRatio = currentPage.width / currentPage.height
     const textAspectRatio = width / height
     const textWidth =
@@ -798,6 +797,7 @@ class AssetUtils {
         layerUtils.addLayers(targetPageIndex, [textUtils.resetScaleForLayer(newLayer, true)])
       }
     } else {
+      // isPic
       if (config.type === 'text') {
         Object.assign(config, {
           widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
@@ -1006,7 +1006,6 @@ class AssetUtils {
     }) as Array<IImage>
 
     const { x, y } = (() => {
-      // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
       if (imageLayers.length === 0) {
         if (this.isShrinkSizeAsPinchPage) {
           const page = pageUtils.getCurrPage

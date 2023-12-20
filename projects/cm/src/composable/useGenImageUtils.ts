@@ -1,6 +1,7 @@
 import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
 import type { GenImageParams, GenImageResult } from '@/types/api'
 import { notify } from '@kyvg/vue3-notification'
@@ -24,7 +25,8 @@ const ids: string[] = []
 const useGenImageUtils = () => {
   const userStore = useUserStore()
   const { setPrevGenParams } = userStore
-  const { prevGenParams } = storeToRefs(useUserStore())
+  const { prevGenParams } = storeToRefs(userStore)
+  const { useUsBucket } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
   const {
     setInitImgSrc,
@@ -146,6 +148,7 @@ const useGenImageUtils = () => {
     } = {},
   ): Promise<string[]> => {
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
+    RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
     if (!showMore) {
       try {
@@ -162,7 +165,7 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
-    const res = (await genImageApis.genImage(userId.value, requestId, params, num)).data
+    const res = (await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
@@ -193,7 +196,7 @@ const useGenImageUtils = () => {
               subDesignId,
             }),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
-            polling(url, { isJson: false, useVer: false, pollingController }),
+            polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
           if (editorType.value !== 'hidden-message') {
             const prepareMask = prepareMaskToUpload()
@@ -237,6 +240,7 @@ const useGenImageUtils = () => {
         } catch (error) {
           onError && onError(index, url, 'saveAssetFromUrl failed')
         }
+        RECORD_TIMING && testUtils.log(`gen-image ${requestId}`, '')
       }),
     ])
     return urls
@@ -245,7 +249,6 @@ const useGenImageUtils = () => {
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
     RECORD_TIMING && testUtils.start('copy editor', { notify: false, setToLog: true })
     const { width: pageWidth, height: pageHeight } = pageSize.value
-    const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
       ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }))
       : await cmWVUtils.copyEditor({
@@ -259,7 +262,7 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('screenshot to blob', { notify: false, setToLog: true })
     return new Promise<void>((resolve) => {
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?lsize=${size}`).then((dataUrl) => {
+      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?ssize=1080`).then((dataUrl) => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         RECORD_TIMING && testUtils.log('screenshot to blob', '')

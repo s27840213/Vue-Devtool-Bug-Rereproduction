@@ -162,7 +162,7 @@ const getDefaultState = (): IEditorState => ({
     type: 'none',
     params: {}
   },
-  disableLayerAction: '',
+  allowLayerAction: 'all',
   controlState: { type: '' }
 })
 
@@ -400,8 +400,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   getFullPageParams(state: IEditorState): IFullPageConfig['params'] {
     return state.fullPageConfig.params
   },
-  getDisableLayerAction(state: IEditorState) {
-    return state.disableLayerAction
+  getAllowLayerAction(state: IEditorState) {
+    return state.allowLayerAction
   },
   getControlState(state: IEditorState) {
     return state.controlState
@@ -1621,8 +1621,8 @@ const mutations: MutationTree<IEditorState> = {
       params: {}
     }
   },
-  SET_disableLayerAction(state: IEditorState, disableLayerAction: IEditorState['disableLayerAction']) {
-    state.disableLayerAction = disableLayerAction
+  SET_allowLayerAction(state: IEditorState, allowLayerAction: IEditorState['allowLayerAction']) {
+    state.allowLayerAction = allowLayerAction
   }
 }
 window.addEventListener(

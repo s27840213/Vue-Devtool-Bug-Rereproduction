@@ -32,11 +32,11 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
         img(
           class="w-full rounded-20"
           :src="imageUtils.appendQuery(getSubDesignThumbUrl(design.type, design.id, design.subId), 'lsize', '300')")
-        //- svg-icon(
-        //-   class="absolute right-10 top-10 bg-white rounded-10 m-1"
-        //-   iconName="more_horizontal"
-        //-   iconWidth="22px"
-        //-   @click="editDesign(design)")
+        svg-icon(
+          class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
+          iconName="more_horizontal"
+          iconWidth="22px"
+          @click.stop="editDesign(design)")
     div(
       v-show="currOpenSubDesign && subDesignThumbLoaded"
       class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
@@ -57,9 +57,10 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
           span(class="typo-h6") {{ `${$t('CM0126')} :` }}
         div(class="h-full w-full grid grid-rows-1 grid-cols-[auto,auto] box-border" ref="promptContainerRef")
           div(
+            v-if="currOpenSubDesign"
             class="text-left typo-body-sm line-clamp-base"
             :ref="'promptRef'"
-            :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}${currOpenSubDesign && currOpenSubDesign.prompt}` }}
+            :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign.prompt}` }}
           svg-icon(
             v-if="promptRef?.scrollHeight !== promptRef?.clientHeight"
             iconColor="white"
@@ -70,21 +71,13 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
 <script setup lang="ts">
 import useActionSheetCm from '@/composable/useActionSheetCm'
 import { useUserStore } from '@/stores/user'
-import type { ICmMyDesign, ICmSubDesign } from '@/types/user'
+import type { ICmMyDesign, ITmpSubDesign } from '@/types/user'
 import { notify } from '@kyvg/vue3-notification'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import { useElementSize } from '@vueuse/core'
-
-interface ITmpSubDesign {
-  id: string
-  subId: string
-  width: number
-  height: number
-  type: string
-}
 
 const { t } = useI18n()
 
@@ -119,8 +112,8 @@ const handleThumbLoaded = () => {
  * @Note why not get the subDesign config directly?
  * bcz I try it before, and found its too slow to get the config from server for lots of subDesigns
  */
-const subDesignsInfos = computed(() => {
-  const { id, subDesignInfo, type } = currOpenDesign
+const subDesignsInfos = computed<ITmpSubDesign[]>(() => {
+  const { id, subDesignInfo, type, thumbIndex } = currOpenDesign
 
   return subDesignInfo.map((info) => {
     const { height, id: subId, width } = info
@@ -131,6 +124,7 @@ const subDesignsInfos = computed(() => {
       width,
       height,
       type,
+      thumbIndex,
     }
   })
 })
@@ -209,10 +203,10 @@ const copyPrompt = () => {
   })
 }
 
-const { setMyDesignActions, toggleActionSheet } = useActionSheetCm()
-const editDesign = (design: ICmSubDesign) => {
-  // setMyDesignActions(design)
-  // toggleActionSheet()
+const { setSubDesignActions, toggleActionSheet } = useActionSheetCm()
+const editDesign = (design: ITmpSubDesign) => {
+  setSubDesignActions(design)
+  toggleActionSheet()
 }
 </script>
 <style lang="scss">

@@ -445,10 +445,11 @@ export default defineComponent({
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
+      const isShrinkSizeAsPinchPage = generalUtils.isPic && generalUtils.isTouchDevice()
       return {
         transform,
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`
+        width: `${width * this.contentScaleRatio * (isShrinkSizeAsPinchPage ? pageUtils.scaleRatio * 0.01 : 1)}px`,
+        height: `${height * this.contentScaleRatio * (isShrinkSizeAsPinchPage ? pageUtils.scaleRatio * 0.01 : 1)}px`
       }
     },
     outlineStyles() {
@@ -535,8 +536,8 @@ export default defineComponent({
         doubleClickCallback: () => {
           if (this.getLayerType !== LayerType.image ||
             this.prePrimaryLayerIndex !== -1 ||
-            this.$store.state.disableLayerAction === 'all') return
-          
+            this.$store.state.allowLayerAction === 'none') return
+
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
           if (generalUtils.isCm) {
             eventUtils.emit(PanelEvent.switchTab, 'crop-flip')

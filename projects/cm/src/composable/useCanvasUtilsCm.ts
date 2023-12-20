@@ -33,12 +33,21 @@ const useCanvasUtils = (
 
   // #region canvasStore
   const canvasStore = useCanvasStore()
-  const { setCurrStep, pushStep, clearStep } = canvasStore
+  const {
+    setCanvas,
+    setCanvasCtx,
+    setCurrStep,
+    pushStep,
+    clearStep,
+    setIsAutoFilling,
+    setIsProcessingStepsQueue,
+    pushToStepsQueue,
+    setCheckPointStep,
+  } = canvasStore
   const {
     brushSize,
     resultCanvas,
     canvasMode,
-    isProcessingCanvas,
     isProcessingStepsQueue,
     loading,
     isChangingBrushSize,
@@ -52,11 +61,11 @@ const useCanvasUtils = (
     isInCanvasFirstStep,
     isInCanvasLastStep,
     drawingColor,
+    checkPointStep,
   } = storeToRefs(canvasStore)
 
   const targetCanvas = computed(() => _targetCanvas?.value || canvas.value)
 
-  const { setCanvasStoreState, setTmpCanvasDataUrl } = canvasStore
   // #endregion
 
   // #region page related
@@ -70,14 +79,14 @@ const useCanvasUtils = (
         return
       }
       while (stepsQueue.value.length !== 0) {
-        isProcessingStepsQueue.value = true
+        setIsProcessingStepsQueue(true)
         const blob = await stepsQueue.value.shift()
         if (blob) {
           pushStep(blob)
         }
       }
 
-      isProcessingStepsQueue.value = false
+      setIsProcessingStepsQueue(false)
     },
     {
       deep: true,
@@ -162,10 +171,9 @@ const useCanvasUtils = (
     if (targetCanvas && targetCanvas.value) {
       targetCanvas.value.width = width
       targetCanvas.value.height = height
-      setCanvasStoreState({
-        canvas: targetCanvas.value,
-        canvasCtx: targetCanvas.value.getContext('2d'),
-      })
+      setCanvas(targetCanvas.value)
+      const targetCtx = targetCanvas.value.getContext('2d')
+      targetCtx && setCanvasCtx(targetCtx)
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.strokeStyle = drawingColor.value
         canvasCtx.value.lineWidth = brushSize.value
@@ -434,9 +442,7 @@ const useCanvasUtils = (
       groupUtils.deselect()
       const copiedCanavs = copyCanvas(canvas.value)
       clearCtx()
-      setCanvasStoreState({
-        isAutoFilling: true,
-      })
+      setIsAutoFilling(true)
       mapEditorToCanvas(() => {
         if (canvasCtx && canvasCtx.value) {
           const pixels = canvasCtx.value.getImageData(
@@ -507,9 +513,7 @@ const useCanvasUtils = (
           copiedCanavs && canvasCtx.value.drawImage(copiedCanavs, 0, 0)
           record()
 
-          setCanvasStoreState({
-            isAutoFilling: false,
-          })
+          setIsAutoFilling(false)
         }
       })
     }
@@ -643,10 +647,15 @@ const useCanvasUtils = (
   const mapEditorToCanvas = async (cb?: () => void) => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
-    const { flag, imageId, cleanup } = await cmWVUtils.copyEditor(
-      { width: pageWidth * contentScaleRatio.value, height: pageHeight * contentScaleRatio.value },
-      true,
-    )
+    const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }))
+      : await cmWVUtils.copyEditor(
+          {
+            width: pageWidth * contentScaleRatio.value,
+            height: pageHeight * contentScaleRatio.value,
+          },
+          true,
+        )
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
@@ -725,7 +734,7 @@ const useCanvasUtils = (
     if (canvas.value) {
       const blobPromise = getCanvasBlob(canvas.value)
       if (blobPromise !== null) {
-        stepsQueue.value.push(blobPromise)
+        pushToStepsQueue(blobPromise)
       }
     }
   }
@@ -748,12 +757,32 @@ const useCanvasUtils = (
   const redo = () => {
     if (!isProcessingStepsQueue.value && !isInCanvasLastStep.value) {
       setCurrStep(currStep.value + 1)
-      updateCurrCanvasImageElement()
+      const url = updateCurrCanvasImageElement()
 
       currCanvasImageElement.value.onload = () => {
         clearCtx()
         drawImageToCtx(currCanvasImageElement.value)
         if (isBiColorEditor) fillNonTransparent(drawingColor.value)
+
+        URL.revokeObjectURL(url)
+      }
+    }
+  }
+
+  const goToCheckpoint = () => {
+    if (checkPointStep.value !== -1) {
+      setCurrStep(checkPointStep.value)
+      const url = updateCurrCanvasImageElement()
+
+      currCanvasImageElement.value.onload = () => {
+        clearCtx()
+        drawImageToCtx(currCanvasImageElement.value)
+        if (isBiColorEditor) fillNonTransparent(drawingColor.value)
+
+        URL.revokeObjectURL(url)
+
+        steps.value.length = checkPointStep.value + 1
+        setCheckPointStep(-1)
       }
     }
   }
@@ -763,7 +792,6 @@ const useCanvasUtils = (
   }
 
   return {
-    setCanvasStoreState,
     reverseSelection,
     downloadCanvas,
     getCanvasDataUrl,
@@ -780,6 +808,8 @@ const useCanvasUtils = (
     restoreCanvas,
     prepareMaskToUpload,
     convertToPinkBasedMask,
+    goToCheckpoint,
+    setCheckPointStep,
     isInCanvasFirstStep,
     isInCanvasLastStep,
     brushSize,
@@ -789,7 +819,6 @@ const useCanvasUtils = (
     isBrushMode,
     resultCanvas,
     currStep,
-    isProcessingCanvas,
     isProcessingStepsQueue,
     loading,
     steps,
