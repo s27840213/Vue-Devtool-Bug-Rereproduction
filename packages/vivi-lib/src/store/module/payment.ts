@@ -55,6 +55,9 @@ const getters: GetterTree<IPayment, unknown> = {
   getPrices(state: IPayment) {
     return state.prices
   },
+  getPaymentPending(state: IPayment) {
+    return state.pending
+  },
   getIsPaymentPending(state: IPayment) {
     return Object.entries(state.pending).some(([key, value]) => value)
   },

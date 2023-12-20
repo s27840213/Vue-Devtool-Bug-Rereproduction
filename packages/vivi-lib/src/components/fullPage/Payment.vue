@@ -91,6 +91,8 @@ import { round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
+import generalUtils from '@/utils/generalUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 
 export default defineComponent({
   emits: ['canShow'],
@@ -249,7 +251,8 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setPaymentPending: 'payment/SET_paymentPending'
+      setPaymentPending: 'payment/SET_paymentPending',
+      clearFullPageConfig: 'UPDATE_clearFullPageConfig'
     }),
     handleImageChange(index: number) {
       this.idxCurrImg = index
@@ -267,13 +270,18 @@ export default defineComponent({
       if (this.isPaymentPending) return
       if (option === 'monthly') option = this.payment.planId.monthly
       else if (option === 'annually') option = (this.isTrialDisabled || !this.isTrialToggled) ? this.payment.planId.annuallyFree0 : this.payment.planId.annually
-      this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
-      stkWVUtils.sendToIOS('SUBSCRIBE', { option })
-      if (timeout) {
-        setTimeout(() => {
-          this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: false })
-          stkWVUtils.appToast('Network timeout error')
-        }, timeout)
+      if (generalUtils.isStk) {
+        this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: true })
+        stkWVUtils.sendToIOS('SUBSCRIBE', { option })
+        if (timeout) {
+          setTimeout(() => {
+            this.setPaymentPending({ [option === 'restore' ? 'restore' : 'purchase']: false })
+            stkWVUtils.appToast('Network timeout error')
+          }, timeout)
+        }
+      } else if (generalUtils.isCm) {
+        if(option === 'restore') cmWVUtils.restore(undefined, true)
+        else cmWVUtils.subscribe(option)
       }
     },
     togglePanel(up?: boolean) {
@@ -641,6 +649,9 @@ export default defineComponent({
     .spinner {
       color: #D9D9D9;
       position: absolute;
+      @include app(cm) {
+        color: #050505;
+      }
     }
   }
   &__notice {

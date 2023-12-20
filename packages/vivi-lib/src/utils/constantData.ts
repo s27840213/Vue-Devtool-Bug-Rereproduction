@@ -1322,12 +1322,26 @@ class ConstantData {
     ['TWN', 'TWD'],
   ])
 
-  // plan id for vivisticker payment
+  // plan id for stk/cm payment
   get planId() {
+    if (generalUtils.isStk) {
+      return {
+        monthly: 'com.nuphototw.vivisticker.monthly',
+        annually: 'com.nuphototw.vivisticker.annually',
+        annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
+      }
+    }
+    if (generalUtils.isCm) {
+      return {
+          monthly: 'com.printage.charmix.monthly',
+          annually: 'com.printage.charmix.yearly',
+          annuallyFree0: 'com.printage.charmix.yearly_free0'
+      }
+    }
     return {
-      monthly: 'com.nuphototw.vivisticker.monthly',
-      annually: 'com.nuphototw.vivisticker.annually',
-      annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
+      monthly: '',
+      annually: '',
+      annuallyFree0: ''
     }
   }
 

@@ -23,7 +23,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
             v-slot="{ navigate }")
             svg-icon(iconName="cm_settings"
               :iconColor="'yellow-0'" @click="navigate")
-      nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+      nubtn(size="mid" icon="crown" @click="handleProBtnClick") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="router-view box-border min-h-full row-start-2 row-end-3"
     :class="{ 'pb-12': !atNonUI  && !atMyDesign}"
@@ -83,7 +83,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
     div(class="modal-container" v-if="isModalOpen")
       modal-card(class="pointer-events-auto")
     transition(name="bottom-up-down")
-      full-page(v-if="fullPageType !== 'none'" class="full-page")
+      full-page(v-if="fullPageType !== 'none'" class="pointer-events-auto")
     spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
     notifications(
       class="notification flex-center "
@@ -332,6 +332,12 @@ const homeIndicatorHeight = computed(() => userInfo.value.homeIndicatorHeight)
 router.isReady().then(() => {
   cmWVUtils.sendAppLoaded()
 })
+// #endregion
+
+// #region pro
+const handleProBtnClick = () => {
+  cmWVUtils.openPayment()
+}
 // #endregion
 </script>
 

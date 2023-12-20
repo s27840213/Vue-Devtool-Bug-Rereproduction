@@ -23,10 +23,10 @@ div(ref="main" class="full-page relative")
   welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"
     class="full-page__close"
-    :class="{'full-page__close--semi-transparent': fullPageConfig.type === 'payment'}"
+    :class="{'full-page__close--semi-transparent': fullPageConfig.type === 'payment' && $isStk}"
     @click.prevent.stop="handleClose")
-    svg-icon(iconName="vivisticker_close"
-            iconColor="white"
+    svg-icon(:iconName="$isStk ? 'vivisticker_close' : 'x-mark'"
+            :iconColor="$isStk ? 'white' : 'dark-1'"
             iconWidth="24px")
 </template>
 
@@ -34,6 +34,7 @@ div(ref="main" class="full-page relative")
 import Payment from '@/components/fullPage/Payment.vue'
 import Welcome from '@/components/fullPage/Welcome.vue'
 import { IFullPageConfig } from '@/interfaces/fullPage'
+import store from '@/store'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -64,7 +65,11 @@ export default defineComponent({
       fullPageConfig: 'getFullPageConfig',
     }) as {
       fullPageConfig: () => IFullPageConfig
-    })
+      }),
+    homeIndicatorHeight() {
+      if(this.$isCm) return store.getters['cmWV/getUserInfo'].homeIndicatorHeight
+      return 0
+    }
   },
   methods: {
     ...mapMutations({
@@ -97,7 +102,7 @@ export default defineComponent({
       this.clearFullPageConfig()
     },
     sendAppLoaded() {
-      stkWVUtils.sendAppLoaded()
+      if( this.$isStk) stkWVUtils.sendAppLoaded()
     },
     handleEnded() {
       if (this.showOnVideoFinish) {
@@ -119,7 +124,12 @@ export default defineComponent({
   grid-template-rows: 1fr auto;
   background: setColor(black-1);
   overflow: hidden;
-  z-index: setZindex('popup');
+  @include stk {
+    z-index: setZindex('popup');
+  }
+  @include cm {
+    @apply z-popup;
+  }
   &__close {
     @include size(24px);
     display: flex;
@@ -127,9 +137,15 @@ export default defineComponent({
     justify-content: center;
     position: absolute;
     top: 20px;
-    right: 20px;
     &--semi-transparent {
       opacity: 0.5;
+    }
+    @include stk {
+      right: 20px;
+    }
+    @include cm {
+      top: v-bind("`${homeIndicatorHeight + 8}px`");
+      left: 16px;
     }
   }
   &__video {

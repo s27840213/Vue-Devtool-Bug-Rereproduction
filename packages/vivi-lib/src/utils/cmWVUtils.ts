@@ -1,33 +1,35 @@
-import i18n from '@/i18n'
-import { ICmProFeatures } from '@/interfaces/payment'
 import listApis from '@/apis/list'
-import { IListServiceContentDataItem, ILoginResult } from '@/interfaces/api'
+import userApis from '@/apis/user'
+import i18n from '@/i18n'
+import { ICmLoginResult, IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
+import { ICmProFeatures, IPrices } from '@/interfaces/payment'
 import router from '@/router'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
-import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
+import constantData from './constantData'
+import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
 
 declare let window: CustomWindow
-
-export interface IGeneralSuccessResponse {
-  flag: '0'
-}
 
 export interface IGeneralFailureResponse {
   flag: string
   msg: string
 }
 
-type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
+interface IGeneralResponse {
+  flag: string
+  msg?: string
+}
 
 export type IUserInfo = {
   hostId: string
@@ -40,7 +42,8 @@ export type IUserInfo = {
   modelName: string,
   flag: string,
   locale: string,
-  userId: string
+  userId: string,
+  storeCountry: string
 }
 
 export interface IAlbum {
@@ -99,6 +102,30 @@ export interface IListAssetResponse {
   group?: string
 }
 
+export interface IPlanInfo {
+  planId: string,
+  priceText: string,
+  priceValue: string
+}
+
+export interface IGetProductResponse extends IGeneralResponse { 
+  priceCurrency: string,
+  monthly: {
+    priceValue: string,
+    priceText: string
+  },
+  annually: {
+    priceValue: string,
+    priceText: string
+  },
+  planInfo: IPlanInfo[]
+}
+
+export interface ISubscribeResponse extends IGeneralResponse { 
+  option: string,
+  txid?: string,
+}
+
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
   textStock: 'text',
@@ -119,6 +146,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     locale: 'en',
     modelName: 'web',
     userId: '',
+    storeCountry: 'USA'
   }
 
   CALLBACK_MAPS = {
@@ -203,7 +231,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   // Like picWVUtils, need merge.
   async login(type: 'Apple' | 'Google' | 'Facebook', locale: string) {
     const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as 
-      { data: ILoginResult, flag: number, msg?: string }
+      { data: ICmLoginResult, flag: number, msg?: string }
     if (!loginResult) {
       throw new Error('login failed')
     }
@@ -325,7 +353,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       y,
       ...(imageId && { imageId }),
       ...(imagePath && { imagePath }),
-    }, { timeout: -1 }) as GeneralResponse | null | undefined
+    }, { timeout: -1 }) as IGeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
@@ -482,6 +510,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return loadedFonts[face] ?? false
   }
 
+  // #region payment
   openPayment(target?: ICmProFeatures) {
     const params = {
       target,
@@ -531,9 +560,152 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async setDefaultPrices() {
-    // TODO: update prices
+    const userInfo = this.getUserInfoFromStore()
+    const locale = userInfo.storeCountry // TODO: no storeCountry in charmix
+    const defaultPrices = store.getters['payment/getPayment'].defaultPrices as { [key: string]: IPrices }
+    const localPrices =  await this.getState('prices')
+    const prices = localPrices ?? defaultPrices[locale]
+
+    if (!prices) return
+    store.commit('payment/UPDATE_payment', { prices })
     store.commit('payment/SET_paymentPending', { info: false })
   }
+
+  async getProducts() {
+    const res = await this.callIOSAsHTTPAPI('GET_PRODUCTS', {
+      planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
+    })
+    if (!res) return
+    const { planInfo, priceCurrency } = res as IGetProductResponse
+    const planIds = store.getters['payment/getPayment'].planId
+    const prices = { currency: priceCurrency }
+    planInfo.forEach(p => {
+      const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
+      plan && Object.assign(prices, {
+        [plan]: {
+          value: parseFloat(p.priceValue),
+          text: p.priceText
+        }
+      })
+    })
+    const annuallyPriceOriginal = planInfo.find(p => p.planId === constantData.planId.annually)
+    const annuallyFree0PriceOriginal = planInfo.find(p => p.planId === constantData.planId.annuallyFree0)
+    Object.assign(prices, {
+      ...(annuallyPriceOriginal && { annuallyOriginal: {
+        value: parseFloat(annuallyPriceOriginal.priceValue),
+        text: annuallyPriceOriginal.priceText
+      }}),
+      ...(annuallyFree0PriceOriginal && { annuallyFree0Original: {
+        value: parseFloat(annuallyFree0PriceOriginal.priceValue),
+        text: annuallyFree0PriceOriginal.priceText
+      }})
+    })
+    store.commit('payment/UPDATE_payment', { prices })
+    store.commit('payment/SET_paymentPending', { info: false })
+    this.setState('prices', prices)
+  }
+
+  async updateSubState(uuid: string, txid?: string, showDupBindModal = true): Promise<{subscribe: boolean, dupBinded: boolean}> {
+    const userInfo = this.getUserInfoFromStore()
+    const res = await userApis.getTxInfo({
+      token: '',
+      app: 'charmix',
+      host_id: userInfo.hostId,
+      uuid,
+      txid
+    })
+    if (res.data.flag === 0) {
+      const isSubscribed = res.data.subscribe === 1
+      store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
+      this.getState('subscribeInfo').then(subscribeInfo => {
+        this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
+      })
+      if (res.data.dup_binded === 1 && showDupBindModal) {
+        modalUtils.setModalInfo(
+          i18n.global.t('STK0024'),
+          [i18n.global.t('CM0134')],
+          {
+            msg: i18n.global.t('STK0023'),
+          },
+        )
+      }
+      return {subscribe: isSubscribed, dupBinded: res.data.dup_binded === 1}
+    }
+    return {subscribe: false, dupBinded: false}
+  }
+
+  async subscribe(planId: string) {
+    if (store.getters['payment/getPaymentPending'].purchase) return
+    store.commit('payment/SET_paymentPending', { purchase: true })
+
+    const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: planId }, { timeout: -1 })
+    const {flag, msg, txid} = res as ISubscribeResponse
+    if (flag === '0') {
+      const isSubscribed = !!txid && (await this.updateSubState('', txid)).subscribe
+      if (isSubscribed) store.commit('SET_fullPageConfig', { type: 'welcome', params: {} })
+    } else if (msg === 'IAP_DISABLED'){
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [i18n.global.t('STK0096')],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
+    }
+
+    store.commit('payment/SET_paymentPending', { purchase: false })
+  }
+
+  async restore(loginResult?: ICmLoginResult, showResult = false) {
+    if (store.getters['payment/getPaymentPending'].restore) return
+    store.commit('payment/SET_paymentPending', { restore: true })
+    let result = { subscribe: false, dupBinded: false }
+    if (loginResult?.has_tx === 1) { 
+      // logged in & is binding
+      const isSubscribed = loginResult.subscribe === 1
+      store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
+      this.getState('subscribeInfo').then(subscribeInfo => {
+        this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
+      })
+      result.subscribe = isSubscribed
+    } else {
+      // not logged in, or logged in but not binding
+      const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 })
+      if (res) {
+        const { flag, txid } = res as ISubscribeResponse
+        if(flag === '0' && !!txid) result = await this.updateSubState('', txid, false)
+      } else {
+        showResult && notify({
+          group: 'warn',
+          text: 'network timeout',
+        })
+      }
+    }
+
+    store.commit('payment/SET_paymentPending', { restore: false })
+    if (showResult) {
+      const title = result.subscribe ? i18n.global.t('CM0135') : i18n.global.t('CM0137')
+      const content = (result.subscribe ? i18n.global.t('CM0136') : i18n.global.t('CM0138')) + 
+        (result.dupBinded ? i18n.global.t('CM0134') : '')
+      modalUtils.setModalInfo(
+        title,
+        [content],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
+    }
+  }
+
+  checkPro(item: { plan?: number }, target?: ICmProFeatures) {
+    const isPro = store.getters['payment/getPayment'].subscribe
+    if (item.plan === 1 && !isPro) {
+      this.openPayment(target)
+      return false
+    }
+    return true
+  }
+  // #endregion
   
   async fetchDebugModeEntrance() {
     this.everEntersDebugMode = (await this.getState('everEntersDebugMode'))?.value ?? false

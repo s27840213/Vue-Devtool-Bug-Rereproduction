@@ -1434,7 +1434,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       termsOfServiceUrl: i18n.global.t('STK0053'),
       privacyPolicyUrl: i18n.global.t('STK0052'),
       defaultTrialToggled: store.getters['payment/getPayment'].trialCountry.includes(userInfo.storeCountry),
-      isPromote: store.getters['payment/getIsPromoteCountry'].includes(userInfo.storeCountry)
+      isPromote: this.isPromoteCountry
     } as IFullPagePaymentConfigParams
     store.commit('SET_fullPageConfig', { type: 'payment', params })
   }
