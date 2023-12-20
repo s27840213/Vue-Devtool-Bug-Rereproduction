@@ -19,24 +19,25 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
           iconName="cm_home"
           iconWidth="22px"
           @click="handleHomeBtnAction(navigate)")
-  div(class="relative grid grid-cols-2 gap-20 overflow-scroll h-full px-16 box-border py-8")
-    div(
-      v-for="(col, i) in myDesignCols"
-      :key="i"
-      class="grid gap-20 h-fit")
+  div(class="relative h-full px-16 box-border py-8 overflow-hidden")
+    div(class="h-full grid grid-cols-2 gap-20 overflow-scroll")
       div(
-        v-for="design in col"
-        :key="design.id"
-        class="relative"
-        @click="selectDesign(design)")
-        img(
-          class="w-full rounded-20"
-          :src="imageUtils.appendQuery(getSubDesignThumbUrl(design.type, design.id, design.subId), 'lsize', '300')")
-        svg-icon(
-          class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
-          iconName="more_horizontal"
-          iconWidth="22px"
-          @click.stop="editDesign(design)")
+        v-for="(col, i) in myDesignCols"
+        :key="i"
+        class="grid gap-20 h-fit")
+        div(
+          v-for="design in col"
+          :key="design.id"
+          class="relative"
+          @click="selectDesign(design)")
+          img(
+            class="w-full rounded-20"
+            :src="imageUtils.appendQuery(getSubDesignThumbUrl(design.type, design.id, design.subId), 'lsize', '300')")
+          svg-icon(
+            class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
+            iconName="more_horizontal"
+            iconWidth="22px"
+            @click.stop="editDesign(design)")
     div(
       v-show="currOpenSubDesign && subDesignThumbLoaded"
       class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
