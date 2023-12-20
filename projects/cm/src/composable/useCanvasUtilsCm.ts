@@ -648,7 +648,7 @@ const useCanvasUtils = (
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }))
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }), { outputType: 'png' })
       : await cmWVUtils.copyEditor(
           {
             width: pageWidth * contentScaleRatio.value,
