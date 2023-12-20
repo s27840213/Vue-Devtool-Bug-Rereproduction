@@ -26,7 +26,7 @@ div(class="panel-text-effect")
         svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
   //- To set effect optoin.
   div(v-if="state === 'options' && currEffect !== null"
-      class="w-full panel-text-effect__form")
+      class="panel-text-effect__form")
     span(class="panel-text-effect__effect-name") {{currEffect.label}}
     div(v-for="option in currEffect.options"
         :key="option.key"

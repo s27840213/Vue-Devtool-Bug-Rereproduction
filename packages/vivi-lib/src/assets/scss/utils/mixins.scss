@@ -81,10 +81,6 @@
   scrollbar-width: none !important;
 }
 
-.no-scrollbar {
-  @include no-scrollbar;
-}
-
 // Push scroll bar to outside. Ex: Categorylist
 @mixin push-scrollbar10 {
   box-sizing: border-box;
@@ -100,10 +96,6 @@
       margin-right: 0;
     }
   }
-}
-
-.push-scrollbar10 {
-  @include push-scrollbar10;
 }
 
 @mixin hover-scrollbar($theme: light, $showX: false) {

@@ -2,7 +2,7 @@
 div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
   div(class="grid grid-rows-1 grid-cols-[auto,auto,auto,minmax(0,1fr)] gap-x-16 items-center box-border")
     div(
-      class="gen-result__block rounded-8 overflow-hidden"
+      class="gen-result__block rounded-8 bg-white overflow-hidden"
       @pointerdown="toggleOriginalImg(true)"
       @pointerup="toggleOriginalImg(false)")
       img(class="w-full h-full object-contain" draggable="false" :src="initImgSrc")
