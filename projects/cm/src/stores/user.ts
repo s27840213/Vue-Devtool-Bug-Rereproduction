@@ -1,6 +1,6 @@
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import type { GenImageParams } from '@/types/api'
-import { ICmMyDesign, ICmSubDesign, IMyDesignType } from '@/types/user'
+import { ICmMyDesign, ICmSubDesign, IMyDesignType, ITmpSubDesign } from '@/types/user'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
@@ -280,18 +280,89 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const deleteSubDesignFromStore = (design: ITmpSubDesign) => {
+    const { id, subId, type, thumbIndex } = design
+
+    const removeFromMap = async (
+      myDesignMap: {
+        [key: string]: ICmMyDesign[]
+      },
+      key: string,
+      index: number,
+    ) => {
+      if (index !== -1) {
+        const isLastSubDesign = myDesignMap[key][index].subDesignInfo.length === 1
+        const subDesignInfo = myDesignMap[key][index].subDesignInfo
+
+        const subDesignIndex = subDesignInfo.findIndex((item) => item.id === subId)
+        if (subDesignIndex === -1) return
+        const isThumb = thumbIndex === subDesignIndex
+
+        if (isThumb && isLastSubDesign) {
+          deleteDesign(currOpenDesign.value as ICmMyDesign)
+          setCurrOpenDesign(undefined)
+          return
+        }
+
+        if (isThumb && !isLastSubDesign) myDesignMap[key][index].thumbIndex = 0
+        subDesignInfo.splice(subDesignIndex, 1)
+        await cmWVUtils.addAsset(
+          `mydesign-${editorType.value}`,
+          currOpenDesign.value,
+          undefined,
+          'mydesign',
+        )
+      }
+    }
+
+    const indexInAll = myDesignFilesMap.all.findIndex((item) => item.id === id)
+    removeFromMap(myDesignFilesMap, 'all', indexInAll)
+
+    const indexInType = myDesignFilesMap[type].findIndex((item) => item.id === id)
+    removeFromMap(myDesignFilesMap, type, indexInType)
+  }
+
   const deleteDesign = async (design: ICmMyDesign) => {
-    const { type, id } = design
-    const data = await cmWVUtils.deleteAsset(`mydesign-${type}`, id, 'mydesign')
-    const { flag } = data ?? { flag: '1' }
-    if (flag === '1') {
-      throw new Error('delete design failed')
-    } else {
-      deleteDesignFromStore(design)
-      // notify({
-      //   group: 'success',
-      //   text: `${t('NN0889')}`,
-      // })
+    try {
+      const { type, id } = design
+      const data = await cmWVUtils.deleteAsset(`mydesign-${type}`, id, 'mydesign')
+      const { flag } = data ?? { flag: '1' }
+      if (flag === '1') {
+        throw new Error('delete design failed')
+      } else {
+        deleteDesignFromStore(design)
+        // notify({
+        //   group: 'success',
+        //   text: `${t('NN0889')}`,
+        // })
+      }
+    } catch (error) {
+      logUtils.setLogForError(error as Error)
+    }
+  }
+
+  const deleteSubDesign = async (design: ITmpSubDesign) => {
+    try {
+      const { id, subId, type } = design
+      const data = await cmWVUtils.deleteAsset(
+        `mydesign-${type}`,
+        `${id}/${subId}`,
+        undefined,
+        false,
+      )
+
+      const { flag } = data ?? { flag: '1' }
+      if (flag === '1') {
+        throw new Error('delete sub design failed')
+      } else {
+        deleteSubDesignFromStore(design)
+        // notify({
+        //   group: 'success',
+        //   text: `${t('NN0889')}`,
+        // })
+      }
+    } catch (error) {
+      logUtils.setLogForError(error as Error)
     }
   }
 
@@ -452,6 +523,7 @@ export const useUserStore = defineStore('user', () => {
     currOpenSubDesign,
     setCurrOpenSubDesign,
     deleteDesign,
+    deleteSubDesign,
     // #endregion
   }
 })
