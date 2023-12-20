@@ -1679,8 +1679,8 @@ const store = createStore({
     fontTag,
     imgControl,
     webView,
-    payment,
     canvasResize,
+    ...(generalUtils.isStk || generalUtils.isCm ? { payment } : {}),
   },
 })
 export default store
