@@ -8,7 +8,7 @@ div(class="w-full flex-around-center")
       :iconName="'home-solid'"
       :iconColor="atHome ? 'yellow-cm' : 'transparent'"
       :iconWidth="'32px'"
-      :strokeColor="'yellow-cm'"
+      :strokeColor="atHome ? 'yellow-cm' : 'white'"
       @click="navigate")
   router-link(
     custom
@@ -17,7 +17,7 @@ div(class="w-full flex-around-center")
     svg-icon(
       :iconName="'grid-solid'"
       :iconColor="atMyDesign ? 'yellow-cm' : 'transparent'"
-      :strokeColor="'yellow-cm'"
+      :strokeColor="atMyDesign ? 'yellow-cm' : 'white'"
       :iconWidth="'32px'"
       @click="navigate")
 </template>
