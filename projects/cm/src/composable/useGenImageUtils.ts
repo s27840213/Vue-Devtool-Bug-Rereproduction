@@ -267,7 +267,7 @@ const useGenImageUtils = () => {
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         RECORD_TIMING && testUtils.log('screenshot to blob', '')
         RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
-        uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
+        uploadImage(imageBlob, `${userId}/input/${requestId}_init`)
           .then(async () => {
             RECORD_TIMING && testUtils.log('upload screenshot', '')
             console.log('screenshot:', new Date().getTime())
@@ -293,7 +293,7 @@ const useGenImageUtils = () => {
         if (maskUrl !== undefined) {
           RECORD_TIMING && testUtils.log('mask to dataUrl', '')
           RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
-          uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
+          uploadImage(maskUrl, `${userId}/input/${requestId}_mask`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
             if (originalMaskDataUrl) {
               setMaskDataUrl(originalMaskDataUrl)
