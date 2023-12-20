@@ -10,6 +10,7 @@ export interface ICanvasState {
   stepsQueue: Array<Promise<Blob | null>>
   steps: Array<Blob>
   currStep: number
+  checkPointStep: number
   isChangingBrushSize: boolean
   isDrawing: boolean
   canvas: HTMLCanvasElement | null
@@ -31,6 +32,7 @@ export const useCanvasStore = defineStore('canvas', {
     stepsQueue: [],
     steps: [],
     currStep: -1,
+    checkPointStep: -1,
     isChangingBrushSize: false,
     isDrawing: false,
     canvas: null as unknown as HTMLCanvasElement,
@@ -100,6 +102,9 @@ export const useCanvasStore = defineStore('canvas', {
     },
     setCurrStep(step: number) {
       this.currStep = step
+    },
+    setCheckPointStep(step?: number) {
+      this.checkPointStep = step ?? this.currStep
     },
     clearStep() {
       this.steps = []

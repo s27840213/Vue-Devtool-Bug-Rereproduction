@@ -318,6 +318,8 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep = this.checkpointStep
+    this.steps.length = this.currStep + 1
+    // @TODO: need to review with Daniel
     this.checkpointStep = -1
     await this.goToCurrStep()
   }

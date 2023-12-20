@@ -39,6 +39,7 @@ div(class="sidebar-tabs flex flex-col items-center gap-4 h-350 overflow-scroll s
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useSteps from '@/composable/useSteps'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import vuex from '@/vuex'
@@ -70,6 +71,7 @@ const editorStore = useEditorStore()
 const { setCurrActiveFeature, setMaskDataUrl } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
 const { openImgSelecotr } = useImgSelectorStore()
+const { setCheckpoint } = useSteps()
 
 const addSubTabs = computed(() => {
   return [
@@ -151,6 +153,10 @@ const handleTabAction = (tab: ISidebarTab) => {
         setCurrActiveFeature('none')
       } else {
         setCurrActiveFeature(tab.icon)
+      }
+
+      if (tab.icon === 'selection') {
+        setCheckpoint()
       }
 
       groupUtils.deselect()
