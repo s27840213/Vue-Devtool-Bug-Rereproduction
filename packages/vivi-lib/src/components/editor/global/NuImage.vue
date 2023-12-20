@@ -1283,7 +1283,7 @@ export default defineComponent({
       }
       return layerInfo
     },
-    scaledConfig(): { [index: string]: string | number } {
+    scaledConfig(): { [index: string]: number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
       const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' || !this.$isTouchDevice() ? 1 : this.pageScaleRatio * 0.01)
       return {
@@ -1319,6 +1319,11 @@ export default defineComponent({
       if (this.isBgImgControl) {
         imgX = 0
         imgY = 0
+      } else if ((this.$isPic || this.$isCm) && this.$isTouchDevice() && this.config.isFrameImg) {
+        imgX *= this.pageScaleRatio * 0.01
+        imgY *= this.pageScaleRatio * 0.01
+        imgWidth *= this.pageScaleRatio * 0.01
+        imgHeight *= this.pageScaleRatio * 0.01
       }
       return {
         transform: `translate(${imgX}px, ${imgY}px)`,

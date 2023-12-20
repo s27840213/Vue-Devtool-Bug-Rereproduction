@@ -319,7 +319,7 @@ export default defineComponent({
         }
       )
       if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
-        if (this.$isTouchDevice()) {
+        if (this.$isStk) {
           styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
         }
         styles.width = `${this.config.styles.width * _f}px`
