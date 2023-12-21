@@ -284,8 +284,8 @@ class StepsUtils {
     // console.warn(generalUtils.deepCopy(this.steps))
   }
 
-  setCheckpoint() {
-    this.checkpointStep = this.currStep
+  setCheckpoint(step?: number) {
+    this.checkpointStep = step ?? this.currStep
   }
 
   async undo() {
@@ -318,6 +318,8 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep = this.checkpointStep
+    this.steps.length = this.currStep + 1
+    // @TODO: need to review with Daniel
     this.checkpointStep = -1
     await this.goToCurrStep()
   }
@@ -356,6 +358,7 @@ class StepsUtils {
       }
       GroupUtils.set(pageIndex, index, layers)
     } else {
+      if (generalUtils.isStk) stkWVUtils.scrollIntoPage(activePageIndex, 300)
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     }
     if (this.currStep > 0) {

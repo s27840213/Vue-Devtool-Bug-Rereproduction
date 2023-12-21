@@ -262,12 +262,12 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('screenshot to blob', { notify: false, setToLog: true })
     return new Promise<void>((resolve) => {
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?ssize=1080`).then((dataUrl) => {
+      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`).then((dataUrl) => {
         setInitImgSrc(dataUrl)
         const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
         RECORD_TIMING && testUtils.log('screenshot to blob', '')
         RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
-        uploadImage(imageBlob, `${userId}/input/${requestId}_init.png`)
+        uploadImage(imageBlob, `${userId}/input/${requestId}_init`)
           .then(async () => {
             RECORD_TIMING && testUtils.log('upload screenshot', '')
             console.log('screenshot:', new Date().getTime())
@@ -293,7 +293,7 @@ const useGenImageUtils = () => {
         if (maskUrl !== undefined) {
           RECORD_TIMING && testUtils.log('mask to dataUrl', '')
           RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
-          uploadImage(maskUrl, `${userId}/input/${requestId}_mask.png`).then(() => {
+          uploadImage(maskUrl, `${userId}/input/${requestId}_mask`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
             if (originalMaskDataUrl) {
               setMaskDataUrl(originalMaskDataUrl)

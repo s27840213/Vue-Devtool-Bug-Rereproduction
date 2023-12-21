@@ -252,7 +252,4 @@ export default defineComponent({
     position: absolute;
   }
 }
-.no-scrollbar {
-  @include no-scrollbar;
-}
 </style>

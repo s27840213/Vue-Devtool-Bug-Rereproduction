@@ -71,7 +71,7 @@ div(class="prompt-area w-full box-border px-24")
             :key="idx"
             class="flex flex-col gap-8 bg-lighter/20 rounded-16 p-12 aspect-square w-full"
             :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
-            @click="() => setGenType(idx)")
+            @click="() => idxGenType = idx")
             img(
               v-if="genType.img"
               class="w-full object-cover object-center rounded-16 aspect-[148/116]"
@@ -99,7 +99,16 @@ div(class="prompt-area w-full box-border px-24")
                 iconColor="yellow-2"
                 @click="() => (option.active = !option.active)")
               span {{ option.title }}
-            span(class="justify-self-end") {{ option.value }}
+            div(class="grid grid-cols-[24px,auto] items-center justify-between min-w-52")
+              transition(name="rotate-right-in")
+                div(v-if="option.key === 'guidance_scale' && isOptionModified(option)"
+                  class="flex-center")
+                  svg-icon(
+                    iconName="cm_reset"
+                    iconWidth="24px"
+                    iconColor="yellow-2"
+                    @click="resetOption(option)")
+              span(class="col-start-2 justify-self-end") {{ option.value }}
           Collapse(
             :when="!!option.active"
             @collapse="currTransitions.add(`collapse-sub-title-${idx}`)"
@@ -127,6 +136,7 @@ div(class="prompt-area w-full box-border px-24")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
 </template>
+
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
@@ -223,13 +233,16 @@ const getGenParams = (): GenImageParams => {
   const params = {
     action: editorType.value,
     prompt: promptText.value,
-  } as GenPowerfulFillParams
+  } as GenImageParams
   switch (editorType.value) {
     case 'hidden-message':
       Object.assign(params, {
         action: genTypes.value?.group[genTypes.value.value].key,
         ...Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
       } as GenHiddenMessageParams)
+      break
+    default:
+      Object.assign(params, Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])))
       break
   }
   return params
@@ -359,7 +372,7 @@ const isSettings = computed({
   },
 })
 const showSettingsIcon = computed(() => {
-  return !isTypeSettings.value && editorType.value === 'hidden-message'
+  return !isTypeSettings.value && ['hidden-message', 'powerful-fill'].includes(editorType.value)
 })
 const showTypeSelector = computed(() => {
   return editorType.value === 'hidden-message'
@@ -397,32 +410,51 @@ const genTypes = computed(() => {
   return genGroupOptions.value.find((o) => o.key === 'type')
 })
 
-const setGenType = (idxGenType: number) => {
-  const preset = [
-    // blend
-    new Map([
-      ['guidance_scale', 7],
-      ['weight', 2],
-      ['guidance_start', 0],
-      ['guidance_end', 1],
-    ]),
-    // light
-    new Map([
-      ['guidance_scale', 7],
-      ['weight', 0.7],
-      ['guidance_start', 0.1],
-      ['guidance_end', 0.7],
-    ]),
-  ][idxGenType]
+const defaultGenImageOptions = computed(() => {
+  if (editorType.value === 'hidden-message') {
+    const preset = [
+      // blend
+      new Map([
+        ['guidance_scale', 7],
+        ['weight', 2],
+        ['guidance_start', 0],
+        ['guidance_end', 1],
+      ]),
+      // light
+      new Map([
+        ['guidance_scale', 10],
+        ['weight', 0.7],
+        ['guidance_start', 0.1],
+        ['guidance_end', 0.7],
+      ]),
+    ][idxGenType.value]
+    const options = constantData.getGenImageOptions('hidden-message') as GenImageOptions ?? []
+    options.forEach((option) => {
+      const newVal = preset.get(option.key)
+      if (newVal) option.value = newVal
+    })
+    return options
+  }
+  return constantData.getGenImageOptions(editorType.value)?.filter((o) => o.type === 'range') as GenImageRangeOption[] ?? []
+})
 
-  const newGenOptions = constantData.getGenImageOptions('hidden-message') as GenImageOptions
-  newGenOptions.forEach((option) => {
-    if (option.key === 'type') option.value = idxGenType
+const idxGenType = ref(genTypes.value?.value ?? 0)
 
-    const newVal = preset.get(option.key)
-    if (newVal) option.value = newVal
+watch(idxGenType, (newVal) => {
+  setCurrGenOptions(currGenOptions.value.map((o) => o.key === 'type' ? Object.assign(o, { value: newVal }) : o))
+  currGenOptions.value.forEach((o) => {
+    if (o.type === 'range') resetOption(o)
   })
-  setCurrGenOptions(newGenOptions)
+})
+
+const isOptionModified = (option: { key: string, value: any }) => {
+  return option.value !== defaultGenImageOptions.value.find((o) => o.key === option.key)?.value
+}
+
+const resetOption = (option: { key: string }) => {
+  const defaultOption = defaultGenImageOptions.value.find((o) => o.key === option.key)
+  if (!defaultOption) return
+  setCurrGenOptions(currGenOptions.value.map((o) => (o.key === option.key ? Object.assign(o, {value: defaultOption.value}) : o)))
 }
 // #endregion
 

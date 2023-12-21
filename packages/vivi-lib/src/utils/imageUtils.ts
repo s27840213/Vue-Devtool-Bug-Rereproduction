@@ -1,10 +1,10 @@
 import imageApi from '@/apis/image-api'
 import {
-  IAssetPhoto,
-  IImageSize,
-  IPhotoItem,
-  IUserImageContentData,
-  isIAssetPhoto,
+IAssetPhoto,
+IImageSize,
+IPhotoItem,
+IUserImageContentData,
+isIAssetPhoto,
 } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -202,8 +202,8 @@ class ImageUtils {
         break
       case 'ios':
         if (generalUtils.isCm) {
-          // make default size to 1600(logner side)
-          res = `chmix://${assetId}?lsize=1600`
+          // make default size to 1920(longer side)
+          res = `chmix://${assetId}?lsize=1920`
         } else if (generalUtils.isStk) {
           res = `vvstk://${assetId}`
         }

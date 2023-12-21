@@ -20,6 +20,8 @@ div(class="editing-options w-full")
 <script setup lang="ts">
 import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useSteps from '@/composable/useSteps'
+import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer'
@@ -28,10 +30,12 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 
-const { drawImageToCtx } = useCanvasUtilsCm()
+const canvasStore = useCanvasStore()
+const { steps, checkPointStep } = storeToRefs(canvasStore)
+const { drawImageToCtx, setCheckPointStep } = useCanvasUtilsCm()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
-
+const { goToCheckpoint, canvasRecord, setCheckpoint } = useSteps()
 const shapeTypes = ['square', 'rectangle', 'circle', 'triangle', 'pentagon', 'hexagon']
 const enableResizerTypes = ['square', 'rectangle']
 
@@ -82,9 +86,6 @@ const chooseSelectionOption = (icon: string) => {
         })
       } else {
         groupUtils.deselect()
-        console.log(icon)
-        console.log(enableResizerTypes)
-        console.log(enableResizerTypes.includes(icon))
         assetUtils.addImage(src, photoAspectRatio, {
           styles: {
             opacity: 30,
@@ -104,6 +105,8 @@ const chooseSelectionOption = (icon: string) => {
                 rotate: config.styles.rotate,
               })
 
+              canvasRecord()
+
               layerUtils.deleteLayer(pageIndex, layerIndex)
             }
           },
@@ -115,12 +118,14 @@ const chooseSelectionOption = (icon: string) => {
 
 const cancel = () => {
   setCurrActiveFeature('none')
+  goToCheckpoint()
   groupUtils.deselect()
 }
 
 const apply = () => {
   setCurrActiveFeature('none')
   groupUtils.deselect()
+  setCheckpoint(true)
 }
 </script>
 <style lang="scss"></style>
