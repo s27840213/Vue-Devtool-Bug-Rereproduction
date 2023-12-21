@@ -135,8 +135,8 @@ const useCanvasUtils = (
 
   const brushStyle = reactive({
     backgroundColor: getBrushColor(drawingColor.value),
-    width: '16px',
-    height: '16px',
+    width: `${brushSize.value * contentScaleRatio.value * 0.01}px`,
+    height: `${brushSize.value * contentScaleRatio.value * 0.01}px}`,
     transform: 'translate(0,0)',
   })
 

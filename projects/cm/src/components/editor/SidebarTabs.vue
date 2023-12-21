@@ -154,7 +154,7 @@ const handleTabAction = (tab: ISidebarTab) => {
         setCurrActiveFeature(tab.icon)
       }
 
-      if (tab.icon === 'selection') {
+      if (tab.icon === 'selection' || tab.icon === 'cm_brush') {
         setCheckpoint()
       }
 
