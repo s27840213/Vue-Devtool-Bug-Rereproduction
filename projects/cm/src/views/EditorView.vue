@@ -451,7 +451,11 @@ const initPagePinchHandler = () => {
       y: rect.top,
     },
   })
-  pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+  const _pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+  pagePinchHandler = (e) => {
+    if (inAspectRatioState.value) return
+    _pagePinchHandler(e)
+  }
 }
 onMounted(() => {
   initPagePinchHandler()

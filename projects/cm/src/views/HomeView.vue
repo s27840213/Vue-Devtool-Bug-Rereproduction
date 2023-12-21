@@ -10,9 +10,6 @@ div(class="box-border h-full w-full px-16 pt-12\ grid gap-16 overflow-scroll scr
   nubtn(
     icon="crown"
     @click="testNotify") Test Img Selector
-  //- nubtn(
-  //-   icon="crown"
-  //-   @click="exportVedio") Test video Selector
   template(
     v-for="(cate, i) in featureCategories"
     :key="i")
@@ -106,13 +103,6 @@ const featureCategories = [
   },
 ]
 // #endregion
-
-// const exportVedio = () => {
-//   const pixiRecorder = new PixiRecorder()
-//   pixiRecorder.genVideo().then((res) => {
-//     console.log('gen vedio', res)
-//   })
-// }
 
 const testNotify = () => {
   notify({
