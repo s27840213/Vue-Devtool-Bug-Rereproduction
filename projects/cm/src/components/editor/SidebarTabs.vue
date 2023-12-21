@@ -1,6 +1,6 @@
 <template lang="pug">
 //- h-358 = 44 (item height) * 7.5 + 4 (gap) * 7 = show 7.5 items
-div(class="sidebar-tabs flex-center flex-col gap-4 h-358 w-44 overflow-scroll scrollbar-hide")
+div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scroll scrollbar-hide")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
       v-if="!tab.hidden"
@@ -43,10 +43,12 @@ import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import type { EditorFeature } from '@/types/editor'
 import vuex from '@/vuex'
 import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -98,10 +100,10 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0048'),
       panelType: '',
       subTabs: addSubTabs.value,
-      // styles: {
-      //   transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
-      //   transition: 'transform 0.2s ease-in-out',
-      // },
+      styles: {
+        transform: currActiveFeature.value === 'add' ? 'rotate(45deg)' : '',
+        transition: 'transform 0.2s ease-in-out',
+      },
     },
     {
       icon: 'selection',
@@ -143,22 +145,27 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
 
 const { clearCtx, reverseSelection, autoFill, getCanvasDataUrl } = useCanvasUtilsCm()
 
+const toggleFeature = (feature: EditorFeature) => {
+  if (currActiveFeature.value === feature) {
+    setCurrActiveFeature('none')
+  } else {
+    setCurrActiveFeature(feature)
+  }
+  groupUtils.deselect()
+}
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
     case 'selection':
+      setCheckpoint()
+      toggleFeature(tab.icon)
+      break
     case 'cm_brush':
+      setCheckpoint()
+      toggleFeature(tab.icon)
+      break
     case 'add': {
-      if (currActiveFeature.value === tab.icon) {
-        setCurrActiveFeature('none')
-      } else {
-        setCurrActiveFeature(tab.icon)
-      }
-
-      if (tab.icon === 'selection' || tab.icon === 'cm_brush') {
-        setCheckpoint()
-      }
-
-      groupUtils.deselect()
+      toggleFeature(tab.icon)
+      cmWVUtils.callIOSAsHTTPAPI('MAKE_VIBRATE')
       break
     }
     case 'auto-fill': {

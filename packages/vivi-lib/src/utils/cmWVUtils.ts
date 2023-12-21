@@ -141,10 +141,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     const { event } = info
     switch (event) {
       case 'screenshot':
-        window.fetchDesign(info.query, info.imageId)
+        window.fetchDesign(info.query, info)
         break
       case 'screenshot-result':
-        this.screenshotMap[info.options as string](info.status as string)
+        this.screenshotMap[(info.options as { imageId: string }).imageId](info.status as string)
         break
     }
   }
@@ -303,9 +303,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
   async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string): Promise<{flag: string, cleanup: () => void}> {
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -322,13 +322,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       y,
       ...(imageId && { imageId }),
       ...(imagePath && { imagePath }),
+      ...(outputType && { outputType }),
+      ...(quality && { quality }),
       snapshotWidth: width,
     }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
         if (action !== 'editorSave') return
-        this.deleteFile('screenshot', imageId ?? '', 'png', imagePath)
+        this.deleteFile('screenshot', imageId ?? '', outputType ?? 'jpg', imagePath)
       }
     }
   }
@@ -358,7 +360,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
   }
 
-  async sendScreenshotUrl(query: string): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
+  async sendScreenshotUrl(query: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
     if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -374,6 +376,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         event: 'screenshot',
         query,
         imageId,
+        outputType,
+        quality,
       },
       to: 'Shot',
     })
@@ -402,7 +406,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       flag: '0',
       imageId,
       cleanup: () => {
-        this.deleteFile('screenshot', imageId, 'png')
+        this.deleteFile('screenshot', imageId, outputType ?? 'jpg')
       }
     }
   }

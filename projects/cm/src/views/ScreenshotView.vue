@@ -58,7 +58,7 @@ export default defineComponent({
         height: 0
       },
       extraData: undefined as any,
-      options: '',
+      options: '' as any,
       params: '',
       toast: undefined as boolean | undefined
     }
@@ -425,7 +425,7 @@ export default defineComponent({
       }
     },
     handleDoneLoading(width: number, height: number) {
-      cmWVUtils.sendCopyEditorCore('editorSave', { width, height }, this.options).then(({ flag }) => {
+      cmWVUtils.sendCopyEditorCore('editorSave', { width, height }, this.options.imageId, undefined, this.options).then(({ flag }) => {
         if (flag === '1') {
           cmWVUtils.callIOSAsHTTPAPI('INFORM_WEB', {
             info: {

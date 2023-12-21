@@ -10,14 +10,12 @@ div(class="nu-background-image" draggable="false" :style="mainStyles"
         @error="onError"
         @load="onLoad"
         :src="finalSrc")
-    //- svg(v-if="isAdjustImage"
     svg(v-if="isAdjustImage && finalSrc" v-show="isShowAdjustImg"
       class="nu-background-image__svg"
       :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
       preserveAspectRatio="none"
       role="image")
       defs
-        //- filter(v-if="!isLayerCtrlled && !isPinchingEditor" :id="filterId"
         filter(:id="filterId"
           color-interpolation-filters="sRGB")
           component(v-for="(elm, idx) in svgFilterElms"
@@ -212,7 +210,7 @@ export default defineComponent({
     },
     isShowAdjustImg(): boolean {
       // forRender img not apply filter
-      if (this.$isTouchDevice()) {
+      if (!this.$isStk && this.$isTouchDevice()) {
         return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
           !this.isImgCtrl && !this.isBgImgCtrl
       } else {

@@ -5,7 +5,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       class="gen-result__block rounded-8 bg-white overflow-hidden"
       @pointerdown="toggleOriginalImg(true)"
       @pointerup="toggleOriginalImg(false)")
-      img(class="w-full h-full object-contain" draggable="false" :src="initImgSrc")
+      img(class="w-full h-full object-cover" draggable="false" :src="initImgSrc")
     div(class="bg-lighter w-2 h-4/5")
     scrollable-container(
       :px="4"

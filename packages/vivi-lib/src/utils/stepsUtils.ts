@@ -358,6 +358,7 @@ class StepsUtils {
       }
       GroupUtils.set(pageIndex, index, layers)
     } else {
+      if (generalUtils.isStk) stkWVUtils.scrollIntoPage(activePageIndex, 300)
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     }
     if (this.currStep > 0) {
