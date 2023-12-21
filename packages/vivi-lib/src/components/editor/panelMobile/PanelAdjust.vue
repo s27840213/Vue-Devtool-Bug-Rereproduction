@@ -15,7 +15,7 @@ div(class="panel-adjust")
         :max="selectedField.max"
         v-progress)
       svg-icon(iconName="cm_reset"
-              iconColor="app-tab-default"
+              iconColor="yellow-0"
               iconWidth="24px"
               @click="resetField(selectedField)")
     div(class="grid gap-24 overflow-scroll no-scrollbar"
@@ -23,17 +23,17 @@ div(class="panel-adjust")
         ref="cmFields")
       template(v-for="field in fields" :key="field.name")
         div(
-          class="flex flex-col items-center justify-center h-52 gap-4 px-4"
+          class="flex-center flex-col h-52 gap-4 px-4"
           @click="selectedField = field")
-          div(class="panel-adjust__modified" :class="`bg-${isFieldModified(field) ? (isFieldSelected(field) ? 'app-tab-active' : 'app-tab-default') : 'transparent'}`")
+          div(class="panel-adjust__modified" :class="`bg-${isFieldModified(field) ? (isFieldSelected(field) ? 'yellow-cm' : 'yellow-0') : 'transparent'}`")
           svg-icon(
             class="click-disabled"
             :iconName="field.name"
-            :iconColor="isFieldSelected(field) ? 'app-tab-active' : 'app-tab-default'"
+            :iconColor="isFieldSelected(field) ? 'yellow-cm' : 'yellow-0'"
             :iconWidth="'24px'")
           span(
             class="no-wrap click-disabled transition ease-linear delay-200 typo-body-sm"
-            :class="`text-${isFieldSelected(field) ? 'app-tab-active' : 'app-tab-default'}`") {{ field.label }}
+            :class="`text-${isFieldSelected(field) ? 'yellow-cm' : 'yellow-0'}`") {{ field.label }}
   template(v-else)
     div(v-for="field in fields" :key="field.name")
       mobile-slider(:title="`${field.label}`"
@@ -251,8 +251,5 @@ export default defineComponent({
   &__top {
     position: absolute;
   }
-}
-.no-scrollbar {
-  @include no-scrollbar;
 }
 </style>

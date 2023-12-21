@@ -1,14 +1,15 @@
-export const editorTypes = ['powerful-fill', 'hidden-message'] as const
-export type EditorType = typeof editorTypes[number]
+export const editorTypes = ['powerful-fill', 'hidden-message', 'magic-combined'] as const
+export type EditorType = (typeof editorTypes)[number]
 // the state of each process
 export type PowerfulfillStates = 'aspectRatio' | 'editing' | 'genResult' | 'saving'
 export type HiddenMessageStates = 'aspectRatio' | 'editing' | 'genResult' | 'saving'
-export type EditorStates = Array<PowerfulfillStates>
+export type MagicCombinedStates = 'aspectRatio' | 'editing' | 'genResult' | 'saving'
+export type EditorStates = Array<PowerfulfillStates | HiddenMessageStates | MagicCombinedStates>
 //
 export type EditorFeature = 'none' | 'cm_brush' | 'selection' | 'add'
 export type PowerfulFillCanvasMode = 'brush' | 'erase' | 'move'
 
-export type DescriptionPanel = 'hidden-message' | 'hidden-message-invert' | 'hidden-message-bgrm'
+export type DescriptionPanel = 'hidden-message-help' | 'hidden-message-invert' | 'hidden-message-bgrm'
 
 // gen image options
 export type GenImageGroupOption = {
@@ -32,6 +33,8 @@ export type GenImageRangeOption = {
   max: number
   step: number
   icon?: string
+  iconActive?: string
+  active?: boolean
   value: number
 }
 export type GenImageOptions = Array<GenImageGroupOption | GenImageRangeOption>

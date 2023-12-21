@@ -1,31 +1,31 @@
 <template lang="pug">
-div(class="w-full flex justify-between items-center box-border py-10" :class="{ 'bg-app-icon-dark': active }")
+div(class="w-full flex-between-center box-border py-10" :class="{ 'bg-dark': active }")
   div(class="flex items-center gap-10" :class="`${textColor} ${textSize}`")
     svg-icon(
       :iconName="iconName"
       iconWidth="24px"
-      iconColor="app-btn-primary-bg")
+      iconColor="yellow-cm")
     span {{ title }}
   svg-icon(
     :iconName="'chevron-right'"
     iconWidth="24px"
-    iconColor="app-btn-primary-text")
+    iconColor="white")
 </template>
 
 <script lang="ts" setup>
-import type { ColorSlip } from '@/types/color';
+import type { IColorKeys } from '@nu/vivi-lib/interfaces/color'
 
 withDefaults(
   defineProps<{
     title: string
-    textColor?: ColorSlip
+    textColor?: IColorKeys
     textSize?: string
     iconName?: string
     active?: boolean
   }>(),
   {
     title: 'Test',
-    textColor: 'app-tab-default',
+    textColor: 'yellow-0',
     textSize: 'typo-h5',
     iconName: 'chevron-right',
     active: false,

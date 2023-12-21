@@ -11,6 +11,7 @@ import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
 import picWVUtils from './picWVUtils'
 import themeUtils from './themeUtils'
+import generalUtils from './generalUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -54,9 +55,12 @@ export interface IEffect {
   key: string
   label: string
   plan: 0 | 1
-  img?: string
+  icon: string
+  size: string
   options: IEffectOption[]
 }
+export type IEffectRaw = Pick<IEffect, 'key' | 'label' | 'options'>
+  & Partial<Omit<IEffect, 'key' | 'label' | 'options'>>
 export interface IEffectCategory {
   name: 'shadow' | 'bg' | 'shape' | 'fill'
   label: string
@@ -468,14 +472,24 @@ class ConstantData {
     })
   }
 
-  textEffects(): IEffectCategory[] {
-    function arrTo2darr(arr: Array<Omit<IEffect, 'plan'> & { plan?: number }>): IEffect[][] {
-      const newArr = []
-      arr.forEach(eff => { eff.plan = eff.plan || 0 })
-      while (arr.length) newArr.push(arr.splice(0, 3) as IEffect[])
-      return newArr
-    }
-    const toOptions = this.toOptions
+  // For TextEffectSetting
+  rawEffect2Effect2d(rawArr: IEffectRaw[]): IEffect[][] {
+    const effectArr: IEffect[] = rawArr.map(eff => ({
+      ...eff,
+      plan: eff.plan || 0,
+      icon: eff.icon || '',
+      size: eff.size || '',
+    }))
+    const arr2d: IEffect[][] = []
+    while (effectArr.length) arr2d.push(effectArr.splice(0, 3))
+    return arr2d
+  }
+
+  textEffects(): {
+    theme: string
+    content: IEffectCategory[]
+  } {
+    const { toOptions, rawEffect2Effect2d: arrTo2darr } = this
 
     const categories = [{
       name: 'shadow' as const,
@@ -594,7 +608,42 @@ class ConstantData {
         options: [...toOptions(['customImg', 'xOffset200', 'yOffset200', 'size', 'opacity'])]
       }, ...textFillUtils.fillCategories])
     }]
-    return categories
+
+    // Assign missing effect icon and icon size.
+    const theme = generalUtils.isStk || generalUtils.isCm ? 'dark' : 'light'
+    categories.forEach(category => {
+      category.effects2d.forEach(effect1d => {
+        effect1d.forEach(effect => {
+          // For TextFill from appJSON which already has an icon and size.
+          if (effect.icon && effect.size) {
+            return
+          }
+          switch (effect.key) {
+            case 'none': // svg-icon
+              effect.icon = 'no-effect'
+              effect.size = '24px'
+              break
+            case 'custom-fill-img': // svg-icon
+              effect.icon = 'add-image'
+              effect.size = '24px'
+              break
+            // Use a different icon based on the locale.
+            case 'text-book':
+              effect.icon = require(`@img/text-effect/${theme}_icon/${category.name}-${effect.key}-${i18n.global.locale}.png`)
+              effect.size = '56'
+              break
+            default:
+              effect.icon = require(`@img/text-effect/${theme}_icon/${category.name}-${effect.key}.png`)
+              effect.size = '56'
+              break
+          }
+        })
+      })
+    })
+    return {
+      theme,
+      content: categories,
+    }
   }
 
   // For Settings
@@ -608,7 +657,9 @@ class ConstantData {
       label: i18n.global.tc('NN0166', 1),
       icon: 'lock'
     }, ...!picWVUtils.inReviewMode ? [{
-      name: 'hr'
+      name: 'hr',
+      label: '',
+      icon: '',
     }, {
       name: 'payment',
       label: i18n.global.t('NN0585'),
@@ -1283,6 +1334,22 @@ class ConstantData {
   // charmix gen image options
   getGenImageOptions = (editorType: string) => {
     return new Map([
+      ['powerful-fill', [
+        {
+          type: 'range',
+          key: 'guidance_scale',
+          title: i18n.global.t('CM0111'),
+          subTitle: i18n.global.t('CM0112'),
+          minDescription: i18n.global.t('CM0113'),
+          maxDescription: i18n.global.t('CM0114'),
+          min: 0,
+          max: 10,
+          step: .5,
+          value: 7.5,
+          icon: 'information-circle',
+          iconActive: 'information-circle-solid',
+        }
+      ]],
       ['hidden-message', [
         {
           type: 'group',
@@ -1310,9 +1377,10 @@ class ConstantData {
           maxDescription: i18n.global.t('CM0114'),
           min: 0,
           max: 10,
-          step: 1,
-          value: 5,
-          icon: 'information-circle-solid',
+          step: .5,
+          value: 7,
+          icon: 'information-circle',
+          iconActive: 'information-circle-solid',
         },
         {
           type: 'range',
@@ -1321,7 +1389,7 @@ class ConstantData {
           min: 0,
           max: 2,
           step: 0.1,
-          value: 0,
+          value: 2,
         },
         {
           type: 'range',

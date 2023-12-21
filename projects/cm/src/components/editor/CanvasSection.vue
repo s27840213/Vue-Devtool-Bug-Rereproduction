@@ -18,7 +18,7 @@ import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import { useEditorStore } from '@/stores/editor'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import { toRefs } from 'vue'; // Workaround for https://github.com/vuejs/eslint-plugin-vue/issues/2322
+import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-plugin-vue/issues/2322
 import { useStore } from 'vuex'
 
 // #region data section
@@ -46,7 +46,7 @@ const canvasStyle = computed(() => {
     width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     transformOrigin: '0 0',
-    transform
+    transform,
   }
 })
 
@@ -55,14 +55,19 @@ const { isBiColorEditor } = useBiColorEditor()
 
 // #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const { brushStyle, showBrush } = useCanvasUtilsCm(canvasRef, wrapperDOM, containerDOM)
+const { brushStyle, showBrush, restoreCanvas } = useCanvasUtilsCm(
+  canvasRef,
+  wrapperDOM,
+  containerDOM,
+)
+
 // #endregion
 
 // #region WebView feature section
 const store = useStore()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const showCanvas = computed(() => {
-  if(editorStore.editorType === 'hidden-message') return true
+  if (editorStore.editorType === 'hidden-message') return true
   return !isDuringCopy.value
 })
 // #endregion

@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "run-p build-only type-check",
+    "build-only": "vue-cli-service build",
+    "type-check": "vue-tsc -p tsconfig.json --composite false",
     "lint": "vue-cli-service lint",
     "build:dev": "vue-cli-service build --mode development",
     "preview-cy": "vite preview --port 8080 --outDir dist-cy"

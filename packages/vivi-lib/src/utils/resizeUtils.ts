@@ -11,6 +11,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import { floor, isEqual, round } from 'lodash'
 import rulerUtils from './rulerUtils'
+import generalUtils from './generalUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -307,7 +308,8 @@ class ResizeUtils {
     }
 
     // update background
-    if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
+    const epsilon = generalUtils.isStk ? 0.001 : Number.EPSILON // to handle error due to rounding when calculating page size in stkWVUtils.getPageSize()
+    if (Math.abs(targetAspectRatio - aspectRatio) < epsilon) {
       this.scaleBackground(pageIndex, page, scale)
     } else {
       // adapt to new size without bleeds if page is in pixel unit, or new size with bleeds if page is in physical unit.

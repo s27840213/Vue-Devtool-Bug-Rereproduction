@@ -10,18 +10,19 @@ div(class="overflow-container full-size rwd-container")
       :color="{close: 'black-5', search: 'black-5'}"
       v-model:expanded="isSearchBarExpanded"
       @search="handleSearch")
-    Tags(v-show="tags && tags.length"
+    tags(
+        v-for="(tag, i) in tagsContent"
+        :key="i"
+        v-show="tag.show"
         class="panel-text__tags"
         :class="{collapsed: !isSearchBarExpanded, 'in-category': isInCategory}"
-        :tags="tags"
-        :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+        :tags="tag.content"
         ref="tags"
         theme="dark"
-        @search="handleSearch"
-        @scroll="(scrollLeft: number) => tagScrollLeft = isInCategory ? tagScrollLeft : scrollLeft")
+        @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(v-for="item in categoryListArray"
-      :class="{collapsed: tags && tags.length && !isSearchBarExpanded}"
+      :class="{collapsed: contentTags && contentTags.length && !isSearchBarExpanded}"
       v-show="item.show" :ref="item.key" :key="item.key"
       :list="item.content" @loadMore="handleLoadMore")
       template(#before)
@@ -47,7 +48,7 @@ div(class="overflow-container full-size rwd-container")
                   @click="handleCategorySearch($t('NN0024'))")
               svg-icon(class="pointer"
                 iconName="clock"
-                iconColor="balck-1"
+                iconColor="black-1"
                 iconWidth="24px")
               div(class="overline-SM") RECENTLY USED
             CategoryTextPreview(v-else :item="item" @click="addText(item)")
@@ -217,9 +218,6 @@ export default defineComponent({
   overflow: hidden;
   padding-top: 10px;
   color: white;
-  &__searchbar {
-    margin-bottom: v-bind("tags && tags.length ? '0' : '10px'");
-  }
   &__tags {
     margin: 7px 0 10px;
     color: setColor(black-5);

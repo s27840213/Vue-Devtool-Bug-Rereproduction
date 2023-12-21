@@ -8,7 +8,9 @@ div(class="toggle"
 </template>
 
 <script lang="ts">
+import type { PropType } from 'vue'
 import { defineComponent } from 'vue'
+import colorTable from '@nu/tailwind-lib/colors.json'
 
 export default defineComponent({
   props: {
@@ -22,11 +24,11 @@ export default defineComponent({
     },
     modelValue: [Number, String, Boolean],
     colorActive: {
-      type: String,
+      type: String as PropType<keyof typeof colorTable>,
       default: 'blue-1'
     },
     colorInactive: {
-      type: String,
+      type: String as PropType<keyof typeof colorTable>,
       default: 'gray-4'
     }
   },

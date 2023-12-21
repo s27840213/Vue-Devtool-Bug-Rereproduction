@@ -3,7 +3,7 @@
 div(class="powerful-fill-tutorial w-screen h-screen")
   div(class="w-full h-full grid")
     div(v-if="[1, 2, 4].includes(step)" class="relative w-fit flex flex-col items-center" :style="tutorialStyles")
-      span(class="text-primary-white typo-h6") {{ tutorialDescription }}
+      span(class="text-white typo-h6") {{ tutorialDescription }}
       div(:class="`grid grid-flow-col grid-cols-${hasNextBtn ? 3 : 2} w-full`")
         div(class="justify-self-center")
           svg-icon(
@@ -14,7 +14,7 @@ div(class="powerful-fill-tutorial w-screen h-screen")
           )
         nubtn(
           v-if="hasNextBtn"
-          class="self-start justify-self-center max-w-[96px]"
+          class="self-start justify-self-center max-w-96"
           size="sm-full"
           @click="emit('nextStep')") {{ nextBtnText }}
         div(class="justify-self-end")

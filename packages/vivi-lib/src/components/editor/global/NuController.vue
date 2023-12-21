@@ -182,7 +182,7 @@ div(:layer-index="`${layerIndex}`"
                 svg-icon(class="control-point__action-svg"
                   iconName="move2" iconWidth="24px"
                   :iconColor="actionColor")
-    action-icon(v-if="isActive && isLocked() && (scaleRatio > 20)"
+    action-icon(v-if="isActive && isLocked() && !isPinchingEditor && (scaleRatio > 20)"
                 class="control-point__bottom-right-icon"
                 iconName="lock"
                 iconSize="16px"
@@ -214,11 +214,13 @@ div(:layer-index="`${layerIndex}`"
 <script lang="ts">
 import ActionIcon from '@/components/editor/controlPoint/ActionIcon.vue'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import { IColorKeys, colorTable } from '@/interfaces/color'
 import { IResizer } from '@/interfaces/controller'
 import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import store from '@/store'
 import { ILayerInfo, LayerType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
 import cssConverter from '@/utils/cssConverter'
@@ -319,7 +321,7 @@ export default defineComponent({
       eventTarget: null as unknown as HTMLElement,
       movingUtils: null as unknown as MovingUtils,
       moveStart: null as any,
-      actionColor: (this.$isStk || this.$isCm ) ? 'black-1' : 'blue-2',
+      actionColor: (this.$isStk || this.$isCm  ? 'black-1' : 'blue-2') as IColorKeys,
     }
   },
   mounted() {
@@ -341,6 +343,7 @@ export default defineComponent({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
+      isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
       controlState: 'getControlState',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -368,19 +371,12 @@ export default defineComponent({
       return this.isActive && !this.controllerHidden
     },
     showControlPtrs(): boolean {
-      return !['pinch', 'move'].includes(this.controlState.type)
-      // return !this.isMoving && this.controlState.type !== 'pinch'
+      if (store.state.allowLayerAction !== 'all') return false
+      return !['pinch', 'move'].includes(this.controlState.type) && !this.isPinchingEditor
     },
     ctrlPtrStyles(): Record<string, number | string> {
-      if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
-        return {
-          outline: this.outlineStyles().outline,
-          opacity: 0
-        }
-      } else {
-        return {
-          outline: this.outlineStyles().outline
-        }
+      return {
+        outline: this.outlineStyles().outline
       }
     },
     resizerProfile() {
@@ -734,7 +730,7 @@ export default defineComponent({
       const checkTextFill = isTextFill(this.config.styles.textFill)
       // To fix tiptap focus issue that opacity 0 need one more tap to focus, set opacity to 0.0001.
       const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
-        !this.contentEditable ? 0.0001 : 1
+        !this.contentEditable && !this.isPinchingEditor ? 0.0001 : 1
       return {
         width: '100%',
         height: '100%',
@@ -762,6 +758,8 @@ export default defineComponent({
           return '#F10994'
         } else if (this.isLocked()) {
           return '#EB5757'
+        } else if (store.state.allowLayerAction === 'crop-only') {
+          return colorTable['yellow-cm']
         } else {
           return generalUtils.getOutlineColor()
         }
@@ -772,7 +770,11 @@ export default defineComponent({
       if ((this.isLine() && !this.$isTouchDevice()) || (this.isMoving && this.currSelectedInfo.index !== this.layerIndex)) {
         outline = 'none'
       } else if (this.isShown() || this.isControllerShown) {
-        outline = `2px solid ${outlineColor}`
+        if (this.isPinchingEditor && (generalUtils.isPic || generalUtils.isCm)) {
+          outline = 'none'
+        } else {
+          outline = `2px solid ${outlineColor}`
+        }
       } else {
         outline = 'none'
       }
@@ -795,6 +797,7 @@ export default defineComponent({
             layerIndex: this.layerIndex
           },
           type: 'scale',
+          phase: 'start',
           id: this.config.id
         }
       })
@@ -848,6 +851,16 @@ export default defineComponent({
       if (generalUtils.getEventType(event) !== 'touch') {
         event.preventDefault()
       }
+
+      if (this.controlState.type === 'scale' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       const altPressed = generalUtils.exact([event.altKey])
       const isCenterBased = altPressed || this.$isTouchDevice()
 
@@ -1047,6 +1060,7 @@ export default defineComponent({
             layerIndex: this.layerIndex
           },
           type: 'move',
+          phase: 'start',
           id: this.config.id
         }
       })
@@ -1078,6 +1092,16 @@ export default defineComponent({
       if (eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
+
+      if (this.controlState.type === 'move' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       event.preventDefault()
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -1138,6 +1162,7 @@ export default defineComponent({
             layerIndex: this.layerIndex
           },
           type: 'resize',
+          phase: 'start',
           id: this.config.id
         }
       })
@@ -1215,6 +1240,16 @@ export default defineComponent({
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
+
+      if (this.controlState.type === 'resize' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       event.preventDefault()
       const altPressed = generalUtils.exact([event.altKey])
       const isCenterBased = altPressed || this.$isTouchDevice()
@@ -1366,6 +1401,17 @@ export default defineComponent({
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event)) {
         return
       }
+      this.setState({
+        controlState: {
+          layerInfo: {
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex
+          },
+          type: 'rotate',
+          phase: 'start',
+          id: this.config.id
+        }
+      })
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       if (this.tooSmall) {
         index = 2
@@ -1396,6 +1442,16 @@ export default defineComponent({
       if (this.ctrlMiddleware() || eventUtils.checkIsMultiTouch(event) || this.isPinchLayer) {
         return
       }
+
+      if (this.controlState.type === 'rotate' && this.controlState.phase !== 'moving') {
+        this.setState({
+          controlState: {
+            ...this.controlState,
+            phase: 'moving'
+          }
+        })
+      }
+
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
@@ -1440,6 +1496,9 @@ export default defineComponent({
       }
     },
     rotateEnd(event: PointerEvent) {
+      if (this.controlState.type === 'rotate' && this.controlState.id === this.config.id) {
+        this.setState({ controlState: { type: '' } })
+      }
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1
@@ -1823,7 +1882,7 @@ export default defineComponent({
     },
     ctrlMiddleware(): boolean {
       if (this.$isTouchDevice()) {
-        if (this.$store.getters['mobileEditor/getIsPinchingEditor']) return true
+        if (this.isPinchingEditor) return true
       }
       return false
     }

@@ -22,7 +22,6 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :page="page"
     :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
     :inFrame="true"
-    :inImageFrame="inImageFrame()"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
     :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
@@ -242,9 +241,8 @@ export default defineComponent({
     }
   },
   mounted() {
-    if (!this.$isStk || this.$isCm) return
+    if (!this.$isStk) return
     if (this.config.clips.length === 1) {
-      if (!this.editorTypeTemplate && this.$route.name !== 'Screenshot') frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
       if (this.config.clips[0].srcObj.type === 'frame') {
         /**
          * If the frame contain only one clip, and is not in template editor or init from mydesign or in preview auto popping the photo-selector

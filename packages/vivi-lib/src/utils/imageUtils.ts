@@ -1,10 +1,10 @@
 import imageApi from '@/apis/image-api'
 import {
-  IAssetPhoto,
-  IImageSize,
-  IPhotoItem,
-  IUserImageContentData,
-  isIAssetPhoto,
+IAssetPhoto,
+IImageSize,
+IPhotoItem,
+IUserImageContentData,
+isIAssetPhoto,
 } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -86,6 +86,11 @@ class ImageUtils {
   appendQuery(src: string, name: string, value: string) {
     if (src === '') return ''
     if (src.includes('data:image/')) return src
+    // check the src is already has the query or not
+    const reg = new RegExp(`(${name}=)([^&]+)`)
+    if(reg.test(src)) {
+      return src.replace(reg, `$1${value}`)
+    }
     if (src.includes('?')) {
       return src + `&${name}=${value}`
     } else {
@@ -197,7 +202,8 @@ class ImageUtils {
         break
       case 'ios':
         if (generalUtils.isCm) {
-          res = `chmix://${assetId}?lsize=1600`
+          // make default size to 1920(longer side)
+          res = `chmix://${assetId}?lsize=1920`
         } else if (generalUtils.isStk) {
           res = `vvstk://${assetId}`
         }
@@ -720,8 +726,8 @@ class ImageUtils {
           assetId: this.getAssetId(src),
         },
         styles: {
-          width: img.width,
-          height: img.height,
+          imgWidth: img.width,
+          imgHeight: img.height,
         },
       }
       return mouseUtils.clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
@@ -945,8 +951,8 @@ class ImageUtils {
       ...mouseUtils.clipperHandler(
         {
           styles: {
-            width: photoWidth,
-            height: photoHeight,
+            imgWidth: photoWidth,
+            imgHeight: photoHeight,
           },
         } as unknown as IImage,
         path,

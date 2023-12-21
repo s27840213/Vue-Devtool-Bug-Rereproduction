@@ -21,6 +21,7 @@ module.exports = {
     'plugin:cypress/recommended',
     '@vue/eslint-config-typescript',
     '@vue/eslint-config-prettier/skip-formatting',
+    'plugin:tailwindcss/recommended',
   ],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -64,5 +65,9 @@ module.exports = {
       },
     ],
     'sonarjs/cognitive-complexity': [offInCommand('warn'), 15],
+
+    // Tailwind rule settings
+    'tailwindcss/classnames-order': 'off',
+    'tailwindcss/no-custom-classname': 'off',
   },
 }

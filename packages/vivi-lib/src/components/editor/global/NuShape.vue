@@ -14,7 +14,9 @@ div(class="nu-shape" :style="styles")
 <script lang="ts">
 import { IFrame, IGroup, IShape } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { PropType, defineComponent } from 'vue'
@@ -282,19 +284,16 @@ export default defineComponent({
     styles() {
       if (this.paramsReady) {
         let size
-        switch (this.config.category) {
-          case 'D': {
-            size = {
-              width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
-              height: `${this.config.styles.initHeight * this.contentScaleRatio}px`
-            }
-            break
+        if  (this.config.category === 'D') {
+          const isShrinkSizeAsPinchPage = generalUtils.isPic && generalUtils.isTouchDevice()
+          size = {
+            width: `${this.config.styles.initWidth * this.contentScaleRatio * (isShrinkSizeAsPinchPage ? pageUtils.scaleRatio * 0.01 : 1)}px`,
+            height: `${this.config.styles.initHeight * this.contentScaleRatio * (isShrinkSizeAsPinchPage ? pageUtils.scaleRatio * 0.01 : 1)}px`
           }
-          default: {
-            size = {
-              width: `${this.config.vSize[0] + this.config.pDiff[0]}px`,
-              height: `${this.config.vSize[1] + this.config.pDiff[1]}px`
-            }
+        } else {
+          size = {
+            width: `${this.config.vSize[0] + this.config.pDiff[0]}px`,
+            height: `${this.config.vSize[1] + this.config.pDiff[1]}px`
           }
         }
         return {

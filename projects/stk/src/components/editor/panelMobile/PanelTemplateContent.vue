@@ -9,19 +9,20 @@ div(class="panel-template-content" ref="panel" :class="{'in-category': isInCateg
     :color="{close: 'black-5', search: 'black-5'}"
     v-model:expanded="isSearchBarExpanded"
     @search="handleSearch")
-  Tags(v-show="tags && tags.length"
+  tags(
+      v-for="(tag, i) in tagsContent"
+      :key="i"
+      v-show="tag.show"
       class="panel-template-content__tags"
       :class="{collapsed: !isSearchBarExpanded}"
-      :tags="tags"
-      :scrollLeft="isInCategory ? 0 : tagScrollLeft"
+      :tags="tag.content"
       ref="tags"
       theme="dark"
-      @search="handleSearch"
-      @scroll="(scrollLeft: number) => tagScrollLeft = (isInCategory || isInGroupTemplate) ? tagScrollLeft : scrollLeft")
+      @search="handleSearch")
   div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
-                :class="{invisible: !item.show, collapsed: tags && tags.length && !isSearchBarExpanded}"
+                :class="{invisible: !item.show, collapsed: contentTags && contentTags.length && !isSearchBarExpanded}"
                 :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="handleLoadMore"
                 @scroll.passive="handleScrollTop($event, item.key as 'mainContent'|'searchResult')")
@@ -111,12 +112,11 @@ export default defineComponent({
       isSearchBarExpanded: false,
       elMainContent: undefined as HTMLElement | undefined,
       numColumns: 2,
-      tagScrollLeft: 0
     }
   },
   mounted() {
     // skip transitions after tags load
-    const unwatch = this.$watch('tags.length', () => {
+    const unwatch = this.$watch('contentTags.length', () => {
       this.toggleTransitions(false)
       window.requestAnimationFrame(() => {
         this.toggleTransitions(true)
@@ -197,8 +197,11 @@ export default defineComponent({
     pending() {
       return this.$store.getters[`templates/${this.igLayout}/pending`]
     },
-    tagsBar() {
-      return this.$store.getters[`templates/${this.igLayout}/tagsBar`]
+    searchTags() {
+      return this.$store.getters[`templates/${this.igLayout}/searchTags`]
+    },
+    contentTags() {
+      return this.$store.getters[`templates/${this.igLayout}/contentTags`]
     },
     isInCategory(): boolean {
       return this.isTabInCategory('template')
@@ -292,8 +295,14 @@ export default defineComponent({
         height: this.itemHeight + 'px'
       }
     },
-    tags(): ITag[] {
-      return this.showAllRecently || this.isInGroupTemplate ? [] : this.tagsBar
+    tagsContent(): { show: boolean, content: ITag[] }[] {
+      return [{
+        show: this.isInCategory && this.searchTags.length,
+        content: this.searchTags
+      }, {
+        show: !this.isInCategory && this.contentTags.length,
+        content: this.contentTags
+      }]
     },
     strBtnAdd(): string {
       return this.$t('STK0064', { type: this.igLayout === 'post' ? this.$t('STK0063') : this.$t('STK0005') })

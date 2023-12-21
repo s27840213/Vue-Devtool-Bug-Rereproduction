@@ -1,71 +1,81 @@
 <template lang="pug">
 div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
   div(class="grid grid-rows-1 grid-cols-[auto,auto,auto,minmax(0,1fr)] gap-x-16 items-center box-border")
-    div(class="gen-result__block flex rounded-lg bg-app-btn-primary-text" @click="setGenResultIndex(-1)")
-      div(
-        class="box-border outline-2 outline rounded-lg w-full h-full transition-all duration-300"
-        :class="[currGenResultIndex === -1 ? 'outline-primary-normal' : 'outline-transparent']")
-        div(class="overflow-hidden rounded-lg w-full h-full px-2 py-4 box-border")
-          img(class="w-full h-full object-contain" :src="initImgSrc")
-    div(class="bg-app-tab-disable w-2 h-4/5")
+    div(
+      class="gen-result__block rounded-8 bg-white overflow-hidden"
+      @pointerdown="toggleOriginalImg(true)"
+      @pointerup="toggleOriginalImg(false)")
+      img(class="w-full h-full object-cover" draggable="false" :src="initImgSrc")
+    div(class="bg-lighter w-2 h-4/5")
     scrollable-container(
       :px="4"
       :py="4")
       div(
-        class="gen-result__block rounded-md bg-neutral-dark-active flex flex-col justify-center items-center"
+        class="gen-result__block rounded-8 bg-dark-6 flex-center flex-col"
+        :class="{ 'pointer-events-none': isGenerating }"
         @click="showMoreRes")
         svg-icon(
           iconName="crown"
-          iconColor="app-tab-active"
+          :iconColor="isGenerating ? 'lighter' : 'yellow-cm'"
           iconWidth="24px")
-        span(class="text-app-text-secondary typo-btn-sm") {{ $t('CM0068') }}
-      //- div(
-      //-   v-for="(genResult, index) in 10"
-      //-   :key="index"
-      //-   class="gen-result__block flex rounded-lg bg-app-btn-primary-text"
-      //-   @click="setGenResultIndex(index)")
-      //-   div(
-      //-     class="box-border outline-2 outline rounded-lg w-full h-full"
-      //-     :class="{ 'outline-app-tab-active': index === currGenResultIndex }")
-      //-     div(class="overflow-hidden w-full h-full")
-      //-       //- img(class="w-full h-full object-cover" src="@/assets/img/test.jpg")
+        span(
+          class="typo-btn-sm transition-colors duration-[0.4s]"
+          :class="[isGenerating ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
       transition-group(name="list")
         div(
           v-for="(genResult, index) in generatedResults"
           :key="genResult.id"
-          class="gen-result__block flex rounded-lg relative"
+          class="gen-result__block flex rounded-8 relative"
           @click="genResult.url.length && setGenResultIndex(index)")
           div(
-            class="box-border outline-2 outline rounded-lg w-full h-full transition-all duration-300 z-2"
-            :class="[index === currGenResultIndex ? 'outline-primary-normal' : 'outline-transparent']")
-            div(class="overflow-hidden rounded-lg w-full h-full")
+            class="box-border outline-2 outline rounded-8 w-full h-full transition-all duration-300 z-2"
+            :class="[index === currGenResultIndex && genResult.url.length ? 'outline-yellow-cm' : 'outline-transparent']")
+            div(class="overflow-hidden rounded-8 w-full h-full")
               img(
                 v-if="genResult.url.length"
                 class="w-full h-full object-cover"
+                draggable="false"
                 :src="appendSizeQuery(genResult.url)")
           div(v-if="!genResult.url.length" class="loading-block")
-          div(class="absolute top-0 left-0 rounded-lg w-full h-full bg-app-tab-bg z-1")
-  div(class="flex flex-col gap-8 justify-between items-center")
+          div(class="absolute top-0 left-0 rounded-8 w-full h-full bg-dark-3 z-1")
+  div(class="flex-between-center flex-col gap-8")
     nubtn(
       size="mid-full"
-      @clickBtn="handleKeepEditing"
-      :disabled="true") {{ $t('CM0067') }}
-    span(class="text-app-text-secondary typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}
+      :disabled="!generatedResults[currGenResultIndex] || generatedResults[currGenResultIndex].url.length === 0"
+      @click="handleKeepEditing") {{ $t('CM0067') }}
+    span(class="text-white typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}
 </template>
+
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const editorStore = useEditorStore()
-const {
-  setGenResultIndex,
-  keepEditingInit,
-} = editorStore
-const { generatedResults, currGenResultIndex, initImgSrc } =
-  storeToRefs(editorStore)
-const { genImageFlow } = useGenImageUtils()
+const { setGenResultIndex, keepEditingInit } = editorStore
+const { 
+  generatedResults,
+  currGenResultIndex: _currGenResultIndex,
+  initImgSrc,
+  isGenerating
+} = storeToRefs(editorStore)
 
+const currGenResultIndex = computed(() => 
+  _currGenResultIndex.value > -1 ? _currGenResultIndex.value : tempGenResultIndex
+)
+
+let tempGenResultIndex = -1
+const toggleOriginalImg = (show: boolean) => {
+  if (show) {
+    tempGenResultIndex = currGenResultIndex.value
+    setGenResultIndex(-1)
+  } else {
+    setGenResultIndex(tempGenResultIndex)
+    tempGenResultIndex = -1
+  }
+}
+
+const { genImageFlow } = useGenImageUtils()
 const showMoreRes = async () => {
   await genImageFlow({ prompt: '', action: 'powerful-fill' }, true, 2)
 }
@@ -96,7 +106,7 @@ $loading-padding: 4px;
     left: 50%;
     height: 100%;
     aspect-ratio: 1/1;
-    background: linear-gradient(0deg, #ffffff 40%, #e4b61f 100%);
+    background: linear-gradient(0deg, rgba(255, 255, 255, 0.4) 40%, #e4b61f 100%);
     transform: translateX(-50%) rotate(90deg) scale(1.2);
     animation: rotate 1.2s linear infinite;
     // bcz loading-block has transform, so the stacking context is different, make z-index won't work

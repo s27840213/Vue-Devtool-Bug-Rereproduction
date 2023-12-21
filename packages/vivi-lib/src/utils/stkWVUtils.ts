@@ -462,6 +462,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (asset.type === 6) {
         store.commit('vivisticker/SET_isInGroupTemplate', false)
       }
+      if (asset.type === 8) {
+        if (jsonData.clips.length === 1) {
+          frameUtils.updateFrameLayerProps(0, 0, 0, { active: true })
+        }
+      }
     }
   }
 
@@ -485,17 +490,17 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     if (editorType === 'story') {
       const targetAspectRatio = 9 / 16
       const footerHeight = 60
-      const maxPageWidth = Math.round(editorWidth * 0.9)
-      const maxPageHeight = Math.round(editorHeight - shortEdge * 0.05 - footerHeight)
+      const maxPageWidth = editorWidth * 0.9
+      const maxPageHeight = editorHeight - shortEdge * 0.05 - footerHeight
       const aspectRatio = maxPageWidth / maxPageHeight
       if (aspectRatio > targetAspectRatio) {
         return {
           width: Math.round(maxPageHeight * targetAspectRatio),
-          height: maxPageHeight,
+          height: Math.round(maxPageHeight),
         }
       } else {
         return {
-          width: maxPageWidth,
+          width: Math.round(maxPageWidth),
           height: Math.round(maxPageWidth / targetAspectRatio),
         }
       }
@@ -710,12 +715,18 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('login')
   }
 
+  async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<WEBVIEW_API_RESULT> {
+    if (!generalUtils.isStk) return
+    store.commit('vivisticker/UPDATE_userInfo', userInfo)
+    return await this.callIOSAsAPI('UPDATE_USER_INFO', userInfo, 'update-user-info')
+  }
+
   async updateLocale(locale: string): Promise<boolean> {
     localStorage.setItem('locale', locale) // set locale to localStorage whether browser mode or not
     if (this.inBrowserMode) {
       return true
     }
-    const data = await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+    const data = await this.updateUserInfo({ locale }) as null | undefined | { flag: string }
     return data?.flag === '0'
   }
 
@@ -1627,7 +1638,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
       container.style.transition = `transform ${duration}ms ease-in-out`
       container.style.transform = `translateX(-${targetPos}px)`
-      if (pageIndex >= 0 && pageIndex < store.getters.getPageslength) store.commit('SET_middlemostPageIndex', pageIndex)
+      if (pageIndex >= 0 && pageIndex < pageUtils.pageNum) store.commit('SET_middlemostPageIndex', pageIndex)
     }
   }
 

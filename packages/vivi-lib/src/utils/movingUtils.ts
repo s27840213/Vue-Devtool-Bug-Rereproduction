@@ -41,7 +41,6 @@ export class MovingUtils {
   private isFollowByPinch = false
 
   private isTouchDevice = generalUtils.isTouchDevice()
-  private isClickOnController = false
 
   private get isBgImgCtrl(): boolean { return store.getters['imgControl/isBgImgCtrl'] }
   private get config(): ILayer { return this._config.config }
@@ -93,7 +92,19 @@ export class MovingUtils {
   }
 
   pageMoveStart(e: PointerEvent) {
-    if (store.getters['mobileEditor/getIsPinchingEditor']) return
+    if (store.getters['mobileEditor/getIsPinchingEditor'] || layerUtils.getCurrLayer.isTyping) return
+
+    store.commit('SET_STATE', {
+      controlState: {
+        layerInfo: {
+          pageIndex: this.pageIndex,
+          layerIndex: this.layerIndex
+        },
+        type: 'pageMove',
+        phase: 'start',
+        id: 'pageMove-' + this.config.id
+      }
+    })
 
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
@@ -114,9 +125,18 @@ export class MovingUtils {
   pageMoving(e: PointerEvent) {
     if (store.getters['mobileEditor/getIsPinchingEditor'] ||
       store.getters.getControlState.type === 'pinch' ||
-      pointerEvtUtils.pointers.length > 1) {
+      pointerEvtUtils.pointers.length > 1 ||
+      (layerUtils.getCurrLayer.isTyping)) {
       this.removeListener()
       return
+    }
+    if (store.state.controlState.type === 'pageMove' && store.state.controlState.phase !== 'moving') {
+      store.commit('SET_STATE', {
+        controlState: {
+          ...store.state.controlState,
+          phase: 'moving'
+        }
+      })
     }
     window.requestAnimationFrame(() => {
       this.pageMovingHandler(e)
@@ -124,6 +144,9 @@ export class MovingUtils {
   }
 
   pageMoveEnd(e: PointerEvent) {
+    if (store.getters.getControlState.id === 'pageMove-' + this.id) {
+      store.commit('SET_STATE', { controlState: { type: '' } })
+    }
     this.removeListener()
   }
 
@@ -203,7 +226,8 @@ export class MovingUtils {
   }
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent, params?: { pointerId?: number, isFollowByPinch?: boolean }) {
-    if(store.getters.getDisableLayerAction) return
+    if(store.state.allowLayerAction === 'none') return
+
     const { pointerId, isFollowByPinch = false } = params || {}
     const eventType = eventUtils.getEventType(event)
     if (eventType === 'pointer') {
@@ -217,7 +241,8 @@ export class MovingUtils {
       controlState: {
         layerInfo: this.layerInfo,
         type: 'move',
-        id: this.id
+        phase: 'start',
+        id: 'move-' + this.id
       }
     })
 
@@ -269,7 +294,6 @@ export class MovingUtils {
     }
 
     if (this.isTouchDevice && !this.config.locked) {
-      this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
     }
     if (eventType === 'pointer') {
@@ -416,6 +440,7 @@ export class MovingUtils {
   }
 
   moving(e: PointerEvent) {
+    if(store.state.allowLayerAction === 'crop-only') return
     const isStartedPointer = this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
     if (layerUtils.getCurrLayer.locked) return
@@ -427,7 +452,7 @@ export class MovingUtils {
       return
     }
 
-    if (store.state.controlState.phase !== 'moving') {
+    if (store.state.controlState.type === 'move' && store.state.controlState.phase !== 'moving') {
       store.commit('SET_STATE', {
         controlState: {
           ...store.state.controlState,
@@ -440,7 +465,8 @@ export class MovingUtils {
     if (!this.isDragging) {
       updateConfigData.dragging = true
     }
-    if (this.isControllerShown) {
+    // stk always moving the layer
+    if (this.isControllerShown || controlUtils.isClickOnController(e, layerUtils.getCurrLayer) || generalUtils.isStk) {
       if (generalUtils.getEventType(e) !== 'touch') {
         e.preventDefault()
       }
@@ -468,27 +494,17 @@ export class MovingUtils {
         }
       }
     } else {
-      // this condition will only happen in Mobile
       const posDiff = {
         x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initMousePos.x),
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
       }
       if (this.isTouchDevice && !this.isLocked) {
-        // if (posDiff.x > 1 || posDiff.y > 1) {
-        //   window.requestAnimationFrame(() => {
-        //     this.movingHandler(e)
-        //     this.isHandleMovingHandler = false
-        //   })
-        //   return
-        // }
         const { mobileSize } = editorUtils
         const { getCurrPage: page, scaleRatio } = pageUtils
         const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
           page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
         if (!isPageFullyInsideEditor) {
-          window.requestAnimationFrame(() => {
-            this.pageMovingHandler(e)
-          })
+          this.pageMoving(e)
         }
       } else {
         if (posDiff.x < 1 && posDiff.y < 1) {
@@ -501,7 +517,7 @@ export class MovingUtils {
 
   movingHandler(e: MouseEvent | PointerEvent) {
     if (this.initMousePos === null) return
-    if (generalUtils.isTouchDevice() &&
+    if (generalUtils.isTouchDevice() && !generalUtils.isStk &&
       this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
 
     const config = layerUtils.getCurrLayer
@@ -559,7 +575,8 @@ export class MovingUtils {
   }
 
   _pageMovingHandler4cm(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (store.state.disableLayerAction) return
+    if (['none', 'crop-only'].includes(store.state.allowLayerAction)) return
+
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) {
       return
     }
@@ -572,10 +589,10 @@ export class MovingUtils {
     const pageScaleRatio = store.state.pageScaleRatio * 0.01
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
-    const isReachLeftEdge = page.x >= 0 && offsetPos.x > 0
-    const isReachRightEdge = page.x <= page.width * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.x < 0
-    const isReachTopEdge = page.y >= 0 && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= page.height * contentScaleRatio * (1 - pageScaleRatio) && offsetPos.y < 0
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= 0
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= page.width * contentScaleRatio * (1 - pageScaleRatio)
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= 0
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= page.height * contentScaleRatio * (1 - pageScaleRatio)
 
     let x = -1
     let y = -1
@@ -617,10 +634,10 @@ export class MovingUtils {
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
 
-    const isReachLeftEdge = page.x >= EDGE_WIDTH.x && offsetPos.x > 0
-    const isReachRightEdge = page.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x && offsetPos.x < 0
-    const isReachTopEdge = page.y >= EDGE_WIDTH.y && offsetPos.y > 0
-    const isReachBottomEdge = page.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y && offsetPos.y < 0
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= EDGE_WIDTH.x
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= editorUtils.mobileSize.width - page.width * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.x
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= EDGE_WIDTH.y
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= editorUtils.mobileSize.height - page.height * contentScaleRatio * pageScaleRatio - EDGE_WIDTH.y
 
     let x = -1
     let y = -1
@@ -654,7 +671,7 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    if (store.getters.getControlState.id === this.id) {
+    if (store.getters.getControlState.id === 'move-' + this.id) {
       store.commit('SET_STATE', { controlState: { type: '' } })
     }
     if (eventUtils.getEventType(e) === 'pointer' && ['pointerup', 'poinerleave'].includes(e.type)) {

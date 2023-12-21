@@ -1,4 +1,5 @@
 import { PowerfulFillCanvasMode } from '@/types/editor'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { defineStore } from 'pinia'
 export interface ICanvasState {
   canvasMode: PowerfulFillCanvasMode
@@ -9,10 +10,9 @@ export interface ICanvasState {
   stepsQueue: Array<Promise<Blob | null>>
   steps: Array<Blob>
   currStep: number
-  isProcessingCanvas: boolean
+  checkPointStep: number
   isChangingBrushSize: boolean
   isDrawing: boolean
-  maskCanvas: HTMLCanvasElement | null
   canvas: HTMLCanvasElement | null
   canvasCtx: CanvasRenderingContext2D | null
   currCanvasImageElement: HTMLImageElement
@@ -25,17 +25,16 @@ const MAX_STEP_COUNT = 20
 export const useCanvasStore = defineStore('canvas', {
   state: (): ICanvasState => ({
     canvasMode: 'brush',
-    brushSize: 16,
+    brushSize: 125,
     resultCanvas: null as unknown as HTMLCanvasElement,
     loading: false,
     isProcessingStepsQueue: false,
     stepsQueue: [],
     steps: [],
     currStep: -1,
-    isProcessingCanvas: false,
+    checkPointStep: -1,
     isChangingBrushSize: false,
     isDrawing: false,
-    maskCanvas: null as unknown as HTMLCanvasElement,
     canvas: null as unknown as HTMLCanvasElement,
     canvasCtx: null as unknown as CanvasRenderingContext2D,
     currCanvasImageElement: new Image(),
@@ -51,14 +50,44 @@ export const useCanvasStore = defineStore('canvas', {
     },
   },
   actions: {
-    setCanvasStoreState(props: Partial<ICanvasState>) {
-      const newState = props
-      const keys = Object.keys(newState) as Array<keyof ICanvasState>
-      keys.forEach((key) => {
-        if (key in this) {
-          ;(this[key] as unknown) = newState[key]
-        }
-      })
+    setCanvasMode(mode: PowerfulFillCanvasMode) {
+      this.canvasMode = mode
+    },
+    setBrushSize(size: number) {
+      this.brushSize = size
+    },
+    setResultCanvas(canvas: HTMLCanvasElement) {
+      this.resultCanvas = canvas
+    },
+    setLoading(loading: boolean) {
+      this.loading = loading
+    },
+    setIsProcessingStepsQueue(isProcessing: boolean) {
+      this.isProcessingStepsQueue = isProcessing
+    },
+    setIsChangingBrushSize(isChanging: boolean) {
+      this.isChangingBrushSize = isChanging
+      if (!isChanging) {
+        cmWVUtils.setState('brushSize', { brushSize: this.brushSize })
+      }
+    },
+    setIsDrawing(isDrawing: boolean) {
+      this.isDrawing = isDrawing
+    },
+    setCanvas(canvas: HTMLCanvasElement) {
+      this.canvas = canvas
+    },
+    setCanvasCtx(ctx: CanvasRenderingContext2D) {
+      this.canvasCtx = ctx
+    },
+    setCurrCanvasImageElement(img: HTMLImageElement) {
+      this.currCanvasImageElement = img
+    },
+    setIsAutoFilling(isAutoFilling: boolean) {
+      this.isAutoFilling = isAutoFilling
+    },
+    setDrawingColor(color: string) {
+      this.drawingColor = color
     },
     pushStep(blob: Blob) {
       this.steps.length = this.currStep + 1
@@ -68,8 +97,14 @@ export const useCanvasStore = defineStore('canvas', {
       this.steps.push(blob)
       this.currStep = this.steps.length - 1
     },
+    pushToStepsQueue(promise: Promise<Blob | null>) {
+      this.stepsQueue.push(promise)
+    },
     setCurrStep(step: number) {
       this.currStep = step
+    },
+    setCheckPointStep(step?: number) {
+      this.checkPointStep = step ?? this.currStep
     },
     clearStep() {
       this.steps = []

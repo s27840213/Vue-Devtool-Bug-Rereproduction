@@ -1,16 +1,16 @@
 <template lang="pug">
-div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :style="mainStyles"
+div(class="nu-background-image" draggable="false" :style="mainStyles"
   @tap="dblTap"
   @pointerdown="bgPointerDown"
   @pointerup="bgPointerUp")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
-    img(v-if="finalSrc" v-show="!isAdjustImage" ref="img"
+    img(v-if="finalSrc" v-show="isShowImg" ref="img"
         :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
         draggable="false"
         @error="onError"
         @load="onLoad"
         :src="finalSrc")
-    svg(v-if="isAdjustImage"
+    svg(v-if="isAdjustImage && finalSrc" v-show="isShowAdjustImg"
       class="nu-background-image__svg"
       :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
       preserveAspectRatio="none"
@@ -26,7 +26,7 @@ div(v-if="!isBgCtrlImgLoaded" class="nu-background-image" draggable="false" :sty
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-      image(v-if="finalSrc" ref="adjust-img"
+      image(ref="adjust-img"
         :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
@@ -187,7 +187,9 @@ export default defineComponent({
       getEditorViewImages: 'file/getEditorViewImages',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
-      isBgCtrlImgLoaded: 'imgControl/isBgCtrlImgLoaded',
+      isPinchingEditor: 'mobileEditor/getIsPinchingEditor',
+      controlState: 'getControlState',
+      isImgCtrl: 'imgControl/isImgCtrl',
     }),
     ...mapState('mobileEditor', {
       inAllPagesMode: 'mobileAllPageMode',
@@ -202,9 +204,26 @@ export default defineComponent({
       }
       return this.src
     },
+    isShowImg(): boolean {
+      if (this.image.config.imgControl) return false
+      return !this.isAdjustImage || !this.isShowAdjustImg
+    },
+    isShowAdjustImg(): boolean {
+      // forRender img not apply filter
+      if (!this.$isStk && this.$isTouchDevice()) {
+        return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
+          !this.isImgCtrl && !this.isBgImgCtrl
+      } else {
+        return this.isAdjustImage
+      }
+    },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
       return !srcObj || srcObj.type === ''
+    },
+    isLayerCtrlling(): boolean {
+      const { controlState } = this
+      return controlState.type !== '' && controlState.phase === 'moving'
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
@@ -243,7 +262,8 @@ export default defineComponent({
     },
     mainStyles(): any {
       return {
-        ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
+        // not apply to vvpic mobile, bcz vvpic mobile disable the svg filter as controlling
+        ...((!generalUtils.isPic || !generalUtils.isTouchDevice()) && this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
         margin: this.padding.split(' ').map(val => '-' + val).join(' '),
         padding: this.padding,
         opacity: this.image.config.styles.opacity / 100,

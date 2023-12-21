@@ -91,7 +91,7 @@ export default defineComponent({
     height: 100%;
     align-items: center;
     background: #FFFFFF;
-    border: 1px solid map-get($colors, gray-4);
+    border: 1px solid setColor(gray-4);
     border-radius: 3px;
     box-sizing: border-box;
     font-size: 14px;
@@ -107,7 +107,7 @@ export default defineComponent({
       cursor: pointer;
 
       &.disabled {
-        color: map-get($colors, gray-4);
+        color: setColor(gray-4);
         cursor: not-allowed;
       }
     }

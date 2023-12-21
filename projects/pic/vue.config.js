@@ -41,6 +41,7 @@ const CopyPlugin = require('copy-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
 const DynamicAliasResolvePlugin = require('../../tools/webpack-plugin-dynamic-alias')
+const jsonImporter = require('node-sass-json-importer')
 
 function resolve(...dir) {
   return path.join(__dirname, ...dir)
@@ -290,6 +291,9 @@ module.exports = defineConfig({
         // https://sass-lang.com/documentation/at-rules/use/#configuration
         // additionalData: `@use "@nu/vivi-lib/assets/scss/utils" as * with($appName: ${process.env.VUE_APP_APP_NAME});`,
         additionalData: '@use "@nu/vivi-lib/assets/scss/utils" as *;',
+        sassOptions: {
+          importer: jsonImporter(),
+        },
       },
     },
   },
@@ -320,6 +324,7 @@ module.exports = defineConfig({
         '@img': resolve('../../packages/vivi-lib/src/assets/img'),
         '@json': resolve('../../packages/vivi-lib/src/assets/json'),
         '@nu/vivi-lib': resolve('../../packages/vivi-lib/src'),
+        '@nu/tailwind-lib': resolve('../../packages/tailwind-lib'),
       },
       plugins: [
         new DynamicAliasResolvePlugin({

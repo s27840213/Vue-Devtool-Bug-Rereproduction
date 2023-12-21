@@ -1,25 +1,27 @@
 <template lang="pug">
 div(class="editing-options w-full")
   div(class="grid grid-rows-1 grid-cols-[auto,minmax(0,1fr)] items-center mb-16 box-border pl-24 pr-8")
-    span(class="typo-btn-sm text-app-text-secondary mr-12") {{ $t('CM0015') }}
+    span(class="typo-btn-sm text-white mr-12") {{ $t('CM0015') }}
     scrollable-container(:gap="20")
       svg-icon(
         v-for="shape in shapeTypes"
         :key="shape"
-        iconColor="primary-light-active"
+        iconColor="yellow-2"
         :iconName="shape"
         iconHeight="32px"
         :sameSize="false"
         @click="chooseSelectionOption(shape)")
-  div(class="flex justify-between items-center box-border px-24")
-    nubtn(
-      theme="secondary"
-      @click="cancel") {{ $t('NN0203') }}
-    span(class="typo-h6 text-app-text-secondary") {{ $t('CM0051') }}
-    nubtn(@click="apply") {{ $t('CM0061') }}
+  footer-bar(
+    class="box-border px-24"
+    :title="$t('CM0051')"
+    @cancel="cancel"
+    @apply="apply")
 </template>
 <script setup lang="ts">
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useSteps from '@/composable/useSteps'
+import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer'
@@ -28,11 +30,14 @@ import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 
-const { drawImageToCtx } = useCanvasUtilsCm()
+const canvasStore = useCanvasStore()
+const { steps, checkPointStep } = storeToRefs(canvasStore)
+const { drawImageToCtx, setCheckPointStep } = useCanvasUtilsCm()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
-
+const { goToCheckpoint, canvasRecord, setCheckpoint } = useSteps()
 const shapeTypes = ['square', 'rectangle', 'circle', 'triangle', 'pentagon', 'hexagon']
+const enableResizerTypes = ['square', 'rectangle']
 
 const chooseSelectionOption = (icon: string) => {
   const src = require(`shape/${icon}.svg`)
@@ -67,6 +72,7 @@ const chooseSelectionOption = (icon: string) => {
 
         layerUtils.updateLayerProps(0, layerUtils.currSelectedInfo.index, {
           srcObj,
+          hideResizer: !enableResizerTypes.includes(icon),
         })
 
         layerUtils.updateLayerStyles(0, layerUtils.currSelectedInfo.index, {
@@ -85,7 +91,7 @@ const chooseSelectionOption = (icon: string) => {
             opacity: 30,
             ctrlrPadding: 6,
           },
-          hideResizer: true,
+          hideResizer: !enableResizerTypes.includes(icon),
           ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: AllLayerTypes) => {
             if (config) {
               const target = document.querySelector(
@@ -99,6 +105,8 @@ const chooseSelectionOption = (icon: string) => {
                 rotate: config.styles.rotate,
               })
 
+              canvasRecord()
+
               layerUtils.deleteLayer(pageIndex, layerIndex)
             }
           },
@@ -110,12 +118,14 @@ const chooseSelectionOption = (icon: string) => {
 
 const cancel = () => {
   setCurrActiveFeature('none')
+  goToCheckpoint()
   groupUtils.deselect()
 }
 
 const apply = () => {
   setCurrActiveFeature('none')
   groupUtils.deselect()
+  setCheckpoint(true)
 }
 </script>
 <style lang="scss"></style>

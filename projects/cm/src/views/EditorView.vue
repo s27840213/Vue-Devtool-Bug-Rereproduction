@@ -13,36 +13,53 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         link-or-text(
           :title="centerTitle"
           :url="centerUrl")
+      div(v-else-if="isResizingCanvas" class="text-white typo-h5 whitespace-nowrap")
+        span {{ `${pageSize.width} x ${pageSize.height}` }}
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
           iconName="cm_flip-h"
-          iconColor="app-btn-primary-text"
+          iconColor="white"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-h')")
         svg-icon(
           class="layer-action"
           iconName="cm_flip-v"
-          iconColor="app-btn-primary-text"
+          iconColor="white"
           iconWidth="20px"
           @click="mappingUtils.mappingIconAction('flip-v')")
       template(v-else-if="currActivePanel === 'adjust'")
-        div(id='header-reset')
+        div(id="header-reset")
       template(v-else)
         svg-icon(
           v-for="btn in centerBtns"
           :key="btn.icon"
           :iconName="btn.icon"
-          :iconColor="btn.disabled ? 'app-tab-disable' : 'app-btn-primary-text'"
+          :iconColor="btn.disabled ? 'lighter' : 'white'"
           :iconWidth="`${btn.width}px`"
           @click="btn.action")
     template(#right)
       nubtn(
         v-if="inGenResultState"
-        @click="handleNextAction") {{ inAspectRatioState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+        @click="handleNextAction") {{ inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+      router-link(
+        v-if="inSavingState"
+        custom
+        :to="'/'"
+        v-slot="{ navigate }")
+        svg-icon(
+          iconColor="white"
+          iconName="cm_home"
+          iconWidth="22px"
+          @click="handleHomeBtnAction(navigate)")
+  canvas-resizer(
+    v-if="isResizingCanvas"
+    :pageIndex="layerUtils.pageIndex"
+    :pageState="pageState[layerUtils.pageIndex]"
+    :noBg="isDuringCopy && isNoBg")
   div(
-    v-if="!inSavingState"
-    class="editor-container flex justify-center items-center relative"
+    v-else-if="!inSavingState"
+    class="editor-container flex-center relative"
     ref="editorContainerRef"
     id="mobile-editor__content"
     @pointerdown="selectStart"
@@ -50,7 +67,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
-    div(class="w-full h-full box-border flex justify-center items-center" @click.self="outerClick")
+    div(class="w-full h-full box-border flex-center" @click.self="outerClick")
       div(
         id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
@@ -64,8 +81,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           nu-page(
             class="z-page"
             v-show="!inGenResultState"
-            :pageIndex="0"
-            :pageState="pageState[0]"
+            :pageIndex="layerUtils.pageIndex"
+            :pageState="pageState[layerUtils.pageIndex]"
             :overflowContainer="editorContainerRef"
             :noBg="isDuringCopy && isNoBg"
             :hideHighlighter="true")
@@ -82,14 +99,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :class="demoBrushSizeOutline"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
-      v-if="!(isDuringCopy && !isAutoFilling) && inEditingState && !inGenResultState && !showSelectionOptions && !isCropping"
+      v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
-      ref="sidebarTabsRef"
-      @downloadMask="downloadCanvas")
+      ref="sidebarTabsRef")
   div(v-else class="editor-view__saving-state")
-    div(
-      class="w-full h-full flex flex-col gap-8 justify-center items-center overflow-hidden rounded-lg p-16 box-border")
-      div(class="result-showcase w-fit h-fit rounded-xl overflow-hidden" ref="resultShowcase")
+    div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
+      div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
         img(
           class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
           :class="{ 'is-flipped': !showVideo }"
@@ -117,64 +132,69 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         //-     autoplay
         //-     mutes
         //-     :src="generatedResults[currGenResultIndex].video")
-      div(class="flex justify-between items-center gap-10")
+      div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
-          :class="showVideo ? 'bg-app-btn-primary-bg' : 'bg-app-slider-bg'"
+          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
           @click="() => (showVideo = true)")
         div(
           class="w-8 h-8 rounded-full transition-colors"
-          :class="!showVideo ? 'bg-app-btn-primary-bg' : 'bg-app-slider-bg'"
+          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
           @click="() => (showVideo = false)")
-    div(class="flex justify-between items-center w-full px-24 py-8 box-border")
+    div(class="flex-between-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
-        div(class="flex justify-center items-center rounded-full bg-primary-normal aspect-square p-4")
+        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
           svg-icon(
             iconName="crown"
-            :iconColor="'app-bg'"
+            :iconColor="'dark-6'"
             iconWidth="20px")
-        span(class="typo-h5 text-app-text-secondary") {{ $t('CM0071') }}
+        span(class="typo-h5 text-white") {{ $t('CM0071') }}
       slide-toggle(
         v-model="removeWatermark"
         :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
         margin="2px"
         optionWidth="22px"
         optionHeight="22px"
-        :bgColor="removeWatermark ? 'app-tab-active' : 'primary-lighter'"
+        :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
-    div(class="flex justify-between items-center w-full px-24 py-8 box-border")
+    div(class="flex-between-center w-full px-24 py-8 box-border")
       div(class="flex items-center gap-8")
-        div(class="flex justify-center items-center rounded-full bg-primary-normal aspect-square p-4")
+        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
           svg-icon(
             iconName="crown"
-            :iconColor="'app-bg'"
+            :iconColor="'dark-6'"
             iconWidth="20px")
-        span(class="typo-h5 text-app-text-secondary") {{ $t('CM0072') }}
+        span(class="typo-h5 text-white") {{ $t('CM0072') }}
       slide-toggle(
         v-model="highResolutionPhoto"
         :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
         margin="2px"
         optionWidth="22px"
         optionHeight="22px"
-        :bgColor="highResolutionPhoto ? 'app-tab-active' : 'primary-lighter'"
+        :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
   transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
       :is="assetPanelComponent"
-      class="bg-app-bg absolute left-0 w-full z-asset-panel box-border"
+      class="bg-dark-6 absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles"
       v-bind="assetPanelProps")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
+import CanvasResizer from '@/components/editor/CanvasResizer.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
+import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
+import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
 import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -204,13 +224,13 @@ import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useEventBus } from '@vueuse/core'
 import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
-import type { VNodeRef } from 'vue'
 import { useStore } from 'vuex'
 
 // #region refs & vars
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
+
 // const sidebarTabsRef = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 
@@ -226,14 +246,29 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
+
+const { ids } = useGenImageUtils()
 
 const removeWatermark = ref(false)
 const highResolutionPhoto = ref(false)
+
+const showSidebarTabs = computed(
+  () =>
+    !isDuringCopy.value &&
+    inEditingState.value &&
+    !inGenResultState.value &&
+    !showSelectionOptions.value &&
+    !isCropping.value &&
+    !showBrushOptions.value &&
+    editorType.value !== 'magic-combined',
+)
 // #endregion
 
 // #region hooks related
 onBeforeRouteLeave((to, from) => {
   if (from.name === 'Editor') {
+    ids.length = 0
     setTimeout(() => {
       /**
        * @NOTE - if we reset immediately, will see the editor from editing state to initial state bcz transition time
@@ -251,7 +286,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, editorType } = editorStore
+const { changeEditorState, updateGenResult, setDescriptionPanel } = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -259,16 +294,26 @@ const {
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
+  showBrushOptions,
+  editorType,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
-watch(() => isManipulatingCanvas.value, (val) => {
-  store.commit('SET_disableLayerAction', val)
-})
+watch(
+  () => isManipulatingCanvas.value,
+  (val) => {
+    store.commit('SET_allowLayerAction', val ? 'none' : 'all')
+  },
+)
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
-  if (inGenResultState.value) {
+  if (inAspectRatioState.value) {
+    changeEditorState('next')
+    useTutorial().runTutorial(editorType.value)
+  } else if (inEditingState.value) {
+    changeEditorState('next')
+  } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
     const currGenResult = generatedResults.value[currGenResultIndex.value]
@@ -302,20 +347,32 @@ const useStep = useSteps()
 const { undo, redo, isInFirstStep, isInLastStep } = useStep
 
 type centerBtn = {
-  icon: string,
-  disabled: boolean,
-  width: number,
+  icon: string
+  disabled: boolean
+  width: number
   action?: () => void
 }
 const centerBtns = computed<centerBtn[]>(() => {
   const retTabs = []
   const stepBtns = [
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
-    { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo }
+    { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo },
   ]
-  if (editorType === 'hidden-message') retTabs.push({ icon: 'question-mark-circle', disabled: false, width: 20, action: () => editorStore.setDescriptionPanel('hidden-message') })
+  if (editorType.value === 'hidden-message')
+    retTabs.push({
+      icon: 'question-mark-circle',
+      disabled: false,
+      width: 20,
+      action: () => setDescriptionPanel('hidden-message-help'),
+    })
   retTabs.push(...stepBtns)
-  if (currEditorTheme.value && editorType === 'hidden-message') retTabs.push({ icon: currEditorTheme.value.toggleIcon, disabled: false, width: 20, action: toggleEditorTheme })
+  if (currEditorTheme.value && editorType.value === 'hidden-message')
+    retTabs.push({
+      icon: currEditorTheme.value.toggleIcon,
+      disabled: false,
+      width: 20,
+      action: toggleEditorTheme,
+    })
   return retTabs
 })
 // #endregion
@@ -333,14 +390,9 @@ const fitScaleRatio = computed(() => {
     pageSize.value.height === 0
   )
     return 1
-  // make longer side become 1600px
-  const pageAspectRatio = pageSize.value.width / pageSize.value.height
-  const newWidth = pageAspectRatio >= 1 ? 1600 : 1600 * pageAspectRatio
-  const newHeight = pageAspectRatio >= 1 ? 1600 / pageAspectRatio : 1600
 
-  // const widthRatio = (editorContainerWidth.value - sidebarTabsWidth.value * 2) / newWidth
-  const widthRatio = (editorContainerWidth.value - 8) / newWidth
-  const heightRatio = editorContainerHeight.value / newHeight
+  const widthRatio = (editorContainerWidth.value - 8) / pageSize.value.width
+  const heightRatio = editorContainerHeight.value / pageSize.value.height
 
   const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
@@ -380,7 +432,7 @@ const fitPage = (ratio: number) => {
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value) return
+    if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
     fitPage(newVal)
   },
 )
@@ -390,7 +442,8 @@ watch(isDuringCopy, () => {
 })
 
 let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
-onMounted(() => {
+const initPagePinchHandler = () => {
+  if (!editorContainerRef.value) return
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
     size: {
@@ -406,7 +459,13 @@ onMounted(() => {
       y: rect.top,
     },
   })
-  pagePinchHandler = (new PagePinchUtils(editorWrapperRef.value as HTMLElement)).pinchHandler
+  pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+}
+onMounted(initPagePinchHandler)
+watch(isResizingCanvas, (newVal) => {
+  if (!newVal) {
+    nextTick(initPagePinchHandler)
+  }
 })
 
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
@@ -424,12 +483,13 @@ const selectStart = (e: PointerEvent) => {
   recordPointer(e)
   if (e.pointerType === 'mouse' && e.button !== 0) return
 
-  const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
-    ? groupUtils.mapLayersToPage(
-        [layerUtils.getCurrConfig as IImage],
-        layerUtils.getCurrLayer as IGroup,
-      )[0]
-    : layerUtils.getCurrLayer
+  const layer =
+    ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
+      ? groupUtils.mapLayersToPage(
+          [layerUtils.getCurrConfig as IImage],
+          layerUtils.getCurrLayer as IGroup,
+        )[0]
+      : layerUtils.getCurrLayer
   const isClickOnController = controlUtils.isClickOnController(e, layer)
 
   if (isImgCtrl.value && !isClickOnController) {
@@ -460,7 +520,9 @@ const selectStart = (e: PointerEvent) => {
     movingUtils.removeListener()
     movingUtils.updateProps({
       _config: { config: layerUtils.getCurrLayer },
-      body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+      body: document.getElementById(
+        `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+      ) as HTMLElement,
     })
     movingUtils.moveStart(e)
   } else {
@@ -591,6 +653,7 @@ const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor
 // #region demo brush size section
 const canvasStore = useCanvasStore()
 const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToRefs(canvasStore)
+const { downloadCanvas } = useCanvasUtils()
 
 const demoBrushSizeStyles = computed(() => {
   return {
@@ -602,8 +665,8 @@ const demoBrushSizeStyles = computed(() => {
 
 const demoBrushSizeOutline = computed(() => {
   return {
-    'outline-primary-white': !isBiColorEditor.value,
-    'outline-neutral-light-hover': isBiColorEditor.value
+    'outline-white': !isBiColorEditor.value,
+    'outline-dark-0': isBiColorEditor.value,
   }
 })
 // #endregion
@@ -611,10 +674,6 @@ const demoBrushSizeOutline = computed(() => {
 // #region event bus
 const bus = useEventBus<string>('editor')
 const unsubcribe = bus.on((event: string, { callback }) => {
-  if (event === 'genMaskUrl') {
-    callback(getCanvasDataUrl())
-  }
-
   if (event === 'fitPage') {
     fitPage(fitScaleRatio.value)
   }
@@ -622,21 +681,6 @@ const unsubcribe = bus.on((event: string, { callback }) => {
 onBeforeUnmount(() => {
   unsubcribe()
 })
-// #endregion
-
-// #region Canvas functions
-const canvasRef = ref<VNodeRef | null>(null)
-const downloadCanvas = () => {
-  if (!canvasRef.value) return
-
-  canvasRef.value.downloadCanvas()
-}
-
-const getCanvasDataUrl = () => {
-  if (!canvasRef.value) return
-
-  return canvasRef.value.getCanvasDataUrl()
-}
 // #endregion
 
 // #region asset panel
@@ -686,12 +730,12 @@ const assetPanelProps = computed((): { [index: string]: any } => {
   switch (currActiveTab.value) {
     case 'text': {
       return {
-        monoColor
+        monoColor,
       }
     }
     case 'object':
       return {
-        monoColor
+        monoColor,
       }
     default: {
       return {}
@@ -785,6 +829,14 @@ const handleSwipe = (dir: string) => {
   showVideo.value = !showVideo.value
 }
 // #endregion
+
+const { setCurrOpenDesign, setCurrOpenSubDesign } = useUserStore()
+
+const handleHomeBtnAction = (navagate: () => void) => {
+  setCurrOpenDesign(undefined)
+  setCurrOpenSubDesign(undefined)
+  navagate()
+}
 </script>
 <style lang="scss" scoped>
 @use '@/assets/scss/transitions.scss';
@@ -811,7 +863,8 @@ const handleSwipe = (dir: string) => {
     backface-visibility: hidden;
     transition: transform 0.6s;
 
-    &--back {}
+    &--back {
+    }
   }
 }
 

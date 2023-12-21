@@ -78,7 +78,7 @@ export default defineComponent({
           align-items: center;
         }
         &:hover {
-          background-color: map-get($colors, blue-4);
+          background-color: setColor(blue-4);
         }
       }
     }
@@ -89,7 +89,7 @@ export default defineComponent({
     min-width: 0;
 
     &-selected {
-      background-color: map-get($colors, blue-4);
+      background-color: setColor(blue-4);
     }
   }
 }

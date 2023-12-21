@@ -298,7 +298,6 @@ export default defineComponent({
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
-      _contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
       showAllAdminTool: 'user/showAllAdminTool',
       useMobileEditor: 'getUseMobileEditor',
@@ -319,8 +318,8 @@ export default defineComponent({
       }
     },
     lazyloadSize(): unknown {
-      // @TODO discuss with allen, the *5 prevent zooming bug
-      if (generalUtils.isCm) {
+      // the following code is a workaround for page-zooming flickering bug
+      if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
         return {
           minHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5,
           maxHeight: this.config.height * this.contentScaleRatio * (this.scaleRatio / 100) * 5

@@ -2,6 +2,7 @@
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
+import { IColorKeys } from '@nu/vivi-lib/interfaces/color'
 import { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
@@ -705,8 +706,8 @@ export default defineComponent({
                           ...config.styles,
                           ...mouseUtils.clipperHandler({
                             styles: {
-                              width: photoWidth,
-                              height: photoHeight
+                              imgWidth: photoWidth,
+                              imgHeight: photoHeight
                             }
                           } as unknown as IImage, path, config.styles).styles,
                           ...{
@@ -830,7 +831,7 @@ export default defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    homeTabColor(tab: IFooterTab): string {
+    homeTabColor(tab: IFooterTab): IColorKeys {
       return (tab.disabled || this.isLocked) ? 'gray-2' : this.tabActive(tab) ? 'white' : 'black-4'
     },
     // eslint-disable-next-line vue/no-unused-properties

@@ -30,9 +30,11 @@ import { ICurrSelectedInfo } from '@nu/vivi-lib/interfaces/editor'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import { ShadowEffectType } from '@nu/vivi-lib/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@nu/vivi-lib/interfaces/layer'
+import { ColorEventType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import backgroundUtils from '@nu/vivi-lib/utils/backgroundUtils'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
+import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE } from '@nu/vivi-lib/utils/imageShadowUtils'
@@ -410,14 +412,11 @@ export default defineComponent({
     },
     handleSwitchBg() {
       this.switchBg()
-      stkWVUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
+      stkWVUtils.updateUserInfo({ editorBg: this.editorBg })
     },
     async handleEndEditing(forceModal = false) {
-      if (this.currActivePanel === 'photo-shadow') {
-        editorUtils.setCurrActivePanel('none')
-        await new Promise(resolve => setTimeout(resolve, 0)) // await the photo-shaddow-panel unomunted hook action
-      }
-      if (this.isUploadingShadowImg) {
+      const isShadowPanelOpen = this.currActivePanel === 'photo-shadow' || colorUtils.currEvent === ColorEventType.photoShadow
+      if (this.isUploadingShadowImg || isShadowPanelOpen) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
       }
