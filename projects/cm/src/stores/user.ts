@@ -15,7 +15,13 @@ import { useEditorStore } from './editor'
 
 export const useUserStore = defineStore('user', () => {
   const editorStore = useEditorStore()
-  const { setCurrDesignThumbIndex, startEditing, setCurrPrompt, setMaskDataUrl } = editorStore
+  const {
+    setCurrDesignThumbIndex,
+    startEditing,
+    setCurrPrompt,
+    setMaskDataUrl,
+    setCurrGenResultIndex,
+  } = editorStore
   const { currDesignId, editorType, currDesignThumbIndex, generatedResults, pageSize, currPrompt } =
     storeToRefs(editorStore)
 
@@ -129,6 +135,7 @@ export const useUserStore = defineStore('user', () => {
   ) => {
     try {
       const { id, subId, type, width, height } = subDesign
+      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
       const url = getSubDesignThumbUrl(type, id, subId)
       pageUtils.setPages([pageUtils.newPage({ width, height })])
       assetUtils.addImage(url, width / height, {
@@ -154,6 +161,8 @@ export const useUserStore = defineStore('user', () => {
         designWidth: width,
         designHeight: height,
       })
+
+      setCurrGenResultIndex(index)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
@@ -168,6 +177,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       const { convertToPinkBasedMask } = useCanvasUtils()
       const { pages, type, prompt, id, subId, width, height } = subDesign
+      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
       setCurrPrompt(prompt)
       pageUtils.setPages(pages)
 
@@ -189,6 +199,7 @@ export const useUserStore = defineStore('user', () => {
         designWidth: width,
         designHeight: height,
       })
+      setCurrGenResultIndex(index)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }

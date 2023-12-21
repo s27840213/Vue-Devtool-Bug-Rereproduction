@@ -71,7 +71,7 @@ div(class="prompt-area w-full box-border px-24")
             :key="idx"
             class="flex flex-col gap-8 bg-lighter/20 rounded-16 p-12 aspect-square w-full"
             :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
-            @click="() => idxGenType = idx")
+            @click="() => (idxGenType = idx)")
             img(
               v-if="genType.img"
               class="w-full object-cover object-center rounded-16 aspect-[148/116]"
@@ -101,8 +101,7 @@ div(class="prompt-area w-full box-border px-24")
               span {{ option.title }}
             div(class="grid grid-cols-[24px,auto] items-center justify-between min-w-52")
               transition(name="rotate-right-in")
-                div(v-if="option.key === 'guidance_scale' && isOptionModified(option)"
-                  class="flex-center")
+                div(v-if="option.key === 'guidance_scale' && isOptionModified(option)" class="flex-center")
                   svg-icon(
                     iconName="cm_reset"
                     iconWidth="24px"
@@ -135,12 +134,15 @@ div(class="prompt-area w-full box-border px-24")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
-  spinner(v-if="isSendingGenImgReq" :textContent="t('CM0086')")
+  spinner(
+    v-if="isSendingGenImgReq"
+    :textContent="t('CM0086')")
 </template>
 
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
+import useSteps from '@/composable/useSteps'
 import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
@@ -178,8 +180,7 @@ const {
   changeEditorState,
   setCurrPrompt,
   setCurrDesignId,
-  setGenResultIndex,
-  setShowEmptyPromptWarning,
+  setCurrGenResultIndex,
   setCurrGenOptions,
 } = editorStore
 const {
@@ -191,7 +192,6 @@ const {
   editorType,
   currGenOptions,
   generatedResults,
-  showEmptyPromptWarning,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -214,6 +214,8 @@ const { t } = useI18n()
 const modalStore = useModalStore()
 const { closeModal, openModal, setNormalModalInfo } = modalStore
 // #endregion
+
+const { reset } = useSteps()
 
 // #region generating function
 const checkIsGenerating = () => {
@@ -244,7 +246,10 @@ const getGenParams = (): GenImageParams => {
       } as GenHiddenMessageParams)
       break
     default:
-      Object.assign(params, Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])))
+      Object.assign(
+        params,
+        Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
+      )
       break
   }
   return params
@@ -275,7 +280,7 @@ const getIsReadyToGen = () => {
       }
       break
     default:
-      if (checkCanvasIsEmpty() && showEmptyPromptWarning.value) {
+      if (checkCanvasIsEmpty()) {
         setNormalModalInfo({
           title: t('CM0091'),
           content: t('CM0092'),
@@ -291,7 +296,6 @@ const getIsReadyToGen = () => {
         })
 
         openModal()
-        setShowEmptyPromptWarning(false)
         return false
       }
       break
@@ -339,7 +343,7 @@ const handleGenerate = async () => {
     },
     onSuccess: (index) => {
       if (inEditingState.value) {
-        setGenResultIndex(index)
+        setCurrGenResultIndex(index)
         changeEditorState('next')
       }
     },
@@ -422,33 +426,43 @@ const defaultGenImageOptions = computed(() => {
         ['guidance_end', 0.7],
       ]),
     ][idxGenType.value]
-    const options = constantData.getGenImageOptions('hidden-message') as GenImageOptions ?? []
+    const options = (constantData.getGenImageOptions('hidden-message') as GenImageOptions) ?? []
     options.forEach((option) => {
       const newVal = preset.get(option.key)
       if (newVal) option.value = newVal
     })
     return options
   }
-  return constantData.getGenImageOptions(editorType.value)?.filter((o) => o.type === 'range') as GenImageRangeOption[] ?? []
+  return (
+    (constantData
+      .getGenImageOptions(editorType.value)
+      ?.filter((o) => o.type === 'range') as GenImageRangeOption[]) ?? []
+  )
 })
 
 const idxGenType = ref(genTypes.value?.value ?? 0)
 
 watch(idxGenType, (newVal) => {
-  setCurrGenOptions(currGenOptions.value.map((o) => o.key === 'type' ? Object.assign(o, { value: newVal }) : o))
+  setCurrGenOptions(
+    currGenOptions.value.map((o) => (o.key === 'type' ? Object.assign(o, { value: newVal }) : o)),
+  )
   currGenOptions.value.forEach((o) => {
     if (o.type === 'range') resetOption(o)
   })
 })
 
-const isOptionModified = (option: { key: string, value: unknown }) => {
+const isOptionModified = (option: { key: string; value: unknown }) => {
   return option.value !== defaultGenImageOptions.value.find((o) => o.key === option.key)?.value
 }
 
 const resetOption = (option: { key: string }) => {
   const defaultOption = defaultGenImageOptions.value.find((o) => o.key === option.key)
   if (!defaultOption) return
-  setCurrGenOptions(currGenOptions.value.map((o) => (o.key === option.key ? Object.assign(o, {value: defaultOption.value}) : o)))
+  setCurrGenOptions(
+    currGenOptions.value.map((o) =>
+      o.key === option.key ? Object.assign(o, { value: defaultOption.value }) : o,
+    ),
+  )
 }
 // #endregion
 
@@ -493,7 +507,7 @@ watch(currTransitions.value, (val) => {
 }
 
 .prompt-text-area {
-  @apply w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
+  @apply w-full box-border px-10 py-4 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
   transition: outline-color 0.45s;
 }
 </style>

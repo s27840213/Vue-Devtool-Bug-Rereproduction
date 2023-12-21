@@ -406,7 +406,6 @@ const useCanvasUtils = (
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
       if (canvasCtx && canvasCtx.value) {
         canvasCtx.value.fillStyle = drawingColor.value
-        record()
       }
       restoreCanvas()
     }
@@ -575,7 +574,7 @@ const useCanvasUtils = (
         img.crossOrigin = 'Anonymous'
 
         img.onload = () => {
-          maskCtxCopy.drawImage(img, 0, 0)
+          maskCtxCopy.drawImage(img, 0, 0, pageSize.value.width, pageSize.value.height)
           const pixels = maskCtxCopy.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
           const result = new ImageData(
             new Uint8ClampedArray(pixels.data),
@@ -648,7 +647,9 @@ const useCanvasUtils = (
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }), { outputType: 'png' })
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: true }), {
+          outputType: 'png',
+        })
       : await cmWVUtils.copyEditor(
           {
             width: pageWidth * contentScaleRatio.value,
@@ -789,6 +790,7 @@ const useCanvasUtils = (
 
   const reset = () => {
     clearStep()
+    record()
   }
 
   return {

@@ -35,7 +35,6 @@ export async function editorRouteHandler(
     const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     setEditorType(type)
     setPageSize(width, height)
-    stepsReset()
     setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOptions) ?? [])
 
     if (isBiColorEditor.value) initBiColorEditor(editorType.value)
