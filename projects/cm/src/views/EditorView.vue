@@ -434,6 +434,7 @@ watch(isDuringCopy, () => {
 })
 
 let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
+let pagePinchUtils = null as PagePinchUtils | null
 const initPagePinchHandler = () => {
   if (!editorContainerRef.value) return
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
@@ -451,10 +452,10 @@ const initPagePinchHandler = () => {
       y: rect.top,
     },
   })
-  const _pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+  pagePinchUtils = new PagePinchUtils(editorWrapperRef.value as HTMLElement)
   pagePinchHandler = (e) => {
     if (inAspectRatioState.value) return
-    _pagePinchHandler(e)
+    pagePinchUtils?.pinchHandler(e)
   }
 }
 onMounted(() => {
@@ -480,7 +481,11 @@ const pointerEvent = ref({
 const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
   recordPointer(e)
+  if (pointerEvtUtils.pointerIds.length >= 3) {
+    return pagePinchUtils?.pinchEnd(e as any)
+  }
   if (e.pointerType === 'mouse' && e.button !== 0) return
+
 
   const layer =
     ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
