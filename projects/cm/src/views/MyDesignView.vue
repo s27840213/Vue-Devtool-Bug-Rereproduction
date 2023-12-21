@@ -1,6 +1,6 @@
 <template lang="pug">
 div(
-  class="my-design w-full h-full grid grid-cols-1 grid-rows-[auto,1fr] justify-center items-center pt-20 px-16 relative")
+  class="my-design w-full h-full grid grid-cols-1 grid-rows-[auto,1fr] justify-center items-center pt-8 px-16 relative")
   scrollable-container(:py="8")
     div(
       v-for="tag in myDesignTags"
