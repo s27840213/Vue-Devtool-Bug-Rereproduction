@@ -54,6 +54,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
   div(
     v-if="wantToQuit || isModalOpen"
     class="mask"
+    :class="{'for-no-close-modal': isModalOpen && isModalNoClose}"
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
@@ -188,6 +189,7 @@ const { isAutoFilling } = storeToRefs(canvasStore)
 const modalStore = useModalStore()
 const { isModalOpen: wantToQuit } = storeToRefs(modalStore)
 const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean)
+const isModalNoClose = computed(() => vuex.getters['modal/getModalInfo'].noClose as boolean)
 // #endregion
 
 const bottomPanelComponent = computed(() => {
@@ -339,6 +341,9 @@ router.isReady().then(() => {
   @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
+  &.for-no-close-modal {
+    @apply z-popup;
+  }
 }
 
 .popup-area {
