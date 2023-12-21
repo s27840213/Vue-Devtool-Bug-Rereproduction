@@ -211,8 +211,9 @@ export default defineComponent({
     isShowAdjustImg(): boolean {
       // forRender img not apply filter
       if (!this.$isStk && this.$isTouchDevice()) {
+        const isCurrLayerTexting = layerUtils.getCurrConfig.isTyping as boolean
         return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
-          !this.isImgCtrl && !this.isBgImgCtrl
+          !this.isImgCtrl && !this.isBgImgCtrl && !isCurrLayerTexting
       } else {
         return this.isAdjustImage
       }

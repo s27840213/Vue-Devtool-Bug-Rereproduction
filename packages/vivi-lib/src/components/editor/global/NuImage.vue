@@ -421,9 +421,11 @@ export default defineComponent({
       // forRender img not apply filter
       if (this.forRender) return false
 
+      // apply for vvpic-mobile/cm only
       if (!this.$isStk && this.$isTouchDevice()) {
+        const isCurrLayerTexting = layerUtils.getCurrConfig.isTyping as boolean
         return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
-          !this.isImgCtrl && !this.isBgImgCtrl
+          !this.isImgCtrl && !this.isBgImgCtrl && !isCurrLayerTexting
       } else if (this.$isStk) {
         let isCurrLayerPinched = false
         const { controlState } = this
