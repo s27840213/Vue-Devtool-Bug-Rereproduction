@@ -83,7 +83,6 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       popup(class="pointer-events-auto")
     div(class="modal-container" v-if="isModalOpen")
       modal-card(class="pointer-events-auto")
-    spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
     notifications(
       class="notification flex-center "
       position="center center"
@@ -124,7 +123,6 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
 
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
-import { useGlobalStore } from '@/stores/global'
 import type { IUserInfo } from '@/utils/cmWVUtils'
 import vuex from '@/vuex'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
@@ -179,8 +177,6 @@ const {
   isSubDesignOpen,
 } = useStateInfo()
 
-const globalStore = useGlobalStore()
-const { showSpinner, spinnerText } = storeToRefs(globalStore)
 const canvasStore = useCanvasStore()
 const { isAutoFilling } = storeToRefs(canvasStore)
 // #endregion
