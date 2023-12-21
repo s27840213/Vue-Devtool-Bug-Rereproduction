@@ -104,6 +104,13 @@ const useSteps = () => {
     stepsTypesArr.value.length = stepTypeCheckPoint.value + 1
   }
 
+  const hasUnsavedChanges = computed(() => {
+    return (
+      (stepsUtils.steps.length !== 1 && !stepsUtils.isInFirstStep) ||
+      (canvasSteps.value.length !== 1 && !isInCanvasFirstStep.value)
+    )
+  })
+
   // const clearStepsBetweenCheckpointAndResult = () => {
   //   stepsUtils.steps.splice(stepTypeCheckPoint.value + 1, stepsUtils.steps.length - stepTypeCheckPoint.value - 1)
   //   canvasSteps.value.splice(stepTypeCheckPoint.value + 1, canvasSteps.value.length - stepTypeCheckPoint.value - 1)
@@ -143,6 +150,7 @@ const useSteps = () => {
     setCheckpoint,
     goToCheckpoint,
     canvasRecord,
+    hasUnsavedChanges,
   }
 }
 

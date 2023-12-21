@@ -4,7 +4,7 @@ div(
   scrollable-container(:py="8")
     div(
       v-for="tag in myDesignTags"
-      class="px-8 py-4 box-border rounded-full typo-body-md whitespace-nowrap"
+      class="px-8 py-4 box-border rounded-full typo-body-md whitespace-nowrap transition-colors duration-400"
       :class="[currMyDesignType === tag.type ? 'bg-yellow-1 text-dark' : 'bg-lighter/33 text-yellow-0']"
       :key="tag.type"
       @click="selectMyDesignType(tag)")

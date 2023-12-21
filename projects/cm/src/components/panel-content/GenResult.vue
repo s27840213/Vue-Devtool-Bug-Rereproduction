@@ -5,7 +5,10 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       class="gen-result__block rounded-8 bg-white overflow-hidden"
       @pointerdown="toggleOriginalImg(true)"
       @pointerup="toggleOriginalImg(false)")
-      img(class="w-full h-full object-cover" draggable="false" :src="initImgSrc")
+      img(
+        class="w-full h-full object-cover"
+        draggable="false"
+        :src="initImgSrc")
     div(class="bg-lighter w-2 h-4/5")
     scrollable-container(
       :px="4"
@@ -26,7 +29,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
           v-for="(genResult, index) in generatedResults"
           :key="genResult.id"
           class="gen-result__block flex rounded-8 relative"
-          @click="genResult.url.length && setGenResultIndex(index)")
+          @click="genResult.url.length && setCurrGenResultIndex(index)")
           div(
             class="box-border outline-2 outline rounded-8 w-full h-full transition-all duration-300 z-2"
             :class="[index === currGenResultIndex && genResult.url.length ? 'outline-yellow-cm' : 'outline-transparent']")
@@ -52,25 +55,25 @@ import { useEditorStore } from '@/stores/editor'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const editorStore = useEditorStore()
-const { setGenResultIndex, keepEditingInit } = editorStore
-const { 
+const { setCurrGenResultIndex, keepEditingInit } = editorStore
+const {
   generatedResults,
   currGenResultIndex: _currGenResultIndex,
   initImgSrc,
-  isGenerating
+  isGenerating,
 } = storeToRefs(editorStore)
 
-const currGenResultIndex = computed(() => 
-  _currGenResultIndex.value > -1 ? _currGenResultIndex.value : tempGenResultIndex
-)
+const currGenResultIndex = computed(() => {
+  return _currGenResultIndex.value > -1 ? _currGenResultIndex.value : tempGenResultIndex
+})
 
 let tempGenResultIndex = -1
 const toggleOriginalImg = (show: boolean) => {
   if (show) {
     tempGenResultIndex = currGenResultIndex.value
-    setGenResultIndex(-1)
+    setCurrGenResultIndex(-1)
   } else {
-    setGenResultIndex(tempGenResultIndex)
+    setCurrGenResultIndex(tempGenResultIndex)
     tempGenResultIndex = -1
   }
 }
