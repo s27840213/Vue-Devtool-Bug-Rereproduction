@@ -47,7 +47,7 @@ div(class="prompt-area w-full box-border px-24")
           v-if="!preview"
           size="mid-full"
           :disabled="isSendingGenImgReq"
-          @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
+          @click="handleGenerate") {{ isSendingGenImgReq ? $t('CM0086') : $t('CM0023') }}
       //- type settings
       div(
         v-else-if="genTypes"
@@ -134,6 +134,9 @@ div(class="prompt-area w-full box-border px-24")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
+  spinner(
+    v-if="isSendingGenImgReq"
+    :textContent="t('CM0086')")
 </template>
 
 <script setup lang="ts">
@@ -168,7 +171,7 @@ const { preview } = toRefs(props)
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()
-const { setShowSpinner, setSpinnerText, debugMode } = globalStore
+const { debugMode } = globalStore
 
 const editorStore = useEditorStore()
 const {
@@ -214,6 +217,7 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 
 const { reset } = useSteps()
 
+// #region generating function
 const checkIsGenerating = () => {
   return new Promise<void>((resolve) => {
     const check = () => {
@@ -317,50 +321,41 @@ const handleGenerate = async () => {
       generalUtils.generateRandomString(4),
     )
     changeEditorState('next')
-  } else {
-    if (!getIsReadyToGen()) return
-    setSpinnerText(`${t('CM0086')}`)
-    setShowSpinner(true)
-    setIsSendingGenImgReq(true)
-    const hasDesignId = currDesignId.value !== ''
-    if (!hasDesignId) {
-      setCurrDesignId(generalUtils.generateAssetId())
-    }
-
-    if (isGenerating.value) {
-      await checkIsGenerating()
-    }
-
-    await genImageFlow(getGenParams(), false, 2, {
-      onApiResponded: () => {
-        if (generatedResults.value.filter((r) => r.url.length).length > 0 && inEditingState.value) {
-          changeEditorState('next')
-          setIsSendingGenImgReq(false)
-          setShowSpinner(false)
-          reset()
-        }
-      },
-      onSuccess: (index) => {
-        if (inEditingState.value) {
-          setCurrGenResultIndex(index)
-          changeEditorState('next')
-          setIsSendingGenImgReq(false)
-          setShowSpinner(false)
-          reset()
-        }
-      },
-      onError: () => {
-        setIsSendingGenImgReq(false)
-        setShowSpinner(false)
-      },
-    }).then(() => {
-      pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-    })
+    return
   }
+
+  if (!getIsReadyToGen()) return
+  setIsSendingGenImgReq(true)
+  const hasDesignId = currDesignId.value !== ''
+  if (!hasDesignId) {
+    setCurrDesignId(generalUtils.generateAssetId())
+  }
+
+  if (isGenerating.value) {
+    await checkIsGenerating()
+  }
+
+  await genImageFlow(getGenParams(), false, 2, {
+    onApiResponded: () => {
+      if (generatedResults.value.filter((r) => r.url.length).length > 0 && inEditingState.value) {
+        changeEditorState('next')
+      }
+    },
+    onSuccess: (index) => {
+      if (inEditingState.value) {
+        setCurrGenResultIndex(index)
+        changeEditorState('next')
+      }
+    },
+  }).then(() => {
+    pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+    setIsSendingGenImgReq(false)
+  })
 }
 const clearPromt = () => {
   promptText.value = ''
 }
+// #endregion
 
 // #region settings
 const isGenSettings = ref(false)
@@ -456,7 +451,7 @@ watch(idxGenType, (newVal) => {
   })
 })
 
-const isOptionModified = (option: { key: string; value: any }) => {
+const isOptionModified = (option: { key: string; value: unknown }) => {
   return option.value !== defaultGenImageOptions.value.find((o) => o.key === option.key)?.value
 }
 

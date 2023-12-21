@@ -69,5 +69,6 @@ module.exports = {
     // Tailwind rule settings
     'tailwindcss/classnames-order': 'off',
     'tailwindcss/no-custom-classname': 'off',
+    'tailwindcss/migration-from-tailwind-2': 'off',
   },
 }
