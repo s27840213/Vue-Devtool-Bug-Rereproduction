@@ -282,20 +282,26 @@ class pagePinchUtils {
   }
 
   private addEdgingTransition() {
-    const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-    currPageEl.classList.add(...TRANSITION_CLASS)
     if (generalUtils.isCm) {
+      const currPageEl = document.getElementById('screenshot-target') as HTMLElement
+      currPageEl.classList.add(...TRANSITION_CLASS)
+      // const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
+      // canvasSection.classList.add(...TRANSITION_CLASS)
+    } else {
       const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
       canvasSection.classList.add(...TRANSITION_CLASS)
     }
   }
 
   private removeEdgingTransition() {
-    const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-    currPageEl.classList.remove(...TRANSITION_CLASS)
     if (generalUtils.isCm) {
-      const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
-      canvasSection.classList.remove(...TRANSITION_CLASS)
+      const currPageEl = document.getElementById('screenshot-target') as HTMLElement
+      currPageEl.classList.remove(...TRANSITION_CLASS)
+      // const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
+      // canvasSection.classList.remove(...TRANSITION_CLASS)
+    } else {
+      const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+      currPageEl.classList.remove(...TRANSITION_CLASS)
     }
   }
 

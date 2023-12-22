@@ -74,7 +74,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
-    div(class="w-full h-full box-border flex-center" @click.self="outerClick")
+    div(class="w-full h-full box-border" @click.self="outerClick")
       div(
         id="screenshot-target"
         class="wrapper relative tutorial-powerful-fill-3--highlight"
@@ -392,14 +392,35 @@ const fitScaleRatio = computed(() => {
 })
 
 const wrapperStyles = computed(() => {
+  const { pinchScale, isPinchingEditor } = store.state.mobileEditor
+  const position = 'absolute'
+  const transformOrigin = '0 0'
+  const page = pageUtils.getCurrPage
+  let transform = `translate(${page.x ?? 0}px, ${page.y?? 0}px)`
+  if (isPinchingEditor && pinchScale !== 1) {
+    transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
+  }
   return {
-    width: `${pageSize.value.width * contentScaleRatio.value}px`,
-    height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    position,
+    transformOrigin,
+    transform,
+    // width: `${pageSize.value.width * contentScaleRatio.value}px`,
+    // height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
   }
 })
 
 const fitPage = (ratio: number) => {
+  const page = pageUtils.getCurrPage
+  const pos = {
+    x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
+    y: 0
+  }
+  // test
+  pageUtils.updatePagePos(0, pos)
+  pageUtils.updatePageInitPos(0, pos)
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
   // editorUtils.handleContentScaleRatio(0)
   // const { hasBleed } = pageUtils
@@ -438,6 +459,7 @@ let pagePinchUtils = null as PagePinchUtils | null
 const initPagePinchHandler = () => {
   if (!editorContainerRef.value) return
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
+  console.log('rect', rect.top, rect.left)
   editorUtils.setMobilePhysicalData({
     size: {
       width: rect.width,
