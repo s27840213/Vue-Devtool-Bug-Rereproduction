@@ -35,6 +35,7 @@ export interface MaskParams {
 export interface IGenResult {
   id: string
   url: string
+  prompt: string
   video?: string
 }
 
@@ -216,13 +217,14 @@ export const useEditorStore = defineStore('editor', {
     setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
       this.isSendingGenImgReq = isSendingGenImgReq
     },
-    unshiftGenResults(url: string, id: string) {
+    unshiftGenResults(url: string, id: string, prompt: string) {
       if (this.generatedResults.length > 0) {
         this.currGenResultIndex += 1
       }
       this.generatedResults.unshift({
         url,
         id,
+        prompt,
       })
     },
     updateGenResult(
