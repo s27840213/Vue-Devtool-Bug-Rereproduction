@@ -183,6 +183,7 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
+import { GenImageParams } from '@/types/api'
 import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -268,7 +269,7 @@ onBeforeRouteLeave((to, from) => {
       editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
-      setPrevGenParams({ requestId: '', params: {} })
+      setPrevGenParams({ requestId: '', params: {} as GenImageParams })
     }, 1000)
   }
 })
