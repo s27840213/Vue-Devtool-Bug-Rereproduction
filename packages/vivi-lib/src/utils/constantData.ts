@@ -1412,6 +1412,14 @@ class ConstantData {
       ]]
     ]).get(editorType)
   }
+
+  inspirationPrompts = [
+    'Sea,wave,aerial view',
+    'Cloud,blue sky,sunlight',
+    'snowy mountain',
+    'Lavender fields,aerial view',
+    'Messy clothes on the bedroom ground,aerial view'
+  ]
 }
 
 export default new ConstantData()
