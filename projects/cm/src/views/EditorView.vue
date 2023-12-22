@@ -183,6 +183,7 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
+import type { GenImageParams } from '@/types/api'
 import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -268,6 +269,7 @@ onBeforeRouteLeave((to, from) => {
       editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
+      setPrevGenParams({ requestId: '', params: {} as GenImageParams })
     }, 1000)
   }
 })
@@ -485,7 +487,6 @@ const selectStart = (e: PointerEvent) => {
     return pagePinchUtils?.pinchEnd(e as any)
   }
   if (e.pointerType === 'mouse' && e.button !== 0) return
-
 
   const layer =
     ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
@@ -800,7 +801,7 @@ watch(showVideo, (newVal) => {
 })
 // #endregion
 
-const { setCurrOpenDesign, setCurrOpenSubDesign } = useUserStore()
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams } = useUserStore()
 
 const handleHomeBtnAction = (navagate: () => void) => {
   setCurrOpenDesign(undefined)

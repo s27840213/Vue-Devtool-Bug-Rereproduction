@@ -1,47 +1,44 @@
 <template lang="pug">
 div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
-  div(class="grid grid-rows-1 grid-cols-[auto,auto,auto,minmax(0,1fr)] gap-x-16 items-center box-border")
+  div(class="flex-start-center gap-x-8")
+    //- Original img
     div(
-      class="gen-result__block rounded-8 bg-white overflow-hidden"
+      class="gen-result__block bg-white overflow-hidden flex-shrink-0"
       @pointerdown="toggleOriginalImg(true)"
       @pointerup="toggleOriginalImg(false)")
       img(
         class="w-full h-full object-cover"
         draggable="false"
         :src="initImgSrc")
-    div(class="bg-lighter w-2 h-4/5")
-    scrollable-container(
-      :px="4"
-      :py="4")
-      div(
-        v-if="editorStore.editorType === 'powerful-fill'"
-        class="gen-result__block rounded-8 bg-dark-6 flex-center flex-col"
-        :class="{ 'pointer-events-none': isGenerating }"
-        @click="showMoreRes")
-        svg-icon(
-          iconName="crown"
-          :iconColor="isGenerating ? 'lighter' : 'yellow-cm'"
-          iconWidth="24px")
-        span(
-          class="typo-btn-sm transition-colors duration-[0.4s]"
-          :class="[isGenerating ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
+    div(class="bg-lighter w-2 h-56 flex-shrink-0")
+    //- Show more btn
+    div(
+      v-if="editorStore.editorType === 'powerful-fill'"
+      class="gen-result__block bg-dark-6 flex-center flex-col flex-shrink-0"
+      :class="{ 'pointer-events-none': disableShowMoreBtn }"
+      @click="showMoreRes")
+      svg-icon(
+        iconName="crown"
+        :iconColor="disableShowMoreBtn ? 'lighter' : 'yellow-cm'"
+        iconWidth="24px")
+      span(
+        class="typo-btn-sm transition-colors duration-[0.4s]"
+        :class="[disableShowMoreBtn ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
+    scrollable-container(:px="0" :py="0" :gap="10")
       transition-group(name="list")
+        //- Results
         div(
           v-for="(genResult, index) in generatedResults"
           :key="genResult.id"
-          class="gen-result__block flex rounded-8 relative"
+          class="gen-result__block overflow-clip"
+          :active="index === currGenResultIndex && !!genResult.url.length"
           @click="genResult.url.length && setCurrGenResultIndex(index)")
-          div(
-            class="box-border outline-2 outline rounded-8 w-full h-full transition-all duration-300 z-2"
-            :class="[index === currGenResultIndex && genResult.url.length ? 'outline-yellow-cm' : 'outline-transparent']")
-            div(class="overflow-hidden rounded-8 w-full h-full")
-              img(
-                v-if="genResult.url.length"
-                class="w-full h-full object-cover"
-                draggable="false"
-                :src="appendSizeQuery(genResult.url)")
-          div(v-if="!genResult.url.length" class="loading-block")
-          div(class="absolute top-0 left-0 rounded-8 w-full h-full bg-dark-3 z-1")
+          img(
+            v-if="genResult.url.length"
+            class="w-full h-full object-cover"
+            draggable="false"
+            :src="appendSizeQuery(genResult.url)")
+          div(v-else class="loading-block")
   div(class="flex-between-center flex-col gap-8")
     nubtn(
       v-if="editorStore.editorType === 'powerful-fill'"
@@ -60,7 +57,11 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+
+const userStore = useUserStore()
+const { prevGenParams } = storeToRefs(userStore)
 
 const editorStore = useEditorStore()
 const { setCurrGenResultIndex, keepEditingInit } = editorStore
@@ -87,6 +88,10 @@ const toggleOriginalImg = (show: boolean) => {
 }
 
 const { genImageFlow } = useGenImageUtils()
+const disableShowMoreBtn = computed(() => {
+  return isGenerating.value || prevGenParams.value.requestId === ''
+})
+
 const showMoreRes = async () => {
   await genImageFlow({ prompt: '', action: 'powerful-fill' }, true, 2)
 }
@@ -100,17 +105,22 @@ const handleKeepEditing = () => {
 }
 </script>
 <style lang="scss" scoped>
-$loading-padding: 4px;
 .gen-result__block {
-  height: 80px;
-  aspect-ratio: 50/80;
+  @apply relative h-80 w-45 rounded-8;
+  &::after { // Highlight outline on the img.
+    @apply absolute inset-0 w-full h-full box-border rounded-8;
+    content: '';
+    transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    border: 0px solid setColor(yellow-cm);
+  }
+  &[active=true]::after {
+    border-width: 2px;
+  }
 }
 
 .loading-block {
-  @apply absolute top-0 left-0 w-full h-full box-border overflow-hidden;
-  transform: scaleX(1.132) scaleY(1.06);
-  border-radius: 10px;
-  &::after {
+  @apply relative w-full h-full overflow-hidden rounded-8;
+  &::before { // Spinner animation.
     content: '';
     position: absolute;
     top: 0;
@@ -120,8 +130,10 @@ $loading-padding: 4px;
     background: linear-gradient(0deg, rgba(255, 255, 255, 0.4) 40%, #e4b61f 100%);
     transform: translateX(-50%) rotate(90deg) scale(1.2);
     animation: rotate 1.2s linear infinite;
-    // bcz loading-block has transform, so the stacking context is different, make z-index won't work
-    // z-index: -1;
+  }
+  &::after { // Img placeholder on the spinner.
+    @apply absolute inset-2 rounded-8 bg-dark-3;
+    content: '';
   }
 }
 
