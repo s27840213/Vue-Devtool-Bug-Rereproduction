@@ -4,7 +4,7 @@ div(class="footer-tabs")
     div(class="footer-tabs__container"
         :class="{main: !isInEditor}"
         :style="containerStyles()"
-        @scroll.passive="updateContainerOverflow"
+        v-fade-scroller="{ fadeWidth: '56px' }"
         ref="container")
       template(v-for="tab in homeTabs" :key="tab.icon")
         div(v-if="!tab.hidden"
@@ -34,7 +34,8 @@ div(class="footer-tabs")
             :style="textIconStyle")
         div(class="footer-tabs__container"
             :style="containerStyles(true)"
-            @scroll.passive="updateContainerOverflow" ref="sub-container")
+            v-fade-scroller="{ fadeWidth: '56px' }"
+            ref="sub-container")
           template(v-for="(tab) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
                 class="footer-tabs__item"
@@ -97,8 +98,6 @@ export default defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       isFontsPanelOpened: false,
       disableTabScroll: false,
-      leftOverflow: false,
-      rightOverflow: false,
       clickedTab: '',
       // eslint-disable-next-line vue/no-unused-properties
       clickedTabTimer: -1,
@@ -349,9 +348,6 @@ export default defineComponent({
         }
         const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
         if (elContainer) elContainer.scrollTo(0, 0)
-        this.$nextTick(() => {
-          this.updateContainerOverflow()
-        })
       },
       deep: true
     },
@@ -371,13 +367,6 @@ export default defineComponent({
     }),
     extraDisableCondition(tab: IFooterTab): boolean {
       return tab.icon !== 'remove-bg' && this.inBgRemoveMode
-    },
-    updateContainerOverflow() {
-      const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
-      if (!elContainer) return
-      const { scrollLeft, scrollWidth, offsetWidth } = elContainer
-      this.leftOverflow = scrollLeft > 0
-      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
       return false
