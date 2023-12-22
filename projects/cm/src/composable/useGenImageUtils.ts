@@ -45,6 +45,7 @@ const useGenImageUtils = () => {
     currDesignId,
     initImgSrc,
     maskDataUrl,
+    currPrompt,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
@@ -70,7 +71,7 @@ const useGenImageUtils = () => {
   ): Promise<void> => {
     for (let i = 0; i < num; i++) {
       ids.unshift(generalUtils.generateRandomString(8))
-      unshiftGenResults('', ids[0])
+      unshiftGenResults('', ids[0], currPrompt.value)
     }
     try {
       await genImage(params, showMore, num, {

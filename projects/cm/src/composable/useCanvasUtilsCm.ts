@@ -167,24 +167,19 @@ const useCanvasUtils = (
     return isBrushMode ? getBrushColor(drawingColor.value) : '#fdd033'
   })
 
-  const createInitCanvas = (width: number, height: number) => {
-    if (sourceCanvas && sourceCanvas.value) {
-      sourceCanvas.value.width = width
-      sourceCanvas.value.height = height
+  const createInitCanvas = (canvas = sourceCanvas?.value, width: number, height: number) => {
+    if (canvas) {
+      canvas.width = width
+      canvas.height = height
 
-      setCanvas(sourceCanvas.value)
-      const targetCtx = sourceCanvas.value.getContext('2d')
+      setCanvas(canvas)
+      const targetCtx = canvas.getContext('2d')
       targetCtx && setCanvasCtx(targetCtx)
       if (targetCtx) {
         targetCtx.strokeStyle = drawingColor.value
         targetCtx.lineWidth = brushSize.value
         targetCtx.lineCap = 'round'
         targetCtx.lineJoin = 'round'
-      } else {
-        // I found sometimes the canvasCtx is null
-        setTimeout(() => {
-          createInitCanvas(width, height)
-        }, 200)
       }
     }
 
@@ -232,6 +227,7 @@ const useCanvasUtils = (
     if (targetCanvas) {
       targetCanvas.width = width
       targetCanvas.height = height
+      createInitCanvas(targetCanvas, width, height)
     }
   }
 
@@ -408,7 +404,7 @@ const useCanvasUtils = (
 
   onMounted(() => {
     if (wrapperRef && editorContainerRef) {
-      createInitCanvas(pageSize.value.width, pageSize.value.height)
+      createInitCanvas(sourceCanvas?.value, pageSize.value.width, pageSize.value.height)
       clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)

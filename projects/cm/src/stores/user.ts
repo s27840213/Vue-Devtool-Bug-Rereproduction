@@ -134,7 +134,7 @@ export const useUserStore = defineStore('user', () => {
     option?: { callback?: (pages: Array<IPage>) => void; type?: string },
   ) => {
     try {
-      const { id, subId, type, width, height } = subDesign
+      const { id, subId, type, width, height, prompt } = subDesign
       const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
       const url = getSubDesignThumbUrl(type, id, subId)
       pageUtils.setPages([pageUtils.newPage({ width, height })])
@@ -156,6 +156,7 @@ export const useUserStore = defineStore('user', () => {
           return {
             id: subDesign.id,
             url: getSubDesignThumbUrl(type, id, subDesign.id),
+            prompt,
           }
         }),
         designWidth: width,
@@ -194,6 +195,7 @@ export const useUserStore = defineStore('user', () => {
           return {
             id: subDesign.id,
             url: getSubDesignThumbUrl(type, id, subDesign.id),
+            prompt,
           }
         }),
         designWidth: width,
