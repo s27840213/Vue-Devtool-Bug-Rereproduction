@@ -268,6 +268,7 @@ onBeforeRouteLeave((to, from) => {
       editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
+      setPrevGenParams({ requestId: '', params: {} })
     }, 1000)
   }
 })
@@ -485,7 +486,6 @@ const selectStart = (e: PointerEvent) => {
     return pagePinchUtils?.pinchEnd(e as any)
   }
   if (e.pointerType === 'mouse' && e.button !== 0) return
-
 
   const layer =
     ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
@@ -800,7 +800,7 @@ watch(showVideo, (newVal) => {
 })
 // #endregion
 
-const { setCurrOpenDesign, setCurrOpenSubDesign } = useUserStore()
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams } = useUserStore()
 
 const handleHomeBtnAction = (navagate: () => void) => {
   setCurrOpenDesign(undefined)

@@ -32,7 +32,7 @@ export const useUserStore = defineStore('user', () => {
     params: {} as GenImageParams,
   })
 
-  const setPrevGenParams = (params: { requestId: string; params: GenImageParams }) => {
+  const setPrevGenParams = (params: { requestId: string; params: GenImageParams | {} }) => {
     Object.assign(prevGenParams, params)
   }
 

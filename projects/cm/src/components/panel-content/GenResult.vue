@@ -16,15 +16,15 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       div(
         v-if="editorStore.editorType === 'powerful-fill'"
         class="gen-result__block rounded-8 bg-dark-6 flex-center flex-col"
-        :class="{ 'pointer-events-none': isGenerating }"
+        :class="{ 'pointer-events-none': disableShowMoreBtn }"
         @click="showMoreRes")
         svg-icon(
           iconName="crown"
-          :iconColor="isGenerating ? 'lighter' : 'yellow-cm'"
+          :iconColor="disableShowMoreBtn ? 'lighter' : 'yellow-cm'"
           iconWidth="24px")
         span(
           class="typo-btn-sm transition-colors duration-[0.4s]"
-          :class="[isGenerating ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
+          :class="[disableShowMoreBtn ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
       transition-group(name="list")
         div(
           v-for="(genResult, index) in generatedResults"
@@ -60,7 +60,11 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+
+const userStore = useUserStore()
+const { prevGenParams } = storeToRefs(userStore)
 
 const editorStore = useEditorStore()
 const { setCurrGenResultIndex, keepEditingInit } = editorStore
@@ -87,6 +91,10 @@ const toggleOriginalImg = (show: boolean) => {
 }
 
 const { genImageFlow } = useGenImageUtils()
+const disableShowMoreBtn = computed(() => {
+  return isGenerating.value || prevGenParams.value.requestId === ''
+})
+
 const showMoreRes = async () => {
   await genImageFlow({ prompt: '', action: 'powerful-fill' }, true, 2)
 }

@@ -81,7 +81,9 @@ const useGenImageUtils = () => {
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
-          const hint = `${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId}`
+          const hint = `${hostId.value}:${
+            userId.value
+          },${generalUtils.generateTimeStamp()},${errorId}`
           logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
           logUtils.uploadLog().then(() => {
             modalUtils.setModalInfo(
@@ -93,7 +95,7 @@ const useGenImageUtils = () => {
                   generalUtils.copyText(hint).then(() => {
                     notify({ group: 'success', text: '已複製' })
                   })
-                }
+                },
               },
             )
           })
@@ -110,18 +112,14 @@ const useGenImageUtils = () => {
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
       logUtils.uploadLog().then(() => {
-        modalUtils.setModalInfo(
-          t('CM0087'),
-          `${t('CM0088')}<br/>(${hint})`,
-          {
-            msg: t('STK0023'),
-            action() {
-              generalUtils.copyText(hint).then(() => {
-                notify({ group: 'success', text: '已複製' })
-              })
-            }
+        modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
+          msg: t('STK0023'),
+          action() {
+            generalUtils.copyText(hint).then(() => {
+              notify({ group: 'success', text: '已複製' })
+            })
           },
-        )
+        })
       })
       for (const id of ids) {
         removeGenResult(id)
@@ -165,7 +163,9 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
-    const res = (await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)).data
+    const res = (
+      await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)
+    ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
@@ -262,23 +262,25 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('screenshot to blob', { notify: false, setToLog: true })
     return new Promise<void>((resolve) => {
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`).then((dataUrl) => {
-        setInitImgSrc(dataUrl)
-        const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
-        RECORD_TIMING && testUtils.log('screenshot to blob', '')
-        RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
-        uploadImage(imageBlob, `${userId}/input/${requestId}_init`)
-          .then(async () => {
-            RECORD_TIMING && testUtils.log('upload screenshot', '')
-            console.log('screenshot:', new Date().getTime())
-            cleanup()
-            resolve()
-          })
-          .catch((error) => {
-            logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
-            throw error
-          })
-      })
+      generalUtils
+        .toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`)
+        .then((dataUrl) => {
+          setInitImgSrc(dataUrl)
+          const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
+          RECORD_TIMING && testUtils.log('screenshot to blob', '')
+          RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
+          uploadImage(imageBlob, `${userId}/input/${requestId}_init`)
+            .then(async () => {
+              RECORD_TIMING && testUtils.log('upload screenshot', '')
+              console.log('screenshot:', new Date().getTime())
+              cleanup()
+              resolve()
+            })
+            .catch((error) => {
+              logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
+              throw error
+            })
+        })
     })
   }
 
