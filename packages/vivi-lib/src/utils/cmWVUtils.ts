@@ -12,6 +12,7 @@ import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
+import modalUtils from './modalUtils'
 
 declare let window: CustomWindow
 
@@ -141,10 +142,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     const { event } = info
     switch (event) {
       case 'screenshot':
-        window.fetchDesign(info.query, info.imageId)
+        window.fetchDesign(info.query, info)
         break
       case 'screenshot-result':
-        this.screenshotMap[info.options as string](info.status as string)
+        this.screenshotMap[(info.options as { imageId: string }).imageId](info.status as string)
         break
     }
   }
@@ -303,9 +304,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
   async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string): Promise<{flag: string, cleanup: () => void}> {
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -322,13 +323,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       y,
       ...(imageId && { imageId }),
       ...(imagePath && { imagePath }),
+      ...(outputType && { outputType }),
+      ...(quality && { quality }),
       snapshotWidth: width,
     }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
         if (action !== 'editorSave') return
-        this.deleteFile('screenshot', imageId ?? '', 'png', imagePath)
+        this.deleteFile('screenshot', imageId ?? '', outputType ?? 'jpg', imagePath)
       }
     }
   }
@@ -358,7 +361,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
   }
 
-  async sendScreenshotUrl(query: string): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
+  async sendScreenshotUrl(query: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
     if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -374,6 +377,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         event: 'screenshot',
         query,
         imageId,
+        outputType,
+        quality,
       },
       to: 'Shot',
     })
@@ -402,7 +407,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       flag: '0',
       imageId,
       cleanup: () => {
-        this.deleteFile('screenshot', imageId, 'png')
+        this.deleteFile('screenshot', imageId, outputType ?? 'jpg')
       }
     }
   }
@@ -588,6 +593,57 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
       return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+  }
+
+  showUpdateModal(force = false) {
+    let locale = this.getUserInfoFromStore().locale
+    if (!['us', 'tw', 'jp'].includes(locale)) {
+      locale = 'us'
+    }
+    const prefix = 'exp_' + locale + '_'
+    const modalInfo = Object.fromEntries(Object.entries(store.getters['cmWV/getModalInfo']).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as string]
+      })
+    )
+    const options = {
+      imgSrc: modalInfo.img_url,
+      noClose: force,
+      noCloseIcon: force,
+      // backdropStyle: {
+      //   backgroundColor: 'rgba(24,25,31,0.3)'
+      // },
+      // cardStyle: {
+      //   backdropFilter: 'blur(10px)',
+      //   backgroundColor: 'rgba(255,255,255,0.9)'
+      // }
+    }
+    modalUtils.setModalInfo(
+      modalInfo.title,
+      modalInfo.msg,
+      {
+        msg: modalInfo.btn_txt,
+        // class: 'btn-black-mid',
+        // style: {
+        //   color: '#F8F8F8'
+        // },
+        action: () => {
+          const url = modalInfo.btn_url
+          if (url) { window.open(url, '_blank') }
+        }
+      },
+      {
+        msg: modalInfo.btn2_txt || '',
+        // class: 'btn-light-mid',
+        // style: {
+        //   border: 'none',
+        //   color: '#474A57',
+        //   backgroundColor: '#D3D3D3'
+        // }
+      },
+      options
+    )
   }
 }
 

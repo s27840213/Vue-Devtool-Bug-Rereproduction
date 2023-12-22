@@ -474,7 +474,7 @@
   "CM0080": "Invert",
   "CM0082": "Background Remove",
   "CM0083": "Pre-process image",
-  "CM0086": "Generating",
+  "CM0086": "Processing",
   "CM0087": "Image Generation Failed",
   "CM0088": "Sorry, we could not generate the image this time. Please try again.",
   "CM0089": "for Some Image",
@@ -521,5 +521,7 @@
   "CM0130": "Landscape",
   "CM0131": "Adjust the selected area",
   "CM0132": "Move around / adjust the cropping of the photos and filling area.",
-  "CM0133": "Switch"
+  "CM0133": "Switch",
+  "CM0140": "The photo will be permanently deleted. Are you sure?",
+  "CM0141": "Delete Photo?"
 }

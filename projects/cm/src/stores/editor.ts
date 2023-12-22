@@ -51,6 +51,7 @@ interface IEditorStore {
   currGenResultIndex: number
   stepsTypesArr: Array<'canvas' | 'editor'>
   currStepTypeIndex: number
+  stepTypeCheckPoint: number
   initImgSrc: string
   useTmpSteps: boolean
   // for my design
@@ -62,7 +63,6 @@ interface IEditorStore {
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
-  showEmptyPromptWarning: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -77,6 +77,7 @@ export const useEditorStore = defineStore('editor', {
     currGenResultIndex: 0,
     stepsTypesArr: [],
     currStepTypeIndex: -1,
+    stepTypeCheckPoint: -1,
     initImgSrc: '',
     maskDataUrl: '',
     maskParams: {},
@@ -89,7 +90,6 @@ export const useEditorStore = defineStore('editor', {
     descriptionPanel: null,
     currDesignThumbIndex: 0,
     // if the user send empty prompt, show warning at fisrt time
-    showEmptyPromptWarning: true,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -265,7 +265,7 @@ export const useEditorStore = defineStore('editor', {
     clearGeneratedResults() {
       this.generatedResults = []
     },
-    setGenResultIndex(index: number) {
+    setCurrGenResultIndex(index: number) {
       this.currGenResultIndex = index
     },
     async undo() {
@@ -293,9 +293,12 @@ export const useEditorStore = defineStore('editor', {
       if (index < 0 || index >= this.stepsTypesArr.length) return
       this.currStepTypeIndex = index
     },
+    setStepTypeCheckPoint(index?: number) {
+      this.stepTypeCheckPoint = index ?? this.currStepTypeIndex
+    },
     resetStepsTypesArr() {
       this.stepsTypesArr = []
-      this.currGenResultIndex = -1
+      this.currStepTypeIndex = -1
     },
     setInitImgSrc(src: string) {
       this.initImgSrc = src
@@ -347,9 +350,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
-    },
-    setShowEmptyPromptWarning(show: boolean) {
-      this.showEmptyPromptWarning = show
     },
   },
 })

@@ -331,12 +331,13 @@ export default defineComponent({
       }
     },
     selectStart(e: PointerEvent) {
+      pointerEvtUtils.addPointer(e)
       if (pointerEvtUtils.pointerIds.length >= 3) {
         return this.pinchUtils.pinchEnd(e as any)
       }
-      pointerEvtUtils.addPointer(e)
       if (!e.isPrimary) return
       if (this.inBgRemoveMode) return
+
       e.stopPropagation()
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()

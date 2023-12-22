@@ -299,9 +299,13 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      const clipPath = !this.forRender && this.config.clipPath &&
-        !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
-        ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      let clipPath = undefined
+      if (!this.forRender && this.config.clipPath && !this.config.isFrameImg && this.primaryLayer?.type === 'frame') {
+        // vvpic mobile and charmix should consider the pageScaleRatio
+        const pathScaleRatio = (this.$isPic && this.$isTouchDevice()) || this.$isCm ? this.contentScaleRatio * this.scaleRatio * 0.01 : this.contentScaleRatio
+        clipPath = `path('${new Svgpath(this.config.clipPath).scale(pathScaleRatio).toString()}')`
+      }
+
       const pointerEvents = this.getPointerEvents
       const outline = this.outlineStyles()
       const _f = this.contentScaleRatio * (this.$isTouchDevice() ? this.scaleRatio * 0.01 : 1)
@@ -319,7 +323,7 @@ export default defineComponent({
         }
       )
       if (this.primaryLayer?.type === 'frame' && this.config.type === 'image') {
-        if (this.$isTouchDevice()) {
+        if (this.$isStk) {
           styles.transform += `scale(${this.$store.state.pageScaleRatio / 100})`
         }
         styles.width = `${this.config.styles.width * _f}px`
@@ -353,13 +357,10 @@ export default defineComponent({
       return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
-      const isRectFrameClip = this.config.type === 'image' && this.config.clipPath && frameUtils.checkIsRect(this.config.clipPath)
       return {
-        ...(this.primaryLayer?.type === 'frame' && this.config.type === 'image' && this.$isTouchDevice() && { transform: `scale(${100 / this.scaleRatio})` }),
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : generalUtils.getOutlineColor()) : 'none',
         strokeWidth: `${7 / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
-        // strokeWidth: `${(this.$isTouchDevice() ? 14 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
     },
     getPointerEvents(): string {

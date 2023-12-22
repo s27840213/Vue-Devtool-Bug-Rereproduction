@@ -147,6 +147,9 @@ router.addRoute({
       await logUtils.uploadLog()
     }
     logUtils.setLog('App Start')
+    if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
+      cmWVUtils.showUpdateModal(true)
+    } // else this.showInitPopups()
     cmWVUtils.fetchTutorialFlags()
     if (to.name !== 'Screenshot') {
       listDesigns('all')

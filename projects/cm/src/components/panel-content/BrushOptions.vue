@@ -30,6 +30,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
 </template>
 <script setup lang="ts">
 import FooterBar from '@/components/panel-content/FooterBar.vue'
+import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import type { PowerfulFillCanvasMode } from '@/types/editor'
@@ -79,6 +80,8 @@ const canvasStore = useCanvasStore()
 const { setBrushSize, setIsChangingBrushSize, setCanvasMode } = canvasStore
 const { brushSize, canvasMode } = storeToRefs(canvasStore)
 
+const { goToCheckpoint } = useSteps()
+
 watch(currMode, (newVal) => {
   setCanvasMode(newVal)
 })
@@ -88,6 +91,7 @@ const { setCurrActiveFeature } = editorStore
 
 const cancel = () => {
   setCurrActiveFeature('none')
+  goToCheckpoint()
   groupUtils.deselect()
 }
 
@@ -100,8 +104,12 @@ const apply = () => {
 onMounted(async () => {
   const brushSize = await cmWVUtils.getState('brushSize')
   if (brushSize !== undefined) {
-    setBrushSize(brushSize.brushSize)
+    // setBrushSize(brushSize.brushSize)
   }
+})
+
+onUnmounted(() => {
+  setCanvasMode(ControlMode.Clear as PowerfulFillCanvasMode)
 })
 </script>
 <style lang="scss"></style>

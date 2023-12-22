@@ -47,7 +47,7 @@ div(class="prompt-area w-full box-border px-24")
           v-if="!preview"
           size="mid-full"
           :disabled="isSendingGenImgReq"
-          @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
+          @click="handleGenerate") {{ isSendingGenImgReq ? $t('CM0086') : $t('CM0023') }}
       //- type settings
       div(
         v-else-if="genTypes"
@@ -71,7 +71,7 @@ div(class="prompt-area w-full box-border px-24")
             :key="idx"
             class="flex flex-col gap-8 bg-lighter/20 rounded-16 p-12 aspect-square w-full"
             :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
-            @click="() => setGenType(idx)")
+            @click="() => (idxGenType = idx)")
             img(
               v-if="genType.img"
               class="w-full object-cover object-center rounded-16 aspect-[148/116]"
@@ -99,7 +99,15 @@ div(class="prompt-area w-full box-border px-24")
                 iconColor="yellow-2"
                 @click="() => (option.active = !option.active)")
               span {{ option.title }}
-            span(class="justify-self-end") {{ option.value }}
+            div(class="grid grid-cols-[24px,auto] items-center justify-between min-w-52")
+              transition(name="rotate-right-in")
+                div(v-if="option.key === 'guidance_scale' && isOptionModified(option)" class="flex-center")
+                  svg-icon(
+                    iconName="cm_reset"
+                    iconWidth="24px"
+                    iconColor="yellow-2"
+                    @click="resetOption(option)")
+              span(class="col-start-2 justify-self-end") {{ option.value }}
           Collapse(
             :when="!!option.active"
             @collapse="currTransitions.add(`collapse-sub-title-${idx}`)"
@@ -126,16 +134,20 @@ div(class="prompt-area w-full box-border px-24")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
+  spinner(
+    v-if="isSendingGenImgReq"
+    :textContent="t('CM0086')")
 </template>
 
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
+import useSteps from '@/composable/useSteps'
 import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import { useModalStore } from '@/stores/modal'
-import type { GenHiddenMessageParams, GenImageParams, GenPowerfulFillParams } from '@/types/api'
+import type { GenHiddenMessageParams, GenImageParams } from '@/types/api'
 import type { GenImageGroupOption, GenImageOptions, GenImageRangeOption } from '@/types/editor'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
@@ -159,7 +171,7 @@ const { preview } = toRefs(props)
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()
-const { setShowSpinner, setSpinnerText, debugMode } = globalStore
+const { debugMode } = globalStore
 
 const editorStore = useEditorStore()
 const {
@@ -168,8 +180,7 @@ const {
   changeEditorState,
   setCurrPrompt,
   setCurrDesignId,
-  setGenResultIndex,
-  setShowEmptyPromptWarning,
+  setCurrGenResultIndex,
   setCurrGenOptions,
 } = editorStore
 const {
@@ -181,7 +192,6 @@ const {
   editorType,
   currGenOptions,
   generatedResults,
-  showEmptyPromptWarning,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -205,6 +215,9 @@ const modalStore = useModalStore()
 const { closeModal, openModal, setNormalModalInfo } = modalStore
 // #endregion
 
+const { reset } = useSteps()
+
+// #region generating function
 const checkIsGenerating = () => {
   return new Promise<void>((resolve) => {
     const check = () => {
@@ -224,13 +237,19 @@ const getGenParams = (): GenImageParams => {
   const params = {
     action: editorType.value,
     prompt: promptText.value,
-  } as GenPowerfulFillParams
+  } as GenImageParams
   switch (editorType.value) {
     case 'hidden-message':
       Object.assign(params, {
         action: genTypes.value?.group[genTypes.value.value].key,
         ...Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
       } as GenHiddenMessageParams)
+      break
+    default:
+      Object.assign(
+        params,
+        Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
+      )
       break
   }
   return params
@@ -261,7 +280,7 @@ const getIsReadyToGen = () => {
       }
       break
     default:
-      if (checkCanvasIsEmpty() && showEmptyPromptWarning.value) {
+      if (checkCanvasIsEmpty()) {
         setNormalModalInfo({
           title: t('CM0091'),
           content: t('CM0092'),
@@ -277,7 +296,6 @@ const getIsReadyToGen = () => {
         })
 
         openModal()
-        setShowEmptyPromptWarning(false)
         return false
       }
       break
@@ -303,49 +321,41 @@ const handleGenerate = async () => {
       generalUtils.generateRandomString(4),
     )
     changeEditorState('next')
-  } else {
-    if (!getIsReadyToGen()) return
-    setSpinnerText(`${t('CM0086')}`)
-    setShowSpinner(true)
-    setIsSendingGenImgReq(true)
-    const hasDesignId = currDesignId.value !== ''
-    if (!hasDesignId) {
-      setCurrDesignId(generalUtils.generateAssetId())
-    }
-
-    if (isGenerating.value) {
-      await checkIsGenerating()
-    }
-
-    await genImageFlow(getGenParams(), false, 2, {
-      onApiResponded: () => {
-        if (generatedResults.value.filter((r) => r.url.length).length > 0 && inEditingState.value) {
-          changeEditorState('next')
-          setIsSendingGenImgReq(false)
-          setShowSpinner(false)
-        }
-      },
-      onSuccess: (index) => {
-        if (inEditingState.value) {
-          setGenResultIndex(index)
-          changeEditorState('next')
-          setIsSendingGenImgReq(false)
-          setShowSpinner(false)
-        }
-      },
-      onError: () => {
-        setIsSendingGenImgReq(false)
-        setShowSpinner(false)
-      },
-    })
-      .then(() => {
-        pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-      })
+    return
   }
+
+  if (!getIsReadyToGen()) return
+  setIsSendingGenImgReq(true)
+  const hasDesignId = currDesignId.value !== ''
+  if (!hasDesignId) {
+    setCurrDesignId(generalUtils.generateAssetId())
+  }
+
+  if (isGenerating.value) {
+    await checkIsGenerating()
+  }
+
+  await genImageFlow(getGenParams(), false, 2, {
+    onApiResponded: () => {
+      if (generatedResults.value.filter((r) => r.url.length).length > 0 && inEditingState.value) {
+        changeEditorState('next')
+      }
+    },
+    onSuccess: (index) => {
+      if (inEditingState.value) {
+        setCurrGenResultIndex(index)
+        changeEditorState('next')
+      }
+    },
+  }).then(() => {
+    pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+    setIsSendingGenImgReq(false)
+  })
 }
 const clearPromt = () => {
   promptText.value = ''
 }
+// #endregion
 
 // #region settings
 const isGenSettings = ref(false)
@@ -360,7 +370,7 @@ const isSettings = computed({
   },
 })
 const showSettingsIcon = computed(() => {
-  return !isTypeSettings.value && editorType.value === 'hidden-message'
+  return !isTypeSettings.value && ['hidden-message', 'powerful-fill'].includes(editorType.value)
 })
 const showTypeSelector = computed(() => {
   return editorType.value === 'hidden-message'
@@ -398,32 +408,61 @@ const genTypes = computed(() => {
   return genGroupOptions.value.find((o) => o.key === 'type')
 })
 
-const setGenType = (idxGenType: number) => {
-  const preset = [
-    // blend
-    new Map([
-      ['guidance_scale', 7],
-      ['weight', 2],
-      ['guidance_start', 0],
-      ['guidance_end', 1],
-    ]),
-    // light
-    new Map([
-      ['guidance_scale', 7],
-      ['weight', 0.7],
-      ['guidance_start', 0.1],
-      ['guidance_end', 0.7],
-    ]),
-  ][idxGenType]
+const defaultGenImageOptions = computed(() => {
+  if (editorType.value === 'hidden-message') {
+    const preset = [
+      // blend
+      new Map([
+        ['guidance_scale', 7],
+        ['weight', 2],
+        ['guidance_start', 0],
+        ['guidance_end', 1],
+      ]),
+      // light
+      new Map([
+        ['guidance_scale', 10],
+        ['weight', 0.7],
+        ['guidance_start', 0.1],
+        ['guidance_end', 0.7],
+      ]),
+    ][idxGenType.value]
+    const options = (constantData.getGenImageOptions('hidden-message') as GenImageOptions) ?? []
+    options.forEach((option) => {
+      const newVal = preset.get(option.key)
+      if (newVal) option.value = newVal
+    })
+    return options
+  }
+  return (
+    (constantData
+      .getGenImageOptions(editorType.value)
+      ?.filter((o) => o.type === 'range') as GenImageRangeOption[]) ?? []
+  )
+})
 
-  const newGenOptions = constantData.getGenImageOptions('hidden-message') as GenImageOptions
-  newGenOptions.forEach((option) => {
-    if (option.key === 'type') option.value = idxGenType
+const idxGenType = ref(genTypes.value?.value ?? 0)
 
-    const newVal = preset.get(option.key)
-    if (newVal) option.value = newVal
+watch(idxGenType, (newVal) => {
+  setCurrGenOptions(
+    currGenOptions.value.map((o) => (o.key === 'type' ? Object.assign(o, { value: newVal }) : o)),
+  )
+  currGenOptions.value.forEach((o) => {
+    if (o.type === 'range') resetOption(o)
   })
-  setCurrGenOptions(newGenOptions)
+})
+
+const isOptionModified = (option: { key: string; value: unknown }) => {
+  return option.value !== defaultGenImageOptions.value.find((o) => o.key === option.key)?.value
+}
+
+const resetOption = (option: { key: string }) => {
+  const defaultOption = defaultGenImageOptions.value.find((o) => o.key === option.key)
+  if (!defaultOption) return
+  setCurrGenOptions(
+    currGenOptions.value.map((o) =>
+      o.key === option.key ? Object.assign(o, { value: defaultOption.value }) : o,
+    ),
+  )
 }
 // #endregion
 
@@ -468,7 +507,7 @@ watch(currTransitions.value, (val) => {
 }
 
 .prompt-text-area {
-  @apply w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
+  @apply w-full box-border px-10 py-4 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
   transition: outline-color 0.45s;
 }
 </style>

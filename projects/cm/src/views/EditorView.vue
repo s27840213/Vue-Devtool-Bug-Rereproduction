@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(
-    class="editor-header box-border px-24 z-median"
+    class="editor-header box-border px-24"
     :middGap="32"
     ref="headerbarRef")
     template(#left)
@@ -39,6 +39,13 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :iconWidth="`${btn.width}px`"
           @click="btn.action")
     template(#right)
+      svg-icon(
+        v-if="hasGeneratedResults && inEditingState"
+        :iconName="'grid-solid'"
+        :iconColor="'transparent'"
+        :strokeColor="'white'"
+        :iconWidth="'24px'"
+        @click="handleProjectBtnAction")
       nubtn(
         v-if="inGenResultState"
         @click="handleNextAction") {{ inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
@@ -59,7 +66,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     :noBg="isDuringCopy && isNoBg")
   div(
     v-else-if="!inSavingState"
-    class="editor-container flex-center relative"
+    class="editor-container flex-center relative overflow-hidden"
     ref="editorContainerRef"
     id="mobile-editor__content"
     @pointerdown="selectStart"
@@ -87,7 +94,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             :noBg="isDuringCopy && isNoBg"
             :hideHighlighter="true")
           canvas-section(
-            v-if="inEditingState"
             class="absolute top-0 left-0 w-full h-full"
             :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
             :containerDOM="editorContainerRef"
@@ -101,8 +107,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     sidebar-tabs(
       v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
-      ref="sidebarTabsRef"
-      @downloadMask="downloadCanvas")
+      ref="sidebarTabsRef")
   div(v-else class="editor-view__saving-state")
     div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
       div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
@@ -114,25 +119,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="result-showcase__card result-showcase__card--front"
           :class="{ 'is-flipped': showVideo }"
           :src="initImgSrc")
-        //- img(
-        //-   class="result-showcase__card result-showcase__card--front"
-        //-   :class="{ 'is-flipped': !showVideo }"
-        //-   :src="currImgSrc")
-        //- div(class="result-showcase__card result-showcase__card--back" :class="{ 'is-flipped': showVideo }")
-        //-   img(
-        //-     v-if="!isVideoGened"
-        //-     class="w-full h-full absolute top-0 left-0 object-cover"
-        //-     :src="initImgSrc")
-        //-   video(
-        //-     v-else
-        //-     class="w-full h-full absolute top-0 left-0 object-cover"
-        //-     ref="video"
-        //-     webkit-playsinline
-        //-     playsinline
-        //-     loop
-        //-     autoplay
-        //-     mutes
-        //-     :src="generatedResults[currGenResultIndex].video")
       div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
@@ -195,6 +181,7 @@ import useSteps from '@/composable/useSteps'
 import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
 import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
@@ -207,7 +194,6 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
 import type { ILayerInfo } from '@nu/vivi-lib/store/types'
 import { LayerType } from '@nu/vivi-lib/store/types'
-import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
@@ -227,6 +213,7 @@ import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
 
+const { t } = useI18n()
 // #region refs & vars
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
@@ -264,6 +251,9 @@ const showSidebarTabs = computed(
     !showBrushOptions.value &&
     editorType.value !== 'magic-combined',
 )
+
+const modalStore = useModalStore()
+const { closeModal, openModal, setNormalModalInfo } = modalStore
 // #endregion
 
 // #region hooks related
@@ -297,6 +287,7 @@ const {
   initImgSrc,
   showBrushOptions,
   editorType,
+  hasGeneratedResults,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
@@ -345,7 +336,7 @@ const currImgSrc = computed(() => {
 })
 
 const useStep = useSteps()
-const { undo, redo, isInFirstStep, isInLastStep } = useStep
+const { undo, redo, reset, isInFirstStep, isInLastStep, hasUnsavedChanges } = useStep
 
 type centerBtn = {
   icon: string
@@ -443,6 +434,7 @@ watch(isDuringCopy, () => {
 })
 
 let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
+let pagePinchUtils = null as PagePinchUtils | null
 const initPagePinchHandler = () => {
   if (!editorContainerRef.value) return
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
@@ -460,9 +452,16 @@ const initPagePinchHandler = () => {
       y: rect.top,
     },
   })
-  pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+  pagePinchUtils = new PagePinchUtils(editorWrapperRef.value as HTMLElement)
+  pagePinchHandler = (e) => {
+    if (inAspectRatioState.value) return
+    pagePinchUtils?.pinchHandler(e)
+  }
 }
-onMounted(initPagePinchHandler)
+onMounted(() => {
+  initPagePinchHandler()
+  reset()
+})
 watch(isResizingCanvas, (newVal) => {
   if (!newVal) {
     nextTick(initPagePinchHandler)
@@ -482,7 +481,11 @@ const pointerEvent = ref({
 const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
   recordPointer(e)
+  if (pointerEvtUtils.pointerIds.length >= 3) {
+    return pagePinchUtils?.pinchEnd(e as any)
+  }
   if (e.pointerType === 'mouse' && e.button !== 0) return
+
 
   const layer =
     ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
@@ -795,40 +798,6 @@ watch(showVideo, (newVal) => {
     }
   }
 })
-const swipeDetector: SwipeDetector = null as unknown as SwipeDetector
-
-// onMounted(() => {
-//   swipeDetector = new SwipeDetector(
-//     resultShowcase.value as HTMLElement,
-//     {
-//       targetDirection: 'horizontal',
-//     },
-//     handleSwipe,
-//   )
-
-// })
-
-// onBeforeUnmount(() => {
-//   swipeDetector.unbind()
-// })
-
-// watch(resultShowcase, () => {
-//   if (resultShowcase) {
-//     swipeDetector = new SwipeDetector(
-//       resultShowcase.value as HTMLElement,
-//       {
-//         targetDirection: 'horizontal',
-//       },
-//       handleSwipe,
-//     )
-//   } else {
-//     swipeDetector.unbind()
-//   }
-// })
-
-const handleSwipe = (dir: string) => {
-  showVideo.value = !showVideo.value
-}
 // #endregion
 
 const { setCurrOpenDesign, setCurrOpenSubDesign } = useUserStore()
@@ -837,6 +806,32 @@ const handleHomeBtnAction = (navagate: () => void) => {
   setCurrOpenDesign(undefined)
   setCurrOpenSubDesign(undefined)
   navagate()
+}
+
+const handleProjectBtnAction = () => {
+  if (hasUnsavedChanges.value) {
+    setNormalModalInfo({
+      title: t('CM0025'),
+      content: t('CM0026'),
+      confirmText: t('CM0028'),
+      cancelText: t('NN0203'),
+      confirm: () => {
+        groupUtils.deselect()
+        changeEditorState('next')
+        reset()
+        closeModal()
+      },
+      cancel: () => {
+        closeModal()
+      },
+    })
+    openModal()
+    return
+  }
+
+  groupUtils.deselect()
+  reset()
+  changeEditorState('next')
 }
 </script>
 <style lang="scss" scoped>

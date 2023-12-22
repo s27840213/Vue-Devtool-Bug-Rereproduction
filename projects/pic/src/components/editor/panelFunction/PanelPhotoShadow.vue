@@ -293,13 +293,6 @@ export default defineComponent({
     }
   }
 }
-.w-full {
-  width: 100%;
-}
-.mx-16 {
-  margin-left: 16px;
-  margin-right: 16px;
-}
 .photo-shape-title {
   font-size: 16px;
   font-weight: bold;
