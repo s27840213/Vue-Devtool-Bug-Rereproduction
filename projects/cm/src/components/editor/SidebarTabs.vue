@@ -170,14 +170,17 @@ const handleTabAction = (tab: ISidebarTab) => {
     }
     case 'auto-fill': {
       autoFill()
+      toggleFeature('none')
       break
     }
     case 'reverse': {
       reverseSelection()
+      toggleFeature('none')
       break
     }
     case 'ban': {
       clearCtx()
+      toggleFeature('none')
       break
     }
     case 'canvas': {
@@ -189,6 +192,7 @@ const handleTabAction = (tab: ISidebarTab) => {
         x: 0,
         y: 0,
       })
+      toggleFeature('none')
       break
     }
     case 'photo-rect':

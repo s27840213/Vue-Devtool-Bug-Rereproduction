@@ -88,7 +88,7 @@ div(class="popup-download text-left"
           :placeholder="colorFormats[selectedTypeVal][0].label"
           :options="colorFormats[selectedTypeVal]"
           @select="handleColorModeSelect")
-        div(v-else-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
+        div(v-else-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format mono")
           span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0].label }}
       div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
         dropdown(class="mt-5"
@@ -254,7 +254,7 @@ export default defineComponent({
   }
   &__color-format {
     width: 65px;
-    &.fixed {
+    &.mono {
       width: auto;
       margin-left: 8px;
       padding: 0px 8px;
