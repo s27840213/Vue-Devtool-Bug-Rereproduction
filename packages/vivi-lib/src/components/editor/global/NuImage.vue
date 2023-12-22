@@ -414,12 +414,6 @@ export default defineComponent({
       ) return false
       return true
     },
-    // isCurrLayerPinched(): boolean {
-    //   const { controlState } = this
-    //   if (controlState.layerInfo) {
-    //     return controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
-    //   } else return false
-    // },
     isShowImg(): boolean {
       return !this.isAdjustImage || !this.isShowAdjustImg
     },
@@ -427,9 +421,18 @@ export default defineComponent({
       // forRender img not apply filter
       if (this.forRender) return false
 
-      if (this.$isTouchDevice()) {
+      // apply for vvpic-mobile/cm only
+      if (!this.$isStk && this.$isTouchDevice()) {
+        const isCurrLayerTexting = layerUtils.getCurrConfig.isTyping as boolean
         return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
-          !this.isImgCtrl && !this.isBgImgCtrl
+          !this.isImgCtrl && !this.isBgImgCtrl && !isCurrLayerTexting
+      } else if (this.$isStk) {
+        let isCurrLayerPinched = false
+        const { controlState } = this
+        if (controlState.layerInfo) {
+          isCurrLayerPinched = controlState.type === 'pinch' && controlState.layerInfo.pageIndex === this.pageIndex && controlState.layerInfo.layerIndex === this.layerIndex
+        }
+        return this.isAdjustImage && !isCurrLayerPinched
       } else {
         return this.isAdjustImage
       }
@@ -1282,7 +1285,7 @@ export default defineComponent({
       }
       return layerInfo
     },
-    scaledConfig(): { [index: string]: string | number } {
+    scaledConfig(): { [index: string]: number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
       const _f = this.contentScaleRatio * (this.primaryLayer?.type === 'frame' || !this.$isTouchDevice() ? 1 : this.pageScaleRatio * 0.01)
       return {
@@ -1318,6 +1321,21 @@ export default defineComponent({
       if (this.isBgImgControl) {
         imgX = 0
         imgY = 0
+      } else if ((this.$isPic || this.$isCm) && this.$isTouchDevice() && this.primaryLayer?.type === 'frame') {
+        const scale = this.pageScaleRatio * 0.01
+        if (this.config.isFrameImg) {
+          imgX *= scale
+          imgY *= scale
+          imgWidth *= scale
+          imgHeight *= scale
+        } else {
+          return {
+            transform: `translate(${imgX * scale}px, ${imgY * scale}px) scale(${scale})`,
+            transformOrigin: '0 0',
+            width: `${imgWidth}px`,
+            height: `${imgHeight}px`
+          }
+        }
       }
       return {
         transform: `translate(${imgX}px, ${imgY}px)`,

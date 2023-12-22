@@ -1,10 +1,10 @@
 <template lang="pug">
 div(
-  class="my-design w-full h-full grid grid-cols-1 grid-rows-[auto,1fr] justify-center items-center pt-20 px-16 relative")
+  class="my-design w-full h-full grid grid-cols-1 grid-rows-[auto,1fr] justify-center items-center pt-8 px-16 relative")
   scrollable-container(:py="8")
     div(
       v-for="tag in myDesignTags"
-      class="px-8 py-4 box-border rounded-full typo-body-md whitespace-nowrap"
+      class="px-8 py-4 box-border rounded-full typo-body-md whitespace-nowrap transition-colors duration-400"
       :class="[currMyDesignType === tag.type ? 'bg-yellow-1 text-dark' : 'bg-lighter/33 text-yellow-0']"
       :key="tag.type"
       @click="selectMyDesignType(tag)")
