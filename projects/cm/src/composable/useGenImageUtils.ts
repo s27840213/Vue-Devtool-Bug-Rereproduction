@@ -227,10 +227,12 @@ const useGenImageUtils = () => {
         // save result image to document
         try {
           onSuccess && onSuccess(index, url)
+          RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'result', {
             subDesignId: ids[index],
             thumbIndex: index,
           })
+          RECORD_TIMING && testUtils.log(`save-result ${index}`, '')
           const srcObj: SrcObj = {
             type: 'ios',
             assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/result`,
