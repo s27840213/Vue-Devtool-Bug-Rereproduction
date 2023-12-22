@@ -52,6 +52,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       v-else
       size="mid-full"
       :disabled="isGenerating"
+      icon="crown"
       @click="showMoreRes") {{ $t('CM0068') }}
     span(class="text-white typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}
 </template>
