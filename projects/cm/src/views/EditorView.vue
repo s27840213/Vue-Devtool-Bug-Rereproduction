@@ -235,6 +235,7 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const layerIndex = computed(() => layerUtils.layerIndex)
 const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
 
 const { ids } = useGenImageUtils()
@@ -250,6 +251,7 @@ const showSidebarTabs = computed(
     !showSelectionOptions.value &&
     !isCropping.value &&
     !showBrushOptions.value &&
+    layerIndex.value === -1 &&
     editorType.value !== 'magic-combined',
 )
 
