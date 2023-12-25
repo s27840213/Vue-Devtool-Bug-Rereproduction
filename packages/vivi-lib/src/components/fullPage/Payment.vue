@@ -49,7 +49,7 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
           span(class="caption-SM") {{ localizedTag }}
     div(class="payment__trial")
       span(class="payment__trial__text caption-LG") {{ strTrial }}
-      toggle-btn(class="payment__trial__toggle" v-model="isTrialToggled" :width="42" :height="24" :colorActive="isTrialDisabled ? 'black-3' : 'alarm'" :colorInactive="isTrialDisabled ? 'black-3' : 'black-4'")
+      toggle-btn(class="payment__trial__toggle" v-model="isTrialToggled" :width="42" :height="24" :colorActive="isTrialDisabled ? 'black-3' : $isCm ? 'yellow-cm' : 'alarm'" :colorInactive="isTrialDisabled ? 'black-3' : 'black-4'")
     div(class="payment__btn-subscribe flex-center" :class="{pending: pending.purchase}" @touchend="handleSubscribe(planSelected)")
       svg-icon(v-if="pending.purchase" class="spinner animate-spin" iconName="spinner" iconWidth="20px")
       div(class="payment__btn-subscribe__text") {{ txtBtnSubscribe }}
@@ -599,6 +599,9 @@ export default defineComponent({
           border-radius: 100px;
           white-space: nowrap;
           color: setColor(black-3);
+          @include app(cm) {
+            @apply bg-yellow-cm;
+          }
         }
     }
   }
