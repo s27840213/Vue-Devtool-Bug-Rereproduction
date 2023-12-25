@@ -82,7 +82,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       popup(class="pointer-events-auto")
     div(class="modal-container" v-if="isModalOpen")
       modal-card(class="pointer-events-auto")
-    transition(name="bottom-up-down")
+    transition(:name="fullpageTransition")
       full-page(v-if="fullPageType !== 'none'" class="pointer-events-auto")
     spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
     notifications(
@@ -339,6 +339,15 @@ router.isReady().then(() => {
 const handleProBtnClick = () => {
   cmWVUtils.openPayment()
 }
+// #endregion
+
+// #region full page
+const fullpageTransition = ref('bottom-up-down')
+watch(fullPageType, (newVal) => {
+  nextTick(() => {
+    fullpageTransition.value = newVal === 'welcome' ? 'fade-in-out' : 'bottom-up-down'
+  })
+})
 // #endregion
 </script>
 

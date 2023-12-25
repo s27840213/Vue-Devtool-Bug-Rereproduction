@@ -1131,7 +1131,7 @@
   "CM0082": "Background Remove",
   "CM0083": "Pre-process image",
   "CM0085": "Mask is empty",
-  "CM0086": "Generating",
+  "CM0086": "Processing",
   "CM0087": "Image Generation Failed",
   "CM0088": "Sorry, we could not generate the image this time. Please try again.",
   "CM0089": "for Some Image",
@@ -1185,5 +1185,7 @@
   "CM0137": "No subscription found",
   "CM0138": "We couldn't find an active subscription for your account.",
   "CM0140": "The photo will be permanently deleted. Are you sure?",
-  "CM0141": "Delete Photo?"
+  "CM0141": "Delete Photo?",
+  "CM0142": "Welcome to Charmix PRO",
+  "CM0143": "Congrats! Charmix Pro opens up endless possibilities for creating visual content. Better and faster. We hope you enjoy it!"
 }

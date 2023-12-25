@@ -1,11 +1,20 @@
 <template lang="pug">
-div(v-show="imgLoaded" class="welcome")
-  div(class="welcome__img")
-    img(:src="require(`@img/png/pricing/vivisticker_welcome.png`)" :load="imgLoaded = true")
-    div(class="welcome__img__overlay")
-  div(class="welcome__text body-MD text-white") {{ $t('STK0054') }}
-  div(class="welcome__btn-start text-H6" @click.prevent.stop="handleClose")
-    span {{ $t('STK0055') }}
+div(v-show="imgLoaded" class="welcome" :class="{'flex-center': $isCm}")
+  template(v-if="$isStk")
+    div(class="welcome__img")
+      img(:src="require(`@img/png/pricing/vivisticker_welcome.png`)" :load="imgLoaded = true")
+      div(class="welcome__img__overlay")
+    div(class="welcome__text body-MD text-white") {{ $t('STK0054') }}
+    div(class="welcome__btn-start text-H6" @click.prevent.stop="handleClose")
+      span {{ $t('STK0055') }}
+  template(v-if="$isCm")
+    div(class="welcome__cm w-320 h-320 relative bg-yellow-0 rounded-24 px-24 py-16 box-border flex-center flex-col gap-16")
+      img(:src="require(`@img/png/pricing/cm_welcome.png`)" class="w-251 h-194 absolute top-[-126px] right-34" :load="imgLoaded = true")
+      span(class="welcome__cm__title typo-h1 mt-40") {{ $t('CM0142') }}
+      span(class="typo-body-lg text-yellow-8") {{ $t('CM0143') }}
+      nubtn(
+        size="mid-full"
+        @click.prevent.stop="handleClose") {{ $t('STK0055') }}
 </template>
 
 <script lang="ts">
@@ -48,6 +57,11 @@ export default defineComponent({
   width: v-bind("containerWidth + 'px'");
   margin: 0 auto;
   position: relative;
+  &__cm__title {
+    background: linear-gradient(129deg, #FFD004 9.58%, #FFC318 42.27%, #FFA32C 99.22%);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   &__img {
     position: relative;
     width: 100%;

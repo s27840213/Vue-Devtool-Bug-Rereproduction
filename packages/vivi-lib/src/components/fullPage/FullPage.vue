@@ -1,5 +1,5 @@
 <template lang="pug">
-div(ref="main" class="full-page relative")
+div(ref="main" class="full-page relative" :class="{welcome: fullPageConfig.type === 'welcome'}")
   template(v-if="fullPageConfig.type === 'video'")
     div(class="full-page__video" :class="fullPageConfig.params.mediaPos ? fullPageConfig.params.mediaPos : ''")
       video(autoplay playsinline muted
@@ -54,7 +54,7 @@ export default defineComponent({
     this.initialize()
   },
   watch: {
-    fullPageType() {
+    'fullPageConfig.type'() {
       this.$nextTick(() => {
         this.initialize()
       })
@@ -94,6 +94,9 @@ export default defineComponent({
             this.showCloseButton = true
           }
           break
+        case 'welcome':
+          if (this.$isCm) this.showCloseButton = false
+          break
         default:
           this.showCloseButton = true
       }
@@ -129,6 +132,9 @@ export default defineComponent({
   }
   @include cm {
     @apply z-popup;
+    &.welcome {
+      @apply bg-dark-4/70
+    }
   }
   &__close {
     @include size(24px);
