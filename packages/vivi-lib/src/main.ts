@@ -11,7 +11,7 @@ import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
 import platform from 'platform'
-import { App, ComputedRef, defineAsyncComponent, nextTick } from 'vue'
+import { App, ComputedRef, DirectiveBinding, defineAsyncComponent, nextTick } from 'vue'
 import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
@@ -21,6 +21,7 @@ import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
+import { useEventListener } from '@vueuse/core'
 // import '@/imports'
 
 // Add variable that bind in vue this and its type define
@@ -163,7 +164,7 @@ app.component('hint', defineAsyncComponent(() =>
 
 app.directive('hint', {
   // When the bound element is inserted into the DOM...
-  mounted: (el, binding, vnode) => {
+  mounted: (el, binding) => {
     tooltipUtils.bind(el, binding)
   },
   beforeUpdate: (el, binding) => {
@@ -176,7 +177,7 @@ app.directive('hint', {
 
 app.directive('ratio-change', {
   // When the bound element is inserted into the DOM...
-  mounted: (el, binding, vnode) => {
+  mounted: (el) => {
     el.addEventListener('change', function () {
       el.blur()
     })
@@ -227,7 +228,7 @@ app.directive('touch', {
    * Useage: div(v-touch @tap="..." @swipeleft="...")
    * If you want to prevetDefault, use: div(v-touch="true" ...)
    */
-  mounted: (el, binding, vnode) => {
+  mounted: (el, binding) => {
     // pass preventDefault as function to fix tap event issue of apple pencil for unknown reason
     const preventDefault = () => {
       return Boolean(binding.value)
@@ -236,14 +237,14 @@ app.directive('touch', {
     at.get('tap').maxDistance = 10 // raise max move distance to trigger double tap event more easily for apple pencil
     anyTouchWeakMap.set(el, at)
   },
-  unmounted: (el, binding, vnode) => {
+  unmounted: (el) => {
     (anyTouchWeakMap.get(el) as AnyTouch).destroy()
     anyTouchWeakMap.delete(el)
   }
 })
 
 app.directive('custom-swipe', {
-  mounted: (el, binding, vnode) => {
+  mounted: (el, binding) => {
     const at = new Core(el as HTMLElement, {
       preventDefault: false
     })
@@ -260,7 +261,7 @@ app.directive('custom-swipe', {
       binding.value(event)
     })
   },
-  unmounted: (el, binding, vnode) => {
+  unmounted: (el) => {
     if (anyTouchWeakMap.has(el)) {
       (anyTouchWeakMap.get(el) as Core).off('swipe')
       anyTouchWeakMap.delete(el)
@@ -341,6 +342,31 @@ app.directive('progress', {
   updated: (el) => {
     setProgressStyle(el)
   }
+})
+
+type FadeScrollerOption = {
+  fadeWidth: string
+  left: boolean
+  right: boolean
+}
+function updateFadeScroller(el: HTMLElement, binding: DirectiveBinding<Partial<FadeScrollerOption> | undefined>) {
+  const { fadeWidth = '48px', left = !0, right = !0 } = binding.value ?? {}
+  const { scrollLeft, scrollWidth, offsetWidth } = el
+  const leftOverflow = left && scrollLeft > 0
+  const rightOverflow = right && scrollLeft + 1 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+
+  // Use mask-image implement fade scroll style, https://stackoverflow.com/a/70971847
+  el.style.maskImage = `
+    linear-gradient(to right,
+      transparent 0, black ${leftOverflow ? fadeWidth : 0},
+      black calc(100% - ${rightOverflow ? fadeWidth : '0px'}), transparent 100%)`
+}
+app.directive('fade-scroller', {
+  mounted: (el: HTMLElement, binding) => {
+    nextTick(() => updateFadeScroller(el, binding))
+    useEventListener(el, 'scroll', () => updateFadeScroller(el, binding), { passive: true })
+  },
+  updated: updateFadeScroller,
 })
 
 let token = localStorage.getItem('token') || ''

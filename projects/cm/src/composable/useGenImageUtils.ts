@@ -76,9 +76,9 @@ const useGenImageUtils = () => {
     try {
       await genImage(params, showMore, num, {
         onApiResponded,
-        onSuccess: (index, imgSrc) => {
+        onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
-          onSuccess && onSuccess(index, imgSrc)
+          !onlyUpdate && onSuccess && onSuccess(index, imgSrc)
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
@@ -141,7 +141,7 @@ const useGenImageUtils = () => {
       onError = undefined,
       onApiResponded = undefined,
     }: {
-      onSuccess?: (index: number, url: string) => void
+      onSuccess?: (index: number, url: string, onlyUpdate?: boolean) => void
       onError?: (index: number, url: string, reason: string) => void
       onApiResponded?: () => void
     } = {},
@@ -226,10 +226,13 @@ const useGenImageUtils = () => {
         RECORD_TIMING && testUtils.log(`polling ${index}`, '')
         // save result image to document
         try {
+          onSuccess && onSuccess(index, url)
+          RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'result', {
             subDesignId: ids[index],
             thumbIndex: index,
           })
+          RECORD_TIMING && testUtils.log(`save-result ${index}`, '')
           const srcObj: SrcObj = {
             type: 'ios',
             assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/result`,
@@ -237,7 +240,7 @@ const useGenImageUtils = () => {
           }
 
           const imgSrc = imageUtils.getSrc(srcObj)
-          onSuccess && onSuccess(index, imgSrc)
+          onSuccess && onSuccess(index, imgSrc, true)
         } catch (error) {
           onError && onError(index, url, 'saveAssetFromUrl failed')
         }
