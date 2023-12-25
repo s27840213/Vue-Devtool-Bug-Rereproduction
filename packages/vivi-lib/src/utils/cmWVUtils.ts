@@ -18,7 +18,6 @@ import constantData from './constantData'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-import modalUtils from './modalUtils'
 
 declare let window: CustomWindow
 
