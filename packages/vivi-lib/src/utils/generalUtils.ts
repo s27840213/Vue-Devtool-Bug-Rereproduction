@@ -281,7 +281,7 @@ class GeneralUtils {
     image.src = src
   }
 
-  async toDataUrlNew(src: string) {
+  async toDataUrlNew(src: string, type = 'png') {
     return new Promise<string>((resolve, reject) => {
         const image = new Image();
         image.crossOrigin = 'Anonymous';
@@ -294,7 +294,7 @@ class GeneralUtils {
             canvas.width = image.naturalWidth;
 
             context?.drawImage(image, 0, 0);
-            const dataURL = canvas.toDataURL('image/png');
+            const dataURL = canvas.toDataURL(`image/${type}`);
             resolve(dataURL);
         };
 

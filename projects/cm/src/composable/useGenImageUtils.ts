@@ -194,6 +194,7 @@ const useGenImageUtils = () => {
           const subDesignId = ids[index]
           const promises = [
             saveDesignImageToDocument(initImgSrc.value, 'original', {
+              type: 'jpg',
               subDesignId,
             }),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
@@ -229,6 +230,7 @@ const useGenImageUtils = () => {
           onSuccess && onSuccess(index, url)
           RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'result', {
+            type: 'jpg',
             subDesignId: ids[index],
             thumbIndex: index,
           })
@@ -236,7 +238,7 @@ const useGenImageUtils = () => {
           const srcObj: SrcObj = {
             type: 'ios',
             assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/result`,
-            userId: '',
+            userId: 'jpg',
           }
 
           const imgSrc = imageUtils.getSrc(srcObj)
@@ -266,7 +268,7 @@ const useGenImageUtils = () => {
       throw new Error('Screenshot Failed')
     }
     await Promise.all([
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`).then((dataUrl) => {
+      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`, 'jpg').then((dataUrl) => {
         setInitImgSrc(dataUrl)
       }),
       new Promise<void>(resolve => {

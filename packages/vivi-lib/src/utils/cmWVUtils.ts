@@ -16,16 +16,16 @@ import uploadUtils from './uploadUtils'
 
 declare let window: CustomWindow
 
-export interface IGeneralSuccessResponse {
+export type GeneralSuccessResponse = {
   flag: '0'
 }
 
-export interface IGeneralFailureResponse {
-  flag: string
+export type GeneralFailureResponse = {
+  flag: '1' | '2'
   msg: string
 }
 
-type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
+export type GeneralResponse = GeneralSuccessResponse | GeneralFailureResponse
 
 export type IUserInfo = {
   hostId: string
@@ -472,7 +472,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async deleteFile(key: string, name: string, type: string, subPath?: string) {
     if (this.inBrowserMode) return
-    await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
+    // await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
   }
 
   async fetchTutorialFlags() {
@@ -612,7 +612,24 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap })
+    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
+  }
+
+  getDocumentPath(url: string) {
+    const urlObj = new URL(url)
+    const paths = (urlObj.hostname + urlObj.pathname).replace('//', '').split('/')
+    const path = paths.slice(0, paths.length - 1).join('/')
+    const name = paths[paths.length - 1]
+    const type = urlObj.searchParams.get('imagetype') ?? 'png'
+    return {
+      path,
+      name,
+      type
+    }
+  }
+
+  async documentToCameraRoll(path: string, name: string, type: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType }) as GeneralResponse
   }
 
   showUpdateModal(force = false) {
