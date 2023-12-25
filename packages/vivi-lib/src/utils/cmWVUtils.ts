@@ -10,9 +10,9 @@ import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
+import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-import modalUtils from './modalUtils'
 
 declare let window: CustomWindow
 
@@ -35,10 +35,11 @@ export type IUserInfo = {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string,
-  flag: string,
-  locale: string,
+  modelName: string
+  flag: string
+  locale: string
   userId: string
+  deviceScale: number
 }
 
 export interface IAlbum {
@@ -97,6 +98,14 @@ export interface IListAssetResponse {
   group?: string
 }
 
+export type FileSource = {
+  path: string,
+  name: string,
+  type: string
+} | {
+  fileId: string
+}
+
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
   textStock: 'text',
@@ -117,6 +126,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     locale: 'en',
     modelName: 'web',
     userId: '',
+    deviceScale: 1,
   }
 
   CALLBACK_MAPS = {
@@ -276,7 +286,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     })
   }
 
-  async copyEditor(pageSize: { width: number, height: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async copyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     return await this.copyEditorCore(this.sendCopyEditor.bind(this), {
       senderArgs: [pageSize],
       preArgs: { noBg },
@@ -294,7 +304,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     this.setDuringCopy(false)
   }
 
-  async sendCopyEditor(pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async sendCopyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
     const { flag, cleanup } = await this.sendCopyEditorCore('editorSave', pageSize, imageId)
     return {
@@ -304,9 +314,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
+  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -325,7 +335,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       ...(imagePath && { imagePath }),
       ...(outputType && { outputType }),
       ...(quality && { quality }),
-      snapshotWidth: width,
+      snapshotWidth: pageSize.snapshotWidth ?? width,
     }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
@@ -361,7 +371,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
   }
 
-  async sendScreenshotUrl(query: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
+  async sendScreenshotUrl(query: string, { outputType, quality, forGenImage }: { outputType?: string, quality?: number, forGenImage?: boolean } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
     if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -379,6 +389,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         imageId,
         outputType,
         quality,
+        forGenImage
       },
       to: 'Shot',
     })
@@ -441,6 +452,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       }
       return { x, y, width, height }
     }
+  }
+
+  getSnapshotWidth({ width, height }: { width: number, height: number }, targetSize: number, type: 'short' | 'long') {
+    const isVertical = height > width
+    return (isVertical && type === 'short' ? targetSize : targetSize / height * width) / this.getUserInfoFromStore().deviceScale
   }
 
   async getState(key: string): Promise<any | undefined> {
@@ -592,7 +608,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
-      return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+    return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+  }
+
+  async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap })
   }
 
   showUpdateModal(force = false) {
