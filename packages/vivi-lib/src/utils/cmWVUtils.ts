@@ -556,8 +556,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         }
       ],
       comparisons: [],
-      termsOfServiceUrl: '',
-      privacyPolicyUrl: '',
+      termsOfServiceUrl: i18n.global.t('CM0145'),
+      privacyPolicyUrl: i18n.global.t('CM0144'),
       defaultTrialToggled: false,
       isPromote: false
     } as IFullPagePaymentConfigParams
