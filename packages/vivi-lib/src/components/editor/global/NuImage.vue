@@ -451,9 +451,6 @@ export default defineComponent({
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(src)
       }
-      if (!this.config.previewSrc) {
-        src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(4))
-      }
       return src
     },
     shadowSrc(): string {
