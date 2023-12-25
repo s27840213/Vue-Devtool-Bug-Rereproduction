@@ -1712,7 +1712,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       const targetPos = currentPage.offsetLeft - parseFloat(window.getComputedStyle(currentPage).marginLeft)
       container.style.transition = `transform ${duration}ms ease-in-out`
       container.style.transform = `translateX(-${targetPos}px)`
-      if (pageIndex >= 0 && pageIndex < store.getters.getPageslength) store.commit('SET_middlemostPageIndex', pageIndex)
+      if (pageIndex >= 0 && pageIndex < pageUtils.pageNum) store.commit('SET_middlemostPageIndex', pageIndex)
     }
   }
 

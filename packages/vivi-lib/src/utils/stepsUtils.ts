@@ -32,8 +32,8 @@ class StepsUtils {
     return popupUtils.isPopupOpen
   }
 
-  get isInFirstStep(): boolean {
-    return (this.currStep === 0)
+  get isInFirstStep(): boolean {  
+    return (this.currStep === 0) || this.currStep === this.checkpointStep
   }
 
   get isInLastStep(): boolean {
@@ -358,6 +358,7 @@ class StepsUtils {
       }
       GroupUtils.set(pageIndex, index, layers)
     } else {
+      if (generalUtils.isStk) stkWVUtils.scrollIntoPage(activePageIndex, 300)
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     }
     if (this.currStep > 0) {

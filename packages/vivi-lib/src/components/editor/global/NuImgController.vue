@@ -185,7 +185,10 @@ export default defineComponent({
     },
     scalerStyles(scaler: { [key: string]: string | number }) {
       const scalerStyle = { ...scaler }
-      scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      // only apply at vvpic-pc
+      if (this.$isPic && !this.$isTouchDevice()) {
+        scalerStyle.transform += ` scale(${100 / this.scaleRatio})`
+      }
       return scalerStyle
     },
     imgControllerPosHandler(): ICoordinate {

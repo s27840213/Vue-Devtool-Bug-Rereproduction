@@ -54,6 +54,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
   div(
     v-if="wantToQuit || isModalOpen"
     class="mask"
+    :class="{'for-no-close-modal': isModalOpen && isModalNoClose}"
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
@@ -84,7 +85,6 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       modal-card(class="pointer-events-auto")
     transition(:name="fullpageTransition")
       full-page(v-if="fullPageType !== 'none'" class="pointer-events-auto")
-    spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
     notifications(
       class="notification flex-center "
       position="center center"
@@ -125,7 +125,6 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
 
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
-import { useGlobalStore } from '@/stores/global'
 import type { IUserInfo } from '@/utils/cmWVUtils'
 import vuex from '@/vuex'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
@@ -181,8 +180,6 @@ const {
   isSubDesignOpen,
 } = useStateInfo()
 
-const globalStore = useGlobalStore()
-const { showSpinner, spinnerText } = storeToRefs(globalStore)
 const fullPageType = computed(() => store.getters.getFullPageType)
 
 const canvasStore = useCanvasStore()
@@ -193,6 +190,7 @@ const { isAutoFilling } = storeToRefs(canvasStore)
 const modalStore = useModalStore()
 const { isModalOpen: wantToQuit } = storeToRefs(modalStore)
 const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean)
+const isModalNoClose = computed(() => vuex.getters['modal/getModalInfo'].noClose as boolean)
 // #endregion
 
 const bottomPanelComponent = computed(() => {
@@ -359,6 +357,9 @@ watch(fullPageType, (newVal) => {
   @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
   transition: backdrop-filter 0.25;
   background-color: rgba(#050505, 0.5);
+  &.for-no-close-modal {
+    @apply z-popup;
+  }
 }
 
 .popup-area {

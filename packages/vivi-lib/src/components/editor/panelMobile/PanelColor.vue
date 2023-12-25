@@ -2,8 +2,7 @@
 div(class="panel-color px-5")
   div(v-if="showDocumentColors")
     div(class="panel-color__title text-left") {{$t('NN0798')}}
-    div(class="panel-color__shape-colors" :style="colorsStyle"
-        @scroll.passive="updateColorsOverflow" ref="colors")
+    div(class="panel-color__shape-colors" :style="colorsStyle" v-fade-scroller)
       color-btn(v-for="(color, index) in getDocumentColors"
         :key="color"
         :color="color" :focus="index === currSelectedColorIndex"
@@ -56,8 +55,6 @@ export default defineComponent({
     return {
       colorUtils,
       currSelectedColorIndex: 0,
-      leftOverflow: false,
-      rightOverflow: false,
       initColor: colorUtils.currColor,
     }
   },
@@ -155,10 +152,8 @@ export default defineComponent({
       }
     },
     colorsStyle(): Record<string, string> {
-      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
         gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 96px) / 7))`,
-        maskImage: `linear-gradient(to right, transparent 0, black ${this.leftOverflow ? '48px' : 0}, black calc(100% - ${this.rightOverflow ? '48px' : '0px'}), transparent 100%)`
       }
     },
     getDocumentColors(): string[] {
@@ -172,12 +167,6 @@ export default defineComponent({
     ...mapActions({
       addRecentlyColors: 'color/addRecentlyColors',
     }),
-    updateColorsOverflow() {
-      if (!this.$refs.colors) return
-      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.colors as HTMLElement
-      this.leftOverflow = scrollLeft > 0
-      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
-    },
     handleChangeStop(color: string) {
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currStopEvent, color)

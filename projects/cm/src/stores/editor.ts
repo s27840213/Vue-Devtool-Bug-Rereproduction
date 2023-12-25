@@ -35,6 +35,7 @@ export interface MaskParams {
 export interface IGenResult {
   id: string
   url: string
+  prompt: string
   video?: string
 }
 
@@ -63,7 +64,6 @@ interface IEditorStore {
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
-  showEmptyPromptWarning: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -91,7 +91,6 @@ export const useEditorStore = defineStore('editor', {
     descriptionPanel: null,
     currDesignThumbIndex: 0,
     // if the user send empty prompt, show warning at fisrt time
-    showEmptyPromptWarning: true,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -218,13 +217,14 @@ export const useEditorStore = defineStore('editor', {
     setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
       this.isSendingGenImgReq = isSendingGenImgReq
     },
-    unshiftGenResults(url: string, id: string) {
+    unshiftGenResults(url: string, id: string, prompt: string) {
       if (this.generatedResults.length > 0) {
         this.currGenResultIndex += 1
       }
       this.generatedResults.unshift({
         url,
         id,
+        prompt,
       })
     },
     updateGenResult(
@@ -267,7 +267,7 @@ export const useEditorStore = defineStore('editor', {
     clearGeneratedResults() {
       this.generatedResults = []
     },
-    setGenResultIndex(index: number) {
+    setCurrGenResultIndex(index: number) {
       this.currGenResultIndex = index
     },
     async undo() {
@@ -300,7 +300,7 @@ export const useEditorStore = defineStore('editor', {
     },
     resetStepsTypesArr() {
       this.stepsTypesArr = []
-      this.currGenResultIndex = -1
+      this.currStepTypeIndex = -1
     },
     setInitImgSrc(src: string) {
       this.initImgSrc = src
@@ -352,9 +352,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
-    },
-    setShowEmptyPromptWarning(show: boolean) {
-      this.showEmptyPromptWarning = show
     },
   },
 })

@@ -8,15 +8,12 @@ div(class="box-border h-full w-full px-16 pt-12\ grid gap-16 overflow-scroll scr
     iconName="brush"
     @clickBtn="openImgSelecotr({ targetEditorType: 'powerful-fill' })")
   div(class="flex gap-8")
-    nubtn(
-      icon="crown"
-      @click="testNotify") Test Img Selector
+    //- nubtn(
+    //-   icon="crown"
+    //-   @click="testNotify") Test Img Selector
     nubtn(
       icon="crown"
       @click="testPro") Test Pro
-  //- nubtn(
-  //-   icon="crown"
-  //-   @click="exportVedio") Test video Selector
   template(
     v-for="(cate, i) in featureCategories"
     :key="i")
@@ -112,19 +109,12 @@ const featureCategories = [
 ]
 // #endregion
 
-// const exportVedio = () => {
-//   const pixiRecorder = new PixiRecorder()
-//   pixiRecorder.genVideo().then((res) => {
-//     console.log('gen vedio', res)
+// const testNotify = () => {
+//   notify({
+//     group: 'success',
+//     text: 'Test notification',
 //   })
 // }
-
-const testNotify = () => {
-  notify({
-    group: 'success',
-    text: 'Test notification',
-  })
-}
 
 const testPro = () => {
   const isPro = store.getters['payment/getPayment'].subscribe

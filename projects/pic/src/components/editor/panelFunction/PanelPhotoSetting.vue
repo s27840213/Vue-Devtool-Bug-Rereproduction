@@ -248,6 +248,10 @@ export default defineComponent({
         }
       }
 
+      if (btn.name === 'replaceImg') {
+        return this.isHandleShadow
+      }
+
       if (btn.name === 'remove-bg') {
         return this.isUploadingImg
         // return this.hasPreviewSrc

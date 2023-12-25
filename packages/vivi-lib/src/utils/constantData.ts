@@ -1348,6 +1348,22 @@ class ConstantData {
   // charmix gen image options
   getGenImageOptions = (editorType: string) => {
     return new Map([
+      ['powerful-fill', [
+        {
+          type: 'range',
+          key: 'guidance_scale',
+          title: i18n.global.t('CM0111'),
+          subTitle: i18n.global.t('CM0112'),
+          minDescription: i18n.global.t('CM0113'),
+          maxDescription: i18n.global.t('CM0114'),
+          min: 0,
+          max: 10,
+          step: .5,
+          value: 7.5,
+          icon: 'information-circle',
+          iconActive: 'information-circle-solid',
+        }
+      ]],
       ['hidden-message', [
         {
           type: 'group',
@@ -1375,7 +1391,7 @@ class ConstantData {
           maxDescription: i18n.global.t('CM0114'),
           min: 0,
           max: 10,
-          step: 1,
+          step: .5,
           value: 7,
           icon: 'information-circle',
           iconActive: 'information-circle-solid',
@@ -1410,6 +1426,14 @@ class ConstantData {
       ]]
     ]).get(editorType)
   }
+
+  inspirationPrompts = [
+    'Sea,wave,aerial view',
+    'Cloud,blue sky,sunlight',
+    'snowy mountain',
+    'Lavender fields,aerial view',
+    'Messy clothes on the bedroom ground,aerial view'
+  ]
 }
 
 export default new ConstantData()

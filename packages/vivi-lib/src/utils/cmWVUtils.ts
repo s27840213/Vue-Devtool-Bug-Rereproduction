@@ -18,6 +18,7 @@ import constantData from './constantData'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
+import modalUtils from './modalUtils'
 
 declare let window: CustomWindow
 
@@ -820,6 +821,57 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
       return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+  }
+
+  showUpdateModal(force = false) {
+    let locale = this.getUserInfoFromStore().locale
+    if (!['us', 'tw', 'jp'].includes(locale)) {
+      locale = 'us'
+    }
+    const prefix = 'exp_' + locale + '_'
+    const modalInfo = Object.fromEntries(Object.entries(store.getters['cmWV/getModalInfo']).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as string]
+      })
+    )
+    const options = {
+      imgSrc: modalInfo.img_url,
+      noClose: force,
+      noCloseIcon: force,
+      // backdropStyle: {
+      //   backgroundColor: 'rgba(24,25,31,0.3)'
+      // },
+      // cardStyle: {
+      //   backdropFilter: 'blur(10px)',
+      //   backgroundColor: 'rgba(255,255,255,0.9)'
+      // }
+    }
+    modalUtils.setModalInfo(
+      modalInfo.title,
+      modalInfo.msg,
+      {
+        msg: modalInfo.btn_txt,
+        // class: 'btn-black-mid',
+        // style: {
+        //   color: '#F8F8F8'
+        // },
+        action: () => {
+          const url = modalInfo.btn_url
+          if (url) { window.open(url, '_blank') }
+        }
+      },
+      {
+        msg: modalInfo.btn2_txt || '',
+        // class: 'btn-light-mid',
+        // style: {
+        //   border: 'none',
+        //   color: '#474A57',
+        //   backgroundColor: '#D3D3D3'
+        // }
+      },
+      options
+    )
   }
 }
 

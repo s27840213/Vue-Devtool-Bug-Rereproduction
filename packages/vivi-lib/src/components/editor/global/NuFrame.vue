@@ -22,7 +22,6 @@ div(:class="[isFrameImg ? 'flex-center full-size' : 'nu-frame__custom']")
     :page="page"
     :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
     :inFrame="true"
-    :inImageFrame="inImageFrame()"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
     :prePrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"

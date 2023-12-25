@@ -10,14 +10,12 @@ div(class="nu-background-image" draggable="false" :style="mainStyles"
         @error="onError"
         @load="onLoad"
         :src="finalSrc")
-    //- svg(v-if="isAdjustImage"
     svg(v-if="isAdjustImage && finalSrc" v-show="isShowAdjustImg"
       class="nu-background-image__svg"
       :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
       preserveAspectRatio="none"
       role="image")
       defs
-        //- filter(v-if="!isLayerCtrlled && !isPinchingEditor" :id="filterId"
         filter(:id="filterId"
           color-interpolation-filters="sRGB")
           component(v-for="(elm, idx) in svgFilterElms"
@@ -212,9 +210,10 @@ export default defineComponent({
     },
     isShowAdjustImg(): boolean {
       // forRender img not apply filter
-      if (this.$isTouchDevice()) {
+      if (!this.$isStk && this.$isTouchDevice()) {
+        const isCurrLayerTexting = layerUtils.getCurrConfig.isTyping as boolean
         return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
-          !this.isImgCtrl && !this.isBgImgCtrl
+          !this.isImgCtrl && !this.isBgImgCtrl && !isCurrLayerTexting
       } else {
         return this.isAdjustImage
       }
@@ -281,7 +280,7 @@ export default defineComponent({
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
-      const { width, height } = this.pageSize
+      const { width, height } = this.page as IPage
       if (!adjust) return []
 
       const elms = []
