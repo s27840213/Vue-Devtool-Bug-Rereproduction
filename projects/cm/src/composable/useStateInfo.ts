@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia'
 
 const useStateInfo = () => {
   const { path } = toRefs(useRoute())
-  const { currentRoute } = toRefs(useRouter())
+  const { currentRoute } = useRouter() 
   const editorStore = useEditorStore()
 
   // #region routing state
