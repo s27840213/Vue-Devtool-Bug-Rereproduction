@@ -9,7 +9,7 @@ div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt
   div(class="typo-h5") {{ title }}
   div(class="flex-start-center flex-col gap-16 overflow-scroll pb-37")
     //- hidden message help
-    template(v-if="descriptionPanel === 'hidden-message-help'")
+    template(v-if="descriptionPanel === 'hidden-message/help'")
       div(class="w-full typo-body-md text-left") {{ t('CM0094') }}
       div(v-for="(item, idx) in hiddenMessageStep1Items" :key="idx" class="flex gap-8")
         div(class="w-full flex flex-col gap-11 items-end")
@@ -73,11 +73,11 @@ const closePanel = () => {
 
 const title = computed(() => {
   switch (descriptionPanel) {
-    case 'hidden-message-help':
+    case 'hidden-message/help':
       return t('CM0093')
-    case 'hidden-message-invert':
+    case 'hidden-message/invert':
       return t('CM0096')
-    case 'hidden-message-bgrm':
+    case 'hidden-message/bgrm':
       return t('CM0100')
   }
   return ''
@@ -85,8 +85,8 @@ const title = computed(() => {
 
 // #region hidden-message help
 const hiddenMessageStep1Items = computed(() => Array.from(Array(3), (_, index) => ({
-  imgA: require(`demo/${descriptionPanel}-demo-${index}a.jpeg`),
-  imgB: require(`demo/${descriptionPanel}-demo-${index}b.png`),
+  imgA: require(`demo/${descriptionPanel}/${index}a.jpeg`),
+  imgB: require(`demo/${descriptionPanel}/${index}b.png`),
   iconName: (() => {
     switch (index) {
       case 0:
@@ -115,9 +115,9 @@ const hiddenMessageStep1Items = computed(() => Array.from(Array(3), (_, index) =
 // #region hidden-message img preprocess
 const hiddenMessageImgPreprocessDescription = computed(() => {
   switch (descriptionPanel) { 
-    case 'hidden-message-invert':
+    case 'hidden-message/invert':
       return t('CM0097')
-    case 'hidden-message-bgrm':
+    case 'hidden-message/bgrm':
       return t('CM0101')
   }
   return ''
@@ -128,7 +128,7 @@ const hiddenMessageImgPreprocessItems = computed(() => Array.from(Array(2), (_, 
   imgB: require(`demo/${descriptionPanel}-demo-${index}b.png`),
   text: (() => {
     switch (descriptionPanel) {
-      case 'hidden-message-invert':
+      case 'hidden-message/invert':
         switch (index) {
           case 0:
             return t('CM0098')
@@ -136,7 +136,7 @@ const hiddenMessageImgPreprocessItems = computed(() => Array.from(Array(2), (_, 
             return t('CM0099')
         }
         break
-      case 'hidden-message-bgrm':
+      case 'hidden-message/bgrm':
         switch (index) {
           case 0:
             return t('CM0102')
