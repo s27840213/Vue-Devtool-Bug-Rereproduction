@@ -478,7 +478,7 @@ export const useUserStore = defineStore('user', () => {
     const srcObj: SrcObj = {
       type: 'ios',
       assetId,
-      userId: '',
+      userId: imgName === 'mask' ? 'png' : 'jpg',
     }
 
     const imgSrc = imageUtils.getSrc(srcObj)
@@ -501,7 +501,7 @@ export const useUserStore = defineStore('user', () => {
     const srcObj: SrcObj = {
       type: 'ios',
       assetId: `mydesign-${type}/${id}/${subId}/result`,
-      userId: '',
+      userId: 'jpg',
     }
 
     const imgSrc = imageUtils.getSrc(srcObj)

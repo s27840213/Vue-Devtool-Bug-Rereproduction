@@ -28,11 +28,16 @@ const useActionSheetCm = () => {
   const savePhotoCb = async () => {
     let targetUrl = ''
     if (isSubDesignOpen.value && currOpenSubDesign.value) {
-      targetUrl = await generalUtils.toDataUrlNew(getSubDesignImage(currOpenSubDesign.value))
+      targetUrl = getSubDesignImage(currOpenSubDesign.value)
     } else {
-      targetUrl = await generalUtils.toDataUrlNew(currGeneratedResults.value.url)
+      targetUrl = currGeneratedResults.value.url
     }
-    return cmWVUtils.saveAssetFromUrl('png', targetUrl)
+    if (targetUrl.startsWith('chmix://')) {
+      const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
+      return cmWVUtils.documentToCameraRoll(path, name, type)
+    } else {
+      return cmWVUtils.saveAssetFromUrl('jpg', await generalUtils.toDataUrlNew(targetUrl, 'jpg'))
+    }
   }
   const saveVideoCb = () => {
     if (currGeneratedResults.value.video) {
@@ -72,9 +77,9 @@ const useActionSheetCm = () => {
         cb: () => {
           savePhotoCb()
             .then((data) => {
-              const { flag, msg } = data
+              const { flag } = data
               if (flag === '1') {
-                throw new Error(msg)
+                throw new Error(data.msg)
               }
               notify({
                 group: 'success',
