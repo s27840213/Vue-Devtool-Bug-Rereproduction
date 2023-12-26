@@ -16,11 +16,11 @@ div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scrol
           class="pointer-events-none"
           :style="tab.styles"
           :iconName="tab.icon"
-          :iconColor="tab.disabled ? 'dark' : currActiveFeature === tab.icon || tabsPressed[index] ? 'yellow-cm' : 'white'"
+          :iconColor="tab.disabled ? 'lighter' : currActiveFeature === tab.icon || tabsPressed[index] ? 'yellow-cm' : 'white'"
           iconWidth="20px")
         span(
           class="typo-btn-sm whitespace-nowrap pointer-events-none transition-colors duration-200"
-          :class="tab.disabled ? 'text-dark' : currActiveFeature === tab.icon || tabsPressed[index] ? 'text-yellow-cm' : 'text-white'") {{ tab.text }}
+          :class="tab.disabled ? 'text-lighter' : currActiveFeature === tab.icon || tabsPressed[index] ? 'text-yellow-cm' : 'text-white'") {{ tab.text }}
       div(
         v-if="tab.icon === currActiveFeature && tab.subTabs"
         class="flex-center flex-col gap-4 bg-dark-1/50 rounded-full")
@@ -41,6 +41,7 @@ div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scrol
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
+import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import type { EditorFeature } from '@/types/editor'
@@ -71,6 +72,10 @@ const { t } = useI18n()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature, setMaskDataUrl } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
+
+const canvasStore = useCanvasStore()
+const { isAutoFilling } = storeToRefs(canvasStore)
+
 const { openImgSelecotr } = useImgSelectorStore()
 const { setCheckpoint } = useSteps()
 
@@ -127,17 +132,20 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0019'),
       panelType: '',
       hidden: editorType.value === 'hidden-message',
+      disabled: isAutoFilling.value,
     },
     {
       icon: 'ban',
       text: t('CM0029'),
       panelType: '',
       hidden: editorType.value === 'hidden-message',
+      disabled: isAutoFilling.value,
     },
     {
       icon: 'canvas',
       text: t('CM0053'),
       panelType: '',
+      disabled: isAutoFilling.value,
       // disabled: true,
     },
   ]
