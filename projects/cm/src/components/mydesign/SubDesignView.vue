@@ -2,7 +2,6 @@
 div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-border z-median")
   headerbar(
     class="editor-header box-border px-24"
-    :middGap="32"
     ref="headerbarRef")
     template(#left)
       back-btn(:customCallback="handleBackAction")
