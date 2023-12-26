@@ -1,11 +1,12 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template lang="pug">
 div(class="photo-setting")
-  span(class="photo-setting__title text-blue-1 text-H6") {{$t('NN0039')}}
+  span(class="photo-setting__title text-blue-1 text-H6") {{ $t('NN0039') }}
   div(class="photo-setting__grid mb-10")
     template(v-for="btnRow in btns")
       template(v-for="btn in btnRow")
-        nubtn(v-if="!btn.condition || btn.condition()"
+        nubtn(
+          v-if="!btn.condition || btn.condition()"
           :key="btn.name"
           :class="btn.extraClass"
           theme="edit"
@@ -14,9 +15,10 @@ div(class="photo-setting")
           :disabled="disableBtn(btn)"
           v-hint="disableBtn(btn) ? btn.hint : ''"
           @click="handleShow(btn.show)") {{ btn.label }}
-      component(v-if="btnRow.map(b => b.show).includes(show)"
+      component(
+        v-if="btnRow.map((b) => b.show).includes(show)"
         class="grid-full"
-        :key="show+'panel'"
+        :key="show + 'panel'"
         :is="show || 'div'"
         ref="popup"
         :imageAdjust="currLayerAdjust"
@@ -63,58 +65,69 @@ export default defineComponent({
     return {
       show: '',
       isSvgImage: false,
-      btns: [[
-        {
-          name: 'replaceImg',
-          label: this.$t('NN0913'),
-          extraClass: 'grid-full',
-          show: 'replaceImg',
-        }], [
-        {
-          name: 'overlay',
-          label: this.$t('NN0899'),
-          show: 'overlay',
-          extraClass: 'grid-full',
-          condition: () => {
-            return this.isAdmin
-          }
-        }], [
-        {
-          name: 'crop',
-          label: `${this.$t('NN0040')}`,
-          show: 'crop',
-          condition: (): boolean => {
-            const currTargetLayer = layerUtils.getCurrConfig
-            return currTargetLayer.type === LayerType.image ||
-              (currTargetLayer.type === LayerType.frame && (currTargetLayer as IFrame).clips.length === 1)
-          }
-        },
-        {
-          name: 'sliders',
-          label: `${this.$t('NN0042')}`,
-          show: 'popup-adjust'
-        }], [
-        {
-          name: 'shadow',
-          label: `${this.$t('NN0429')}`,
-          show: 'panel-photo-shadow',
-          hint: this.$t('NN0500'),
-          condition: (): boolean => {
-            const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-            if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
-              return (currLayer as IGroup).layers[subLayerIdx].type === LayerType.image
-            }
-            return currLayer.type === LayerType.image
-          }
-        },
-        {
-          name: 'BGRM',
-          label: this.$t('NN0043'),
-          show: 'remove-bg',
-          condition: () => {
-            return this.isImage && !this.isFrame && !this.inReviewMode
+      btns: [
+        [
+          {
+            name: 'replaceImg',
+            label: this.$t('NN0913'),
+            extraClass: 'grid-full',
+            show: 'replaceImg',
           },
-        }]
+        ],
+        [
+          {
+            name: 'overlay',
+            label: this.$t('NN0899'),
+            show: 'overlay',
+            extraClass: 'grid-full',
+            condition: () => {
+              return this.isAdmin
+            },
+          },
+        ],
+        [
+          {
+            name: 'crop',
+            label: `${this.$t('NN0040')}`,
+            show: 'crop',
+            condition: (): boolean => {
+              const currTargetLayer = layerUtils.getCurrConfig
+              return (
+                currTargetLayer.type === LayerType.image ||
+                (currTargetLayer.type === LayerType.frame &&
+                  (currTargetLayer as IFrame).clips.length === 1)
+              )
+            },
+          },
+          {
+            name: 'sliders',
+            label: `${this.$t('NN0042')}`,
+            show: 'popup-adjust',
+          },
+        ],
+        [
+          {
+            name: 'shadow',
+            label: `${this.$t('NN0429')}`,
+            show: 'panel-photo-shadow',
+            hint: this.$t('NN0500'),
+            condition: (): boolean => {
+              const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
+              if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
+                return (currLayer as IGroup).layers[subLayerIdx].type === LayerType.image
+              }
+              return currLayer.type === LayerType.image
+            },
+          },
+          {
+            name: 'BGRM',
+            label: this.$t('NN0043'),
+            show: 'remove-bg',
+            condition: () => {
+              return this.isImage && !this.isFrame && !this.inReviewMode
+            },
+          },
+        ],
       ] as IBtn[][],
     }
   },
@@ -141,7 +154,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState('imgControl', {
-      imageControlConfig: 'image'
+      imageControlConfig: 'image',
     }),
     ...mapGetters({
       currFunctionPanelType: 'getCurrFunctionPanelType',
@@ -157,7 +170,7 @@ export default defineComponent({
       isAdmin: 'user/isAdmin',
     }),
     ...mapState('shadow', {
-      handleId: 'handleId'
+      handleId: 'handleId',
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
@@ -176,7 +189,7 @@ export default defineComponent({
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
       const { index, type } = this.currSubSelectedInfo
-      const imageLayers = layers.flatMap(layer => {
+      const imageLayers = layers.flatMap((layer) => {
         if (layer.type === 'image') return layer
         if (layer.type === 'frame') {
           const frame = layer as IFrame
@@ -195,7 +208,7 @@ export default defineComponent({
         }
         return null
       })
-      return { ...imageLayers.find(layer => !!layer) }
+      return { ...imageLayers.find((layer) => !!layer) }
     },
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
@@ -204,8 +217,12 @@ export default defineComponent({
     //   return this.currLayer.previewSrc !== undefined
     // },
     isUploadingImg(): boolean {
-      return !(this.currLayer.srcObj.type && this.currLayer.srcObj.assetId && imageUtils.getSrc(this.currLayer.srcObj, 'prev'))
-    }
+      return !(
+        this.currLayer.srcObj.type &&
+        this.currLayer.srcObj.assetId &&
+        imageUtils.getSrc(this.currLayer.srcObj, 'prev')
+      )
+    },
   },
   watch: {
     currSelectedLayers: {
@@ -219,31 +236,47 @@ export default defineComponent({
         } else {
           this.isSvgImage = false
         }
-      }
-    }
+      },
+    },
   },
   methods: {
     ...mapMutations({
-      updateImgCtrlConfig: 'imgControl/UPDATE_CONFIG'
+      updateImgCtrlConfig: 'imgControl/UPDATE_CONFIG',
     }),
     disableBtn(btn: IBtn): boolean {
       if (btn.name === 'BGRM') {
-        return this.isUploadingImg || this.isHandleShadow || this.isSvgImage || this.show === 'panel-photo-shadow'
+        return (
+          this.isUploadingImg ||
+          this.isHandleShadow ||
+          this.isSvgImage ||
+          this.show === 'panel-photo-shadow'
+        )
         // return this.hasPreviewSrc || this.isHandleShadow || this.isSvgImage || this.show === 'panel-photo-shadow'
       }
       const currLayer = layerUtils.getCurrConfig as IImage
       if (!currLayer.styles) return false
       const { shadow } = currLayer.styles
       if (shadow) {
-        const isCurrLayerHanlingShadow = [this.handleId.layerId, this.handleId.subLayerId].includes(currLayer.id)
-        const isLayerNeedRedraw = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+        const isCurrLayerHanlingShadow = [this.handleId.layerId, this.handleId.subLayerId].includes(
+          currLayer.id,
+        )
+        const isLayerNeedRedraw =
+          shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
         const isShadowPanelOpen = this.currFunctionPanelType === FunctionPanelType.photoShadow
         if (btn.name === 'shadow') {
-          return (isCurrLayerHanlingShadow && !isShadowPanelOpen) ||
+          return (
+            (isCurrLayerHanlingShadow && !isShadowPanelOpen) ||
             this.isUploadImgShadow ||
             currLayer.previewSrc?.includes('data:image/png;base64') ||
-            store.state.file.uploadingAssets.some((e: { id: string }) => e.id === (layerUtils.getCurrConfig as IImage).tmpId)
-        } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
+            store.state.file.uploadingAssets.some(
+              (e: { id: string }) => e.id === (layerUtils.getCurrConfig as IImage).tmpId,
+            )
+          )
+        } else if (
+          ['remove-bg', 'crop'].includes(btn.name) &&
+          isLayerNeedRedraw &&
+          this.isHandleShadow
+        ) {
           return true
         }
       }
@@ -270,14 +303,11 @@ export default defineComponent({
         case 'replaceImg':
           popupUtils.openPopup('replace', undefined, {
             replaceImg: (img: IAssetPhoto | IPhotoItem) => {
-              const url = isIAssetPhoto(img) ? img.urls.prev
+              const url = isIAssetPhoto(img)
+                ? img.urls.prev
                 : imageUtils.getSrc({ type: 'unsplash', userId: '', assetId: img.id }, 'prev')
-              imageUtils.replaceImg(
-                imageUtils.toSrcObj(img),
-                url,
-                img.width / img.height,
-              )
-            }
+              imageUtils.replaceImg(imageUtils.toSrcObj(img), url, img.width / img.height)
+            },
           })
           return
         case 'panel-photo-shadow': {
@@ -294,28 +324,49 @@ export default defineComponent({
             const currLayer = layerUtils.getCurrLayer
             switch (currLayer.type) {
               case LayerType.group: {
-                const target = (currLayer as IGroup).layers.find(l => l.type === LayerType.image && l.active)
+                const target = (currLayer as IGroup).layers.find(
+                  (l) => l.type === LayerType.image && l.active,
+                )
                 if (target && target.type === LayerType.image) {
                   const { shadow } = (target as IImage).styles
-                  const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+                  const needRedrawShadow =
+                    shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
                   if (!(this.isHandleShadow && needRedrawShadow)) {
-                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                    layerUtils.updateLayerProps(
+                      layerUtils.pageIndex,
+                      layerUtils.layerIndex,
+                      { imgControl: true },
+                      layerUtils.subLayerIdx,
+                    )
                   }
                 }
                 break
               }
               case LayerType.image: {
                 const { shadow } = (currLayer as IImage).styles
-                const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+                const needRedrawShadow =
+                  shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
                 if (!(this.isHandleShadow && needRedrawShadow)) {
-                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
+                    imgControl: true,
+                  })
                 }
                 break
               }
               case LayerType.frame:
-                index = Math.max((layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === LayerType.image && l.active), 0)
+                index = Math.max(
+                  (layerUtils.getCurrLayer as IFrame).clips.findIndex(
+                    (l) => l.type === LayerType.image && l.active,
+                  ),
+                  0,
+                )
                 if (index >= 0) {
-                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                  frameUtils.updateFrameLayerProps(
+                    layerUtils.pageIndex,
+                    layerUtils.layerIndex,
+                    index,
+                    { imgControl: true },
+                  )
                 }
                 break
             }
@@ -339,7 +390,10 @@ export default defineComponent({
       if (colorPanel && colorPanel.contains(e.target as Node)) {
         return
       }
-      if (!(this.$refs.popup as any)[0].$el.contains(e.target as Node)) {
+      if (
+        (this.$refs.popup as any)[0].$el &&
+        !(this.$refs.popup as any)[0].$el.contains(e.target as Node)
+      ) {
         if (!this.isHandleShadow) {
           this.handleOutside()
         }
@@ -353,13 +407,13 @@ export default defineComponent({
         this.updateImgCtrlConfig({ adjust: newAdjust })
       }
 
-      if (layerUtils.getCurrLayer.type === 'frame' && (layerUtils.getCurrLayer as IFrame).clips[0].isFrameImg) {
-        frameUtils.updateFrameLayerStyles(
-          pageUtils.currFocusPageIndex,
-          this.currSelectedIndex,
-          0,
-          { adjust: newAdjust }
-        )
+      if (
+        layerUtils.getCurrLayer.type === 'frame' &&
+        (layerUtils.getCurrLayer as IFrame).clips[0].isFrameImg
+      ) {
+        frameUtils.updateFrameLayerStyles(pageUtils.currFocusPageIndex, this.currSelectedIndex, 0, {
+          adjust: newAdjust,
+        })
       }
 
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
@@ -370,14 +424,14 @@ export default defineComponent({
               pageUtils.currFocusPageIndex,
               this.currSelectedIndex,
               index,
-              { adjust: newAdjust }
+              { adjust: newAdjust },
             )
           } else {
             // case 2: one frame layer w/o selected clip, index = -1
             return frameUtils.updateFrameLayerAllClipsStyles(
               pageUtils.currFocusPageIndex,
               this.currSelectedIndex,
-              { adjust: newAdjust }
+              { adjust: newAdjust },
             )
           }
         }
@@ -386,7 +440,7 @@ export default defineComponent({
           pageUtils.currFocusPageIndex,
           this.currSelectedIndex,
           index,
-          { adjust: newAdjust }
+          { adjust: newAdjust },
         )
       }
       if (types.has('image') || types.has('group')) {
@@ -398,11 +452,11 @@ export default defineComponent({
           adjust: newAdjust,
           pageIndex: pageUtils.currFocusPageIndex,
           layerIndex: this.currSelectedIndex,
-          subLayerIndex: index >= 0 ? index : undefined
+          subLayerIndex: index >= 0 ? index : undefined,
         })
       }
-    }
-  }
+    },
+  },
 })
 </script>
 
