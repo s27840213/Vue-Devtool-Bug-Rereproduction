@@ -26,7 +26,7 @@ const useGenImageUtils = () => {
   const userStore = useUserStore()
   const { setPrevGenParams } = userStore
   const { prevGenParams } = storeToRefs(userStore)
-  const { useUsBucket } = storeToRefs(useUploadStore())
+  const { useUsBucket, uploadMap } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
   const {
     setInitImgSrc,
@@ -45,6 +45,7 @@ const useGenImageUtils = () => {
     currDesignId,
     initImgSrc,
     maskDataUrl,
+    currPrompt,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
@@ -70,18 +71,20 @@ const useGenImageUtils = () => {
   ): Promise<void> => {
     for (let i = 0; i < num; i++) {
       ids.unshift(generalUtils.generateRandomString(8))
-      unshiftGenResults('', ids[0])
+      unshiftGenResults('', ids[0], currPrompt.value)
     }
     try {
       await genImage(params, showMore, num, {
         onApiResponded,
-        onSuccess: (index, imgSrc) => {
+        onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
-          onSuccess && onSuccess(index, imgSrc)
+          !onlyUpdate && onSuccess && onSuccess(index, imgSrc)
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
-          const hint = `${hostId.value}:${userId.value},${generalUtils.generateTimeStamp()},${errorId}`
+          const hint = `${hostId.value}:${
+            userId.value
+          },${generalUtils.generateTimeStamp()},${errorId}`
           logUtils.setLogAndConsoleLog(`#${errorId}: ${reason} for ${ids[index]}: ${url}`)
           logUtils.uploadLog().then(() => {
             modalUtils.setModalInfo(
@@ -93,7 +96,7 @@ const useGenImageUtils = () => {
                   generalUtils.copyText(hint).then(() => {
                     notify({ group: 'success', text: '已複製' })
                   })
-                }
+                },
               },
             )
           })
@@ -110,18 +113,14 @@ const useGenImageUtils = () => {
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
       logUtils.uploadLog().then(() => {
-        modalUtils.setModalInfo(
-          t('CM0087'),
-          `${t('CM0088')}<br/>(${hint})`,
-          {
-            msg: t('STK0023'),
-            action() {
-              generalUtils.copyText(hint).then(() => {
-                notify({ group: 'success', text: '已複製' })
-              })
-            }
+        modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
+          msg: t('STK0023'),
+          action() {
+            generalUtils.copyText(hint).then(() => {
+              notify({ group: 'success', text: '已複製' })
+            })
           },
-        )
+        })
       })
       for (const id of ids) {
         removeGenResult(id)
@@ -142,7 +141,7 @@ const useGenImageUtils = () => {
       onError = undefined,
       onApiResponded = undefined,
     }: {
-      onSuccess?: (index: number, url: string) => void
+      onSuccess?: (index: number, url: string, onlyUpdate?: boolean) => void
       onError?: (index: number, url: string, reason: string) => void
       onApiResponded?: () => void
     } = {},
@@ -165,7 +164,9 @@ const useGenImageUtils = () => {
     }
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
-    const res = (await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)).data
+    const res = (
+      await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)
+    ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
@@ -193,6 +194,7 @@ const useGenImageUtils = () => {
           const subDesignId = ids[index]
           const promises = [
             saveDesignImageToDocument(initImgSrc.value, 'original', {
+              type: 'jpg',
               subDesignId,
             }),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
@@ -225,18 +227,22 @@ const useGenImageUtils = () => {
         RECORD_TIMING && testUtils.log(`polling ${index}`, '')
         // save result image to document
         try {
+          onSuccess && onSuccess(index, url)
+          RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'result', {
+            type: 'jpg',
             subDesignId: ids[index],
             thumbIndex: index,
           })
+          RECORD_TIMING && testUtils.log(`save-result ${index}`, '')
           const srcObj: SrcObj = {
             type: 'ios',
             assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/result`,
-            userId: '',
+            userId: 'jpg',
           }
 
           const imgSrc = imageUtils.getSrc(srcObj)
-          onSuccess && onSuccess(index, imgSrc)
+          onSuccess && onSuccess(index, imgSrc, true)
         } catch (error) {
           onError && onError(index, url, 'saveAssetFromUrl failed')
         }
@@ -250,36 +256,38 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('copy editor', { notify: false, setToLog: true })
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }))
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }), { forGenImage: true })
       : await cmWVUtils.copyEditor({
           width: pageWidth * contentScaleRatio.value,
           height: pageHeight * contentScaleRatio.value,
+          snapshotWidth: cmWVUtils.getSnapshotWidth(pageSize.value, 1080, 'short')
         })
     RECORD_TIMING && testUtils.log('copy editor', '')
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
-    RECORD_TIMING && testUtils.start('screenshot to blob', { notify: false, setToLog: true })
-    return new Promise<void>((resolve) => {
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`).then((dataUrl) => {
+    await Promise.all([
+      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`, 'jpg').then((dataUrl) => {
         setInitImgSrc(dataUrl)
-        const imageBlob = generalUtils.dataURLtoBlob(dataUrl)
-        RECORD_TIMING && testUtils.log('screenshot to blob', '')
+      }),
+      new Promise<void>(resolve => {
         RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
-        uploadImage(imageBlob, `${userId}/input/${requestId}_init`)
-          .then(async () => {
-            RECORD_TIMING && testUtils.log('upload screenshot', '')
-            console.log('screenshot:', new Date().getTime())
-            cleanup()
-            resolve()
-          })
-          .catch((error) => {
-            logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
-            throw error
-          })
+        cmWVUtils.uploadFileToUrl(
+          { path: 'screenshot', name: imageId, type: 'jpg' },
+          uploadMap.value ?? {},
+          `${userId}/input/${requestId}_init`,
+        ).then(() => {
+          RECORD_TIMING && testUtils.log('upload screenshot', '')
+          console.log('screenshot:', new Date().getTime())
+          cleanup()
+          resolve()
+        }).catch((error) => {
+          logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
+          throw error
+        })
       })
-    })
+    ])
   }
 
   const uploadMaskAsImage = async (userId: string, requestId: string) => {

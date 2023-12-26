@@ -2,7 +2,7 @@
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { IColorKeys } from '@nu/vivi-lib/interfaces/color'
+import { IColorKeys, colorTable } from '@nu/vivi-lib/interfaces/color'
 import { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
@@ -60,6 +60,7 @@ export default defineComponent({
     inImageEditor(): boolean {
       return this.editorType === 'image'
     },
+    // eslint-disable-next-line vue/no-unused-properties
     isSettingTabsOpen(): boolean {
       return this.editorTypeTemplate && this.tabs.length > 0
     },
@@ -839,25 +840,25 @@ export default defineComponent({
       return (tab.disabled || this.isLocked) ? 'gray-2' : this.tabActive(tab) ? 'white' : 'black-4'
     },
     // eslint-disable-next-line vue/no-unused-properties
-    customContainerStyles(isSubContainer: boolean): { [index: string]: string } {
-      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
+    BGColor() {
       return {
-        backgroundColor: '#141414',
-        ...(this.isSettingTabsOpen === isSubContainer && {
-          maskImage: this.contentEditable ? 'none'
-            : `linear-gradient(to right,
-          transparent 0, black ${this.leftOverflow ? '56px' : 0},
-          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
-        }),
-        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' }),
-        ...(isSubContainer && { paddingLeft: '0px' })
+        backgroundColor: colorTable['black-1']
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    subTabStyles(): { [index: string]: string } {
+    customContentStyles(isSub = false) {
+      if (isSub) {
+        return {
+          ...(this.isTablet && { justifyContent: 'center', gridTemplateColumns: 'auto auto' })
+        }
+      }
+      return {}
+    },
+    // eslint-disable-next-line vue/no-unused-properties
+    customContainerStyles(isSub: boolean): { [index: string]: string } {
       return {
-        backgroundColor: '#141414',
-        ...(this.isTablet && { justifyContent: 'center', gridTemplateColumns: 'auto auto' })
+        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' }),
+        ...(isSub && { paddingLeft: '0px' })
       }
     },
   }

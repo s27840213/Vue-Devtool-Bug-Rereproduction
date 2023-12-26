@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 
 const useStateInfo = () => {
   const { path } = toRefs(useRoute())
+  const { currentRoute } = useRouter() 
   const editorStore = useEditorStore()
 
   // #region routing state
@@ -15,7 +16,7 @@ const useStateInfo = () => {
   const atDescription = computed(() => path.value === '/description')
   const atEditor = computed(() => path.value === '/editor')
   const atEventTester = computed(() => path.value === '/nativeevttest')
-  const atScreenshot = computed(() => path.value.startsWith('/screenshot'))
+  const atScreenshot = computed(() => currentRoute.value.name === 'Screenshot')
   const atNonUI = computed(() => atScreenshot.value || atEventTester.value)
   // #endregion
 

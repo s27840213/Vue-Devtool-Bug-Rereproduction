@@ -998,9 +998,8 @@ class AssetUtils {
     const allLayers = this.getLayers(targetPageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-      if (layer.type !== 'image') return false
-
-      if (this.isShrinkSizeAsPinchPage) return
+      if (layer.type !== 'image' || 
+        this.isShrinkSizeAsPinchPage) return false
 
       return layer.type === 'image' && !layer.moved && (layer as IImage).srcObj.assetId === assetId
     }) as Array<IImage>

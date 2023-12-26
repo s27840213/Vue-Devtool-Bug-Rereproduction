@@ -62,6 +62,7 @@ const useCanvasUtils = (
     isInCanvasLastStep,
     drawingColor,
     checkPointStep,
+    isAutoFilling,
   } = storeToRefs(canvasStore)
 
   const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
@@ -167,24 +168,19 @@ const useCanvasUtils = (
     return isBrushMode ? getBrushColor(drawingColor.value) : '#fdd033'
   })
 
-  const createInitCanvas = (width: number, height: number) => {
-    if (sourceCanvas && sourceCanvas.value) {
-      sourceCanvas.value.width = width
-      sourceCanvas.value.height = height
+  const createInitCanvas = (canvas = sourceCanvas?.value, width: number, height: number) => {
+    if (canvas) {
+      canvas.width = width
+      canvas.height = height
 
-      setCanvas(sourceCanvas.value)
-      const targetCtx = sourceCanvas.value.getContext('2d')
+      setCanvas(canvas)
+      const targetCtx = canvas.getContext('2d')
       targetCtx && setCanvasCtx(targetCtx)
       if (targetCtx) {
         targetCtx.strokeStyle = drawingColor.value
         targetCtx.lineWidth = brushSize.value
         targetCtx.lineCap = 'round'
         targetCtx.lineJoin = 'round'
-      } else {
-        // I found sometimes the canvasCtx is null
-        setTimeout(() => {
-          createInitCanvas(width, height)
-        }, 200)
       }
     }
 
@@ -232,6 +228,7 @@ const useCanvasUtils = (
     if (targetCanvas) {
       targetCanvas.width = width
       targetCanvas.height = height
+      createInitCanvas(targetCanvas, width, height)
     }
   }
 
@@ -408,7 +405,7 @@ const useCanvasUtils = (
 
   onMounted(() => {
     if (wrapperRef && editorContainerRef) {
-      createInitCanvas(pageSize.value.width, pageSize.value.height)
+      createInitCanvas(sourceCanvas?.value, pageSize.value.width, pageSize.value.height)
       clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
       useEventListener(editorContainerRef, 'touchstart', disableTouchEvent)
@@ -450,7 +447,9 @@ const useCanvasUtils = (
     }
   }
 
-  const autoFill = () => {
+  const autoFill = async () => {
+    if (isAutoFilling.value) return
+
     if (canvas && canvas.value) {
       groupUtils.deselect()
       setIsAutoFilling(true)
@@ -462,32 +461,9 @@ const useCanvasUtils = (
           const tmpCtx = tmpCanvas.getContext('2d') as CanvasRenderingContext2D
           tmpCtx?.drawImage(img, 0, 0, pageSize.value.width, pageSize.value.height)
 
-          const pixels = tmpCtx?.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
-          const result = new ImageData(
-            new Uint8ClampedArray(pixels.data),
-            pageSize.value.width,
-            pageSize.value.height,
-          )
-          // The total number of pixels (RGBA values).
-          const bufferSize = pixels.data.length
-
-          // Iterate over every pixel to find the boundaries of the non-transparent content.
-          for (let i = 0; i < bufferSize; i += 4) {
-            // Check the alpha (transparency) value of each pixel.
-            if (pixels.data[i + 3] === 0) {
-              result.data[i] = 255
-              result.data[i + 1] = 114
-              result.data[i + 2] = 98
-              result.data[i + 3] = 255
-            } else {
-              // If the pixel is not transparent, set it to transparent.
-              result.data[i + 3] = 0
-            }
-          }
-          // canvasCtx.value.putImageData(result, 0, 0)
-          tmpCtx?.putImageData(result, 0, 0)
-
-          await downloadCanvas(tmpCanvas)
+          tmpCtx.globalCompositeOperation = 'source-out'
+          tmpCtx.fillStyle = drawingColor.value
+          tmpCtx.fillRect(0, 0, pageSize.value.width, pageSize.value.height)
 
           canvasCtx.value.save()
           canvasCtx.value.shadowBlur = 0 // Blur level
@@ -671,10 +647,12 @@ const useCanvasUtils = (
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
+
+    setIsAutoFilling(false)
     imageUtils.imgLoadHandler(`chmix://screenshot/${imageId}?lsize=${size}`, async (img) => {
       if (canvasCtx && canvasCtx.value) {
         cb && cb(img)
-        // cleanup()
+        cleanup()
       }
     })
   }

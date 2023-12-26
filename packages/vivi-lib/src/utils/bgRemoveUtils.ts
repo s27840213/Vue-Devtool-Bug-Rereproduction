@@ -80,6 +80,7 @@ class BgRemoveUtils {
 
   removeBg(): void {
     console.time('removeBg total time')
+    logUtils.setLogAndConsoleLog('start removing bg')
     const { layers, pageIndex, index } = pageUtils.currSelectedInfo as ICurrSelectedInfo
 
     this.setIsProcessing(true)
@@ -102,17 +103,24 @@ class BgRemoveUtils {
     const aspect = imgWidth >= imgHeight ? 0 : 1
     const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
     const initSrc = imageUtils.getSrc((pageUtils.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
+    logUtils.setLogAndConsoleLog('send API')
     console.time('send API')
     store.dispatch('user/removeBg', { srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
+      logUtils.setLogAndConsoleLog('get API response')
       console.timeEnd('send API')
+
+      logUtils.setLogAndConsoleLog(JSON.stringify(data))
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('API success, start polling')
         console.time('polling')
         uploadUtils.polling(data.url, (json: any) => {
           if (json.flag === 0 && json.data) {
+            logUtils.setLogAndConsoleLog('polling success')
             this.reduceBgrmRemain()
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
+            logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
+            
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                 inProcess: LayerProcessType.none
@@ -135,9 +143,13 @@ class BgRemoveUtils {
             return true
           }
           if (json.flag === 1) {
+            logUtils.setLogAndConsoleLog('polling failed')
+
+            
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
+            logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
+            
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                 inProcess: LayerProcessType.none
@@ -152,9 +164,11 @@ class BgRemoveUtils {
           return false
         })
       } else {
+        logUtils.setLogAndConsoleLog('Bg remove failed')
         const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
         const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
+        logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
+        
         if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
           layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
             inProcess: false
@@ -171,15 +185,15 @@ class BgRemoveUtils {
 
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
-    logUtils.setLog('start removing bg')
+    logUtils.setLogAndConsoleLog('start removing bg')
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
     console.timeEnd('send API ~ get response time')
-    logUtils.setLog('finish removing bg')
+    logUtils.setLogAndConsoleLog('finish removing bg')
 
     console.time('generate frontend data time')
     if (data.flag === 0) {
       editorUtils.setCurrActivePanel('remove-bg')
-      logUtils.setLog('finish removing bg')
+      logUtils.setLogAndConsoleLog('finish removing bg')
       const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
       this.setAutoRemoveResult(autoRemoveResult)
       this.setInBgRemoveMode(true)

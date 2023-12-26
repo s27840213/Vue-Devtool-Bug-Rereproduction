@@ -9,7 +9,7 @@ div(
       :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
       v-if="currOpenSubDesign"
       @load="handleThumbLoaded"
-      :src="imageUtils.appendQuery(getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId), 'lsize', '900')")
+      :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
   div(class="flex flex-col gap-8 text-white w-full h-fit flex-1")
     div(class="flex items-center gap-4 w-full")
       svg-icon(
@@ -35,7 +35,6 @@ import { useUserStore } from '@/stores/user'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const { t } = useI18n()
 

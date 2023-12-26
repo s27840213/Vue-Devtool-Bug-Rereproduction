@@ -1,8 +1,11 @@
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
-const RECORD_START_DELAY = 2000
-const RECORD_END_DELAY = 100
+// the time unit is ms
+const FRAME_TIME = 16.667
+const RECORD_START_DELAY = 0
+const RECORD_END_DELAY = 1000
+const TRANSITION_TIME = 3000
 const IMG2_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
 const IMG1_EXAMPLE =
@@ -145,7 +148,7 @@ export default class PixiRecorder {
   private isImgReady = false
   private video = ''
 
-  constructor(src = IMG1_EXAMPLE, res = IMG2_EXAMPLE, fragment = fragment_slide) {
+  constructor(src: string = IMG1_EXAMPLE, res: string = IMG2_EXAMPLE, fragment = fragment_slide) {
     document.body.appendChild(this.pixi.view as HTMLCanvasElement)
     this.addImage(src, res)
       .then(() => {
@@ -232,7 +235,7 @@ export default class PixiRecorder {
     this.uniforms.nextImage = this.texture_res
     this.filter = new PIXI.Filter(undefined, fragment_opacity, this.uniforms)
     this.sprite_src.filters = [this.filter]
-    this._animate = (delta) => {
+    this._animate = () => {
       if (this.uniforms.opacity >= 1) {
         if (this.dynamicAnimateEndTime === 0) {
           this.dynamicAnimateEndTime = this.time
@@ -246,8 +249,8 @@ export default class PixiRecorder {
           }
         }
       }
-      this.time += delta
-      this.uniforms.opacity = this.time / 100
+      this.time += FRAME_TIME
+      this.uniforms.opacity = this.time / TRANSITION_TIME
     }
   }
 
@@ -257,15 +260,15 @@ export default class PixiRecorder {
     this.uniforms.nextImage = this.texture_res
     this.filter = new PIXI.Filter(undefined, fragment1, this.uniforms)
     this.sprite_src.filters = [this.filter]
-    this._animate = (delta) => {
+    this._animate = () => {
       if (this.uniforms.dispFactor >= 1) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
         if (this.canvasRecorder) {
           this.canvasRecorder.stop()
         }
       }
-      this.time += delta
-      this.uniforms.dispFactor = this.time / 100
+      this.time += FRAME_TIME
+      this.uniforms.dispFactor = this.time / TRANSITION_TIME
     }
   }
 
@@ -274,14 +277,14 @@ export default class PixiRecorder {
 
     this.filter = new PIXI.Filter(undefined, fragment3, this.uniforms)
     this.sprite_src.filters = [this.filter]
-    this._animate = (delta) => {
-      if (this.time / 300 >= Math.PI * 0.5) {
+    this._animate = () => {
+      if (this.time / TRANSITION_TIME >= Math.PI * 0.5) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
         if (this.canvasRecorder) {
           this.canvasRecorder.stop()
         }
       }
-      this.time += delta
+      this.time += FRAME_TIME
     }
   }
 
@@ -292,8 +295,8 @@ export default class PixiRecorder {
     this.uniforms.nextImage = this.texture_res
     this.filter = new PIXI.Filter(undefined, fragment_slide, this.uniforms)
     this.sprite_src.filters = [this.filter]
-    this._animate = (delta) => {
-      if (this.time >= 200) {
+    this._animate = () => {
+      if (this.time >= TRANSITION_TIME) {
         if (this.dynamicAnimateEndTime === 0) {
           this.dynamicAnimateEndTime = this.time
         } else {
@@ -306,8 +309,8 @@ export default class PixiRecorder {
           }
         }
       }
-      this.time += delta
-      this.uniforms.dispFactor = this.time / 200
+      this.time += FRAME_TIME
+      this.uniforms.dispFactor = this.time / TRANSITION_TIME
     }
   }
 
