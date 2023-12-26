@@ -136,7 +136,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       const { id, subId, type, width, height, prompt } = subDesign
       const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
-      const url = getSubDesignThumbUrl(type, id, subId)
+      const url = getSubDesignThumbUrl(type, id, subId, Math.max(width, height))
       pageUtils.setPages([pageUtils.newPage({ width, height })])
       assetUtils.addImage(url, width / height, {
         fit: 1,
@@ -155,7 +155,7 @@ export const useUserStore = defineStore('user', () => {
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
             id: subDesign.id,
-            url: getSubDesignThumbUrl(type, id, subDesign.id),
+            url: getSubDesignThumbUrl(type, id, subDesign.id, Math.max(width, height)),
             prompt,
           }
         }),
@@ -183,10 +183,11 @@ export const useUserStore = defineStore('user', () => {
       pageUtils.setPages(pages)
 
       const maskUrl = await convertToPinkBasedMask(
-        getTargetImageUrl(type, id, subId, 'mask'),
+        getTargetImageUrl(type, id, subId, 'mask', 400),
         width,
         height,
       )
+
       setMaskDataUrl(maskUrl)
       startEditing(type, {
         stateTarget: 'editing',
@@ -194,7 +195,7 @@ export const useUserStore = defineStore('user', () => {
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
             id: subDesign.id,
-            url: getSubDesignThumbUrl(type, id, subDesign.id),
+            url: getSubDesignThumbUrl(type, id, subDesign.id, Math.max(width, height)),
             prompt,
           }
         }),
@@ -466,7 +467,13 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const getTargetImageUrl = (type: string, id: string, subId: string, imgName: string) => {
+  const getTargetImageUrl = (
+    type: string,
+    id: string,
+    subId: string,
+    imgName: string,
+    size = 1600,
+  ) => {
     const assetId = `mydesign-${type}/${id}/${subId}/${imgName}`
     const srcObj: SrcObj = {
       type: 'ios',
@@ -476,16 +483,16 @@ export const useUserStore = defineStore('user', () => {
 
     const imgSrc = imageUtils.getSrc(srcObj)
 
-    return imgSrc
+    return imageUtils.appendQuery(imgSrc, 'lsize', `${size}`)
   }
 
-  const getDesignThumbUrl = (design: ICmMyDesign) => {
+  const getDesignThumbUrl = (design: ICmMyDesign, size = 400) => {
     const { id, subDesignInfo, thumbIndex, type } = design
-    return getTargetImageUrl(type, id, subDesignInfo[thumbIndex].id, 'result')
+    return getTargetImageUrl(type, id, subDesignInfo[thumbIndex].id, 'result', size)
   }
 
-  const getSubDesignThumbUrl = (type: string, id: string, subId: string) => {
-    return getTargetImageUrl(type, id, subId, 'result')
+  const getSubDesignThumbUrl = (type: string, id: string, subId: string, size = 400) => {
+    return getTargetImageUrl(type, id, subId, 'result', size)
   }
 
   const getSubDesignImage = (design: ICmSubDesign) => {

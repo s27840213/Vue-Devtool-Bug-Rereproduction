@@ -2,7 +2,6 @@
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(
     class="editor-header box-border px-24"
-    :middGap="32"
     ref="headerbarRef")
     template(#left)
       back-btn
@@ -112,13 +111,44 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
       div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
         img(
-          class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
+          class="result-showcase__card result-showcase__card--back"
           :class="{ 'is-flipped': !showVideo }"
           :src="currImgSrc")
-        img(
-          class="result-showcase__card result-showcase__card--front"
-          :class="{ 'is-flipped': showVideo }"
-          :src="initImgSrc")
+        div(class="result-showcase__card result-showcase__card--front"
+          :class="{ 'is-flipped': showVideo }")
+          img(
+            v-if="!isVideoGened"
+            class="w-full h-full absolute top-0 left-0"
+            :src="initImgSrc")
+          video(
+            v-else
+            class="w-full h-full absolute top-0 left-0"
+            ref="video"
+            webkit-playsinline
+            playsinline
+            loop
+            autoplay
+            mutes
+            :src="generatedResults[currGenResultIndex].video")
+        //- img(
+        //-   class="result-showcase__card result-showcase__card--front"
+        //-   :class="{ 'is-flipped': !showVideo }"
+        //-   :src="currImgSrc")
+        //- div(class="result-showcase__card result-showcase__card--back" :class="{ 'is-flipped': showVideo }")
+        //-   img(
+        //-     v-if="!isVideoGened"
+        //-     class="w-full h-full absolute top-0 left-0 object-cover"
+        //-     :src="initImgSrc")
+        //-   video(
+        //-     v-else
+        //-     class="w-full h-full absolute top-0 left-0 object-cover"
+        //-     ref="video"
+        //-     webkit-playsinline
+        //-     playsinline
+        //-     loop
+        //-     autoplay
+        //-     mutes
+        //-     :src="generatedResults[currGenResultIndex].video")
       div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"

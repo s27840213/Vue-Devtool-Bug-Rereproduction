@@ -222,7 +222,7 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 const { reset } = useSteps()
 
 // #region generating function
-const checkIsGenerating = () => {
+const waitForGenerating = () => {
   return new Promise<void>((resolve) => {
     const check = () => {
       if (isGenerating.value) {
@@ -336,9 +336,7 @@ const handleGenerate = async () => {
     setCurrDesignId(generalUtils.generateAssetId())
   }
 
-  if (isGenerating.value) {
-    await checkIsGenerating()
-  }
+  await waitForGenerating()
 
   await genImageFlow(getGenParams(), false, 2, {
     onApiResponded: () => {

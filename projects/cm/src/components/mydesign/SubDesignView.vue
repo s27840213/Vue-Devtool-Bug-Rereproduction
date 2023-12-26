@@ -2,7 +2,6 @@
 div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-border z-median")
   headerbar(
     class="editor-header box-border px-24"
-    :middGap="32"
     ref="headerbarRef")
     template(#left)
       back-btn(:customCallback="handleBackAction")
@@ -30,45 +29,13 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
           :key="design.id"
           class="relative"
           @click="selectDesign(design)")
-          img(
-            class="w-full rounded-20"
-            :src="imageUtils.appendQuery(getSubDesignThumbUrl(design.type, design.id, design.subId), 'lsize', '300')")
+          img(class="w-full rounded-20" :src="getSubDesignThumbUrl(design.type, design.id, design.subId)")
           svg-icon(
             class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
             iconName="more_horizontal"
             iconWidth="22px"
             @click.stop="editDesign(design)")
     sub-design-detail
-    //- div(
-    //-   v-show="currOpenSubDesign && subDesignThumbLoaded"
-    //-   class="absolute top-0 left-0 flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
-    //-   div(v-if="currOpenSubDesign" class="w-fit h-fit overflow-hidden rounded-8")
-    //-     img(
-    //-       class="object-contain"
-    //-       :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
-    //-       :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
-    //-       v-if="currOpenSubDesign"
-    //-       @load="handleThumbLoaded"
-    //-       :src="imageUtils.appendQuery(getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId), 'lsize', '900')")
-    //-   div(class="flex flex-col gap-8 text-white w-full h-fit flex-1")
-    //-     div(class="flex items-center gap-4 w-full")
-    //-       svg-icon(
-    //-         iconName="prompt"
-    //-         iconWidth="24px"
-    //-         @click="copyPrompt")
-    //-       span(class="typo-h6") {{ `${$t('CM0126')} :` }}
-    //-     div(class="h-full w-full grid grid-rows-1 grid-cols-[auto,auto] box-border" ref="promptContainerRef")
-    //-       div(
-    //-         v-if="currOpenSubDesign"
-    //-         class="text-left typo-body-sm line-clamp-base"
-    //-         :ref="'promptRef'"
-    //-         :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign.prompt}` }}
-    //-       svg-icon(
-    //-         v-if="promptRef?.scrollHeight !== promptRef?.clientHeight"
-    //-         iconColor="white"
-    //-         iconName="chevron-down"
-    //-         iconWidth="24px"
-    //-         @click="togglePrompt")
 </template>
 <script setup lang="ts">
 import useActionSheetCm from '@/composable/useActionSheetCm'
@@ -76,7 +43,6 @@ import { useUserStore } from '@/stores/user'
 import type { ICmMyDesign, ITmpSubDesign } from '@/types/user'
 import { notify } from '@kyvg/vue3-notification'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 // #region props & emits
 const emits = defineEmits(['closeSubDesignList'])
