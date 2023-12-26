@@ -9,7 +9,8 @@ export default new (class Utils {
       url: '/get-charmix-static',
       method: 'GET',
       params: {
-        us: us ? '1' : '0'
+        us: us ? '1' : '0',
+        accelerate: '1',
       },
     }))
   }
