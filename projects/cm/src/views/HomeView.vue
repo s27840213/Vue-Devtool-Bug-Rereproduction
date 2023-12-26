@@ -1,5 +1,15 @@
 <template lang="pug">
-div(class="box-border h-full w-full px-16 pt-12\ grid gap-16 overflow-scroll scrollbar-hide")
+div(v-if="isPhaseOne" class="box-border h-full w-full px-24 pt-12 grid gap-16 overflow-scroll scrollbar-hide")
+  feature-card(
+    v-for="(feature, idx) in phaseOneFeatures"
+    :key="idx"
+    :bgImg="feature.bgImg"
+    :bgImgB="feature.bgImgB"
+    :title="feature.title"
+    :subTitle="feature.subTitle"
+    theme="lg"
+    @click="feature.action && feature.action()")
+div(v-else class="box-border h-full w-full px-16 pt-12 grid gap-16 overflow-scroll scrollbar-hide")
   highlight-section(
     :title="$t('CM0001')"
     :description="$t('CM0002')"
@@ -46,24 +56,26 @@ const { openImgSelecotr } = useImgSelectorStore()
 // #region feature card
 type FeatureCard = {
   bgImg: string
+  bgImgB?: string
   title: string
+  subTitle?: string
   action?: () => void
 }
 const quickStartFeatures: FeatureCard[] = [
   {
-    bgImg: 'bg-replace',
+    bgImg: 'bg-replace.png',
     title: i18n.global.t('CM0005'),
   },
   {
-    bgImg: 'tmp',
+    bgImg: 'tmp.png',
     title: i18n.global.t('CM0006'),
   },
   {
-    bgImg: 'tmp',
+    bgImg: 'tmp.png',
     title: i18n.global.t('CM0007'),
   },
   {
-    bgImg: 'tmp',
+    bgImg: 'tmp.png',
     title: i18n.global.t('CM0008'),
     action: () => {
       openImgSelecotr({ targetEditorType: 'magic-combined' })
@@ -72,22 +84,22 @@ const quickStartFeatures: FeatureCard[] = [
 ]
 const aiArtFeatures: FeatureCard[] = [
   {
-    bgImg: 'surreal',
+    bgImg: 'surreal.png',
     title: i18n.global.t('CM0009'),
   },
   {
-    bgImg: 'reflection',
+    bgImg: 'reflection.png',
     title: i18n.global.t('CM0010'),
   },
   {
-    bgImg: 'hidden-message',
+    bgImg: 'hidden-message.png',
     title: i18n.global.t('CM0078'),
     action() {
       router.push('/description?target=hidden-message')
     },
   },
   {
-    bgImg: 'tmp',
+    bgImg: 'tmp.png',
     title: i18n.global.t('CM0011'),
   },
 ]
@@ -99,6 +111,30 @@ const featureCategories = [
   {
     category: i18n.global.t('CM0009'),
     content: aiArtFeatures,
+  },
+]
+// #endregion
+
+// #region phase one
+const isPhaseOne = true
+const phaseOneFeatures: FeatureCard[] = [
+  {
+    bgImg: "demo/powerful-fill/cover-a.png",
+    bgImgB: "demo/powerful-fill/cover-b.png",
+    title: i18n.global.t('CM0001'),
+    subTitle: i18n.global.t('CM0002'),
+    action() {
+      openImgSelecotr({ targetEditorType: 'powerful-fill' })
+    },
+  },
+  {
+    bgImg: "demo/hidden-message/cover-a.png",
+    bgImgB: "demo/hidden-message/cover-b.png",
+    title: i18n.global.t('CM0078'),
+    subTitle: i18n.global.t('CM0002'),
+    action() {
+      router.push('/description?target=hidden-message')
+    },
   },
 ]
 // #endregion

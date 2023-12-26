@@ -9,7 +9,7 @@ export type EditorStates = Array<PowerfulfillStates | HiddenMessageStates | Magi
 export type EditorFeature = 'none' | 'cm_brush' | 'selection' | 'add'
 export type PowerfulFillCanvasMode = 'brush' | 'erase' | 'move'
 
-export type DescriptionPanel = 'hidden-message-help' | 'hidden-message-invert' | 'hidden-message-bgrm'
+export type DescriptionPanel = 'hidden-message/help' | 'hidden-message/invert' | 'hidden-message/bgrm'
 
 // gen image options
 export type GenImageGroupOption = {
