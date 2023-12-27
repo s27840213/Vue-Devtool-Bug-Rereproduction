@@ -68,7 +68,7 @@ div(class="panel-download" :style="containerStyles")
         :title="noPageRange && rangeType === 'spec' ? `${$t('NN0823')}` : rangeTypeText"
         :iconName="'chevron-right'"
         :textSize="'body-SM'"
-        :textColor="noPageRange && rangeType === 'spec' ? 'text-red' : 'text-gray-2'"
+        :textColor="noPageRange && rangeType === 'spec' ? 'red' : 'gray-2'"
         @click="handleTypeSelectorAction('selectPage')")
       hr(class="full-width")
       nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"

@@ -7,6 +7,7 @@ import Components from 'unplugin-vue-components/vite'
 import { defineConfig, loadEnv } from 'vite'
 import svgSpritePlugin from 'vite-plugin-svg-sprite'
 import transformPlugin from 'vite-plugin-transform'
+import jsonImporter from 'node-sass-json-importer'
 
 function resolve(...dir: string[]) {
   return path.join(__dirname, ...dir)
@@ -55,6 +56,10 @@ export default defineConfig({
         replacement: resolve('../../packages/vivi-lib/src'),
       },
       {
+        find: '@nu/tailwind-lib',
+        replacement: resolve('../../packages/tailwind-lib'),
+      },
+      {
         find: '@i18n',
         replacement: resolve(
           process.env.NODE_ENV === 'production'
@@ -101,8 +106,11 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         additionalData: '@use "@nu/vivi-lib/assets/scss/utils" as *;',
+        importer: jsonImporter(),
       },
     },
+    // Specific post css config file folder.
+    postcss: '../../packages/tailwind-lib',
   },
   server: {
     port: 8082,

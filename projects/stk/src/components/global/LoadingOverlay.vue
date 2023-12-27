@@ -2,7 +2,7 @@
 Transition(name="fade")
   div(v-if="loadingOverlay.show" class="loading-overlay text-H6 text-white")
     div(class="loading-overlay__spinner")
-      svg-icon(class="spinner" iconName="spiner" iconWidth="24px")
+      svg-icon(class="spinner animate-spin" iconName="spinner" iconWidth="24px")
     div(v-for="(msg, idx) in loadingOverlay.msgs" :key="idx") {{ msg }}
 </template>
 
@@ -41,7 +41,6 @@ export default defineComponent({
     border-radius: 10px;
     .spinner {
       color: #D9D9D9;
-      animation: rotate 0.5s infinite linear;
     }
   }
   &::before {
@@ -61,12 +60,6 @@ export default defineComponent({
   &-enter-from,
   &-leave-to {
     opacity: 0;
-  }
-}
-
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
   }
 }
 </style>

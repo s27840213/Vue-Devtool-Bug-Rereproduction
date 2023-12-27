@@ -1,22 +1,31 @@
+import listApis from '@/apis/list'
 import { IListServiceContentDataItem, ILoginResult } from '@/interfaces/api'
+import { CustomWindow } from '@/interfaces/customWindow'
+import { IAsset } from '@/interfaces/module'
+import { IPage } from '@/interfaces/page'
+import router from '@/router'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
-import listApis from '@/apis/list'
+import modalUtils from './modalUtils'
+import pageUtils from './pageUtils'
+import uploadUtils from './uploadUtils'
 
-export interface IGeneralSuccessResponse {
+declare let window: CustomWindow
+
+export type GeneralSuccessResponse = {
   flag: '0'
 }
 
-export interface IGeneralFailureResponse {
-  flag: string
+export type GeneralFailureResponse = {
+  flag: '1' | '2'
   msg: string
 }
 
-type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
+export type GeneralResponse = GeneralSuccessResponse | GeneralFailureResponse
 
 export type IUserInfo = {
   hostId: string
@@ -26,9 +35,11 @@ export type IUserInfo = {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string,
-  flag: string,
-  locale: string,
+  modelName: string
+  flag: string
+  locale: string
+  userId: string
+  deviceScale: number
 }
 
 export interface IAlbum {
@@ -80,9 +91,19 @@ export interface ISaveAssetFromUrlResponse {
 }
 
 export interface IListAssetResponse {
+  flag: string,
   key: string
   assets: any[]
   nextPage: string
+  group?: string
+}
+
+export type FileSource = {
+  path: string,
+  name: string,
+  type: string
+} | {
+  fileId: string
 }
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
@@ -104,12 +125,40 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     flag: '0',
     locale: 'en',
     modelName: 'web',
+    userId: '',
+    deviceScale: 1,
   }
 
-  CALLBACK_MAPS = {}
+  CALLBACK_MAPS = {
+    base: [
+      'appBecomeActive',
+      'informWebResult'
+    ]
+  }
+
+  screenshotMap = {} as { [key: string]: (status: string) => void }
+
   everEntersDebugMode = false
   appLoadedSent = false
   tutorialFlags = {} as { [key: string]: boolean }
+  isAnyIOSImgOnError = false
+
+  appBecomeActive() {
+    console.log('app become active!')
+  }
+
+  informWebResult(data: { info: ({ event: string } & Record<string, unknown>) }) {
+    const { info } = data
+    const { event } = info
+    switch (event) {
+      case 'screenshot':
+        window.fetchDesign(info.query, info)
+        break
+      case 'screenshot-result':
+        this.screenshotMap[(info.options as { imageId: string }).imageId](info.status as string)
+        break
+    }
+  }
 
   get inBrowserMode() {
     return store.getters['cmWV/getInBrowserMode']
@@ -146,7 +195,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   sendAppLoaded() {
-    if (!this.appLoadedSent) {
+    if (!this.inBrowserMode && !this.appLoadedSent) {
       this.sendToIOS('REQUEST', this.makeAPIRequest('APP_LOADED', {}), true)
       this.appLoadedSent = true
     }
@@ -174,6 +223,13 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       // logUtils.setLogAndConsoleLog('Apple login failed')
       notify({ group: 'error', text: loginResult.msg })
     }
+  }
+
+  // Like picWVUtils, need merge.
+  async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<void> {
+    if (!generalUtils.isCm) return
+    store.commit('cmWV/UPDATE_userInfo', userInfo)
+    await this.callIOSAsHTTPAPI('UPDATE_USER_INFO', userInfo)
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {
@@ -230,7 +286,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     })
   }
 
-  async copyEditor(pageSize: { width: number, height: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async copyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     return await this.copyEditorCore(this.sendCopyEditor.bind(this), {
       senderArgs: [pageSize],
       preArgs: { noBg },
@@ -248,7 +304,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     this.setDuringCopy(false)
   }
 
-  async sendCopyEditor(pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async sendCopyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
     const { flag, cleanup } = await this.sendCopyEditorCore('editorSave', pageSize, imageId)
     return {
@@ -258,9 +314,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string): Promise<{flag: string, cleanup: () => void}> {
+  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -277,41 +333,130 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       y,
       ...(imageId && { imageId }),
       ...(imagePath && { imagePath }),
+      ...(outputType && { outputType }),
+      ...(quality && { quality }),
+      snapshotWidth: pageSize.snapshotWidth ?? width,
     }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
         if (action !== 'editorSave') return
-        this.deleteFile('screenshot', imageId ?? '', 'png', imagePath)
+        this.deleteFile('screenshot', imageId ?? '', outputType ?? 'jpg', imagePath)
+      }
+    }
+  }
+
+  createUrl(item: IAsset): string {
+    switch (item.type) {
+      case 5:
+      case 11:
+      case 10:
+        return `type=svg&id=${item.id}&ver=${item.ver}`
+      case 14:
+        return `type=svgImage2&id=${item.id}&ver=${item.ver}`
+      case 15:
+        return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
+      // case 7: deprecated
+      //   return `type=text&id=${item.id}&ver=${item.ver}`
+      case 1:
+        return `type=background&id=${item.id}&ver=${item.ver}`
+      default:
+        return ''
+    }
+  }
+
+  createUrlForJSON({ page = undefined, noBg = true }: { page?: IPage, noBg?: boolean } = {}): string {
+    page = page ?? pageUtils.currFocusPage
+    // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
+    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
+  }
+
+  async sendScreenshotUrl(query: string, { outputType, quality, forGenImage }: { outputType?: string, quality?: number, forGenImage?: boolean } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
+    if (this.inBrowserMode) {
+      const url = `${window.location.origin}/screenshot/?${query}`
+      window.open(url, '_blank')
+      return {
+        flag: '0',
+        imageId: '',
+        cleanup: () => { console.log('empty cleanup') }
+      }
+    }
+    const imageId = generalUtils.generateAssetId()
+    await this.callIOSAsHTTPAPI('INFORM_WEB', {
+      info: {
+        event: 'screenshot',
+        query,
+        imageId,
+        outputType,
+        quality,
+        forGenImage
+      },
+      to: 'Shot',
+    })
+    const status = await Promise.race([
+      new Promise<string>(resolve => {
+        this.screenshotMap[imageId] = resolve
+      }),
+      new Promise<string>(resolve => {
+        setTimeout(() => {
+          resolve('timeout')
+        }, 20000)
+      })
+    ])
+    switch (status) {
+      case 'error':
+      case 'timeout':
+        console.log(`Screenshot Failed at ShotWeb with status: ${status}`)
+        return {
+          flag: '1',
+          imageId,
+          cleanup: () => { console.log('empty cleanup') }
+        }
+      // case 'completed': pass
+    }
+    return {
+      flag: '0',
+      imageId,
+      cleanup: () => {
+        this.deleteFile('screenshot', imageId, outputType ?? 'jpg')
       }
     }
   }
 
   getEditorDimensions(pageSize: { width: number, height: number }): { x: number; y: number; width: number; height: number } {
-    const editorEle = document.getElementById('screenshot-target') as HTMLElement
-    const defaultDimensions = {
-      x: 0,
-      y: 0,
-      width: pageSize.width,
-      height: pageSize.height
+    if (router.currentRoute.value.name === 'Screenshot') {
+      return { x: 0, y: 0, width: pageSize.width, height: pageSize.height }
+    } else {
+      const editorEle = document.getElementById('screenshot-target') as HTMLElement
+      const defaultDimensions = {
+        x: 0,
+        y: 0,
+        width: pageSize.width,
+        height: pageSize.height
+      }
+      if (!editorEle) {
+        return defaultDimensions
+      }
+      let { width, height, x, y } = editorEle.getBoundingClientRect()
+      if (width <= 0) {
+        width = defaultDimensions.width
+      }
+      if (height <= 0) {
+        height = defaultDimensions.height
+      }
+      if (x <= 0) {
+        x = defaultDimensions.x
+      }
+      if (y <= 0) {
+        y = defaultDimensions.y
+      }
+      return { x, y, width, height }
     }
-    if (!editorEle) {
-      return defaultDimensions
-    }
-    let { width, height, x, y } = editorEle.getBoundingClientRect()
-    if (width <= 0) {
-      width = defaultDimensions.width
-    }
-    if (height <= 0) {
-      height = defaultDimensions.height
-    }
-    if (x <= 0) {
-      x = defaultDimensions.x
-    }
-    if (y <= 0) {
-      y = defaultDimensions.y
-    }
-    return { x, y, width, height }
+  }
+
+  getSnapshotWidth({ width, height }: { width: number, height: number }, targetSize: number, type: 'short' | 'long') {
+    const isVertical = height > width
+    return (isVertical && type === 'short' ? targetSize : targetSize / height * width) / this.getUserInfoFromStore().deviceScale
   }
 
   async getState(key: string): Promise<any | undefined> {
@@ -327,7 +472,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async deleteFile(key: string, name: string, type: string, subPath?: string) {
     if (this.inBrowserMode) return
-    await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
+    // await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
   }
 
   async fetchTutorialFlags() {
@@ -368,18 +513,27 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     await this.setState('everEntersDebugMode', { value: this.everEntersDebugMode })
   }
 
-  async listAsset(key: string, group?: string): Promise<void> {
-    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
-    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group })
-    if (!res) return
-    this.handleListAssetResult(res as IListAssetResponse)
-  }
+  async listAsset(key: string, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
+    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return;
+    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group });
 
-  async listMoreAsset(key: string, nextPage: number, group?: string): Promise<void> {
+    if(returnResponse) {
+      return res as IListAssetResponse
+    }
+    if (!res) return;
+
+    this.handleListAssetResult(res as IListAssetResponse);
+}
+
+  async listMoreAsset(key: string, nextPage: number, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
     if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
     if (nextPage < 0) return
     const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group, pageIndex: nextPage })
     if (!res) return
+
+    if(returnResponse) {
+      return res as IListAssetResponse
+    }
     this.handleListAssetResult(res as IListAssetResponse)
   }
 
@@ -426,11 +580,107 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return resList
   }
 
+  async isValidJson(data: object): Promise<boolean> {
+    if (!this.checkVersion('1.42')) return true
+    const valid = ((await this.callIOSAsHTTPAPI('IS_VALID_JSON', { object: data}))?.valid ?? '0')
+    return valid === '1'
+  }
+
   async addAsset(key: string, asset: any, limit = 100, group?: string) {
     if (this.inBrowserMode) return
     if (this.checkVersion('1.0.14')) {
       await this.callIOSAsHTTPAPI('ADD_ASSET', { key, asset, limit, group })
     }
+  }
+
+  async addJson(path: string ,name: string, content: {[index: string]: any}) {
+    if (this.inBrowserMode) return
+    if (this.checkVersion('1.0.14')) {
+      return await this.callIOSAsHTTPAPI('ADD_JSON', { path, name, content })
+    }
+  }
+
+  async getJson(path: string ,name: string) {
+    if (this.inBrowserMode) return
+    if (this.checkVersion('1.0.14')) {
+      return await this.callIOSAsHTTPAPI('GET_JSON', { path, name })
+    }
+  }
+
+  async deleteAsset(key: string, id: string, group?: string, updateList = true) {
+    return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+  }
+
+  async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
+  }
+
+  getDocumentPath(url: string) {
+    const urlObj = new URL(url)
+    const paths = (urlObj.hostname + urlObj.pathname).replace('//', '').split('/')
+    const path = paths.slice(0, paths.length - 1).join('/')
+    const name = paths[paths.length - 1]
+    const type = urlObj.searchParams.get('imagetype') ?? 'png'
+    return {
+      path,
+      name,
+      type
+    }
+  }
+
+  async documentToCameraRoll(path: string, name: string, type: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType }) as GeneralResponse
+  }
+
+  showUpdateModal(force = false) {
+    let locale = this.getUserInfoFromStore().locale
+    if (!['us', 'tw', 'jp'].includes(locale)) {
+      locale = 'us'
+    }
+    const prefix = 'exp_' + locale + '_'
+    const modalInfo = Object.fromEntries(Object.entries(store.getters['cmWV/getModalInfo']).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as string]
+      })
+    )
+    const options = {
+      imgSrc: modalInfo.img_url,
+      noClose: force,
+      noCloseIcon: force,
+      // backdropStyle: {
+      //   backgroundColor: 'rgba(24,25,31,0.3)'
+      // },
+      // cardStyle: {
+      //   backdropFilter: 'blur(10px)',
+      //   backgroundColor: 'rgba(255,255,255,0.9)'
+      // }
+    }
+    modalUtils.setModalInfo(
+      modalInfo.title,
+      modalInfo.msg,
+      {
+        msg: modalInfo.btn_txt,
+        // class: 'btn-black-mid',
+        // style: {
+        //   color: '#F8F8F8'
+        // },
+        action: () => {
+          const url = modalInfo.btn_url
+          if (url) { window.open(url, '_blank') }
+        }
+      },
+      {
+        msg: modalInfo.btn2_txt || '',
+        // class: 'btn-light-mid',
+        // style: {
+        //   border: 'none',
+        //   color: '#474A57',
+        //   backgroundColor: '#D3D3D3'
+        // }
+      },
+      options
+    )
   }
 }
 

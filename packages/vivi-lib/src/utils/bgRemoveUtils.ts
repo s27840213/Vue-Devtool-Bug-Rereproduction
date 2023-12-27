@@ -80,6 +80,7 @@ class BgRemoveUtils {
 
   removeBg(): void {
     console.time('removeBg total time')
+    logUtils.setLogAndConsoleLog('start removing bg')
     const { layers, pageIndex, index } = pageUtils.currSelectedInfo as ICurrSelectedInfo
 
     this.setIsProcessing(true)
@@ -102,17 +103,24 @@ class BgRemoveUtils {
     const aspect = imgWidth >= imgHeight ? 0 : 1
     const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
     const initSrc = imageUtils.getSrc((pageUtils.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
+    logUtils.setLogAndConsoleLog('send API')
     console.time('send API')
     store.dispatch('user/removeBg', { srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
+      logUtils.setLogAndConsoleLog('get API response')
       console.timeEnd('send API')
+
+      logUtils.setLogAndConsoleLog(JSON.stringify(data))
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('API success, start polling')
         console.time('polling')
         uploadUtils.polling(data.url, (json: any) => {
           if (json.flag === 0 && json.data) {
+            logUtils.setLogAndConsoleLog('polling success')
             this.reduceBgrmRemain()
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
+            logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
+            
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                 inProcess: LayerProcessType.none
@@ -135,9 +143,13 @@ class BgRemoveUtils {
             return true
           }
           if (json.flag === 1) {
+            logUtils.setLogAndConsoleLog('polling failed')
+
+            
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
+            logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
+            
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                 inProcess: LayerProcessType.none
@@ -152,9 +164,11 @@ class BgRemoveUtils {
           return false
         })
       } else {
+        logUtils.setLogAndConsoleLog('Bg remove failed')
         const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
         const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
+        logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
+        
         if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
           layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
             inProcess: false
@@ -171,15 +185,15 @@ class BgRemoveUtils {
 
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
-    logUtils.setLog('start removing bg')
+    logUtils.setLogAndConsoleLog('start removing bg')
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
     console.timeEnd('send API ~ get response time')
-    logUtils.setLog('finish removing bg')
+    logUtils.setLogAndConsoleLog('finish removing bg')
 
     console.time('generate frontend data time')
     if (data.flag === 0) {
       editorUtils.setCurrActivePanel('remove-bg')
-      logUtils.setLog('finish removing bg')
+      logUtils.setLogAndConsoleLog('finish removing bg')
       const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
       this.setAutoRemoveResult(autoRemoveResult)
       this.setInBgRemoveMode(true)
@@ -219,28 +233,25 @@ class BgRemoveUtils {
 
     const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
     const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
-    const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles
-    const { width, height } = targetLayerStyle
+    const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles as IImageStyle
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
-    const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON } = trimCanvas(this.canvas)
-    const previewSrc = trimedCanvas.toDataURL('image/png;base64')
+    const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
+    console.log(trimCanvas(this.canvas))
+    const previewSrc = this.canvas.toDataURL('image/png;base64')
 
     const { pageId, layerId } = this.bgRemoveIdInfo
     layerUtils.updateLayerProps(pageIndex, index, {
       previewSrc,
       trace: 1
     })
-    const newImageWidth = width * remainingWidthPercentage
-    const newImageHeight = height * remainingHeightPercentage
     layerUtils.updateLayerStyles(pageIndex, index, {
       x: targetLayerStyle.x + xShift,
       y: targetLayerStyle.y + yShift,
-      width: newImageWidth,
-      height: newImageHeight,
-      imgWidth: newImageWidth,
-      imgHeight: newImageHeight,
-      imgX: 0,
-      imgY: 0
+      ...this.getTrimmedCropStyles(targetLayerStyle, {
+        percentage: { w: remainingWidthPercentage, h: remainingHeightPercentage },
+        bound,
+        originSize: { w: this.canvas.width, h: this.canvas.height },
+      })
     })
     this.setInBgRemoveMode(false)
     pageUtils.setScaleRatio(this.prevPageScaleRatio)
@@ -261,51 +272,65 @@ class BgRemoveUtils {
     })
     console.log(cropJSON)
     try{
-      uploadUtils.uploadCropJSON(cropJSON, id ?? privateId).then(() => {
-        uploadUtils.uploadAsset('image', [previewSrc], {
-          addToPage: false,
-          pollingCallback: (json: IUploadAssetResponse) => {
-            const targetPageIndex = pageUtils.getPageIndexById(pageId)
-            const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-            const srcObj = {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index
-            }
-            layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-              srcObj,
-              trace: 1
-            })
-            store.commit('DELETE_previewSrc', {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index,
-              assetIndex: json.data.asset_index
-            })
-            const image = layerUtils.getLayer(pageIndex, index) as IImage
-            if (image.type === LayerType.image) {
-              if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
-                const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
-                const layerData = {
-                  config: image,
-                  layerInfo
-                }
-                imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+      uploadUtils.uploadAsset('image', [previewSrc], {
+        addToPage: false,
+        pollingCallback: (json: IUploadAssetResponse) => {
+          const targetPageIndex = pageUtils.getPageIndexById(pageId)
+          const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+          const srcObj = {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: teamId,
+            assetId: this.isAdmin ? json.data.id : json.data.asset_index
+          }
+          layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+            srcObj,
+            trace: 1
+          })
+          store.commit('DELETE_previewSrc', {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: teamId,
+            assetId: this.isAdmin ? json.data.id : json.data.asset_index,
+            assetIndex: json.data.asset_index
+          })
+          const image = layerUtils.getLayer(pageIndex, index) as IImage
+          if (image.type === LayerType.image) {
+            if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
+              const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
+              const layerData = {
+                config: image,
+                layerInfo
               }
+              imageShadowPanelUtils.handleShadowUpload(layerData, true)
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             }
-            stepsUtils.record()
-            this.setLoading(false)
-            this.setIsProcessing(false)
-          },
-          id: id ?? privateId,
-          needCompressed: false,
-          pollingJsonName: 'result2.json'
-        })
+          }
+          stepsUtils.record()
+          this.setLoading(false)
+          this.setIsProcessing(false)
+        },
+        id: id ?? privateId,
+        needCompressed: false,
+        pollingJsonName: 'result2.json'
       })
     } catch (error) {
       console.log(error)
     }
+  }
+
+  getTrimmedCropStyles(styles: IImageStyle, data: {
+    percentage: { w: number, h: number },
+    bound: { top: number, left: number, right: number, bottom: number }
+    originSize: { w: number, h: number }
+  }) {
+    const { percentage, bound, originSize } = data
+    const trimmedSizeRatio = (bound.right - bound.left) / (bound.bottom - bound.top)
+    const width = styles.width * percentage.w
+    const height = width / trimmedSizeRatio
+    const imgWidth = width / percentage.w
+    const imgHeight = height / percentage.h
+    const imgX = -bound.left / originSize.w * imgWidth
+    const imgY = -bound.top / originSize.h * imgHeight
+    return { width, height, imgWidth, imgHeight, imgX, imgY }
   }
 
   downloadCanvas() {
@@ -336,7 +361,7 @@ class BgRemoveUtils {
   saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
-    const { canvas: trimedCanvas, width, height, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+    const { canvas: trimedCanvas, width, height, } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
 
     const assetId = generalUtils.generateAssetId()

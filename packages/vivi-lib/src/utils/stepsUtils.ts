@@ -9,6 +9,7 @@ import GroupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import { nextTick, reactive } from 'vue'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
+import layerUtils from './layerUtils'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import shapeUtils from './shapeUtils'
@@ -31,8 +32,8 @@ class StepsUtils {
     return popupUtils.isPopupOpen
   }
 
-  get isInFirstStep(): boolean {
-    return (this.currStep === 0)
+  get isInFirstStep(): boolean {  
+    return (this.currStep === 0) || this.currStep === this.checkpointStep
   }
 
   get isInLastStep(): boolean {
@@ -221,6 +222,10 @@ class StepsUtils {
   async fillDataForLayersInPages(pages: IPage[]): Promise<IPage[]> {
     const pagePromises = []
     for (const [pageIndex, page] of pages.entries()) {
+      if ((generalUtils.isPic || generalUtils.isCm) && pageIndex === layerUtils.pageIndex) {
+        page.x = pageUtils.getCurrPage.x
+        page.y = pageUtils.getCurrPage.y
+      }
       if (pageUtils.isOutOfBound(pageIndex)) continue
       pagePromises.push(new Promise((resolve, reject) => {
         try {
@@ -279,8 +284,8 @@ class StepsUtils {
     // console.warn(generalUtils.deepCopy(this.steps))
   }
 
-  setCheckpoint() {
-    this.checkpointStep = this.currStep
+  setCheckpoint(step?: number) {
+    this.checkpointStep = step ?? this.currStep
   }
 
   async undo() {
@@ -313,17 +318,19 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep = this.checkpointStep
+    this.steps.length = this.currStep + 1
+    // @TODO: need to review with Daniel
     this.checkpointStep = -1
     await this.goToCurrStep()
   }
 
   async goToCurrStep() {
-    const activePageIndex = pageUtils.currActivePageIndex
+    const activePageIndex = this.steps[this.currStep].currActivePageIndex
+    // const activePageIndex = pageUtils.currActivePageIndex
     const pages = await this.fillDataForLayersInPages(generalUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     if (generalUtils.isPic) {
-      // console.warn(generalUtils.deepCopy(this.steps[this.currStep]))
       const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
       let layers: (IShape | IText | IImage | IGroup | IFrame)[]
       if (pages[pageIndex]) {
@@ -351,6 +358,7 @@ class StepsUtils {
       }
       GroupUtils.set(pageIndex, index, layers)
     } else {
+      if (generalUtils.isStk) stkWVUtils.scrollIntoPage(activePageIndex, 300)
       GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages, activePageIndex)
     }
     if (this.currStep > 0) {

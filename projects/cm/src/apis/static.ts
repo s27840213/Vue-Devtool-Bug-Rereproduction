@@ -4,12 +4,13 @@ import apiUtils from '@nu/vivi-lib/utils/apiUtils'
 import type { AxiosResponse } from 'axios'
 
 export default new (class Utils {
-  async getStatic(): Promise<AxiosResponse<StaticResponse>> {
+  async getStatic(us: boolean): Promise<AxiosResponse<StaticResponse>> {
     return apiUtils.requestWithRetry(() => axios.request<StaticResponse>({
       url: '/get-charmix-static',
       method: 'GET',
       params: {
-        us: 1
+        us: us ? '1' : '0',
+        accelerate: '1',
       },
     }))
   }

@@ -462,6 +462,20 @@ class GroupUtils {
     layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
       // calculate scale offset
       if (layer.type === 'image') {
+        // imgFrame should map exactly the same as the parent frame layer
+        if (layer.isFrameImg && tmpLayer.type === 'frame') {
+          const scale = tmpLayer.styles.width / layer.styles.width
+          layer.styles.width = tmpLayer.styles.width
+          layer.styles.height = tmpLayer.styles.height
+          layer.styles.x = tmpLayer.styles.x
+          layer.styles.y = tmpLayer.styles.y
+          layer.styles.scale = 1
+          layer.styles.imgWidth *= scale
+          layer.styles.imgHeight *= scale
+          layer.styles.imgX *= scale
+          layer.styles.imgY *= scale
+          return [layer]
+        }
         layer = layer as IImage
 
         layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale

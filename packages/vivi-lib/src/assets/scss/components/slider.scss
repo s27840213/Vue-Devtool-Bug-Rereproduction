@@ -3,7 +3,7 @@
 @mixin inputType($type: '') {
   &__slider {
     &--range {
-      @include setColors(blue-1, black-5, app-tab-active) using ($color) {
+      @include setColors(blue-1, black-5, yellow-cm) using ($color) {
         @include progressSlider($height: 3px,
           $thumbSize: 16px,
           $marginTop: -6.5px,
@@ -28,11 +28,11 @@
 
       margin: auto;
 
-      @include setColors(blue-1, white, app-tab-active) using ($color) {
+      @include setColors(blue-1, white, yellow-cm) using ($color) {
         --lower-color: #{$color};
       }
 
-      @include setColors(gray-4, black-3-5, app-tab-slider-bg-raw, $cmOpacity: 0.5) using ($color) {
+      @include setColors(gray-4, black-3-5, lighter, $cmOpacity: 0.5) using ($color) {
         --upper-color: #{$color};
 
         &[disabled] {
@@ -55,6 +55,28 @@
 
         &::-moz-range-thumb {
           border-color: setColor(white);
+        }
+
+        &[disabled] {
+          &::-webkit-slider-thumb {
+            background-color: setColor(black-3-5);
+          }
+
+          &::-moz-range-thumb {
+            background-color: setColor(black-3-5);
+          }
+        }
+      }
+
+      @include cm {
+        &::-webkit-slider-thumb {
+          border-color: setColor(yellow-cm);
+          box-shadow: 0px 0px 4px setColor(gray-1);
+        }
+
+        &::-moz-range-thumb {
+          border-color: setColor(yellow-cm);
+          box-shadow: 0px 0px 4px setColor(gray-1);
         }
 
         &[disabled] {

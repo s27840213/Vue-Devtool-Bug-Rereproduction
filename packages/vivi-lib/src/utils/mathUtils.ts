@@ -82,6 +82,35 @@ class MathUtils {
     return Math.min(Math.max(num, min), max)
   }
 
+  // cover: img keep ratio and larger than container.
+  // contain: img keep ratio and smaller than container.
+  calcFit(
+    mode: 'cover' | 'contain',
+    target: { width: number, height: number } | number,
+    container: { width: number, height: number }) {
+    const targetRatio = 
+      typeof target === 'number' ? target
+        : target.width / target.height
+    const containerRatio = container.width / container.height
+
+    if ((mode === 'cover' && targetRatio > containerRatio) ||
+      (mode === 'contain' && targetRatio < containerRatio)) {
+      return {
+        width: container.height * targetRatio,
+        height: container.height,
+        x: -(container.height * targetRatio - container.width) / 2,
+        y: 0,
+      }
+    } else {
+      return {
+        width: container.width,
+        height: container.width / targetRatio,
+        x: 0,
+        y: -(container.width / targetRatio - container.height) / 2,
+      }
+    }
+  }
+
   // getCornerPoints(angle: number, posInfo: Partial<IStyle>) {
   //   const { x, y, width, height } = posInfo
   //   const center = this.getCenter(posInfo)

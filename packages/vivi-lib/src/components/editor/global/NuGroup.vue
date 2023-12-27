@@ -53,5 +53,7 @@ export default defineComponent({
   position: absolute;
   transform-style: flat;
   transform-origin: top left;
+  width: 100%;
+  height: 100%;
 }
 </style>

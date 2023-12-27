@@ -12,6 +12,7 @@ export interface IMobileEditorState {
   // pageCenterPos: used to indicate the center pos of the page (editor)
   pageCenterPos: { x: number, y: number },
   isPinchingEditor: boolean,
+  isDisableSwipe: boolean
   pinchScale: number
   showMobileSubPanel: boolean
 }
@@ -27,6 +28,7 @@ const getDefaultState = (): IMobileEditorState => ({
   showMobilePanel: false,
   pageCenterPos: { x: -1, y: -1 },
   isPinchingEditor: false,
+  isDisableSwipe: false,
   pinchScale: 1,
   showMobileSubPanel: false,
 })
@@ -93,6 +95,9 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   SET_isPinchingEditor(state: IMobileEditorState, bool: boolean) {
     state.isPinchingEditor = bool
+  },
+  SET_isDisableSwipe(state: IMobileEditorState, bool: boolean) {
+    state.isDisableSwipe = bool
   },
   SET_pageCenterPos(state: IMobileEditorState, pos: { x: number, y: number }) {
     state.pageCenterPos.x = pos.x

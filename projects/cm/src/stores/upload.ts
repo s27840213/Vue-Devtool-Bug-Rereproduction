@@ -3,8 +3,15 @@ import { defineStore } from 'pinia'
 
 export const useUploadStore = defineStore('upload', () => {
   const uploadMap = ref(undefined as UploadMap | undefined)
+  const useUsBucket = ref(false)
+
   const setUploadMap = (value: UploadMap) => {
     uploadMap.value = value
   }
-  return { uploadMap, setUploadMap }
+
+  const setUseUsBucket = (value: boolean) => {
+    useUsBucket.value = value
+  }
+
+  return { uploadMap, useUsBucket, setUploadMap, setUseUsBucket }
 })

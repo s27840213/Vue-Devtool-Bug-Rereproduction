@@ -1,14 +1,14 @@
 <template lang="pug">
-div(class="w-full flex items-center justify-around")
+div(class="w-full flex-around-center")
   router-link(
     custom
     v-slot="{ navigate }"
     to="/")
     svg-icon(
       :iconName="'home-solid'"
-      :iconColor="atHome ? 'app-tab-active' : 'transparent'"
+      :iconColor="atHome ? 'yellow-cm' : 'transparent'"
       :iconWidth="'32px'"
-      :strokeColor="'app-tab-active'"
+      :strokeColor="atHome ? 'yellow-cm' : 'white'"
       @click="navigate")
   router-link(
     custom
@@ -16,8 +16,8 @@ div(class="w-full flex items-center justify-around")
     to="/mydesign")
     svg-icon(
       :iconName="'grid-solid'"
-      :iconColor="atMyDesign ? 'app-tab-active' : 'transparent'"
-      :strokeColor="'app-tab-active'"
+      :iconColor="atMyDesign ? 'yellow-cm' : 'transparent'"
+      :strokeColor="atMyDesign ? 'yellow-cm' : 'white'"
       :iconWidth="'32px'"
       @click="navigate")
 </template>

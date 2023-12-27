@@ -17,7 +17,7 @@ import PanelOrder from '@nu/vivi-lib/components/editor/panelMobile/PanelOrder.vu
 import PanelPhotoShadow from '@nu/vivi-lib/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelPosition from '@nu/vivi-lib/components/editor/panelMobile/PanelPosition.vue'
 import PanelRemoveBg from '@nu/vivi-lib/components/editor/panelMobile/PanelRemoveBg.vue'
-import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffect.vue'
+import PanelTextEffect from '@nu/vivi-lib/components/editor/panelMobile/PanelTextEffectMobile.vue'
 import { IAssetPhoto, IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'

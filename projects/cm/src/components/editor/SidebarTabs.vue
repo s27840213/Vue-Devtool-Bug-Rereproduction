@@ -1,52 +1,59 @@
 <template lang="pug">
-div(class="sidebar-tabs flex flex-col items-center gap-4 h-[350px] overflow-scroll scrollbar-hide")
+//- h-358 = 44 (item height) * 7.5 + 4 (gap) * 7 = show 7.5 items
+div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scroll scrollbar-hide")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
       v-if="!tab.hidden"
       :key="`${tab.icon}-${index}`"
-      class="w-44"
+      class="grid gap-4"
+      ref="tabsRef"
       :class="getTabTutorialClasses(tab.text)")
       div(
-        class="sidebar__tab flex flex-col items-center justify-center gap-2 box-border p-4"
+        class="sidebar-tabs__tabs"
         @click.stop="handleTabAction(tab)"
         @pointerdown.stop)
         svg-icon(
           class="pointer-events-none"
           :style="tab.styles"
           :iconName="tab.icon"
-          :iconColor="tab.disabled ? 'app-icon-dark' : currActiveFeature === tab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+          :iconColor="tab.disabled ? 'lighter' : currActiveFeature === tab.icon || tabsPressed[index] ? 'yellow-cm' : 'white'"
           iconWidth="20px")
         span(
-          class="typo-btn-sm whitespace-nowrap pointer-events-none"
-          :class="tab.disabled ? 'text-app-icon-dark' : 'text-app-btn-primary-text'") {{ tab.text }}
+          class="typo-btn-sm whitespace-nowrap pointer-events-none transition-colors duration-200"
+          :class="tab.disabled ? 'text-lighter' : currActiveFeature === tab.icon || tabsPressed[index] ? 'text-yellow-cm' : 'text-white'") {{ tab.text }}
       div(
         v-if="tab.icon === currActiveFeature && tab.subTabs"
-        class="flex flex-col items-center justify-center gap-2 bg-neutral-light-active/50 rounded-full")
+        class="flex-center flex-col gap-4 bg-dark-1/50 rounded-full")
         div(
           v-for="(subTab, index) in tab.subTabs"
           :key="`${subTab.icon}-${index}`"
-          class="flex flex-col items-center justify-center gap-2 box-border p-4"
+          class="sidebar-tabs__tabs"
           :class="getTabTutorialClasses(subTab.text)"
           @click.stop="handleTabAction(subTab)"
           @pointerdown.stop)
           svg-icon(
             :style="subTab.styles"
             :iconName="subTab.icon"
-            :iconColor="currActiveFeature === subTab.icon ? 'app-tab-active' : 'app-btn-primary-text'"
+            :iconColor="'white'"
             iconWidth="20px")
-          span(
-            class="typo-btn-sm whitespace-nowrap"
-            :class="true ? 'text-app-tab-default' : 'text-app-tab-disable'") {{ subTab.text }}
+          span(class="typo-btn-sm whitespace-nowrap" :class="true ? 'text-yellow-0' : 'text-lighter'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useSteps from '@/composable/useSteps'
+import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import type { EditorFeature } from '@/types/editor'
+import vuex from '@/vuex'
+import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
-const emits = defineEmits(['downloadMask'])
 
 interface ISidebarTab {
   icon: string
@@ -63,9 +70,14 @@ interface ISidebarTab {
 
 const { t } = useI18n()
 const editorStore = useEditorStore()
-const { setCurrActiveFeature } = editorStore
+const { setCurrActiveFeature, setMaskDataUrl } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
+
+const canvasStore = useCanvasStore()
+const { isAutoFilling } = storeToRefs(canvasStore)
+
 const { openImgSelecotr } = useImgSelectorStore()
+const { setCheckpoint } = useSteps()
 
 const addSubTabs = computed(() => {
   return [
@@ -120,51 +132,75 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0019'),
       panelType: '',
       hidden: editorType.value === 'hidden-message',
+      disabled: isAutoFilling.value,
     },
     {
       icon: 'ban',
       text: t('CM0029'),
       panelType: '',
       hidden: editorType.value === 'hidden-message',
+      disabled: isAutoFilling.value,
     },
     {
       icon: 'canvas',
       text: t('CM0053'),
       panelType: '',
+      disabled: isAutoFilling.value,
       // disabled: true,
     },
   ]
 })
 
-const { clearCtx, reverseSelection, autoFill } = useCanvasUtilsCm()
+const { clearCtx, reverseSelection, autoFill, getCanvasDataUrl } = useCanvasUtilsCm()
 
+const toggleFeature = (feature: EditorFeature) => {
+  if (currActiveFeature.value === feature) {
+    setCurrActiveFeature('none')
+  } else {
+    setCurrActiveFeature(feature)
+  }
+  groupUtils.deselect()
+}
 const handleTabAction = (tab: ISidebarTab) => {
   switch (tab.icon) {
     case 'selection':
+      setCheckpoint()
+      toggleFeature(tab.icon)
+      break
     case 'cm_brush':
+      setCheckpoint()
+      toggleFeature(tab.icon)
+      break
     case 'add': {
-      if (currActiveFeature.value === tab.icon) {
-        setCurrActiveFeature('none')
-      } else {
-        setCurrActiveFeature(tab.icon)
-      }
-
-      groupUtils.deselect()
+      toggleFeature(tab.icon)
+      cmWVUtils.callIOSAsHTTPAPI('MAKE_VIBRATE')
       break
     }
     case 'auto-fill': {
       autoFill()
+      toggleFeature('none')
       break
     }
     case 'reverse': {
       reverseSelection()
+      toggleFeature('none')
       break
     }
     case 'ban': {
       clearCtx()
+      toggleFeature('none')
       break
     }
     case 'canvas': {
+      setMaskDataUrl(getCanvasDataUrl() ?? '')
+      vuex.commit('canvasResize/SET_isResizing', true)
+      vuex.commit('mobileEditor/UPDATE_pinchScale', 1)
+      vuex.commit('SET_pageScaleRatio', 100)
+      pageUtils.updatePagePos(layerUtils.pageIndex, {
+        x: 0,
+        y: 0,
+      })
+      toggleFeature('none')
       break
     }
     case 'photo-rect':
@@ -190,28 +226,14 @@ const getTabTutorialClasses = (text: string) => {
     'tutorial-hidden-message-3--highlight': text === t('NN0494'),
   }
 }
+
+const tabsRef = ref<HTMLElement[] | null>(null)
+const tabsPressed = ref(Array(defaultEditorTabs.value.length).fill(false))
+useTapTransition(tabsRef, tabsPressed)
 </script>
 <style lang="scss" scoped>
-.sidebar-tabs {
-  // filter: drop-shadow(0px 0px 0px 20px #4444dd);
-  filter: drop-shadow(1px 1px 0px rgba(32, 32, 32, 0.2))
-    drop-shadow(-1px 1px 0px rgba(32, 32, 32, 0.2)) drop-shadow(1px -1px 0px rgba(32, 32, 32, 0.2))
-    drop-shadow(-1px -1px 0px rgba(32, 32, 32, 0.2));
-}
-
-.sub-tabs {
-  transition:
-    grid-template-rows 0.3s ease-in-out,
-    height 0.3s ease-in-out;
-}
-
-.open {
-  grid-template-rows: 1fr;
-  height: auto;
-}
-
-.close {
-  grid-template-rows: 0fr;
-  height: 0px;
+.sidebar-tabs__tabs {
+  @apply flex-center flex-col gap-4 w-44 h-44;
+  filter: drop-shadow(0px 0px 2px rgba(#202020, 0.8));
 }
 </style>

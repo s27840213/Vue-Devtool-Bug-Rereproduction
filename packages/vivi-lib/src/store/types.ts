@@ -52,8 +52,8 @@ export interface IEditorState {
    */
   controlState: {
     layerInfo?: ILayerInfo,
-    type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | '',
-    phase?: 'moving' | 'pinching'
+    type: 'move' | 'resize' | 'scale' | 'rotate' | 'pinch' | 'pageMove' | '',
+    phase?: 'start' | 'moving' | 'end',
     id?: string
   }
   currSelectedResInfo: Record<string, never> | {
@@ -117,7 +117,7 @@ export interface IEditorState {
   showGlobalErrorModal: boolean,
   newTemplateShownMode: boolean,
   modalInfo: { [key: string]: any },
-  disableLayerAction: boolean,
+  allowLayerAction: 'all' | 'none' | 'crop-only',
 }
 
 export enum SidebarPanelType {

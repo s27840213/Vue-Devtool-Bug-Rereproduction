@@ -4,7 +4,7 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
     template(#left)
       back-btn(:customCallback="handleBackAction")
     template(#middle)
-      span(class="typo-h5 text-app-text-secondary") {{ headerbarTitle }}
+      span(class="typo-h5 text-white") {{ headerbarTitle }}
     template(#right)
   //- Use v-for and v-show to keep scroll position when state switch.
   div(
@@ -14,9 +14,9 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
     class="grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)] gap-16 py-10 overflow-scroll scrollbar-hide")
     div(
       v-show="showInitOptions"
-      class="w-full box-border p-24 rounded-[20px] flex flex-col items-center justify-between gap-16 gradient--yellow")
-      div(class="w-full h-full flex items-center justify-between")
-        div(class="flex flex-col items-start justify-between gap-12")
+      class="w-full box-border p-24 rounded-20 flex-between-center flex-col gap-16 gradient--yellow")
+      div(class="w-full h-full flex-between-center")
+        div(class="flex-between-start flex-col gap-12")
           div(class="typo-h1") {{ $t('CM0030').toUpperCase() }}
           div(class="typo-body-md") {{ $t('CM0033') }}
           div(class="typo-body-md") {{ $t('CM0034') }}
@@ -25,7 +25,7 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       nubtn(
         icon="crown"
         size="mid-full") {{ $t('CM0032') }}
-    div(class="flex flex-col gap-16 text-app-btn-primary-text text-left typo-h6")
+    div(class="flex flex-col gap-16 text-white text-left typo-h6")
       template(
         v-for="op in config"
         :key="op.title")
@@ -68,6 +68,7 @@ const buildNumber = computed(() => {
   return buildNumber ? `v.${buildNumber}` : 'local'
 })
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'])
+const userId = computed(() => vuex.getters['user/getUserId'])
 
 const domainOptions = computed((): IOptionConfig[] => [
   {
@@ -84,7 +85,7 @@ const domainOptions = computed((): IOptionConfig[] => [
     iconName: 'global',
     selected: hostname.includes('cmrd'),
     callback: () => {
-      cmWVUtils.switchDomain('https://cmrd.vivipic.com')
+      cmWVUtils.switchDomain('https://cmrd.vivipic.com/')
     },
   },
   ...Array(3)
@@ -92,9 +93,9 @@ const domainOptions = computed((): IOptionConfig[] => [
     .map((_, index) => ({
       title: `localhost:808${index}`,
       iconName: 'global',
-      selected: hostname.includes(`localhost:808${index}`),
+      selected: hostname.includes(`localhost:808${index}/`),
       callback: () => {
-        cmWVUtils.switchDomain(`localhost:808${index}`)
+        cmWVUtils.switchDomain(`localhost:808${index}/`)
       },
     })),
   ...Array(6)
@@ -104,7 +105,7 @@ const domainOptions = computed((): IOptionConfig[] => [
       iconName: 'global',
       selected: hostname.includes(`dev${index}`),
       callback: () => {
-        cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com`)
+        cmWVUtils.switchDomain(`https://stkdev${index}.vivipic.com/`)
       },
     })),
 ])
@@ -260,7 +261,7 @@ const debugOptions: Array<IOptionConfig> = [
   },
 ]
 
-const segmentTitleStyle = 'py-4 border-0 border-b-[1px] border-solid border-app-slider-bg'
+const segmentTitleStyle = 'py-4 border-0 border-b-1 border-solid border-lighter/80'
 const initOptions = computed(
   () =>
     [
@@ -271,8 +272,8 @@ const initOptions = computed(
       { title: t('CM0043'), class: segmentTitleStyle },
       ...aboutOptions,
       {
-        title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}`, // Debug info
-        class: 'typo-body-sm text-center text-primary-lighter py-10',
+        title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}:${userId.value}`, // Debug info
+        class: 'typo-body-sm text-center text-lighter py-10',
         callback: handleDebugMode,
       },
       ...(debugMode.value ? debugOptions : []),

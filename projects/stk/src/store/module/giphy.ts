@@ -97,17 +97,17 @@ const getDefaultState = (): IGiphyState => ({
 })
 const state = getDefaultState()
 
-const $all = Object.freeze({
+const $all = () => ({
   active: true,
   keyword: '$all',
-  type: 0
-}) as ITag
+  type: 0,
+} as ITag)
 
 function favoritesCategoryActiveTag() {
   const { searchTarget } = state.favorites
   if (!isIGifCategory(searchTarget)) return ''
   const tags = state.favorites.categoriesContent[searchTarget.id]?.tags
-  const tag = find(tags, 'active') ?? $all
+  const tag = find(tags, 'active') ?? $all()
   return `${tag.keyword}:${tag.type}`
 }
 
@@ -399,7 +399,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
         },
         gifs: gifs.concat(data.content[0].list),
         // Add a special tag that show category search result instead tag result.
-        tags: data.tags ? [$all, ...data.tags].map((tag) => ({
+        tags: data.tags ? [$all(), ...data.tags].map((tag) => ({
           active: tag.active ?? false,
           keyword: tag.keyword,
           type: tag.type
@@ -534,7 +534,7 @@ const mutations: MutationTree<IGiphyState> = {
   UPDATE_searchResult(state: IGiphyState, result: { tags?: ITag[], content: IGif[] }) {
     if (result.tags && result.tags.length !== 0) {
       // Add a special tag that show category search result instead tag result.
-      state.searchResult.tags = [$all, ...result.tags]
+      state.searchResult.tags = [$all(), ...result.tags]
     }
     state.searchResult.content = result.content
   },
@@ -577,12 +577,13 @@ const getters: GetterTree<IGiphyState, unknown> = {
   isSearchingTag(state: IGiphyState) {
     return state.nextTagContent.keyword !== ''
   },
-  tagsBar(state: IGiphyState, getters) { // Data for tags.vue component
-    const target = getters.isSearchingCategory
-      ? state.searchResult.tags : state.tags
-    return target.map(processTags)
+  contentTags(state: IGiphyState) {
+    return state.tags.map(processTags)
   },
-  favoritesTagsBar(state: IGiphyState, getters) { // Data for tags.vue component
+  searchTags(state: IGiphyState) {
+    return state.searchResult.tags.map(processTags)
+  },
+  favoritesTagsBar(state: IGiphyState, getters) {
     const fsr = getters.favoritesSearchResult as IGiphyFavoritesSearchResult
     const target = fsr.title
       ? fsr.tags : []

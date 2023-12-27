@@ -1,15 +1,13 @@
 <template lang="pug">
 svg(
   v-if="iconName === 'loading'"
-  class="svg-icon"
-  :class="`text-${iconColor} svg-${iconName}` + (strokeColor ? `stroke-${strokeColor}` : '')"
+  :class="classes"
   viewBox="0 0 120 30"
   :style="iconStyles"
   v-html="loadingSvg")
 svg(
   v-else
-  class="svg-icon"
-  :class="`text-${iconColor} svg-${iconName} ` + (strokeColor ? `stroke-${strokeColor}` : '')"
+  :class="classes"
   :style="iconStyles")
   use(
     :xlink:href="`#${iconName}`"
@@ -19,6 +17,7 @@ svg(
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import self from './SvgIcon.vue'
+import colorTable from '@nu/tailwind-lib/colors.json'
 
 declare module 'vue' {
   export interface GlobalComponents {
@@ -30,10 +29,10 @@ const props = withDefaults(
   defineProps<{
     iconName: string
     iconWidth?: string
-    iconColor?: string
+    iconColor?: keyof typeof colorTable
     iconHeight?: string
     // only used for those who alread has stroke
-    strokeColor?: string
+    strokeColor?: keyof typeof colorTable
     sameSize?: boolean
   }>(),
   {
@@ -73,6 +72,16 @@ const loadingSvg = `
                     repeatCount="indefinite" />
         </circle>
       `
+
+const classes = computed(() => {
+  return {
+    'svg-icon': true,
+    [`svg-${props.iconName}`]: true,
+    [`text-${props.iconColor}`]: props.iconColor,
+    [`stroke-${props.strokeColor}`]: props.strokeColor,
+  }
+})
+
 const iconStyles = computed(() => {
   let width = props.iconWidth
   let height = props.iconHeight

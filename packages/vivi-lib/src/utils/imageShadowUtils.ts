@@ -7,6 +7,7 @@ import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { getDilate } from './canvasAlgorithms'
+import flipUtils from './flipUtils'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import logUtils from './logUtils'
@@ -146,7 +147,7 @@ class ImageShadowUtils {
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
     const { canvasT, canvasMaxSize } = this
-    const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow } } = config
+    const { styles: { width, height, imgWidth, imgHeight, shadow } } = config
     const { maxsize = 1600, middsize = 510 } = shadow
     const ctxT = this.canvasT.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
 
@@ -202,6 +203,14 @@ class ImageShadowUtils {
         const scaleRatio = img.naturalWidth / imgWidth
         const x = (canvas.width - drawCanvasW) * 0.5
         const y = (canvas.height - drawCanvasH) * 0.5
+        let imgX = config.styles.imgX
+        let imgY = config.styles.imgY
+        if (config.styles.horizontalFlip) {
+          imgX = flipUtils.imgFlipMapper(config, 'h').imgX
+        }
+        if (config.styles.verticalFlip) {
+          imgY = flipUtils.imgFlipMapper(config, 'v').imgY
+        }
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
         ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
       }
@@ -368,11 +377,17 @@ class ImageShadowUtils {
 
     const { styles } = config
     const { timeout = DRAWING_TIMEOUT, cb } = params
-    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
+    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
-
     const scaleRatio = img.naturalWidth / _imgWidth
+    let { imgX: _imgX, imgY: _imgY } = styles
+    if (config.styles.horizontalFlip) {
+      _imgX = flipUtils.imgFlipMapper(config, 'h').imgX
+    }
+    if (config.styles.verticalFlip) {
+      _imgY = flipUtils.imgFlipMapper(config, 'v').imgY
+    }
     const imgX = _imgX * scaleRatio
     const imgY = _imgY * scaleRatio
     const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
@@ -873,11 +888,12 @@ class ImageShadowUtils {
     store.commit('SET_srcState', { layerInfo, effect, effects, layerSrcObj, shadowSrcObj, layerState })
   }
 
-  setUploadId(id?: ILayerIdentifier) {
-    if (!id) {
-      id = { pageId: '', layerId: '', subLayerId: '' }
-    }
+  setUploadId(id: ILayerIdentifier, identifier?: string) {
+    id = { pageId: '', layerId: '', subLayerId: '' }
     store.commit('shadow/SET_UPLOAD_ID', id)
+    if (typeof identifier !== 'undefined') {
+      store.commit('shadow/SET_UPLOAD_IDENTIFIER', identifier)
+    }
   }
 
   setProcessId(id?: ILayerIdentifier) {

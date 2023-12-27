@@ -4,10 +4,8 @@
   // For formatter.
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    // Auto fix eslint error/warn.
-    "source.fixAll.eslint": true,
-    // Auto sort import.
-    "source.organizeImports": true
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
   },
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -31,6 +29,7 @@
   ],
   // For preventing @apply unknownAtRules warning: https://github.com/tailwindlabs/tailwindcss/discussions/5258#discussioncomment-1979394
   "css.customData": [".vscode/tailwind.json"],
+  "scss.lint.unknownAtRules": "ignore",
   // For Volar HTML tag/props casing setting.
   // "vue.complete.casing.status": false, // Prevent casing setting to show in vscode bottom-bar right side.
   "vue.complete.casing.tags": "kebab",
@@ -50,5 +49,6 @@
   "search.exclude": {
     "**/dist": true,
     "**/prerender": true
-  }
+  },
+  "tailwindCSS.experimental.configFile": "packages/tailwind-lib/tailwind.config.cjs"
 }

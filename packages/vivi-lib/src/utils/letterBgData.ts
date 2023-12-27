@@ -1,7 +1,7 @@
 import i18n from '@/i18n'
 import { ITextLetterBg } from '@/interfaces/format'
 import store from '@/store'
-import constantData from '@/utils/constantData'
+import constantData, { IEffectRaw } from '@/utils/constantData'
 import textUtils from '@/utils/textUtils'
 
 export const textLetterBgName = [
@@ -19,7 +19,7 @@ export const textLetterBgName = [
 export type ITextLetterBgName = typeof textLetterBgName[number]
 
 class LetterBGData {
-  getEffects() {
+  getEffects(): IEffectRaw[] {
     const noColor = constantData.toOptions([
       'xOffset200',
       'yOffset200',
@@ -212,7 +212,7 @@ class LetterBGData {
       key: 'rectangle-flag-custom',
       label: i18n.global.tc('NN0903'),
       options: withColor,
-    }, ...store.getters['user/isAdmin'] ? [{
+    }, {
       key: 'stretch-dog',
       label: i18n.global.tc('NN0914'),
       plan: 1,
@@ -231,7 +231,7 @@ class LetterBGData {
       key: 'stretch-dragon',
       label: i18n.global.tc('NN0917'),
       options: noColor,
-    }] : []]
+    }]
   }
 
   getLetterBgSetting(textBg: ITextLetterBg, index: number, head: boolean, tail: boolean) {
@@ -635,16 +635,16 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1010
       },
       'stretch-dog': {
-        lineHeight: 1.96, fontSpacing: 350,
-      },
-      'stretch-rabbit': {
         lineHeight: 1.96, fontSpacing: 280,
       },
+      'stretch-rabbit': {
+        lineHeight: 1.96, fontSpacing: 200,
+      },
       'stretch-cat': {
-        lineHeight: 1.96, fontSpacing: 270,
+        lineHeight: 1.96, fontSpacing: 200,
       },
       'stretch-dragon': {
-        lineHeight: 1.96, fontSpacing: 190,
+        lineHeight: 1.96, fontSpacing: 160,
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
@@ -671,7 +671,7 @@ class LetterBGData {
   }
 
   bgNeedRotate(name: ITextLetterBgName) {
-    return /(paper-tap|stretch-)/.test(name)
+    return /(paper-tap|stretch-|(triangle|rectangle)-flag)/.test(name)
   }
 }
 export default new LetterBGData()

@@ -1,19 +1,19 @@
 <template lang="pug">
 div(
   v-if="!srcPreprocessImg"
-  class="image-selector bg-app-bg text-app-tab-default \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
+  class="image-selector bg-dark-6 text-yellow-0 \ h-full w-full grid grid-rows-[auto,auto,auto,minmax(0,1fr),auto] grid-cols-1")
   //- 1. Top bar
-  div(class="box-border px-24 py-8 flex justify-between items-center")
+  div(class="box-border px-24 py-8 flex-between-center")
     back-btn
-    span(class="text-app-btn-primary-text") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
+    span(class="text-white") {{ $tc('CM0058', requireNum > 1 ? 2 : 1, { num: requireNum }) }}
     div(class="w-24")
   //- 2. Tabs for photo & stock
   tabs(
-    class="bg-app-tab-bg min-h-[52px] rounded-t-[24px]"
+    class="bg-dark-3 min-h-52 rounded-t-24"
     :tabs="[$t('STK0067'), $t('STK0069')]"
     v-model="tabIndex")
   //- 3. (Album bar or search bar) + demo img
-  div(class="bg-app-tab-bg box-border px-12 py-8 h-60 \ grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
+  div(class="bg-dark-3 box-border px-12 py-8 h-60 \ grid grid-cols-[minmax(0,1fr),auto,auto] gap-10")
     div(
       v-if="inPhoto"
       class="flex items-center gap-10"
@@ -27,7 +27,9 @@ div(
           :iconWidth="'12px'")
     search-bar(
       v-if="inStock"
-      class="text-app-text-primary"
+      class="text-dark"
+      :defaultKeyword="unsplash.keyword"
+      clear
       @search="searchUnsplash")
     //- Demo img
     div(
@@ -35,17 +37,17 @@ div(
       :key="img.assetId"
       class="relative flex justify-center"
       @click="selectDemo(i)")
-      img(class="w-44 h-44 object-cover rounded-[10px]" :src="img.assetId")
+      img(class="w-44 h-44 object-cover rounded-10" :src="img.assetId")
       span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
   //- 4-1. Photo
   div(
     v-if="inPhoto"
-    class="bg-app-tab-bg w-full h-full box-border grid \ grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
+    class="bg-dark-3 w-full h-full box-border grid \ grid-rows-[auto,minmax(0,1fr)] grid-cols-1")
     //- Photo selector
     div(
       v-if="isAlbumOpened"
-      class="img-selector__img-grid bg-app-bg overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
-      div(class="aspect-square flex flex-col items-center justify-center" @click="useCamera")
+      class="img-selector__img-grid bg-dark-6 overflow-scroll grid \ grid-cols-3 grid-flow-row gap-2")
+      div(class="aspect-square flex-center flex-col" @click="useCamera")
         svg-icon(class="mb-10" iconName="camera")
         span {{ $t('CM0060') }}
       div(
@@ -62,7 +64,7 @@ div(
           v-if="selected(img, 'ios')"
           class="absolute right-0 top-0"
           iconName="item-check"
-          iconColor="app-tab-active")
+          iconColor="yellow-cm")
       observer-sentinel(
         class="flex justify-center box-border py-12"
         v-if="initLoaded && !noMoreContent && !isLoadingContent"
@@ -72,7 +74,7 @@ div(
         svg-icon(
           class="mb-10"
           :iconName="'loading'"
-          iconColor="app-text-secondary")
+          iconColor="white")
     //- Album selector
     div(v-else class="flex flex-col gap-8 mx-10")
       div(
@@ -85,7 +87,7 @@ div(
           img(
             class="object-cover aspect-square w-80"
             :src="`chmix://cameraroll/${album.thumbId}?type=thumb`")
-          div(class="flex flex-col items-start justify-center gap-4")
+          div(class="flex-center-start flex-col gap-4")
             span {{ album.title }}
             span {{ album.albumSize }}
   //- 4-2. Stock
@@ -107,7 +109,7 @@ div(
           v-if="selected(img, 'unsplash')"
           class="absolute right-0 top-0"
           iconName="item-check"
-          iconColor="app-tab-active")
+          iconColor="yellow-cm")
     observer-sentinel(
       class="flex justify-center box-border py-12 col-span-2"
       :target="'.img-selector__img-grid'"
@@ -117,10 +119,10 @@ div(
         v-if="unsplashLoading"
         class="mb-10"
         :iconName="'loading'"
-        iconColor="app-text-secondary")
+        iconColor="white")
   //- 5. Multi-select candidate UI
   div(v-if="requireNum > 1 && targetImgs.length" class="mx-16 mt-10 mb-20 grid gap-20")
-    div(class="flex justify-between items-center h-32")
+    div(class="flex-between-center h-32")
       span {{ $t('CM0062', { num: requireNum }) }}
       nubtn(@click="sendToEditor") {{ $t('NN0744') }}
     div(class="flex flex-row gap-20")
@@ -134,46 +136,53 @@ div(
           iconName="close-btn"
           @click="pull(targetImgs, img)")
 //- Preprocess view
-div(v-else class="preprocess w-full h-full bg-app-bg text-app-text-secondary")
-  div(class="w-full h-[74%] pt-37 pb-20 flex justify-center items-center box-border")
+div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
+  div(class="w-full h-[74%] pt-37 pb-20 flex-center box-border")
     img(
-      class="w-full h-full object-cover object-center filter"
-      :class="{'grayscale': editorType === 'hidden-message', invert: isInvert}"
+      class="w-full h-full object-cover object-center"
+      :class="{ grayscale: editorType === 'hidden-message', invert: isInvert }"
       :src="srcPreprocessImg")
   div(class="p-24 pb-37 flex flex-col gap-16")
-    div(class="flex justify-between items-center typo-h5 py-8")
+    div(class="flex-between-center typo-h5 py-8")
       div(class="flex gap-8")
         span {{ $t('CM0080') }}
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-          @click="() => editorStore.setDescriptionPanel('hidden-message-invert')")
-      toggle-btn(class="payment__trial__toggle" v-model="isInvert" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
-    div(class="flex justify-between items-center typo-h5 py-8")
+          @click="() => editorStore.setDescriptionPanel('hidden-message/invert')")
+      toggle-btn(
+        class="payment__trial__toggle"
+        v-model="isInvert"
+        :width="36"
+        :height="22"
+        colorInactive="lighter"
+        colorActive="yellow-cm")
+    div(class="flex-between-center typo-h5 py-8")
       div(class="flex gap-8")
         svg-icon(
-          class="bg-app-tab-active text-app-bg rounded-full"
+          class="bg-yellow-cm text-dark-6 rounded-full"
           iconName="crown"
-          iconWidth="24px"
-        )
+          iconWidth="24px")
         span {{ $t('CM0082') }}
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-          @click="() => editorStore.setDescriptionPanel('hidden-message-bgrm')")
-      toggle-btn(class="payment__trial__toggle" v-model="isBgRemove" :width="36" :height="22" colorInactive="app-tab-slider-bg-raw" colorActive="app-tab-active")
-    div(class="flex justify-between items-center typo-h6")
-      nubtn(
-        theme="secondary"
-        size="sm"
-        @click="cancelPreprocess") {{ $t('NN0203') }}
-      span {{ $t('CM0083') }}
-      nubtn(
-        size="sm"
-        @click="applyPreprocess") {{ $t('CM0061') }}
+          @click="() => editorStore.setDescriptionPanel('hidden-message/bgrm')")
+      toggle-btn(
+        class="payment__trial__toggle"
+        v-model="isBgRemove"
+        :width="36"
+        :height="22"
+        colorInactive="lighter"
+        colorActive="yellow-cm")
+    footer-bar(
+      :title="$t('CM0083')"
+      @cancel="cancelPreprocess"
+      @apply="applyPreprocess")
 </template>
 
 <script lang="ts" setup>
+import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
@@ -194,10 +203,8 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
-import { find, pull } from 'lodash'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-
-const router = useRouter()
+import { find, pull } from 'lodash'
 
 const props = defineProps({
   requireNum: {
@@ -237,14 +244,14 @@ const albums = computed(() => [
   ...smartAlbum,
   ...(myAlbum.length > 0
     ? [
-      {
-        // 'My album' text
-        albumId: 'myAlbum',
-        albumSize: 0,
-        title: 'myAlbum',
-        thumbId: 'myAlbum',
-      },
-    ]
+        {
+          // 'My album' text
+          albumId: 'myAlbum',
+          albumSize: 0,
+          title: 'myAlbum',
+          thumbId: 'myAlbum',
+        },
+      ]
     : []),
   ...myAlbum,
 ])
@@ -268,7 +275,7 @@ const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
 const { editorType } = storeToRefs(editorStore)
-const { setPageSize, setImgAspectRatio } = editorStore
+const { setImgAspectRatio, setPageSize } = editorStore
 const { replaceImgFlag } = useImgSelectorStore()
 
 const toggleAlbum = () => {
@@ -311,8 +318,13 @@ const selectAlbum = (album: IAlbum) => {
 }
 const useCamera = () => {
   cmWVUtils.callIOSAsHTTPAPI('USE_CAMERA', undefined, { timeout: -1 }).then((img) => {
+    if (img && img.flag && img.msg === 'User canceled.') {
+      // The user didn't take a photo, do nothing.
+      return
+    }
     if (!img || img.flag) {
-      notify({ group: 'error', text: 'Camera img select error' })
+      notify({ group: 'error', text: `Camera img select error: ${img?.msg}` })
+      return
     }
     selectImage(img as IAlbumContent, 'ios')
   })
@@ -365,7 +377,7 @@ const selectDemo = (i: number) => {
   } else {
     targetImgs.push(demoImgs[i])
   }
-  sendToEditor()
+  beforeSendToEditor()
 }
 
 const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') => {
@@ -384,7 +396,20 @@ const selectImage = (img: IPhotoItem | IAlbumContent, type: 'ios' | 'unsplash') 
     userId: '',
     ratio: img.width / img.height,
   })
-  if (props.requireNum === 1) sendToEditor()
+  if (props.requireNum === 1) beforeSendToEditor()
+}
+
+const beforeSendToEditor = () => {
+  if (atEditor.value && editorType.value === 'hidden-message' && !srcPreprocessImg.value) {
+    srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
+    return
+  }
+  sendToEditor()
+
+  // prevent we adding the image to the editor too early, cause the image position in wrong place
+  if (!atEditor.value) {
+    setPageSize(900, 1600)
+  }
 }
 
 const sendToEditor = async () => {
@@ -396,31 +421,26 @@ const sendToEditor = async () => {
     )
   } else {
     const initAtEditor = atEditor.value
-    if (initAtEditor && editorType.value === 'hidden-message' && !srcPreprocessImg.value) {
-      srcPreprocessImg.value = imageUtils.getSrc(targetImgs[0])
-      return
+
+    if (!initAtEditor) {
+      setImgAspectRatio(targetImgs[0].ratio)
+      targetEditorType.value && editorStore.startEditing(targetEditorType.value)
     }
-    setImgAspectRatio(targetImgs[0].ratio)
-    if (!atEditor.value && targetEditorType.value) await router.push({ name: 'Editor', query: { type: targetEditorType.value } })
-    setPageSize(900, 1600)
+
     nextTick(() => {
       targetImgs.forEach((img) => {
         // if we aren't at editor at beginning, we need to fit the image, and don't need to record
-        assetUtils.addImage(
-          img,
-          img.ratio,
-          {
-            fit: initAtEditor ? 0.8 : 1,
-            record: initAtEditor,
-            styles: {
-              adjust: {
-                ...(editorType.value === 'hidden-message' && { saturate: -100 }),
-                invert: +isInvert.value
-              }
-            }
-          })
+        assetUtils.addImage(img, img.ratio, {
+          record: initAtEditor,
+          styles: {
+            adjust: {
+              ...(editorType.value === 'hidden-message' && { saturate: -100 }),
+              invert: +isInvert.value,
+            },
+          },
+          ...(!initAtEditor && { fit: 1 }),
+        })
       })
-      if (!initAtEditor) stepsUtils.reset()
       if (!initAtEditor || editorType.value === 'hidden-message') {
         groupUtils.deselect()
       }
@@ -435,6 +455,7 @@ const sendToEditor = async () => {
 cmWVUtils
   .getAlbumList()
   .then((res) => {
+    if (!res) return // For browser version
     if (res.flag === 1) {
       console.error(res.msg)
     } else {
@@ -482,5 +503,4 @@ const applyPreprocess = () => {
 // #endregion
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

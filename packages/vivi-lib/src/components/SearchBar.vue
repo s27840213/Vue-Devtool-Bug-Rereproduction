@@ -51,7 +51,8 @@ div(class="search-bar" :class="{vivisticker: vivisticker !== 'none'}")
 
 <script lang="ts">
 import i18n from '@/i18n'
-import { defineComponent } from 'vue'
+import { IColorKeys } from '@/interfaces/color'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -73,7 +74,7 @@ export default defineComponent({
       default: ''
     },
     color: {
-      type: Object,
+      type: Object as PropType<Record<string, IColorKeys>>,
       default: () => {
         return {
           close: 'gray-3',
