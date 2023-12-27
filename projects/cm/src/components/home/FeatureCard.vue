@@ -5,7 +5,7 @@ div(
   :style="cardStyles")
   compare-image(
     v-if="bgImgB"
-    class="absolute top-0 left-0"
+    class="feature-card__compare-image absolute top-0 left-0"
     :srcA="require(bgImg)"
     :srcB="require(bgImgB)"
   )
@@ -46,5 +46,14 @@ const cardStyles = computed(() => {
 .feature-card {
   background-repeat: no-repeat;
   background-size: cover;
+  &__compare-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;  
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.40) 0%, rgba(255, 255, 255, 0.12) 7.99%, rgba(0, 0, 0, 0.34) 75.64%, rgba(0, 0, 0, 0.40) 93.44%);
+  }
 }
 </style>
