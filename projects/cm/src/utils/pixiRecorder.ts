@@ -5,9 +5,9 @@ import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
 // the time unit is ms
 const FRAME_TIME = 16.667
-const RECORD_START_DELAY = 0
+const RECORD_START_DELAY = 200
 const RECORD_END_DELAY = 1000
-const TRANSITION_TIME = 3000
+const TRANSITION_TIME = 2800
 const IMG2_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
 const IMG1_EXAMPLE =
@@ -141,8 +141,8 @@ export default class PixiRecorder {
           const ratio = this.texture_wm.width / this.texture_wm.height
           this.sprite_wm.width = this.sprite_src.width * 0.5
           this.sprite_wm.height = this.sprite_wm.width / ratio
-          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 20
-          this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 20
+          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
+          this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
           this.pixi.stage.addChild(this.sprite_wm)
         }
         const renderer = this.pixi.renderer
@@ -152,7 +152,6 @@ export default class PixiRecorder {
 
         // @TEST use
         // const testCanvas = this.pixi.view as HTMLCanvasElement
-        // console.log('testCanvas.width, testCanvas.height', testCanvas.width, testCanvas.height)
         // document.body.appendChild(testCanvas)
         // testCanvas.style.position = 'absolute'
         // testCanvas.style.top = '0'
