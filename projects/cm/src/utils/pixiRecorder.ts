@@ -1,15 +1,19 @@
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
 // the time unit is ms
 const FRAME_TIME = 16.667
-const RECORD_START_DELAY = 0
+const RECORD_START_DELAY = 200
 const RECORD_END_DELAY = 1000
-const TRANSITION_TIME = 3000
+const TRANSITION_TIME = 2800
 const IMG2_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
 const IMG1_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
+const WATER_MARK = new URL('../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg', import.meta.url).href
+// const WATER_MARK = require('charmix-logo.png')
 
 export const fragment_opacity = `
   varying vec2 vTextureCoord;
@@ -91,34 +95,6 @@ export const fragment_slide = `
     }
   }
   `
-// export const fragment_slide = `
-//   varying vec2 vTextureCoord;
-//   uniform sampler2D uSampler;
-//   uniform highp vec4 inputSize;
-//   uniform highp vec4 outputFrame;
-
-//   vec2 mapCoord( vec2 coord ) {
-//     coord *= inputSize.xy / outputFrame.zw;
-//     return coord;
-//   }
-//   uniform sampler2D nextImage;
-//   uniform float dispFactor;
-
-//   void main() {
-//     vec2 uv = vTextureCoord;
-//     vec2 coord = mapCoord(vTextureCoord);
-
-//     vec4 img1 = texture2D(uSampler, vec2(uv.x, uv.y));
-//     vec4 img2 = texture2D(nextImage, vec2(coord.x, coord.y));
-//     if (uv.x < dispFactor) {
-//       gl_FragColor = texture2D(nextImage, vec2(coord.x, coord.y));
-//     } else if (uv.x == dispFactor) {
-//       gl_FragColor = mix(img1, img2, 0.5);
-//     } else {
-//       gl_FragColor = texture2D(uSampler, vec2(uv.x, uv.y));
-//     }
-//   }
-// `
 export const fragment3 = `
   varying vec2 vTextureCoord;
   uniform sampler2D uSampler;
@@ -138,6 +114,8 @@ export default class PixiRecorder {
   private sprite_src = null as null | PIXI.Sprite
   private texture_res = null as null | PIXI.Texture
   private sprite_res = null as null | PIXI.Sprite
+  private texture_wm = null as null | PIXI.Texture
+  private sprite_wm = null as null | PIXI.Sprite
   private filter = null as null | PIXI.Filter
   private uniforms = {} as { [key: string]: any }
   private time = 0
@@ -147,7 +125,7 @@ export default class PixiRecorder {
   private _genVideoResolver = null as null | (() => void)
   private isImgReady = false
   private video = ''
-
+  // charmix-logo
   constructor(src: string = IMG1_EXAMPLE, res: string = IMG2_EXAMPLE, fragment = fragment_slide) {
     document.body.appendChild(this.pixi.view as HTMLCanvasElement)
     this.addImage(src, res)
@@ -159,12 +137,20 @@ export default class PixiRecorder {
         this.pixi.view.width = this.sprite_src.width
         this.pixi.view.height = this.sprite_src.height
         this.pixi.stage.addChild(this.sprite_src)
-
+        if (this.sprite_wm && this.texture_wm) {
+          const ratio = this.texture_wm.width / this.texture_wm.height
+          this.sprite_wm.width = this.sprite_src.width * 0.5
+          this.sprite_wm.height = this.sprite_wm.width / ratio
+          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 30
+          this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
+          this.pixi.stage.addChild(this.sprite_wm)
+        }
         const renderer = this.pixi.renderer
         renderer.resize(this.sprite_src.width, this.sprite_src.height)
 
         this.addFilter(fragment)
 
+        // @TEST use
         // const testCanvas = this.pixi.view as HTMLCanvasElement
         // console.log('testCanvas.width, testCanvas.height', testCanvas.width, testCanvas.height)
         // document.body.appendChild(testCanvas)
@@ -173,6 +159,8 @@ export default class PixiRecorder {
         // testCanvas.style.width = '300px'
         // testCanvas.style.left = '0'
 
+        // if the genVideo func is called, but the imgs is not loaded yet,
+        // the genVideo func will await for the imgs to be loaded
         if (this._genVideoResolver) {
           this._genVideoResolver()
         }
@@ -328,8 +316,6 @@ export default class PixiRecorder {
   }
 
   addImage(img1: string, img2: string) {
-    console.log('img1', img1)
-    console.log('img2', img2)
     const p1 = new Promise<PIXI.Texture>((resolve) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
         this.texture_src = texture
@@ -346,11 +332,45 @@ export default class PixiRecorder {
         this.sprite_res = new PIXI.Sprite(texture)
         this.sprite_res.width = texture.width
         this.sprite_res.height = texture.height
-        console.log('img2 done')
+        console.log('img2 done', devicePixelRatio)
         resolve(texture)
       })
     })
-    return Promise.all([p1, p2])
+
+    // const p3 = new Promise<PIXI.Texture>((resolve) => {
+    //   // PIXI.Texture.fromURL(WATER_MARK, { resourceOptions: { scale: 10 } }).then((texture) => {
+    //   PIXI.Texture.fromURL(WATER_MARK, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
+    //     // safari bug: svg partially rendered, need to destroy it and reload it again
+    //     // see. https://github.com/pixijs/pixijs/issues/7204
+    //     texture.baseTexture.destroy()
+    //     PIXI.Texture.fromURL(WATER_MARK, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
+    //       this.texture_wm = texture
+    //       this.sprite_wm = new PIXI.Sprite(texture)
+    //       this.sprite_wm.width = texture.width
+    //       this.sprite_wm.height = texture.height
+    //       resolve(texture)
+    //     })
+    //   })
+    // })
+
+    const p3 = new Promise<PIXI.Texture>(resolve => {
+      imageUtils.imgLoadHandler(WATER_MARK, (img: HTMLImageElement) => {
+        imageShadowPanelUtils.svgImageSizeFormatter(img, 500, () => {
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = 500
+            const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+            ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight)
+            this.texture_wm = new PIXI.Texture(new PIXI.BaseTexture(canvas))
+            this.sprite_wm = new PIXI.Sprite(this.texture_wm)
+            resolve(this.texture_wm)
+          }
+        })
+      })
+    })
+
+
+    return Promise.all([p1, p2, p3])
   }
 }
 
