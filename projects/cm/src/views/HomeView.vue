@@ -10,6 +10,9 @@ div(class="box-border h-full w-full px-16 pt-12\ grid gap-16 overflow-scroll scr
   //- nubtn(
   //-   icon="crown"
   //-   @click="testNotify") Test Img Selector
+  nubtn(
+    icon="crown"
+    @click="exportVedio") Test video Selector
   template(
     v-for="(cate, i) in featureCategories"
     :key="i")
@@ -40,6 +43,7 @@ div(class="box-border h-full w-full px-16 pt-12\ grid gap-16 overflow-scroll scr
 import i18n from '@/i18n'
 import router from '@/router'
 import { useImgSelectorStore } from '@/stores/imgSelector'
+import PixiRecorder from '@/utils/pixiRecorder'
 
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -109,6 +113,12 @@ const featureCategories = [
 //     text: 'Test notification',
 //   })
 // }
+const exportVedio = () => {
+  const pixiRecorder = new PixiRecorder()
+  pixiRecorder.genVideo().then((res) => {
+    console.log('gen vedio finished', res)
+  })
+}
 </script>
 <style scoped lang="scss">
 .feature-section {
