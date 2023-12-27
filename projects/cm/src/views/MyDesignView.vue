@@ -23,7 +23,7 @@ div(
         class="relative")
         img(
           class="w-full rounded-20"
-          :src="imageUtils.appendQuery(getDesignThumbUrl(design), 'lsize', '300')"
+          :src="getDesignThumbUrl(design)"
           @click="selectDesign(design)")
         svg-icon(
           class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
@@ -55,7 +55,6 @@ import { useUserStore } from '@/stores/user'
 import type { ICmMyDesign, IMyDesignType } from '@/types/user'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 // #region hooks
 onBeforeRouteLeave((to, from) => {

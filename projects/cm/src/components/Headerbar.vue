@@ -31,9 +31,9 @@ withDefaults(
   }>(),
   {
     hide: false,
-    leftGap: 4,
-    middGap: 4,
-    rightGap: 4,
+    leftGap: 16,
+    middGap: 32,
+    rightGap: 16,
   },
 )
 

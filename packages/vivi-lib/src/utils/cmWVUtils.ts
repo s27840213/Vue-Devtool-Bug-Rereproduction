@@ -22,15 +22,16 @@ import logUtils from './logUtils'
 
 declare let window: CustomWindow
 
-export interface IGeneralFailureResponse {
-  flag: string
+export type GeneralSuccessResponse = {
+  flag: '0'
+}
+
+export type GeneralFailureResponse = {
+  flag: '1' | '2'
   msg: string
 }
 
-interface IGeneralResponse {
-  flag: string
-  msg?: string
-}
+export type GeneralResponse = GeneralSuccessResponse | GeneralFailureResponse
 
 export type IUserInfo = {
   hostId: string
@@ -40,11 +41,12 @@ export type IUserInfo = {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string,
-  flag: string,
-  locale: string,
+  modelName: string
+  flag: string
+  locale: string
   userId: string,
   storeCountry: string
+  deviceScale: number
 }
 
 export interface IAlbum {
@@ -109,7 +111,7 @@ export interface IPlanInfo {
   priceValue: string
 }
 
-export interface IGetProductResponse extends IGeneralResponse { 
+export type GetProductResponse = GeneralResponse & { 
   priceCurrency: string,
   monthly: {
     priceValue: string,
@@ -122,9 +124,17 @@ export interface IGetProductResponse extends IGeneralResponse {
   planInfo: IPlanInfo[]
 }
 
-export interface ISubscribeResponse extends IGeneralResponse { 
+export type SubscribeResponse = GeneralResponse & { 
   option: string,
   txid?: string,
+}
+
+export type FileSource = {
+  path: string,
+  name: string,
+  type: string
+} | {
+  fileId: string
 }
 
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
@@ -147,7 +157,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     locale: 'en',
     modelName: 'web',
     userId: '',
-    storeCountry: 'USA'
+    storeCountry: 'USA',
+    deviceScale: 1,
   }
 
   CALLBACK_MAPS = {
@@ -307,7 +318,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     })
   }
 
-  async copyEditor(pageSize: { width: number, height: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async copyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     return await this.copyEditorCore(this.sendCopyEditor.bind(this), {
       senderArgs: [pageSize],
       preArgs: { noBg },
@@ -325,7 +336,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     this.setDuringCopy(false)
   }
 
-  async sendCopyEditor(pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async sendCopyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
     const { flag, cleanup } = await this.sendCopyEditorCore('editorSave', pageSize, imageId)
     return {
@@ -335,9 +346,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
+  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -356,8 +367,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       ...(imagePath && { imagePath }),
       ...(outputType && { outputType }),
       ...(quality && { quality }),
-      snapshotWidth: width,
-    }, { timeout: -1 }) as IGeneralResponse | null | undefined
+      snapshotWidth: pageSize.snapshotWidth ?? width,
+    }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
@@ -392,7 +403,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
   }
 
-  async sendScreenshotUrl(query: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
+  async sendScreenshotUrl(query: string, { outputType, quality, forGenImage }: { outputType?: string, quality?: number, forGenImage?: boolean } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
     if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -410,6 +421,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         imageId,
         outputType,
         quality,
+        forGenImage
       },
       to: 'Shot',
     })
@@ -474,6 +486,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
+  getSnapshotWidth({ width, height }: { width: number, height: number }, targetSize: number, type: 'short' | 'long') {
+    const isVertical = height > width
+    return (isVertical && type === 'short' ? targetSize : targetSize / height * width) / this.getUserInfoFromStore().deviceScale
+  }
+
   async getState(key: string): Promise<any | undefined> {
     if (this.inBrowserMode) return
     const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }, { retry: true }) as IGetStateResponse
@@ -487,7 +504,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async deleteFile(key: string, name: string, type: string, subPath?: string) {
     if (this.inBrowserMode) return
-    await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
+    // await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
   }
 
   async fetchTutorialFlags() {
@@ -582,7 +599,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
     })
     if (!res) return
-    const { planInfo, priceCurrency } = res as IGetProductResponse
+    const { planInfo, priceCurrency } = res as GetProductResponse
     const planIds = store.getters['payment/getPayment'].planId
     const prices = { currency: priceCurrency }
     planInfo.forEach(p => {
@@ -645,12 +662,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (store.getters['payment/getPaymentPending'].purchase) return
     store.commit('payment/SET_paymentPending', { purchase: true })
 
-    const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: planId }, { timeout: -1 })
-    const {flag, msg, txid} = res as ISubscribeResponse
-    if (flag === '0') {
-      const isSubscribed = !!txid && (await this.updateSubState('', txid)).subscribe
+    const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: planId }, { timeout: -1 }) as SubscribeResponse
+
+    if (res.flag === '0') {
+      const isSubscribed = !!res.txid && (await this.updateSubState('', res.txid)).subscribe
       if (isSubscribed) store.commit('SET_fullPageConfig', { type: 'welcome', params: {} })
-    } else if (msg === 'IAP_DISABLED'){
+    } else if (res.msg === 'IAP_DISABLED'){
       modalUtils.setModalInfo(
         i18n.global.t('STK0024'),
         [i18n.global.t('STK0096')],
@@ -679,7 +696,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       // not logged in, or logged in but not binding
       const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 })
       if (res) {
-        const { flag, txid } = res as ISubscribeResponse
+        const { flag, txid } = res as SubscribeResponse
         if(flag === '0' && !!txid) result = await this.updateSubState('', txid, false)
       } else {
         logUtils.setLogAndConsoleLog('restore timeout')
@@ -822,7 +839,28 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
-      return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+    return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+  }
+
+  async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
+  }
+
+  getDocumentPath(url: string) {
+    const urlObj = new URL(url)
+    const paths = (urlObj.hostname + urlObj.pathname).replace('//', '').split('/')
+    const path = paths.slice(0, paths.length - 1).join('/')
+    const name = paths[paths.length - 1]
+    const type = urlObj.searchParams.get('imagetype') ?? 'png'
+    return {
+      path,
+      name,
+      type
+    }
+  }
+
+  async documentToCameraRoll(path: string, name: string, type: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType }) as GeneralResponse
   }
 
   showUpdateModal(force = false) {

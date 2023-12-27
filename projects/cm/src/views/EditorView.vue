@@ -1,9 +1,6 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
-  headerbar(
-    class="editor-header box-border px-24"
-    :middGap="32"
-    ref="headerbarRef")
+  headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
       back-btn
     template(
@@ -46,9 +43,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :strokeColor="'white'"
         :iconWidth="'24px'"
         @click="handleProjectBtnAction")
-      nubtn(
-        v-if="inGenResultState"
-        @click="handleNextAction") {{ inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+      svg-icon(
+        v-if="inGenResultState || inEditingState"
+        iconName="download"
+        iconColor="white"
+        @click="handleNextAction")
       router-link(
         v-if="inSavingState"
         custom
@@ -108,17 +107,35 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef")
+    transition(name="fade-in")
+      loading-brick(
+        v-if="isAutoFilling"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
   div(v-else class="editor-view__saving-state")
     div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-      div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
+      div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden flex-center abosolute top-0" ref="resultShowcase")
         img(
-          class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
+          class="result-showcase__card result-showcase__card--back"
           :class="{ 'is-flipped': !showVideo }"
           :src="currImgSrc")
-        img(
-          class="result-showcase__card result-showcase__card--front"
-          :class="{ 'is-flipped': showVideo }"
-          :src="initImgSrc")
+        div(class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
+          :class="{ 'is-flipped': showVideo }")
+          teplate(v-if="!isVideoGened")
+            img(
+              class="w-full h-full absolute top-0 left-0"
+              :src="initImgSrc")
+            transition(name="fade-in")
+              loading-brick(class="z-median")
+          video(
+            v-else
+            class="w-full h-full absolute top-0 left-0"
+            ref="video"
+            webkit-playsinline
+            playsinline
+            loop
+            autoplay
+            mutes
+            :src="generatedResults[currGenResultIndex].video")
       div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
@@ -178,7 +195,6 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
-import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
@@ -190,6 +206,7 @@ import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
@@ -235,6 +252,7 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const layerIndex = computed(() => layerUtils.layerIndex)
 const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
 
 const { ids } = useGenImageUtils()
@@ -250,6 +268,7 @@ const showSidebarTabs = computed(
     !showSelectionOptions.value &&
     !isCropping.value &&
     !showBrushOptions.value &&
+    layerIndex.value === -1 &&
     editorType.value !== 'magic-combined',
 )
 
@@ -290,6 +309,8 @@ const {
   showBrushOptions,
   editorType,
   hasGeneratedResults,
+  currDesignId,
+  currSubDesignId,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
@@ -302,11 +323,9 @@ watch(
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
-  if (inAspectRatioState.value) {
-    changeEditorState('next')
-    useTutorial().runTutorial(editorType.value)
-  } else if (inEditingState.value) {
-    changeEditorState('next')
+  if (inEditingState.value) {
+    // TODO: save to original.json
+    saveSubDesign(`${currDesignId.value}/${currSubDesignId.value}`, currSubDesignId.value, 'result')
   } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
@@ -357,7 +376,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       icon: 'question-mark-circle',
       disabled: false,
       width: 20,
-      action: () => setDescriptionPanel('hidden-message-help'),
+      action: () => setDescriptionPanel('hidden-message/help'),
     })
   retTabs.push(...stepBtns)
   if (currEditorTheme.value && editorType.value === 'hidden-message')
@@ -801,7 +820,12 @@ watch(showVideo, (newVal) => {
 })
 // #endregion
 
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams } = useUserStore()
+const {
+  setCurrOpenDesign,
+  setCurrOpenSubDesign,
+  setPrevGenParams,
+  saveSubDesign,
+} = useUserStore()
 
 const handleHomeBtnAction = (navagate: () => void) => {
   setCurrOpenDesign(undefined)

@@ -945,12 +945,12 @@ class AssetUtils {
       const scaleRatio = photoWidth / boundingWidth
 
       newStyles = {
-        width: width * scaleRatio,
-        height: height * scaleRatio,
-        initWidth: width * scaleRatio,
-        initHeight: height * scaleRatio,
-        imgWidth: imgWidth * scaleRatio,
-        imgHeight: imgHeight * scaleRatio,
+        width: width * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        height: height * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        initWidth: width * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        initHeight: height * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        imgWidth: imgWidth * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        imgHeight: imgHeight * scaleRatio * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
         imgX: imgX * scaleRatio,
         imgY: imgY * scaleRatio
       }
@@ -965,12 +965,12 @@ class AssetUtils {
           : this.pageSize.height * resizeRatio
 
       newStyles = {
-        width: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
-        height: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
-        initWidth: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
-        initHeight: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
-        imgWidth: this.isShrinkSizeAsPinchPage ? photoWidth / (pageUtils.scaleRatio * 0.01) : photoWidth,
-        imgHeight: this.isShrinkSizeAsPinchPage ? photoHeight / (pageUtils.scaleRatio * 0.01) : photoHeight,
+        width: photoWidth * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        height: photoHeight * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        initWidth: photoWidth * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        initHeight: photoHeight * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        imgWidth: photoWidth * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
+        imgHeight: photoHeight * (this.isShrinkSizeAsPinchPage ? 1 / (pageUtils.scaleRatio * 0.01) : 1),
       }
     }
 
@@ -998,9 +998,8 @@ class AssetUtils {
     const allLayers = this.getLayers(targetPageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
-      if (layer.type !== 'image') return false
-
-      if (this.isShrinkSizeAsPinchPage) return
+      if (layer.type !== 'image' ||
+        this.isShrinkSizeAsPinchPage) return false
 
       return layer.type === 'image' && !layer.moved && (layer as IImage).srcObj.assetId === assetId
     }) as Array<IImage>
