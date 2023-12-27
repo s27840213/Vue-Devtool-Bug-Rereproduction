@@ -174,7 +174,7 @@ export default class PixiRecorder {
       await Promise.race(
         [
           new Promise<void>(resolve => { this._genVideoResolver = resolve }),
-          new Promise<void>((_, reject) => setTimeout(reject, 60000))
+          new Promise<void>((resolve, reject) => setTimeout(reject, 60000))
         ]
       ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
     }

@@ -203,7 +203,6 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
-import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { find, pull } from 'lodash'
 
 const props = defineProps({
