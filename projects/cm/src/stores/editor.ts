@@ -57,7 +57,6 @@ interface IEditorStore {
   useTmpSteps: boolean
   // for my design
   currDesignId: string
-  currSubDesignId: string
   // for saving to document and show more results
   currPrompt: string
   currGenOptions: GenImageOptions
@@ -86,7 +85,6 @@ export const useEditorStore = defineStore('editor', {
     currPrompt: '',
     currGenOptions: [],
     currDesignId: '',
-    currSubDesignId: '',
     editorTheme: null,
     descriptionPanel: null,
     currDesignThumbIndex: 0,
@@ -134,6 +132,9 @@ export const useEditorStore = defineStore('editor', {
     },
     isInEditorLastStep(): boolean {
       return stepsUtils.isInLastStep
+    },
+    currSubDesignId(): string {
+      return this.currGeneratedResults.id
     },
     currGeneratedResults(): { id: string; url: string; video?: string } {
       return this.generatedResults[this.currGenResultIndex]
@@ -340,9 +341,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignId(id: string) {
       this.currDesignId = id
-    },
-    setCurrSubDesignId(id: string) {
-      this.currSubDesignId = id
     },
     setEditorTheme(theme: string | null) {
       this.editorTheme = theme

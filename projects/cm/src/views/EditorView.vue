@@ -43,9 +43,11 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :strokeColor="'white'"
         :iconWidth="'24px'"
         @click="handleProjectBtnAction")
-      nubtn(
-        v-if="inGenResultState"
-        @click="handleNextAction") {{ inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+      svg-icon(
+        v-if="inGenResultState || inEditingState"
+        iconName="download"
+        iconColor="white"
+        @click="handleNextAction")
       router-link(
         v-if="inSavingState"
         custom
@@ -209,7 +211,6 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
-import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
@@ -324,6 +325,8 @@ const {
   showBrushOptions,
   editorType,
   hasGeneratedResults,
+  currDesignId,
+  currSubDesignId,
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
@@ -336,11 +339,9 @@ watch(
 
 const isVideoGened = ref(false)
 const handleNextAction = function () {
-  if (inAspectRatioState.value) {
-    changeEditorState('next')
-    useTutorial().runTutorial(editorType.value)
-  } else if (inEditingState.value) {
-    changeEditorState('next')
+  if (inEditingState.value) {
+    // TODO: save to original.json    
+    saveSubDesign(`${currDesignId.value}/${currSubDesignId.value}`, currSubDesignId.value, 'result')
   } else if (inGenResultState.value) {
     changeEditorState('next')
     isVideoGened.value = false
@@ -835,7 +836,12 @@ watch(showVideo, (newVal) => {
 })
 // #endregion
 
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams } = useUserStore()
+const {
+  setCurrOpenDesign,
+  setCurrOpenSubDesign,
+  setPrevGenParams,
+  saveSubDesign,
+} = useUserStore()
 
 const handleHomeBtnAction = (navagate: () => void) => {
   setCurrOpenDesign(undefined)
