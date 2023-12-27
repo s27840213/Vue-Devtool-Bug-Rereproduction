@@ -149,12 +149,15 @@ const useGenImageUtils = () => {
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
     RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
+    let cleanup: null | (() => void) = null
+
     if (!showMore) {
       try {
-        await Promise.all([
+        const res = await Promise.all([
           uploadEditorAsImage(userId.value, requestId),
           uploadMaskAsImage(userId.value, requestId),
         ])
+        cleanup = res[0]
       } catch (error) {
         logUtils.setLogForError(error as Error)
         throw new Error('Upload Images For /gen-image Failed')
@@ -193,10 +196,17 @@ const useGenImageUtils = () => {
         try {
           const subDesignId = ids[index]
           const promises = [
-            saveDesignImageToDocument(initImgSrc.value, 'original', {
-              type: 'jpg',
-              subDesignId,
-            }),
+            (async () => {
+              if (!initImgSrc.value.startsWith('data:')) {
+                const dataUrl = await generalUtils.toDataUrlNew(initImgSrc.value, 'jpg')
+                setInitImgSrc(dataUrl)
+                cleanup && cleanup()
+              }
+              await saveDesignImageToDocument(initImgSrc.value, 'original', {
+                type: 'jpg',
+                subDesignId,
+              })
+            })(),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
@@ -260,34 +270,27 @@ const useGenImageUtils = () => {
       : await cmWVUtils.copyEditor({
           width: pageWidth * contentScaleRatio.value,
           height: pageHeight * contentScaleRatio.value,
-          snapshotWidth: cmWVUtils.getSnapshotWidth(pageSize.value, 1080, 'short')
+          snapshotWidth: cmWVUtils.getSnapshotWidth(pageSize.value, 1080, 'short'),
         })
     RECORD_TIMING && testUtils.log('copy editor', '')
     if (flag !== '0') {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
-    await Promise.all([
-      generalUtils.toDataUrlNew(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`, 'jpg').then((dataUrl) => {
-        setInitImgSrc(dataUrl)
-      }),
-      new Promise<void>(resolve => {
-        RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
-        cmWVUtils.uploadFileToUrl(
-          { path: 'screenshot', name: imageId, type: 'jpg' },
-          uploadMap.value ?? {},
-          `${userId}/input/${requestId}_init`,
-        ).then(() => {
-          RECORD_TIMING && testUtils.log('upload screenshot', '')
-          console.log('screenshot:', new Date().getTime())
-          cleanup()
-          resolve()
-        }).catch((error) => {
-          logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
-          throw error
-        })
-      })
-    ])
+    RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
+    try {
+      await cmWVUtils.uploadFileToUrl(
+        { path: 'screenshot', name: imageId, type: 'jpg' },
+        uploadMap.value ?? {},
+        `${userId}/input/${requestId}_init`,
+      )
+    } catch (error) {
+      logUtils.setLogAndConsoleLog('Upload Editor Image Failed')
+      throw error
+    }
+    RECORD_TIMING && testUtils.log('upload screenshot', '')
+    console.log('screenshot:', new Date().getTime())
+    return cleanup
   }
 
   const uploadMaskAsImage = async (userId: string, requestId: string) => {
