@@ -229,7 +229,7 @@ const useGenImageUtils = () => {
           await Promise.all(promises)
         } catch (error: any) {
           logUtils.setLogForError(error)
-          if (!error.message.includes('Cancelled')) {
+          if (!error.message?.includes('Cancelled')) {
             onError && onError(index, url, error.message)
           }
           return
@@ -276,6 +276,7 @@ const useGenImageUtils = () => {
       logUtils.setLogAndConsoleLog('Screenshot Failed')
       throw new Error('Screenshot Failed')
     }
+    setInitImgSrc(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`)
     RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
     try {
       await cmWVUtils.uploadFileToUrl(
