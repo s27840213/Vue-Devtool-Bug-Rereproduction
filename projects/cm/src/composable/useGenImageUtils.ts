@@ -194,10 +194,9 @@ const useGenImageUtils = () => {
           const subDesignId = ids[index]
           const promises = [
             saveDesignImageToDocument(initImgSrc.value, 'original', {
-              type: 'jpg',
               subDesignId,
             }),
-            saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'config'),
+            saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
           if (editorType.value !== 'hidden-message') {
@@ -205,6 +204,7 @@ const useGenImageUtils = () => {
             if (prepareMask) {
               promises.push(
                 saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+                  type: 'png',
                   subDesignId,
                 }),
               )
@@ -229,15 +229,14 @@ const useGenImageUtils = () => {
         try {
           onSuccess && onSuccess(index, url)
           RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
-          await saveDesignImageToDocument(url, 'result', {
-            type: 'jpg',
+          await saveDesignImageToDocument(url, 'thumb', {
             subDesignId: ids[index],
             thumbIndex: index,
           })
           RECORD_TIMING && testUtils.log(`save-result ${index}`, '')
           const srcObj: SrcObj = {
             type: 'ios',
-            assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/result`,
+            assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/thumb`,
             userId: 'jpg',
           }
 
