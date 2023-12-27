@@ -113,7 +113,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
   div(v-else class="editor-view__saving-state")
     div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-      //- div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden flex-center abosolute top-0" ref="resultShowcase")
       div(class="result-showcase w-full h-full rounded-8 overflow-hidden flex-center abosolute top-0" ref="resultShowcase")
         img(
           class="result-showcase__card result-showcase__card--back"

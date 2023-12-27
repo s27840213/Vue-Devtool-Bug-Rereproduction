@@ -4,7 +4,6 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
 // the time unit is ms
-const FRAME_TIME = 16.667
 const RECORD_START_DELAY = 200
 const RECORD_END_DELAY = 1000
 const TRANSITION_TIME = 2800
@@ -118,8 +117,8 @@ export default class PixiRecorder {
   private sprite_wm = null as null | PIXI.Sprite
   private filter = null as null | PIXI.Filter
   private uniforms = {} as { [key: string]: any }
-  private time = 0
-  private dynamicAnimateEndTime = 0
+  private time_start = -1
+  private dynamicAnimateEndTime = -1
   private canvasRecorder = null as null | CanvasRecorder
   private _animate = null as null | ((delta: number) => void)
   private _genVideoResolver = null as null | (() => void)
@@ -178,7 +177,6 @@ export default class PixiRecorder {
       ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
     }
 
-    this.time = 0
     if (RECORD_START_DELAY) {
       setTimeout(() => {
         if (this._animate) {
@@ -199,7 +197,6 @@ export default class PixiRecorder {
         return null
       }
       this.video = res
-      console.log('genVideo', this.video)
       return res
     })
   }
@@ -223,12 +220,17 @@ export default class PixiRecorder {
     this.filter = new PIXI.Filter(undefined, fragment_opacity, this.uniforms)
     this.sprite_src.filters = [this.filter]
     this._animate = () => {
+      const now = Date.now()
+      // init time
+      if (this.time_start === -1) {
+        this.time_start = now
+      }
       if (this.uniforms.opacity >= 1) {
-        if (this.dynamicAnimateEndTime === 0) {
-          this.dynamicAnimateEndTime = this.time
+        if (this.dynamicAnimateEndTime === -1) {
+          this.dynamicAnimateEndTime = now
         } else {
-          if (this.time - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
-            this.dynamicAnimateEndTime = 0
+          if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
+            this.dynamicAnimateEndTime = -1
             this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
             if (this.canvasRecorder) {
               this.canvasRecorder.stop()
@@ -236,8 +238,7 @@ export default class PixiRecorder {
           }
         }
       }
-      this.time += FRAME_TIME
-      this.uniforms.opacity = this.time / TRANSITION_TIME
+      this.uniforms.opacity = (now - this.time_start) / TRANSITION_TIME
     }
   }
 
@@ -248,14 +249,14 @@ export default class PixiRecorder {
     this.filter = new PIXI.Filter(undefined, fragment1, this.uniforms)
     this.sprite_src.filters = [this.filter]
     this._animate = () => {
+      const now = Date.now()
       if (this.uniforms.dispFactor >= 1) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
         if (this.canvasRecorder) {
           this.canvasRecorder.stop()
         }
       }
-      this.time += FRAME_TIME
-      this.uniforms.dispFactor = this.time / TRANSITION_TIME
+      this.uniforms.dispFactor = (now - this.time_start) / TRANSITION_TIME
     }
   }
 
@@ -265,13 +266,13 @@ export default class PixiRecorder {
     this.filter = new PIXI.Filter(undefined, fragment3, this.uniforms)
     this.sprite_src.filters = [this.filter]
     this._animate = () => {
-      if (this.time / TRANSITION_TIME >= Math.PI * 0.5) {
+      const now = Date.now()
+      if (now / TRANSITION_TIME >= Math.PI * 0.5) {
         this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
         if (this.canvasRecorder) {
           this.canvasRecorder.stop()
         }
       }
-      this.time += FRAME_TIME
     }
   }
 
@@ -283,12 +284,17 @@ export default class PixiRecorder {
     this.filter = new PIXI.Filter(undefined, fragment_slide, this.uniforms)
     this.sprite_src.filters = [this.filter]
     this._animate = () => {
-      if (this.time >= TRANSITION_TIME) {
-        if (this.dynamicAnimateEndTime === 0) {
-          this.dynamicAnimateEndTime = this.time
+      const now = Date.now()
+      // init time
+      if (this.time_start === -1) {
+        this.time_start = now
+      }
+      if (this.uniforms.dispFactor >= 1) {
+        if (this.dynamicAnimateEndTime === -1) {
+          this.dynamicAnimateEndTime = now
         } else {
-          if (this.time - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
-            this.dynamicAnimateEndTime = 0
+          if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
+            this.dynamicAnimateEndTime = -1
             this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
             if (this.canvasRecorder) {
               this.canvasRecorder.stop()
@@ -296,8 +302,7 @@ export default class PixiRecorder {
           }
         }
       }
-      this.time += FRAME_TIME
-      this.uniforms.dispFactor = this.time / TRANSITION_TIME
+      this.uniforms.dispFactor = (now - this.time_start) / TRANSITION_TIME
     }
   }
 
@@ -321,7 +326,6 @@ export default class PixiRecorder {
         this.sprite_src = new PIXI.Sprite(texture)
         this.sprite_src.width = texture.width
         this.sprite_src.height = texture.height
-        console.log('img1 done')
         resolve(texture)
       })
     })
@@ -331,28 +335,12 @@ export default class PixiRecorder {
         this.sprite_res = new PIXI.Sprite(texture)
         this.sprite_res.width = texture.width
         this.sprite_res.height = texture.height
-        console.log('img2 done', devicePixelRatio)
         resolve(texture)
       })
     })
 
-    // const p3 = new Promise<PIXI.Texture>((resolve) => {
-    //   // PIXI.Texture.fromURL(WATER_MARK, { resourceOptions: { scale: 10 } }).then((texture) => {
-    //   PIXI.Texture.fromURL(WATER_MARK, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
-    //     // safari bug: svg partially rendered, need to destroy it and reload it again
-    //     // see. https://github.com/pixijs/pixijs/issues/7204
-    //     texture.baseTexture.destroy()
-    //     PIXI.Texture.fromURL(WATER_MARK, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
-    //       this.texture_wm = texture
-    //       this.sprite_wm = new PIXI.Sprite(texture)
-    //       this.sprite_wm.width = texture.width
-    //       this.sprite_wm.height = texture.height
-    //       resolve(texture)
-    //     })
-    //   })
-    // })
-
     const p3 = new Promise<PIXI.Texture>(resolve => {
+      // to fix svg blurry error, we need to resize the svg first
       imageUtils.imgLoadHandler(WATER_MARK, (img: HTMLImageElement) => {
         imageShadowPanelUtils.svgImageSizeFormatter(img, 500, () => {
           img.onload = () => {
@@ -360,14 +348,25 @@ export default class PixiRecorder {
             canvas.width = 500
             const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
             ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight)
-            this.texture_wm = new PIXI.Texture(new PIXI.BaseTexture(canvas))
-            this.sprite_wm = new PIXI.Sprite(this.texture_wm)
-            resolve(this.texture_wm)
+            PIXI.Texture.fromURL(img.src, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
+              // safari bug: svg partially rendered, need to destroy it and reload it again
+              // see. https://github.com/pixijs/pixijs/issues/7204
+              texture.baseTexture.destroy()
+              PIXI.Texture.fromURL(img.src, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
+                this.texture_wm = texture
+                this.sprite_wm = new PIXI.Sprite(texture)
+                this.sprite_wm.width = texture.width
+                this.sprite_wm.height = texture.height
+                resolve(texture)
+              })
+            })
+            // this.texture_wm = new PIXI.Texture(new PIXI.BaseTexture(canvas))
+            // this.sprite_wm = new PIXI.Sprite(this.texture_wm)
+            // resolve(this.texture_wm)
           }
         })
       })
     })
-
 
     return Promise.all([p1, p2, p3])
   }
