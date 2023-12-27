@@ -18,6 +18,7 @@ import constantData from './constantData'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
+import logUtils from './logUtils'
 
 declare let window: CustomWindow
 
@@ -610,7 +611,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     this.setState('prices', prices)
   }
 
-  async updateSubState(uuid: string, txid?: string, showDupBindModal = true): Promise<{subscribe: boolean, dupBinded: boolean}> {
+  async updateSubState(uuid: string, txid?: string, showDupBindModal = true): Promise<{ subscribe: boolean, dupBinded: boolean }> {
     const userInfo = this.getUserInfoFromStore()
     const res = await userApis.getTxInfo({
       token: '',
@@ -619,6 +620,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       uuid,
       txid
     })
+    logUtils.setLogAndConsoleLog(`getTxInfo: ${JSON.stringify({token: store.getters['user/getGetTxToken'], uuid: uuid, txid: txid, res: res?.data})}`)
     if (res.data.flag === 0) {
       const isSubscribed = res.data.subscribe === 1
       store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
@@ -680,6 +682,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         const { flag, txid } = res as ISubscribeResponse
         if(flag === '0' && !!txid) result = await this.updateSubState('', txid, false)
       } else {
+        logUtils.setLogAndConsoleLog('restore timeout')
         showResult && notify({
           group: 'warn',
           text: 'network timeout',
