@@ -1,53 +1,56 @@
 <template lang="pug">
-div(v-if="isPhaseOne" class="box-border h-full w-full px-24 pt-12 grid gap-16 overflow-scroll scrollbar-hide")
-  feature-card(
-    v-for="(feature, idx) in phaseOneFeatures"
-    :key="idx"
-    :bgImg="feature.bgImg"
-    :bgImgB="feature.bgImgB"
-    :title="feature.title"
-    :subTitle="feature.subTitle"
-    theme="lg"
-    @click="feature.action && feature.action()")
-div(v-else class="box-border h-full w-full px-16 pt-12 grid gap-16 overflow-scroll scrollbar-hide")
-  highlight-section(
-    :title="$t('CM0001')"
-    :description="$t('CM0002')"
-    :btnText="$t('CM0003')"
-    :theme="'powerful-fill'"
-    iconName="brush"
-    @clickBtn="openImgSelecotr({ targetEditorType: 'powerful-fill' })")
-  //- nubtn(
-  //-   icon="crown"
-  //-   @click="testNotify") Test Img Selector
-  nubtn(
-    icon="crown"
-    @click="exportVedio") Test video Selector
-  template(
-    v-for="(cate, i) in featureCategories"
-    :key="i")
-    div(class="w-full typo-h4 text-yellow-cm text-left") {{ cate.category }}
-    div(class="feature-section")
-      feature-card(
-        v-for="feature in cate.content"
-        :key="feature.title"
-        :bgImg="feature.bgImg"
-        :title="feature.title"
-        @click="feature.action && feature.action()")
-  highlight-section(
-    :title="$t('CM0001')"
-    :description="$t('CM0002')"
-    :btnText="$t('CM0003')"
-    :btnIconName="'instagram'"
-    :theme="'ig'"
-    iconName="ig-3d")
-  highlight-section(
-    :title="$t('CM0001')"
-    :description="$t('CM0002')"
-    :btnText="$t('CM0003')"
-    :btnIconName="'tiktok'"
-    :theme="'tiktok'"
-    iconName="tiktok-3d")
+div(class="box-border h-full w-full px-16 pt-12 grid gap-16 overflow-scroll scrollbar-hide")
+  div(
+    v-if="isPhaseOne"
+    class="flex flex-col gap-16 px-8")
+    feature-card(
+      v-for="(feature, idx) in phaseOneFeatures"
+      :key="idx"
+      :bgImg="feature.bgImg"
+      :bgImgB="feature.bgImgB"
+      :title="feature.title"
+      :subTitle="feature.subTitle"
+      theme="lg"
+      @click="feature.action && feature.action()")
+  template(v-else)
+    highlight-section(
+      :title="$t('CM0001')"
+      :description="$t('CM0002')"
+      :btnText="$t('CM0003')"
+      :theme="'powerful-fill'"
+      iconName="brush"
+      @clickBtn="openImgSelecotr({ targetEditorType: 'powerful-fill' })")
+    //- nubtn(
+    //-   icon="crown"
+    //-   @click="testNotify") Test Img Selector
+    nubtn(
+      icon="crown"
+      @click="exportVedio") Test video Selector
+    template(
+      v-for="(cate, i) in featureCategories"
+      :key="i")
+      div(class="w-full typo-h4 text-yellow-cm text-left") {{ cate.category }}
+      div(class="feature-section")
+        feature-card(
+          v-for="feature in cate.content"
+          :key="feature.title"
+          :bgImg="feature.bgImg"
+          :title="feature.title"
+          @click="feature.action && feature.action()")
+    highlight-section(
+      :title="$t('CM0001')"
+      :description="$t('CM0002')"
+      :btnText="$t('CM0003')"
+      :btnIconName="'instagram'"
+      :theme="'ig'"
+      iconName="ig-3d")
+    highlight-section(
+      :title="$t('CM0001')"
+      :description="$t('CM0002')"
+      :btnText="$t('CM0003')"
+      :btnIconName="'tiktok'"
+      :theme="'tiktok'"
+      iconName="tiktok-3d")
 </template>
 <script setup lang="ts">
 import i18n from '@/i18n'
