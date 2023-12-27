@@ -1,9 +1,6 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
-  headerbar(
-    class="editor-header box-border px-24"
-    :middGap="32"
-    ref="headerbarRef")
+  headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
       back-btn
     template(
@@ -108,6 +105,10 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef")
+    transition(name="fade-in")
+      loading-brick(
+        v-if="isAutoFilling"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
   div(v-else class="editor-view__saving-state")
     div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
       div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
@@ -115,8 +116,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="result-showcase__card result-showcase__card--back"
           :class="{ 'is-flipped': !showVideo }"
           :src="currImgSrc")
-        div(class="result-showcase__card result-showcase__card--front"
-          :class="{ 'is-flipped': showVideo }")
+        div(class="result-showcase__card result-showcase__card--front" :class="{ 'is-flipped': showVideo }")
           img(
             v-if="!isVideoGened"
             class="w-full h-full absolute top-0 left-0"
@@ -221,6 +221,7 @@ import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
@@ -390,7 +391,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       icon: 'question-mark-circle',
       disabled: false,
       width: 20,
-      action: () => setDescriptionPanel('hidden-message-help'),
+      action: () => setDescriptionPanel('hidden-message/help'),
     })
   retTabs.push(...stepBtns)
   if (currEditorTheme.value && editorType.value === 'hidden-message')

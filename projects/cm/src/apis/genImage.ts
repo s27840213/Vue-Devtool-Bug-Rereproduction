@@ -25,6 +25,7 @@ export default new (class Utils {
           ...params,
           num,
           us: us ? '1' : '0',
+          accelerate: '1',
         },
       }),
     )

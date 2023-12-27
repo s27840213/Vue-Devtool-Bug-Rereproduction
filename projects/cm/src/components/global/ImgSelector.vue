@@ -149,7 +149,7 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-          @click="() => editorStore.setDescriptionPanel('hidden-message-invert')")
+          @click="() => editorStore.setDescriptionPanel('hidden-message/invert')")
       toggle-btn(
         class="payment__trial__toggle"
         v-model="isInvert"
@@ -167,7 +167,7 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-          @click="() => editorStore.setDescriptionPanel('hidden-message-bgrm')")
+          @click="() => editorStore.setDescriptionPanel('hidden-message/bgrm')")
       toggle-btn(
         class="payment__trial__toggle"
         v-model="isBgRemove"
