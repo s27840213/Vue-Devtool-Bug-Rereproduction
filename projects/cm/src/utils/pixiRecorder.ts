@@ -141,7 +141,7 @@ export default class PixiRecorder {
           const ratio = this.texture_wm.width / this.texture_wm.height
           this.sprite_wm.width = this.sprite_src.width * 0.5
           this.sprite_wm.height = this.sprite_wm.width / ratio
-          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 30
+          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
           this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
           this.pixi.stage.addChild(this.sprite_wm)
         }
@@ -152,7 +152,6 @@ export default class PixiRecorder {
 
         // @TEST use
         // const testCanvas = this.pixi.view as HTMLCanvasElement
-        // console.log('testCanvas.width, testCanvas.height', testCanvas.width, testCanvas.height)
         // document.body.appendChild(testCanvas)
         // testCanvas.style.position = 'absolute'
         // testCanvas.style.top = '0'
