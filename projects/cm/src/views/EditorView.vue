@@ -44,7 +44,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :iconWidth="'24px'"
         @click="handleProjectBtnAction")
       svg-icon(
-        v-if="inGenResultState || inEditingState"
+        v-if="inGenResultState || (inEditingState && designName !== '')"
         iconName="download"
         iconColor="white"
         @click="handleNextAction")
@@ -310,6 +310,7 @@ const {
   hasGeneratedResults,
   currDesignId,
   currSubDesignId,
+  designName
 } = storeToRefs(editorStore)
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
@@ -332,9 +333,12 @@ watch(
 
 const isVideoLoaded = ref(false)
 const handleNextAction = function () {
-  if (inEditingState.value) {
-    // TODO: save to original.json
-    saveSubDesign(`${currDesignId.value}/${currSubDesignId.value}`, currSubDesignId.value, 'result')
+  if (inEditingState.value && designName.value !== '') {
+    saveSubDesign(
+      `${currDesignId.value}/${currSubDesignId.value}`,
+      currSubDesignId.value,
+      designName.value
+    )
   } else if (inGenResultState.value) {
     changeEditorState('next')
     const currGenResult = generatedResults.value[currGenResultIndex.value]
