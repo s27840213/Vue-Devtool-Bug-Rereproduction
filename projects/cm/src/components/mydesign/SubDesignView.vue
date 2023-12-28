@@ -113,15 +113,14 @@ const handleHomeBtnAction = (navagate: () => void) => {
 const selectDesign = (subDesign: ITmpSubDesign) => {
   getSubDesignConfig(currOpenDesign, subDesign.subId).then((data) => {
     try {
-      const { content, flag, name, path } = data
-      if (flag === '1') {
+      if (!data || data.flag === '1') {
         notify({
           group: 'error',
           text: 'Get design config error',
         })
         throw new Error('getSubDesignConfig error')
       }
-      setCurrOpenSubDesign(content)
+      setCurrOpenSubDesign(data.content)
     } catch (e) {
       console.log(e)
     }
