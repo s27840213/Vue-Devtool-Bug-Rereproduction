@@ -23,7 +23,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
             v-slot="{ navigate }")
             svg-icon(iconName="cm_settings"
               :iconColor="'yellow-0'" @click="navigate")
-      nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+      nubtn(size="mid" icon="crown" @click="handleProBtnClick") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="router-view box-border min-h-full row-start-2 row-end-3"
     :class="{ 'pb-12': !atNonUI  && !atMyDesign}"
@@ -83,6 +83,8 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       popup(class="pointer-events-auto")
     div(class="modal-container" v-if="isModalOpen")
       modal-card(class="pointer-events-auto")
+    transition(:name="fullpageTransition")
+      full-page(v-if="fullPageType !== 'none'" class="pointer-events-auto")
     notifications(
       class="notification flex-center "
       position="center center"
@@ -153,6 +155,7 @@ import router from './router'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
+import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
@@ -176,6 +179,8 @@ const {
   isDesignOpen,
   isSubDesignOpen,
 } = useStateInfo()
+
+const fullPageType = computed(() => store.getters.getFullPageType)
 
 const canvasStore = useCanvasStore()
 const { isAutoFilling } = storeToRefs(canvasStore)
@@ -325,6 +330,21 @@ const homeIndicatorHeight = computed(() => userInfo.value.homeIndicatorHeight)
 
 router.isReady().then(() => {
   cmWVUtils.sendAppLoaded()
+})
+// #endregion
+
+// #region pro
+const handleProBtnClick = () => {
+  cmWVUtils.openPayment()
+}
+// #endregion
+
+// #region full page
+const fullpageTransition = ref('bottom-up-down')
+watch(fullPageType, (newVal) => {
+  nextTick(() => {
+    fullpageTransition.value = newVal === 'welcome' ? 'fade-in-out' : 'bottom-up-down'
+  })
 })
 // #endregion
 </script>

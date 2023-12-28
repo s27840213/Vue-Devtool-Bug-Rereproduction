@@ -60,10 +60,6 @@ div(
     :isMultiPage="pagesState.length > 1")
   div(v-if="isInBgRemoveSection" class="vvstk-editor__bg-remove-container")
     panel-remove-bg(:need-calculate-mobile-panel-height="false")
-      //- bg-remove-container(v-if="bgRemoveContainerRef"
-      //-   :containerWH="containerWH"
-      //-   :containerRef="bgRemoveContainerRef"
-      //-   :previewSrc="bgRemovePreviewSrc")
 </template>
 
 <script lang="ts">
@@ -116,7 +112,6 @@ export default defineComponent({
       cardHeight: 0,
       animated: false,
       swipeDetector: null as unknown as SwipeDetector,
-      bgRemoveContainerRef: null as unknown as HTMLElement,
       isInPageAdd: false,
       isPinchInit: false,
       pinchControlUtils: null as null | PinchControlUtils,
@@ -124,13 +119,12 @@ export default defineComponent({
       mobilePanelHeight: 0,
       pointerEvent: {
         initPos: null as null | ICoordinate,
-        pointerIds: [] as Array<number>
+        pointerIds: [] as Array<number>,
       },
     }
   },
   mounted() {
     const editorView = this.$refs.editorView as HTMLElement
-    this.bgRemoveContainerRef = this.$refs.bgRemoveContainer as HTMLElement
     this.swipeDetector = new SwipeDetector(
       editorView,
       { targetDirection: 'horizontal' },
@@ -141,13 +135,6 @@ export default defineComponent({
     this.swipeDetector.unbind()
   },
   watch: {
-    isProcessing(val) {
-      if (val === true) {
-        this.$nextTick(() => {
-          this.bgRemoveContainerRef = this.$refs.bgRemoveContainer as HTMLElement
-        })
-      }
-    },
     isInEditor(newVal, oldVal): void {
       if (newVal && !oldVal) {
         this.$nextTick(() => {
@@ -282,8 +269,12 @@ export default defineComponent({
       if (this.inBgRemoveMode || this.isInBgRemoveSection) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       if (this.isImgCtrl) {
-        const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) ?
-          groupUtils.mapLayersToPage([layerUtils.getCurrConfig as IImage], layerUtils.getCurrLayer as IGroup)[0] : layerUtils.getCurrLayer
+        const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type)
+          ? groupUtils.mapLayersToPage(
+              [layerUtils.getCurrConfig as IImage],
+              layerUtils.getCurrLayer as IGroup,
+            )[0]
+          : layerUtils.getCurrLayer
         if (!controlUtils.isClickOnController(e, layer)) {
           const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
           switch (currLayer.type) {
@@ -305,7 +296,9 @@ export default defineComponent({
         this.movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
           snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-          body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+          body: document.getElementById(
+            `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+          ) as HTMLElement,
         })
         this.movingUtils.moveStart(e)
         this.pointerEvent.initPos = { x: e.x, y: e.y }
@@ -317,7 +310,9 @@ export default defineComponent({
     selectEnd(e: PointerEvent) {
       if (this.pointerEvent.initPos) {
         const isSingleTouch = pointerEvtUtils.pointers.length === 1
-        const isConsiderNotMoved = Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5
+        const isConsiderNotMoved =
+          Math.abs(e.x - this.pointerEvent.initPos.x) < 5 &&
+          Math.abs(e.y - this.pointerEvent.initPos.y) < 5
         if (isSingleTouch && isConsiderNotMoved && !this.$store.getters['imgControl/isImgCtrl']) {
           // the moveingEnd would consider the layer to be selected,
           // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
@@ -344,10 +339,13 @@ export default defineComponent({
     onPinch(e: AnyTouchEvent) {
       const touches = (e.nativeEvent as TouchEvent).touches
       // prevent 3 touches above error
-      if (this.pointerEvent.pointerIds.length === 2 && touches.length === 2 &&
+      if (
+        this.pointerEvent.pointerIds.length === 2 &&
+        touches.length === 2 &&
         (!this.pointerEvent.pointerIds.includes(touches[0].identifier) ||
-        !this.pointerEvent.pointerIds.includes(touches[1].identifier)))
-      return this.pinchStart(e)
+          !this.pointerEvent.pointerIds.includes(touches[1].identifier))
+      )
+        return this.pinchStart(e)
 
       if (e.phase === 'end' && this.isPinchInit) {
         // pinch end handling
@@ -371,33 +369,44 @@ export default defineComponent({
       this.pinchControlUtils?.pinch(e)
     },
     pinchStart(e: AnyTouchEvent) {
-      if (this.$store.getters['imgControl/isImgCtrl'] || this.$store.getters['imgControl/isImgCtrl']) return
+      if (
+        this.$store.getters['imgControl/isImgCtrl'] ||
+        this.$store.getters['imgControl/isImgCtrl']
+      )
+        return
       if (this.$store.getters['bgRemove/getInBgRemoveMode']) return
 
-      const _config = { config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex) } as unknown as { config: ILayer }
+      const _config = {
+        config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex),
+      } as unknown as { config: ILayer }
 
       if (_config.config.locked) return
       // if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
 
-      const  layerInfo = new Proxy({
-        pageIndex: layerUtils.pageIndex,
-        layerIndex: layerUtils.layerIndex
-      }, {
-        get(_, key) {
-          if (key === 'pageIndex') return layerUtils.pageIndex
-          else if (key === 'layerIndex') return layerUtils.layerIndex
-        }
-      }) as ILayerInfo
+      const layerInfo = new Proxy(
+        {
+          pageIndex: layerUtils.pageIndex,
+          layerIndex: layerUtils.layerIndex,
+        },
+        {
+          get(_, key) {
+            if (key === 'pageIndex') return layerUtils.pageIndex
+            else if (key === 'layerIndex') return layerUtils.layerIndex
+          },
+        },
+      ) as ILayerInfo
       const movingUtils = new MovingUtils({
         _config,
         layerInfo,
         snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-        body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+        body: document.getElementById(
+          `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+        ) as HTMLElement,
       })
       const data = {
         layerInfo,
         config: undefined,
-        movingUtils: movingUtils as MovingUtils
+        movingUtils: movingUtils as MovingUtils,
       }
       this.pinchControlUtils = new PinchControlUtils(data)
       console.log('pinchControlUtils', pointerEvtUtils.pointerIds)

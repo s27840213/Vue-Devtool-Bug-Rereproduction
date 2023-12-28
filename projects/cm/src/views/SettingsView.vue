@@ -24,7 +24,8 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
         img(src="@/assets/img/crown-3d.png" class="w-128 h-128")
       nubtn(
         icon="crown"
-        size="mid-full") {{ $t('CM0032') }}
+        size="mid-full"
+        @click="handleProBtnClick") {{ $t('CM0032') }}
     div(class="flex flex-col gap-16 text-white text-left typo-h6")
       template(
         v-for="op in config"
@@ -299,6 +300,12 @@ const accountOptions = computed(
       },
     ] as IOptionConfig[],
 )
+// #endregion
+
+// #region pro
+const handleProBtnClick = () => {
+  cmWVUtils.openPayment()
+}
 // #endregion
 
 const configs = computed(

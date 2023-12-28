@@ -1,6 +1,5 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
-import useSteps from '@/composable/useSteps'
 import router from '@/router'
 import type {
   DescriptionPanel,
@@ -12,12 +11,13 @@ import type {
   MagicCombinedStates,
   PowerfulfillStates,
 } from '@/types/editor'
+import { ICmSubDesign } from '@/types/user'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
-import assetUtils from '@nu/vivi-lib/utils/assetUtils'
-import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -57,6 +57,7 @@ interface IEditorStore {
   useTmpSteps: boolean
   // for my design
   currDesignId: string
+  designName: '' | 'original' | 'result'
   // for saving to document and show more results
   currPrompt: string
   currGenOptions: GenImageOptions
@@ -85,6 +86,7 @@ export const useEditorStore = defineStore('editor', {
     currPrompt: '',
     currGenOptions: [],
     currDesignId: '',
+    designName: '',
     editorTheme: null,
     descriptionPanel: null,
     currDesignThumbIndex: 0,
@@ -168,12 +170,13 @@ export const useEditorStore = defineStore('editor', {
     },
     startEditing(
       type: EditorType,
-      props?: {
+      options?: {
         stateTarget?: string
         designId?: string
         generatedResults?: Array<IGenResult>
         designWidth?: number
         designHeight?: number
+        designName?: '' | 'result' | 'original'
       },
     ) {
       const {
@@ -182,9 +185,12 @@ export const useEditorStore = defineStore('editor', {
         generatedResults,
         designWidth = 900,
         designHeight = 1600,
-      } = props || {}
+        designName = ''
+      } = options || {}
+
       this.currStateIndex = 0
       this.editorType = type
+      this.designName = designName
       if (designId) this.currDesignId = designId
       this.editorStates = editorStatesMap[this.editorType]
       if (stateTarget && this.editorStates.findIndex((item) => item === stateTarget) !== -1) {
@@ -319,25 +325,20 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOptions) {
       this.currGenOptions = options
     },
-    keepEditingInit() {
-      this.changeToSpecificEditorState(this.editorType, 'editing')
-      this.createNewPage(this.pageSize.width, this.pageSize.height)
-      const targetUrl =
-        this.currGenResultIndex === -1
-          ? this.initImgSrc
-          : this.generatedResults[this.currGenResultIndex].url
+    async keepEditingInit() {
+      const { initWithSubDeisgnImage } = useUserStore()
+      const subDesign = (await cmWVUtils.getJson(
+        `mydesign-${this.editorType}/${this.currDesignId}/${this.currSubDesignId}`,
+        'original'
+      )) as {
+        flag: '0' | '1'
+        name: string
+        path: string
+        content: ICmSubDesign
+      } | undefined | null
 
-      assetUtils.addImage(targetUrl, this.pageAspectRatio, {
-        record: false,
-        fit: 1,
-      })
-      groupUtils.deselect()
-      this.maskDataUrl = ''
-      this.initImgSrc = targetUrl
-      this.currPrompt = ''
-      useCanvasUtils().clearCtx()
-
-      useSteps().reset()
+      if (!subDesign || subDesign.flag === '1') return
+      initWithSubDeisgnImage(subDesign.content)
     },
     setCurrDesignId(id: string) {
       this.currDesignId = id

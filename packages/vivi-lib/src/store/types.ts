@@ -1,4 +1,5 @@
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { IFullPageConfig } from '@/interfaces/fullPage'
 import { SrcObj } from '@/interfaces/gallery'
 import { ITmp } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
@@ -117,6 +118,7 @@ export interface IEditorState {
   showGlobalErrorModal: boolean,
   newTemplateShownMode: boolean,
   modalInfo: { [key: string]: any },
+  fullPageConfig: IFullPageConfig,
   allowLayerAction: 'all' | 'none' | 'crop-only',
 }
 

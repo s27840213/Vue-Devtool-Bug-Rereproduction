@@ -1,6 +1,5 @@
 import { IAsset } from '@nu/vivi-lib/interfaces/module'
-import { IFullPageConfig, ILoadingOverlay, IMyDesign, IPayment, IPaymentPending, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
-import constantData from '@nu/vivi-lib/utils/constantData'
+import { ILoadingOverlay, IMyDesign, IUserInfo, IUserSettings } from '@nu/vivi-lib/interfaces/vivisticker'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
 import _ from 'lodash'
@@ -22,7 +21,6 @@ interface IViviStickerState {
   editorType: string,
   inBrowserMode: boolean,
   showTutorial: boolean,
-  fullPageConfig: IFullPageConfig,
   recentlyBgColors: string[],
   hasNewBgColor: boolean,
   isDuringCopy: boolean,
@@ -38,12 +36,10 @@ interface IViviStickerState {
   editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
   modalInfo: { [key: string]: any },
-  payment: IPayment,
   uuid: string,
   loadedFonts: { [key: string]: true },
   templateShareType: 'none' | 'story' | 'post',
-  loadingOverlay: ILoadingOverlay,
-  promote: string[]
+  loadingOverlay: ILoadingOverlay
 }
 
 const EDITOR_BGS = [
@@ -67,10 +63,6 @@ const getDefaultState = (): IViviStickerState => ({
   editorType: 'none',
   inBrowserMode: false,
   showTutorial: false,
-  fullPageConfig: {
-    type: 'none',
-    params: {}
-  },
   recentlyBgColors: [],
   hasNewBgColor: false,
   isDuringCopy: false,
@@ -85,47 +77,6 @@ const getDefaultState = (): IViviStickerState => ({
   editingAssetInfo: {},
   selectedDesigns: {},
   modalInfo: {},
-  payment: {
-    subscribe: false,
-    prices: {
-      currency: '',
-      monthly: {
-        value: NaN,
-        text: ''
-      },
-      annually: {
-        value: NaN,
-        text: ''
-      },
-      annuallyFree0: {
-        value: NaN,
-        text: ''
-      },
-      annuallyOriginal: {
-        value: NaN,
-        text: ''
-      },
-      annuallyFree0Original: {
-        value: NaN,
-        text: ''
-      }
-    },
-    defaultPrices: {},
-    trialDays: NaN,
-    trialCountry: [],
-    pending: {
-      info: true,
-      purchase: false,
-      restore: false
-    },
-    planId: {
-      monthly: constantData.planId.monthly,
-      annually: constantData.planId.annually,
-      annuallyFree0: constantData.planId.annuallyFree0,
-      annuallyOriginal: constantData.planId.annually,
-      annuallyFree0Original: constantData.planId.annuallyFree0
-    }
-  },
   uuid: '',
   loadedFonts: {},
   debugMode: process.env.NODE_ENV === 'development',
@@ -133,8 +84,7 @@ const getDefaultState = (): IViviStickerState => ({
   loadingOverlay: {
     show: false,
     msgs: []
-  },
-  promote: []
+  }
 })
 
 const state = getDefaultState()
@@ -199,15 +149,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getShowTutorial(state: IViviStickerState): boolean {
     return state.showTutorial
   },
-  getFullPageConfig(state: IViviStickerState): IFullPageConfig {
-    return state.fullPageConfig
-  },
-  getFullPageType(state: IViviStickerState): IFullPageConfig['type'] {
-    return state.fullPageConfig.type
-  },
-  getFullPageParams(state: IViviStickerState): IFullPageConfig['params'] {
-    return state.fullPageConfig.params
-  },
   getRecentlyBgColors(state: IViviStickerState): string[] {
     return state.recentlyBgColors
   },
@@ -263,12 +204,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getLoadedFonts(state: IViviStickerState): { [key: string]: true } {
     return state.loadedFonts
   },
-  getPayment(state: IViviStickerState): IPayment {
-    return state.payment
-  },
-  getIsPaymentPending(state) {
-    return Object.entries(state.payment.pending).some(([key, value]) => value)
-  },
   getUuid(state: IViviStickerState): string {
     return state.uuid
   },
@@ -277,21 +212,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getLoadingOverlay(state: IViviStickerState): ILoadingOverlay {
     return state.loadingOverlay
-  },
-  getPromote(state: IViviStickerState): string[] {
-    return state.promote
-  },
-  getIsPromote(state: IViviStickerState, getters): string[] {
-    return getters.getIsPromoteCountry && getters.getIsPromoteLanguage
-  },
-  getIsPromoteCountry(state: IViviStickerState): boolean {
-    return state.promote.includes(state.userInfo.storeCountry ?? '')
-  },
-  getIsPromoteLanguage(state: IViviStickerState, getters): boolean {
-    return getters.getPromoteLanguages.includes(state.userInfo.locale)
-  },
-  getPromoteLanguages(state: IViviStickerState): string[] {
-    return [...new Set(state.promote.map(stkWVUtils.getLanguageByCountry))]
   }
 }
 
@@ -353,21 +273,6 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial
   },
-  SET_fullPageType(state: IViviStickerState, fullPageType: IFullPageConfig['type']) {
-    state.fullPageConfig.type = fullPageType
-  },
-  SET_fullPageParams(state: IViviStickerState, fullPageParams: IFullPageConfig['params']) {
-    state.fullPageConfig.params = fullPageParams
-  },
-  SET_fullPageConfig(state: IViviStickerState, data: IFullPageConfig) {
-    state.fullPageConfig = data
-  },
-  UPDATE_clearFullPageConfig(state: IViviStickerState) {
-    state.fullPageConfig = {
-      type: 'none',
-      params: {}
-    }
-  },
   SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
     state.recentlyBgColors = recentlyBgColors
   },
@@ -409,16 +314,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_modalInfo(state: IViviStickerState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
-  },
-  UPDATE_payment(state: IViviStickerState, data: Partial<IPayment>) {
-    Object.entries(data).forEach(([key, value]) => {
-      (state.payment as any)[key] = value
-    })
-  },
-  SET_paymentPending(state: IViviStickerState, data: Record<keyof IPaymentPending, boolean>) {
-    for (const item of Object.entries(data)) {
-      state.payment.pending[item[0] as keyof IPaymentPending] = item[1]
-    }
   },
   SET_uuid(state: IViviStickerState, uuid: string) {
     state.uuid = uuid
@@ -515,9 +410,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_loadingOverlayMsgs(state: IViviStickerState, msgs: string[]) {
     state.loadingOverlay.msgs = msgs
-  },
-  SET_promote(state: IViviStickerState, value: string[]) {
-    state.promote = value
   }
 }
 
