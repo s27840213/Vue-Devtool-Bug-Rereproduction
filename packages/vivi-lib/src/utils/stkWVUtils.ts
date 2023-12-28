@@ -3,10 +3,12 @@ import userApis from '@/apis/user'
 import i18n from '@/i18n'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { IFullPagePaymentConfigParams, IFullPageVideoConfigParams } from '@/interfaces/fullPage'
 import { IFrame, IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
-import { IFullPageVideoConfigParams, IIosImgData, IMyDesign, IMyDesignTag, IPrices, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
+import { IPrices, IStkProFeatures } from '@/interfaces/payment'
+import { IIosImgData, IMyDesign, IMyDesignTag, ISubscribeInfo, ISubscribeResult, ISubscribeResultV1_45, ITempDesign, IUserInfo, IUserSettings, isCheckState, isGetProducts, isV1_26, isV1_42 } from '@/interfaces/vivisticker'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -32,8 +34,6 @@ import textPropUtils from './textPropUtils'
 import textUtils, { SYSTEM_FONTS } from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
-
-export type IViviStickerProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
 
 declare let window: CustomWindow
 
@@ -199,10 +199,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     return !this.checkVersion('1.26')
   }
 
-  get isOldPrice(): boolean {
-    return !this.checkVersion('1.42')
-  }
-
   get isGetProductsSupported(): boolean {
     return this.checkVersion('1.45')
   }
@@ -213,6 +209,19 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isBgRemoveSupported(): boolean {
     return store.getters['vivisticker/getDebugMode'] || (this.checkVersion('1.35'))
+  }
+
+  get isPromoteCountry(): boolean {
+    return store.getters['payment/getPromote'].includes(this.getUserInfoFromStore().storeCountry ?? '')
+  }
+
+  get isPromoteLanguage(): boolean {
+    const promoteLanguages = [...new Set(store.getters['payment/getPromote'].map(this.getLanguageByCountry))]
+    return promoteLanguages.includes(this.getUserInfoFromStore().locale)
+  }
+
+  get isPromote(): boolean {
+    return this.isPromoteCountry && this.isPromoteLanguage
   }
 
   getUserInfoFromStore(): IUserInfo {
@@ -297,12 +306,12 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   async setDefaultPrices() {
     const userInfo = this.getUserInfoFromStore()
     const locale = isV1_42(userInfo) ? userInfo.storeCountry : constantData.countryMap223.get(i18n.global.locale) ?? 'USA'
-    const defaultPrices = store.getters['vivisticker/getPayment'].defaultPrices as { [key: string]: IPrices }
+    const defaultPrices = store.getters['payment/getPayment'].defaultPrices as { [key: string]: IPrices }
     const localPrices = this.isGetProductsSupported ? await this.getState('prices') : (await this.getState('subscribeInfo'))?.prices
     const prices = localPrices ?? defaultPrices[locale]
     if (!prices) return
-    store.commit('vivisticker/UPDATE_payment', { prices })
-    store.commit('vivisticker/SET_paymentPending', { info: false })
+    store.commit('payment/UPDATE_payment', { prices })
+    store.commit('payment/SET_paymentPending', { info: false })
   }
 
   addDesignDisabled() {
@@ -1362,16 +1371,81 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     await this.setState('tutorialFlags', this.tutorialFlags)
   }
 
-  openPayment(target?: IViviStickerProFeatures) {
+  openPayment(target?: IStkProFeatures) {
     if (this.isPaymentDisabled) {
       this.showUpdateModal()
       return
     }
-    store.commit('vivisticker/SET_fullPageConfig', { type: 'payment', params: { target } })
+    const userInfo = this.getUserInfoFromStore()
+    const {
+      currency,
+      monthly: monthlyPrice,
+      annually: annuallyPrice,
+      annuallyOriginal: annuallyPriceOriginal
+    } = store.getters['payment/getPayment'].prices as IPrices
+    const params = {
+      target: target ?? 'frame',
+      theme: 'stk',
+      carouselItems: [
+        {
+          key: 'template',
+          title: i18n.global.t('STK0071'),
+          img: require(`@img/png/pricing/${i18n.global.locale}/vivisticker_pro-template.png`)
+        },
+        {
+          key: 'frame',
+          title: i18n.global.t('STK0049'),
+          img: require('@img/png/pricing/vivisticker_frame.png')
+        },
+        {
+          key: 'object',
+          title: i18n.global.t('STK0051'),
+          img: require('@img/png/pricing/vivisticker_pro-object.png')
+        },
+        {
+          key: 'text',
+          title: i18n.global.t('STK0050'),
+          img: require(`@img/png/pricing/${i18n.global.locale}/vivisticker_pro-text.png`)
+        },
+        {
+          key: 'bg-remove',
+          title: i18n.global.t('STK0083'),
+          img: require(`@img/png/pricing/${i18n.global.locale}/vivisticker_pro-bg-remove.png`)
+        }
+      ],
+      cards: [],
+      btnPlans: [
+        {
+          key: 'monthly',
+          title: i18n.global.t('NN0514'),
+          subTitle: '',
+          price: this.formatPrice(monthlyPrice.value, currency, monthlyPrice.text)
+        },
+        {
+          key: 'annually',
+          title: i18n.global.t('NN0515'),
+          subTitle: '',
+          price: this.formatPrice(annuallyPrice.value, currency, annuallyPrice.text),
+          originalPrice: this.formatPrice(annuallyPriceOriginal.value, currency, annuallyPriceOriginal.text, 'original')
+        }
+      ],
+      comparisons: [
+        { feature: i18n.global.t('STK0037'), free: true, pro: true },
+        { feature: i18n.global.t('STK0038'), free: false, pro: true },
+        { feature: i18n.global.t('STK0039'), free: false, pro: true },
+        { feature: i18n.global.t('STK0040'), free: false, pro: true },
+        { feature: i18n.global.t('STK0041'), free: false, pro: true }
+      ],
+      termsOfServiceUrl: i18n.global.t('STK0053'),
+      privacyPolicyUrl: i18n.global.t('STK0052'),
+      defaultTrialToggled: store.getters['payment/getPayment'].trialCountry.includes(userInfo.storeCountry),
+      isPromote: this.isPromoteCountry
+    } as IFullPagePaymentConfigParams
+    store.commit('SET_fullPageConfig', { type: 'payment', params })
   }
 
-  checkPro(item: { plan?: number }, target?: IViviStickerProFeatures) {
-    const isPro = store.getters['vivisticker/getPayment'].subscribe
+  checkPro(item: { plan?: number }, target?: IStkProFeatures) {
+    const isPro = store.getters['payment/getPayment'].subscribe
     if (item.plan === 1 && !isPro) {
       this.openPayment(target)
       return false
@@ -1388,7 +1462,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
     const { subscribe, monthly, annually, priceCurrency } = data
     const isSubscribed = subscribe === '1'
     const prices = { currency: priceCurrency }
-    const planIds = store.getters['vivisticker/getPayment'].planId
+    const planIds = store.getters['payment/getPayment'].planId
     data.planInfo.forEach(p => {
       const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
       if (!plan) return
@@ -1400,8 +1474,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       })
     })
     const subscribeInfo = { subscribe: isSubscribed, prices }
-    store.commit('vivisticker/UPDATE_payment', subscribeInfo)
-    store.commit('vivisticker/SET_paymentPending', { info: false })
+    store.commit('payment/UPDATE_payment', subscribeInfo)
+    store.commit('payment/SET_paymentPending', { info: false })
     this.getState('subscribeInfo').then(subscribeInfo => {
       if (subscribeInfo?.subscribe && !isSubscribed) {
         this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
@@ -1413,7 +1487,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getSubscribeInfo() {
-    const planIds = Object.values(store.getters['vivisticker/getPayment'].planId).concat(Object.values(constantData.planId))
+    const planIds = Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
     this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
     this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: planIds })
   }
@@ -1425,7 +1499,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       if (data.reason) return
       if (isGetProducts(data)) {
         const { planInfo, priceCurrency } = data
-        const planIds = store.getters['vivisticker/getPayment'].planId
+        const planIds = store.getters['payment/getPayment'].planId
         const prices = { currency: priceCurrency }
         planInfo.forEach(p => {
           const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
@@ -1448,8 +1522,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
             text: annuallyFree0PriceOriginal.priceText
           }})
         })
-        store.commit('vivisticker/UPDATE_payment', { prices })
-        store.commit('vivisticker/SET_paymentPending', { info: false })
+        store.commit('payment/UPDATE_payment', { prices })
+        store.commit('payment/SET_paymentPending', { info: false })
         this.setState('prices', prices)
       }
       else if (isCheckState(data)) {
@@ -1457,7 +1531,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         if (complete === '0') this.registerSticker()
         const isSubscribed = subscribe === '1'
         const subscribeInfo = { subscribe: isSubscribed }
-        store.commit('vivisticker/UPDATE_payment', subscribeInfo)
+        store.commit('payment/UPDATE_payment', subscribeInfo)
         this.getState('subscribeInfo').then(subscribeInfo => {
           if (subscribeInfo?.subscribe && !isSubscribed) {
             this.setState('showPaymentInfo', { count: 1, timestamp: Date.now() })
@@ -1467,11 +1541,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       }
       return
     }
-    if (!store.getters['vivisticker/getIsPaymentPending']) return // drop result if is timeout
+    if (!store.getters['payment/getIsPaymentPending']) return // drop result if is timeout
     if (!data.reason) {
       const isSubscribed = data.subscribe === '1'
-      store.commit('vivisticker/UPDATE_payment', { subscribe: isSubscribed })
-      if (isSubscribed) store.commit('vivisticker/SET_fullPageConfig', { type: 'welcome', params: {} })
+      store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
+      if (isSubscribed) store.commit('SET_fullPageConfig', { type: 'welcome', params: {} })
       this.getState('subscribeInfo').then(subscribeInfo => {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
@@ -1484,7 +1558,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         },
       )
     }
-    store.commit('vivisticker/SET_paymentPending', { purchase: false, restore: false })
+    store.commit('payment/SET_paymentPending', { purchase: false, restore: false })
   }
 
   async registerSticker() {
@@ -1529,7 +1603,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   openFullPageVideo(key: keyof IStickerVideoUrls, { delayedClose = undefined, mediaPos = 'top' }: Pick<IFullPageVideoConfigParams, 'delayedClose' | 'mediaPos'> = {}) {
     const stickerVideoUrls = constantData.stickerVideoUrls()
-    store.commit('vivisticker/SET_fullPageConfig', {
+    store.commit('SET_fullPageConfig', {
       type: 'video',
       params: {
         video: stickerVideoUrls[key].video,

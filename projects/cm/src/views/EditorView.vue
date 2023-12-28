@@ -37,14 +37,14 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="btn.action")
     template(#right)
       svg-icon(
-        v-if="hasGeneratedResults && inEditingState"
+        v-if="canGotoProject"
         :iconName="'grid-solid'"
         :iconColor="'transparent'"
         :strokeColor="'white'"
         :iconWidth="'24px'"
         @click="handleProjectBtnAction")
       svg-icon(
-        v-if="inGenResultState || inEditingState"
+        v-if="inGenResultState || canSaveSubDesign"
         iconName="download"
         iconColor="white"
         @click="handleNextAction")
@@ -113,18 +113,23 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
   div(v-else class="editor-view__saving-state")
     div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-      div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
+      div(
+        class="result-showcase w-full h-full rounded-8 overflow-hidden flex-center abosolute top-0"
+        ref="resultShowcase")
         img(
           class="result-showcase__card result-showcase__card--back"
           :class="{ 'is-flipped': !showVideo }"
           :src="currImgSrc")
-        div(class="result-showcase__card result-showcase__card--front" :class="{ 'is-flipped': showVideo }")
+        div(
+          class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
+          :class="{ 'is-flipped': showVideo }")
           img(
-            v-if="!isVideoGened"
-            class="w-full h-full absolute top-0 left-0"
+            v-show="!isVideoLoaded"
+            class="w-full h-full absolute top-0 left-0 object-contain"
             :src="initImgSrc")
+          loading-brick(v-show="!isVideoLoaded" class="z-median")
           video(
-            v-else
+            v-show="isVideoLoaded"
             class="w-full h-full absolute top-0 left-0"
             ref="video"
             webkit-playsinline
@@ -132,26 +137,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             loop
             autoplay
             mutes
+            @loadeddata="() => { isVideoLoaded = true }"
             :src="generatedResults[currGenResultIndex].video")
-        //- img(
-        //-   class="result-showcase__card result-showcase__card--front"
-        //-   :class="{ 'is-flipped': !showVideo }"
-        //-   :src="currImgSrc")
-        //- div(class="result-showcase__card result-showcase__card--back" :class="{ 'is-flipped': showVideo }")
-        //-   img(
-        //-     v-if="!isVideoGened"
-        //-     class="w-full h-full absolute top-0 left-0 object-cover"
-        //-     :src="initImgSrc")
-        //-   video(
-        //-     v-else
-        //-     class="w-full h-full absolute top-0 left-0 object-cover"
-        //-     ref="video"
-        //-     webkit-playsinline
-        //-     playsinline
-        //-     loop
-        //-     autoplay
-        //-     mutes
-        //-     :src="generatedResults[currGenResultIndex].video")
       div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
@@ -341,7 +328,10 @@ const {
   hasGeneratedResults,
   currDesignId,
   currSubDesignId,
+  designName,
 } = storeToRefs(editorStore)
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = useUserStore()
+
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
 watch(
@@ -351,14 +341,43 @@ watch(
   },
 )
 
-const isVideoGened = ref(false)
+watch(
+  () => inSavingState.value,
+  (val) => {
+    if (val) {
+      showVideo.value = true
+      isVideoLoaded.value = false
+    }
+  },
+)
+
+const isVideoLoaded = ref(false)
+
+const currImgSrc = computed(() => {
+  return currGenResultIndex.value === -1
+    ? initImgSrc.value
+    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+})
+
+// #endregion
+
+// #region headerbar state & callback
+const canSaveSubDesign = computed(() => {
+  return (
+    inEditingState.value &&
+    designName.value !== '' &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+  )
+})
 const handleNextAction = function () {
-  if (inEditingState.value) {
-    // TODO: save to original.json
-    saveSubDesign(`${currDesignId.value}/${currSubDesignId.value}`, currSubDesignId.value, 'result')
+  if (canSaveSubDesign.value && designName.value !== '') {
+    saveSubDesign(
+      `${currDesignId.value}/${currSubDesignId.value}`,
+      currSubDesignId.value,
+      designName.value,
+    )
   } else if (inGenResultState.value) {
     changeEditorState('next')
-    isVideoGened.value = false
     const currGenResult = generatedResults.value[currGenResultIndex.value]
     if (currGenResult) {
       if (!currGenResult.video) {
@@ -369,22 +388,13 @@ const handleNextAction = function () {
         const pixiRecorder = new PixiRecorder(src, res)
         pixiRecorder.genVideo().then((data) => {
           if (data) {
-            isVideoGened.value = true
             updateGenResult(currGenResult.id, { video: data })
           }
         })
-      } else {
-        isVideoGened.value = true
       }
     }
   }
 }
-
-const currImgSrc = computed(() => {
-  return currGenResultIndex.value === -1
-    ? initImgSrc.value
-    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
-})
 
 const useStep = useSteps()
 const { undo, redo, reset, isInFirstStep, isInLastStep, hasUnsavedChanges } = useStep
@@ -418,6 +428,45 @@ const centerBtns = computed<centerBtn[]>(() => {
     })
   return retTabs
 })
+
+const canGotoProject = computed(() => {
+  return (
+    hasGeneratedResults.value &&
+    inEditingState.value &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+  )
+})
+const handleProjectBtnAction = () => {
+  if (hasUnsavedChanges.value) {
+    setNormalModalInfo({
+      title: t('CM0025'),
+      content: t('CM0026'),
+      confirmText: t('CM0028'),
+      cancelText: t('NN0203'),
+      confirm: () => {
+        groupUtils.deselect()
+        changeEditorState('next')
+        reset()
+        closeModal()
+      },
+      cancel: () => {
+        closeModal()
+      },
+    })
+    openModal()
+    return
+  }
+
+  groupUtils.deselect()
+  reset()
+  changeEditorState('next')
+}
+
+const handleHomeBtnAction = (navagate: () => void) => {
+  setCurrOpenDesign(undefined)
+  setCurrOpenSubDesign(undefined)
+  navagate()
+}
 // #endregion
 
 // #region page related
@@ -867,40 +916,6 @@ const startBgRemove = (type: 'cm-bg-remove') => {
   }
 }
 // #endregion
-
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = useUserStore()
-
-const handleHomeBtnAction = (navagate: () => void) => {
-  setCurrOpenDesign(undefined)
-  setCurrOpenSubDesign(undefined)
-  navagate()
-}
-
-const handleProjectBtnAction = () => {
-  if (hasUnsavedChanges.value) {
-    setNormalModalInfo({
-      title: t('CM0025'),
-      content: t('CM0026'),
-      confirmText: t('CM0028'),
-      cancelText: t('NN0203'),
-      confirm: () => {
-        groupUtils.deselect()
-        changeEditorState('next')
-        reset()
-        closeModal()
-      },
-      cancel: () => {
-        closeModal()
-      },
-    })
-    openModal()
-    return
-  }
-
-  groupUtils.deselect()
-  reset()
-  changeEditorState('next')
-}
 </script>
 <style lang="scss" scoped>
 @use '@/assets/scss/transitions.scss';

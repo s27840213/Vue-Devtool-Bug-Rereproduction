@@ -421,7 +421,6 @@
   "STK0045": "Restore Purchase",
   "STK0046": "Try free & Subscribe",
   "STK0047": "Subscribe",
-  "STK0048": "{day} Day Free Trial",
   "STK0049": "Creative Frames",
   "STK0050": "Premium Font Collections",
   "STK0051": "PRO Sticker Library",
@@ -480,5 +479,14 @@
   "CM0114": "vibrant color but<newline>more details",
   "CM0115": "Control Weights",
   "CM0116": "Start Control Step",
-  "CM0117": "Ending Control Step"
+  "CM0117": "Ending Control Step",
+  "CM0134": "Please contact us if you need to change the account connected with your subscription.",
+  "CM0135": "You're all Set",
+  "CM0136": "Your purchase is successful.",
+  "CM0137": "No subscription found",
+  "CM0138": "We couldn't find an active subscription for your account.",
+  "CM0142": "Welcome to Charmix PRO",
+  "CM0143": "Congrats! Charmix Pro opens up endless possibilities for creating visual content. Better and faster. We hope you enjoy it!",
+  "CM0144": "https://vivisticker.com/us/privacy-policy/",
+  "CM0145": "https://vivisticker.com/us/terms-of-use/"
 }

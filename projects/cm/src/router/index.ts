@@ -4,8 +4,10 @@ import HomeView from '@/views/HomeView.vue'
 import Screenshot from '@/views/ScreenshotView.vue'
 import store from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import { IPrices } from '@nu/vivi-lib/interfaces/payment'
 import router from '@nu/vivi-lib/router'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import localeUtils from '@nu/vivi-lib/utils/localeUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -123,6 +125,8 @@ router.addRoute({
     },
   },
   async beforeEnter(to, from, next) {
+    loginUtils.checkToken(() => cmWVUtils.restore())
+
     useI18n() // prevent import being removed
     // useI18n().locale = 'tw'
 
@@ -151,6 +155,8 @@ router.addRoute({
       cmWVUtils.showUpdateModal(true)
     } // else this.showInitPopups()
     cmWVUtils.fetchTutorialFlags()
+    cmWVUtils.setDefaultPrices()
+    cmWVUtils.getProducts()
     if (to.name !== 'Screenshot') {
       listDesigns('all')
     }
@@ -185,8 +191,6 @@ router.beforeEach(async (to, from, next) => {
   cmWVUtils.setupAPIInterface()
   cmWVUtils.registerCallbacks('base')
   useUploadUtils().getUrlMap()
-
-  loginUtils.checkToken()
 
   // store scroll position
   const elScrollable = document.getElementsByClassName('overflow-scroll')[0] as HTMLElement
@@ -223,6 +227,7 @@ router.beforeEach(async (to, from, next) => {
       verApi: json.ver_api,
       imgSizeMap: json.image_size_map,
       imgSizeMapExtra: json.image_size_map_extra,
+      getTxToken: json.get_tx_token,
     })
     textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     const defaultFontsJson = json.default_font as Array<{ id: string; ver: number }>
@@ -237,6 +242,57 @@ router.beforeEach(async (to, from, next) => {
     })
 
     store.commit('cmWV/SET_modalInfo', json.modal)
+
+    if (json.default_price && Object.keys(json.default_price).length) {
+      const planPostfix = json.default_price.plan_id ? '_' + json.default_price.plan_id : ''
+      store.commit('payment/UPDATE_payment', {
+        defaultPrices: Object.fromEntries(
+          Object.entries(
+            json.default_price.prices as { [key: string]: { monthly: number; annually: number } },
+          ).map(([locale, prices]) => {
+            const currency = constantData.currencyMap.get(locale) ?? 'USD'
+            const defaultAnnuallyPriceOriginal =
+              json.default_price.original_prices?.[locale]?.annually ?? NaN
+            return [
+              locale,
+              {
+                currency,
+                ...Object.fromEntries(
+                  Object.entries(prices).map(([plan, price]) => [
+                    plan,
+                    {
+                      value: price,
+                      text: price.toString(),
+                    },
+                  ]),
+                ),
+                annuallyFree0: {
+                  value: prices.annually,
+                  text: prices.annually.toString(),
+                },
+                annuallyOriginal: {
+                  value: defaultAnnuallyPriceOriginal,
+                  text: defaultAnnuallyPriceOriginal.toString(),
+                },
+                annuallyFree0Original: {
+                  value: defaultAnnuallyPriceOriginal,
+                  text: defaultAnnuallyPriceOriginal.toString(),
+                },
+              },
+            ]
+          }),
+        ) as { [key: string]: IPrices },
+        trialDays: json.default_price.trial_days,
+        trialCountry: json.default_price.trial_country,
+        planId: {
+          monthly: constantData.planId.monthly,
+          annually: constantData.planId.annually + planPostfix,
+          annuallyFree0: constantData.planId.annuallyFree0 + planPostfix,
+          annuallyOriginal: constantData.planId.annually,
+          annuallyFree0Original: constantData.planId.annuallyFree0,
+        },
+      })
+    }
 
     uploadUtils.setLoginOutput({
       upload_log_map: json.ul_log_map,

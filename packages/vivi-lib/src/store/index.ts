@@ -55,6 +55,8 @@ import {
   LayerType,
   SidebarPanelType,
 } from './types'
+import { IFullPageConfig } from '@/interfaces/fullPage'
+import payment from '@/store/module/payment'
 
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),
@@ -156,6 +158,10 @@ const getDefaultState = (): IEditorState => ({
   showGlobalErrorModal: false,
   newTemplateShownMode: true,
   modalInfo: {},
+  fullPageConfig: {
+    type: 'none',
+    params: {}
+  },
   allowLayerAction: 'all',
   controlState: { type: '' }
 })
@@ -384,6 +390,15 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getModalInfo(state: IEditorState): { [key: string]: string } {
     return state.modalInfo
+  },
+  getFullPageConfig(state: IEditorState): IFullPageConfig {
+    return state.fullPageConfig
+  },
+  getFullPageType(state: IEditorState): IFullPageConfig['type'] {
+    return state.fullPageConfig.type
+  },
+  getFullPageParams(state: IEditorState): IFullPageConfig['params'] {
+    return state.fullPageConfig.params
   },
   getAllowLayerAction(state: IEditorState) {
     return state.allowLayerAction
@@ -1591,6 +1606,21 @@ const mutations: MutationTree<IEditorState> = {
   SET_modalInfo(state: IEditorState, modalInfo: { [key: string]: any }) {
     state.modalInfo = modalInfo
   },
+  SET_fullPageType(state: IEditorState, fullPageType: IFullPageConfig['type']) {
+    state.fullPageConfig.type = fullPageType
+  },
+  SET_fullPageParams(state: IEditorState, fullPageParams: IFullPageConfig['params']) {
+    state.fullPageConfig.params = fullPageParams
+  },
+  SET_fullPageConfig(state: IEditorState, data: IFullPageConfig) {
+    state.fullPageConfig = data
+  },
+  UPDATE_clearFullPageConfig(state: IEditorState) {
+    state.fullPageConfig = {
+      type: 'none',
+      params: {}
+    }
+  },
   SET_allowLayerAction(state: IEditorState, allowLayerAction: IEditorState['allowLayerAction']) {
     state.allowLayerAction = allowLayerAction
   }
@@ -1620,6 +1650,7 @@ export type IStoreRoot = IEditorState & {
   fontTag: typeof fontTag.state
   imgControl: typeof imgControl.state
   webView: typeof webView.state
+  payment: typeof payment.state
   canvasResize: typeof canvasResize.state
 }
 const store = createStore({
@@ -1649,6 +1680,7 @@ const store = createStore({
     imgControl,
     webView,
     canvasResize,
+    ...(generalUtils.isStk || generalUtils.isCm ? { payment } : {}),
   },
 })
 export default store

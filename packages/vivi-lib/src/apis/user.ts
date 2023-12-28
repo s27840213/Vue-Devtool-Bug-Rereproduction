@@ -1,6 +1,6 @@
 import axios from '@/apis'
 import i18n from '@/i18n'
-import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
+import { IGetTxInfoParams, IGetTxInfoResponse, IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
@@ -205,4 +205,14 @@ export default {
       }
     }))
   },
+  // https://www.notion.so/vivipic/get-tx-info-api-d90d7f64e05946ea8ceaec615d51094f
+  async getTxInfo(params: IGetTxInfoParams): Promise<AxiosPromise<IGetTxInfoResponse>> {
+    return await apiUtils.requestWithRetry<IGetTxInfoResponse>(() => axios('/get-tx-info', {
+      method: 'POST',
+      data: {
+        ...params,
+        token: params.token || store.getters['user/getGetTxToken']
+      }
+    }))
+  }
 }
