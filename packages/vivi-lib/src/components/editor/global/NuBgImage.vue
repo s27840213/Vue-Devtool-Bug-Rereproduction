@@ -280,7 +280,7 @@ export default defineComponent({
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
-      const { width, height } = this.pageSize
+      const { width, height } = this.page as IPage
       if (!adjust) return []
 
       const elms = []

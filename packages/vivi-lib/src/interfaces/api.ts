@@ -1,6 +1,7 @@
 import { LocaleName } from '@/i18n'
 import { RawImage } from '@/interfaces/gallery'
 import { IBleed } from '@/interfaces/page'
+import generalUtils from '@/utils/generalUtils'
 import { intersection, isEqual } from 'lodash'
 
 /* eslint-disable camelcase */
@@ -519,7 +520,58 @@ export interface ILoginResult {
   complete: number,
 }
 
-export interface ILoginResponse {
+export interface ICmLoginResult {
+  user_name: string
+  user_id: string
+  token: string
+  new_user: boolean
+  locale: LocaleName
+  ai_credit: number
+  has_tx: 0 | 1
+  // following contains if has_tx=1
+  subscribe?: 0 | 1
+  stop_subscribe?: 0 | 1
+  uuid?: string
+  next_billing_time?: string
+  plan_id?: string
+  next_plan_id?: string
+  retry?: 0 | 1
+  in_trial?: 0 | 1
+}
+
+export interface ILoginResponse<T extends ILoginResult | ICmLoginResult = ILoginResult | ICmLoginResult> {
   flag: number,
-  data: ILoginResult
+  data: T
+}
+
+export const isPicLoginResponse = (data: ILoginResponse): data is ILoginResponse<ILoginResult> => {
+  return generalUtils.isPic
+}
+
+export const isCmLoginResponse = (data: ILoginResponse): data is ILoginResponse<ICmLoginResult> => {
+  return generalUtils.isCm
+}
+
+// https://www.notion.so/vivipic/get-tx-info-api-d90d7f64e05946ea8ceaec615d51094f
+export interface IGetTxInfoParams {
+  token: string,
+  app: 'sticker' | 'charmix'
+  host_id: string
+  uuid: string
+  txid?: string
+}
+
+export interface IGetTxInfoResponse {
+  flag: 0 | 1,
+  dup_binded: 0 | 1 // for charmix only
+  has_tx: 0 | 1,
+  uuid?: string
+  subscribe?: 0 | 1
+  stop_subscribe?: 0 | 1
+  plan_id?: string
+  next_plan_id?: string
+  next_billing_time?: string
+  retry?: 0 | 1
+  in_trial?: 0 | 1
+  ai_credit?: number // for charmix only
 }

@@ -43,7 +43,7 @@ export const useCanvasStore = defineStore('canvas', {
   }),
   getters: {
     isInCanvasFirstStep(): boolean {
-      return this.currStep === 0
+      return this.currStep === 0 || this.currStep === this.checkPointStep
     },
     isInCanvasLastStep(): boolean {
       return this.currStep === this.steps.length - 1

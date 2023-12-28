@@ -25,12 +25,12 @@ div(class="bg-remove-area"
 </template>
 
 <script lang="ts">
-import logUtils from '@nu/vivi-lib/utils/logUtils'
-import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
-import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
-import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
-import { bgRemoveMoveHandler } from '@nu/vivi-lib/store/module/bgRemove'
+import { IBgRemoveInfo } from '@/interfaces/image'
+import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
+import logUtils from '@/utils/logUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import pageUtils from '@/utils/pageUtils'
+import shortcutUtils from '@/utils/shortcutUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 

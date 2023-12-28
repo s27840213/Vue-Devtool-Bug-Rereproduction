@@ -176,3 +176,40 @@ export const _IPaymentPayingView = [
 export type IPaymentPayingView = typeof _IPaymentPayingView[number]
 
 export type IPaymentView = IPaymentWarningView | IPaymentPayingView
+
+// for vivisticker & charmix
+export type IStkProFeatures = 'object' | 'text' | 'background' | 'frame' | 'template' | 'bg-remove'
+export type ICmProFeatures = 'powerful-fill'
+export interface IPrice {
+  value: number,
+  text: string
+}
+export interface IPrices {
+  currency: string,
+  monthly: IPrice,
+  annually: IPrice,
+  annuallyFree0: IPrice,
+  annuallyOriginal: IPrice,
+  annuallyFree0Original: IPrice
+}
+export interface IPaymentPending {
+  info: boolean,
+  purchase: boolean,
+  restore: boolean
+}
+export interface IPayment {
+  subscribe: boolean,
+  prices: IPrices,
+  defaultPrices: { [key: string]: IPrices },
+  trialDays: number,
+  trialCountry: string[],
+  pending: IPaymentPending,
+  planId: {
+    monthly: string,
+    annually: string,
+    annuallyFree0: string,
+    annuallyOriginal: string,
+    annuallyFree0Original: string
+  },
+  promote: string[]
+}

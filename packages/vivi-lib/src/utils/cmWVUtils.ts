@@ -1,8 +1,12 @@
 import listApis from '@/apis/list'
-import { IListServiceContentDataItem, ILoginResult } from '@/interfaces/api'
+import userApis from '@/apis/user'
+import i18n from '@/i18n'
+import { ICmLoginResult, IListServiceContentDataItem } from '@/interfaces/api'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
+import { ICmProFeatures, IPrices } from '@/interfaces/payment'
 import router from '@/router'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
@@ -10,22 +14,24 @@ import { HTTPLikeWebViewUtils } from '@/utils/nativeAPIUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
+import constantData from './constantData'
+import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-import modalUtils from './modalUtils'
+import logUtils from './logUtils'
 
 declare let window: CustomWindow
 
-export interface IGeneralSuccessResponse {
+export type GeneralSuccessResponse = {
   flag: '0'
 }
 
-export interface IGeneralFailureResponse {
-  flag: string
+export type GeneralFailureResponse = {
+  flag: '1' | '2'
   msg: string
 }
 
-type GeneralResponse = IGeneralSuccessResponse | IGeneralFailureResponse
+export type GeneralResponse = GeneralSuccessResponse | GeneralFailureResponse
 
 export type IUserInfo = {
   hostId: string
@@ -35,10 +41,12 @@ export type IUserInfo = {
   statusBarHeight: number
   homeIndicatorHeight: number
   country: string
-  modelName: string,
-  flag: string,
-  locale: string,
-  userId: string
+  modelName: string
+  flag: string
+  locale: string
+  userId: string,
+  storeCountry: string
+  deviceScale: number
 }
 
 export interface IAlbum {
@@ -97,6 +105,38 @@ export interface IListAssetResponse {
   group?: string
 }
 
+export interface IPlanInfo {
+  planId: string,
+  priceText: string,
+  priceValue: string
+}
+
+export type GetProductResponse = GeneralResponse & { 
+  priceCurrency: string,
+  monthly: {
+    priceValue: string,
+    priceText: string
+  },
+  annually: {
+    priceValue: string,
+    priceText: string
+  },
+  planInfo: IPlanInfo[]
+}
+
+export type SubscribeResponse = GeneralResponse & { 
+  option: string,
+  txid?: string,
+}
+
+export type FileSource = {
+  path: string,
+  name: string,
+  type: string
+} | {
+  fileId: string
+}
+
 export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
   textStock: 'text',
@@ -117,6 +157,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     locale: 'en',
     modelName: 'web',
     userId: '',
+    storeCountry: 'USA',
+    deviceScale: 1,
   }
 
   CALLBACK_MAPS = {
@@ -201,7 +243,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   // Like picWVUtils, need merge.
   async login(type: 'Apple' | 'Google' | 'Facebook', locale: string) {
     const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as 
-      { data: ILoginResult, flag: number, msg?: string }
+      { data: ICmLoginResult, flag: number, msg?: string }
     if (!loginResult) {
       throw new Error('login failed')
     }
@@ -276,7 +318,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     })
   }
 
-  async copyEditor(pageSize: { width: number, height: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async copyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }, noBg = false): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     return await this.copyEditorCore(this.sendCopyEditor.bind(this), {
       senderArgs: [pageSize],
       preArgs: { noBg },
@@ -294,7 +336,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     this.setDuringCopy(false)
   }
 
-  async sendCopyEditor(pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
+  async sendCopyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
     const { flag, cleanup } = await this.sendCopyEditorCore('editorSave', pageSize, imageId)
     return {
@@ -304,9 +346,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
+  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void}>
+  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -325,7 +367,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       ...(imagePath && { imagePath }),
       ...(outputType && { outputType }),
       ...(quality && { quality }),
-      snapshotWidth: width,
+      snapshotWidth: pageSize.snapshotWidth ?? width,
     }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
@@ -361,7 +403,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
   }
 
-  async sendScreenshotUrl(query: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
+  async sendScreenshotUrl(query: string, { outputType, quality, forGenImage }: { outputType?: string, quality?: number, forGenImage?: boolean } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
     if (this.inBrowserMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -379,6 +421,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         imageId,
         outputType,
         quality,
+        forGenImage
       },
       to: 'Shot',
     })
@@ -443,6 +486,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
+  getSnapshotWidth({ width, height }: { width: number, height: number }, targetSize: number, type: 'short' | 'long') {
+    const isVertical = height > width
+    return (isVertical && type === 'short' ? targetSize : targetSize / height * width) / this.getUserInfoFromStore().deviceScale
+  }
+
   async getState(key: string): Promise<any | undefined> {
     if (this.inBrowserMode) return
     const data = await this.callIOSAsHTTPAPI('GET_STATE', { key }, { retry: true }) as IGetStateResponse
@@ -485,6 +533,205 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return loadedFonts[face] ?? false
   }
 
+  // #region payment
+  openPayment(target?: ICmProFeatures) {
+    const params = {
+      target,
+      theme: 'cm',
+      carouselItems: [
+        {
+          key: 'powerful-fill',
+          title: 'Powerful Fill',
+          img: require('@img/png/pricing/cm-pro.png')
+        },
+      ],
+      cards: [
+        {
+          iconName: 'unlimited',
+          title: 'Unlimited creation'
+        },
+        {
+          iconName: 'watermark',
+          title: 'Watermark free'
+        },
+        {
+          iconName: 'backward',
+          title: 'Fast image processing'
+        }
+      ],
+      btnPlans: [
+        {
+          key: 'annually',
+          title: i18n.global.t('NN0515'),
+          subTitle: '',
+          price: store.getters['payment/getPayment'].prices.annually.text
+        },
+        {
+          key: 'monthly',
+          title: i18n.global.t('NN0514'),
+          subTitle: '',
+          price: store.getters['payment/getPayment'].prices.monthly.text
+        }
+      ],
+      comparisons: [],
+      termsOfServiceUrl: i18n.global.t('CM0145'),
+      privacyPolicyUrl: i18n.global.t('CM0144'),
+      defaultTrialToggled: false,
+      isPromote: false
+    } as IFullPagePaymentConfigParams
+    store.commit('SET_fullPageConfig', { type: 'payment', params })
+  }
+
+  async setDefaultPrices() {
+    const userInfo = this.getUserInfoFromStore()
+    const locale = userInfo.storeCountry // TODO: no storeCountry in charmix
+    const defaultPrices = store.getters['payment/getPayment'].defaultPrices as { [key: string]: IPrices }
+    const localPrices =  await this.getState('prices')
+    const prices = localPrices ?? defaultPrices[locale]
+
+    if (!prices) return
+    store.commit('payment/UPDATE_payment', { prices })
+    store.commit('payment/SET_paymentPending', { info: false })
+  }
+
+  async getProducts() {
+    const res = await this.callIOSAsHTTPAPI('GET_PRODUCTS', {
+      planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
+    })
+    if (!res) return
+    const { planInfo, priceCurrency } = res as GetProductResponse
+    const planIds = store.getters['payment/getPayment'].planId
+    const prices = { currency: priceCurrency }
+    planInfo.forEach(p => {
+      const plan = Object.keys(planIds).find(plan => planIds[plan] === p.planId)
+      plan && Object.assign(prices, {
+        [plan]: {
+          value: parseFloat(p.priceValue),
+          text: p.priceText
+        }
+      })
+    })
+    const annuallyPriceOriginal = planInfo.find(p => p.planId === constantData.planId.annually)
+    const annuallyFree0PriceOriginal = planInfo.find(p => p.planId === constantData.planId.annuallyFree0)
+    Object.assign(prices, {
+      ...(annuallyPriceOriginal && { annuallyOriginal: {
+        value: parseFloat(annuallyPriceOriginal.priceValue),
+        text: annuallyPriceOriginal.priceText
+      }}),
+      ...(annuallyFree0PriceOriginal && { annuallyFree0Original: {
+        value: parseFloat(annuallyFree0PriceOriginal.priceValue),
+        text: annuallyFree0PriceOriginal.priceText
+      }})
+    })
+    store.commit('payment/UPDATE_payment', { prices })
+    store.commit('payment/SET_paymentPending', { info: false })
+    this.setState('prices', prices)
+  }
+
+  async updateSubState(uuid: string, txid?: string, showDupBindModal = true): Promise<{ subscribe: boolean, dupBinded: boolean }> {
+    const userInfo = this.getUserInfoFromStore()
+    const res = await userApis.getTxInfo({
+      token: '',
+      app: 'charmix',
+      host_id: userInfo.hostId,
+      uuid,
+      txid
+    })
+    logUtils.setLogAndConsoleLog(`getTxInfo: ${JSON.stringify({token: store.getters['user/getGetTxToken'], uuid: uuid, txid: txid, res: res?.data})}`)
+    if (res.data.flag === 0) {
+      const isSubscribed = res.data.subscribe === 1
+      store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
+      this.getState('subscribeInfo').then(subscribeInfo => {
+        this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
+      })
+      if (res.data.dup_binded === 1 && showDupBindModal) {
+        modalUtils.setModalInfo(
+          i18n.global.t('STK0024'),
+          [i18n.global.t('CM0134')],
+          {
+            msg: i18n.global.t('STK0023'),
+          },
+        )
+      }
+      return {subscribe: isSubscribed, dupBinded: res.data.dup_binded === 1}
+    }
+    return {subscribe: false, dupBinded: false}
+  }
+
+  async subscribe(planId: string) {
+    if (store.getters['payment/getPaymentPending'].purchase) return
+    store.commit('payment/SET_paymentPending', { purchase: true })
+
+    const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: planId }, { timeout: -1 }) as SubscribeResponse
+
+    if (res.flag === '0') {
+      const isSubscribed = !!res.txid && (await this.updateSubState('', res.txid)).subscribe
+      if (isSubscribed) store.commit('SET_fullPageConfig', { type: 'welcome', params: {} })
+    } else if (res.msg === 'IAP_DISABLED'){
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [i18n.global.t('STK0096')],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
+    }
+
+    store.commit('payment/SET_paymentPending', { purchase: false })
+  }
+
+  async restore(loginResult?: ICmLoginResult, showResult = false) {
+    if (store.getters['payment/getPaymentPending'].restore) return
+    store.commit('payment/SET_paymentPending', { restore: true })
+    let result = { subscribe: false, dupBinded: false }
+    if (loginResult?.has_tx === 1) { 
+      // logged in & is binding
+      const isSubscribed = loginResult.subscribe === 1
+      store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
+      this.getState('subscribeInfo').then(subscribeInfo => {
+        this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
+      })
+      result.subscribe = isSubscribed
+    } else {
+      // not logged in, or logged in but not binding
+      const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 })
+      if (res) {
+        const { flag, txid } = res as SubscribeResponse
+        if(flag === '0' && !!txid) result = await this.updateSubState('', txid, false)
+      } else {
+        logUtils.setLogAndConsoleLog('restore timeout')
+        showResult && notify({
+          group: 'warn',
+          text: 'network timeout',
+        })
+      }
+    }
+
+    store.commit('payment/SET_paymentPending', { restore: false })
+    if (showResult) {
+      const title = result.subscribe ? i18n.global.t('CM0135') : i18n.global.t('CM0137')
+      const content = (result.subscribe ? i18n.global.t('CM0136') : i18n.global.t('CM0138')) + 
+        (result.dupBinded ? i18n.global.t('CM0134') : '')
+      modalUtils.setModalInfo(
+        title,
+        [content],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
+    }
+  }
+
+  checkPro(item: { plan?: number }, target?: ICmProFeatures) {
+    const isPro = store.getters['payment/getPayment'].subscribe
+    if (item.plan === 1 && !isPro) {
+      this.openPayment(target)
+      return false
+    }
+    return true
+  }
+  // #endregion
+  
   async fetchDebugModeEntrance() {
     this.everEntersDebugMode = (await this.getState('everEntersDebugMode'))?.value ?? false
     if (!this.everEntersDebugMode && ((await this.getState('debugMode'))?.value ?? false)) {
@@ -592,7 +839,28 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
-      return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+    return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
+  }
+
+  async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
+  }
+
+  getDocumentPath(url: string) {
+    const urlObj = new URL(url)
+    const paths = (urlObj.hostname + urlObj.pathname).replace('//', '').split('/')
+    const path = paths.slice(0, paths.length - 1).join('/')
+    const name = paths[paths.length - 1]
+    const type = urlObj.searchParams.get('imagetype') ?? 'png'
+    return {
+      path,
+      name,
+      type
+    }
+  }
+
+  async documentToCameraRoll(path: string, name: string, type: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType }) as GeneralResponse
   }
 
   showUpdateModal(force = false) {

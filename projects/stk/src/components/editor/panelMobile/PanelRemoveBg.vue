@@ -31,7 +31,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
 </template>
 
 <script lang="ts">
-import BgRemoveContainer from '@/components/editor/backgroundRemove/BgRemoveContainer.vue'
+import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import { IImage } from '@nu/vivi-lib/interfaces/layer'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'

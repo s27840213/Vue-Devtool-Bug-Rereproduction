@@ -11,21 +11,11 @@ div(class="description-page w-full h-full text-white px-24")
       transition(name="fade-in")
         // update key to trigger vue transition
         // eslint-disable-next-line vue/require-toggle-inside-transition
-        div(:key="idxCurrImg")
-          img(
-            :src="getImgs(idxCurrImg).imgB"
-            class="w-full h-full object-cover object-center absolute top-0 left-0"
-            ref="elImgA"
-            :style="{ animation: 'zoom 3s ease-in-out both infinite' }")
-          img(
-            :src="getImgs(idxCurrImg).imgA"
-            class="w-full h-full object-cover object-center absolute top-0 left-0"
-            ref="elImgB"
-            :style="{ animation: 'clip-path-scan-x 3s ease-in-out both infinite' }")
-          div(
-            class="w-6 h-full bg-yellow-cm absolute top-0"
-            ref="elSplitter"
-            :style="{ animation: 'move-scan-x 3s ease-in-out both infinite' }")
+        compare-image(
+          :key="idxCurrImg"
+          :srcA="getImgs(idxCurrImg).imgA"
+          :srcB="getImgs(idxCurrImg).imgB"
+        )
     div(class="flex justify-center gap-16")
       img(
         v-for="(n, idx) in 3"
@@ -54,12 +44,12 @@ const target: Ref<EditorType> = ref(route.query.target as EditorType)
 const idxCurrImg = ref(0)
 const getImgs = (idx: number) => {
   return {
-    imgA: require(`demo/${target.value}-demo-${idx}a.png`),
-    imgB: require(`demo/${target.value}-demo-${idx}b.png`),
+    imgA: require(`demo/${target.value}/description/${idx}a.png`),
+    imgB: require(`demo/${target.value}/description/${idx}b.png`),
   }
 }
 const getThumbImgs = (idx: number) => {
-  return require(`demo/${target.value}-demo-${idx}b-thumb.png`)
+  return require(`demo/${target.value}/description/${idx}b-thumb.png`)
 }
 
 const title = ref('')

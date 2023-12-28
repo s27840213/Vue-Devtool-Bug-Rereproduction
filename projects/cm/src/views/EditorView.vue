@@ -1,9 +1,6 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
-  headerbar(
-    class="editor-header box-border px-24"
-    :middGap="32"
-    ref="headerbarRef")
+  headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
       back-btn
     template(
@@ -40,15 +37,17 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="btn.action")
     template(#right)
       svg-icon(
-        v-if="hasGeneratedResults && inEditingState"
+        v-if="canGotoProject"
         :iconName="'grid-solid'"
         :iconColor="'transparent'"
         :strokeColor="'white'"
         :iconWidth="'24px'"
         @click="handleProjectBtnAction")
-      nubtn(
-        v-if="inGenResultState"
-        @click="handleNextAction") {{ inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
+      svg-icon(
+        v-if="inGenResultState || canSaveSubDesign"
+        iconName="download"
+        iconColor="white"
+        @click="handleNextAction")
       router-link(
         v-if="inSavingState"
         custom
@@ -108,17 +107,38 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef")
+    transition(name="fade-in")
+      loading-brick(
+        v-if="isAutoFilling"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
   div(v-else class="editor-view__saving-state")
     div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-      div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
+      div(
+        class="result-showcase w-full h-full rounded-8 overflow-hidden flex-center abosolute top-0"
+        ref="resultShowcase")
         img(
-          class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
+          class="result-showcase__card result-showcase__card--back"
           :class="{ 'is-flipped': !showVideo }"
           :src="currImgSrc")
-        img(
-          class="result-showcase__card result-showcase__card--front"
-          :class="{ 'is-flipped': showVideo }"
-          :src="initImgSrc")
+        div(
+          class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
+          :class="{ 'is-flipped': showVideo }")
+          img(
+            v-show="!isVideoLoaded"
+            class="w-full h-full absolute top-0 left-0 object-contain"
+            :src="initImgSrc")
+          loading-brick(v-show="!isVideoLoaded" class="z-median")
+          video(
+            v-show="isVideoLoaded"
+            class="w-full h-full absolute top-0 left-0"
+            ref="video"
+            webkit-playsinline
+            playsinline
+            loop
+            autoplay
+            mutes
+            @loadeddata="() => { isVideoLoaded = true }"
+            :src="generatedResults[currGenResultIndex].video")
       div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
@@ -162,6 +182,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
+  bg-remove-container(
+    class="absolute top-0 left-0 w-full h-full z-bg-remove"
+    v-if="(inBgRemoveMode || isProcessing) && editorContainerRef"
+    :containerWH="editorContainerSize"
+    :containerRef="editorContainerRef"
+    :previewSrc="previewSrc")
   transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
@@ -178,17 +204,19 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
-import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
+import type { GenImageParams } from '@/types/api'
 import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
+import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
@@ -198,6 +226,7 @@ import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -208,6 +237,7 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { useEventBus } from '@vueuse/core'
 import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
@@ -227,6 +257,11 @@ const video = ref<HTMLVideoElement | null>(null)
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementBounding(editorContainerRef)
 
+const editorContainerSize = computed(() => ({
+  width: editorContainerWidth.value,
+  height: editorContainerHeight.value,
+}))
+
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
 const isNoBg = computed(() => store.getters['cmWV/getIsNoBg'])
@@ -234,6 +269,7 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const layerIndex = computed(() => layerUtils.layerIndex)
 const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
 
 const { ids } = useGenImageUtils()
@@ -249,6 +285,7 @@ const showSidebarTabs = computed(
     !showSelectionOptions.value &&
     !isCropping.value &&
     !showBrushOptions.value &&
+    layerIndex.value === -1 &&
     editorType.value !== 'magic-combined',
 )
 
@@ -268,6 +305,7 @@ onBeforeRouteLeave((to, from) => {
       editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
+      setPrevGenParams({ requestId: '', params: {} as GenImageParams })
     }, 1000)
   }
 })
@@ -288,7 +326,12 @@ const {
   showBrushOptions,
   editorType,
   hasGeneratedResults,
+  currDesignId,
+  currSubDesignId,
+  designName,
 } = storeToRefs(editorStore)
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = useUserStore()
+
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
 watch(
@@ -298,16 +341,43 @@ watch(
   },
 )
 
-const isVideoGened = ref(false)
+watch(
+  () => inSavingState.value,
+  (val) => {
+    if (val) {
+      showVideo.value = true
+      isVideoLoaded.value = false
+    }
+  },
+)
+
+const isVideoLoaded = ref(false)
+
+const currImgSrc = computed(() => {
+  return currGenResultIndex.value === -1
+    ? initImgSrc.value
+    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+})
+
+// #endregion
+
+// #region headerbar state & callback
+const canSaveSubDesign = computed(() => {
+  return (
+    inEditingState.value &&
+    designName.value !== '' &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+  )
+})
 const handleNextAction = function () {
-  if (inAspectRatioState.value) {
-    changeEditorState('next')
-    useTutorial().runTutorial(editorType.value)
-  } else if (inEditingState.value) {
-    changeEditorState('next')
+  if (canSaveSubDesign.value && designName.value !== '') {
+    saveSubDesign(
+      `${currDesignId.value}/${currSubDesignId.value}`,
+      currSubDesignId.value,
+      designName.value,
+    )
   } else if (inGenResultState.value) {
     changeEditorState('next')
-    isVideoGened.value = false
     const currGenResult = generatedResults.value[currGenResultIndex.value]
     if (currGenResult) {
       if (!currGenResult.video) {
@@ -318,22 +388,13 @@ const handleNextAction = function () {
         const pixiRecorder = new PixiRecorder(src, res)
         pixiRecorder.genVideo().then((data) => {
           if (data) {
-            isVideoGened.value = true
             updateGenResult(currGenResult.id, { video: data })
           }
         })
-      } else {
-        isVideoGened.value = true
       }
     }
   }
 }
-
-const currImgSrc = computed(() => {
-  return currGenResultIndex.value === -1
-    ? initImgSrc.value
-    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
-})
 
 const useStep = useSteps()
 const { undo, redo, reset, isInFirstStep, isInLastStep, hasUnsavedChanges } = useStep
@@ -355,7 +416,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       icon: 'question-mark-circle',
       disabled: false,
       width: 20,
-      action: () => setDescriptionPanel('hidden-message-help'),
+      action: () => setDescriptionPanel('hidden-message/help'),
     })
   retTabs.push(...stepBtns)
   if (currEditorTheme.value && editorType.value === 'hidden-message')
@@ -367,6 +428,45 @@ const centerBtns = computed<centerBtn[]>(() => {
     })
   return retTabs
 })
+
+const canGotoProject = computed(() => {
+  return (
+    hasGeneratedResults.value &&
+    inEditingState.value &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+  )
+})
+const handleProjectBtnAction = () => {
+  if (hasUnsavedChanges.value) {
+    setNormalModalInfo({
+      title: t('CM0025'),
+      content: t('CM0026'),
+      confirmText: t('CM0028'),
+      cancelText: t('NN0203'),
+      confirm: () => {
+        groupUtils.deselect()
+        changeEditorState('next')
+        reset()
+        closeModal()
+      },
+      cancel: () => {
+        closeModal()
+      },
+    })
+    openModal()
+    return
+  }
+
+  groupUtils.deselect()
+  reset()
+  changeEditorState('next')
+}
+
+const handleHomeBtnAction = (navagate: () => void) => {
+  setCurrOpenDesign(undefined)
+  setCurrOpenSubDesign(undefined)
+  navagate()
+}
 // #endregion
 
 // #region page related
@@ -507,7 +607,6 @@ const selectStart = (e: PointerEvent) => {
     return pagePinchUtils?.pinchEnd(e as any)
   }
   if (e.pointerType === 'mouse' && e.button !== 0) return
-
 
   const layer =
     ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
@@ -822,39 +921,23 @@ watch(showVideo, (newVal) => {
 })
 // #endregion
 
-const { setCurrOpenDesign, setCurrOpenSubDesign } = useUserStore()
+// #region bg remove related
+const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+const isProcessing = computed(() => store.getters['bgRemove/getIsProcessing'])
+const previewSrc = ref('')
 
-const handleHomeBtnAction = (navagate: () => void) => {
-  setCurrOpenDesign(undefined)
-  setCurrOpenSubDesign(undefined)
-  navagate()
-}
+const startBgRemove = (type: 'cm-bg-remove') => {
+  if (!inBgRemoveMode && !isProcessing) {
+    store.commit('bgRemove/SET_isProcessing', true)
 
-const handleProjectBtnAction = () => {
-  if (hasUnsavedChanges.value) {
-    setNormalModalInfo({
-      title: t('CM0025'),
-      content: t('CM0026'),
-      confirmText: t('CM0028'),
-      cancelText: t('NN0203'),
-      confirm: () => {
-        groupUtils.deselect()
-        changeEditorState('next')
-        reset()
-        closeModal()
-      },
-      cancel: () => {
-        closeModal()
-      },
+    const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+    previewSrc.value = src
+    generalUtils.toDataURL(src, (dataUrl: string) => {
+      uploadUtils.uploadAsset(type, [dataUrl])
     })
-    openModal()
-    return
   }
-
-  groupUtils.deselect()
-  reset()
-  changeEditorState('next')
 }
+// #endregion
 </script>
 <style lang="scss" scoped>
 @use '@/assets/scss/transitions.scss';

@@ -11,12 +11,16 @@ div(class="prompt-area w-full box-border px-24")
         :class="editorType === 'magic-combined' ? 'gap-24' : 'gap-16'"
         ref="elMain")
         //- header bar
-        div(class="w-full relative flex-center")
-          span(:class="title.class") {{ title.label }}
+        div(class="w-full grid grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)]")
+          svg-icon(
+            v-if="showInspirationIcon"
+            iconName="light-bulb"
+            @click="handleInspiration")
+          span(class="col-start-2" :class="title.class") {{ title.label }}
           svg-icon(
             v-if="showSettingsIcon"
             :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
-            class="text-yellow-0 absolute right-0"
+            class="justify-self-end text-yellow-0"
             @click="isGenSettings = !isGenSettings")
         //- content
         div(class="w-full relative")
@@ -218,7 +222,7 @@ const { closeModal, openModal, setNormalModalInfo } = modalStore
 const { reset } = useSteps()
 
 // #region generating function
-const checkIsGenerating = () => {
+const waitForGenerating = () => {
   return new Promise<void>((resolve) => {
     const check = () => {
       if (isGenerating.value) {
@@ -319,6 +323,7 @@ const handleGenerate = async () => {
     unshiftGenResults(
       'https://asset.vivipic.com/charmix/HVDSrQpG4iRTDHkqvU3Y/output/231030115145557ftqnuIbG.png?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1699242747&Signature=E8P5c%2B3fO9b%2BvF%2BhCi1IJdT79ik%3D&X-Amzn-Trace-Id=Root%3D1-653f287b-585cd2fd4f2337005d01b2fd%3BParent%3D78c0465c20c9e530%3BSampled%3D0%3BLineage%3Dee147589%3A0',
       generalUtils.generateRandomString(4),
+      currPrompt.value,
     )
     changeEditorState('next')
     return
@@ -331,9 +336,7 @@ const handleGenerate = async () => {
     setCurrDesignId(generalUtils.generateAssetId())
   }
 
-  if (isGenerating.value) {
-    await checkIsGenerating()
-  }
+  await waitForGenerating()
 
   await genImageFlow(getGenParams(), false, 2, {
     onApiResponded: () => {
@@ -368,6 +371,9 @@ const isSettings = computed({
     isGenSettings.value = newVal
     isTypeSettings.value = newVal
   },
+})
+const showInspirationIcon = computed(() => {
+  return editorType.value === 'hidden-message'
 })
 const showSettingsIcon = computed(() => {
   return !isTypeSettings.value && ['hidden-message', 'powerful-fill'].includes(editorType.value)
@@ -463,6 +469,13 @@ const resetOption = (option: { key: string }) => {
       o.key === option.key ? Object.assign(o, { value: defaultOption.value }) : o,
     ),
   )
+}
+
+const idxInspiration = ref(0)
+const handleInspiration = () => {
+  const inspirationPrompts = constantData.inspirationPrompts
+  promptText.value = inspirationPrompts[idxInspiration.value]
+  idxInspiration.value = (idxInspiration.value + 1) % inspirationPrompts.length
 }
 // #endregion
 

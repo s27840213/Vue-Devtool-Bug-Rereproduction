@@ -72,7 +72,7 @@ export interface IBgRemoveState {
 
 const getDefaultState = (): IBgRemoveState => ({
   inBgRemoveMode: false,
-  brushSize: generalUtils.isStk || generalUtils.isCm ? 16: 50,
+  brushSize: generalUtils.isStk || generalUtils.isCm ? 100: 50,
   showInitImage: false,
   clearMode: true,
   movingMode: false,

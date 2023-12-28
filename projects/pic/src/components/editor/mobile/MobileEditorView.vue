@@ -1,41 +1,45 @@
 <template lang="pug">
-div(class="editor-view" v-touch
-    :class="isBackgroundImageControl ? 'editor-view__dim-background' : 'bg-gray-5'"
-    :style="editorViewStyle"
-    @wheel="handleWheel"
-    @scroll="!inBgRemoveMode ? scrollUpdate() : null"
-    @pointerdown="selectStart"
-    @pointerleave="removePointer"
-    @pointerup="selectEnd"
-    @mousewheel="handleWheel"
-    @pinch="!inBgRemoveMode ? pinchUtils.pinchHandler($event) : null"
-    ref="editorView")
-  div(class="editor-view__abs-container"
-      :style="absContainerStyle")
-    div(class="editor-view__canvas"
-        ref="canvas"
-        :style="canvasStyle")
+div(
+  class="editor-view"
+  v-touch
+  :class="isBackgroundImageControl ? 'editor-view__dim-background' : 'bg-gray-5'"
+  :style="editorViewStyle"
+  @wheel="handleWheel"
+  @scroll="!inBgRemoveMode ? scrollUpdate() : null"
+  @pointerdown="selectStart"
+  @pointerleave="removePointer"
+  @pointerup="selectEnd"
+  @mousewheel="handleWheel"
+  @pinch="!inBgRemoveMode ? pinchUtils.pinchHandler($event) : null"
+  ref="editorView")
+  div(class="editor-view__abs-container" :style="absContainerStyle")
+    div(
+      class="editor-view__canvas"
+      ref="canvas"
+      :style="canvasStyle")
       template(v-if="!inBgRemoveMode")
-        page-card(v-for="(page,index) in pagesState"
-            :key="`page-${page.config.id}`"
-            :config="page"
-            :cardWidth="cardWidth"
-            :cardHeight="cardHeight"
-            :pageIndex="index"
-            :editorView="editorView"
-            :isAnyBackgroundImageControl="isBackgroundImageControl"
-            @pointerdown="selectStart"
-            @click.self.prevent="outerClick($event)")
+        page-card(
+          v-for="(page, index) in pagesState"
+          :key="`page-${page.config.id}`"
+          :config="page"
+          :cardWidth="cardWidth"
+          :cardHeight="cardHeight"
+          :pageIndex="index"
+          :editorView="editorView"
+          :isAnyBackgroundImageControl="isBackgroundImageControl"
+          @pointerdown="selectStart"
+          @click.self.prevent="outerClick($event)")
       div(v-else class="editor-view__bg-remove-area")
-        bg-remove-area(:editorViewCanvas="editorCanvas")
-  page-number(v-if="!hasSelectedLayer"
+        bg-remove-area-pic(:editorViewCanvas="editorCanvas")
+  page-number(
+    v-if="!hasSelectedLayer"
     :pageNum="pageNum"
     :currCardIndex="currCardIndex")
 </template>
 
 <script lang="ts">
 import PageNumber from '@/components/editor/PageNumber.vue'
-import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import BgRemoveAreaPic from '@/components/editor/backgroundRemove/BgRemoveAreaPic.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
 import { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
@@ -70,14 +74,14 @@ const TRANSITION_TIME = constantData.pinchTransitionTime
 export default defineComponent({
   emits: [],
   components: {
-    BgRemoveArea,
+    BgRemoveAreaPic,
     PageNumber,
-    PageCard
+    PageCard,
   },
   props: {
     currActivePanel: {
       default: 'none',
-      type: String
+      type: String,
     },
     /**
      * @param showMobilePanel - this param is a little different to showMobilePanel in vuex
@@ -86,8 +90,8 @@ export default defineComponent({
      */
     showMobilePanel: {
       default: false,
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -105,8 +109,8 @@ export default defineComponent({
       movingUtils: null as unknown as MovingUtils,
       pinchUtils: null as unknown as PagePinchUtils,
       pointerEvent: {
-        initPos: null as null | ICoordinate
-      }
+        initPos: null as null | ICoordinate,
+      },
     }
   },
   created() {
@@ -123,8 +127,10 @@ export default defineComponent({
             {
               msg: `${this.$t('NN0358')}`,
               class: 'btn-blue-mid',
-              action: () => { return false }
-            }
+              action: () => {
+                return false
+              },
+            },
           )
         }
         unwatchPages()
@@ -143,7 +149,11 @@ export default defineComponent({
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
     this.editorCanvas = this.$refs.canvas as HTMLElement
-    this.swipeDetector = new SwipeDetector(this.editorView, { targetDirection: 'vertical' }, this.handleSwipe)
+    this.swipeDetector = new SwipeDetector(
+      this.editorView,
+      { targetDirection: 'vertical' },
+      this.handleSwipe,
+    )
 
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
@@ -153,8 +163,10 @@ export default defineComponent({
 
     if (this.$isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
-      pageUtils.originPageSize.width = pageUtils.getPages[0].width * pageUtils.mobileMinScaleRatio * 0.01
-      pageUtils.originPageSize.height = pageUtils.getPages[0].height * pageUtils.mobileMinScaleRatio * 0.01
+      pageUtils.originPageSize.width =
+        pageUtils.getPages[0].width * pageUtils.mobileMinScaleRatio * 0.01
+      pageUtils.originPageSize.height =
+        pageUtils.getPages[0].height * pageUtils.mobileMinScaleRatio * 0.01
 
       const rect = this.editorView.getBoundingClientRect()
       editorUtils.setMobilePhysicalData({
@@ -164,12 +176,12 @@ export default defineComponent({
         },
         centerPos: {
           x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2
+          y: rect.top + rect.height / 2,
         },
         pos: {
           x: rect.left,
-          y: rect.top
-        }
+          y: rect.top,
+        },
       })
       editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
     }
@@ -191,24 +203,24 @@ export default defineComponent({
       pageIndex: {
         get() {
           return layerUtils.pageIndex
-        }
+        },
       },
       layerIndex: {
         get() {
           return layerUtils.layerIndex
-        }
+        },
       },
       subLayerIdx: {
         get() {
           return layerUtils.subLayerIdx
-        }
-      }
+        },
+      },
     })
     this.movingUtils = new MovingUtils({
       _config: { config: {} as ILayer },
       snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
       body: this.$refs.editorView as HTMLElement,
-      layerInfo
+      layerInfo,
     })
     this.pinchUtils = new PagePinchUtils(this.$refs.editorView as HTMLElement)
   },
@@ -227,17 +239,17 @@ export default defineComponent({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
-    }
+    },
   },
 
   computed: {
     ...mapState({
-      isGettingDesign: 'isGettingDesign'
+      isGettingDesign: 'isGettingDesign',
     }),
     ...mapState('mobileEditor', {
       mobileAllPageMode: 'mobileAllPageMode',
       isPinchingEditor: 'isPinchingEditor',
-      isDisableSwipe: 'isDisableSwipe'
+      isDisableSwipe: 'isDisableSwipe',
     }),
     ...mapGetters({
       groupId: 'getGroupId',
@@ -255,7 +267,7 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       groupType: 'getGroupType',
       isBgImgCtrl: 'imgControl/isBgImgCtrl',
-      isImgCtrl: 'imgControl/isImgCtrl'
+      isImgCtrl: 'imgControl/isImgCtrl',
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
@@ -282,21 +294,24 @@ export default defineComponent({
     },
     editorViewStyle(): { [index: string]: string | number } {
       return {
-        overflow: this.isDetailPage ? 'scroll' : 'initial'
+        overflow: this.isDetailPage ? 'scroll' : 'initial',
       }
     },
     canvasStyle(): { [index: string]: string | number } {
       return {
-        padding: this.isDetailPage ? '40px 0px' : '0px'
+        padding: this.isDetailPage ? '40px 0px' : '0px',
       }
     },
     absContainerStyle(): { [index: string]: string | number } {
       const transformDuration = !this.showMobilePanel ? 0.3 : 0
       return {
-        transform: this.isDetailPage || this.inBgRemoveMode ? 'initial' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
-        transition: `transform ${transformDuration}s`
+        transform:
+          this.isDetailPage || this.inBgRemoveMode
+            ? 'initial'
+            : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
+        transition: `transform ${transformDuration}s`,
       }
-    }
+    },
   },
   methods: {
     ...mapMutations({
@@ -306,14 +321,9 @@ export default defineComponent({
       setInBgRemoveMode: 'SET_inBgRemoveMode',
       addPage: 'ADD_page',
       setCurrCardIndex: 'mobileEditor/SET_currCardIndex',
-      setPinchScaleRatio: 'SET_pinchScaleRatio'
+      setPinchScaleRatio: 'SET_pinchScaleRatio',
     }),
-    ...mapActions('layouts',
-      [
-        'getCategories',
-        'getRecently'
-      ]
-    ),
+    ...mapActions('layouts', ['getCategories', 'getRecently']),
     outerClick(e: MouseEvent) {
       if (eventUtils.checkIsMultiTouch(e)) {
         return
@@ -327,7 +337,9 @@ export default defineComponent({
         pageUtils.findCentralPageIndexInfo()
       }
       if (imageUtils.isImgControl()) {
-        controlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        controlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, {
+          imgControl: false,
+        })
       }
     },
     selectStart(e: PointerEvent) {
@@ -343,12 +355,13 @@ export default defineComponent({
         formatUtils.clearCopiedFormat()
       }
 
-      const layer = ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
-        ? groupUtils.mapLayersToPage(
-          [layerUtils.getCurrConfig as IImage],
-          layerUtils.getCurrLayer as IGroup,
-        )[0]
-      : layerUtils.getCurrLayer
+      const layer =
+        ['group', 'frame'].includes(layerUtils.getCurrLayer.type) && layerUtils.subLayerIdx !== -1
+          ? groupUtils.mapLayersToPage(
+              [layerUtils.getCurrConfig as IImage],
+              layerUtils.getCurrLayer as IGroup,
+            )[0]
+          : layerUtils.getCurrLayer
       const isClickOnController = controlUtils.isClickOnController(e, layer)
 
       if (this.isImgCtrl && !isClickOnController) {
@@ -359,7 +372,9 @@ export default defineComponent({
             layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
             break
           case LayerType.frame:
-            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, {
+              imgControl: false,
+            })
             break
         }
         return
@@ -369,7 +384,9 @@ export default defineComponent({
         this.movingUtils.removeListener()
         this.movingUtils.updateProps({
           _config: { config: layerUtils.getCurrLayer },
-          body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+          body: document.getElementById(
+            `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+          ) as HTMLElement,
         })
         this.movingUtils.moveStart(e)
       } else {
@@ -381,7 +398,9 @@ export default defineComponent({
     selectEnd(e: PointerEvent) {
       if (this.pointerEvent.initPos) {
         const isSingleTouch = pointerEvtUtils.pointers.length === 1
-        const isConsiderNotMoved = Math.abs(e.x - this.pointerEvent.initPos.x) < 5 && Math.abs(e.y - this.pointerEvent.initPos.y) < 5
+        const isConsiderNotMoved =
+          Math.abs(e.x - this.pointerEvent.initPos.x) < 5 &&
+          Math.abs(e.y - this.pointerEvent.initPos.y) < 5
         if (isSingleTouch && isConsiderNotMoved && !this.$store.getters['imgControl/isImgCtrl']) {
           // the moveingEnd would consider the layer to be selected,
           // however in this case the layer should be consider as deselected, bcz the position is thought as not moved.
@@ -416,7 +435,9 @@ export default defineComponent({
         }
         this.$nextTick(() => {
           if (document.activeElement?.tagName === 'BODY' && !this.isShowPagePreview) {
-            this.geCurrActivePageIndex === -1 ? pageUtils.findCentralPageIndexInfo() : pageUtils.activeCurrActivePage()
+            this.geCurrActivePageIndex === -1
+              ? pageUtils.findCentralPageIndexInfo()
+              : pageUtils.activeCurrActivePage()
           }
         })
       }, 0)
@@ -440,18 +461,21 @@ export default defineComponent({
           })
         } else {
           groupUtils.deselect()
-          const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
-          this.addPage(pageUtils.newPage({
-            width: lastPage?.width,
-            height: lastPage?.height,
-            backgroundColor: lastPage?.backgroundColor,
-            physicalWidth: lastPage?.physicalWidth,
-            physicalHeight: lastPage?.physicalHeight,
-            isEnableBleed: lastPage?.isEnableBleed,
-            bleeds: lastPage?.bleeds,
-            physicalBleeds: lastPage?.physicalBleeds,
-            unit: lastPage?.unit
-          }))
+          const lastPage =
+            pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+          this.addPage(
+            pageUtils.newPage({
+              width: lastPage?.width,
+              height: lastPage?.height,
+              backgroundColor: lastPage?.backgroundColor,
+              physicalWidth: lastPage?.physicalWidth,
+              physicalHeight: lastPage?.physicalHeight,
+              isEnableBleed: lastPage?.isEnableBleed,
+              bleeds: lastPage?.bleeds,
+              physicalBleeds: lastPage?.physicalBleeds,
+              unit: lastPage?.unit,
+            }),
+          )
           this.$nextTick(() => {
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)
@@ -494,7 +518,7 @@ export default defineComponent({
     removePointer(e: PointerEvent) {
       pointerEvtUtils.removePointer(e.pointerId)
     },
-  }
+  },
 })
 </script>
 
@@ -503,7 +527,7 @@ $REULER_SIZE: 20px;
 
 .editor-view {
   position: relative;
-  z-index: setZindex("editor-view");
+  z-index: setZindex('editor-view');
   @include size(100%, 100%);
 
   &__abs-container {
@@ -540,8 +564,9 @@ $REULER_SIZE: 20px;
     background-color: rgba(0, 0, 0, 0.4);
   }
   &__pinch-transition {
-    transition: transform .25s, webkit-transform .25s;
+    transition:
+      transform 0.25s,
+      webkit-transform 0.25s;
   }
 }
-
 </style>

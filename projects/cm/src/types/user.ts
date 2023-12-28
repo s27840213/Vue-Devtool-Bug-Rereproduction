@@ -25,6 +25,7 @@ export interface ICmMyDesign {
 export interface ICmSubDesign extends IMyDesign {
   type: EditorType
   subId: string
+  fileName: 'original' | 'result'
   prompt: string
   // waterfall UI need this
   width: number

@@ -203,7 +203,7 @@ class ImageUtils {
       case 'ios':
         if (generalUtils.isCm) {
           // make default size to 1920(longer side)
-          res = `chmix://${assetId}?lsize=1920`
+          res = `chmix://${assetId}?lsize=1920${userId !== '' ? `&imagetype=${userId}` : ''}`
         } else if (generalUtils.isStk) {
           res = `vvstk://${assetId}`
         }
