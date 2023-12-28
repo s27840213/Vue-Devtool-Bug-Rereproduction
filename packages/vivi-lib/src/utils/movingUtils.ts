@@ -13,6 +13,7 @@ import groupUtils from './groupUtils'
 import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
 import mouseUtils from './mouseUtils'
+import pagePinchUtils from './pagePinchUtils'
 import pageUtils from './pageUtils'
 import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
@@ -574,25 +575,24 @@ export class MovingUtils {
       return
     }
     const { getCurrPage: page } = pageUtils
-    const contentScaleRatio = store.getters.getContentScaleRatio
-    const pageScaleRatio = store.state.pageScaleRatio * 0.01
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
+    const edgeLimit = pagePinchUtils.getEdgeLimit(store.state.pageScaleRatio)
 
-    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= 0
-    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= page.width * contentScaleRatio * (1 - pageScaleRatio)
-    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= 0
-    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= page.height * contentScaleRatio * (1 - pageScaleRatio)
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= edgeLimit.left
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= edgeLimit.right
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= edgeLimit.top
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= edgeLimit.bottom
 
     let x = -1
     let y = -1
     if (isReachRightEdge || isReachLeftEdge) {
-      x = isReachRightEdge ? page.width * contentScaleRatio * (1 - pageScaleRatio) : 0
+      x = isReachRightEdge ? edgeLimit.right : edgeLimit.left
     } else {
       x = offsetPos.x + page.x
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
-      y = isReachBottomEdge ? page.height * contentScaleRatio * (1 - pageScaleRatio) : 0
+      y = isReachBottomEdge ? edgeLimit.bottom : edgeLimit.top
     } else {
       y = offsetPos.y + page.y
     }

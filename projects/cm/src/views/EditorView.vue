@@ -558,8 +558,16 @@ let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
 let pagePinchUtils = null as PagePinchUtils | null
 const initPagePinchHandler = () => {
   if (!editorContainerRef.value) return
+  setMobilePysicalSize()
+  pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
+  pagePinchHandler = (e) => {
+    if (inAspectRatioState.value) return
+    setMobilePysicalSize()
+    pagePinchUtils?.pinchHandler(e)
+  }
+}
+const setMobilePysicalSize = () => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
-  console.log('rect', rect.top, rect.left)
   editorUtils.setMobilePhysicalData({
     size: {
       width: rect.width,
@@ -574,11 +582,6 @@ const initPagePinchHandler = () => {
       y: rect.top,
     },
   })
-  pagePinchUtils = new PagePinchUtils(editorWrapperRef.value as HTMLElement)
-  pagePinchHandler = (e) => {
-    if (inAspectRatioState.value) return
-    pagePinchUtils?.pinchHandler(e)
-  }
 }
 onMounted(() => {
   initPagePinchHandler()
