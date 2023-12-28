@@ -286,7 +286,7 @@ export const useUserStore = defineStore('user', () => {
         )) as IListAssetResponse
       }
 
-      const { flag, assets, key, nextPage, group } = data
+      const { flag, assets, key, nextPage } = data
       if (flag === '1') throw new Error('list my design failed')
 
       const designs = assets as ICmMyDesign[]

@@ -37,14 +37,14 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           @click="btn.action")
     template(#right)
       svg-icon(
-        v-if="hasGeneratedResults && inEditingState"
+        v-if="canGotoProject"
         :iconName="'grid-solid'"
         :iconColor="'transparent'"
         :strokeColor="'white'"
         :iconWidth="'24px'"
         @click="handleProjectBtnAction")
       svg-icon(
-        v-if="inGenResultState || (inEditingState && designName !== '')"
+        v-if="inGenResultState || canSaveSubDesign"
         iconName="download"
         iconColor="white"
         @click="handleNextAction")
@@ -312,6 +312,13 @@ const {
   currSubDesignId,
   designName
 } = storeToRefs(editorStore)
+const {
+  setCurrOpenDesign,
+  setCurrOpenSubDesign,
+  setPrevGenParams,
+  saveSubDesign,
+} = useUserStore()
+
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 
 watch(
@@ -332,8 +339,23 @@ watch(
 )
 
 const isVideoLoaded = ref(false)
+
+const currImgSrc = computed(() => {
+  return currGenResultIndex.value === -1
+    ? initImgSrc.value
+    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+})
+
+// #endregion
+
+// #region headerbar state & callback
+const canSaveSubDesign = computed(() => {
+  return inEditingState.value &&
+    designName.value !== '' &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+})
 const handleNextAction = function () {
-  if (inEditingState.value && designName.value !== '') {
+  if (canSaveSubDesign.value && designName.value !== '') {
     saveSubDesign(
       `${currDesignId.value}/${currSubDesignId.value}`,
       currSubDesignId.value,
@@ -358,12 +380,6 @@ const handleNextAction = function () {
     }
   }
 }
-
-const currImgSrc = computed(() => {
-  return currGenResultIndex.value === -1
-    ? initImgSrc.value
-    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
-})
 
 const useStep = useSteps()
 const { undo, redo, reset, isInFirstStep, isInLastStep, hasUnsavedChanges } = useStep
@@ -397,6 +413,43 @@ const centerBtns = computed<centerBtn[]>(() => {
     })
   return retTabs
 })
+
+const canGotoProject = computed(() => {
+  return hasGeneratedResults.value &&
+    inEditingState.value &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+})
+const handleProjectBtnAction = () => {
+  if (hasUnsavedChanges.value) {
+    setNormalModalInfo({
+      title: t('CM0025'),
+      content: t('CM0026'),
+      confirmText: t('CM0028'),
+      cancelText: t('NN0203'),
+      confirm: () => {
+        groupUtils.deselect()
+        changeEditorState('next')
+        reset()
+        closeModal()
+      },
+      cancel: () => {
+        closeModal()
+      },
+    })
+    openModal()
+    return
+  }
+
+  groupUtils.deselect()
+  reset()
+  changeEditorState('next')
+}
+
+const handleHomeBtnAction = (navagate: () => void) => {
+  setCurrOpenDesign(undefined)
+  setCurrOpenSubDesign(undefined)
+  navagate()
+}
 // #endregion
 
 // #region page related
@@ -828,45 +881,6 @@ watch(showVideo, (newVal) => {
   }
 })
 // #endregion
-
-const {
-  setCurrOpenDesign,
-  setCurrOpenSubDesign,
-  setPrevGenParams,
-  saveSubDesign,
-} = useUserStore()
-
-const handleHomeBtnAction = (navagate: () => void) => {
-  setCurrOpenDesign(undefined)
-  setCurrOpenSubDesign(undefined)
-  navagate()
-}
-
-const handleProjectBtnAction = () => {
-  if (hasUnsavedChanges.value) {
-    setNormalModalInfo({
-      title: t('CM0025'),
-      content: t('CM0026'),
-      confirmText: t('CM0028'),
-      cancelText: t('NN0203'),
-      confirm: () => {
-        groupUtils.deselect()
-        changeEditorState('next')
-        reset()
-        closeModal()
-      },
-      cancel: () => {
-        closeModal()
-      },
-    })
-    openModal()
-    return
-  }
-
-  groupUtils.deselect()
-  reset()
-  changeEditorState('next')
-}
 </script>
 <style lang="scss" scoped>
 @use '@/assets/scss/transitions.scss';
