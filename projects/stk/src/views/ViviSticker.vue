@@ -44,7 +44,7 @@ import VvstkEditor from '@/components/editor/editor/VvstkEditor.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
-import FullPage from '@/components/fullPage/FullPage.vue'
+import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 import LoadingOverlay from '@/components/global/LoadingOverlay.vue'
 import MainMenu from '@/components/mainMenu/MainMenu.vue'
 import MyDesign from '@/components/mydesign/MyDesign.vue'
@@ -53,7 +53,6 @@ import Tutorial from '@/components/tutorial/Tutorial.vue'
 import { IPage } from '@/interfaces/page'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IFooterTabProps } from '@nu/vivi-lib/interfaces/editor'
-import { IPayment } from '@nu/vivi-lib/interfaces/vivisticker'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
@@ -68,6 +67,7 @@ import { find } from 'lodash'
 import VConsole from 'vconsole'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
+import { IPrices } from '@nu/vivi-lib/interfaces/payment'
 
 declare let window: CustomWindow
 
@@ -184,7 +184,7 @@ export default defineComponent({
       isInTemplateShare: 'vivisticker/getIsInTemplateShare',
       isInPagePreview: 'vivisticker/getIsInPagePreview',
       showTutorial: 'vivisticker/getShowTutorial',
-      fullPageType: 'vivisticker/getFullPageType',
+      fullPageType: 'getFullPageType',
       userInfo: 'vivisticker/getUserInfo',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
@@ -194,12 +194,9 @@ export default defineComponent({
       debugMode: 'vivisticker/getDebugMode',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
       modalOpen: 'modal/getModalOpen',
-      isPromote: 'vivisticker/getIsPromote',
-      isPromoteCountry: 'vivisticker/getIsPromoteCountry',
-      isPromoteLanguage: 'vivisticker/getIsPromoteLanguage',
     }),
-    payment(): IPayment {
-      return this.$store.state.vivisticker.payment as IPayment
+    prices(): IPrices {
+      return this.$store.getters['payment/getPrices'] as IPrices
     },
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
@@ -244,7 +241,7 @@ export default defineComponent({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setFullPageConfig: 'SET_fullPageConfig',
       setDebugMode: 'vivisticker/SET_debugMode'
     }),
     headerStyles() {
@@ -368,16 +365,16 @@ export default defineComponent({
 
       // show popup
       const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
-      const price = stkWVUtils.formatPrice(this.payment.prices.annually.value, this.payment.prices.currency, this.payment.prices.annually.text, 'modal')
-      const priceOriginal = this.payment.prices.annuallyOriginal ? stkWVUtils.formatPrice(this.payment.prices.annuallyOriginal.value, this.payment.prices.currency, this.payment.prices.annuallyOriginal.text, 'modal') : ''
-      const isCloseBtnOnly = this.isPromote && subscribed
+      const price = stkWVUtils.formatPrice(this.prices.annually.value, this.prices.currency, this.prices.annually.text, 'modal')
+      const priceOriginal = this.prices.annuallyOriginal ? stkWVUtils.formatPrice(this.prices.annuallyOriginal.value, this.prices.currency, this.prices.annuallyOriginal.text, 'modal') : ''
+      const isCloseBtnOnly = stkWVUtils.isPromote && subscribed
       const lastModalMsg = await stkWVUtils.getState('lastModalMsg')
       const lastModalTime = await stkWVUtils.getState('lastModalTime')
       const isDuplicated = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
       const isCoolDown = (lastModalTime === undefined || lastModalTime === null) ? false : Date.now() - lastModalTime.value < modalInfo.duration * 3600000
       const shown = modalInfo.duration === -1 ? isDuplicated : isDuplicated && isCoolDown // ignore cool down if duration is set to -1
       const isInvalidCountry = !!modalInfo.country.length && !modalInfo.country.includes(this.userInfo.storeCountry)
-      const isPromoteToBeHide = this.isPromoteLanguage && (!this.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== this.userInfo.locale)
+      const isPromoteToBeHide = stkWVUtils.isPromoteLanguage && (!stkWVUtils.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== this.userInfo.locale)
       const btn_txt = modalInfo.btn_txt
       if (!btn_txt || shown || isInvalidCountry || isPromoteToBeHide) return false
 
@@ -396,7 +393,7 @@ export default defineComponent({
       }
       modalUtils.setModalInfo(
         modalInfo.title,
-        this.isPromote && priceOriginal ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
+        stkWVUtils.isPromote && priceOriginal ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
         {
           msg: isCloseBtnOnly ? modalInfo.btn2_txt : btn_txt,
           class: 'btn-black-mid',
@@ -448,7 +445,7 @@ export default defineComponent({
       const isPushModalShown = await this.showPushModalInfo()
       if (isPushModalShown) {
         stkWVUtils.sendAppLoaded()
-        if (this.isPromote && !subscribed) {
+        if (stkWVUtils.isPromote && !subscribed) {
           isShowPaymentView = true
         }
         const unwatch = this.$watch('modalOpen', (newVal) => {

@@ -1,5 +1,4 @@
 import { IPage } from '@/interfaces/page'
-import { IViviStickerProFeatures } from '@/utils/stkWVUtils'
 
 export interface IUserInfoV1_0 {
   hostId: string,
@@ -42,45 +41,6 @@ export interface IUserSettings {
   emojiSetting: string
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IFullPageNoneConfigParams { }
-
-export interface IFullPageNoneConfig {
-  type: 'none',
-  params: IFullPageNoneConfigParams
-}
-
-export interface IFullPageVideoConfigParams {
-  video: string,
-  thumbnail: string,
-  delayedClose?: number, // -1 means close btn only shows after video is finished.
-  mediaPos?: 'top' | 'bottom' | 'center',
-}
-
-export interface IFullPageVideoConfig {
-  type: 'video',
-  params: IFullPageVideoConfigParams
-}
-
-export interface IFullPagePaymentConfigParams {
-  target?: IViviStickerProFeatures
-}
-
-export interface IFullPagePaymentConfig {
-  type: 'payment',
-  params: IFullPagePaymentConfigParams
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IFullPageWelcomeConfigParams { }
-
-export interface IFullPageWelcomeConfig {
-  type: 'welcome',
-  params: IFullPageWelcomeConfigParams
-}
-
-export type IFullPageConfig = IFullPageNoneConfig | IFullPageVideoConfig | IFullPagePaymentConfig | IFullPageWelcomeConfig
-
 export interface IAssetInfo {
   plan?: number,
   assetId?: string,
@@ -112,40 +72,6 @@ export interface IMyDesignTag {
 
 export interface IIosImgData {
   images: Array<string>
-}
-export interface IPrice {
-  value: number,
-  text: string
-}
-export interface IPrices {
-  currency: string,
-  monthly: IPrice,
-  annually: IPrice,
-  annuallyFree0: IPrice,
-  annuallyOriginal: IPrice,
-  annuallyFree0Original: IPrice
-}
-
-export interface IPaymentPending {
-  info: boolean,
-  purchase: boolean,
-  restore: boolean
-}
-
-export interface IPayment {
-  subscribe: boolean,
-  prices: IPrices,
-  defaultPrices: { [key: string]: IPrices },
-  trialDays: number,
-  trialCountry: string[],
-  pending: IPaymentPending,
-  planId: {
-    monthly: string,
-    annually: string,
-    annuallyFree0: string,
-    annuallyOriginal: string,
-    annuallyFree0Original: string
-  },
 }
 
 export interface IPlanInfo {
