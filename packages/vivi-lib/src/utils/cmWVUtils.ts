@@ -472,7 +472,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async deleteFile(key: string, name: string, type: string, subPath?: string) {
     if (this.inBrowserMode) return
-    // await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
+    await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
   }
 
   async fetchTutorialFlags() {

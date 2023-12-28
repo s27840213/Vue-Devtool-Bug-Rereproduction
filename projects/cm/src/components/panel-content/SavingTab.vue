@@ -33,7 +33,7 @@ import { useUserStore } from '@/stores/user'
 import { notify } from '@kyvg/vue3-notification'
 
 const userStore = useUserStore()
-const { initWithSubDeisgnImage, initWithSubDesignConfig } = userStore
+const { editSubDesignResult, initWithSubDesignConfig } = userStore
 const { atEditor } = useStateInfo()
 const { currOpenSubDesign } = storeToRefs(userStore)
 const editorStore = useEditorStore()
@@ -66,8 +66,7 @@ const edit = () => {
   if (atEditor.value) {
     keepEditingInit()
   } else {
-    if (!currOpenSubDesign.value) return
-    initWithSubDeisgnImage(currOpenSubDesign.value)
+    editSubDesignResult()
   }
 }
 </script>
