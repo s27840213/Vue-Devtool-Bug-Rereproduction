@@ -23,7 +23,15 @@ export const useUserStore = defineStore('user', () => {
     setCurrGenResultIndex,
     setInitImgSrc
   } = editorStore
-  const { currDesignId, editorType, currDesignThumbIndex, generatedResults, pageSize, currPrompt } =
+  const {
+    currDesignId,
+    currSubDesignId,
+    editorType,
+    currDesignThumbIndex,
+    generatedResults,
+    pageSize,
+    currPrompt
+  } =
     storeToRefs(editorStore)
 
   const { t } = useI18n()
@@ -119,14 +127,18 @@ export const useUserStore = defineStore('user', () => {
     currOpenDesign.value = design
   }
 
-  const getSubDesignConfig = async (myDesign: ICmMyDesign, subDesignId: string, name = 'original') => {
+  const getSubDesignConfig = async (
+    myDesign: ICmMyDesign | Pick<ICmMyDesign, 'id' | 'type'>, 
+    subDesignId: string,
+    name = 'original'
+  ) => {
     const { id, type } = myDesign
     const data = (await cmWVUtils.getJson(`mydesign-${type}/${id}/${subDesignId}`, name)) as {
       flag: '0' | '1'
       name: string
       path: string
       content: ICmSubDesign
-    }
+    } | undefined | null
     return data
   }
   // #endregion
@@ -179,14 +191,14 @@ export const useUserStore = defineStore('user', () => {
       setCurrPrompt('')
       setInitImgSrc(resultUrl)
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
-      setCurrGenResultIndex(index)
+      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
+      index && setCurrGenResultIndex(index)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
   }
 
-  const editSubDesignResult = async() => {
+  const editSubDesignResult = async() => { // Do the same thing with editor.keepEditingInit.
     if (!currOpenDesign.value || !currOpenSubDesign.value) return false
     const { subId } = currOpenSubDesign.value
 
@@ -240,8 +252,8 @@ export const useUserStore = defineStore('user', () => {
         designHeight: height,
       })
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
-      setCurrGenResultIndex(index)
+      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
+      index && setCurrGenResultIndex(index)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }

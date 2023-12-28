@@ -55,7 +55,7 @@ const share = () => {
 
 const recreate = () => {
   if (atEditor.value) {
-    changeToSpecificEditorState(editorType.value, 'editing')
+    changeToSpecificEditorState('editing')
   } else {
     if (!currOpenSubDesign.value) return
     initWithSubDesignConfig(currOpenSubDesign.value)

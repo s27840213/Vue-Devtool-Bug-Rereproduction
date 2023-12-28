@@ -315,7 +315,12 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, setDescriptionPanel } = editorStore
+const { 
+  changeEditorState,
+  updateGenResult,
+  setDescriptionPanel,
+  changeToSpecificEditorState,
+} = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -376,6 +381,7 @@ const handleNextAction = function () {
       currSubDesignId.value,
       designName.value,
     )
+    changeToSpecificEditorState('saving')
   } else if (inGenResultState.value) {
     changeEditorState('next')
     const currGenResult = generatedResults.value[currGenResultIndex.value]

@@ -118,7 +118,8 @@ const missingUse = computed(() => {
   if (!useRef.value) return
   const missing = !document.querySelector(`symbol#${props.iconName}`)
   if (missing) console.error(`Missing svg icon: ${props.iconName}.`)
-  return missing
+  // return missing
+  return true // Temporarily prevent false alarms.
 })
 </script>
 
