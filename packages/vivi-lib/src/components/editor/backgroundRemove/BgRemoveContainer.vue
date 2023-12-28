@@ -35,12 +35,12 @@ div(
 <script lang="ts">
 /* eslint-disable */
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import MobileSlider from '@nu/vivi-lib/components/editor/mobile/MobileSlider.vue'
-import { ICoordinate } from '@nu/vivi-lib/interfaces/frame'
-import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
-import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
-import constantData from '@nu/vivi-lib/utils/constantData'
-import mathUtils from '@nu/vivi-lib/utils/mathUtils'
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import { ICoordinate } from '@/interfaces/frame'
+import { IBgRemoveInfo } from '@/interfaces/image'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import constantData from '@/utils/constantData'
+import mathUtils from '@/utils/mathUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'

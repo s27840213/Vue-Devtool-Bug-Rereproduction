@@ -1,57 +1,76 @@
 <template lang="pug">
-div(class="editor-view bg-gray-5"
-    :style="cursorStyles()"
-    @pointerdown="!inBgRemoveMode ? !getInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
-    @wheel="handleWheel"
-    @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
-    @mousewheel="handleWheel"
-    @contextmenu.prevent
-    ref="editorView")
+div(
+  class="editor-view bg-gray-5"
+  :style="cursorStyles()"
+  @pointerdown="!inBgRemoveMode ? (!getInGestureMode ? selectStart($event) : dragEditorViewStart($event)) : null"
+  @wheel="handleWheel"
+  @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
+  @mousewheel="handleWheel"
+  @contextmenu.prevent
+  ref="editorView")
   disk-warning(class="editor-view__warning" size="large")
   div(class="editor-view__grid")
-    div(class="editor-view__canvas"
-        ref="canvas"
-        @pointerdown.left.self="outerClick($event)")
+    div(
+      class="editor-view__canvas"
+      ref="canvas"
+      @pointerdown.left.self="outerClick($event)")
       //- @mousedown.left.self="outerClick($event)")
       template(v-if="!inBgRemoveMode")
-        nu-page(v-for="(page,index) in pagesState"
-                :key="`page-${page.config.id}`"
-                :pageIndex="index"
-                :overflowContainer="editorView"
-                :style="{'z-index': `${getPageZIndex(index)}`}"
-                :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
-                @stepChange="handleStepChange")
-        div(v-show="isSelecting" class="selection-area" ref="selectionArea"
-          :style="{zIndex: pageNum+3}")
-      bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
+        nu-page(
+          v-for="(page, index) in pagesState"
+          :key="`page-${page.config.id}`"
+          :pageIndex="index"
+          :overflowContainer="editorView"
+          :style="{ 'z-index': `${getPageZIndex(index)}` }"
+          :pageState="page"
+          :index="index"
+          :isAnyBackgroundImageControl="isBackgroundImageControl"
+          @stepChange="handleStepChange")
+        div(
+          v-show="isSelecting"
+          class="selection-area"
+          ref="selectionArea"
+          :style="{ zIndex: pageNum + 3 }")
+      bg-remove-area-pic(
+        v-else
+        :editorViewCanvas="editorViewCanvas")
     template(v-if="showRuler && !isShowPagePreview")
-      ruler-hr(:isSidebarPanelOpen="isSidebarPanelOpen"
+      ruler-hr(
+        :isSidebarPanelOpen="isSidebarPanelOpen"
         :editorView="editorView"
         @pointerdown.stop="dragStartH($event)")
-      ruler-vr(:editorView="editorView"
+      ruler-vr(
+        :editorView="editorView"
         @pointerdown.stop="dragStartV($event)")
       div(class="corner-block")
-  div(v-if="!inBgRemoveMode"
-      class="editor-view__guidelines-area"
-      ref="guidelinesArea")
-    div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-        :style="{'cursor': `url(${require('@img/svg/ruler-v.svg')}) 16 16, pointer`}"
-        @pointerdown.left.stop="lockGuideline ? null: dragStartV($event)"
-        @mouseout.stop="closeGuidelineV()"
-        @pointerup.right.stop.prevent="openGuidelinePopup($event)")
+  div(
+    v-if="!inBgRemoveMode"
+    class="editor-view__guidelines-area"
+    ref="guidelinesArea")
+    div(
+      v-if="isShowGuidelineV"
+      class="guideline guideline--v"
+      ref="guidelineV"
+      :style="{ cursor: `url(${require('@img/svg/ruler-v.svg')}) 16 16, pointer` }"
+      @pointerdown.left.stop="lockGuideline ? null : dragStartV($event)"
+      @mouseout.stop="closeGuidelineV()"
+      @pointerup.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
-        span {{rulerVPos}}
-    div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-        :style="{'cursor': `url(${require('@img/svg/ruler-h.svg')}) 16 16, pointer`}"
-        @pointerdown.left.stop="lockGuideline ? null : dragStartH($event)"
-        @mouseout.stop="closeGuidelineH()"
-        @pointerup.right.stop.prevent="openGuidelinePopup($event)")
+        span {{ rulerVPos }}
+    div(
+      v-if="isShowGuidelineH"
+      class="guideline guideline--h"
+      ref="guidelineH"
+      :style="{ cursor: `url(${require('@img/svg/ruler-h.svg')}) 16 16, pointer` }"
+      @pointerdown.left.stop="lockGuideline ? null : dragStartH($event)"
+      @mouseout.stop="closeGuidelineH()"
+      @pointerup.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
-        span {{rulerHPos}}
+        span {{ rulerHPos }}
 </template>
 
 <script lang="ts">
-import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import BgRemoveAreaPic from '@/components/editor/backgroundRemove/BgRemoveAreaPic.vue'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
@@ -89,9 +108,9 @@ export default defineComponent({
   components: {
     RulerHr,
     RulerVr,
-    BgRemoveArea,
+    BgRemoveAreaPic,
     DiskWarning,
-    NuPage
+    NuPage,
   },
   data() {
     return {
@@ -112,7 +131,7 @@ export default defineComponent({
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
-      scrollHeight: 0
+      scrollHeight: 0,
     }
   },
   created() {
@@ -121,7 +140,7 @@ export default defineComponent({
         return {
           // Access by self.timeStart
           // eslint-disable-next-line vue/no-unused-properties
-          timeStart: 0
+          timeStart: 0,
         }
       },
       beforeUpdate() {
@@ -153,11 +172,11 @@ export default defineComponent({
             propsData: {
               index: self.$options.propsData?.index,
               pageIndex: self.$options.propsData?.pageIndex,
-              layerIndex: self.$options.propsData?.layerIndex
-            }
+              layerIndex: self.$options.propsData?.layerIndex,
+            },
           })
         })
-      }
+      },
     })
 
     // check and auto resize pages oversized on design loaded
@@ -173,8 +192,10 @@ export default defineComponent({
             {
               msg: `${this.$t('NN0358')}`,
               class: 'btn-blue-mid',
-              action: () => { return false }
-            }
+              action: () => {
+                return false
+              },
+            },
           )
         }
         unwatchPages()
@@ -213,7 +234,15 @@ export default defineComponent({
 
           this.isShowGuidelineV = true
           this.lastMappedVPos = pagePos
-          this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currPage.unit, pageUtils.getPageDPI().width), PRECISION)
+          this.rulerVPos = round(
+            unitUtils.convert(
+              Math.round(this.lastMappedVPos),
+              'px',
+              this.currPage.unit,
+              pageUtils.getPageDPI().width,
+            ),
+            PRECISION,
+          )
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -226,7 +255,15 @@ export default defineComponent({
           }
           this.isShowGuidelineH = true
           this.lastMappedHPos = pagePos
-          this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currPage.unit, pageUtils.getPageDPI().height), PRECISION)
+          this.rulerHPos = round(
+            unitUtils.convert(
+              Math.round(this.lastMappedHPos),
+              'px',
+              this.currPage.unit,
+              pageUtils.getPageDPI().height,
+            ),
+            PRECISION,
+          )
 
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
@@ -259,17 +296,17 @@ export default defineComponent({
   props: {
     currPage: {
       type: Object as PropType<IPage>,
-      required: true
+      required: true,
     },
     isSidebarPanelOpen: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     ...mapState({
       cursor: 'cursor',
-      isGettingDesign: 'isGettingDesign'
+      isGettingDesign: 'isGettingDesign',
     }),
     ...mapGetters({
       groupId: 'getGroupId',
@@ -296,7 +333,7 @@ export default defineComponent({
       scaleRatio: 'getPageScaleRatio',
     }),
     pages(): Array<IPage> {
-      return (this.pagesState as Array<IPageState>).map(p => p.config)
+      return (this.pagesState as Array<IPageState>).map((p) => p.config)
     },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -320,7 +357,7 @@ export default defineComponent({
     },
     showRuler(): boolean {
       return this._showRuler && !this.inBgRemoveMode
-    }
+    },
   },
   methods: {
     ...mapMutations({
@@ -329,14 +366,9 @@ export default defineComponent({
       setPageScaleRatio: 'SET_pageScaleRatio',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
-      setInGestureMode: 'SET_inGestureMode'
+      setInGestureMode: 'SET_inGestureMode',
     }),
-    ...mapActions('layouts',
-      [
-        'getCategories',
-        'getRecently'
-      ]
-    ),
+    ...mapActions('layouts', ['getCategories', 'getRecently']),
     cursorStyles() {
       const { cursor } = this
       return cursor ? { cursor } : {}
@@ -349,7 +381,9 @@ export default defineComponent({
         pageUtils.setBackgroundImageControlDefault()
         pageUtils.findCentralPageIndexInfo()
         if (imageUtils.isImgControl()) {
-          ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+          ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, {
+            imgControl: false,
+          })
         }
       }
     },
@@ -366,7 +400,9 @@ export default defineComponent({
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrLayer },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-            body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+            body: document.getElementById(
+              `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
+            ) as HTMLElement,
           })
           movingUtils.moveStart(e)
           return
@@ -376,7 +412,10 @@ export default defineComponent({
         formatUtils.clearCopiedFormat()
       }
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
+      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(
+        e,
+        this.$refs.canvas as HTMLElement,
+      )
       eventUtils.addPointerEvent('pointermove', this.selecting)
       eventUtils.addPointerEvent('pointerup', this.selectEnd)
       window.addEventListener('scroll', this.scrollUpdate, { capture: true })
@@ -405,7 +444,7 @@ export default defineComponent({
       if (this.isSelecting || RulerUtils.isDragging) {
         const event = new PointerEvent('pointermove', {
           clientX: this.currentAbsPos.x,
-          clientY: this.currentAbsPos.y
+          clientY: this.currentAbsPos.y,
         })
         window.dispatchEvent(event)
       }
@@ -421,7 +460,9 @@ export default defineComponent({
        * The following function sets focus on the page, which will break the functionality of a text editor (e.g. composition).
        * So prevent changing focus when a text editor is focused.
        */
-      pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.() || this.isSettingScaleRatio)
+      pageUtils.findCentralPageIndexInfo(
+        tiptapUtils.editor?.view?.hasFocus?.() || this.isSettingScaleRatio,
+      )
     },
     selectEnd() {
       if (this.isSelecting) {
@@ -454,26 +495,34 @@ export default defineComponent({
       const page = (this.pagesState as IPageState[])[pageUtils.currFocusPageIndex].config
       const layers = page.layers
 
-      const pageEle = document.querySelector(`.nu-page-content-${pageUtils.currFocusPageIndex}`) as HTMLElement
+      const pageEle = document.querySelector(
+        `.nu-page-content-${pageUtils.currFocusPageIndex}`,
+      ) as HTMLElement
       const pageData = pageEle.getBoundingClientRect()
       const selectionPolygonConfig = selectionData.toJSON()
-      selectionPolygonConfig.x = (selectionPolygonConfig.x - pageData.x) / this.scaleRatio * 100
-      selectionPolygonConfig.y = (selectionPolygonConfig.y - pageData.y) / this.scaleRatio * 100
-      selectionPolygonConfig.width = selectionPolygonConfig.width / this.scaleRatio * 100
-      selectionPolygonConfig.height = selectionPolygonConfig.height / this.scaleRatio * 100
+      selectionPolygonConfig.x = ((selectionPolygonConfig.x - pageData.x) / this.scaleRatio) * 100
+      selectionPolygonConfig.y = ((selectionPolygonConfig.y - pageData.y) / this.scaleRatio) * 100
+      selectionPolygonConfig.width = (selectionPolygonConfig.width / this.scaleRatio) * 100
+      selectionPolygonConfig.height = (selectionPolygonConfig.height / this.scaleRatio) * 100
 
       const layerIndexs: number[] = []
       if (layers.length > 0) {
         layers.forEach((layer, index) => {
           let layerPolygonConfig
           if (shapeUtils.isLine(layer)) {
-            const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(layer.point ?? [], layer.styles, true, this.$isTouchDevice(), layer.size?.[0])
+            const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(
+              layer.point ?? [],
+              layer.styles,
+              true,
+              this.$isTouchDevice(),
+              layer.size?.[0],
+            )
             layerPolygonConfig = {
               x,
               y,
               width,
               height,
-              rotate
+              rotate,
             }
           } else {
             layerPolygonConfig = {
@@ -481,10 +530,13 @@ export default defineComponent({
               y: layer.styles.y,
               width: layer.styles.width,
               height: layer.styles.height,
-              rotate: layer.styles.rotate
+              rotate: layer.styles.rotate,
             }
           }
-          if (!layer.locked && mathUtils.calculateIfIntersect(selectionPolygonConfig, layerPolygonConfig)) {
+          if (
+            !layer.locked &&
+            mathUtils.calculateIfIntersect(selectionPolygonConfig, layerPolygonConfig)
+          ) {
             layerIndexs.push(index)
           }
         })
@@ -493,15 +545,15 @@ export default defineComponent({
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }
     },
-    renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
+    renderSelectionArea(initPoint: { x: number; y: number }, endPoint: { x: number; y: number }) {
       const minX = Math.min(initPoint.x, endPoint.x)
       const maxX = Math.max(initPoint.x, endPoint.x)
       const minY = Math.min(initPoint.y, endPoint.y)
       const maxY = Math.max(initPoint.y, endPoint.y)
       const selectionArea = this.$refs.selectionArea as HTMLElement
       selectionArea.style.transform = `translate(${Math.round(minX)}px,${Math.round(minY)}px)`
-      selectionArea.style.width = `${Math.round((maxX - minX))}px`
-      selectionArea.style.height = `${Math.round((maxY - minY))}px`
+      selectionArea.style.width = `${Math.round(maxX - minX)}px`
+      selectionArea.style.height = `${Math.round(maxY - minY)}px`
     },
     detectBlur(event: Event) {
       // The reason why I used setTimeout event here is to make the callback function being executed after the activeElement has been changed
@@ -513,7 +565,9 @@ export default defineComponent({
         }
         this.$nextTick(() => {
           if (document.activeElement?.tagName === 'BODY' && !this.isShowPagePreview) {
-            this.geCurrActivePageIndex === -1 ? pageUtils.findCentralPageIndexInfo() : pageUtils.activeCurrActivePage()
+            this.geCurrActivePageIndex === -1
+              ? pageUtils.findCentralPageIndexInfo()
+              : pageUtils.activeCurrActivePage()
           }
         })
       }, 0)
@@ -542,7 +596,15 @@ export default defineComponent({
     },
     draggingV(e: PointerEvent) {
       this.lastMappedVPos = this.mapGuidelineToPage('v').pos
-      this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currPage.unit, pageUtils.getPageDPI().width), PRECISION)
+      this.rulerVPos = round(
+        unitUtils.convert(
+          Math.round(this.lastMappedVPos),
+          'px',
+          this.currPage.unit,
+          pageUtils.getPageDPI().width,
+        ),
+        PRECISION,
+      )
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
@@ -550,7 +612,8 @@ export default defineComponent({
       RulerUtils.setIsDragging(false)
       if (this.from === -1) {
         const mouseOverPageIndex = RulerUtils.getMouseOverPageIndex(e)
-        if (mouseOverPageIndex === -1) { // if no page contains mouse
+        if (mouseOverPageIndex === -1) {
+          // if no page contains mouse
           const mostlyOverlappedPageIndex = RulerUtils.getMostlyOverlappedPageIndex(e)
           if (mostlyOverlappedPageIndex === -1) {
             this.isShowGuidelineV = false
@@ -585,7 +648,7 @@ export default defineComponent({
         eventUtils.removePointerEvent('pointerup', this.dragEndV)
       })
     },
-    renderGuidelineV(pos: { x: number, y: number }) {
+    renderGuidelineV(pos: { x: number; y: number }) {
       const guidelineV = this.$refs.guidelineV as HTMLElement
       guidelineV.style.transform = `translate(${pos.x}px,0px)`
     },
@@ -640,7 +703,15 @@ export default defineComponent({
     },
     draggingH(e: MouseEvent) {
       this.lastMappedHPos = this.mapGuidelineToPage('h').pos
-      this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currPage.unit, pageUtils.getPageDPI().height), PRECISION)
+      this.rulerHPos = round(
+        unitUtils.convert(
+          Math.round(this.lastMappedHPos),
+          'px',
+          this.currPage.unit,
+          pageUtils.getPageDPI().height,
+        ),
+        PRECISION,
+      )
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineH(this.currentRelPos)
     },
@@ -676,13 +747,16 @@ export default defineComponent({
         window.removeEventListener('mouseup', this.dragEndH)
       })
     },
-    renderGuidelineH(pos: { x: number, y: number }) {
+    renderGuidelineH(pos: { x: number; y: number }) {
       const guidelineH = this.$refs.guidelineH as HTMLElement
       guidelineH.style.transform = `translate(0px,${pos.y}px)`
     },
-    mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
+    mapGuidelineToPage(type: string): { pos: number; outOfPage: boolean } {
       // just has two options: ['v','h']
-      const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
+      const guideline =
+        type === 'v'
+          ? (this.$refs.guidelineV as HTMLElement)
+          : (this.$refs.guidelineH as HTMLElement)
       const from = type === 'v' ? this.from : RulerUtils.getOverlappedPageIndex(guideline, 'h')
       const result = RulerUtils.mapGuidelineToPage(guideline, type, from)
       return result
@@ -717,7 +791,7 @@ export default defineComponent({
     handleStepChange() {
       this.isShowGuidelineV = false
       this.isShowGuidelineH = false
-    }
+    },
     // handleKeydown(e: KeyboardEvent) {
     //   if (e.key === ' ') {
     //     e.preventDefault()
@@ -726,7 +800,7 @@ export default defineComponent({
     //     }
     //   }
     // }
-  }
+  },
 })
 </script>
 
@@ -744,7 +818,7 @@ $REULER_SIZE: 20px;
     height: 8px;
   }
   position: relative;
-  z-index: setZindex("editor-view");
+  z-index: setZindex('editor-view');
 
   &__warning {
     width: 90%;
@@ -758,8 +832,8 @@ $REULER_SIZE: 20px;
     grid-template-rows: $REULER_SIZE 1fr;
     grid-template-columns: $REULER_SIZE 1fr;
     grid-template-areas:
-      "corner-block hr-rulers"
-      "vr-rulers canvas";
+      'corner-block hr-rulers'
+      'vr-rulers canvas';
   }
   &__canvas {
     grid-area: canvas;
@@ -811,7 +885,7 @@ $REULER_SIZE: 20px;
     height: 100%;
     // cursor: url("/assets/icon/ruler-v.svg");
     &::before {
-      content: "";
+      content: '';
       position: absolute;
       top: 0;
       right: 0;
@@ -819,7 +893,7 @@ $REULER_SIZE: 20px;
       height: 100%;
     }
     &::after {
-      content: "";
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
@@ -834,7 +908,7 @@ $REULER_SIZE: 20px;
     height: 0px;
     // cursor: "/assets/icon/ruler/ruler-v.svg";
     &::before {
-      content: "";
+      content: '';
       position: absolute;
       top: -5px;
       right: 0;
@@ -842,7 +916,7 @@ $REULER_SIZE: 20px;
       height: 5px;
     }
     &::after {
-      content: "";
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
