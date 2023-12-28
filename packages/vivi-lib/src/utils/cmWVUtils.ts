@@ -859,8 +859,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async documentToCameraRoll(path: string, name: string, type: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType }) as GeneralResponse
+  async documentToCameraRoll(path: string, name: string, type: string, watermark: boolean, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType, watermark }) as GeneralResponse
   }
 
   showUpdateModal(force = false) {

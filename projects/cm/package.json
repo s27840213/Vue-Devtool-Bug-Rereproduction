@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "run-p type-check build-only lint",
     "preview": "vite preview",
-    "build-only": "vite build",
+    "build-only": "vite build -l warn",
     "type-check": "vue-tsc -p tsconfig.app.json --composite false",
     "lint": "eslint . --ext .vue,.ts",
     "format": "prettier --write src/ --ignore-path"

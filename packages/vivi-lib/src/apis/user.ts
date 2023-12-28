@@ -189,6 +189,22 @@ export default {
       }
     }))
   },
+  async removeBgCm(uuid: string, assetId?: number, type = 'cm-bg-remove'): Promise<any> {
+    const typeMap: {[index: string]: string} = {
+      'cm-bg-remove': 'bg',
+      'cm-bg-remove-face': 'bgf'
+    }
+    console.log(this.getToken())
+    return await apiUtils.requestWithRetry(() => axios('/remove-bg-charmix', {
+      method: 'POST',
+      data: {
+        path: `removebgcm/${uuid}/${assetId}/${typeMap[type]}`,
+        locale: this.getLocale(),
+        token: this.getToken(),
+        debug: 1
+      }
+    }))
+  },
   // https://www.notion.so/vivipic/get-tx-info-api-d90d7f64e05946ea8ceaec615d51094f
   async getTxInfo(params: IGetTxInfoParams): Promise<AxiosPromise<IGetTxInfoResponse>> {
     return await apiUtils.requestWithRetry<IGetTxInfoResponse>(() => axios('/get-tx-info', {

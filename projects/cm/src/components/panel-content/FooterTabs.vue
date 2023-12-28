@@ -81,6 +81,7 @@ import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { cloneDeep, pick } from 'lodash'
 import { mapGetters, mapMutations } from 'vuex'
 import { CMobilePanel } from './MobilePanel.vue'
@@ -121,6 +122,7 @@ export default defineComponent({
       isProcessing: 'bgRemove/getIsProcessing',
       controllerHidden: 'webView/getControllerHidden',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
     }),
     hideTabs(): boolean {
       return this.hideTabsPanels.includes(this.currActivePanel)
@@ -196,8 +198,15 @@ export default defineComponent({
           text: `${this.$t('NN0490')}`,
           hidden: this.isSvgImage || this.inEffectEditingMode,
         },
-        // charmix disabled for now
-        // { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', forPro: true, plan: 'bg-remove', hidden: this.inEffectEditingMode || this.isInFrame || this.inImageEditor, disabled: this.isProcessing },
+        {
+          icon: 'remove-bg',
+          text: `${this.$t('NN0043')}`,
+          panelType: 'remove-bg',
+          forPro: true,
+          plan: 'bg-remove',
+          hidden: this.inEffectEditingMode || this.isInFrame,
+          disabled: this.isProcessing,
+        },
         {
           icon: 'effect',
           text: `${this.$t('NN0429')}`,
@@ -676,6 +685,8 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setImgConfig: 'imgControl/SET_CONFIG',
+      setPreviewImage: 'bgRemove/SET_previewImage',
+      setIsProcessing: 'bgRemove/SET_isProcessing',
     }),
     settingTabColor(tab: IFooterTab): string {
       return tab.disabled || this.isLocked
@@ -846,30 +857,16 @@ export default defineComponent({
           )
           break
         }
-        case 'cm_remove-bg': {
-          if (this.isInEditor) {
-            // TODO: need cm version of beRemoveSection
-            // this.setIsInBgRemoveSection(!this.isInBgRemoveSection)
-            this.$emit('switchTab', 'none')
-            return
+        case 'remove-bg': {
+          if (!this.inBgRemoveMode && !this.isProcessing) {
+            this.setIsProcessing(true)
+
+            const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+
+            generalUtils.toDataURL(src, (dataUrl: string) => {
+              uploadUtils.uploadAsset('cm-bg-remove', [dataUrl])
+            })
           }
-          // if (!this.inBgRemoveMode && !this.isProcessing) {
-          //   this.setIsProcessing(true)
-
-          //   // first step: get the image src
-
-          //   // second step: upload the src to backend, and then call the bg remove API
-
-          //   // after finish bg removing, update the srcObj
-          //   const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
-          //   const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
-
-          //   generalUtils.toDataURL(src, (dataUrl: string) => {
-          //     uploadUtils.uploadAsset('stk-bg-remove', [dataUrl])
-          //   })
-
-          //   return
-          // }
           break
         }
         case 'photo':

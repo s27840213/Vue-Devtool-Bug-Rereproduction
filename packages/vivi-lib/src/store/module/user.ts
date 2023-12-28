@@ -469,9 +469,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       picWVUtils.updateUserInfo(userInfo)
       cmWVUtils.updateUserInfo(userInfo)
 
-      uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       if (generalUtils.isPic) {
+        uploadUtils.setLoginOutput(data.data)
         dispatch('payment/getBillingInfo', {}, { root: true })
       } else if (isCmLoginResponse(data)) {
         cmWVUtils.restore(data.data)
@@ -527,6 +527,14 @@ const actions: ActionTree<IUserModule, unknown> = {
   async removeBgStk({ state }, { uuid, assetId, type }) {
     try {
       const { data } = await userApis.removeBgStk(uuid, assetId, type)
+      return data
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async removeBgCm({ state }, { uuid, assetId, type }) {
+    try {
+      const { data } = await userApis.removeBgCm(uuid, assetId, type)
       return data
     } catch (error) {
       console.log(error)

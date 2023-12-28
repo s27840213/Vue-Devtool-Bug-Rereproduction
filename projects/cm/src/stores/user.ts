@@ -3,16 +3,15 @@ import type { GenImageParams } from '@/types/api'
 import { ICmMyDesign, ICmSubDesign, IMyDesignType, ITmpSubDesign } from '@/types/user'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
-import { IPage } from '@nu/vivi-lib/interfaces/page'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import cmWVUtils, { IListAssetResponse } from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineStore } from 'pinia'
 import { useEditorStore } from './editor'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 
 export const useUserStore = defineStore('user', () => {
   const editorStore = useEditorStore()
@@ -22,8 +21,17 @@ export const useUserStore = defineStore('user', () => {
     setCurrPrompt,
     setMaskDataUrl,
     setCurrGenResultIndex,
+    setInitImgSrc
   } = editorStore
-  const { currDesignId, editorType, currDesignThumbIndex, generatedResults, pageSize, currPrompt } =
+  const {
+    currDesignId,
+    currSubDesignId,
+    editorType,
+    currDesignThumbIndex,
+    generatedResults,
+    pageSize,
+    currPrompt
+  } =
     storeToRefs(editorStore)
 
   const { t } = useI18n()
@@ -37,8 +45,17 @@ export const useUserStore = defineStore('user', () => {
     Object.assign(prevGenParams, params)
   }
 
-  // #region my design related
+  const aiCredit = ref(0)
 
+  const setAiCredit = (credit: number) => {
+    aiCredit.value = credit
+  }
+
+  const increaseAiCredit = (amount: number) => {
+    aiCredit.value += amount
+  }
+
+  // #region Variable declare
   const MYDESIGN_TAGS: Array<{ label: string; type: IMyDesignType }> = [
     {
       label: t('NN0324'),
@@ -93,7 +110,9 @@ export const useUserStore = defineStore('user', () => {
   const currNextPages = computed(() => {
     return myDesignNextPagesMap[currMyDesignType.value]
   })
+  // #endregion
 
+  // #region getter and setter
   const getDesignsByType = (type: string) => {
     return myDesignFilesMap[type] ?? []
   }
@@ -118,19 +137,25 @@ export const useUserStore = defineStore('user', () => {
     currOpenDesign.value = design
   }
 
-  const getSubDesignConfig = async (myDesign: ICmMyDesign, subDesignId: string, name = 'original') => {
+  const getSubDesignConfig = async (
+    myDesign: ICmMyDesign | Pick<ICmMyDesign, 'id' | 'type'>, 
+    subDesignId: string,
+    name = 'original'
+  ) => {
     const { id, type } = myDesign
     const data = (await cmWVUtils.getJson(`mydesign-${type}/${id}/${subDesignId}`, name)) as {
       flag: '0' | '1'
       name: string
       path: string
       content: ICmSubDesign
-    }
+    } | undefined | null
     return data
   }
+  // #endregion
 
-  // edit
+  // #region edit sub design
   const initWithSubDeisgnImage = async (subDesign: ICmSubDesign) => {
+
     try {
       const { id, subId, type, width, height, prompt } = subDesign
       const thumbUrl = getSubDesignThumbUrl(type, id, subId,  Math.max(width, height))
@@ -138,7 +163,11 @@ export const useUserStore = defineStore('user', () => {
 
       // Copy thumb img to result img.
       const thumb = await generalUtils.toDataUrlNew(thumbUrl)
-      await saveDesignImageToDocument(thumb, 'result', { designId: id, subDesignId: subId })
+      await saveDesignImageToDocument(thumb, 'result', {
+        designId: id,
+        subDesignId: subId,
+        myDesignEditorType: type,
+      })
 
       // Create new design with result img.
       pageUtils.setPages([pageUtils.newPage({ width, height })])
@@ -153,8 +182,9 @@ export const useUserStore = defineStore('user', () => {
           },
         },
       })
-      startEditing(type, {
+      startEditing('powerful-fill', {
         stateTarget: 'editing',
+        designName: 'result',
         designId: id,
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
@@ -167,14 +197,18 @@ export const useUserStore = defineStore('user', () => {
         designHeight: height,
       })
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
-      setCurrGenResultIndex(index)
+      setMaskDataUrl('')
+      setCurrPrompt('')
+      setInitImgSrc(resultUrl)
+
+      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
+      index && setCurrGenResultIndex(index)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
   }
 
-  const editSubDesignResult = async() => {
+  const editSubDesignResult = async() => { // Do the same thing with editor.keepEditingInit.
     if (!currOpenDesign.value || !currOpenSubDesign.value) return false
     const { subId } = currOpenSubDesign.value
 
@@ -182,28 +216,29 @@ export const useUserStore = defineStore('user', () => {
     const subDesignData = await getSubDesignConfig(currOpenDesign.value, subId, 'result')
     // if (subDesignData.flag === '0') {
     if (subDesignData) {
-      initWithSubDesignConfig(subDesignData.content, { addMask: false })
+      initWithSubDesignConfig(subDesignData.content)
       return
     }
 
     // Cannot find result.json, use result img to create new design.
     initWithSubDeisgnImage(currOpenSubDesign.value)
   }
+  // #endregion
 
   // recreate
   const initWithSubDesignConfig = async (
     subDesign: ICmSubDesign,
-    options?: { addMask: boolean },
+    // options?: { addMask: boolean },
   ) => {
-    const { addMask = true } = options || {}
+    // const { addMask = true } = options || {}
     try {
       const { convertToPinkBasedMask } = useCanvasUtils()
-      const { pages, type, prompt, id, subId, width, height } = subDesign
+      const { pages, type, prompt, id, fileName, subId, width, height } = subDesign
       
       setCurrPrompt(prompt)
       pageUtils.setPages(pages)
 
-      if (addMask) {
+      if (fileName === 'original' && type === 'powerful-fill') {
         const maskUrl = await convertToPinkBasedMask(
           getTargetImageUrl(type, id, subId, 'mask', 400),
           width,
@@ -214,6 +249,7 @@ export const useUserStore = defineStore('user', () => {
 
       startEditing(type, {
         stateTarget: 'editing',
+        designName: fileName,
         designId: id,
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
@@ -226,8 +262,8 @@ export const useUserStore = defineStore('user', () => {
         designHeight: height,
       })
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId) ?? -1
-      setCurrGenResultIndex(index)
+      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
+      index && setCurrGenResultIndex(index)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
@@ -272,7 +308,7 @@ export const useUserStore = defineStore('user', () => {
         )) as IListAssetResponse
       }
 
-      const { flag, assets, key, nextPage, group } = data
+      const { flag, assets, key, nextPage } = data
       if (flag === '1') throw new Error('list my design failed')
 
       const designs = assets as ICmMyDesign[]
@@ -416,20 +452,22 @@ export const useUserStore = defineStore('user', () => {
       subDesignId?: string
       thumbIndex?: number
       designId?: string
+      myDesignEditorType?: string
     },
   ) => {
     const { 
       subDesignId,
       type = 'jpg',
       thumbIndex,
-      designId = currDesignId.value
+      designId = currDesignId.value,
+      myDesignEditorType = editorType.value,
     } = props ?? {}
 
     if (thumbIndex !== undefined) {
       setCurrDesignThumbIndex(thumbIndex)
     }
     const data = (await cmWVUtils.saveAssetFromUrl(type, url, {
-      key: `mydesign-${editorType.value}/${designId}`,
+      key: `mydesign-${myDesignEditorType}/${designId}`,
       ...(subDesignId && { subPath: subDesignId }),
       name: fileName,
     })) ?? {
@@ -440,7 +478,7 @@ export const useUserStore = defineStore('user', () => {
     return data
   }
 
-  const saveSubDesign = async (path: string, subDesignId: string, name = 'original') => {
+  const saveSubDesign = async (path: string, subDesignId: string, name: 'original' | 'result' = 'original') => {
     try {
       if (cmWVUtils.inBrowserMode) return
       const pages = uploadUtils.prepareJsonToUpload(pageUtils.getPages)
@@ -474,6 +512,7 @@ export const useUserStore = defineStore('user', () => {
         type: editorType.value,
         id: currDesignId.value,
         subId: subDesignId,
+        fileName: name,
         updateTime: new Date(Date.now()).toISOString(),
         pages,
         ver: cmWVUtils.getUserInfoFromStore().appVer,
@@ -548,11 +587,26 @@ export const useUserStore = defineStore('user', () => {
 
     return imgSrc
   }
+
+  // #region save option
+  const removeWatermark = ref(false)
+  const highResolutionPhoto = ref(false)
+
+  const setRemoveWatermark = (value: boolean) => {
+    removeWatermark.value = value
+  }
+
+  const setHighResolutionPhoto = (value: boolean) => {
+    highResolutionPhoto.value = value
+  }
   // #endregion
 
   return {
     prevGenParams,
     setPrevGenParams,
+    aiCredit,
+    setAiCredit,
+    increaseAiCredit,
     // #region my design related
     myDesignTags,
     myDesignFilesMap,
@@ -585,6 +639,12 @@ export const useUserStore = defineStore('user', () => {
     setCurrOpenSubDesign,
     deleteDesign,
     deleteSubDesign,
+    // #endregion
+    // #region save option related
+    removeWatermark,
+    highResolutionPhoto,
+    setRemoveWatermark,
+    setHighResolutionPhoto,
     // #endregion
   }
 })

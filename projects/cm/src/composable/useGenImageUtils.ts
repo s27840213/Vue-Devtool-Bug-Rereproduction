@@ -48,11 +48,12 @@ const useGenImageUtils = () => {
     currPrompt,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
-  const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
+  const { saveDesignImageToDocument, saveSubDesign, setAiCredit } = useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const hostId = computed(() => store.getters['cmWV/getUserInfo'].hostId)
+  const token = computed(() => store.getters['user/getToken'])
   const { t } = useI18n()
 
   const genImageFlow = async (
@@ -168,7 +169,7 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
     const res = (
-      await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)
+      await genImageApis.genImage(userId.value, requestId, token.value, params, num, useUsBucket.value)
     ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
@@ -178,6 +179,7 @@ const useGenImageUtils = () => {
 
     onApiResponded && onApiResponded()
 
+    setAiCredit(res.ai_credit)
     setPrevGenParams({ requestId, params })
     const urls = res.urls.map((urlMap) => urlMap.url)
     const pollingController = getPollingController()
