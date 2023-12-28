@@ -514,6 +514,14 @@ const actions: ActionTree<IUserModule, unknown> = {
     } catch (error) {
       console.log(error)
     }
+  },
+  async removeBgCm({ state }, { uuid, assetId, type }) {
+    try {
+      const { data } = await userApis.removeBgCm(uuid, assetId, type)
+      return data
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 

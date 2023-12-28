@@ -195,6 +195,12 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
         :toggleMode="true"
         :overlapSize="'8px'")
+  bg-remove-container(
+    class="absolute top-0 left-0 w-full h-full z-bg-remove"
+    v-if="(inBgRemoveMode || isProcessing) && editorContainerRef"
+    :containerWH="editorContainerSize"
+    :containerRef="editorContainerRef"
+    :previewSrc="previewSrc")
   transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
@@ -218,6 +224,7 @@ import { useUserStore } from '@/stores/user'
 import type { GenImageParams } from '@/types/api'
 import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
+import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
@@ -232,6 +239,7 @@ import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -242,6 +250,7 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { useEventBus } from '@vueuse/core'
 import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
@@ -260,6 +269,11 @@ const video = ref<HTMLVideoElement | null>(null)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementBounding(editorContainerRef)
+
+const editorContainerSize = computed(() => ({
+  width: editorContainerWidth.value,
+  height: editorContainerHeight.value,
+}))
 
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
@@ -340,7 +354,7 @@ watch(
 const isVideoGened = ref(false)
 const handleNextAction = function () {
   if (inEditingState.value) {
-    // TODO: save to original.json    
+    // TODO: save to original.json
     saveSubDesign(`${currDesignId.value}/${currSubDesignId.value}`, currSubDesignId.value, 'result')
   } else if (inGenResultState.value) {
     changeEditorState('next')
@@ -836,12 +850,25 @@ watch(showVideo, (newVal) => {
 })
 // #endregion
 
-const {
-  setCurrOpenDesign,
-  setCurrOpenSubDesign,
-  setPrevGenParams,
-  saveSubDesign,
-} = useUserStore()
+// #region bg remove related
+const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+const isProcessing = computed(() => store.getters['bgRemove/getIsProcessing'])
+const previewSrc = ref('')
+
+const startBgRemove = (type: 'cm-bg-remove') => {
+  if (!inBgRemoveMode && !isProcessing) {
+    store.commit('bgRemove/SET_isProcessing', true)
+
+    const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+    previewSrc.value = src
+    generalUtils.toDataURL(src, (dataUrl: string) => {
+      uploadUtils.uploadAsset(type, [dataUrl])
+    })
+  }
+}
+// #endregion
+
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = useUserStore()
 
 const handleHomeBtnAction = (navagate: () => void) => {
   setCurrOpenDesign(undefined)

@@ -240,6 +240,7 @@ router.beforeEach(async (to, from, next) => {
 
     uploadUtils.setLoginOutput({
       upload_log_map: json.ul_log_map,
+      ul_removebg_map: json.ul_removebg_map,
     })
   }
   next()

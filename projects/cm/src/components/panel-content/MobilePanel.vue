@@ -87,7 +87,7 @@ const component = defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       noRowGapPanels: ['crop-flip', 'color', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      hideFooterPanels: ['remove-bg'],
+      hideFooterPanels: [],
       // eslint-disable-next-line vue/no-unused-properties
       hideMobilePanelPanels: ['crop-flip'],
     }
@@ -200,7 +200,7 @@ const component = defineComponent({
             panelHistory: this.panelHistory,
           }
         }
-        case 'adjust': { 
+        case 'adjust': {
           return {
             isBiColorEditor: this.isBiColorEditor,
           }
@@ -349,7 +349,11 @@ const component = defineComponent({
       const isLayerAction = isSvg
         ? (target as SVGElement).classList.contains('layer-action')
         : (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
-      return isLayerAction ? true : (target.parentElement ? this.checkLayerAction(target.parentElement) : false)
+      return isLayerAction
+        ? true
+        : target.parentElement
+        ? this.checkLayerAction(target.parentElement)
+        : false
     },
     // eslint-disable-next-line vue/no-unused-properties
     middlewareCondition(target: HTMLElement | SVGElement): boolean {

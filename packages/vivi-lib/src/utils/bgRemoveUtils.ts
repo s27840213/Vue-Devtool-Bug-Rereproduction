@@ -199,6 +199,44 @@ class BgRemoveUtils {
       this.setInBgRemoveMode(true)
       this.setIsProcessing(false)
     } else {
+      logUtils.setLogAndConsoleLog('failed to remove bg: ' + data.msg)
+      notify({ group: 'error', text: data.msg })
+      this.setIsProcessing(false)
+      this.setPreviewImage({ src: '', width: 0, height: 0 })
+    }
+    console.timeEnd('generate frontend data time')
+    console.timeEnd('removeBg total time')
+    // duration_db => 確認使用者身份的資料庫查詢
+    // duration_download => 從s3下載使用者要去背的圖到lambda
+    // duration_process => 將圖片送給第三方去背api並接收結果
+    // duration_upload => 將去背結果寫回s3，並產生前端可以下載的signed url
+    const { duration_db, duration_download, duration_process, duration_upload } = data
+
+    console.log(`total backend process time: ${duration_db + duration_download + duration_process + duration_upload}ms`)
+    console.log(data)
+
+    // return data
+  }
+
+  async removeBgCm(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {
+    console.time('send API ~ get response time')
+
+    this.setIsProcessing(true)
+    this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
+    logUtils.setLogAndConsoleLog('start removing bg')
+    const data = await store.dispatch('user/removeBgCm', { uuid, assetId, type })
+    console.timeEnd('send API ~ get response time')
+    logUtils.setLogAndConsoleLog('finish removing bg')
+
+    console.time('generate frontend data time')
+    if (data.flag === 0) {
+      logUtils.setLogAndConsoleLog('finish removing bg')
+      const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
+      this.setAutoRemoveResult(autoRemoveResult)
+      this.setInBgRemoveMode(true)
+      this.setIsProcessing(false)
+    } else {
+      logUtils.setLogAndConsoleLog('failed to remove bg: ' + data.msg)
       notify({ group: 'error', text: data.msg })
       this.setIsProcessing(false)
       this.setPreviewImage({ src: '', width: 0, height: 0 })
@@ -361,7 +399,7 @@ class BgRemoveUtils {
   saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
     const { trimCanvas } = useCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
-    const { canvas: trimedCanvas, width, height, } = trimmedCanvasInfo
+    const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
 
     const assetId = generalUtils.generateAssetId()
