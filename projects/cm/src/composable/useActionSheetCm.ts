@@ -10,7 +10,7 @@ import useActionSheet from './useActionSheet'
 const useActionSheetCm = () => {
   const userStore = useUserStore()
   const { getSubDesignImage, deleteDesign, deleteSubDesign } = userStore
-  const { currOpenSubDesign, isSubDesignOpen } = storeToRefs(userStore)
+  const { currOpenSubDesign, isSubDesignOpen, removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
   const { t } = useI18n()
   const {
     isActionSheetOpen,
@@ -34,7 +34,7 @@ const useActionSheetCm = () => {
     }
     if (targetUrl.startsWith('chmix://')) {
       const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.documentToCameraRoll(path, name, type)
+      return cmWVUtils.documentToCameraRoll(path, name, type, !removeWatermark.value, highResolutionPhoto.value ? 2 : 1, 'scale')
     } else {
       return cmWVUtils.saveAssetFromUrl('jpg', await generalUtils.toDataUrlNew(targetUrl, 'jpg'))
     }

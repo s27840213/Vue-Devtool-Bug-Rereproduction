@@ -274,9 +274,6 @@ const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizin
 
 const { ids } = useGenImageUtils()
 
-const removeWatermark = ref(false)
-const highResolutionPhoto = ref(false)
-
 const showSidebarTabs = computed(
   () =>
     !isDuringCopy.value &&
@@ -335,7 +332,9 @@ const {
   currSubDesignId,
   designName,
 } = storeToRefs(editorStore)
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = useUserStore()
+const userStore = useUserStore()
+const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = userStore
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 

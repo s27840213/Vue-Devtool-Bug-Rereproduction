@@ -578,6 +578,19 @@ export const useUserStore = defineStore('user', () => {
     return imgSrc
   }
 
+  // #region save option
+  const removeWatermark = ref(false)
+  const highResolutionPhoto = ref(false)
+
+  const setRemoveWatermark = (value: boolean) => {
+    removeWatermark.value = value
+  }
+
+  const setHighResolutionPhoto = (value: boolean) => {
+    highResolutionPhoto.value = value
+  }
+  // #endregion
+
   return {
     prevGenParams,
     setPrevGenParams,
@@ -613,6 +626,12 @@ export const useUserStore = defineStore('user', () => {
     setCurrOpenSubDesign,
     deleteDesign,
     deleteSubDesign,
+    // #endregion
+    // #region save option related
+    removeWatermark,
+    highResolutionPhoto,
+    setRemoveWatermark,
+    setHighResolutionPhoto,
     // #endregion
   }
 })
