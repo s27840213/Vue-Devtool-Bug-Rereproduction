@@ -454,9 +454,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       picWVUtils.updateUserInfo(userInfo)
       cmWVUtils.updateUserInfo(userInfo)
 
-      uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       if (generalUtils.isPic) {
+        uploadUtils.setLoginOutput(data.data)
         dispatch('payment/getBillingInfo', {}, { root: true })
       }
       dispatch('getAllAssets', { token: newToken })
