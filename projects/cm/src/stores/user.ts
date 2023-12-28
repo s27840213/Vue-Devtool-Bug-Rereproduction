@@ -45,6 +45,16 @@ export const useUserStore = defineStore('user', () => {
     Object.assign(prevGenParams, params)
   }
 
+  const aiCredit = ref(0)
+
+  const setAiCredit = (credit: number) => {
+    aiCredit.value = credit
+  }
+
+  const increaseAiCredit = (amount: number) => {
+    aiCredit.value += amount
+  }
+
   // #region Variable declare
   const MYDESIGN_TAGS: Array<{ label: string; type: IMyDesignType }> = [
     {
@@ -594,6 +604,9 @@ export const useUserStore = defineStore('user', () => {
   return {
     prevGenParams,
     setPrevGenParams,
+    aiCredit,
+    setAiCredit,
+    increaseAiCredit,
     // #region my design related
     myDesignTags,
     myDesignFilesMap,
