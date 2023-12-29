@@ -219,16 +219,18 @@ class BgRemoveUtils {
   }
 
   async removeBgCm(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {
-    console.time('send API ~ get response time')
 
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
     logUtils.setLogAndConsoleLog('start removing bg')
     const data = await store.dispatch('user/removeBgCm', { uuid, assetId, type })
-    console.timeEnd('send API ~ get response time')
+    // const data = {
+    //   flag: 0,
+    //   url: `https://template.vivipic.com/admin/NuVCei56OafXuls19X6r/asset/image/231113094035241OsdlRsXg/full?rand=${generalUtils.generateRandomString(4)}`,
+    //   msg: ''
+    // }
     logUtils.setLogAndConsoleLog('finish removing bg')
 
-    console.time('generate frontend data time')
     if (data.flag === 0) {
       logUtils.setLogAndConsoleLog('finish removing bg')
       const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
@@ -241,17 +243,13 @@ class BgRemoveUtils {
       this.setIsProcessing(false)
       this.setPreviewImage({ src: '', width: 0, height: 0 })
     }
-    console.timeEnd('generate frontend data time')
-    console.timeEnd('removeBg total time')
     // duration_db => 確認使用者身份的資料庫查詢
     // duration_download => 從s3下載使用者要去背的圖到lambda
     // duration_process => 將圖片送給第三方去背api並接收結果
     // duration_upload => 將去背結果寫回s3，並產生前端可以下載的signed url
-    const { duration_db, duration_download, duration_process, duration_upload } = data
+    // const { duration_db, duration_download, duration_process, duration_upload } = data
 
-    console.log(`total backend process time: ${duration_db + duration_download + duration_process + duration_upload}ms`)
-    console.log(data)
-
+    // console.log(`total backend process time: ${duration_db + duration_download + duration_process + duration_upload}ms`)
     // return data
   }
 
@@ -387,6 +385,7 @@ class BgRemoveUtils {
     return trimmedCanvasInfo
   }
 
+  // #region used for vivisticker
   screenshot() {
     const src = this.canvas.toDataURL('image/png;base64')
     stkWVUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
@@ -438,6 +437,30 @@ class BgRemoveUtils {
         return callback(path)
       }
     })
+  }
+  // #endregion
+
+  undo() {
+      // BgRemoveArea will listen to Ctrl/Cmd + Z event, so I dispatch an event to make the undo function in BgRemoveArea.vue conducted
+      const event = new KeyboardEvent('keydown', {
+        ctrlKey: true,
+        metaKey: true,
+        shiftKey: false,
+        key: 'z',
+        repeat: false
+      })
+      window.dispatchEvent(event)
+  }
+  
+  redo() {
+    const event = new KeyboardEvent('keydown', {
+      ctrlKey: true,
+      metaKey: true,
+      shiftKey: true,
+      key: 'z',
+      repeat: false
+    })
+    window.dispatchEvent(event)
   }
 }
 

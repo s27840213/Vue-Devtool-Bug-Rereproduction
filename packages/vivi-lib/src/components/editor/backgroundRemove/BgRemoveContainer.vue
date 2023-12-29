@@ -16,6 +16,10 @@ div(
     :teleportTarget="teleportTarget"
     :inVivisticker="true"
     :fitScaleRatio="bgRemoveScaleRatio")
+  div(
+    v-if="isChangingBrushSize"
+    class="demo-brush absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none rounded-full outline-4 z-highest outline-white"
+    :style="demoBrushSizeStyles")
   //- used to debug
   teleport(
     v-if="false"
@@ -41,8 +45,9 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import constantData from '@/utils/constantData'
 import mathUtils from '@/utils/mathUtils'
+import pageUtils from '@/utils/pageUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
-import { PropType, defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 export const RM_SECTION_PADDING = 20
 
@@ -54,12 +59,7 @@ export default defineComponent({
     MobileSlider,
   },
   props: {
-    containerWH: {
-      type: Object as PropType<{ width: number; height: number }>,
-      default: () => {
-        return { width: '0', height: '0' }
-      },
-    },
+    
     containerRef: {
       type: HTMLElement,
       default: null,
@@ -70,7 +70,7 @@ export default defineComponent({
     },
     teleportTarget: {
       type: String,
-      default: '.panel-remove-bg__rm-section',
+      default: '.bg-remove-container',
     },
   },
   data() {
@@ -116,7 +116,16 @@ export default defineComponent({
       canvasSize: 'bgRemove/getCanvasSize',
       pinch: 'bgRemove/getPinchState',
       bgCurrSize: 'bgRemove/getBgCurrSize',
+      clearMode: 'bgRemove/getClearMode',
+      brushSize: 'bgRemove/getBrushSize',
+      isChangingBrushSize: 'bgRemove/getIsChangingBrushSize',
     }),
+    containerWH () {
+      return {
+        width: this.rmSection?.clientWidth ?? 0,
+        height: this.rmSection?.clientHeight ?? 0,
+      }
+    },
     fitScaleRatio(): number {
       const { width, height } = this.containerWH
       const { width: imgWidth, height: imgHeight } = this.previewImage
@@ -127,8 +136,18 @@ export default defineComponent({
       const newHeight = aspectRatio > 1 ? 1600 / aspectRatio : 1600
       const ratio = Math.min(width / newWidth, height / newHeight) * 0.9
 
-      return ratio
+      return ratio / this.contentScaleRatio
     },
+    brushColor(): string {
+      return this.clearMode ? '#fcaea9' : '#fdd033'
+    },
+    demoBrushSizeStyles() {
+      return {
+        width: `${this.brushSize * this.contentScaleRatio * pageUtils.scaleRatio * 0.01}px`,
+        height: `${this.brushSize * this.contentScaleRatio * pageUtils.scaleRatio * 0.01}px`,
+        backgroundColor: `${this.brushColor}4C`, // 30% opacity
+      }
+    }
   },
   watch: {
     inBgRemoveMode(val) {
@@ -411,7 +430,6 @@ export default defineComponent({
           this.updatePinchState({ isPinching: false })
           this.isPanning = false
           this.translationRatio = null
-          this.rmSection = null
           this.setInGestureMode(false)
           break
         }
@@ -488,5 +506,9 @@ export default defineComponent({
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.demo-brush {
+  outline-style: solid;
 }
 </style>

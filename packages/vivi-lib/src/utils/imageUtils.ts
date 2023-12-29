@@ -1,10 +1,10 @@
 import imageApi from '@/apis/image-api'
 import {
-IAssetPhoto,
-IImageSize,
-IPhotoItem,
-IUserImageContentData,
-isIAssetPhoto,
+  IAssetPhoto,
+  IImageSize,
+  IPhotoItem,
+  IUserImageContentData,
+  isIAssetPhoto,
 } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -24,6 +24,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import frameDefaultImg from '@img/svg/frame.svg'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
+import logUtils from './logUtils'
 
 const APP_VER_FOR_REFRESH_CACHE = 'v922'
 
@@ -140,7 +141,7 @@ class ImageUtils {
         if (typeof size === 'string' && (size as string).includes('ext')) {
           res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
-          const query = forBgRemove
+          const query = generalUtils.isCm ? '' : forBgRemove
             ? `?rand_ver=${generalUtils.generateRandomString(6)}`
             : '?origin=true'
           res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'
@@ -150,7 +151,7 @@ class ImageUtils {
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        const query = forBgRemove
+        const query = generalUtils.isCm ? '' : forBgRemove
           ? `&rand_ver=${generalUtils.generateRandomString(6)}`
           : '&origin=true'
         res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
@@ -670,6 +671,7 @@ class ImageUtils {
       const img = await loadImage
       return { width: img.width, height: img.height, exists: true }
     } catch (error) {
+      logUtils.setLogAndConsoleLog(error)
       return { width: defaultWidth, height: defaultHeight, exists: false }
     }
   }
@@ -773,9 +775,12 @@ class ImageUtils {
     }
   }
 
+  // used for vivisticker and charmix
   async getBgRemoveInfoStk(url: string, initSrc: string) {
     const { width, height } = await this.getImageSize(url, 1000, 1000)
-    url = this.appendRandomQuery(url)
+    if(!generalUtils.isCm) {
+      url = this.appendRandomQuery(url)
+    }
     return {
       width: width,
       height: height,

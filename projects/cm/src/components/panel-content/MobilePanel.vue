@@ -87,8 +87,6 @@ const component = defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       noRowGapPanels: ['crop-flip', 'color', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
-      hideFooterPanels: [],
-      // eslint-disable-next-line vue/no-unused-properties
       hideMobilePanelPanels: ['crop-flip'],
     }
   },

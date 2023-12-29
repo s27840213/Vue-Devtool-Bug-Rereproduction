@@ -10,7 +10,8 @@ import useActionSheet from './useActionSheet'
 const useActionSheetCm = () => {
   const userStore = useUserStore()
   const { getSubDesignImage, deleteDesign, deleteSubDesign } = userStore
-  const { currOpenSubDesign, isSubDesignOpen, removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
+  const { currOpenSubDesign, isSubDesignOpen, removeWatermark, highResolutionPhoto } =
+    storeToRefs(userStore)
   const { t } = useI18n()
   const {
     isActionSheetOpen,
@@ -23,25 +24,32 @@ const useActionSheetCm = () => {
   } = useActionSheet()
 
   const editorStore = useEditorStore()
-  const { currGeneratedResults } = storeToRefs(editorStore)
+  const { currGeneratedResult } = storeToRefs(editorStore)
 
   const savePhotoCb = async () => {
     let targetUrl = ''
     if (isSubDesignOpen.value && currOpenSubDesign.value) {
       targetUrl = getSubDesignImage(currOpenSubDesign.value)
     } else {
-      targetUrl = currGeneratedResults.value.url
+      targetUrl = currGeneratedResult.value.url
     }
     if (targetUrl.startsWith('chmix://')) {
       const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.documentToCameraRoll(path, name, type, !removeWatermark.value, highResolutionPhoto.value ? 2 : 1, 'scale')
+      return cmWVUtils.documentToCameraRoll(
+        path,
+        name,
+        type,
+        !removeWatermark.value,
+        highResolutionPhoto.value ? 2 : 1,
+        'scale',
+      )
     } else {
       return cmWVUtils.saveAssetFromUrl('jpg', await generalUtils.toDataUrlNew(targetUrl, 'jpg'))
     }
   }
   const saveVideoCb = () => {
-    if (currGeneratedResults.value.video) {
-      return saveToCameraRoll(currGeneratedResults.value.video)
+    if (currGeneratedResult.value.video) {
+      return saveToCameraRoll(currGeneratedResult.value.video)
     } else {
       throw new Error('video not generated yet')
     }

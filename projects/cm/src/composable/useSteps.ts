@@ -1,4 +1,6 @@
 import { useEditorStore } from '@/stores/editor'
+import store from '@nu/vivi-lib/store'
+import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
 import useCanvasUtils from './useCanvasUtilsCm'
@@ -38,14 +40,32 @@ const useSteps = () => {
     goToCheckpoint: goToCanvasCheckpoint,
   } = useCanvasUtils()
 
+  // #region bg remove related
+  const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+  const inBgRemoveFirstStep = computed(() => store.getters['bgRemove/inFirstStep'])
+  const inBgRemoveLastStep = computed(() => store.getters['bgRemove/inLastStep'])
+  // #endregion
+
   const editorStepsNum = computed(() => editorSteps.value.length)
   const canvasStepsNum = computed(() => canvasSteps.value.length)
 
-  const isInFirstStep = computed(() => isInEditorFirstStep.value && isInCanvasFirstStep.value)
-  const isInLastStep = computed(() => isInEditorLastStep.value && isInCanvasLastStep.value)
+  const isInFirstStep = computed(() =>
+    inBgRemoveMode.value
+      ? inBgRemoveFirstStep.value
+      : isInEditorFirstStep.value && isInCanvasFirstStep.value,
+  )
+  const isInLastStep = computed(() =>
+    inBgRemoveMode.value
+      ? inBgRemoveLastStep.value
+      : isInEditorLastStep.value && isInCanvasLastStep.value,
+  )
 
   const undo = () => {
     if (isInFirstStep.value || isProcessingStepsQueue.value) return
+    if (inBgRemoveMode.value) {
+      bgRemoveUtils.undo()
+      return
+    }
     if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorFirstStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value - 1)
@@ -66,6 +86,10 @@ const useSteps = () => {
 
   const redo = () => {
     if (isInLastStep.value || isProcessingStepsQueue.value) return
+    if (inBgRemoveMode.value) {
+      bgRemoveUtils.redo()
+      return
+    }
     if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorLastStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value + 1)

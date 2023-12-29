@@ -42,7 +42,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  emits: ['pointerdown', 'update'],
+  emits: ['pointerdown', 'update' ,'pointerup'],
   data() {
     return {
     }
@@ -108,6 +108,7 @@ export default defineComponent({
     },
     handlePointerup() {
       this.handleChangeStop()
+      this.$emit('pointerup')
     }
   }
 })

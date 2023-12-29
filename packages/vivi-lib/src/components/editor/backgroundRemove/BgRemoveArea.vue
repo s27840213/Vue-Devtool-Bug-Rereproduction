@@ -72,12 +72,6 @@ export default defineComponent({
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
-      brushStyle: {
-        backgroundColor: '#fcaea9',
-        width: '16px',
-        height: '16px',
-        transform: 'translate(0,0)'
-      },
       initImgSrc: '',
       imgSrc: '',
       blurPx: 1,
@@ -92,6 +86,7 @@ export default defineComponent({
       pointerStartY: 0,
       isDrawing: false,
       loading: true,
+      brushPos: { x: 0, y: 0 },
     }
   },
   created() {
@@ -214,6 +209,14 @@ export default defineComponent({
         height: this.canvasHeight
       }
     },
+    brushStyle(): { [index: string]: string } {
+      return {
+        backgroundColor: this.brushColor,
+        width: `${this.brushSize}px`,
+        height: `${this.brushSize}px`,
+        transform: `translate(${this.brushPos.x}px,${this.brushPos.y}px)`
+      }
+    },
     areaStyles(): { [index: string]: string } {
       const { width, height } = this.size
 
@@ -261,19 +264,20 @@ export default defineComponent({
     // }
   },
   watch: {
-    brushSize(newVal: number) {
-      if (this.contentCtx) {
+    brushSize:{
+      handler: function (newVal) {
+        if (this.contentCtx) {
         this.contentCtx.lineWidth = newVal
         this.blurCtx.lineWidth = newVal
         this.clearModeCtx.lineWidth = newVal
-        this.brushStyle.width = `${newVal + this.blurPx}px`
-        this.brushStyle.height = `${newVal + this.blurPx}px`
         if (this.clearMode) {
           this.blurPx = 1
           this.contentCtx.filter = `blur(${this.blurPx}px)`
         }
       }
     },
+    immediate: true
+  },
     restoreInitState(newVal) {
       if (newVal) {
         this.clearCtx()
@@ -310,9 +314,6 @@ export default defineComponent({
       if (val) {
         this.showBrush = false
       }
-    },
-    brushColor(newVal) {
-      this.brushStyle.backgroundColor = newVal
     },
     stepsQueue: {
       async handler(newVal, oldVal) {
@@ -491,13 +492,16 @@ export default defineComponent({
       this._setCanvas(this.contentCanvas)
       this.pushStep()
       this.isDrawing = false
-      if (this.$isTouchDevice()) {
+      if (this.$isTouchDevice() || this.$isCm) {
         this.showBrush = false
       }
     },
     setBrushPos(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
-      this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
+      this.brushPos = {
+        x: x - (this.brushSize + this.blurPx) / 2,
+        y: y - (this.brushSize + this.blurPx) / 2
+      }
     },
     drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')

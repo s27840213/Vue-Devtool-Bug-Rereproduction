@@ -1,9 +1,9 @@
 <template lang="pug">
-div(class="panel-remove-bg" ref="panelRemoveBg")
+div(class="panel-remove-bg w-full h-full overflow-hidden" ref="panelRemoveBgRef")
   bg-remove-container(
     v-if="inBgRemoveMode || isProcessing"
     :containerWH="containerWH"
-    :containerRef="panelRemoveBg"
+    :containerRef="panelRemoveBgRef"
     :previewSrc="previewSrc")
   div(v-else class="btn-section")
     transition(name="fade-down-up")
@@ -53,7 +53,7 @@ export default defineComponent({
   },
   data() {
     return {
-      panelRemoveBg: null as unknown as HTMLElement,
+      panelRemoveBgRef: null as unknown as HTMLElement,
       mobilePanelHeight: 0,
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
@@ -62,7 +62,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
+    this.panelRemoveBgRef = this.$refs.panelRemoveBgRef as HTMLElement
     this.mounted = true
   },
   computed: {
@@ -75,11 +75,8 @@ export default defineComponent({
     }),
     containerWH() {
       return {
-        width: this.panelRemoveBg ? this.panelRemoveBg.offsetWidth : 0,
-        /**
-         * @Note 60 is the height of the footer
-         */
-        height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight - this.mobilePanelHeight : 0,
+        width: this.panelRemoveBgRef?.clientWidth || 0,
+        height: this.panelRemoveBgRef?.clientHeight || 0,
       }
     },
   },
