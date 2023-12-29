@@ -3,7 +3,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
       back-btn(
-        v-if="!inBgRemoveMode && !isProcessingBgRemove"
+        v-if="canBack"
         :toTarget="fromMyDesign ? '/mydesign' : '/'")
     template(
       v-if="inEditingState && !inGenResultState"
@@ -336,6 +336,7 @@ const {
   currDesignId,
   currSubDesignId,
   designName,
+  currGeneratedResult,
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
@@ -366,12 +367,18 @@ const isVideoLoaded = ref(false)
 const currImgSrc = computed(() => {
   return currGenResultIndex.value === -1
     ? initImgSrc.value
-    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+    : currGeneratedResult.value?.url ?? ''
 })
 
 // #endregion
 
 // #region headerbar state & callback
+const canBack = computed(() => 
+  !inBgRemoveMode.value &&
+  !isProcessingBgRemove.value &&
+  !['cm_brush', 'selection'].includes(currActiveFeature.value)
+)
+
 const canSaveSubDesign = computed(() => {
   return (
     inEditingState.value &&
@@ -390,12 +397,12 @@ const handleNextAction = async function () {
     changeToSpecificEditorState('saving')
   } else if (inGenResultState.value) {
     changeEditorState('next')
-    const currGenResult = generatedResults.value[currGenResultIndex.value]
+    const currGenResult = currGeneratedResult.value
     if (currGenResult) {
       if (!currGenResult.video) {
         const src = imageUtils.appendRandomQuery(initImgSrc.value)
         const res = imageUtils.appendRandomQuery(
-          generatedResults.value[currGenResultIndex.value].url,
+          currGeneratedResult.value.url,
         )
         const pixiRecorder = new PixiRecorder(src, res)
         pixiRecorder.genVideo().then((data) => {

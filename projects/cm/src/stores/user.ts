@@ -226,7 +226,6 @@ export const useUserStore = defineStore('user', () => {
   }
   // #endregion
 
-  // recreate
   const initWithSubDesignConfig = async (
     subDesign: ICmSubDesign,
     // options?: { addMask: boolean },
