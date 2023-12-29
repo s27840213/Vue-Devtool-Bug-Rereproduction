@@ -25,7 +25,6 @@ export const useUserStore = defineStore('user', () => {
   } = editorStore
   const {
     currDesignId,
-    currSubDesignId,
     editorType,
     currDesignThumbIndex,
     generatedResults,
@@ -200,7 +199,7 @@ export const useUserStore = defineStore('user', () => {
 
       setMaskDataUrl('')
       setCurrPrompt('')
-      setInitImgSrc(resultUrl)
+      setInitImgSrc(getTargetImageUrl(type, id, subId, 'original'))
 
       const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
       index && setCurrGenResultIndex(index)
@@ -263,6 +262,8 @@ export const useUserStore = defineStore('user', () => {
         designWidth: width,
         designHeight: height,
       })
+
+      setInitImgSrc(getTargetImageUrl(type, id, subId, 'original'))
 
       const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
       index && setCurrGenResultIndex(index)
@@ -570,7 +571,11 @@ export const useUserStore = defineStore('user', () => {
       userId: imgName === 'mask' ? 'png' : 'jpg',
     }
 
-    const imgSrc = imageUtils.getSrc(srcObj)
+    let imgSrc = imageUtils.getSrc(srcObj)
+
+    if (imgName === 'thumb') { // Prevent cache
+      imgSrc = imageUtils.appendQuery(imgSrc, 'rand_ver', `${generalUtils.serialNumber}`)
+    }
 
     return imageUtils.appendQuery(imgSrc, 'lsize', `${size}`)
   }

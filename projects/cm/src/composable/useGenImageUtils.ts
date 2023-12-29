@@ -114,14 +114,18 @@ const useGenImageUtils = () => {
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
       logUtils.uploadLog().then(() => {
-        modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
-          msg: t('STK0023'),
-          action() {
-            generalUtils.copyText(hint).then(() => {
-              notify({ group: 'success', text: '已複製' })
-            })
-          },
-        })
+        if ((error as Error).message?.includes('no credits')) {
+          cmWVUtils.openPayment()
+        } else {
+          modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
+            msg: t('STK0023'),
+            action() {
+              generalUtils.copyText(hint).then(() => {
+                notify({ group: 'success', text: '已複製' })
+              })
+            },
+          })
+        }
       })
       for (const id of ids) {
         removeGenResult(id)

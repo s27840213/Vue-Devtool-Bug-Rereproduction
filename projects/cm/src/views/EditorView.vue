@@ -371,9 +371,9 @@ const canSaveSubDesign = computed(() => {
     !['cm_brush', 'selection'].includes(currActiveFeature.value)
   )
 })
-const handleNextAction = function () {
+const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
-    saveSubDesign(
+    await saveSubDesign(
       `${currDesignId.value}/${currSubDesignId.value}`,
       currSubDesignId.value,
       designName.value,
