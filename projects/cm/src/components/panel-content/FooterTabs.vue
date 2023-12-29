@@ -18,7 +18,7 @@ div(class="cm-footer-tabs flex flex-col pt-8" :class="{ 'px-24': currActivePanel
       v-if="!hideTabs"
       ref="footerTabs"
       class="footer-tabs-row flex gap-24")
-      div(v-if="showBackBtn" class="cm-footer-tabs flex-center h-44")
+      div(v-if="showBackBtn" class="cm-footer-tabs flex-center h-47")
         div(class="flex-center bg-white/[.65] rounded-full w-22 h-22" @click="handleBack")
           svg-icon(
             iconName="chevron-down"
@@ -29,7 +29,7 @@ div(class="cm-footer-tabs flex flex-col pt-8" :class="{ 'px-24': currActivePanel
           div(
             v-if="!tab.hidden"
             :key="tab.icon"
-            class="cm-footer-tabs flex-center flex-col h-44 gap-4 px-4"
+            class="cm-footer-tabs flex-center flex-col h-47 gap-4 px-4 relative"
             :class="{ 'click-disabled': tab.disabled || isLocked || extraDisableCondition(tab) }"
             @click="handleTabAction(tab)")
             color-btn(
@@ -37,13 +37,14 @@ div(class="cm-footer-tabs flex flex-col pt-8" :class="{ 'px-24': currActivePanel
               size="22px"
               class="click-disabled"
               :color="globalSelectedColor")
-            svg-icon(
-              v-else
-              class="click-disabled"
-              :iconName="tab.icon"
-              :iconColor="settingTabColor(tab)"
-              :iconWidth="'24px'"
-              :style="{ ...textIconStyle, transition: 'background-color 0.2s, color 0.2s, stroke 0.2s' }")
+            div(v-else class="relative flex-center")
+              svg-icon(
+                class="click-disabled"
+                :iconName="tab.icon"
+                :iconColor="settingTabColor(tab)"
+                :iconWidth="'24px'"
+                :style="{ ...textIconStyle, transition: 'background-color 0.2s, color 0.2s, stroke 0.2s' }")
+              svg-icon(v-if="tab.forPro" class="absolute -bottom-7 -right-11" iconName="crown" iconColor="yellow-cm" iconWidth="14px")
             span(
               class="no-wrap click-disabled transition ease-linear delay-100 typo-body-sm"
               :class="`text-${settingTabColor(tab)}`") {{ tab.text }}
@@ -714,8 +715,7 @@ export default defineComponent({
       if (this.isBgImgCtrl) pageUtils.setBackgroundImageControlDefault()
     },
     handleTabAction(tab: IFooterTab) {
-      // if (!paymentUtils.checkProApp({ plan: tab.forPro ? 1 : 0 }, undefined, tab.plan)) return
-      if (!paymentUtils.checkProApp({ plan: 0 }, undefined, tab.plan)) return // cm currently disables all pro-items
+      if (!paymentUtils.checkProApp({ plan: tab.forPro ? 1 : 0 })) return
       // if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
       //   editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       // }

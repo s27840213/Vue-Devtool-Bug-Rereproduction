@@ -203,6 +203,7 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import { find, pull } from 'lodash'
 
 const props = defineProps({
@@ -499,6 +500,11 @@ const applyPreprocess = () => {
     // TODO: remove bg
   }
 }
+watch(isBgRemove, (newVal) => {
+  if(newVal && !paymentUtils.checkProApp({plan: 1})) {
+    isBgRemove.value = false
+  }
+})
 // #endregion
 </script>
 
