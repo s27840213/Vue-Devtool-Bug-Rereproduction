@@ -1,6 +1,7 @@
 import { PowerfulFillCanvasMode } from '@/types/editor'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { defineStore } from 'pinia'
+import { pick } from 'lodash'
 export interface ICanvasState {
   canvasMode: PowerfulFillCanvasMode
   brushSize: number
@@ -20,27 +21,29 @@ export interface ICanvasState {
   drawingColor: string
 }
 
+const defaultState = {
+  canvasMode: 'brush',
+  brushSize: 125,
+  resultCanvas: null as unknown as HTMLCanvasElement,
+  loading: false,
+  isProcessingStepsQueue: false,
+  stepsQueue: [],
+  steps: [],
+  currStep: -1,
+  checkPointStep: -1,
+  isChangingBrushSize: false,
+  isDrawing: false,
+  canvas: null as unknown as HTMLCanvasElement,
+  canvasCtx: null as unknown as CanvasRenderingContext2D,
+  currCanvasImageElement: new Image(),
+  isAutoFilling: false,
+  drawingColor: '#FF7262',
+} as ICanvasState
+
 const MAX_STEP_COUNT = 20
 
 export const useCanvasStore = defineStore('canvas', {
-  state: (): ICanvasState => ({
-    canvasMode: 'brush',
-    brushSize: 125,
-    resultCanvas: null as unknown as HTMLCanvasElement,
-    loading: false,
-    isProcessingStepsQueue: false,
-    stepsQueue: [],
-    steps: [],
-    currStep: -1,
-    checkPointStep: -1,
-    isChangingBrushSize: false,
-    isDrawing: false,
-    canvas: null as unknown as HTMLCanvasElement,
-    canvasCtx: null as unknown as CanvasRenderingContext2D,
-    currCanvasImageElement: new Image(),
-    isAutoFilling: false,
-    drawingColor: '#FF7262',
-  }),
+  state: (): ICanvasState => ({ ...defaultState }),
   getters: {
     isInCanvasFirstStep(): boolean {
       return this.currStep === 0 || this.currStep === this.checkPointStep
@@ -50,6 +53,9 @@ export const useCanvasStore = defineStore('canvas', {
     },
   },
   actions: {
+    reset(keys?: Array<keyof ICanvasState>) {
+      Object.assign(this, keys?.length ? pick(defaultState, keys) : defaultState) // if no keys provided, reset all
+    },
     setCanvasMode(mode: PowerfulFillCanvasMode) {
       this.canvasMode = mode
     },
