@@ -107,6 +107,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
+          :class="demoBrushSizeOutline"
           class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
@@ -365,18 +366,17 @@ watch(
 const isVideoLoaded = ref(false)
 
 const currImgSrc = computed(() => {
-  return currGenResultIndex.value === -1
-    ? initImgSrc.value
-    : currGeneratedResult.value?.url ?? ''
+  return currGenResultIndex.value === -1 ? initImgSrc.value : currGeneratedResult.value?.url ?? ''
 })
 
 // #endregion
 
 // #region headerbar state & callback
-const canBack = computed(() => 
-  !inBgRemoveMode.value &&
-  !isProcessingBgRemove.value &&
-  !['cm_brush', 'selection'].includes(currActiveFeature.value)
+const canBack = computed(
+  () =>
+    !inBgRemoveMode.value &&
+    !isProcessingBgRemove.value &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value),
 )
 
 const canSaveSubDesign = computed(() => {
@@ -401,9 +401,7 @@ const handleNextAction = async function () {
     if (currGenResult) {
       if (!currGenResult.video) {
         const src = imageUtils.appendRandomQuery(initImgSrc.value)
-        const res = imageUtils.appendRandomQuery(
-          currGeneratedResult.value.url,
-        )
+        const res = imageUtils.appendRandomQuery(currGeneratedResult.value.url)
         const pixiRecorder = new PixiRecorder(src, res)
         pixiRecorder.genVideo().then((data) => {
           if (data) {
@@ -794,12 +792,17 @@ const removePointer = (e: PointerEvent) => {
 // #endregion
 
 // #region bi-color-editor
-const { toggleEditorTheme, currEditorTheme, isBiColorEditor, initBiColorEditor } = useBiColorEditor()
-watch(inEditingState, (newVal) => {
-  if (newVal && isBiColorEditor.value) {
-    initBiColorEditor(editorType.value)
-  }
-}, { immediate: true })
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor, initBiColorEditor } =
+  useBiColorEditor()
+watch(
+  inEditingState,
+  (newVal) => {
+    if (newVal && isBiColorEditor.value) {
+      initBiColorEditor(editorType.value)
+    }
+  },
+  { immediate: true },
+)
 // #endregion
 
 // #region demo brush size section
@@ -991,9 +994,6 @@ const previewSrc = ref('')
     @apply max-h-full object-contain;
     backface-visibility: hidden;
     transition: transform 0.6s;
-
-    &--back {
-    }
   }
 }
 

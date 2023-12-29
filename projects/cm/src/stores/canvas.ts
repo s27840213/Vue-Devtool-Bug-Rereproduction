@@ -1,7 +1,7 @@
 import { PowerfulFillCanvasMode } from '@/types/editor'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
-import { defineStore } from 'pinia'
 import { pick } from 'lodash'
+import { defineStore } from 'pinia'
 export interface ICanvasState {
   canvasMode: PowerfulFillCanvasMode
   brushSize: number
@@ -23,7 +23,7 @@ export interface ICanvasState {
 
 const defaultState = {
   canvasMode: 'brush',
-  brushSize: 125,
+  brushSize: 260,
   resultCanvas: null as unknown as HTMLCanvasElement,
   loading: false,
   isProcessingStepsQueue: false,

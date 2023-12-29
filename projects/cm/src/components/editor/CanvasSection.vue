@@ -22,15 +22,18 @@ import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-p
 import { useStore } from 'vuex'
 
 // #region data section
-const props = withDefaults(defineProps<{
-  containerDOM: HTMLElement | null
-  wrapperDOM: HTMLElement | null
-  noOpacity?: boolean
-  width?: number
-  height?: number
-}>(), {
-  noOpacity: false,
-})
+const props = withDefaults(
+  defineProps<{
+    containerDOM: HTMLElement | null
+    wrapperDOM: HTMLElement | null
+    noOpacity?: boolean
+    width?: number
+    height?: number
+  }>(),
+  {
+    noOpacity: false,
+  },
+)
 
 const { containerDOM, wrapperDOM, noOpacity, width, height } = toRefs(props)
 
@@ -48,8 +51,12 @@ const canvasStyle = computed(() => {
   return {
     // width: `${pageSize.value.width * contentScaleRatio.value}px`,
     // height: `${pageSize.value.height * contentScaleRatio.value}px`,
-    width: `${ width?.value || (pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) }px`,
-    height: `${ height?.value || (pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) }px`,
+    width: `${
+      width?.value || pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01
+    }px`,
+    height: `${
+      height?.value || pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01
+    }px`,
     transformOrigin: '0 0',
     transform,
   }
