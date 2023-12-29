@@ -514,14 +514,21 @@ const wrapperStyles = computed(() => {
 
 const fitPage = (ratio: number) => {
   const page = pageUtils.getCurrPage
-  const pos = {
+  const newInitPos = {
     x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
     y: 0
   }
-  // test
-  pageUtils.updatePagePos(0, pos)
-  pageUtils.updatePageInitPos(0, pos)
+  const posDiff =  {
+    x: newInitPos.x - page.initPos.x,
+    y: newInitPos.y - page.initPos.y
+  }
+  const newPos = {
+    x: page.x + posDiff.x,
+    y: page.y + posDiff.y
+  }
   store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
+  pageUtils.updatePageInitPos(0, newInitPos)
+  pageUtils.updatePagePos(0, newPos)
   // editorUtils.handleContentScaleRatio(0)
   // const { hasBleed } = pageUtils
   // const page = pageUtils.getPage(0)
@@ -546,6 +553,7 @@ watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
+    console.log(' fitScaleRatio.value,')
     fitPage(newVal)
   },
 )
