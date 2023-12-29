@@ -373,6 +373,7 @@ const canSaveSubDesign = computed(() => {
 })
 const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
+    groupUtils.deselect()
     await saveSubDesign(
       `${currDesignId.value}/${currSubDesignId.value}`,
       currSubDesignId.value,
