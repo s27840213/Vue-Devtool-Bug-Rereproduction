@@ -40,7 +40,7 @@ const { t } = useI18n()
 
 const userStore = useUserStore()
 const { getSubDesignThumbUrl } = userStore
-const { currMyDesignType, currOpenSubDesign } = storeToRefs(userStore)
+const { currOpenSubDesign } = storeToRefs(userStore)
 
 const subDesignThumbLoaded = ref(false)
 // use to prevent the UI shift when the thumb is loaded

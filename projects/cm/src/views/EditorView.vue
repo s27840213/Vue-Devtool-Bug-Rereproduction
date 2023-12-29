@@ -204,7 +204,6 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
-import router from '@/router'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
@@ -376,9 +375,9 @@ const canSaveSubDesign = computed(() => {
     !['cm_brush', 'selection'].includes(currActiveFeature.value)
   )
 })
-const handleNextAction = function () {
+const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
-    saveSubDesign(
+    await saveSubDesign(
       `${currDesignId.value}/${currSubDesignId.value}`,
       currSubDesignId.value,
       designName.value,
