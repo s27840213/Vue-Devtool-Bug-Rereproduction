@@ -1,24 +1,36 @@
 <template lang="pug">
-header-tabs(:rootStyles="{}"
-            :isInEditor="isInEditor"
-            :leftTabs="leftTabs"
-            :centerTitle="centerTitle"
-            :centerUrl="centerUrl"
-            :rightTabs="rightTabs")
+header-tabs(
+  :rootStyles="{}"
+  :isInEditor="isInEditor"
+  :leftTabs="leftTabs"
+  :centerTitle="centerTitle"
+  :centerUrl="centerUrl"
+  :rightTabs="rightTabs")
   template(v-slot="")
-    div(v-if="isInEditor && !editorTypeTemplate" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleCopy")
-        svg-icon(iconName="copy"
-                  iconWidth="18px"
-                  iconHeight="18px"
-                  iconColor="black-1")
-        span {{ $t('NN0032') }}
-    div(v-if="inBgRemoveMode" class="header-bar__feature-icon body-XS text-black-1 btn-feature" @click.prevent.stop="handleBgRemoveNext")
-        span(class="ml-5") {{ $t('NN0744') }}
-        svg-icon(iconName="chevron-right"
-                  iconWidth="18px"
-                  iconHeight="18px"
-                  iconColor="black-1")
-    div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
+    div(
+      v-if="isInEditor && !editorTypeTemplate"
+      class="header-bar__feature-icon body-XS text-black-1 btn-feature"
+      @click.prevent.stop="handleCopy")
+      svg-icon(
+        iconName="copy"
+        iconWidth="18px"
+        iconHeight="18px"
+        iconColor="black-1")
+      span {{ $t('NN0032') }}
+    div(
+      v-if="inBgRemoveMode"
+      class="header-bar__feature-icon body-XS text-black-1 btn-feature"
+      @click.prevent.stop="handleBgRemoveNext")
+      span(class="ml-5") {{ $t('NN0744') }}
+      svg-icon(
+        iconName="chevron-right"
+        iconWidth="18px"
+        iconHeight="18px"
+        iconColor="black-1")
+    div(
+      v-if="isInMyDesign && !isInEditor"
+      class="header-bar__right-text"
+      @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 
 <script lang="ts">
@@ -69,12 +81,13 @@ export default defineComponent({
       bgRemoveSrcInfo: {
         key: '',
         id: '',
-      }
+      },
+      tabBtnSize: 24,
     }
   },
   computed: {
     ...mapState('templates', {
-      templatesIgLayout: 'igLayout'
+      templatesIgLayout: 'igLayout',
     }),
     ...mapGetters({
       staticHeaderTab: 'objects/headerTab',
@@ -113,7 +126,7 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       isProcessing: 'bgRemove/getIsProcessing',
       isInBgRemoveSection: 'vivisticker/getIsInBgRemoveSection',
-      editingDesignId: 'vivisticker/getEditingDesignId'
+      editingDesignId: 'vivisticker/getEditingDesignId',
     }),
     templateHeaderTab() {
       return this.$store.getters[`templates/${this.$store.state.templates.igLayout}/headerTab`]
@@ -134,13 +147,23 @@ export default defineComponent({
       if (this.inBgRemoveMode) {
         const retTabs = []
         const stepTabs = [
-          { icon: 'undo', disabled: this.inBgRemoveFirstStep || this.isCropping, width: 24, action: this.undo },
-          { icon: 'redo', disabled: this.inBgRemoveLastStep || this.isCropping, width: 24, action: this.redo }
+          {
+            icon: 'undo',
+            disabled: this.inBgRemoveFirstStep || this.isCropping,
+            width: this.tabBtnSize,
+            action: this.undo,
+          },
+          {
+            icon: 'redo',
+            disabled: this.inBgRemoveLastStep || this.isCropping,
+            width: this.tabBtnSize,
+            action: this.redo,
+          },
         ]
         retTabs.push({
           icon: 'vivisticker_close',
           disabled: false,
-          width: 24,
+          width: this.tabBtnSize,
           action: () => {
             if (this.isUploadingShadowImg) {
               notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
@@ -153,7 +176,7 @@ export default defineComponent({
             if (this.isInBgRemoveSection) {
               this.setIsInBgRemoveSection(false)
             }
-          }
+          },
         })
         retTabs.push(...stepTabs)
         return retTabs
@@ -161,32 +184,63 @@ export default defineComponent({
 
       if (this.isInMultiPageShare) {
         return [
-          { icon: 'chevron-left', width: 24, action: () => this.setIsInMultiPageShare(false) }
+          {
+            icon: 'chevron-left',
+            width: this.tabBtnSize,
+            action: () => this.setIsInMultiPageShare(false),
+          },
         ]
       } else if (this.isInTemplateShare) {
-        return [
-          { icon: 'chevron-left', width: 24, action: this.clearTemplateShare }
-        ]
+        return [{ icon: 'chevron-left', width: this.tabBtnSize, action: this.clearTemplateShare }]
       } else if (this.isInEditor && !this.inBgRemoveMode) {
-        if (this.isInPagePreview) return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInPagePreview(false) }]
+        if (this.isInPagePreview)
+          return [
+            {
+              icon: 'chevron-left',
+              width: this.tabBtnSize,
+              action: () => this.setIsInPagePreview(false),
+            },
+          ]
         if (this.isInBgRemoveSection) {
           if (this.isProcessing) {
             return [
               { icon: 'vivisticker_logo', logo: true, width: 20, action: this.handleOpenIG },
-              { icon: 'vivisticker_title', logo: true, width: 100, height: 18, action: this.handleOpenIG }
+              {
+                icon: 'vivisticker_title',
+                logo: true,
+                width: 100,
+                height: 18,
+                action: this.handleOpenIG,
+              },
             ]
           }
-          return [{ icon: 'chevron-left', width: 24, action: () => this.setIsInBgRemoveSection(!this.isInBgRemoveSection) }]
+          return [
+            {
+              icon: 'chevron-left',
+              width: this.tabBtnSize,
+              action: () => this.setIsInBgRemoveSection(!this.isInBgRemoveSection),
+            },
+          ]
         }
         const retTabs = []
         const stepTabs = [
-          { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: this.undo },
-          { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: this.redo }
+          {
+            icon: 'undo',
+            disabled: stepsUtils.isInFirstStep || this.isCropping,
+            width: this.tabBtnSize,
+            action: this.undo,
+          },
+          {
+            icon: 'redo',
+            disabled: stepsUtils.isInLastStep || this.isCropping,
+            width: this.tabBtnSize,
+            action: this.redo,
+          },
         ]
         retTabs.push({
           icon: 'vivisticker_close',
           disabled: false,
-          width: 24,
+          width: this.tabBtnSize,
           action: () => {
             if (this.isUploadingShadowImg) {
               notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
@@ -206,54 +260,58 @@ export default defineComponent({
               this.setInEffectEditingMode(false)
             }
             this.handleEndEditing(true)
-          }
+          },
         })
         if (this.stepCount > 1) retTabs.push(...stepTabs)
         return retTabs
       } else if (this.isInMyDesign) {
-        return [
-          { icon: 'chevron-left', width: 24, action: this.leaveMyDesign }
-        ]
+        return [{ icon: 'chevron-left', width: this.tabBtnSize, action: this.leaveMyDesign }]
       } else if (this.isInBgShare) {
-        return [
-          { icon: 'chevron-left', width: 24, action: this.clearBgShare }
-        ]
+        return [{ icon: 'chevron-left', width: this.tabBtnSize, action: this.clearBgShare }]
       } else if (this.isInGroupTemplate) {
         return [
-          { icon: 'chevron-left', width: 24, action: () => this.setIsInGroupTemplate(false) }
+          {
+            icon: 'chevron-left',
+            width: this.tabBtnSize,
+            action: () => this.setIsInGroupTemplate(false),
+          },
         ]
       } else if (this.isInCategory) {
-        return [
-          { icon: 'chevron-left', width: 24, action: this.clearCategory }
-        ]
+        return [{ icon: 'chevron-left', width: this.tabBtnSize, action: this.clearCategory }]
       } else {
         return [
           { icon: 'vivisticker_logo', logo: true, width: 20, action: this.handleOpenIG },
-          { icon: 'vivisticker_title', logo: true, width: 100, height: 18, action: this.handleOpenIG }
+          {
+            icon: 'vivisticker_title',
+            logo: true,
+            width: 100,
+            height: 18,
+            action: this.handleOpenIG,
+          },
         ]
       }
     },
-    titleInfo(): { title: string, url: string } {
+    titleInfo(): { title: string; url: string } {
       switch (this.currActiveTab) {
         case 'object':
           return {
             title: this.staticHeaderTab.title || this.giphyKeyword,
-            url: this.staticHeaderTab.bulbUrl || ''
+            url: this.staticHeaderTab.bulbUrl || '',
           }
         case 'background':
           return {
             title: this.backgroundHeaderTab.title,
-            url: this.backgroundHeaderTab.bulbUrl
+            url: this.backgroundHeaderTab.bulbUrl,
           }
         case 'text':
           return {
             title: this.textHeaderTab.title,
-            url: this.textHeaderTab.bulbUrl
+            url: this.textHeaderTab.bulbUrl,
           }
         case 'template':
           return {
             title: this.templateHeaderTab.title,
-            url: this.templateHeaderTab.bulbUrl
+            url: this.templateHeaderTab.bulbUrl,
           }
       }
       return { title: '', url: '' }
@@ -282,21 +340,21 @@ export default defineComponent({
       return this.isInCategory && !this.isInEditor ? this.titleInfo.url : ''
     },
     rightTabs(): TabConfig[] {
-      const downloadTab = stkWVUtils.checkVersion('1.34') ? [{ icon: 'download_flat', width: 24, action: this.handleDownload }] : []
+      const downloadTab = stkWVUtils.checkVersion('1.34')
+        ? [{ icon: 'download_flat', width: this.tabBtnSize, action: this.handleDownload }]
+        : []
       if (this.isInMultiPageShare) {
         return []
       } else if (this.isInTemplateShare) {
-        return [
-          { icon: 'home', width: 24, action: this.handleEndEditing },
-        ]
+        return [{ icon: 'home', width: this.tabBtnSize, action: this.handleEndEditing }]
       } else if (this.inBgRemoveMode) {
         return []
       } else if (this.isInEditor) {
         if (this.isInPagePreview) return []
         if (this.inEffectEditingMode) {
           return [
-            { icon: 'bg', width: 24, action: this.handleSwitchBg },
-            ...downloadTab
+            { icon: 'bg', width: this.tabBtnSize, action: this.handleSwitchBg },
+            ...downloadTab,
           ]
         }
         if (this.isInBgRemoveSection) {
@@ -305,14 +363,11 @@ export default defineComponent({
         if (this.editorTypeTemplate) {
           return [
             ...this.lockIcon,
-            { icon: 'copy', width: 24, action: this.handleCopy },
-            { icon: 'share', width: 24, action: this.handleShareTemplate },
+            { icon: 'copy', width: this.tabBtnSize, action: this.handleCopy },
+            { icon: 'share', width: this.tabBtnSize, action: this.handleShareTemplate },
           ]
         }
-        return [
-          { icon: 'bg', width: 24, action: this.handleSwitchBg },
-          ...downloadTab,
-        ]
+        return [{ icon: 'bg', width: this.tabBtnSize, action: this.handleSwitchBg }, ...downloadTab]
       } else if (this.isInMyDesign) {
         return []
       } else if (this.isInCategory && !_.isEmpty(this.staticHeaderTab)) {
@@ -322,20 +377,26 @@ export default defineComponent({
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else {
-        return this.isProcessing ? [] : [
-          ...(stkWVUtils.checkVersion('1.13') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
-          { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
-        ]
+        return this.isProcessing
+          ? []
+          : [
+              ...(stkWVUtils.checkVersion('1.13')
+                ? [{ icon: 'folder', width: this.tabBtnSize, action: this.handleMyDesign }]
+                : []),
+              { icon: 'more', width: this.tabBtnSize, action: this.handleMore, isPanelIcon: true },
+            ]
       }
     },
     lockIcon(): TabConfig[] {
       const icon = this.isLocked ? 'lock' : 'unlock'
       if (this.inBgSettingMode || this.selectedLayerNum > 0) {
-        return [{
-          icon,
-          width: 24,
-          action: () => mappingUtils.mappingIconAction(icon)
-        }]
+        return [
+          {
+            icon,
+            width: this.tabBtnSize,
+            action: () => mappingUtils.mappingIconAction(icon),
+          },
+        ]
       } else {
         return []
       }
@@ -344,8 +405,20 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
+      return this.inBgSettingMode
+        ? backgroundUtils.backgroundLocked
+        : layerUtils.getSelectedLayer().locked
     },
+  },
+  mounted() {
+    window.addEventListener('resize', () => {
+      this.updateTabBtnWidth()
+    })
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', () => {
+      this.updateTabBtnWidth()
+    })
   },
   methods: {
     ...mapActions({
@@ -355,7 +428,7 @@ export default defineComponent({
       resetGifTagContent: 'giphy/resetTagContent',
       resetBackgroundsSearch: 'background/resetSearch',
       resetTextsSearch: 'textStock/resetSearch',
-      updateUserSettings: 'vivisticker/updateUserSettings'
+      updateUserSettings: 'vivisticker/updateUserSettings',
     }),
     ...mapMutations({
       setIsInCategory: 'assetPanel/SET_isInCategory',
@@ -415,7 +488,9 @@ export default defineComponent({
       stkWVUtils.updateUserInfo({ editorBg: this.editorBg })
     },
     async handleEndEditing(forceModal = false) {
-      const isShadowPanelOpen = this.currActivePanel === 'photo-shadow' || colorUtils.currEvent === ColorEventType.photoShadow
+      const isShadowPanelOpen =
+        this.currActivePanel === 'photo-shadow' ||
+        colorUtils.currEvent === ColorEventType.photoShadow
       if (this.isUploadingShadowImg || isShadowPanelOpen) {
         notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
@@ -430,37 +505,40 @@ export default defineComponent({
         if (stkWVUtils.userSettings.autoSave && !forceModal) {
           if (this.isSavingAsMyDesign) return
           this.isSavingAsMyDesign = true
-          stkWVUtils.saveAsMyDesign().catch((err) => {
-            console.warn(err.message)
-          }).finally(() => {
-            stkWVUtils.endEditing()
-            this.isSavingAsMyDesign = false
-          })
+          stkWVUtils
+            .saveAsMyDesign()
+            .catch((err) => {
+              console.warn(err.message)
+            })
+            .finally(() => {
+              stkWVUtils.endEditing()
+              this.isSavingAsMyDesign = false
+            })
         } else {
           const options = {
             checkboxText: `${this.$t('STK0010')}`,
             checked: this.userSettings.autoSave,
             onCheckedChange: (checked: boolean) => {
               this.updateUserSettings({
-                autoSave: checked
+                autoSave: checked,
               })
               if (checked) {
                 modalUtils.updateButton('cancel', {
                   style: {
                     color: '#9C9C9C',
                     backgroundColor: '#D9DBE1',
-                    pointerEvents: 'none'
-                  }
+                    pointerEvents: 'none',
+                  },
                 })
               } else {
                 modalUtils.updateButton('cancel', {
                   style: {
                     color: '#474A57',
-                    backgroundColor: '#D9DBE1'
-                  }
+                    backgroundColor: '#D9DBE1',
+                  },
                 })
               }
-            }
+            },
           }
           /**
            * @Note have not implement the save feature for bg remove result
@@ -473,12 +551,15 @@ export default defineComponent({
               action: () => {
                 if (this.isSavingAsMyDesign) return
                 this.isSavingAsMyDesign = true
-                stkWVUtils.saveAsMyDesign().catch((err) => {
-                  console.warn(err.message)
-                }).finally(() => {
-                  stkWVUtils.endEditing()
-                  this.isSavingAsMyDesign = false
-                })
+                stkWVUtils
+                  .saveAsMyDesign()
+                  .catch((err) => {
+                    console.warn(err.message)
+                  })
+                  .finally(() => {
+                    stkWVUtils.endEditing()
+                    this.isSavingAsMyDesign = false
+                  })
 
                 // restore the stored id and key info if saving design, otherwise we may ocationnaly delete wrong asset
                 const { id, key } = this.bgRemoveSrcInfo
@@ -486,7 +567,7 @@ export default defineComponent({
                   this.bgRemoveSrcInfo.id = ''
                   this.bgRemoveSrcInfo.key = ''
                 }
-              }
+              },
             },
             {
               msg: `${this.$t('STK0011')}`,
@@ -503,10 +584,11 @@ export default defineComponent({
               },
               style: {
                 color: '#474A57',
-                backgroundColor: '#D9DBE1'
-              }
+                backgroundColor: '#D9DBE1',
+              },
             },
-            options)
+            options,
+          )
         }
       } else {
         stkWVUtils.endEditing()
@@ -515,13 +597,9 @@ export default defineComponent({
     getCopyCallback(modalText: string, onSuccess?: () => void): (flag: string) => void {
       return (flag: string) => {
         if (flag === '1') {
-          modalUtils.setModalInfo(
-            `${this.$t('STK0017')}`,
-            [modalText],
-            {
-              msg: `${this.$t('STK0019')}`
-            }
-          )
+          modalUtils.setModalInfo(`${this.$t('STK0017')}`, [modalText], {
+            msg: `${this.$t('STK0019')}`,
+          })
         } else {
           onSuccess && onSuccess()
         }
@@ -554,27 +632,27 @@ export default defineComponent({
             } else {
               this._handleCopy()
             }
-          }
+          },
         })
         return
       }
       this._handleCopy()
     },
     _handleCopy() {
-      const copyCallback = this.getCopyCallback(
-        `${this.$t('STK0018')}`,
-        () => {
-          if (['object', 'objectGroup'].includes(this.editorType)) {
-            stkWVUtils.handleIos16Video()
-          }
+      const copyCallback = this.getCopyCallback(`${this.$t('STK0018')}`, () => {
+        if (['object', 'objectGroup'].includes(this.editorType)) {
+          stkWVUtils.handleIos16Video()
         }
-      )
+      })
       if (this.inBgRemoveMode) {
         bgRemoveUtils.screenshot()
-      } else if (stkWVUtils.checkVersion('1.31') && (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)) {
+      } else if (
+        stkWVUtils.checkVersion('1.31') &&
+        (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1)
+      ) {
         stkWVUtils.copyWithScreenshotUrl(
           stkWVUtils.createUrlForJSON({ source: 'editor' }),
-          copyCallback
+          copyCallback,
         )
       } else if (stkWVUtils.checkVersion('1.3')) {
         stkWVUtils.copyEditor(copyCallback)
@@ -612,7 +690,7 @@ export default defineComponent({
             } else {
               task()
             }
-          }
+          },
         })
         return
       }
@@ -620,7 +698,7 @@ export default defineComponent({
       if (this.editingAssetInfo.isFrame || this.editingAssetInfo.fit === 1) {
         stkWVUtils.downloadWithScreenshotUrl(
           stkWVUtils.createUrlForJSON({ source: 'editor' }),
-          downloadCallback
+          downloadCallback,
         )
       } else {
         stkWVUtils.downloadEditor(downloadCallback)
@@ -657,14 +735,17 @@ export default defineComponent({
 
               this.bgRemoveSrcInfo = {
                 key,
-                id
+                id,
               }
               this.addImage(srcObj, aspectRatio)
-              imageShadowUtils.updateEffectProps({
-                pageIndex: layerUtils.pageIndex,
-                layerIndex: layerUtils.layerIndex,
-                subLayerIdx: -1
-              }, { isTransparent: true })
+              imageShadowUtils.updateEffectProps(
+                {
+                  pageIndex: layerUtils.pageIndex,
+                  layerIndex: layerUtils.layerIndex,
+                  subLayerIdx: -1,
+                },
+                { isTransparent: true },
+              )
               editorUtils.setCurrActivePanel('photo-shadow')
               return srcObj
             })
@@ -672,77 +753,95 @@ export default defineComponent({
           (srcObj: SrcObj) => {
             setTimeout(() => {
               imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
-                const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
-                imageShadowUtils.updateEffectProps({
-                  pageIndex: layerUtils.pageIndex,
-                  layerIndex: layerUtils.layerIndex,
-                  subLayerIdx: -1
-                }, {
-                  maxsize,
-                  middsize: Math.max(img.naturalWidth, img.naturalHeight)
-                })
-                imageShadowUtils.setEffect(ShadowEffectType.frame, {
-                  frame: {
-                    spread: 30,
-                    radius: 0,
-                    opacity: 100
+                const maxsize = Math.min(
+                  Math.max(img.naturalWidth, img.naturalHeight),
+                  CANVAS_MAX_SIZE,
+                )
+                imageShadowUtils.updateEffectProps(
+                  {
+                    pageIndex: layerUtils.pageIndex,
+                    layerIndex: layerUtils.layerIndex,
+                    subLayerIdx: -1,
                   },
-                  frameColor: imageShadowUtils.getLocalEffectColor(ShadowEffectType.frame) || '#FECD56',
-                }, undefined)
+                  {
+                    maxsize,
+                    middsize: Math.max(img.naturalWidth, img.naturalHeight),
+                  },
+                )
+                imageShadowUtils.setEffect(
+                  ShadowEffectType.frame,
+                  {
+                    frame: {
+                      spread: 30,
+                      radius: 0,
+                      opacity: 100,
+                    },
+                    frameColor:
+                      imageShadowUtils.getLocalEffectColor(ShadowEffectType.frame) || '#FECD56',
+                  },
+                  undefined,
+                )
               })
             }, 0)
           },
-          designId
+          designId,
         )
       } else {
         const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
         const targetLayerStyle = layers[0].styles as IImageStyle
         bgRemoveUtils.setInBgRemoveMode(false)
         editorUtils.setShowMobilePanel(false)
-        const designId = this.editingDesignId ? this.editingDesignId : generalUtils.generateAssetId()
+        const designId = this.editingDesignId
+          ? this.editingDesignId
+          : generalUtils.generateAssetId()
 
         // bcz the bg removing will save the image to document first before we save designs, so we need to set the editingDesignId to make the saved json
         // to save to the same directory, or it will cause disk leak
 
         this.setEditingDesignId(designId)
-        bgRemoveUtils.saveToIOS(designId, async (data, path, aspectRatio, trimmedCanvasInfo) => {
-          const srcObj = {
-            type: 'ios',
-            userId: '',
-            assetId: path,
-          }
+        bgRemoveUtils.saveToIOS(
+          designId,
+          async (data, path, aspectRatio, trimmedCanvasInfo) => {
+            const srcObj = {
+              type: 'ios',
+              userId: '',
+              assetId: path,
+            }
 
-          const [key, id, ...res] = path.split('/')
+            const [key, id, ...res] = path.split('/')
 
-          this.bgRemoveSrcInfo = {
-            key,
-            id
-          }
+            this.bgRemoveSrcInfo = {
+              key,
+              id,
+            }
 
-          const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+            const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } =
+              trimmedCanvasInfo
 
-          const { width, height } = targetLayerStyle
+            const { width, height } = targetLayerStyle
 
-          const newImageWidth = width * remainingWidthPercentage
-          const newImageHeight = height * remainingHeightPercentage
-          layerUtils.updateLayerStyles(pageIndex, index, {
-            x: targetLayerStyle.x + xShift,
-            y: targetLayerStyle.y + yShift,
-            width: newImageWidth,
-            height: newImageHeight,
-            imgWidth: newImageWidth,
-            imgHeight: newImageHeight,
-            imgX: 0,
-            imgY: 0
-          })
+            const newImageWidth = width * remainingWidthPercentage
+            const newImageHeight = height * remainingHeightPercentage
+            layerUtils.updateLayerStyles(pageIndex, index, {
+              x: targetLayerStyle.x + xShift,
+              y: targetLayerStyle.y + yShift,
+              width: newImageWidth,
+              height: newImageHeight,
+              imgWidth: newImageWidth,
+              imgHeight: newImageHeight,
+              imgX: 0,
+              imgY: 0,
+            })
 
-          layerUtils.updateLayerProps(pageIndex, index, {
-            srcObj,
-          })
+            layerUtils.updateLayerProps(pageIndex, index, {
+              srcObj,
+            })
 
-          this.setIsInBgRemoveSection(false)
-          return srcObj
-        }, targetLayerStyle)
+            this.setIsInBgRemoveSection(false)
+            return srcObj
+          },
+          targetLayerStyle,
+        )
       }
     },
     // this is used for old version(< 1.35)
@@ -762,11 +861,14 @@ export default defineComponent({
                 assetId: 'bgRemove/' + assetId,
               }
               this.addImage(srcObj, aspectRatio)
-              imageShadowUtils.updateEffectProps({
-                pageIndex: layerUtils.pageIndex,
-                layerIndex: layerUtils.layerIndex,
-                subLayerIdx: -1
-              }, { isTransparent: true })
+              imageShadowUtils.updateEffectProps(
+                {
+                  pageIndex: layerUtils.pageIndex,
+                  layerIndex: layerUtils.layerIndex,
+                  subLayerIdx: -1,
+                },
+                { isTransparent: true },
+              )
               editorUtils.setCurrActivePanel('photo-shadow')
               return srcObj
             })
@@ -774,27 +876,38 @@ export default defineComponent({
           (srcObj: SrcObj) => {
             setTimeout(() => {
               imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj), (img) => {
-                const maxsize = Math.min(Math.max(img.naturalWidth, img.naturalHeight), CANVAS_MAX_SIZE)
-                imageShadowUtils.updateEffectProps({
-                  pageIndex: layerUtils.pageIndex,
-                  layerIndex: layerUtils.layerIndex,
-                  subLayerIdx: -1
-                }, {
-                  maxsize,
-                  middsize: Math.max(img.naturalWidth, img.naturalHeight)
-                })
-                imageShadowUtils.setEffect(ShadowEffectType.frame, {
-                  frame: {
-                    spread: 30,
-                    radius: 0,
-                    opacity: 100
+                const maxsize = Math.min(
+                  Math.max(img.naturalWidth, img.naturalHeight),
+                  CANVAS_MAX_SIZE,
+                )
+                imageShadowUtils.updateEffectProps(
+                  {
+                    pageIndex: layerUtils.pageIndex,
+                    layerIndex: layerUtils.layerIndex,
+                    subLayerIdx: -1,
                   },
-                  frameColor: imageShadowUtils.getLocalEffectColor(ShadowEffectType.frame) || '#FECD56',
-                }, undefined)
+                  {
+                    maxsize,
+                    middsize: Math.max(img.naturalWidth, img.naturalHeight),
+                  },
+                )
+                imageShadowUtils.setEffect(
+                  ShadowEffectType.frame,
+                  {
+                    frame: {
+                      spread: 30,
+                      radius: 0,
+                      opacity: 100,
+                    },
+                    frameColor:
+                      imageShadowUtils.getLocalEffectColor(ShadowEffectType.frame) || '#FECD56',
+                  },
+                  undefined,
+                )
               })
             }, 0)
           },
-          generalUtils.generateAssetId()
+          generalUtils.generateAssetId(),
         )
       } else {
         const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
@@ -808,7 +921,8 @@ export default defineComponent({
             assetId: 'bgRemove/' + assetId,
           }
 
-          const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+          const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } =
+            trimmedCanvasInfo
 
           const { width, height } = targetLayerStyle
 
@@ -822,7 +936,7 @@ export default defineComponent({
             imgWidth: newImageWidth,
             imgHeight: newImageHeight,
             imgX: 0,
-            imgY: 0
+            imgY: 0,
           })
 
           layerUtils.updateLayerProps(pageIndex, index, {
@@ -876,7 +990,7 @@ export default defineComponent({
           metaKey: true,
           shiftKey: false,
           key: 'z',
-          repeat: false
+          repeat: false,
         })
         window.dispatchEvent(event)
       } else {
@@ -890,7 +1004,7 @@ export default defineComponent({
           metaKey: true,
           shiftKey: true,
           key: 'z',
-          repeat: false
+          repeat: false,
         })
         window.dispatchEvent(event)
       } else {
@@ -908,14 +1022,23 @@ export default defineComponent({
         imageUtils.setImgControlDefault()
       }
       this.setTemplateShareType(this.editorType)
-    }
-  }
+    },
+    updateTabBtnWidth() {
+      const screenWidth = document.body.clientWidth
+      console.log(screenWidth)
+      if (screenWidth > 360) {
+        this.tabBtnSize = 24
+      } else {
+        this.tabBtnSize = 20
+      }
+    },
+  },
 })
 </script>
 
 <style lang="scss" scoped>
 .header-bar {
-  .btn-feature{
+  .btn-feature {
     display: flex;
     align-items: center;
     padding: 4px 8px;
