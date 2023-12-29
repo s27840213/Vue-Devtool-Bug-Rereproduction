@@ -76,7 +76,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     div(class="w-full h-full box-border" @click.self="outerClick")
       div(
         id="screenshot-target"
-        class="wrapper relative tutorial-powerful-fill-3--highlight"
+        class="wrapper tutorial-powerful-fill-3--highlight absolute"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         img(
@@ -493,7 +493,6 @@ const fitScaleRatio = computed(() => {
 
 const wrapperStyles = computed(() => {
   const { pinchScale, isPinchingEditor } = store.state.mobileEditor
-  const position = 'absolute'
   const transformOrigin = '0 0'
   const page = pageUtils.getCurrPage
   let transform = `translate(${page.x ?? 0}px, ${page.y?? 0}px)`
@@ -501,7 +500,6 @@ const wrapperStyles = computed(() => {
     transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
   }
   return {
-    position,
     transformOrigin,
     transform,
     // width: `${pageSize.value.width * contentScaleRatio.value}px`,
