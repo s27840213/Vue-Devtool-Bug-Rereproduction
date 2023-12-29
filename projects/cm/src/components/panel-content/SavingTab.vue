@@ -26,11 +26,10 @@ div(class="w-full flex-center gap-64 py-12 box-border")
     span(class="text-yellow-0 typo-body-sm") {{ $t('NN0504') }}
 </template>
 <script setup lang="ts">
-import useActionSheetCm from '@/composable/useActionSheetCm'
-import useStateInfo from '@/composable/useStateInfo'
-import { useEditorStore } from '@/stores/editor'
-import { useUserStore } from '@/stores/user'
-import { notify } from '@kyvg/vue3-notification'
+import useActionSheetCm from '@/composable/useActionSheetCm';
+import useStateInfo from '@/composable/useStateInfo';
+import { useEditorStore } from '@/stores/editor';
+import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore()
 const { editSubDesignResult, initWithSubDesignConfig } = userStore
@@ -40,17 +39,15 @@ const editorStore = useEditorStore()
 const { changeToSpecificEditorState, keepEditingInit } = editorStore
 const { editorType } = storeToRefs(editorStore)
 
-const { setSavingActions, toggleActionSheet } = useActionSheetCm()
+const { setSavingActions, setSharingActions, toggleActionSheet } = useActionSheetCm()
 const save = () => {
   setSavingActions()
   toggleActionSheet()
 }
 
 const share = () => {
-  notify({
-    group: 'success',
-    text: 'share',
-  })
+  setSharingActions()
+  toggleActionSheet()
 }
 
 const recreate = () => {
