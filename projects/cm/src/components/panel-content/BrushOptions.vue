@@ -208,6 +208,7 @@ const apply = () => {
 }
 
 onMounted(async () => {
+  if (inBgRemoveMode.value) return
   const brushSize = await cmWVUtils.getState('brushSize')
   if (brushSize !== undefined) {
     setMaskBrushSize(brushSize.brushSize)
