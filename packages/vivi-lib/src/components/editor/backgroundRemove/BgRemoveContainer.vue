@@ -59,7 +59,6 @@ export default defineComponent({
     MobileSlider,
   },
   props: {
-    
     containerRef: {
       type: HTMLElement,
       default: null,

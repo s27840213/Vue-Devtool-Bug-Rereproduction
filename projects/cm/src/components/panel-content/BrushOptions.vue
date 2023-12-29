@@ -171,6 +171,37 @@ const cancel = () => {
 }
 
 const apply = () => {
+  if (inBgRemoveMode.value) {
+    // const { index, pageIndex, layers } = layerUtils.currSelectedInfo
+    //     const targetLayerStyle = layers[0].styles as IImageStyle
+    //     setInBgRemoveMode(false)
+    //     // bgRemoveUtils.saveToIOS(designId, async (data, path, aspectRatio, trimmedCanvasInfo) => {
+    //       const srcObj = {
+    //         type: 'ios',
+    //         userId: '',
+    //         assetId: path,
+    //       }
+    //       const [key, id, ...res] = path.split('/')
+    //       const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
+    //       const { width, height } = targetLayerStyle
+    //       const newImageWidth = width * remainingWidthPercentage
+    //       const newImageHeight = height * remainingHeightPercentage
+    //       layerUtils.updateLayerStyles(pageIndex, index, {
+    //         x: targetLayerStyle.x + xShift,
+    //         y: targetLayerStyle.y + yShift,
+    //         width: newImageWidth,
+    //         height: newImageHeight,
+    //         imgWidth: newImageWidth,
+    //         imgHeight: newImageHeight,
+    //         imgX: 0,
+    //         imgY: 0
+    //       })
+    //       layerUtils.updateLayerProps(pageIndex, index, {
+    //         srcObj,
+    //       })
+    //       return srcObj
+    // }, targetLayerStyle)
+  }
   setCurrActiveFeature('none')
   PagePinchUtils.resetPageScale()
   groupUtils.deselect()

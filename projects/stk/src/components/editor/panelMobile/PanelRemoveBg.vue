@@ -2,7 +2,6 @@
 div(class="panel-remove-bg w-full h-full overflow-hidden" ref="panelRemoveBgRef")
   bg-remove-container(
     v-if="inBgRemoveMode || isProcessing"
-    :containerWH="containerWH"
     :containerRef="panelRemoveBgRef"
     :previewSrc="previewSrc")
   div(v-else class="btn-section")
@@ -73,12 +72,6 @@ export default defineComponent({
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       isInEditor: 'vivisticker/getIsInEditor',
     }),
-    containerWH() {
-      return {
-        width: this.panelRemoveBgRef?.clientWidth || 0,
-        height: this.panelRemoveBgRef?.clientHeight || 0,
-      }
-    },
   },
   methods: {
     ...mapMutations({

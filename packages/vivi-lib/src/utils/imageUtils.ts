@@ -659,7 +659,7 @@ class ImageUtils {
     setAnonymous = true,
   ): Promise<{ width: number; height: number; exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
-      if (!url.includes('appver')) {
+      if (!url.includes('appver') && !generalUtils.isCm) {
         url = this.appendQuery(url, 'appver', APP_VER_FOR_REFRESH_CACHE)
       }
       this.imgLoadHandler(url, (img) => resolve(img), {
