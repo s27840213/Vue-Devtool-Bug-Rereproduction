@@ -23,14 +23,14 @@ const useActionSheetCm = () => {
   } = useActionSheet()
 
   const editorStore = useEditorStore()
-  const { currGeneratedResults } = storeToRefs(editorStore)
+  const { currGeneratedResult } = storeToRefs(editorStore)
 
   const savePhotoCb = async () => {
     let targetUrl = ''
     if (isSubDesignOpen.value && currOpenSubDesign.value) {
       targetUrl = getSubDesignImage(currOpenSubDesign.value)
     } else {
-      targetUrl = currGeneratedResults.value.url
+      targetUrl = currGeneratedResult.value.url
     }
     if (targetUrl.startsWith('chmix://')) {
       const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
@@ -40,8 +40,8 @@ const useActionSheetCm = () => {
     }
   }
   const saveVideoCb = () => {
-    if (currGeneratedResults.value.video) {
-      return saveToCameraRoll(currGeneratedResults.value.video)
+    if (currGeneratedResult.value.video) {
+      return saveToCameraRoll(currGeneratedResult.value.video)
     } else {
       throw new Error('video not generated yet')
     }
