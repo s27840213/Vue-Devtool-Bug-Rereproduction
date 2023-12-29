@@ -41,7 +41,7 @@ div(v-if="descriptionPanel" class="panel-description w-full h-[inherit] px-16 pt
       prompt-area(preview)
       div(class="w-full")
     //- img preprocess info
-    template(v-if="['hidden-message-invert', 'hidden-message-bgrm'].includes(descriptionPanel)")
+    template(v-if="['hidden-message/invert', 'hidden-message/bgrm'].includes(descriptionPanel)")
       div(class="w-full typo-body-md text-left") {{ hiddenMessageImgPreprocessDescription }}
       div(
         v-for="(item, idx) in hiddenMessageImgPreprocessItems"
@@ -124,8 +124,8 @@ const hiddenMessageImgPreprocessDescription = computed(() => {
 })
 
 const hiddenMessageImgPreprocessItems = computed(() => Array.from(Array(2), (_, index) => ({
-  imgA: require(`demo/${descriptionPanel}-demo-${index}a.jpeg`),
-  imgB: require(`demo/${descriptionPanel}-demo-${index}b.png`),
+  imgA: require(`demo/${descriptionPanel}/${index}a.jpeg`),
+  imgB: require(`demo/${descriptionPanel}/${index}b.png`),
   text: (() => {
     switch (descriptionPanel) {
       case 'hidden-message/invert':
