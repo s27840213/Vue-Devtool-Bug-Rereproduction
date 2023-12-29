@@ -5,6 +5,7 @@ import { editorTypes } from '@/types/editor'
 import store from '@/vuex'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
+import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import VueRouter from 'vue-router'
 
 const isValidType = (x: any): x is EditorType => editorTypes.includes(x)
@@ -32,12 +33,10 @@ export async function editorRouteHandler(
     const { editorType } = storeToRefs(editorStore)
     const { setEditorType, setPageSize, setCurrActiveFeature, stepsReset, setCurrGenOptions } =
       editorStore
-    const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     setEditorType(type)
     setPageSize(width, height)
     setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOptions) ?? [])
 
-    if (isBiColorEditor.value) initBiColorEditor(editorType.value)
     store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
     switch (type) {
       case 'powerful-fill':

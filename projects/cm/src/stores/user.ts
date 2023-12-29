@@ -1,3 +1,4 @@
+import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import type { GenImageParams } from '@/types/api'
 import { ICmMyDesign, ICmSubDesign, IMyDesignType, ITmpSubDesign } from '@/types/user'
@@ -12,6 +13,7 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineStore } from 'pinia'
 import { useEditorStore } from './editor'
+import { useCanvasStore } from '@/stores/canvas'
 
 export const useUserStore = defineStore('user', () => {
   const editorStore = useEditorStore()
@@ -175,13 +177,11 @@ export const useUserStore = defineStore('user', () => {
         fit: 1,
         record: false,
         select: false,
-        styles: {
-          adjust: {
-            ...(editorType.value === 'hidden-message' && { saturate: -100 }),
-            invert: true,
-          },
-        },
       })
+
+      // reset drawing color
+      if (useBiColorEditor().isBiColorEditor) useCanvasStore().reset(['drawingColor'])
+
       startEditing('powerful-fill', {
         stateTarget: 'editing',
         designName: 'result',
@@ -238,8 +238,9 @@ export const useUserStore = defineStore('user', () => {
       setCurrPrompt(prompt)
       pageUtils.setPages(pages)
 
-      if (fileName === 'original' && type === 'powerful-fill') {
-        const maskUrl = await convertToPinkBasedMask(
+      // add mask
+      if (fileName === 'original') {
+        const maskUrl = type === 'hidden-message' ? getTargetImageUrl(type, id, subId, 'mask') : await convertToPinkBasedMask(
           getTargetImageUrl(type, id, subId, 'mask', 400),
           width,
           height,

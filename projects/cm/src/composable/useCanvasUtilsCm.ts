@@ -710,6 +710,7 @@ const useCanvasUtils = (
           width: maskParams.value.width ?? pageSize.value.width,
           height: maskParams.value.height ?? pageSize.value.height,
         })
+        if (isBiColorEditor.value) fillNonTransparent(drawingColor.value)
       }
     }
   }

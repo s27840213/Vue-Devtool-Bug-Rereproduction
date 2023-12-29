@@ -189,7 +189,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       case 'screenshot-result':
         this.screenshotMap[(info.options as { imageId: string }).imageId](info.status as string)
         break
-    }
+          }
   }
 
   get inBrowserMode() {
@@ -397,10 +397,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON({ page = undefined, noBg = true }: { page?: IPage, noBg?: boolean } = {}): string {
+  createUrlForJSON({ page = undefined, noBg = true, maskUrl = '' }: { page?: IPage, noBg?: boolean, maskUrl?: string } = {}): string {
     page = page ?? pageUtils.currFocusPage
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
+    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}&maskUrl=${encodeURIComponent(maskUrl)}`
   }
 
   async sendScreenshotUrl(query: string, { outputType, quality, forGenImage }: { outputType?: string, quality?: number, forGenImage?: boolean } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
