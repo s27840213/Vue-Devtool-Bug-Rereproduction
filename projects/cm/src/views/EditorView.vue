@@ -112,76 +112,77 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         v-if="isAutoFilling"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
   div(v-else class="editor-view__saving-state")
-    div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-      div(
-        class="result-showcase w-full h-full rounded-8 overflow-hidden flex-center abosolute top-0"
-        ref="resultShowcase")
-        img(
-          class="result-showcase__card result-showcase__card--back"
-          :class="{ 'is-flipped': !showVideo }"
-          :src="currImgSrc")
-        div(
-          class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
-          :class="{ 'is-flipped': showVideo }")
-          img(
-            v-show="!isVideoLoaded"
-            class="w-full h-full absolute top-0 left-0 object-contain"
-            :src="initImgSrc")
-          loading-brick(v-show="!isVideoLoaded" class="z-median")
-          video(
-            v-show="isVideoLoaded"
-            class="w-full h-full absolute top-0 left-0"
-            ref="video"
-            webkit-playsinline
-            playsinline
-            loop
-            autoplay
-            mutes
-            @loadeddata="() => { isVideoLoaded = true }"
-            :src="generatedResults[currGenResultIndex].video")
-      div(class="flex-between-center gap-10")
-        div(
-          class="w-8 h-8 rounded-full transition-colors"
-          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = true)")
-        div(
-          class="w-8 h-8 rounded-full transition-colors"
-          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = false)")
-    div(class="flex-between-center w-full px-24 py-8 box-border")
-      div(class="flex items-center gap-8")
-        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
-          svg-icon(
-            iconName="crown"
-            :iconColor="'dark-6'"
-            iconWidth="20px")
-        span(class="typo-h5 text-white") {{ $t('CM0071') }}
-      slide-toggle(
-        v-model="removeWatermark"
-        :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
-        margin="2px"
-        optionWidth="22px"
-        optionHeight="22px"
-        :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
-        :toggleMode="true"
-        :overlapSize="'8px'")
-    div(class="flex-between-center w-full px-24 py-8 box-border")
-      div(class="flex items-center gap-8")
-        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
-          svg-icon(
-            iconName="crown"
-            :iconColor="'dark-6'"
-            iconWidth="20px")
-        span(class="typo-h5 text-white") {{ $t('CM0072') }}
-      slide-toggle(
-        v-model="highResolutionPhoto"
-        :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
-        margin="2px"
-        optionWidth="22px"
-        optionHeight="22px"
-        :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
-        :toggleMode="true"
-        :overlapSize="'8px'")
+    sub-design-detail
+    //- div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
+    //-   div(
+    //-     class="result-showcase w-full h-full rounded-8 overflow-hidden flex-center abosolute top-0"
+    //-     ref="resultShowcase")
+    //-     img(
+    //-       class="result-showcase__card result-showcase__card--back"
+    //-       :class="{ 'is-flipped': !showVideo }"
+    //-       :src="currImgSrc")
+    //-     div(
+    //-       class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
+    //-       :class="{ 'is-flipped': showVideo }")
+    //-       img(
+    //-         v-show="!isVideoLoaded"
+    //-         class="w-full h-full absolute top-0 left-0 object-contain"
+    //-         :src="initImgSrc")
+    //-       loading-brick(v-show="!isVideoLoaded" class="z-median")
+    //-       video(
+    //-         v-show="isVideoLoaded"
+    //-         class="w-full h-full absolute top-0 left-0"
+    //-         ref="video"
+    //-         webkit-playsinline
+    //-         playsinline
+    //-         loop
+    //-         autoplay
+    //-         mutes
+    //-         @loadeddata="() => { isVideoLoaded = true }"
+    //-         :src="generatedResults[currGenResultIndex].video")
+    //-   div(class="flex-between-center gap-10")
+    //-     div(
+    //-       class="w-8 h-8 rounded-full transition-colors"
+    //-       :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
+    //-       @click="() => (showVideo = true)")
+    //-     div(
+    //-       class="w-8 h-8 rounded-full transition-colors"
+    //-       :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
+    //-       @click="() => (showVideo = false)")
+    //- div(class="flex-between-center w-full px-24 py-8 box-border")
+    //-   div(class="flex items-center gap-8")
+    //-     div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
+    //-       svg-icon(
+    //-         iconName="crown"
+    //-         :iconColor="'dark-6'"
+    //-         iconWidth="20px")
+    //-     span(class="typo-h5 text-white") {{ $t('CM0071') }}
+    //-   slide-toggle(
+    //-     v-model="removeWatermark"
+    //-     :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
+    //-     margin="2px"
+    //-     optionWidth="22px"
+    //-     optionHeight="22px"
+    //-     :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
+    //-     :toggleMode="true"
+    //-     :overlapSize="'8px'")
+    //- div(class="flex-between-center w-full px-24 py-8 box-border")
+    //-   div(class="flex items-center gap-8")
+    //-     div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
+    //-       svg-icon(
+    //-         iconName="crown"
+    //-         :iconColor="'dark-6'"
+    //-         iconWidth="20px")
+    //-     span(class="typo-h5 text-white") {{ $t('CM0072') }}
+    //-   slide-toggle(
+    //-     v-model="highResolutionPhoto"
+    //-     :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
+    //-     margin="2px"
+    //-     optionWidth="22px"
+    //-     optionHeight="22px"
+    //-     :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
+    //-     :toggleMode="true"
+    //-     :overlapSize="'8px'")
   bg-remove-container(
     class="absolute top-0 left-0 w-full h-full z-bg-remove"
     v-if="(inBgRemoveMode || isProcessing) && editorContainerRef"
@@ -204,7 +205,6 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
-import router from '@/router'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
@@ -218,7 +218,6 @@ import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
-import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
 import type { ILayerInfo } from '@nu/vivi-lib/store/types'
@@ -314,12 +313,8 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { 
-  changeEditorState,
-  updateGenResult,
-  setDescriptionPanel,
-  changeToSpecificEditorState,
-} = editorStore
+const { changeEditorState, updateGenResult, setDescriptionPanel, changeToSpecificEditorState } =
+  editorStore
 const {
   pageSize,
   currActiveFeature,

@@ -135,6 +135,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
+import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
@@ -155,7 +156,6 @@ import router from './router'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useModalStore } from './stores/modal'
-import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 

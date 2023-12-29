@@ -1,6 +1,7 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import router from '@/router'
+import { useUserStore } from '@/stores/user'
 import type {
   DescriptionPanel,
   EditorFeature,
@@ -15,7 +16,6 @@ import type { IStep } from '@nu/vivi-lib/interfaces/steps'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
-import { useUserStore } from '@/stores/user'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -133,9 +133,9 @@ export const useEditorStore = defineStore('editor', {
       return stepsUtils.isInLastStep
     },
     currSubDesignId(): string {
-      return this.currGeneratedResults.id
+      return this.currGeneratedResult.id
     },
-    currGeneratedResults(): { id: string; url: string; video?: string } {
+    currGeneratedResult(): { id: string; url: string; video?: string } {
       return this.generatedResults[this.currGenResultIndex]
     },
     generatedResultsNum(): number {
@@ -182,7 +182,7 @@ export const useEditorStore = defineStore('editor', {
         generatedResults,
         designWidth = 900,
         designHeight = 1600,
-        designName = ''
+        designName = '',
       } = options || {}
 
       this.currStateIndex = 0
@@ -322,13 +322,10 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOptions) {
       this.currGenOptions = options
     },
-    async keepEditingInit() { // Do the same thing with user.editSubDesignResult.
+    async keepEditingInit() {
+      // Do the same thing with user.editSubDesignResult.
       const { initWithSubDeisgnImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
-      const { 
-        editorType: type,
-        currDesignId: id,
-        currSubDesignId: subId,
-      } = this
+      const { editorType: type, currDesignId: id, currSubDesignId: subId } = this
 
       // Try to open result.json.
       const resultJson = await getSubDesignConfig({ type, id }, subId, 'result')
