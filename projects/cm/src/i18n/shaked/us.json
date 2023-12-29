@@ -498,6 +498,7 @@
   "CM0080": "Invert",
   "CM0082": "Background Remove",
   "CM0083": "Pre-process image",
+  "CM0084": "Sharing as",
   "CM0086": "Processing",
   "CM0087": "Image Generation Failed",
   "CM0088": "Sorry, we could not generate the image this time. Please try again.",
