@@ -60,7 +60,8 @@ interface IEditorStore {
   currGenOptions: GenImageOptions
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
-  currDesignThumbIndex: number
+  currDesignThumbIndex: number,
+  isShowLoadingBrick: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -87,6 +88,7 @@ export const useEditorStore = defineStore('editor', {
     editorTheme: null,
     descriptionPanel: null,
     currDesignThumbIndex: 0,
+    isShowLoadingBrick: false
     // if the user send empty prompt, show warning at fisrt time
   }),
   getters: {
@@ -352,5 +354,8 @@ export const useEditorStore = defineStore('editor', {
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
     },
+    setIsShowLoadingBrick(bool: boolean) {
+      this.isShowLoadingBrick = bool
+    }
   },
 })

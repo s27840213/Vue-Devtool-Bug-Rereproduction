@@ -116,7 +116,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       ref="sidebarTabsRef")
     transition(name="fade-in")
       loading-brick(
-        v-if="isAutoFilling"
+        v-if="isAutoFilling || isShowLoadingBrick"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
     bg-remove-container(
       v-if="inBgRemoveMode && editorContainerRef"
@@ -219,8 +219,8 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
+import { useVideoRcordStore } from '@/stores/videoRecord'
 import type { GenImageParams } from '@/types/api'
-import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -338,6 +338,7 @@ const {
   currSubDesignId,
   designName,
   currGeneratedResult,
+  isShowLoadingBrick
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
@@ -402,12 +403,12 @@ const handleNextAction = async function () {
       if (!currGenResult.video) {
         const src = imageUtils.appendRandomQuery(initImgSrc.value)
         const res = imageUtils.appendRandomQuery(currGeneratedResult.value.url)
-        const pixiRecorder = new PixiRecorder(src, res)
-        pixiRecorder.genVideo().then((data) => {
-          if (data) {
-            updateGenResult(currGenResult.id, { video: data })
-          }
-        })
+        const { addImage, genVideo } = useVideoRcordStore()
+        await addImage(src, res)
+        const data = await genVideo()
+        if (data) {
+          updateGenResult(currGenResult.id, { video: data })
+        }
       }
     }
   }
