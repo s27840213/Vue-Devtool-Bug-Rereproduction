@@ -2,7 +2,7 @@
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
-      back-btn
+      back-btn(:toTarget="fromMyDesign ? '/mydesign' : '/'")
     template(
       v-if="inEditingState && !inGenResultState"
       #middle)
@@ -204,6 +204,7 @@ import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
+import router from '@/router'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
@@ -288,6 +289,7 @@ const showSidebarTabs = computed(
 
 const modalStore = useModalStore()
 const { closeModal, openModal, setNormalModalInfo } = modalStore
+
 // #endregion
 
 // #region hooks related
@@ -337,6 +339,7 @@ const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
 const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = userStore
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
+const fromMyDesign = hasGeneratedResults.value
 
 watch(
   () => isManipulatingCanvas.value,

@@ -637,7 +637,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       uuid,
       txid
     })
-    logUtils.setLogAndConsoleLog(`getTxInfo: ${JSON.stringify({token: store.getters['user/getGetTxToken'], uuid: uuid, txid: txid, res: res?.data})}`)
+    logUtils.setLogAndConsoleLog('getTxInfo', {token: store.getters['user/getGetTxToken'], uuid: uuid, txid: txid, res: res?.data})
     if (res.data.flag === 0) {
       const isSubscribed = res.data.subscribe === 1
       store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })

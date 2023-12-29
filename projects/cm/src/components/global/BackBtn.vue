@@ -18,6 +18,7 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
+import { toRefs } from 'vue'
 
 /**
  * @Note - how to use this component?
@@ -28,12 +29,13 @@ import { useStore } from 'vuex'
  * Precedence: customCallback > toTarget
  */
 
-const { toTarget, customCallback } = withDefaults(
+const props = withDefaults(
   defineProps<{ toTarget?: string; customCallback?: () => void }>(),
   {
     toTarget: '/',
   },
 )
+const { toTarget, customCallback } = toRefs(props)
 const { inEditingState, atSettings } = useStateInfo()
 
 // #region modal
@@ -58,8 +60,8 @@ const store = useStore()
 const { t } = useI18n()
 
 const handleBackAction = (navagate: () => void) => {
-  if (customCallback) {
-    customCallback()
+  if (customCallback?.value) {
+    customCallback.value()
     return
   }
 
