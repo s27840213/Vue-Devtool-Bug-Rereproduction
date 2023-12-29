@@ -238,8 +238,9 @@ export const useUserStore = defineStore('user', () => {
       setCurrPrompt(prompt)
       pageUtils.setPages(pages)
 
-      if (fileName === 'original' && type === 'powerful-fill') {
-        const maskUrl = await convertToPinkBasedMask(
+      // add mask
+      if (fileName === 'original') {
+        const maskUrl = type === 'hidden-message' ? getTargetImageUrl(type, id, subId, 'mask') : await convertToPinkBasedMask(
           getTargetImageUrl(type, id, subId, 'mask', 400),
           width,
           height,

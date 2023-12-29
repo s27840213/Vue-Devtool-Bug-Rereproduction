@@ -211,7 +211,12 @@ const useGenImageUtils = () => {
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
-          if (editorType.value !== 'hidden-message') {
+          if (editorType.value === 'hidden-message') {
+            maskDataUrl.value && saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+              type: 'png',
+              subDesignId,
+            })
+          } else {
             const prepareMask = prepareMaskToUpload()
             if (prepareMask) {
               promises.push(
@@ -266,8 +271,9 @@ const useGenImageUtils = () => {
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
     RECORD_TIMING && testUtils.start('copy editor', { notify: false, setToLog: true })
     const { width: pageWidth, height: pageHeight } = pageSize.value
+    if (editorType.value === 'hidden-message') setMaskDataUrl(getCanvasDataUrl() ?? '')
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }), { forGenImage: true })
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false, ...( editorType.value === 'hidden-message' && { maskUrl: maskDataUrl.value }) }), { forGenImage: true })
       : await cmWVUtils.copyEditor({
           width: pageWidth * contentScaleRatio.value,
           height: pageHeight * contentScaleRatio.value,

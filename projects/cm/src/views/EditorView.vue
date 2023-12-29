@@ -756,9 +756,15 @@ const recordPointer = (e: PointerEvent) => {
 const removePointer = (e: PointerEvent) => {
   pointerEvtUtils.removePointer(e.pointerId)
 }
+// #endregion
 
-// toggle editor theme
-const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor()
+// #region bi-color-editor
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor, initBiColorEditor } = useBiColorEditor()
+watch(inEditingState, (newVal) => {
+  if (newVal && isBiColorEditor.value) {
+    initBiColorEditor(editorType.value)
+  }
+}, { immediate: true })
 // #endregion
 
 // #region demo brush size section
