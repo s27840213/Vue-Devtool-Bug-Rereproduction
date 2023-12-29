@@ -194,13 +194,14 @@ export default {
       'cm-bg-remove': 'bg',
       'cm-bg-remove-face': 'bgf'
     }
-    console.log(this.getToken())
+    // console.log(store.getters['cmWV/getUserInfo'].userId)
     return await apiUtils.requestWithRetry(() => axios('/remove-bg-charmix', {
       method: 'POST',
       data: {
         path: `removebgcm/${uuid}/${assetId}/${typeMap[type]}`,
         locale: this.getLocale(),
         token: this.getToken(),
+        // token: this.getToken(),
         debug: 1
       }
     }))

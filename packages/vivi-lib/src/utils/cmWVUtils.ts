@@ -15,10 +15,10 @@ import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import constantData from './constantData'
+import logUtils from './logUtils'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-import logUtils from './logUtils'
 
 declare let window: CustomWindow
 
@@ -861,6 +861,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async documentToCameraRoll(path: string, name: string, type: string, watermark: boolean, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
     return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType, watermark }) as GeneralResponse
+  }
+
+  async shareFile(path: string) {
+    return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
   }
 
   showUpdateModal(force = false) {

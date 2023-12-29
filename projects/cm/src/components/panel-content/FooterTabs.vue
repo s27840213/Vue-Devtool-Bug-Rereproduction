@@ -1,15 +1,19 @@
 <template lang="pug">
-div(class="cm-footer-tabs flex flex-col pt-8 px-24")
+div(class="cm-footer-tabs flex flex-col pt-8" :class="{ 'px-24': currActivePanel !== 'cm_remove-bg' }")
   transition(
     name="panel-up"
     @after-leave="afterLeave")
     div(v-show="showMobilePanel")
+      brush-options(v-if="currActivePanel === 'cm_remove-bg'")
       mobile-panel(
+        v-else
         ref="mobile-panel"
         class="mb-16"
         :currPage="currPage"
         :currActivePanel="currActivePanel")
-  div(class="flex flex-col gap-24 bg-dark-3 shadow-[0_100px_0_100px_black] shadow-dark-3 z-[1]")
+  div(
+    class="flex flex-col gap-24 bg-dark-3 shadow-[0_100px_0_100px_black] shadow-dark-3 z-[1]"
+    ref="footerTabsRef")
     div(
       v-if="!hideTabs"
       ref="footerTabs"
@@ -98,7 +102,15 @@ export default defineComponent({
   },
   data() {
     return {
-      hideTabsPanels: ['crop-flip', 'adjust', 'fonts', 'color', 'text-effect', 'photo-shadow'],
+      hideTabsPanels: [
+        'crop-flip',
+        'adjust',
+        'fonts',
+        'color',
+        'text-effect',
+        'photo-shadow',
+        'cm_remove-bg',
+      ],
       bottomTitlePanels: ['crop-flip', 'adjust'],
     }
   },
@@ -199,9 +211,9 @@ export default defineComponent({
           hidden: this.isSvgImage || this.inEffectEditingMode,
         },
         {
-          icon: 'remove-bg',
+          icon: 'cm_remove-bg',
           text: `${this.$t('NN0043')}`,
-          panelType: 'remove-bg',
+          panelType: 'cm_remove-bg',
           forPro: true,
           plan: 'bg-remove',
           hidden: this.inEffectEditingMode || this.isInFrame,
@@ -857,7 +869,7 @@ export default defineComponent({
           )
           break
         }
-        case 'remove-bg': {
+        case 'cm_remove-bg': {
           if (!this.inBgRemoveMode && !this.isProcessing) {
             this.setIsProcessing(true)
 

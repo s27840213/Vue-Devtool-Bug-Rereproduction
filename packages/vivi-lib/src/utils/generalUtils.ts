@@ -9,6 +9,7 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 
 class GeneralUtils {
+  private _serialNumber = 0
   flags: { [key: string]: boolean }[] = []
   flagsCallback: (() => void) | undefined = undefined
 
@@ -113,6 +114,11 @@ class GeneralUtils {
 
   generateRandomTime(start: Date, end: Date) {
     return start.getTime() + Math.random() * (end.getTime() - start.getTime())
+  }
+
+  get serialNumber() {
+    this._serialNumber++
+    return this._serialNumber
   }
 
   async asyncForEach(array: Array<any>, callback: (el: any, index?: number, array?: Array<any>) => void) {

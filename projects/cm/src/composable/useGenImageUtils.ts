@@ -61,9 +61,9 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = undefined,
-      onError = undefined,
-      onApiResponded = undefined,
+      onSuccess = () => { /**/ },
+      onError = () => { /**/ },
+      onApiResponded = () => { /**/ },
     }: {
       onSuccess?: (index: number, url: string) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -79,7 +79,7 @@ const useGenImageUtils = () => {
         onApiResponded,
         onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
-          !onlyUpdate && onSuccess && onSuccess(index, imgSrc)
+          !onlyUpdate && onSuccess(index, imgSrc)
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
@@ -105,7 +105,7 @@ const useGenImageUtils = () => {
           if (generatedResultsNum.value === 0 && inGenResultState.value) {
             changeEditorState('prev')
           }
-          onError && onError(index, url, reason)
+          onError(index, url, reason)
         },
       })
     } catch (error) {
@@ -114,14 +114,18 @@ const useGenImageUtils = () => {
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
       logUtils.uploadLog().then(() => {
-        modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
-          msg: t('STK0023'),
-          action() {
-            generalUtils.copyText(hint).then(() => {
-              notify({ group: 'success', text: '已複製' })
-            })
-          },
-        })
+        if ((error as Error).message?.includes('no credits')) {
+          cmWVUtils.openPayment()
+        } else {
+          modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
+            msg: t('STK0023'),
+            action() {
+              generalUtils.copyText(hint).then(() => {
+                notify({ group: 'success', text: '已複製' })
+              })
+            },
+          })
+        }
       })
       for (const id of ids) {
         removeGenResult(id)
@@ -129,7 +133,7 @@ const useGenImageUtils = () => {
       if (generatedResultsNum.value === 0 && inGenResultState.value) {
         changeEditorState('prev')
       }
-      onError && onError(-1, '', (error as Error).message)
+      onError(-1, '', (error as Error).message)
     }
   }
 
@@ -138,9 +142,9 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = undefined,
-      onError = undefined,
-      onApiResponded = undefined,
+      onSuccess = () => { /**/ },
+      onError = () => { /**/ },
+      onApiResponded = () => { /**/ },
     }: {
       onSuccess?: (index: number, url: string, onlyUpdate?: boolean) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -177,7 +181,7 @@ const useGenImageUtils = () => {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
 
-    onApiResponded && onApiResponded()
+    onApiResponded()
 
     setAiCredit(res.ai_credit)
     setPrevGenParams({ requestId, params })
@@ -237,14 +241,14 @@ const useGenImageUtils = () => {
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message?.includes('Cancelled')) {
-            onError && onError(index, url, error.message)
+            onError(index, url, error.message)
           }
           return
         }
         RECORD_TIMING && testUtils.log(`polling ${index}`, '')
         // save result image to document
         try {
-          onSuccess && onSuccess(index, url)
+          onSuccess(index, url)
           RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'thumb', {
             subDesignId: ids[index],
@@ -258,9 +262,9 @@ const useGenImageUtils = () => {
           }
 
           const imgSrc = imageUtils.getSrc(srcObj)
-          onSuccess && onSuccess(index, imgSrc, true)
+          onSuccess(index, imgSrc, true)
         } catch (error) {
-          onError && onError(index, url, 'saveAssetFromUrl failed')
+          onError(index, url, 'saveAssetFromUrl failed')
         }
         RECORD_TIMING && testUtils.log(`gen-image ${requestId}`, '')
       }),
