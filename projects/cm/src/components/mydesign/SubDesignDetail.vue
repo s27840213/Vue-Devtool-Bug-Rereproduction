@@ -4,12 +4,50 @@ div(
   class="flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
   //- :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
   div(v-if="currOpenSubDesign" class="w-fit h-full relative")
-    img(
-      class="object-contain rounded-8"
-      :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
-      v-if="currOpenSubDesign"
-      @load="handleThumbLoaded"
-      :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
+    template(v-if="!atEditor")
+      img(
+        class="object-contain rounded-8"
+        :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
+        v-if="currOpenSubDesign"
+        @load="handleThumbLoaded"
+        :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
+    div(v-else class="w-full h-full flex-center flex-col gap-8 overflow-hidden p-16 box-border")
+      div(
+        class="result-showcase w-full h-full overflow-hidden flex-center abosolute top-0"
+        ref="resultShowcase")
+        img(
+          class="result-showcase__card result-showcase__card--back rounded-8"
+          :class="{ 'is-flipped': !showVideo }"
+          @load="handleThumbLoaded"
+          :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
+        div(
+          class="result-showcase__card result-showcase__card--front w-fit h-fit rounded-8 overflow-hidden absolute flex-center"
+          :class="{ 'is-flipped': showVideo }")
+          img(
+            v-show="!isVideoLoaded"
+            class="w-full h-full absolute top-0 left-0 object-contain"
+            :src="initImgSrc")
+          loading-brick(v-show="!isVideoLoaded" class="z-median")
+          video(
+            v-show="isVideoLoaded"
+            class="w-full h-full absolute top-0 left-0"
+            ref="video"
+            webkit-playsinline
+            playsinline
+            loop
+            autoplay
+            mutes
+            @loadeddata="() => { isVideoLoaded = true }"
+            :src="generatedResults[currGenResultIndex].video")
+      div(class="flex-between-center gap-10")
+        div(
+          class="w-8 h-8 rounded-full transition-colors"
+          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
+          @click="() => (showVideo = true)")
+        div(
+          class="w-8 h-8 rounded-full transition-colors"
+          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
+          @click="() => (showVideo = false)")
     loading-brick(
       v-if="isGeningVideo"
       class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
@@ -46,14 +84,21 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 
 const { t } = useI18n()
 
-const { atEditor } = useStateInfo()
+const { atEditor, inSavingState } = useStateInfo()
 
 const userStore = useUserStore()
 const { getSubDesignThumbUrl, getSubDesignConfig, setCurrOpenSubDesign } = userStore
 const { currOpenSubDesign } = storeToRefs(userStore)
 
 const editorStore = useEditorStore()
-const { currDesignId, currSubDesignId, editorType } = storeToRefs(editorStore)
+const {
+  currDesignId,
+  currSubDesignId,
+  editorType,
+  initImgSrc,
+  generatedResults,
+  currGenResultIndex,
+} = storeToRefs(editorStore)
 
 const videoRecordStore = useVideoRcordStore()
 const { isGeningVideo } = storeToRefs(videoRecordStore)
@@ -118,5 +163,44 @@ const copyPrompt = () => {
   })
 }
 // #endregion
+
+// #region result showcase
+const video = ref<HTMLVideoElement | null>(null)
+const resultShowcase = ref<HTMLElement | null>(null)
+const isVideoLoaded = ref(false)
+const showVideo = ref(true)
+
+watch(
+  () => inSavingState.value,
+  (val) => {
+    if (val) {
+      showVideo.value = true
+      isVideoLoaded.value = false
+    }
+  },
+)
+
+watch(showVideo, (newVal) => {
+  if (video.value) {
+    if (!newVal) {
+      video.value.currentTime = 0
+    }
+  }
+})
+// #endregion
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.result-showcase {
+  transform-style: preserve-3d;
+
+  &__card {
+    @apply max-h-full object-contain;
+    backface-visibility: hidden;
+    transition: transform 0.6s;
+  }
+}
+
+.is-flipped {
+  transform: rotateY(180deg);
+}
+</style>

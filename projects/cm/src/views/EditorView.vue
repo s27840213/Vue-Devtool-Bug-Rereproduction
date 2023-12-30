@@ -126,42 +126,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       :previewSrc="previewSrc")
   div(v-else class="editor-view__saving-state")
     sub-design-detail
-    //- div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-    //-   div(
-    //-     class="result-showcase w-full h-full rounded-8 overflow-hidden flex-center abosolute top-0"
-    //-     ref="resultShowcase")
-    //-     img(
-    //-       class="result-showcase__card result-showcase__card--back"
-    //-       :class="{ 'is-flipped': !showVideo }"
-    //-       :src="currImgSrc")
-    //-     div(
-    //-       class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
-    //-       :class="{ 'is-flipped': showVideo }")
-    //-       img(
-    //-         v-show="!isVideoLoaded"
-    //-         class="w-full h-full absolute top-0 left-0 object-contain"
-    //-         :src="initImgSrc")
-    //-       loading-brick(v-show="!isVideoLoaded" class="z-median")
-    //-       video(
-    //-         v-show="isVideoLoaded"
-    //-         class="w-full h-full absolute top-0 left-0"
-    //-         ref="video"
-    //-         webkit-playsinline
-    //-         playsinline
-    //-         loop
-    //-         autoplay
-    //-         mutes
-    //-         @loadeddata="() => { isVideoLoaded = true }"
-    //-         :src="generatedResults[currGenResultIndex].video")
-    //-   div(class="flex-between-center gap-10")
-    //-     div(
-    //-       class="w-8 h-8 rounded-full transition-colors"
-    //-       :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-    //-       @click="() => (showVideo = true)")
-    //-     div(
-    //-       class="w-8 h-8 rounded-full transition-colors"
-    //-       :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-    //-       @click="() => (showVideo = false)")
     //- div(class="flex-between-center w-full px-24 py-8 box-border")
     //-   div(class="flex items-center gap-8")
     //-     div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
@@ -258,7 +222,6 @@ const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
 
 // const sidebarTabsRef = ref<HTMLElement | null>(null)
-const video = ref<HTMLVideoElement | null>(null)
 
 // const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
@@ -352,18 +315,6 @@ watch(
     store.commit('SET_allowLayerAction', val ? 'none' : 'all')
   },
 )
-
-watch(
-  () => inSavingState.value,
-  (val) => {
-    if (val) {
-      showVideo.value = true
-      isVideoLoaded.value = false
-    }
-  },
-)
-
-const isVideoLoaded = ref(false)
 
 const currImgSrc = computed(() => {
   return currGenResultIndex.value === -1 ? initImgSrc.value : currGeneratedResult.value?.url ?? ''
@@ -944,18 +895,6 @@ const centerTitle = computed(() => {
 })
 // #endregion
 
-// #region result showcase
-const resultShowcase = ref<HTMLElement | null>(null)
-const showVideo = ref(true)
-watch(showVideo, (newVal) => {
-  if (video.value) {
-    if (!newVal) {
-      video.value.currentTime = 0
-    }
-  }
-})
-// #endregion
-
 // #region bg remove related
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
 const isProcessingBgRemove = computed(() => store.getters['bgRemove/getIsProcessing'])
@@ -988,17 +927,4 @@ const previewSrc = ref('')
 
 // @TODO discuss with allen
 //@apply max-w-full max-h-full object-contain;
-.result-showcase {
-  transform-style: preserve-3d;
-
-  &__card {
-    @apply max-h-full object-contain;
-    backface-visibility: hidden;
-    transition: transform 0.6s;
-  }
-}
-
-.is-flipped {
-  transform: rotateY(180deg);
-}
 </style>
