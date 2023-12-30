@@ -21,7 +21,7 @@ div(
           @load="handleThumbLoaded"
           :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
         div(
-          class="result-showcase__card result-showcase__card--front w-fit h-fit rounded-8 overflow-hidden absolute flex-center"
+          class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
           :class="{ 'is-flipped': showVideo }")
           img(
             v-show="!isVideoLoaded"
