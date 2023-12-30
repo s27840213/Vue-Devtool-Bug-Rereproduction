@@ -2,7 +2,6 @@ import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import { useVideoRcordStore } from '@/stores/videoRecord'
 import { ICmMyDesign, ITmpSubDesign } from '@/types/user'
-import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -72,14 +71,18 @@ const useActionSheetCm = () => {
       return cmWVUtils.shareFile(`${path}/${name}.${type}`)
     } else {
       console.log('retry or something else') // TODO: need to discuss with native for this case
-      throw new Error ('not implemented yet')
+      throw new Error('not implemented yet')
     }
   }
   const shareVideoCb = async () => {
     console.log('share video')
   }
 
-  const setSavingActions = () => {
+  const setSavingActions = (
+    photoCb: () => void,
+    videoCb: () => void,
+    photoAndVideoCb: () => void,
+  ) => {
     setPrimaryActions([
       {
         labels: [
@@ -106,27 +109,7 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
-        cb: () => {
-          savePhotoCb()
-            .then((data) => {
-              const { flag } = data
-              if (flag === '1') {
-                throw new Error(data.msg)
-              }
-              notify({
-                group: 'success',
-                text: `${t('NN0889')}`,
-              })
-              toggleActionSheet()
-            })
-            .catch((e) => {
-              console.log(e)
-              notify({
-                group: 'error',
-                text: e,
-              })
-            })
-        },
+        cb: photoCb,
       },
       {
         labels: [
@@ -136,24 +119,7 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
-        cb: () => {
-          saveVideoCb()
-            .then(() => {
-              notify({
-                group: 'success',
-                text: `${t('NN0889')}`,
-              })
-              toggleActionSheet()
-            })
-            .catch((e) => {
-              console.log(e)
-              // @TODO
-              notify({
-                group: 'error',
-                text: 'gen vedio error',
-              })
-            })
-        },
+        cb: videoCb,
       },
       {
         labels: [
@@ -163,22 +129,7 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
-        cb: () => {
-          Promise.all([savePhotoCb(), saveVideoCb()])
-            .then(() => {
-              notify({
-                group: 'success',
-                text: `${t('NN0889')}`,
-              })
-              toggleActionSheet()
-            })
-            .catch(() => {
-              notify({
-                group: 'error',
-                text: 'error',
-              })
-            })
-        },
+        cb: photoAndVideoCb,
       },
     ])
 
@@ -198,7 +149,7 @@ const useActionSheetCm = () => {
     ])
   }
 
-  const setSharingActions = () => {
+  const setSharingActions = (photoCb: () => void, videoCb: () => void) => {
     setPrimaryActions([
       {
         labels: [
@@ -225,23 +176,7 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
-        cb: () => {
-          sharePhotoCb()
-            .then((data) => {
-              const { flag } = data
-              if (flag === '1') {
-                throw new Error(data.msg)
-              }
-              toggleActionSheet()
-            })
-            .catch((e) => {
-              console.log(e)
-              notify({
-                group: 'error',
-                text: e,
-              })
-            })
-        },
+        cb: photoCb,
       },
       {
         labels: [
@@ -251,20 +186,7 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
-        cb: () => {
-          shareVideoCb()
-            .then(() => {
-              toggleActionSheet()
-            })
-            .catch((e) => {
-              console.log(e)
-              // @TODO
-              notify({
-                group: 'error',
-                text: 'gen vedio error',
-              })
-            })
-        },
+        cb: videoCb,
       },
     ])
 
@@ -394,6 +316,10 @@ const useActionSheetCm = () => {
     setSharingActions,
     setMyDesignActions,
     setSubDesignActions,
+    savePhotoCb,
+    saveVideoCb,
+    sharePhotoCb,
+    shareVideoCb,
     reset,
     toggleActionSheet,
   }

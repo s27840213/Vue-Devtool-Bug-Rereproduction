@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-border z-median")
+div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-border z-canvas")
   headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
       back-btn(:customCallback="handleBackAction")

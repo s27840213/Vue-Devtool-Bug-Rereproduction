@@ -29,6 +29,7 @@ div(class="w-full flex-center gap-64 py-12 box-border")
 import useActionSheetCm from '@/composable/useActionSheetCm';
 import useStateInfo from '@/composable/useStateInfo';
 import { useEditorStore } from '@/stores/editor';
+import { useMediaStore } from '@/stores/media';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore()
@@ -37,16 +38,63 @@ const { atEditor } = useStateInfo()
 const { currOpenSubDesign } = storeToRefs(userStore)
 const editorStore = useEditorStore()
 const { changeToSpecificEditorState, keepEditingInit } = editorStore
-const { editorType } = storeToRefs(editorStore)
+const { setMediaParams, setInMediaOptions } = useMediaStore()
 
-const { setSavingActions, setSharingActions, toggleActionSheet } = useActionSheetCm()
+const {
+  setSavingActions,
+  setSharingActions,
+  toggleActionSheet,
+} = useActionSheetCm()
+
 const save = () => {
-  setSavingActions()
+  setSavingActions(
+    () => {
+      setMediaParams({
+        action: 'save',
+        media: 'photo'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+    () => {
+      setMediaParams({
+        action: 'save',
+        media: 'video'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+    () => {
+      setMediaParams({
+        action: 'save',
+        media: 'photo_video'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+  )
   toggleActionSheet()
 }
 
 const share = () => {
-  setSharingActions()
+  setSharingActions(
+    () => {
+      setMediaParams({
+        action: 'share',
+        media: 'photo'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+    () => {
+      setMediaParams({
+        action: 'share',
+        media: 'video'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    }
+  )
   toggleActionSheet()
 }
 
