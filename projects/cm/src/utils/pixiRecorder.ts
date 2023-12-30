@@ -139,6 +139,7 @@ export default class PixiRecorder {
       ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
     }
 
+    this.time_start = -1
     if (RECORD_START_DELAY) {
       setTimeout(() => {
         if (this._animate) {
@@ -322,9 +323,6 @@ export default class PixiRecorder {
                 resolve(texture)
               })
             })
-            // this.texture_wm = new PIXI.Texture(new PIXI.BaseTexture(canvas))
-            // this.sprite_wm = new PIXI.Sprite(this.texture_wm)
-            // resolve(this.texture_wm)
           }
         })
       })
@@ -352,7 +350,6 @@ export default class PixiRecorder {
         }
         const renderer = this.pixi.renderer
         renderer.resize(this.sprite_src.width, this.sprite_src.height)
-
         this.addFilter(this.fragment)
 
         // @TEST use

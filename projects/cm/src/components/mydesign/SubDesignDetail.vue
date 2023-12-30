@@ -2,7 +2,7 @@
 div(
   v-show="currOpenSubDesign && thumbLoaded"
   class="flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
-  div(v-if="currOpenSubDesign" class="w-fit h-fit overflow-hidden rounded-8")
+  div(v-if="currOpenSubDesign" class="w-fit h-fit overflow-hidden rounded-8 relative")
     img(
       class="object-contain"
       :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
@@ -10,6 +10,9 @@ div(
       v-if="currOpenSubDesign"
       @load="handleThumbLoaded"
       :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
+    loading-brick(
+      v-if="isGeningVideo"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit flex-1")
     div(class="flex items-center gap-4 w-full")
       svg-icon(
@@ -34,7 +37,9 @@ div(
 import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
+import { useVideoRcordStore } from '@/stores/videoRecord'
 import { notify } from '@kyvg/vue3-notification'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 
@@ -48,6 +53,9 @@ const { currOpenSubDesign } = storeToRefs(userStore)
 
 const editorStore = useEditorStore()
 const { currDesignId, currSubDesignId, editorType } = storeToRefs(editorStore)
+
+const videoRecordStore = useVideoRcordStore()
+const { isGeningVideo } = storeToRefs(videoRecordStore)
 
 const thumbLoaded = ref(false)
 // use to prevent the UI shift when the thumb is loaded

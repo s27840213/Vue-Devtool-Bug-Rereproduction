@@ -116,7 +116,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       ref="sidebarTabsRef")
     transition(name="fade-in")
       loading-brick(
-        v-if="isAutoFilling || isShowLoadingBrick"
+        v-if="isAutoFilling"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
     bg-remove-container(
       v-if="inBgRemoveMode && editorContainerRef"
@@ -337,8 +337,7 @@ const {
   currDesignId,
   currSubDesignId,
   designName,
-  currGeneratedResult,
-  isShowLoadingBrick
+  currGeneratedResult
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
@@ -387,6 +386,8 @@ const canSaveSubDesign = computed(() => {
     !['cm_brush', 'selection'].includes(currActiveFeature.value)
   )
 })
+const videoRecordStore = useVideoRcordStore()
+const {addImage, genVideo } = videoRecordStore
 const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
     groupUtils.deselect()
@@ -403,7 +404,6 @@ const handleNextAction = async function () {
       if (!currGenResult.video) {
         const src = imageUtils.appendRandomQuery(initImgSrc.value)
         const res = imageUtils.appendRandomQuery(currGeneratedResult.value.url)
-        const { addImage, genVideo } = useVideoRcordStore()
         await addImage(src, res)
         const data = await genVideo()
         if (data) {

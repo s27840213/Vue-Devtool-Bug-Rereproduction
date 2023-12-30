@@ -1,10 +1,10 @@
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
+import { useVideoRcordStore } from '@/stores/videoRecord'
 import { ICmMyDesign, ITmpSubDesign } from '@/types/user'
-import { saveToCameraRoll } from '@/utils/pixiRecorder'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
 const useActionSheetCm = () => {
@@ -48,10 +48,15 @@ const useActionSheetCm = () => {
     }
   }
   const saveVideoCb = () => {
+    const { saveToCameraRoll } = useVideoRcordStore()
     if (currGeneratedResult.value.video) {
       return saveToCameraRoll(currGeneratedResult.value.video)
     } else {
-      throw new Error('video not generated yet')
+      const { setGenVideoCb } = useVideoRcordStore()
+      return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
+        setGenVideoCb(() => resolve(saveToCameraRoll(currGeneratedResult.value.video)))
+        console.log('video not generated yet, wait for it generated')
+      })
     }
   }
 
