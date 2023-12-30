@@ -337,7 +337,7 @@ const {
   currDesignId,
   currSubDesignId,
   designName,
-  currGeneratedResult
+  currGeneratedResult,
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
@@ -387,7 +387,7 @@ const canSaveSubDesign = computed(() => {
   )
 })
 const videoRecordStore = useVideoRcordStore()
-const {addImage, genVideo } = videoRecordStore
+const { addImage, genVideo } = videoRecordStore
 const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
     groupUtils.deselect()
@@ -982,7 +982,7 @@ const previewSrc = ref('')
 
 .editor-view {
   &__saving-state {
-    @apply grid grid-rows-[minmax(0,1fr),auto,auto] grid-cols-1 justify-items-center items-center h-full w-full gap-16;
+    @apply grid grid-rows-[minmax(0,1fr)] grid-cols-1 justify-items-center items-center h-full w-full;
   }
 }
 

@@ -2,11 +2,11 @@
 div(
   v-show="currOpenSubDesign && thumbLoaded"
   class="flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
-  div(v-if="currOpenSubDesign" class="w-fit h-fit overflow-hidden rounded-8 relative")
+  //- :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
+  div(v-if="currOpenSubDesign" class="w-fit h-full relative")
     img(
-      class="object-contain"
+      class="object-contain rounded-8"
       :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
-      :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
       v-if="currOpenSubDesign"
       @load="handleThumbLoaded"
       :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
@@ -31,6 +31,7 @@ div(
         iconColor="white"
         iconName="chevron-down"
         iconWidth="24px"
+        :style="isPromptExapnded ? 'transition: transform linear 0.1s; transform: scaleY(-1)' : ''"
         @click="togglePrompt")
 </template>
 <script setup lang="ts">
