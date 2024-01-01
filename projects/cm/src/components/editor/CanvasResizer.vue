@@ -35,6 +35,7 @@ import type { IPageState } from '@nu/vivi-lib/interfaces/page'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import resizeUtils from '@nu/vivi-lib/utils/resizeUtils'
 import { useElementBounding } from '@vueuse/core'
 
 // #region data
@@ -56,9 +57,10 @@ const renderedSize = computed(() => {
 })
 const MIN_PADDING_X = 24
 const MIN_PADDING_Y = 24
+const MAX_SIZE = 1600
 // #endregion
 
-defineProps({
+const props = defineProps({
   pageState: {
     type: Object as PropType<IPageState>,
     required: true,
@@ -273,6 +275,15 @@ const resizing = (event: PointerEvent) => {
     x: initLayerOffset.x + layerOffset.x,
     y: initLayerOffset.y + layerOffset.y,
   })
+  const { pageIndex, pageState } = toRefs(props)
+  const longerSide = Math.max(newWidth, newHeight)
+  if (longerSide > MAX_SIZE) {
+    const ratio = 1600 / longerSide
+    resizeUtils.resizePage(pageIndex.value, pageState.value.config, {
+      width: newWidth * ratio,
+      height: newHeight * ratio,
+    })
+  }
   pressingTimer = window.setTimeout(() => resizing(event), 50)
 }
 
