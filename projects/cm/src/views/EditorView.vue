@@ -13,7 +13,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :title="centerTitle"
           :url="centerUrl")
       div(v-else-if="isResizingCanvas" class="text-white typo-h5 whitespace-nowrap")
-        span {{ `${pageSize.width} x ${pageSize.height}` }}
+        span {{ `${outputSize.width} x ${outputSize.height}` }}
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
@@ -242,6 +242,13 @@ const isCropping = computed(() => {
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 const layerIndex = computed(() => layerUtils.layerIndex)
 const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
+const outputSize = computed(() => {
+  const ratio = 1920 / Math.max(pageSize.value.width, pageSize.value.height)
+  return {
+    width: Math.round(ratio * pageSize.value.width),
+    height: Math.round(ratio * pageSize.value.height),
+  }
+})
 
 const { ids } = useGenImageUtils()
 
