@@ -1,20 +1,14 @@
 <template lang="pug">
-div(
-  ref="containerRef"
-  class="canvas-resizer overflow-hidden relative select-none"
-  v-touch
-  @panstart.stop="panStart"
-  @panmove.stop="panMove")
+div(ref="containerRef" class="canvas-resizer overflow-hidden relative select-none")
   page-content(
-    class="absolute select-none"
-    :style="translateStyles"
+    class="absolute top-half left-half -translate-x-half -translate-y-half select-none"
     :config="pageState.config"
     :pageIndex="pageIndex"
     :contentScaleRatio="contentScaleRatio"
     :noBg="noBg")
   div(
-    class="absolute select-none"
-    :style="{ ...sizeStyles, ...translateStyles }"
+    class="absolute top-half left-half -translate-x-half -translate-y-half select-none"
+    :style="{ ...sizeStyles }"
     @touchstart.prevent)
     div(
       v-for="controller in controllers"
@@ -24,6 +18,13 @@ div(
       :style="controller.styles"
       @touchstart.prevent
       @pointerdown.prevent.stop="resizeStart($event, controller.params)")
+  //- The following points are for resizing logic debugging, don't delete them!
+  //- div(
+  //-   class="fixed rounded-[50%] w-8 h-8 -translate-x-half -translate-y-half bg-red"
+  //-   :style="{ top: `${currentPointerPos.y}px`, left: `${currentPointerPos.x}px` }")
+  //- div(
+  //-   class="fixed rounded-[50%] w-8 h-8 -translate-x-half -translate-y-half bg-yellow"
+  //-   :style="{ top: `${anchorPos.y}px`, left: `${anchorPos.x}px` }")
 </template>
 
 <script setup lang="ts">
@@ -31,10 +32,10 @@ import { useEditorStore } from '@/stores/editor'
 import vuex from '@/vuex'
 import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import type { IPageState } from '@nu/vivi-lib/interfaces/page'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { useElementBounding } from '@vueuse/core'
-import type { AnyTouchEvent } from 'any-touch'
 
 // #region data
 const containerRef = ref<HTMLElement | null>(null)
@@ -47,35 +48,14 @@ const {
 const contentScaleRatio = computed(() => vuex.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
 const { pageSize } = storeToRefs(editorStore)
-
-const pos = reactive({
-  x: 0,
-  y: 0,
-})
-const offset = reactive({
-  x: 0,
-  y: 0,
-})
-const translates = computed(() => {
-  return {
-    x: pos.x + offset.x,
-    y: pos.y + offset.y,
-  }
-})
 const renderedSize = computed(() => {
   return {
     width: pageSize.value.width * contentScaleRatio.value,
     height: pageSize.value.height * contentScaleRatio.value,
   }
 })
-const MIN_PADDING_X = 16
-const MIN_PADDING_Y = 16
-const paddings = computed(() => {
-  return {
-    x: Math.max(pos.x, MIN_PADDING_X),
-    y: Math.max(pos.y, MIN_PADDING_Y),
-  }
-})
+const MIN_PADDING_X = 24
+const MIN_PADDING_Y = 24
 // #endregion
 
 defineProps({
@@ -141,7 +121,7 @@ const getControllers = (isTouchArea = false): IControllerConfig[] => {
                 marginX(subIndex) * CONTROLLER_CONFIG.margin
               }px)`,
               transform: `translate(${resizerXs[subIndex] - 100}%, ${resizerYs[subIndex] - 100}%)${
-                isTouchArea ? ` scale${subIndex % 2 === 0 ? 'Y' : 'X'}(4)` : ''
+                isTouchArea ? ` scale${subIndex % 2 === 0 ? 'Y' : 'X'}(8)` : ''
               }`,
             },
             color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
@@ -163,7 +143,7 @@ const getControllers = (isTouchArea = false): IControllerConfig[] => {
                 (scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)
               }px)`,
               transform: `translate(-${scalerPs[subIndex]}%, ${resizerYs[equivalentIndex] - 100}%)${
-                isTouchArea ? ' scaleY(4)' : ''
+                isTouchArea ? ' scaleY(8)' : ''
               }`,
             },
             color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
@@ -184,7 +164,7 @@ const getControllers = (isTouchArea = false): IControllerConfig[] => {
                 marginX(equivalentIndex) * CONTROLLER_CONFIG.margin
               }px)`,
               transform: `translate(${resizerXs[equivalentIndex] - 100}%, -${scalerPs[subIndex]}%)${
-                isTouchArea ? ' scaleX(4)' : ''
+                isTouchArea ? ' scaleX(8)' : ''
               }`,
             },
             color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
@@ -200,12 +180,6 @@ const controllers = ref<IControllerConfig[]>([...getControllers(), ...getControl
 // #endregion
 
 // #region styles
-const translateStyles = computed(() => {
-  return {
-    top: `${translates.value.y}px`,
-    left: `${translates.value.x}px`,
-  }
-})
 const sizeStyles = computed(() => {
   return {
     width: `${renderedSize.value.width}px`,
@@ -214,47 +188,18 @@ const sizeStyles = computed(() => {
 })
 // #endregion
 
-// #region pos
+// #region pos and contentScaleRatio
 watchEffect(() => {
   if (containerWidth.value === 0 && containerHeight.value === 0) return
-  pos.x = (containerWidth.value - renderedSize.value.width) / 2
-  pos.y = (containerHeight.value - renderedSize.value.height) / 2
+  const ratio = Math.min(
+    (containerWidth.value - MIN_PADDING_X * 2) / pageSize.value.width,
+    (containerHeight.value - MIN_PADDING_Y * 2) / pageSize.value.height,
+  )
+  vuex.commit('SET_contentScaleRatio4Page', {
+    pageIndex: layerUtils.pageIndex,
+    contentScaleRatio: ratio,
+  })
 })
-// #endregion
-
-// #region offset
-watchEffect(() => {
-  const limits = {
-    x: [paddings.value.x, containerWidth.value - paddings.value.x - renderedSize.value.width],
-    y: [paddings.value.y, containerHeight.value - paddings.value.y - renderedSize.value.height],
-  }
-  const minTranslates = { x: Math.min(...limits.x), y: Math.min(...limits.y) }
-  const maxTranslates = { x: Math.max(...limits.x), y: Math.max(...limits.y) }
-  const clampedTranlates = {
-    x: Math.min(Math.max(translates.value.x, minTranslates.x), maxTranslates.x),
-    y: Math.min(Math.max(translates.value.y, minTranslates.y), maxTranslates.y),
-  }
-  offset.x = clampedTranlates.x - pos.x
-  offset.y = clampedTranlates.y - pos.y
-})
-
-const lastPointerPos = reactive({
-  x: 0,
-  y: 0,
-})
-
-const panStart = (event: AnyTouchEvent) => {
-  lastPointerPos.x = event.x
-  lastPointerPos.y = event.y
-}
-
-const panMove = (event: AnyTouchEvent) => {
-  if (isResizing.value) return
-  offset.x += event.x - lastPointerPos.x
-  offset.y += event.y - lastPointerPos.y
-  lastPointerPos.x = event.x
-  lastPointerPos.y = event.y
-}
 // #endregion
 
 // #region resize
@@ -262,125 +207,77 @@ vuex.commit('canvasResize/SET_initSize', {
   width: pageSize.value.width,
   height: pageSize.value.height,
 })
-const MIN_SIZE = 512
-const MAX_SIZE = 2048
 
-const isResizing = ref(false)
 const controllingParams = ref({ vertical: 0, horizontal: 0 } as IControllerConfig['params'])
-let initPointerPos = { x: 0, y: 0 }
-let initSize = { width: 0, height: 0 }
-let initLayerOffset = { x: 0, y: 0 }
+const anchorPos = reactive({ x: 0, y: 0 })
+const currentPointerPos = reactive({ x: 0, y: 0 })
 let pressingTimer = -1
 
 const resizeStart = (event: PointerEvent, params: IControllerConfig['params']) => {
   controllingParams.value = params
-  isResizing.value = true
-  initPointerPos = mouseUtils.getMouseAbsPoint(event)
-  initSize = { width: pageSize.value.width, height: pageSize.value.height }
-  initLayerOffset = vuex.getters['canvasResize/getLayerOffset']
   window.addEventListener('pointermove', resizing)
   window.addEventListener('pointerup', resizeEnd)
-  pressingTimer = window.setTimeout(() => resizing(event), 100)
 }
 
 const resizing = (event: PointerEvent) => {
   window.clearTimeout(pressingTimer)
   const { horizontal, vertical } = controllingParams.value
 
-  // START: special handler for edging
-  const wider = renderedSize.value.width > containerWidth.value - 2 * MIN_PADDING_X
-  const higher = renderedSize.value.height > containerHeight.value - 2 * MIN_PADDING_Y
-  if (wider) {
-    if (horizontal < 0) {
-      initPointerPos.x = containerX.value + MIN_PADDING_X
-      initSize.width = pageSize.value.width
-      initLayerOffset.x = vuex.getters['canvasResize/getLayerOffset'].x
-    }
-    if (horizontal > 0) {
-      initPointerPos.x = containerX.value + containerWidth.value - MIN_PADDING_X
-      initSize.width = pageSize.value.width
-      initLayerOffset.x = vuex.getters['canvasResize/getLayerOffset'].x
-    }
-  }
-  if (higher) {
-    if (vertical < 0) {
-      initPointerPos.y = containerY.value + MIN_PADDING_Y
-      initSize.height = pageSize.value.height
-      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
-    }
-    if (vertical > 0) {
-      initPointerPos.y = containerY.value + containerHeight.value - MIN_PADDING_Y
-      initSize.height = pageSize.value.height
-      initLayerOffset.y = vuex.getters['canvasResize/getLayerOffset'].y
-    }
-  }
-  // END
+  const wider = renderedSize.value.width >= containerWidth.value - 2 * MIN_PADDING_X
+  const higher = renderedSize.value.height >= containerHeight.value - 2 * MIN_PADDING_Y
 
   const pointerPos = mouseUtils.getMouseAbsPoint(event)
+  Object.assign(currentPointerPos, pointerPos)
+
+  // #region anchor pos
+  const paddingX = (containerWidth.value - renderedSize.value.width) / 2
+  const paddingY = (containerHeight.value - renderedSize.value.height) / 2
+
+  anchorPos.x = containerX.value + paddingX + (renderedSize.value.width / 2) * (horizontal + 1)
+  anchorPos.y = containerY.value + paddingY + (renderedSize.value.height / 2) * (vertical + 1)
+  // #endregion
+
   const diff = {
-    x: pointerPos.x - initPointerPos.x,
-    y: pointerPos.y - initPointerPos.y,
+    x: pointerPos.x - anchorPos.x,
+    y: pointerPos.y - anchorPos.y,
   }
   const sizeDiff = { width: 0, height: 0 }
   const layerOffset = { x: 0, y: 0 }
+  const initSize = pageSize.value
+  const initLayerOffset = vuex.getters['canvasResize/getLayerOffset']
 
   if (horizontal !== 0) {
-    const amount = diff.x * horizontal * 2
+    const amount = diff.x * horizontal * (wider ? 0.5 : 2)
     sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
   }
 
   if (vertical !== 0) {
-    const amount = diff.y * vertical * 2
+    const amount = diff.y * vertical * (higher ? 0.5 : 2)
     sizeDiff.height = Math.trunc(amount / contentScaleRatio.value)
   }
 
   const newWidth = initSize.width + sizeDiff.width
   const newHeight = initSize.height + sizeDiff.height
-  const finalWidth = Math.max(Math.min(newWidth, MAX_SIZE), MIN_SIZE)
-  const finalHeight = Math.max(Math.min(newHeight, MAX_SIZE), MIN_SIZE)
   if (horizontal < 0) {
-    layerOffset.x = finalWidth - initSize.width
+    layerOffset.x = newWidth - initSize.width
   }
   if (vertical < 0) {
-    layerOffset.y = finalHeight - initSize.height
+    layerOffset.y = newHeight - initSize.height
   }
 
   pageUtils.updatePageProps({
-    width: finalWidth,
-    height: finalHeight,
+    width: newWidth,
+    height: newHeight,
   })
   vuex.commit('canvasResize/SET_layerOffset', {
     x: initLayerOffset.x + layerOffset.x,
     y: initLayerOffset.y + layerOffset.y,
   })
-  nextTick(() => {
-    if (horizontal < 0 && diff.x < 0 && translates.value.x < MIN_PADDING_X) {
-      offset.x = MIN_PADDING_X - pos.x
-    }
-    if (vertical < 0 && diff.y < 0 && translates.value.y < MIN_PADDING_Y) {
-      offset.y = MIN_PADDING_Y - pos.y
-    }
-    if (
-      horizontal > 0 &&
-      diff.x > 0 &&
-      translates.value.x > containerWidth.value - renderedSize.value.width - MIN_PADDING_X
-    ) {
-      offset.x = containerWidth.value - renderedSize.value.width - MIN_PADDING_X - pos.x
-    }
-    if (
-      vertical > 0 &&
-      diff.y > 0 &&
-      translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y
-    ) {
-      offset.y = containerHeight.value - renderedSize.value.height - MIN_PADDING_Y - pos.y
-    }
-  })
-  pressingTimer = window.setTimeout(() => resizing(event), 100)
+  pressingTimer = window.setTimeout(() => resizing(event), 50)
 }
 
 const resizeEnd = (event: PointerEvent) => {
   window.clearTimeout(pressingTimer)
-  isResizing.value = false
   window.removeEventListener('pointermove', resizing)
   window.removeEventListener('pointerup', resizeEnd)
 }

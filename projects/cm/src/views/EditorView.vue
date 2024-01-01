@@ -496,6 +496,7 @@ const wrapperStyles = computed(() => {
 })
 
 const fitPage = (ratio: number) => {
+  if (isResizingCanvas.value) return
   store.commit('SET_contentScaleRatio4Page', {
     pageIndex: layerUtils.pageIndex,
     contentScaleRatio: ratio,
