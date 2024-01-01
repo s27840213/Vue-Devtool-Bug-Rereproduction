@@ -496,7 +496,10 @@ const wrapperStyles = computed(() => {
 })
 
 const fitPage = (ratio: number) => {
-  store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
+  store.commit('SET_contentScaleRatio4Page', {
+    pageIndex: layerUtils.pageIndex,
+    contentScaleRatio: ratio,
+  })
   // editorUtils.handleContentScaleRatio(0)
   // const { hasBleed } = pageUtils
   // const page = pageUtils.getPage(0)

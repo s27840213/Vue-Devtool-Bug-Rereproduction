@@ -1,25 +1,29 @@
 <template lang="pug">
-div(ref="containerRef"
-    class="canvas-resizer overflow-hidden relative select-none"
-    v-touch
-    @panstart.stop="panStart"
-    @panmove.stop="panMove")
-  page-content(class="absolute select-none"
-              :style="translateStyles"
-              :config="pageState.config"
-              :pageIndex="pageIndex"
-              :contentScaleRatio="contentScaleRatio"
-              :noBg="noBg")
-  div(class="absolute select-none"
-      :style="{...sizeStyles, ...translateStyles}"
-      @touchstart.prevent)
-    div(v-for="controller in controllers"
-        :key="controller.key"
-        class="absolute select-none"
-        :class="controller.color"
-        :style="controller.styles"
-        @touchstart.prevent
-        @pointerdown.prevent.stop="resizeStart($event, controller.params)")
+div(
+  ref="containerRef"
+  class="canvas-resizer overflow-hidden relative select-none"
+  v-touch
+  @panstart.stop="panStart"
+  @panmove.stop="panMove")
+  page-content(
+    class="absolute select-none"
+    :style="translateStyles"
+    :config="pageState.config"
+    :pageIndex="pageIndex"
+    :contentScaleRatio="contentScaleRatio"
+    :noBg="noBg")
+  div(
+    class="absolute select-none"
+    :style="{ ...sizeStyles, ...translateStyles }"
+    @touchstart.prevent)
+    div(
+      v-for="controller in controllers"
+      :key="controller.key"
+      class="absolute select-none"
+      :class="controller.color"
+      :style="controller.styles"
+      @touchstart.prevent
+      @pointerdown.prevent.stop="resizeStart($event, controller.params)")
 </template>
 
 <script setup lang="ts">
@@ -34,7 +38,12 @@ import type { AnyTouchEvent } from 'any-touch'
 
 // #region data
 const containerRef = ref<HTMLElement | null>(null)
-const { width: containerWidth, height: containerHeight, x: containerX, y: containerY } = useElementBounding(containerRef)
+const {
+  width: containerWidth,
+  height: containerHeight,
+  x: containerX,
+  y: containerY,
+} = useElementBounding(containerRef)
 const contentScaleRatio = computed(() => vuex.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
 const { pageSize } = storeToRefs(editorStore)
@@ -50,7 +59,7 @@ const offset = reactive({
 const translates = computed(() => {
   return {
     x: pos.x + offset.x,
-    y: pos.y + offset.y
+    y: pos.y + offset.y,
   }
 })
 const renderedSize = computed(() => {
@@ -72,15 +81,15 @@ const paddings = computed(() => {
 defineProps({
   pageState: {
     type: Object as PropType<IPageState>,
-    required: true
+    required: true,
   },
   pageIndex: {
     type: Number,
-    required: true
+    required: true,
   },
   noBg: {
     type: Boolean,
-    default: false
+    default: false,
   },
 })
 
@@ -105,79 +114,102 @@ interface IControllerConfig {
 }
 
 const getControllers = (isTouchArea = false): IControllerConfig[] => {
-  return Array(12).fill(0).map((_, index) => {
-    const isResizer = index < 4
-    const isScalerX = index < 8 && !isResizer
-    const subIndex = index % 4
-    const equivalentIndex = isScalerX ? (subIndex < 2 ? 0 : 2) : (subIndex < 2 ? 1 : 3)
-    const resizerXs = [50, 100, 50, 0]
-    const resizerYs = [0, 50, 100, 50]
-    const scalerPs = [0, 100, 100, 0]
-    const marginY = (subIndex: number) => (subIndex % 2 === 0 ? (subIndex - 1) : 0)
-    const marginX = (subIndex: number) => (subIndex % 2 !== 0 ? (2 - subIndex) : 0)
-    return isResizer ? {
-      key: `controller-${subIndex}`,
-      styles: {
-        width: `${subIndex % 2 === 0 ? CONTROLLER_CONFIG.length : CONTROLLER_CONFIG.width}px`,
-        height: `${subIndex % 2 === 0 ? CONTROLLER_CONFIG.width : CONTROLLER_CONFIG.length}px`,
-        top: `calc(${resizerYs[subIndex]}% + ${marginY(subIndex) * CONTROLLER_CONFIG.margin}px)`,
-        left: `calc(${resizerXs[subIndex]}% + ${marginX(subIndex) * CONTROLLER_CONFIG.margin}px)`,
-        transform: `translate(${resizerXs[subIndex] - 100}%, ${resizerYs[subIndex] - 100}%)${isTouchArea ? ` scale${subIndex % 2 === 0 ? 'Y' : 'X'}(4)` : ''}`,
-      },
-      color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
-      params: {
-        vertical: (subIndex % 2 === 0 ? (subIndex - 1) : 0) as direction,
-        horizontal: (subIndex % 2 !== 0 ? (2 - subIndex) : 0) as direction,
-      },
-    } : isScalerX ? {
-      key: `controller-${subIndex}`,
-      styles: {
-        width: `${CONTROLLER_CONFIG.length}px`,
-        height: `${CONTROLLER_CONFIG.width}px`,
-        top: `calc(${resizerYs[equivalentIndex]}% + ${marginY(equivalentIndex) * CONTROLLER_CONFIG.margin}px)`,
-        left: `calc(${scalerPs[subIndex]}% + ${(scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)}px)`,
-        transform: `translate(-${scalerPs[subIndex]}%, ${resizerYs[equivalentIndex] - 100}%)${isTouchArea ? ' scaleY(4)' : ''}`,
-      },
-      color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
-      params: {
-        vertical: (equivalentIndex - 1) as direction,
-        horizontal: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
-      },
-    } : {
-      key: `controller-${subIndex}`,
-      styles: {
-        width: `${CONTROLLER_CONFIG.width}px`,
-        height: `${CONTROLLER_CONFIG.length}px`,
-        top: `calc(${scalerPs[subIndex]}% + ${(scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)}px)`,
-        left: `calc(${resizerXs[equivalentIndex]}% + ${marginX(equivalentIndex) * CONTROLLER_CONFIG.margin}px)`,
-        transform: `translate(${resizerXs[equivalentIndex] - 100}%, -${scalerPs[subIndex]}%)${isTouchArea ? ' scaleX(4)' : ''}`,
-      },
-      color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
-      params: {
-        vertical: ((subIndex > 0 && subIndex < 3) ? 1 : -1) as direction,
-        horizontal: (2 - equivalentIndex) as direction,
-      },
-    }
-  })
+  return Array(12)
+    .fill(0)
+    .map((_, index) => {
+      const isResizer = index < 4
+      const isScalerX = index < 8 && !isResizer
+      const subIndex = index % 4
+      const equivalentIndex = isScalerX ? (subIndex < 2 ? 0 : 2) : subIndex < 2 ? 1 : 3
+      const resizerXs = [50, 100, 50, 0]
+      const resizerYs = [0, 50, 100, 50]
+      const scalerPs = [0, 100, 100, 0]
+      const marginY = (subIndex: number) => (subIndex % 2 === 0 ? subIndex - 1 : 0)
+      const marginX = (subIndex: number) => (subIndex % 2 !== 0 ? 2 - subIndex : 0)
+      return isResizer
+        ? {
+            key: `controller-${subIndex}`,
+            styles: {
+              width: `${subIndex % 2 === 0 ? CONTROLLER_CONFIG.length : CONTROLLER_CONFIG.width}px`,
+              height: `${
+                subIndex % 2 === 0 ? CONTROLLER_CONFIG.width : CONTROLLER_CONFIG.length
+              }px`,
+              top: `calc(${resizerYs[subIndex]}% + ${
+                marginY(subIndex) * CONTROLLER_CONFIG.margin
+              }px)`,
+              left: `calc(${resizerXs[subIndex]}% + ${
+                marginX(subIndex) * CONTROLLER_CONFIG.margin
+              }px)`,
+              transform: `translate(${resizerXs[subIndex] - 100}%, ${resizerYs[subIndex] - 100}%)${
+                isTouchArea ? ` scale${subIndex % 2 === 0 ? 'Y' : 'X'}(4)` : ''
+              }`,
+            },
+            color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
+            params: {
+              vertical: (subIndex % 2 === 0 ? subIndex - 1 : 0) as direction,
+              horizontal: (subIndex % 2 !== 0 ? 2 - subIndex : 0) as direction,
+            },
+          }
+        : isScalerX
+        ? {
+            key: `controller-${subIndex}`,
+            styles: {
+              width: `${CONTROLLER_CONFIG.length}px`,
+              height: `${CONTROLLER_CONFIG.width}px`,
+              top: `calc(${resizerYs[equivalentIndex]}% + ${
+                marginY(equivalentIndex) * CONTROLLER_CONFIG.margin
+              }px)`,
+              left: `calc(${scalerPs[subIndex]}% + ${
+                (scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)
+              }px)`,
+              transform: `translate(-${scalerPs[subIndex]}%, ${resizerYs[equivalentIndex] - 100}%)${
+                isTouchArea ? ' scaleY(4)' : ''
+              }`,
+            },
+            color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
+            params: {
+              vertical: (equivalentIndex - 1) as direction,
+              horizontal: (subIndex > 0 && subIndex < 3 ? 1 : -1) as direction,
+            },
+          }
+        : {
+            key: `controller-${subIndex}`,
+            styles: {
+              width: `${CONTROLLER_CONFIG.width}px`,
+              height: `${CONTROLLER_CONFIG.length}px`,
+              top: `calc(${scalerPs[subIndex]}% + ${
+                (scalerPs[subIndex] / 50 - 1) * (CONTROLLER_CONFIG.margin + CONTROLLER_CONFIG.width)
+              }px)`,
+              left: `calc(${resizerXs[equivalentIndex]}% + ${
+                marginX(equivalentIndex) * CONTROLLER_CONFIG.margin
+              }px)`,
+              transform: `translate(${resizerXs[equivalentIndex] - 100}%, -${scalerPs[subIndex]}%)${
+                isTouchArea ? ' scaleX(4)' : ''
+              }`,
+            },
+            color: isTouchArea ? 'bg-transparent' : CONTROLLER_CONFIG.color,
+            params: {
+              vertical: (subIndex > 0 && subIndex < 3 ? 1 : -1) as direction,
+              horizontal: (2 - equivalentIndex) as direction,
+            },
+          }
+    })
 }
 
-const controllers = ref<IControllerConfig[]>([
-  ...getControllers(),
-  ...getControllers(true)
-])
+const controllers = ref<IControllerConfig[]>([...getControllers(), ...getControllers(true)])
 // #endregion
 
 // #region styles
 const translateStyles = computed(() => {
   return {
     top: `${translates.value.y}px`,
-    left: `${translates.value.x}px`
+    left: `${translates.value.x}px`,
   }
 })
 const sizeStyles = computed(() => {
   return {
     width: `${renderedSize.value.width}px`,
-    height: `${renderedSize.value.height}px`
+    height: `${renderedSize.value.height}px`,
   }
 })
 // #endregion
@@ -226,7 +258,10 @@ const panMove = (event: AnyTouchEvent) => {
 // #endregion
 
 // #region resize
-vuex.commit('canvasResize/SET_initSize', { width: pageSize.value.width, height: pageSize.value.height })
+vuex.commit('canvasResize/SET_initSize', {
+  width: pageSize.value.width,
+  height: pageSize.value.height,
+})
 const MIN_SIZE = 512
 const MAX_SIZE = 2048
 
@@ -316,7 +351,7 @@ const resizing = (event: PointerEvent) => {
   })
   vuex.commit('canvasResize/SET_layerOffset', {
     x: initLayerOffset.x + layerOffset.x,
-    y: initLayerOffset.y + layerOffset.y
+    y: initLayerOffset.y + layerOffset.y,
   })
   nextTick(() => {
     if (horizontal < 0 && diff.x < 0 && translates.value.x < MIN_PADDING_X) {
@@ -325,10 +360,18 @@ const resizing = (event: PointerEvent) => {
     if (vertical < 0 && diff.y < 0 && translates.value.y < MIN_PADDING_Y) {
       offset.y = MIN_PADDING_Y - pos.y
     }
-    if (horizontal > 0 && diff.x > 0 && translates.value.x > containerWidth.value - renderedSize.value.width - MIN_PADDING_X) {
+    if (
+      horizontal > 0 &&
+      diff.x > 0 &&
+      translates.value.x > containerWidth.value - renderedSize.value.width - MIN_PADDING_X
+    ) {
       offset.x = containerWidth.value - renderedSize.value.width - MIN_PADDING_X - pos.x
     }
-    if (vertical > 0 && diff.y > 0 && translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y) {
+    if (
+      vertical > 0 &&
+      diff.y > 0 &&
+      translates.value.y > containerHeight.value - renderedSize.value.height - MIN_PADDING_Y
+    ) {
       offset.y = containerHeight.value - renderedSize.value.height - MIN_PADDING_Y - pos.y
     }
   })
@@ -342,7 +385,6 @@ const resizeEnd = (event: PointerEvent) => {
   window.removeEventListener('pointerup', resizeEnd)
 }
 // #endregion
-
 </script>
 
 <style lang="scss">
