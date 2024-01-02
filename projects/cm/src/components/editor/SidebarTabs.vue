@@ -1,6 +1,7 @@
 <template lang="pug">
-//- h-358 = 44 (item height) * 7.5 + 4 (gap) * 7 = show 7.5 items
-div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scroll scrollbar-hide")
+//- h-375 = 44 (item height) * 8 + 4 (gap) * 7 - 5 = show 8 items - 5px
+div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-375 w-44 overflow-scroll scrollbar-hide"
+  v-fade-scroller="{ vertical: true }")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
       v-if="!tab.hidden"
