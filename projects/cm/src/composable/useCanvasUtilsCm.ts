@@ -233,10 +233,10 @@ const useCanvasUtils = (
 
   // #region Drawing methods
   const drawLine = (e: PointerEvent) => {
-    if (canvasCtx && canvasCtx.value && wrapperRef && wrapperRef.value) {
+    if (canvasCtx && canvasCtx.value && editorContainerRef && editorContainerRef.value) {
       canvasCtx.value.beginPath()
       canvasCtx.value.moveTo(initPos.x, initPos.y)
-      const { x, y } = getMousePosInTarget(e, wrapperRef.value)
+      const { x, y } = getMousePosInTarget(e, editorContainerRef.value)
       // showMagnifyAtRight = xPercentage < 0.25 && yPercentage < 0.25
       canvasCtx.value.lineTo(x, y)
       canvasCtx.value.stroke()
@@ -279,10 +279,10 @@ const useCanvasUtils = (
       showBrushOptions.value &&
       (isBrushMode.value || isEraseMode.value) &&
       !loading.value &&
-      wrapperRef &&
-      wrapperRef.value
+      editorContainerRef &&
+      editorContainerRef.value
     ) {
-      const { x, y } = getMousePosInTarget(e, wrapperRef.value)
+      const { x, y } = getMousePosInTarget(e, editorContainerRef.value)
       pointerStartPos.x = e.clientX
       pointerStartPos.y = e.clientY
       Object.assign(initPos, {
