@@ -65,7 +65,7 @@ div(
         :ref="'promptRef'"
         :style="{ '-webkit-line-clamp': promptContainerLineClamp }") {{ `${currOpenSubDesign.prompt}` }}
       svg-icon(
-        v-if="promptRef?.scrollHeight !== promptRef?.clientHeight"
+        v-if="isExpandable"
         iconColor="white"
         iconName="chevron-down"
         iconWidth="24px"
@@ -138,19 +138,35 @@ onBeforeUnmount(() => {
 // #region prompt related when sub desgin is open
 // used to dynamically calculate the line-clamp size of the prompt
 const isPromptExapnded = ref(false)
+const isExpandable = ref(false)
 
 const promptContainerRef = ref<HTMLElement | null>(null)
 const promptRef = ref<HTMLElement | null>(null)
 
-const promptContainerSize = useElementSize(promptContainerRef)
+// const promptContainerSize = useElementSize(promptContainerRef)
 const promptContainerLineClamp = computed(() => {
   if (isPromptExapnded.value) return 999
 
   if (promptContainerRef.value) {
-    return Math.max(3, Math.floor(promptContainerSize.height.value / 19.2))
+    // return Math.max(3, Math.floor(promptContainerSize.height.value / 19.2))
+    return 3
   }
   return 99
 })
+
+const checkExpandable = () => {
+  if (
+    promptRef.value?.scrollHeight ||
+    promptRef.value?.clientHeight ||
+    currOpenSubDesign.value?.prompt === ''
+  ) {
+    isExpandable.value = promptRef.value?.scrollHeight !== promptRef.value?.clientHeight
+    return
+  }
+  setTimeout(checkExpandable, 100)
+}
+
+checkExpandable()
 
 const togglePrompt = () => {
   isPromptExapnded.value = !isPromptExapnded.value
