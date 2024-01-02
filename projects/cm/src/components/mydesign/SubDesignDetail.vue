@@ -1,13 +1,14 @@
 <template lang="pug">
 div(
   v-show="currOpenSubDesign && thumbLoaded"
-  class="flex flex-col items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16")
-  //- :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
-  div(v-if="currOpenSubDesign" class="w-fit h-full relative")
+  class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
+  ref="rootRef")
+  div(v-if="currOpenSubDesign" class="w-full h-full relative")
     template(v-if="!atEditor")
       img(
-        class="object-contain rounded-8"
+        class="rounded-8"
         :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
+        :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
         v-if="currOpenSubDesign"
         @load="handleThumbLoaded"
         :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
@@ -18,6 +19,7 @@ div(
         img(
           class="result-showcase__card result-showcase__card--back rounded-8"
           :class="{ 'is-flipped': !showVideo }"
+          :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
           @load="handleThumbLoaded"
           :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
         div(
@@ -51,14 +53,16 @@ div(
           @click="() => (showVideo = false)")
     div(v-if="isExportingVideo" class="result-showcase__dim-cover")
       loading-brick(class="z-median")
-  div(class="flex flex-col gap-8 text-white w-full h-fit flex-1")
+  div(class="flex flex-col gap-8 text-white w-full h-fit")
     div(class="flex items-center gap-4 w-full")
       svg-icon(
         iconName="prompt"
         iconWidth="24px"
         @click="copyPrompt")
       span(class="typo-h6") {{ `${$t('CM0126')} :` }}
-    div(class="h-full w-full grid grid-rows-1 grid-cols-[auto,auto] box-border" ref="promptContainerRef")
+    div(
+      class="h-full w-full grid grid-rows-1 grid-cols-[auto,auto] box-border items-end"
+      ref="promptContainerRef")
       div(
         v-if="currOpenSubDesign"
         class="text-left typo-body-sm line-clamp-base"
@@ -142,13 +146,16 @@ const isExpandable = ref(false)
 
 const promptContainerRef = ref<HTMLElement | null>(null)
 const promptRef = ref<HTMLElement | null>(null)
+const rootRef = ref<HTMLElement | null>(null)
 
 // const promptContainerSize = useElementSize(promptContainerRef)
 const promptContainerLineClamp = computed(() => {
-  if (isPromptExapnded.value) return 999
+  if (isPromptExapnded.value) {
+    if (!rootRef.value) return 999
+    return Math.floor((rootRef.value.clientHeight * 0.4) / 19.2)
+  }
 
   if (promptContainerRef.value) {
-    // return Math.max(3, Math.floor(promptContainerSize.height.value / 19.2))
     return 3
   }
   return 99
@@ -210,7 +217,7 @@ watch(showVideo, (newVal) => {
   transform-style: preserve-3d;
 
   &__card {
-    @apply max-h-full object-contain;
+    @apply max-h-full;
     backface-visibility: hidden;
     transition: transform 0.6s;
   }
