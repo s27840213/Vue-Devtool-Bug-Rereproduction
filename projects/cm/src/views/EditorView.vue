@@ -83,7 +83,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       @click.self="outerClick")
       div(
         id="screenshot-target"
-        class="wrapper relative flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
+        class="wrapper absolute top-0 left-0 flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- loading for gen result
@@ -538,9 +538,10 @@ const fitPage = (ratio: number) => {
   if (isResizingCanvas.value) return
 
   const page = pageUtils.getCurrPage
+  editorUtils.setMobilePhysicalData({ size: editorContainerSize.value })
   const newInitPos = {
     x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
-    y: 0
+    y: (editorUtils.mobileSize.height - page.height * ratio) * 0.5,
   }
   const posDiff =  {
     x: newInitPos.x - page.initPos.x,
@@ -614,7 +615,7 @@ const setMobilePysicalSize = () => {
       y: rect.top,
     },
   })
-  pagePinchUtils = new PagePinchUtils(editorWrapperRef.value as HTMLElement)
+  pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
   pagePinchHandler = (e) => {
     if (inBgRemoveMode.value) return
     if (inAspectRatioState.value) return
