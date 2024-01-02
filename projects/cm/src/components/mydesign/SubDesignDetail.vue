@@ -10,10 +10,10 @@ div(
     @swipeleft="handleSwipeLeft"
     @swiperight="handleSwipeRight")
     div(
-      class="w-full h-full grid justify-items-center gap-8 overflow-hidden"
+      class="w-full h-full grid justify-items-center items-center gap-8 overflow-hidden"
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
       div(
-        class="result-showcase flex-center abosolute top-0"
+        class="result-showcase flex-center"
         ref="resultShowcase"
         :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
         :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
