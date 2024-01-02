@@ -83,13 +83,23 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       @click.self="outerClick")
       div(
         id="screenshot-target"
-        class="wrapper relative tutorial-powerful-fill-3--highlight"
+        class="wrapper relative flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
+        //- loading for gen result
+        div(v-if="inGenResultState && currImgSrc === ''"
+          class="w-full h-fit grid grid-rows-2 gap-16 justify-center text-white")
+          div(class="typo-body-md grid justify-center gap-8")
+            span {{ fakeLoading }}%
+            div(class="relative rounded-full bg-yellow-0/50 w-100 h-8")
+              div(class="absolute rounded-full bg-yellow-cm h-8" :style="{ width: fakeLoading + 'px' }")
+          div(class="typo-body-sm max-w-245") {{ fakeLoadingText }}
+        //- Show gen result
         img(
-          v-if="inGenResultState"
+          v-else-if="inGenResultState"
           class="h-full object-cover"
           :src="currImgSrc")
+        //- Editor
         template(v-else)
           nu-page(
             class="z-page"
@@ -297,7 +307,6 @@ const { changeEditorState, updateGenResult, setDescriptionPanel, changeToSpecifi
 const {
   pageSize,
   currActiveFeature,
-  generatedResults,
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
@@ -308,6 +317,7 @@ const {
   currSubDesignId,
   designName,
   currGeneratedResult,
+  isGenerating,
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
@@ -327,6 +337,24 @@ const currImgSrc = computed(() => {
   return currGenResultIndex.value === -1 ? initImgSrc.value : currGeneratedResult.value?.url ?? ''
 })
 
+const fakeLoading = ref(5)
+watch(() => isGenerating.value && inGenResultState.value, (val, old) => {
+  if (!val || old) return
+  
+  // Start fake loading.
+  fakeLoading.value = 0
+  const fakeLoadingId = window.setInterval(() => {
+    fakeLoading.value += 1
+    if (fakeLoading.value >= 95) { // Stop fake loading.
+      window.clearInterval(fakeLoadingId)
+    }
+  }, 100)
+})
+const fakeLoadingText = computed(() => {
+  if (fakeLoading.value > 90) return t('CM0149')
+  else if (fakeLoading.value > 50) return t('CM0148')
+  else return t('CM0147')
+})
 // #endregion
 
 // #region headerbar state & callback

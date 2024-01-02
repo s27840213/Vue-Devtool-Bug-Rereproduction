@@ -103,7 +103,7 @@ div(
         class="relative")
         img(
           class="w-full"
-          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
+          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=150`"
           @click="selectImage(img, 'unsplash')")
         svg-icon(
           v-if="selected(img, 'unsplash')"
