@@ -47,11 +47,11 @@ const useActionSheetCm = () => {
     }
   }
   const saveVideoCb = () => {
-    const { saveToCameraRoll } = useVideoRcordStore()
+    const { saveToCameraRoll, setGenVideoCb, setIsExportVideo } = useVideoRcordStore()
+    setIsExportVideo(true)
     if (currGeneratedResult.value.video) {
       return saveToCameraRoll(currGeneratedResult.value.video)
     } else {
-      const { setGenVideoCb } = useVideoRcordStore()
       return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
         setGenVideoCb(() => resolve(saveToCameraRoll(currGeneratedResult.value.video)))
         console.log('video not generated yet, wait for it generated')

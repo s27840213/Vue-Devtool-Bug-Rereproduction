@@ -27,7 +27,6 @@ div(
             v-show="!isVideoLoaded"
             class="w-full h-full absolute top-0 left-0 object-contain"
             :src="initImgSrc")
-          loading-brick(v-show="!isVideoLoaded" class="z-median")
           video(
             v-show="isVideoLoaded"
             class="w-full h-full absolute top-0 left-0"
@@ -39,6 +38,8 @@ div(
             mutes
             @loadeddata="() => { isVideoLoaded = true }"
             :src="generatedResults[currGenResultIndex].video")
+          div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
+            loading-brick(class="z-median")
       div(class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
@@ -48,9 +49,8 @@ div(
           class="w-8 h-8 rounded-full transition-colors"
           :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
           @click="() => (showVideo = false)")
-    loading-brick(
-      v-if="isGeningVideo"
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
+    div(v-if="isExportingVideo" class="result-showcase__dim-cover")
+      loading-brick(class="z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit flex-1")
     div(class="flex items-center gap-4 w-full")
       svg-icon(
@@ -101,7 +101,7 @@ const {
 } = storeToRefs(editorStore)
 
 const videoRecordStore = useVideoRcordStore()
-const { isGeningVideo } = storeToRefs(videoRecordStore)
+const { isExportingVideo } = storeToRefs(videoRecordStore)
 
 const thumbLoaded = ref(false)
 // use to prevent the UI shift when the thumb is loaded
@@ -197,6 +197,18 @@ watch(showVideo, (newVal) => {
     @apply max-h-full object-contain;
     backface-visibility: hidden;
     transition: transform 0.6s;
+  }
+
+  &__dim-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.631372549);
   }
 }
 
