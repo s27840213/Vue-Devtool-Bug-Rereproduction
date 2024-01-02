@@ -4,12 +4,14 @@ import { defineStore } from 'pinia'
 
 export interface IVideoRecordState {
   genVideoCb: null | (() => void),
-  isGeningVideo: boolean
+  isGeningVideo: boolean,
+  isExportingVideo: boolean
 }
 
 const defaultState = {
   genVideoCb: null,
-  isGeningVideo: false
+  isGeningVideo: false,
+  isExportingVideo: false
 } as IVideoRecordState
 
 const pixi = new PixiRecorder()
@@ -40,9 +42,15 @@ export const useVideoRcordStore = defineStore('videoRecord', {
     },
     saveToCameraRoll(url?: string) {
       return pixi.saveToCameraRoll(url)
+        .finally(() => {
+          this.setIsExportVideo(false)
+        })
     },
     setGenVideoCb(cb: () => void) {
       this.genVideoCb = cb
+    },
+    setIsExportVideo(bool: boolean) {
+      this.isExportingVideo = bool
     }
   }
 })
