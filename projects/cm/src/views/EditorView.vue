@@ -83,7 +83,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       @click.self="outerClick")
       div(
         id="screenshot-target"
-        class="wrapper relative flex-center tutorial-powerful-fill-3--highlight"
+        class="wrapper relative flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- loading for gen result
