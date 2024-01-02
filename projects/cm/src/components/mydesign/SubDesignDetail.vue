@@ -3,7 +3,12 @@ div(
   v-show="currOpenSubDesign && thumbLoaded"
   class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
   ref="rootRef")
-  div(v-if="currOpenSubDesign" class="w-full h-full relative")
+  div(
+    v-if="currOpenSubDesign"
+    class="w-full h-full relative"
+    v-touch
+    @swipeleft="handleSwipeLeft"
+    @swiperight="handleSwipeRight")
     div(
       class="w-full h-full grid justify-items-center gap-8 overflow-hidden"
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
@@ -39,15 +44,16 @@ div(
             :src="generatedResults[currGenResultIndex].video")
           div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
             loading-brick(class="z-median")
-      div(v-if="atEditor" class="flex-between-center gap-10")
+      div(
+        v-if="atEditor"
+        class="flex-between-center gap-10"
+        @click="() => (showVideo = !showVideo)")
         div(
           class="w-8 h-8 rounded-full transition-colors"
-          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = true)")
+          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'")
         div(
           class="w-8 h-8 rounded-full transition-colors"
-          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = false)")
+          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'")
     div(v-if="isExportingVideo" class="result-showcase__dim-cover")
       loading-brick(class="z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit")
@@ -82,6 +88,7 @@ import { notify } from '@kyvg/vue3-notification'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import type { AnyTouchEvent } from 'any-touch'
 
 const { t } = useI18n()
 
@@ -208,6 +215,16 @@ watch(showVideo, (newVal) => {
   }
 })
 // #endregion
+
+const handleSwipeLeft = (e: AnyTouchEvent) => {
+  e.stopImmediatePropagation()
+  showVideo.value = false
+}
+
+const handleSwipeRight = (e: AnyTouchEvent) => {
+  e.stopImmediatePropagation()
+  showVideo.value = true
+}
 </script>
 <style lang="scss">
 .result-showcase {
