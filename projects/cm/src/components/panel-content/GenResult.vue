@@ -24,7 +24,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       span(
         class="typo-btn-sm transition-colors duration-[0.4s]"
         :class="[disableShowMoreBtn ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
-    scrollable-container(:px="0" :py="0" :gap="10" v-fade-scroller="{ fadeWidth: '24px', left: false }")
+    scrollable-container(:px="0" :py="0" :gap="10" v-fade-scroller="{ fadeWidth: '24px', prev: false }")
       transition-group(name="list")
         //- Results
         div(
