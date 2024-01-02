@@ -4,34 +4,31 @@ div(
   class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
   ref="rootRef")
   div(v-if="currOpenSubDesign" class="w-full h-full relative")
-    template(v-if="!atEditor")
-      img(
-        class="rounded-8"
-        :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
-        :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
-        v-if="currOpenSubDesign"
-        @load="handleThumbLoaded"
-        :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
-    div(v-else class="w-full h-full flex-center flex-col gap-8 overflow-hidden p-16 box-border")
+    div(
+      class="w-full h-full grid justify-items-center gap-8 overflow-hidden"
+      :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
       div(
-        class="result-showcase w-full h-full overflow-hidden flex-center abosolute top-0"
-        ref="resultShowcase")
+        class="result-showcase flex-center abosolute top-0"
+        ref="resultShowcase"
+        :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
+        :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
         img(
-          class="result-showcase__card result-showcase__card--back rounded-8"
+          class="result-showcase__card result-showcase__card--back w-full h-full"
           :class="{ 'is-flipped': !showVideo }"
-          :style="{ 'aspect-ratio': `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }"
+          v-if="currOpenSubDesign"
           @load="handleThumbLoaded"
           :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
         div(
+          v-if="atEditor"
           class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
           :class="{ 'is-flipped': showVideo }")
           img(
             v-show="!isVideoLoaded"
-            class="w-full h-full absolute top-0 left-0 object-contain"
+            class="w-full h-full absolute inset-0"
             :src="initImgSrc")
           video(
             v-show="isVideoLoaded"
-            class="w-full h-full absolute top-0 left-0"
+            class="w-full h-full absolute inset-0"
             ref="video"
             webkit-playsinline
             playsinline
@@ -42,7 +39,7 @@ div(
             :src="generatedResults[currGenResultIndex].video")
           div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
             loading-brick(class="z-median")
-      div(class="flex-between-center gap-10")
+      div(v-if="atEditor" class="flex-between-center gap-10")
         div(
           class="w-8 h-8 rounded-full transition-colors"
           :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
@@ -217,7 +214,7 @@ watch(showVideo, (newVal) => {
   transform-style: preserve-3d;
 
   &__card {
-    @apply max-h-full;
+    @apply max-h-full overflow-hidden rounded-8;
     backface-visibility: hidden;
     transition: transform 0.6s;
   }
