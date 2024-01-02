@@ -345,21 +345,32 @@ app.directive('progress', {
 })
 
 type FadeScrollerOption = {
+  vertical: boolean
   fadeWidth: string
-  left: boolean
-  right: boolean
+  prev: boolean
+  next: boolean
 }
 function updateFadeScroller(el: HTMLElement, binding: DirectiveBinding<Partial<FadeScrollerOption> | undefined>) {
-  const { fadeWidth = '48px', left = !0, right = !0 } = binding.value ?? {}
-  const { scrollLeft, scrollWidth, offsetWidth } = el
-  const leftOverflow = left && scrollLeft > 0
-  const rightOverflow = right && scrollLeft + 1 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+  const {
+    vertical = false,
+    fadeWidth = '48px',
+    prev = !0,
+    next = !0,
+  } = binding.value ?? {}
+
+  // Handle vertical case.
+  const [scrollLeft, scrollWidth, offsetWidth, target] = !vertical
+    ? [el.scrollLeft, el.scrollWidth, el.offsetWidth, 'right']
+    : [el.scrollTop, el.scrollHeight, el.offsetHeight, 'bottom']
+
+  const prevOverflow = prev && scrollLeft > 0
+  const nextOverflow = next && scrollLeft + 1 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
 
   // Use mask-image implement fade scroll style, https://stackoverflow.com/a/70971847
   el.style.maskImage = `
-    linear-gradient(to right,
-      transparent 0, black ${leftOverflow ? fadeWidth : 0},
-      black calc(100% - ${rightOverflow ? fadeWidth : '0px'}), transparent 100%)`
+    linear-gradient(to ${target},
+      transparent 0, black ${prevOverflow ? fadeWidth : 0},
+      black calc(100% - ${nextOverflow ? fadeWidth : '0px'}), transparent 100%)`
 }
 app.directive('fade-scroller', {
   mounted: (el: HTMLElement, binding) => {

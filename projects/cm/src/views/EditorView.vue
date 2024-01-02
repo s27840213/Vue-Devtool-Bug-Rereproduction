@@ -83,7 +83,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       @click.self="outerClick")
       div(
         id="screenshot-target"
-        class="wrapper relative flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
+        class="wrapper absolute top-0 left-0 flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- loading for gen result
@@ -340,7 +340,7 @@ const currImgSrc = computed(() => {
 const fakeLoading = ref(5)
 watch(() => isGenerating.value && inGenResultState.value, (val, old) => {
   if (!val || old) return
-  
+
   // Start fake loading.
   fakeLoading.value = 0
   const fakeLoadingId = window.setInterval(() => {
@@ -516,19 +516,44 @@ const fitScaleRatio = computed(() => {
 })
 
 const wrapperStyles = computed(() => {
+  const { pinchScale, isPinchingEditor } = store.state.mobileEditor
+  const transformOrigin = '0 0'
+  const page = pageUtils.getCurrPage
+  let transform = `translate(${page.x ?? 0}px, ${page.y?? 0}px)`
+  if (isPinchingEditor && pinchScale !== 1) {
+    transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
+  }
   return {
-    width: `${pageSize.value.width * contentScaleRatio.value}px`,
-    height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    transformOrigin,
+    transform,
+    // width: `${pageSize.value.width * contentScaleRatio.value}px`,
+    // height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
   }
 })
 
 const fitPage = (ratio: number) => {
   if (isResizingCanvas.value) return
-  store.commit('SET_contentScaleRatio4Page', {
-    pageIndex: layerUtils.pageIndex,
-    contentScaleRatio: ratio,
-  })
+
+  const page = pageUtils.getCurrPage
+  editorUtils.setMobilePhysicalData({ size: editorContainerSize.value })
+  const newInitPos = {
+    x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
+    y: (editorUtils.mobileSize.height - page.height * ratio) * 0.5,
+  }
+  const posDiff =  {
+    x: newInitPos.x - page.initPos.x,
+    y: newInitPos.y - page.initPos.y
+  }
+  const newPos = {
+    x: page.x + posDiff.x,
+    y: page.y + posDiff.y
+  }
+  store.commit('SET_contentScaleRatio4Page', { pageIndex: layerUtils.pageIndex, contentScaleRatio: ratio })
+  pageUtils.updatePageInitPos(0, newInitPos)
+  pageUtils.updatePagePos(0, newPos)
   // editorUtils.handleContentScaleRatio(0)
   // const { hasBleed } = pageUtils
   // const page = pageUtils.getPage(0)
@@ -553,6 +578,7 @@ watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
+    console.log(' fitScaleRatio.value,')
     fitPage(newVal)
   },
 )
@@ -565,6 +591,17 @@ let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
 let pagePinchUtils = null as PagePinchUtils | null
 const initPagePinchHandler = () => {
   if (!editorContainerRef.value) return
+  setMobilePysicalSize()
+  pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
+  pagePinchHandler = (e) => {
+    if (inAspectRatioState.value ||
+      isProcessingBgRemove.value ||
+      (inGenResultState.value && currImgSrc.value === '')) return
+    setMobilePysicalSize()
+    pagePinchUtils?.pinchHandler(e)
+  }
+}
+const setMobilePysicalSize = () => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
     size: {
@@ -580,7 +617,7 @@ const initPagePinchHandler = () => {
       y: rect.top,
     },
   })
-  pagePinchUtils = new PagePinchUtils(editorWrapperRef.value as HTMLElement)
+  pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
   pagePinchHandler = (e) => {
     if (inBgRemoveMode.value) return
     if (inAspectRatioState.value) return
