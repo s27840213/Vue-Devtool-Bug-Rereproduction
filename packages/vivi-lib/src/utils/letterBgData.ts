@@ -1,6 +1,5 @@
 import i18n from '@/i18n'
 import { ITextLetterBg } from '@/interfaces/format'
-import store from '@/store'
 import constantData, { IEffectRaw } from '@/utils/constantData'
 import textUtils from '@/utils/textUtils'
 
@@ -13,7 +12,7 @@ export const textLetterBgName = [
   'star', 'baby', 'paper-tap', 'paper-tap-point', 'paper-tap-stripe',
   'paper-tap-grid', 'triangle-flag', 'triangle-flag-custom',
   'rectangle-flag', 'rectangle-flag-custom', 'stretch-dog', 'stretch-rabbit',
-  'stretch-cat', 'stretch-dragon',
+  'stretch-cat', 'stretch-dragon', 'mahjong', 'wealth',
 ] as const
 
 export type ITextLetterBgName = typeof textLetterBgName[number]
@@ -231,6 +230,14 @@ class LetterBGData {
       key: 'stretch-dragon',
       label: i18n.global.tc('NN0917'),
       options: noColor,
+    }, {
+      key: 'mahjong',
+      label: i18n.global.tc('NN0920'),
+      options: withColor,
+    }, {
+      key: 'wealth',
+      label: i18n.global.tc('NN0921'),
+      options: noColor,
     }]
   }
 
@@ -278,6 +285,8 @@ class LetterBGData {
         break
       case 'cloud':
       case 'triangle-flag':
+      case 'mahjong':
+      case 'wealth':
         href += index % 4
         break
       case 'penguin':
@@ -518,6 +527,13 @@ class LetterBGData {
         yOffset200: 10,
         size: 220,
       },
+      mahjong: {
+        ...letterBgDefault,
+        color: '#7FB77B'
+      },
+      wealth: {
+        ...letterBgDefault,
+      },
     }
   }
 
@@ -646,6 +662,12 @@ class LetterBGData {
       'stretch-dragon': {
         lineHeight: 1.96, fontSpacing: 160,
       },
+      mahjong: {
+        lineHeight: 1.96, fontSpacing: 160,
+      },
+      wealth: {
+        lineHeight: 1.96, fontSpacing: 160,
+      },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -666,7 +688,7 @@ class LetterBGData {
   }
 
   isColorChangeable(href: string) {
-    return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star|paper-tap)/
+    return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star|paper-tap|mahjong)/
       .test(href)
   }
 
