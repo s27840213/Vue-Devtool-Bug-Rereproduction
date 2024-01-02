@@ -10,7 +10,6 @@ router-link(
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
-import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useModalStore } from '@/stores/modal'
@@ -18,6 +17,8 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
+import { toRefs } from 'vue'
+import useSteps from '@/composable/useSteps'
 
 /**
  * @Note - how to use this component?
@@ -28,13 +29,13 @@ import { useStore } from 'vuex'
  * Precedence: customCallback > toTarget
  */
 
-const { toTarget, customCallback } = withDefaults(
+const props = withDefaults(
   defineProps<{ toTarget?: string; customCallback?: () => void }>(),
   {
     toTarget: '/',
   },
 )
-const { inEditingState, atSettings } = useStateInfo()
+const { toTarget, customCallback } = toRefs(props)
 
 // #region modal
 const modalStore = useModalStore()
@@ -51,6 +52,7 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 const editorStore = useEditorStore()
 const { changeEditorState } = editorStore
 const { inGenResultState, inSavingState } = storeToRefs(editorStore)
+const { hasUnsavedChanges } = useSteps()
 // #endregion
 
 const store = useStore()
@@ -58,8 +60,8 @@ const store = useStore()
 const { t } = useI18n()
 
 const handleBackAction = (navagate: () => void) => {
-  if (customCallback) {
-    customCallback()
+  if (customCallback?.value) {
+    customCallback.value()
     return
   }
 
@@ -93,7 +95,7 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (inEditingState.value) {
+  if (hasUnsavedChanges.value) {
     setNormalModalInfo({
       title: t('CM0025'),
       content: t('CM0026'),

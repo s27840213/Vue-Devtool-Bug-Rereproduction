@@ -124,47 +124,9 @@ export default class PixiRecorder {
   private _genVideoResolver = null as null | (() => void)
   private isImgReady = false
   private video = ''
-  // charmix-logo
-  constructor(src: string = IMG1_EXAMPLE, res: string = IMG2_EXAMPLE, fragment = fragment_slide) {
-    document.body.appendChild(this.pixi.view as HTMLCanvasElement)
+  private fragment = fragment_slide
+  constructor(src: string = IMG1_EXAMPLE, res: string = IMG2_EXAMPLE) {
     this.addImage(src, res)
-      .then(() => {
-        this.isImgReady = true
-        if (!this.sprite_src || !this.sprite_res) return console.warn('no sprite')
-
-
-        this.pixi.view.width = this.sprite_src.width
-        this.pixi.view.height = this.sprite_src.height
-        this.pixi.stage.addChild(this.sprite_src)
-        if (this.sprite_wm && this.texture_wm) {
-          const ratio = this.texture_wm.width / this.texture_wm.height
-          this.sprite_wm.width = this.sprite_src.width * 0.5
-          this.sprite_wm.height = this.sprite_wm.width / ratio
-          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
-          this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
-          this.pixi.stage.addChild(this.sprite_wm)
-        }
-        const renderer = this.pixi.renderer
-        renderer.resize(this.sprite_src.width, this.sprite_src.height)
-
-        this.addFilter(fragment)
-
-        // @TEST use
-        // const testCanvas = this.pixi.view as HTMLCanvasElement
-        // document.body.appendChild(testCanvas)
-        // testCanvas.style.position = 'absolute'
-        // testCanvas.style.top = '0'
-        // testCanvas.style.width = '300px'
-        // testCanvas.style.left = '0'
-
-        // if the genVideo func is called, but the imgs is not loaded yet,
-        // the genVideo func will await for the imgs to be loaded
-        if (this._genVideoResolver) {
-          this._genVideoResolver()
-        }
-      }).catch(() => {
-        throw new Error('pixi-recorder: can not load image!')
-      })
   }
 
   async genVideo() {
@@ -177,6 +139,7 @@ export default class PixiRecorder {
       ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
     }
 
+    this.time_start = -1
     if (RECORD_START_DELAY) {
       setTimeout(() => {
         if (this._animate) {
@@ -319,7 +282,7 @@ export default class PixiRecorder {
     }
   }
 
-  addImage(img1: string, img2: string) {
+  loadImgs(img1: string, img2: string) {
     const p1 = new Promise<PIXI.Texture>((resolve) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
         this.texture_src = texture
@@ -360,15 +323,51 @@ export default class PixiRecorder {
                 resolve(texture)
               })
             })
-            // this.texture_wm = new PIXI.Texture(new PIXI.BaseTexture(canvas))
-            // this.sprite_wm = new PIXI.Sprite(this.texture_wm)
-            // resolve(this.texture_wm)
           }
         })
       })
     })
 
     return Promise.all([p1, p2, p3])
+  }
+
+  addImage(src: string, res: string) {
+    return this.loadImgs(src, res)
+      .then(() => {
+        this.isImgReady = true
+        if (!this.sprite_src || !this.sprite_res) return console.warn('no sprite')
+
+        this.pixi.view.width = this.sprite_src.width
+        this.pixi.view.height = this.sprite_src.height
+        this.pixi.stage.addChild(this.sprite_src)
+        if (this.sprite_wm && this.texture_wm) {
+          const ratio = this.texture_wm.width / this.texture_wm.height
+          this.sprite_wm.width = this.sprite_src.width * 0.5
+          this.sprite_wm.height = this.sprite_wm.width / ratio
+          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
+          this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
+          this.pixi.stage.addChild(this.sprite_wm)
+        }
+        const renderer = this.pixi.renderer
+        renderer.resize(this.sprite_src.width, this.sprite_src.height)
+        this.addFilter(this.fragment)
+
+        // @TEST use
+        // const testCanvas = this.pixi.view as HTMLCanvasElement
+        // document.body.appendChild(testCanvas)
+        // testCanvas.style.position = 'absolute'
+        // testCanvas.style.top = '0'
+        // testCanvas.style.width = '300px'
+        // testCanvas.style.left = '0'
+
+        // if the genVideo func is called, but the imgs is not loaded yet,
+        // the genVideo func will await for the imgs to be loaded
+        if (this._genVideoResolver) {
+          this._genVideoResolver()
+        }
+      }).catch(() => {
+        throw new Error('pixi-recorder: can not load image!')
+      })
   }
 }
 

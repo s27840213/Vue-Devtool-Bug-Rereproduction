@@ -99,7 +99,7 @@ const iconStyles = computed(() => {
     width: width || (props.sameSize && height) || '40px',
     height: height || (props.sameSize && width) || '40px',
     // For debug, to find missing svg icon files.
-    ...missingUse.value && { background: 'red' },
+    // ...missingUse.value && { background: 'red' },
   }
 })
 
@@ -114,13 +114,13 @@ const iconAspectRatio = computed(() => {
   return 1
 })
 const useRef = ref<SVGGraphicsElement | null>(null)
-const missingUse = computed(() => {
-  if (!useRef.value) return
-  const missing = !document.querySelector(`symbol#${props.iconName}`)
-  if (missing) console.error(`Missing svg icon: ${props.iconName}.`)
-  // return missing
-  return true // Temporarily prevent false alarms.
-})
+// const missingUse = computed(() => {
+//   if (!useRef.value) return
+//   const missing = !document.querySelector(`symbol#${props.iconName}`)
+//   if (missing) console.error(`Missing svg icon: ${props.iconName}.`)
+//   // return missing
+//   return false // Temporarily prevent false alarms.
+// })
 </script>
 
 <style lang="scss" scoped>

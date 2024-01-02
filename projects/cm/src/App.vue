@@ -52,7 +52,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
-    v-if="wantToQuit || isModalOpen"
+    v-if="wantToQuit || isModalOpen || inMediaOptions"
     class="mask"
     :class="{'for-no-close-modal': isModalOpen && isModalNoClose}"
     ref="maskRef"
@@ -66,19 +66,22 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
         class="w-full h-full z-img-selector pointer-events-auto"
         :requireNum="requireImgNum")
     transition(name="fade-in-out")
-      div(v-if="showDescriptionPanel"
-      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-dark-4/70")
+      div(v-if="showDescriptionPanel || inMediaOptions"
+      class="absolute w-full h-full pointer-events-auto bg-dark-4/70"
+      :class="showDescriptionPanel ? 'z-description-panel' : 'z-popup'")
     transition(name="bottom-up-down")
       bottom-panel(
-        v-if="showDescriptionPanel"
-        class="absolute bottom-0 z-desciption-panel pointer-events-auto"
+        v-if="showDescriptionPanel || inMediaOptions"
+        class="absolute bottom-0 pointer-events-auto"
+        :class="showDescriptionPanel ? 'z-description-panel' : 'z-popup'"
         :gap="statusBarHeight + 150"
-        ignoreHomeIndicator)
+        :ignoreHomeIndicator="showDescriptionPanel")
         template(#content="{setSlotRef}")
           transition(
             name="bottom-panel-transition"
             mode="out-in")
-            panel-description(:ref="(el: any) => setSlotRef(el)")
+            panel-description(v-if="showDescriptionPanel" :ref="(el: any) => setSlotRef(el)")
+            saving-options(v-else-if="inMediaOptions" :ref="(el: any) => setSlotRef(el)")
     div(class="popup-area")
       popup(class="pointer-events-auto")
     div(class="modal-container" v-if="isModalOpen")
@@ -135,6 +138,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
+import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
@@ -147,6 +151,7 @@ import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PanelDescription from './components/panel-content/PanelDescription.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
+import SavingOptions from './components/panel-content/SavingOptions.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useActionSheetCm from './composable/useActionSheetCm'
@@ -154,8 +159,8 @@ import useStateInfo from './composable/useStateInfo'
 import router from './router'
 import { useCanvasStore } from './stores/canvas'
 import { useImgSelectorStore } from './stores/imgSelector'
+import { useMediaStore } from './stores/media'
 import { useModalStore } from './stores/modal'
-import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
 
@@ -184,6 +189,9 @@ const fullPageType = computed(() => store.getters.getFullPageType)
 
 const canvasStore = useCanvasStore()
 const { isAutoFilling } = storeToRefs(canvasStore)
+
+const mediaStore = useMediaStore()
+const { inMediaOptions } = storeToRefs(mediaStore)
 // #endregion
 
 // #region bottom panel warning modal

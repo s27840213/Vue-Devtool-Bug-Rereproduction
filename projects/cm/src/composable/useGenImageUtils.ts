@@ -48,11 +48,12 @@ const useGenImageUtils = () => {
     currPrompt,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
-  const { saveDesignImageToDocument, saveSubDesign } = useUserStore()
+  const { saveDesignImageToDocument, saveSubDesign, setAiCredit } = useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const hostId = computed(() => store.getters['cmWV/getUserInfo'].hostId)
+  const token = computed(() => store.getters['user/getToken'])
   const { t } = useI18n()
 
   const genImageFlow = async (
@@ -60,9 +61,9 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = undefined,
-      onError = undefined,
-      onApiResponded = undefined,
+      onSuccess = () => { /**/ },
+      onError = () => { /**/ },
+      onApiResponded = () => { /**/ },
     }: {
       onSuccess?: (index: number, url: string) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -78,7 +79,7 @@ const useGenImageUtils = () => {
         onApiResponded,
         onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
-          !onlyUpdate && onSuccess && onSuccess(index, imgSrc)
+          !onlyUpdate && onSuccess(index, imgSrc)
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
@@ -104,7 +105,7 @@ const useGenImageUtils = () => {
           if (generatedResultsNum.value === 0 && inGenResultState.value) {
             changeEditorState('prev')
           }
-          onError && onError(index, url, reason)
+          onError(index, url, reason)
         },
       })
     } catch (error) {
@@ -113,14 +114,18 @@ const useGenImageUtils = () => {
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
       logUtils.uploadLog().then(() => {
-        modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
-          msg: t('STK0023'),
-          action() {
-            generalUtils.copyText(hint).then(() => {
-              notify({ group: 'success', text: '已複製' })
-            })
-          },
-        })
+        if ((error as Error).message?.includes('no credits')) {
+          cmWVUtils.openPayment()
+        } else {
+          modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
+            msg: t('STK0023'),
+            action() {
+              generalUtils.copyText(hint).then(() => {
+                notify({ group: 'success', text: '已複製' })
+              })
+            },
+          })
+        }
       })
       for (const id of ids) {
         removeGenResult(id)
@@ -128,7 +133,7 @@ const useGenImageUtils = () => {
       if (generatedResultsNum.value === 0 && inGenResultState.value) {
         changeEditorState('prev')
       }
-      onError && onError(-1, '', (error as Error).message)
+      onError(-1, '', (error as Error).message)
     }
   }
 
@@ -137,9 +142,9 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = undefined,
-      onError = undefined,
-      onApiResponded = undefined,
+      onSuccess = () => { /**/ },
+      onError = () => { /**/ },
+      onApiResponded = () => { /**/ },
     }: {
       onSuccess?: (index: number, url: string, onlyUpdate?: boolean) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -168,7 +173,7 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
     const res = (
-      await genImageApis.genImage(userId.value, requestId, params, num, useUsBucket.value)
+      await genImageApis.genImage(userId.value, requestId, token.value, params, num, useUsBucket.value)
     ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
@@ -176,8 +181,9 @@ const useGenImageUtils = () => {
       throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
     }
 
-    onApiResponded && onApiResponded()
+    onApiResponded()
 
+    setAiCredit(res.ai_credit)
     setPrevGenParams({ requestId, params })
     const urls = res.urls.map((urlMap) => urlMap.url)
     const pollingController = getPollingController()
@@ -209,7 +215,12 @@ const useGenImageUtils = () => {
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
-          if (editorType.value !== 'hidden-message') {
+          if (editorType.value === 'hidden-message') {
+            maskDataUrl.value && saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+              type: 'png',
+              subDesignId,
+            })
+          } else {
             const prepareMask = prepareMaskToUpload()
             if (prepareMask) {
               promises.push(
@@ -230,14 +241,14 @@ const useGenImageUtils = () => {
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message?.includes('Cancelled')) {
-            onError && onError(index, url, error.message)
+            onError(index, url, error.message)
           }
           return
         }
         RECORD_TIMING && testUtils.log(`polling ${index}`, '')
         // save result image to document
         try {
-          onSuccess && onSuccess(index, url)
+          onSuccess(index, url)
           RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'thumb', {
             subDesignId: ids[index],
@@ -251,9 +262,9 @@ const useGenImageUtils = () => {
           }
 
           const imgSrc = imageUtils.getSrc(srcObj)
-          onSuccess && onSuccess(index, imgSrc, true)
+          onSuccess(index, imgSrc, true)
         } catch (error) {
-          onError && onError(index, url, 'saveAssetFromUrl failed')
+          onError(index, url, 'saveAssetFromUrl failed')
         }
         RECORD_TIMING && testUtils.log(`gen-image ${requestId}`, '')
       }),
@@ -264,8 +275,9 @@ const useGenImageUtils = () => {
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
     RECORD_TIMING && testUtils.start('copy editor', { notify: false, setToLog: true })
     const { width: pageWidth, height: pageHeight } = pageSize.value
+    if (editorType.value === 'hidden-message') setMaskDataUrl(getCanvasDataUrl() ?? '')
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }), { forGenImage: true })
+      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false, ...( editorType.value === 'hidden-message' && { maskUrl: maskDataUrl.value }) }), { forGenImage: true })
       : await cmWVUtils.copyEditor({
           width: pageWidth * contentScaleRatio.value,
           height: pageHeight * contentScaleRatio.value,

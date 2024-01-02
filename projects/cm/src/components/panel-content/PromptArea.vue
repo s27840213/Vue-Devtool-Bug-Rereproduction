@@ -146,7 +146,6 @@ div(class="prompt-area w-full box-border px-24")
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
-import useSteps from '@/composable/useSteps'
 import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
@@ -191,11 +190,9 @@ const {
   isSendingGenImgReq,
   currPrompt,
   currDesignId,
-  inEditingState,
   isGenerating,
   editorType,
   currGenOptions,
-  generatedResults,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -218,8 +215,6 @@ const { t } = useI18n()
 const modalStore = useModalStore()
 const { closeModal, openModal, setNormalModalInfo } = modalStore
 // #endregion
-
-const { reset } = useSteps()
 
 // #region generating function
 const waitForGenerating = () => {
@@ -338,17 +333,13 @@ const handleGenerate = async () => {
 
   await waitForGenerating()
 
+  setTimeout(() => { 
+    setCurrGenResultIndex(0)
+    changeEditorState('next')
+  }, 3000)
   await genImageFlow(getGenParams(), false, 2, {
-    onApiResponded: () => {
-      if (generatedResults.value.filter((r) => r.url.length).length > 0 && inEditingState.value) {
-        changeEditorState('next')
-      }
-    },
     onSuccess: (index) => {
-      if (inEditingState.value) {
-        setCurrGenResultIndex(index)
-        changeEditorState('next')
-      }
+      setCurrGenResultIndex(index)
     },
   }).then(() => {
     pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })

@@ -1,5 +1,6 @@
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ICoordinate } from '@/interfaces/frame'
+import { IFullPageConfig } from '@/interfaces/fullPage'
 import { SrcObj } from '@/interfaces/gallery'
 import {
   IFrame,
@@ -28,6 +29,7 @@ import mobileEditor from '@/store/module/mobileEditor'
 import modal from '@/store/module/modal'
 import objects from '@/store/module/objects'
 import page from '@/store/module/page'
+import payment from '@/store/module/payment'
 import popup from '@/store/module/popup'
 import shadow from '@/store/module/shadow'
 import templates from '@/store/module/templates'
@@ -55,8 +57,6 @@ import {
   LayerType,
   SidebarPanelType,
 } from './types'
-import { IFullPageConfig } from '@/interfaces/fullPage'
-import payment from '@/store/module/payment'
 
 const getDefaultState = (): IEditorState => ({
   sessionId: generalUtils.generateRandomString(12),

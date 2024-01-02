@@ -1,6 +1,7 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import router from '@/router'
+import { useUserStore } from '@/stores/user'
 import type {
   DescriptionPanel,
   EditorFeature,
@@ -11,13 +12,10 @@ import type {
   MagicCombinedStates,
   PowerfulfillStates,
 } from '@/types/editor'
-import { ICmSubDesign } from '@/types/user'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
-import { useUserStore } from '@/stores/user'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -55,7 +53,6 @@ interface IEditorStore {
   stepTypeCheckPoint: number
   initImgSrc: string
   useTmpSteps: boolean
-  // for my design
   currDesignId: string
   designName: '' | 'original' | 'result'
   // for saving to document and show more results
@@ -63,7 +60,7 @@ interface IEditorStore {
   currGenOptions: GenImageOptions
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
-  currDesignThumbIndex: number
+  currDesignThumbIndex: number,
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -136,9 +133,9 @@ export const useEditorStore = defineStore('editor', {
       return stepsUtils.isInLastStep
     },
     currSubDesignId(): string {
-      return this.currGeneratedResults.id
+      return this.currGeneratedResult.id
     },
-    currGeneratedResults(): { id: string; url: string; video?: string } {
+    currGeneratedResult(): { id: string; url: string; video?: string } {
       return this.generatedResults[this.currGenResultIndex]
     },
     generatedResultsNum(): number {
@@ -185,7 +182,7 @@ export const useEditorStore = defineStore('editor', {
         generatedResults,
         designWidth = 900,
         designHeight = 1600,
-        designName = ''
+        designName = '',
       } = options || {}
 
       this.currStateIndex = 0
@@ -194,7 +191,7 @@ export const useEditorStore = defineStore('editor', {
       if (designId) this.currDesignId = designId
       this.editorStates = editorStatesMap[this.editorType]
       if (stateTarget && this.editorStates.findIndex((item) => item === stateTarget) !== -1) {
-        this.changeToSpecificEditorState(type, stateTarget)
+        this.changeToSpecificEditorState(stateTarget)
       }
       if (generatedResults) {
         this.generatedResults = generatedResults
@@ -211,8 +208,8 @@ export const useEditorStore = defineStore('editor', {
         this.currStateIndex--
       }
     },
-    changeToSpecificEditorState(type: EditorType, state: string) {
-      this.editorStates = editorStatesMap[this.editorType]
+    changeToSpecificEditorState(state: string, type?: EditorType) {
+      this.editorStates = editorStatesMap[type ?? this.editorType]
       this.currStateIndex = this.editorStates.findIndex((item) => item === state)
     },
     setCurrActiveFeature(feature: EditorFeature) {
@@ -326,19 +323,22 @@ export const useEditorStore = defineStore('editor', {
       this.currGenOptions = options
     },
     async keepEditingInit() {
-      const { initWithSubDeisgnImage } = useUserStore()
-      const subDesign = (await cmWVUtils.getJson(
-        `mydesign-${this.editorType}/${this.currDesignId}/${this.currSubDesignId}`,
-        'original'
-      )) as {
-        flag: '0' | '1'
-        name: string
-        path: string
-        content: ICmSubDesign
-      } | undefined | null
+      // Do the same thing with user.editSubDesignResult.
+      const { initWithSubDeisgnImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
+      const { editorType: type, currDesignId: id, currSubDesignId: subId } = this
 
-      if (!subDesign || subDesign.flag === '1') return
-      initWithSubDeisgnImage(subDesign.content)
+      // Try to open result.json.
+      const resultJson = await getSubDesignConfig({ type, id }, subId, 'result')
+      if (resultJson && resultJson.flag === '0') {
+        initWithSubDesignConfig(resultJson.content)
+        return
+      }
+
+      // Cannot find result.json, use result img to create new design.
+      const originalJson = await getSubDesignConfig({ type, id }, subId)
+      if (originalJson && originalJson.flag === '0') {
+        initWithSubDeisgnImage(originalJson.content)
+      }
     },
     setCurrDesignId(id: string) {
       this.currDesignId = id
@@ -351,6 +351,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
-    },
+    }
   },
 })

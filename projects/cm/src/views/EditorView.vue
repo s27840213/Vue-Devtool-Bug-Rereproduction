@@ -2,7 +2,9 @@
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
   headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
-      back-btn
+      back-btn(
+        v-if="canBack"
+        :toTarget="fromMyDesign ? '/mydesign' : '/'")
     template(
       v-if="inEditingState && !inGenResultState"
       #middle)
@@ -11,7 +13,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :title="centerTitle"
           :url="centerUrl")
       div(v-else-if="isResizingCanvas" class="text-white typo-h5 whitespace-nowrap")
-        span {{ `${pageSize.width} x ${pageSize.height}` }}
+        span {{ `${outputSize.width} x ${outputSize.height}` }}
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
@@ -30,34 +32,36 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       template(v-else)
         svg-icon(
           v-for="btn in centerBtns"
+          :class="{ 'pointer-events-none': btn.disabled }"
           :key="btn.icon"
           :iconName="btn.icon"
           :iconColor="btn.disabled ? 'lighter' : 'white'"
           :iconWidth="`${btn.width}px`"
           @click="btn.action")
     template(#right)
-      svg-icon(
-        v-if="canGotoProject"
-        :iconName="'grid-solid'"
-        :iconColor="'transparent'"
-        :strokeColor="'white'"
-        :iconWidth="'24px'"
-        @click="handleProjectBtnAction")
-      svg-icon(
-        v-if="inGenResultState || canSaveSubDesign"
-        iconName="download"
-        iconColor="white"
-        @click="handleNextAction")
-      router-link(
-        v-if="inSavingState"
-        custom
-        :to="'/'"
-        v-slot="{ navigate }")
+      template(v-if="!inBgRemoveMode")
         svg-icon(
+          v-if="canGotoProject"
+          :iconName="'grid-solid'"
+          :iconColor="'transparent'"
+          :strokeColor="'white'"
+          :iconWidth="'24px'"
+          @click="handleProjectBtnAction")
+        svg-icon(
+          v-if="inGenResultState || canSaveSubDesign"
+          iconName="download"
           iconColor="white"
-          iconName="cm_home"
-          iconWidth="22px"
-          @click="handleHomeBtnAction(navigate)")
+          @click="handleNextAction")
+        router-link(
+          v-if="inSavingState"
+          custom
+          :to="'/'"
+          v-slot="{ navigate }")
+          svg-icon(
+            iconColor="white"
+            iconName="cm_home"
+            iconWidth="22px"
+            @click="handleHomeBtnAction(navigate)")
   canvas-resizer(
     v-if="isResizingCanvas"
     :pageIndex="layerUtils.pageIndex"
@@ -73,16 +77,29 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
-    div(class="w-full h-full box-border" @click.self="outerClick")
+    div(
+      v-show="!inBgRemoveMode"
+      class="w-full h-full box-border flex-center"
+      @click.self="outerClick")
       div(
         id="screenshot-target"
-        class="wrapper tutorial-powerful-fill-3--highlight absolute"
+        class="wrapper relative flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
+        //- loading for gen result
+        div(v-if="inGenResultState && currImgSrc === ''"
+          class="w-full h-fit grid grid-rows-2 gap-16 justify-center text-white")
+          div(class="typo-body-md grid justify-center gap-8")
+            span {{ fakeLoading }}%
+            div(class="relative rounded-full bg-yellow-0/50 w-100 h-8")
+              div(class="absolute rounded-full bg-yellow-cm h-8" :style="{ width: fakeLoading + 'px' }")
+          div(class="typo-body-sm max-w-245") {{ fakeLoadingText }}
+        //- Show gen result
         img(
-          v-if="inGenResultState"
+          v-else-if="inGenResultState"
           class="h-full object-cover"
           :src="currImgSrc")
+        //- Editor
         template(v-else)
           nu-page(
             class="z-page"
@@ -100,8 +117,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
-          class="demo-brush"
           :class="demoBrushSizeOutline"
+          class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
       v-if="showSidebarTabs"
@@ -111,83 +128,48 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       loading-brick(
         v-if="isAutoFilling"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
+    bg-remove-container(
+      v-if="inBgRemoveMode && editorContainerRef"
+      class="absolute top-0 left-0 z-bg-remove bg-dark-6"
+      :containerWH="editorContainerSize"
+      :containerRef="editorContainerRef"
+      :previewSrc="previewSrc")
   div(v-else class="editor-view__saving-state")
-    div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-      div(
-        class="result-showcase w-full h-full rounded-8 overflow-hidden flex-center abosolute top-0"
-        ref="resultShowcase")
-        img(
-          class="result-showcase__card result-showcase__card--back"
-          :class="{ 'is-flipped': !showVideo }"
-          :src="currImgSrc")
-        div(
-          class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
-          :class="{ 'is-flipped': showVideo }")
-          img(
-            v-show="!isVideoLoaded"
-            class="w-full h-full absolute top-0 left-0 object-contain"
-            :src="initImgSrc")
-          loading-brick(v-show="!isVideoLoaded" class="z-median")
-          video(
-            v-show="isVideoLoaded"
-            class="w-full h-full absolute top-0 left-0"
-            ref="video"
-            webkit-playsinline
-            playsinline
-            loop
-            autoplay
-            mutes
-            @loadeddata="() => { isVideoLoaded = true }"
-            :src="generatedResults[currGenResultIndex].video")
-      div(class="flex-between-center gap-10")
-        div(
-          class="w-8 h-8 rounded-full transition-colors"
-          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = true)")
-        div(
-          class="w-8 h-8 rounded-full transition-colors"
-          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = false)")
-    div(class="flex-between-center w-full px-24 py-8 box-border")
-      div(class="flex items-center gap-8")
-        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
-          svg-icon(
-            iconName="crown"
-            :iconColor="'dark-6'"
-            iconWidth="20px")
-        span(class="typo-h5 text-white") {{ $t('CM0071') }}
-      slide-toggle(
-        v-model="removeWatermark"
-        :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
-        margin="2px"
-        optionWidth="22px"
-        optionHeight="22px"
-        :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
-        :toggleMode="true"
-        :overlapSize="'8px'")
-    div(class="flex-between-center w-full px-24 py-8 box-border")
-      div(class="flex items-center gap-8")
-        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
-          svg-icon(
-            iconName="crown"
-            :iconColor="'dark-6'"
-            iconWidth="20px")
-        span(class="typo-h5 text-white") {{ $t('CM0072') }}
-      slide-toggle(
-        v-model="highResolutionPhoto"
-        :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
-        margin="2px"
-        optionWidth="22px"
-        optionHeight="22px"
-        :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
-        :toggleMode="true"
-        :overlapSize="'8px'")
-  bg-remove-container(
-    class="absolute top-0 left-0 w-full h-full z-bg-remove"
-    v-if="(inBgRemoveMode || isProcessing) && editorContainerRef"
-    :containerWH="editorContainerSize"
-    :containerRef="editorContainerRef"
-    :previewSrc="previewSrc")
+    sub-design-detail
+    //- div(class="flex-between-center w-full px-24 py-8 box-border")
+    //-   div(class="flex items-center gap-8")
+    //-     div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
+    //-       svg-icon(
+    //-         iconName="crown"
+    //-         :iconColor="'dark-6'"
+    //-         iconWidth="20px")
+    //-     span(class="typo-h5 text-white") {{ $t('CM0071') }}
+    //-   slide-toggle(
+    //-     v-model="removeWatermark"
+    //-     :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
+    //-     margin="2px"
+    //-     optionWidth="22px"
+    //-     optionHeight="22px"
+    //-     :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
+    //-     :toggleMode="true"
+    //-     :overlapSize="'8px'")
+    //- div(class="flex-between-center w-full px-24 py-8 box-border")
+    //-   div(class="flex items-center gap-8")
+    //-     div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
+    //-       svg-icon(
+    //-         iconName="crown"
+    //-         :iconColor="'dark-6'"
+    //-         iconWidth="20px")
+    //-     span(class="typo-h5 text-white") {{ $t('CM0072') }}
+    //-   slide-toggle(
+    //-     v-model="highResolutionPhoto"
+    //-     :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
+    //-     margin="2px"
+    //-     optionWidth="22px"
+    //-     optionHeight="22px"
+    //-     :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
+    //-     :toggleMode="true"
+    //-     :overlapSize="'8px'")
   transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
@@ -195,6 +177,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       class="bg-dark-6 absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles"
       v-bind="assetPanelProps")
+  spinner(
+    v-if="isProcessingBgRemove"
+    :textContent="t('CM0086')")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
@@ -208,8 +193,8 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
+import { useVideoRcordStore } from '@/stores/videoRecord'
 import type { GenImageParams } from '@/types/api'
-import PixiRecorder from '@/utils/pixiRecorder'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -217,7 +202,6 @@ import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
-import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
 import type { ILayerInfo } from '@nu/vivi-lib/store/types'
@@ -226,7 +210,6 @@ import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -237,7 +220,6 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
-import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { useEventBus } from '@vueuse/core'
 import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
@@ -250,7 +232,6 @@ const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
 
 // const sidebarTabsRef = ref<HTMLElement | null>(null)
-const video = ref<HTMLVideoElement | null>(null)
 
 // const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
@@ -271,11 +252,15 @@ const isCropping = computed(() => {
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
 const layerIndex = computed(() => layerUtils.layerIndex)
 const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
+const outputSize = computed(() => {
+  const ratio = 1920 / Math.max(pageSize.value.width, pageSize.value.height)
+  return {
+    width: Math.round(ratio * pageSize.value.width),
+    height: Math.round(ratio * pageSize.value.height),
+  }
+})
 
 const { ids } = useGenImageUtils()
-
-const removeWatermark = ref(false)
-const highResolutionPhoto = ref(false)
 
 const showSidebarTabs = computed(
   () =>
@@ -286,11 +271,13 @@ const showSidebarTabs = computed(
     !isCropping.value &&
     !showBrushOptions.value &&
     layerIndex.value === -1 &&
-    editorType.value !== 'magic-combined',
+    editorType.value !== 'magic-combined' &&
+    !inBgRemoveMode.value,
 )
 
 const modalStore = useModalStore()
 const { closeModal, openModal, setNormalModalInfo } = modalStore
+
 // #endregion
 
 // #region hooks related
@@ -315,11 +302,11 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, setDescriptionPanel } = editorStore
+const { changeEditorState, updateGenResult, setDescriptionPanel, changeToSpecificEditorState } =
+  editorStore
 const {
   pageSize,
   currActiveFeature,
-  generatedResults,
   inGenResultState,
   currGenResultIndex,
   initImgSrc,
@@ -329,10 +316,15 @@ const {
   currDesignId,
   currSubDesignId,
   designName,
+  currGeneratedResult,
+  isGenerating,
 } = storeToRefs(editorStore)
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = useUserStore()
+const userStore = useUserStore()
+const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = userStore
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
+const fromMyDesign = hasGeneratedResults.value
 
 watch(
   () => isManipulatingCanvas.value,
@@ -341,27 +333,38 @@ watch(
   },
 )
 
-watch(
-  () => inSavingState.value,
-  (val) => {
-    if (val) {
-      showVideo.value = true
-      isVideoLoaded.value = false
-    }
-  },
-)
-
-const isVideoLoaded = ref(false)
-
 const currImgSrc = computed(() => {
-  return currGenResultIndex.value === -1
-    ? initImgSrc.value
-    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
+  return currGenResultIndex.value === -1 ? initImgSrc.value : currGeneratedResult.value?.url ?? ''
 })
 
+const fakeLoading = ref(5)
+watch(() => isGenerating.value && inGenResultState.value, (val, old) => {
+  if (!val || old) return
+
+  // Start fake loading.
+  fakeLoading.value = 0
+  const fakeLoadingId = window.setInterval(() => {
+    fakeLoading.value += 1
+    if (fakeLoading.value >= 95) { // Stop fake loading.
+      window.clearInterval(fakeLoadingId)
+    }
+  }, 100)
+})
+const fakeLoadingText = computed(() => {
+  if (fakeLoading.value > 90) return t('CM0149')
+  else if (fakeLoading.value > 50) return t('CM0148')
+  else return t('CM0147')
+})
 // #endregion
 
 // #region headerbar state & callback
+const canBack = computed(
+  () =>
+    !inBgRemoveMode.value &&
+    !isProcessingBgRemove.value &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value),
+)
+
 const canSaveSubDesign = computed(() => {
   return (
     inEditingState.value &&
@@ -369,28 +372,29 @@ const canSaveSubDesign = computed(() => {
     !['cm_brush', 'selection'].includes(currActiveFeature.value)
   )
 })
-const handleNextAction = function () {
+const videoRecordStore = useVideoRcordStore()
+const { addImage, genVideo } = videoRecordStore
+const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
-    saveSubDesign(
+    groupUtils.deselect()
+    await saveSubDesign(
       `${currDesignId.value}/${currSubDesignId.value}`,
       currSubDesignId.value,
       designName.value,
     )
+    changeToSpecificEditorState('saving')
   } else if (inGenResultState.value) {
     changeEditorState('next')
-    const currGenResult = generatedResults.value[currGenResultIndex.value]
+    const currGenResult = currGeneratedResult.value
     if (currGenResult) {
       if (!currGenResult.video) {
         const src = imageUtils.appendRandomQuery(initImgSrc.value)
-        const res = imageUtils.appendRandomQuery(
-          generatedResults.value[currGenResultIndex.value].url,
-        )
-        const pixiRecorder = new PixiRecorder(src, res)
-        pixiRecorder.genVideo().then((data) => {
-          if (data) {
-            updateGenResult(currGenResult.id, { video: data })
-          }
-        })
+        const res = imageUtils.appendRandomQuery(currGeneratedResult.value.url)
+        await addImage(src, res)
+        const data = await genVideo()
+        if (data) {
+          updateGenResult(currGenResult.id, { video: data })
+        }
       }
     }
   }
@@ -406,6 +410,7 @@ type centerBtn = {
   action?: () => void
 }
 const centerBtns = computed<centerBtn[]>(() => {
+  if (isProcessingBgRemove.value) return []
   const retTabs = []
   const stepBtns = [
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
@@ -419,6 +424,25 @@ const centerBtns = computed<centerBtn[]>(() => {
       action: () => setDescriptionPanel('hidden-message/help'),
     })
   retTabs.push(...stepBtns)
+  if (inBgRemoveMode.value) {
+    retTabs.unshift({
+      icon: showInitImage ? 'eye-slash' : 'eye',
+      disabled: false,
+      width: 20,
+      action: () => {
+        setShowInitImage(!showInitImage.value)
+      },
+    })
+
+    retTabs.push({
+      icon: 'reset',
+      disabled: !modifiedFlag.value,
+      width: 20,
+      action: () => {
+        setRestoreInitState(true)
+      },
+    })
+  }
   if (currEditorTheme.value && editorType.value === 'hidden-message')
     retTabs.push({
       icon: currEditorTheme.value.toggleIcon,
@@ -511,6 +535,8 @@ const wrapperStyles = computed(() => {
 })
 
 const fitPage = (ratio: number) => {
+  if (isResizingCanvas.value) return
+
   const page = pageUtils.getCurrPage
   const newInitPos = {
     x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
@@ -524,7 +550,7 @@ const fitPage = (ratio: number) => {
     x: page.x + posDiff.x,
     y: page.y + posDiff.y
   }
-  store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
+  store.commit('SET_contentScaleRatio4Page', { pageIndex: layerUtils.pageIndex, contentScaleRatio: ratio })
   pageUtils.updatePageInitPos(0, newInitPos)
   pageUtils.updatePagePos(0, newPos)
   // editorUtils.handleContentScaleRatio(0)
@@ -588,6 +614,12 @@ const setMobilePysicalSize = () => {
       y: rect.top,
     },
   })
+  pagePinchUtils = new PagePinchUtils(editorWrapperRef.value as HTMLElement)
+  pagePinchHandler = (e) => {
+    if (inBgRemoveMode.value) return
+    if (inAspectRatioState.value) return
+    pagePinchUtils?.pinchHandler(e)
+  }
 }
 onMounted(() => {
   initPagePinchHandler()
@@ -602,6 +634,7 @@ watch(isResizingCanvas, (newVal) => {
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
 
 const outerClick = () => {
+  console.log('outer click')
   editorUtils.setInBgSettingMode(false)
   pageUtils.setBackgroundImageControlDefault()
 }
@@ -611,6 +644,7 @@ const pointerEvent = ref({
 })
 const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
+  if (inBgRemoveMode.value) return
   recordPointer(e)
   if (pointerEvtUtils.pointerIds.length >= 3) {
     return pagePinchUtils?.pinchEnd(e as any)
@@ -684,6 +718,7 @@ const selectStart = (e: PointerEvent) => {
 // is bcz the native click/tap event is triggered as the event happened in a-short-time even the layer has moved a little position,
 // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
 const selectEnd = (e: PointerEvent) => {
+  if (inBgRemoveMode.value) return
   if (pointerEvent.value.initPos) {
     const isSingleTouch = pointerEvtUtils.pointers.length === 1
     const isConsiderNotMoved =
@@ -779,9 +814,20 @@ const recordPointer = (e: PointerEvent) => {
 const removePointer = (e: PointerEvent) => {
   pointerEvtUtils.removePointer(e.pointerId)
 }
+// #endregion
 
-// toggle editor theme
-const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor()
+// #region bi-color-editor
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor, initBiColorEditor } =
+  useBiColorEditor()
+watch(
+  inEditingState,
+  (newVal) => {
+    if (newVal && isBiColorEditor.value) {
+      initBiColorEditor(editorType.value)
+    }
+  },
+  { immediate: true },
+)
 // #endregion
 
 // #region demo brush size section
@@ -839,6 +885,10 @@ textUtils.loadDefaultFonts()
 
 watch(currActiveTab, () => {
   setAssetPanelTop()
+})
+
+watch(currActiveFeature, () => {
+  console.log(currActiveFeature.value)
 })
 
 const assetPanelStyles = computed(() => {
@@ -918,34 +968,19 @@ const centerTitle = computed(() => {
 })
 // #endregion
 
-// #region result showcase
-const resultShowcase = ref<HTMLElement | null>(null)
-const showVideo = ref(true)
-watch(showVideo, (newVal) => {
-  if (video.value) {
-    if (!newVal) {
-      video.value.currentTime = 0
-    }
-  }
-})
-// #endregion
-
 // #region bg remove related
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
-const isProcessing = computed(() => store.getters['bgRemove/getIsProcessing'])
-const previewSrc = ref('')
-
-const startBgRemove = (type: 'cm-bg-remove') => {
-  if (!inBgRemoveMode && !isProcessing) {
-    store.commit('bgRemove/SET_isProcessing', true)
-
-    const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
-    previewSrc.value = src
-    generalUtils.toDataURL(src, (dataUrl: string) => {
-      uploadUtils.uploadAsset(type, [dataUrl])
-    })
-  }
+const isProcessingBgRemove = computed(() => store.getters['bgRemove/getIsProcessing'])
+const modifiedFlag = computed(() => store.getters['bgRemove/getModifiedFlag'])
+const showInitImage = computed(() => store.getters['bgRemove/getShowInitImage'])
+const setShowInitImage = (val: boolean) => {
+  store.commit('bgRemove/SET_showInitImage', val)
 }
+
+const setRestoreInitState = (val: boolean) => {
+  store.commit('bgRemove/SET_restoreInitState', val)
+}
+const previewSrc = ref('')
 // #endregion
 </script>
 <style lang="scss" scoped>
@@ -959,26 +994,10 @@ const startBgRemove = (type: 'cm-bg-remove') => {
 
 .editor-view {
   &__saving-state {
-    @apply grid grid-rows-[minmax(0,1fr),auto,auto] grid-cols-1 justify-items-center items-center h-full w-full gap-16;
+    @apply grid grid-rows-[minmax(0,1fr)] grid-cols-1 justify-items-center items-center h-full w-full;
   }
 }
 
 // @TODO discuss with allen
 //@apply max-w-full max-h-full object-contain;
-.result-showcase {
-  transform-style: preserve-3d;
-
-  &__card {
-    @apply max-h-full object-contain;
-    backface-visibility: hidden;
-    transition: transform 0.6s;
-
-    &--back {
-    }
-  }
-}
-
-.is-flipped {
-  transform: rotateY(180deg);
-}
 </style>

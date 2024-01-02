@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import i18n from '@/i18n'
-import { IPaymentView, IPaymentWarningView, IStkProFeatures } from '@/interfaces/payment'
+import { ICmProFeatures, IPaymentView, IPaymentWarningView, IStkProFeatures } from '@/interfaces/payment'
 import router from '@/router'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
@@ -9,6 +9,7 @@ import modalUtils from './modalUtils'
 import picWVUtils from './picWVUtils'
 import popupUtils from './popupUtils'
 import stkWVUtils from './stkWVUtils'
+import cmWVUtils from './cmWVUtils'
 
 class PaymentUtils {
   get status(): string { return store.getters['payment/getStatus'] }
@@ -24,7 +25,7 @@ class PaymentUtils {
     popupUtils.openPopup('payment')
   }
 
-  checkProApp(item: { plan?: number }, targetPic?: IPaymentWarningView, targetStk?: IStkProFeatures): boolean {
+  checkProApp(item: { plan?: number }, targetPic?: IPaymentWarningView, targetStk?: IStkProFeatures, targetCm?: ICmProFeatures): boolean {
     if (generalUtils.isPic) {
       if (!targetPic) return true // vivipic requires target, if not provided, treat as a no-check-needed situation
       return this.checkPro({ ...item, plan: item.plan ?? 0 }, targetPic)
@@ -33,7 +34,7 @@ class PaymentUtils {
       return stkWVUtils.checkPro(item, targetStk) // vivisticker allows undefined target
     }
     if (generalUtils.isCm) {
-      return true // TODO: charmix checkPro function
+      return cmWVUtils.checkPro(item, targetCm) // charmix allows undefined target
     }
     return true
   }

@@ -37,6 +37,7 @@ declare module 'vue' {
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SavingOptions: typeof import('./components/panel-content/SavingOptions.vue')['default']
     SavingTab: typeof import('./components/panel-content/SavingTab.vue')['default']
     ScrollableContainer: typeof import('./components/global/ScrollableContainer.vue')['default']
     SelectionOptions: typeof import('./components/panel-content/SelectionOptions.vue')['default']

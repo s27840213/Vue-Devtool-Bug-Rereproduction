@@ -51,7 +51,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       :disabled="isGenerating"
       icon="crown"
       @click="showMoreRes") {{ $t('CM0068') }}
-    span(class="text-white typo-btn-md") {{ `${$t('CM0066')}: ${100}` }}
+    span(class="text-white typo-btn-md") {{ `${$t('CM0066')}: ${aiCredit}` }}
 </template>
 
 <script setup lang="ts">
@@ -61,7 +61,7 @@ import { useUserStore } from '@/stores/user'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const userStore = useUserStore()
-const { prevGenParams } = storeToRefs(userStore)
+const { prevGenParams, aiCredit } = storeToRefs(userStore)
 
 const editorStore = useEditorStore()
 const { setCurrGenResultIndex, keepEditingInit } = editorStore

@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="screenshot")
+div(class="screenshot relative")
   nu-layer(v-if="usingLayer"
             ref="target"
             :config="config"
@@ -12,9 +12,19 @@ div(class="screenshot")
     img(:src="backgroundImage" @load="onload")
   div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
   page-content(v-if="usingJSON" :config="page" :pageIndex="0" :noBg="extraData.noBg" :contentScaleRatio="contentScaleRatio" :style="pageTransforms()")
+  canvas-section(
+    v-show="extraData?.maskUrl"
+    class="absolute top-0 left-0"
+    :containerDOM="$el"
+    :wrapperDOM="$el"
+    :width="canvasSize.width"
+    :height="canvasSize.height"
+    noOpacity)
 </template>
 
 <script lang="ts">
+import useCanvasUtils from '@/composable/useCanvasUtilsCm'
+import { useEditorStore } from '@/stores/editor'
 import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { AllLayerTypes, IImageStyle, ILayer } from '@nu/vivi-lib/interfaces/layer'
@@ -40,6 +50,16 @@ enum ScreenShotMode {
 
 export default defineComponent({
   name: 'ScreenShot',
+  setup() {
+    const { setMaskDataUrl, updateMaskParams } = useEditorStore()
+    const { restoreCanvas, updateCanvasSize } = useCanvasUtils()
+    return {
+      setMaskDataUrl,
+      restoreCanvas,
+      updateMaskParams,
+      updateCanvasSize
+    }
+  },
   data() {
     return {
       usingLayer: false,
@@ -99,6 +119,12 @@ export default defineComponent({
       } else {
         return ScreenShotMode.PAGE
       }
+    },
+    canvasSize() {
+      return {
+        width: this.page.width * this.contentScaleRatio,
+        height: this.page.height * this.contentScaleRatio
+      }
     }
   },
   methods: {
@@ -126,7 +152,8 @@ export default defineComponent({
         if (toast !== null) {
           this.toast = toast === 'true'
         }
-        this.extraData = { thumbType, designId, key, noBg }
+        const maskUrl = urlParams.get('maskUrl')
+        this.extraData = { thumbType, designId, key, noBg, maskUrl }
         switch (type) {
           case 'svg': {
             const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json() as ILayer
@@ -299,6 +326,13 @@ export default defineComponent({
               this.contentScaleRatio = Math.min(window.outerWidth / newSize.width, window.outerHeight / newSize.height)
               this.JSONcontentSize = newSize
               this.usingJSON = true
+
+              if (maskUrl) {
+                this.setMaskDataUrl(maskUrl)
+                this.updateMaskParams({ x: 0, y: 0, width: page.width * this.contentScaleRatio, height: page.height * this.contentScaleRatio })
+                this.updateCanvasSize(undefined, page.width * this.contentScaleRatio, page.height * this.contentScaleRatio)
+                this.restoreCanvas()
+              }
             }
             if (page.layers.length === 0 && !hasBgImg) {
               // TODO: check for transparent bg color

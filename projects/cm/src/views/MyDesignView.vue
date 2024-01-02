@@ -57,7 +57,7 @@ import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 
 // #region hooks
-onBeforeRouteLeave((to, from) => {
+onBeforeRouteLeave(() => {
   setCurrOpenDesign(undefined)
   setCurrOpenSubDesign(undefined)
 })

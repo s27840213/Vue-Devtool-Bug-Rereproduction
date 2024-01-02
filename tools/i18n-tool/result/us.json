@@ -1130,6 +1130,7 @@
   "CM0081": "Auto filling ",
   "CM0082": "Background Remove",
   "CM0083": "Pre-process image",
+  "CM0084": "Sharing as",
   "CM0085": "Mask is empty",
   "CM0086": "Processing",
   "CM0087": "Image Generation Failed",
@@ -1189,5 +1190,10 @@
   "CM0142": "Welcome to Charmix PRO",
   "CM0143": "Congrats! Charmix Pro opens up endless possibilities for creating visual content. Better and faster. We hope you enjoy it!",
   "CM0144": "https://vivisticker.com/us/privacy-policy/",
-  "CM0145": "https://vivisticker.com/us/terms-of-use/"
+  "CM0145": "https://vivisticker.com/us/terms-of-use/",
+  "CM0146": "Save as ",
+  "CM0147": "A specific prompt can generate better results. Give it a few tries!",
+  "CM0148": "Generating your images…",
+  "CM0149": "Almost done…",
+  "CM0150": "Share as"
 }

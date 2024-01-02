@@ -10,8 +10,8 @@ import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import { floor, isEqual, round } from 'lodash'
-import rulerUtils from './rulerUtils'
 import generalUtils from './generalUtils'
+import rulerUtils from './rulerUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -196,12 +196,13 @@ class ResizeUtils {
     }
     pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX * scale, page.backgroundImage.posY * scale)
     pageUtils.updateBackgroundImageStyles(
-      pageIndex, {
-      width,
-      height,
-      imgWidth: width,
-      imgHeight: height
-    }
+      pageIndex,
+      {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      }
     )
   }
 
@@ -308,7 +309,7 @@ class ResizeUtils {
     }
 
     // update background
-    const epsilon = generalUtils.isStk ? 0.001 : Number.EPSILON // to handle error due to rounding when calculating page size in stkWVUtils.getPageSize()
+    const epsilon = (generalUtils.isStk || generalUtils.isCm) ? 0.001 : Number.EPSILON // to handle error due to rounding when calculating page size in stkWVUtils.getPageSize()
     if (Math.abs(targetAspectRatio - aspectRatio) < epsilon) {
       this.scaleBackground(pageIndex, page, scale)
     } else {
@@ -359,8 +360,8 @@ class ResizeUtils {
     } else {
       rulerUtils.removeInvalidGuides(pageIndex, format)
       pageUtils.setPageSize(pageIndex, format.width, format.height, format.physicalWidth, format.physicalHeight, format.unit)
-      }
     }
+  }
 
   testResizeAllPages() {
     const { getPages: pages } = pageUtils

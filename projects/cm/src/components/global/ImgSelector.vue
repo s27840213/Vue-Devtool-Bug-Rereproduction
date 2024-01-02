@@ -103,7 +103,7 @@ div(
         class="relative")
         img(
           class="w-full"
-          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
+          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=150`"
           @click="selectImage(img, 'unsplash')")
         svg-icon(
           v-if="selected(img, 'unsplash')"
@@ -203,6 +203,7 @@ import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import { find, pull } from 'lodash'
 
 const props = defineProps({
@@ -499,6 +500,11 @@ const applyPreprocess = () => {
     // TODO: remove bg
   }
 }
+watch(isBgRemove, (newVal) => {
+  if(newVal && !paymentUtils.checkProApp({plan: 1})) {
+    isBgRemove.value = false
+  }
+})
 // #endregion
 </script>
 

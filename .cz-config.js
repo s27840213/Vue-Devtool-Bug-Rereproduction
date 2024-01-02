@@ -6,7 +6,7 @@ module.exports = {
     { value: 'fix', name: 'fix:      A bug fix' },
     {
       value: 'refactor',
-      name: 'refactor: A code change that neither fixes a bug nor adds a feature'
+      name: 'refactor: A code change that neither fixes a bug nor adds a feature',
     },
     { value: 'perf', name: 'perf:     A code change that improves performance' },
     { value: 'docs', name: 'docs:     Documentation only changes' },
@@ -14,10 +14,10 @@ module.exports = {
     { value: 'test', name: 'test:     Adding missing tests' },
     {
       value: 'chore',
-      name: 'chore:    Changes to the build process or auxiliary tools\n            and libraries such as documentation generation'
+      name: 'chore:    Changes to the build process or auxiliary tools\n            and libraries such as documentation generation',
     },
     { value: 'revert', name: 'revert:   Revert to a commit' },
-    { value: 'cy', name: 'cy:   Update Cypress testcase or fix Cypress error.' }
+    { value: 'cy', name: 'cy:   Update Cypress testcase or fix Cypress error.' },
     // { value: 'WIP', name: 'WIP:      Work in progress' }
   ],
 
@@ -45,10 +45,10 @@ module.exports = {
     body: 'Provide a LONGER description of the change (optional). Use "|" to break new line:\n',
     // breaking: 'List any BREAKING CHANGES (optional):\n',
     footer: 'List any ISSUES CLOSED by this change (optional). E.g.: #31, #34:\n',
-    confirmCommit: 'Are you sure you want to proceed with the commit above?'
+    confirmCommit: 'Are you sure you want to proceed with the commit above?',
   },
   allowCustomScopes: false,
   allowBreakingChanges: [],
   // limit subject length
-  subjectLimit: 100
+  subjectLimit: 100,
 }

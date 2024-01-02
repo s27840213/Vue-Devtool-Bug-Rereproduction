@@ -13,7 +13,7 @@ export interface IActionSheetBtn {
 
 export const useActionSheetStore = defineStore('actionSheet', () => {
   const isActionSheetOpen = ref(false)
-  const primaryActions = reactive<Array<IActionSheetBtn>>([
+  const primaryActions = ref<Array<IActionSheetBtn>>([
     {
       labels: [
         {
@@ -50,7 +50,7 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
     },
   ])
 
-  const secondaryActions = reactive<Array<IActionSheetBtn>>([
+  const secondaryActions = ref<Array<IActionSheetBtn>>([
     {
       labels: [
         {
@@ -71,11 +71,11 @@ export const useActionSheetStore = defineStore('actionSheet', () => {
   ])
 
   const setPrimaryActions = (newActions: Array<IActionSheetBtn>) => {
-    Object.assign(primaryActions, newActions)
+    primaryActions.value = newActions
   }
 
   const setSecondaryActions = (newActions: Array<IActionSheetBtn>) => {
-    Object.assign(secondaryActions, newActions)
+    secondaryActions.value = newActions
   }
 
   const toggleActionSheet = (resetFlag?: boolean) => {

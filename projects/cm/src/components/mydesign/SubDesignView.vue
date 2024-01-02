@@ -1,8 +1,6 @@
 <template lang="pug">
-div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-border z-median")
-  headerbar(
-    class="editor-header box-border px-24"
-    ref="headerbarRef")
+div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-border z-canvas")
+  headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
       back-btn(:customCallback="handleBackAction")
     template(#middle)
@@ -35,7 +33,7 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
             iconName="more_horizontal"
             iconWidth="22px"
             @click.stop="editDesign(design)")
-    sub-design-detail
+    sub-design-detail(class="absolute top-0 left-0")
 </template>
 <script setup lang="ts">
 import useActionSheetCm from '@/composable/useActionSheetCm'
@@ -113,15 +111,14 @@ const handleHomeBtnAction = (navagate: () => void) => {
 const selectDesign = (subDesign: ITmpSubDesign) => {
   getSubDesignConfig(currOpenDesign, subDesign.subId).then((data) => {
     try {
-      const { content, flag, name, path } = data
-      if (flag === '1') {
+      if (!data || data.flag === '1') {
         notify({
           group: 'error',
           text: 'Get design config error',
         })
         throw new Error('getSubDesignConfig error')
       }
-      setCurrOpenSubDesign(content)
+      setCurrOpenSubDesign(data.content)
     } catch (e) {
       console.log(e)
     }

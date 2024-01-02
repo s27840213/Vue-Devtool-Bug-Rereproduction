@@ -133,20 +133,20 @@ const useCanvasUtils = (
   }
 
   const showBrush = ref(false)
-
-  const brushStyle = reactive({
-    backgroundColor: getBrushColor(drawingColor.value),
-    width: `${brushSize.value * contentScaleRatio.value * 0.01}px`,
-    height: `${brushSize.value * contentScaleRatio.value * 0.01}px}`,
-    transform: 'translate(0,0)',
-  })
-
   const pageScaleRatio = computed(() => store.getters.getPageScaleRatio)
 
-  watch([brushSize, pageScaleRatio], ([newBrushSize, newScaleRatio]) => {
-    brushStyle.width = `${newBrushSize * contentScaleRatio.value * newScaleRatio * 0.01}px`
-    brushStyle.height = `${newBrushSize * contentScaleRatio.value * newScaleRatio * 0.01}px`
+  const brushPos = reactive({ x: 0, y: 0 })
 
+  const brushStyle = computed(() => {
+    return {
+      backgroundColor: getBrushColor(drawingColor.value),
+      width: `${brushSize.value * contentScaleRatio.value * pageScaleRatio.value * 0.01}px`,
+      height: `${brushSize.value * contentScaleRatio.value * pageScaleRatio.value * 0.01}px`,
+      transform: `translate(${brushPos.x}px, ${brushPos.y}px)`,
+    }
+  })
+
+  watch(brushSize, (newBrushSize) => {
     if (canvasCtx && canvasCtx.value) {
       canvasCtx.value.lineWidth = newBrushSize
     }
@@ -216,7 +216,6 @@ const useCanvasUtils = (
     if (canvasCtx && canvasCtx.value) {
       if (isBiColorEditor.value) fillNonTransparent(newVal)
       canvasCtx.value.strokeStyle = newVal
-      brushStyle.backgroundColor = getBrushColor(newVal)
     }
   })
 
@@ -251,18 +250,15 @@ const useCanvasUtils = (
   const setBrushPos = (e: PointerEvent) => {
     if (wrapperRef && wrapperRef.value) {
       const { x, y } = getMousePosInTarget(e, wrapperRef.value)
-      brushStyle.transform = `translate(${
+      brushPos.x =
         x * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 -
         (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 +
         pageUtils.getCurrPage.x
-      }px, ${
+
+      brushPos.y =
         y * contentScaleRatio.value * pageUtils.scaleRatio * 0.01 -
         (brushSize.value * contentScaleRatio.value * pageUtils.scaleRatio * 0.01) / 2 +
         pageUtils.getCurrPage.y
-      }px)`
-      // brushStyle.transform = `translate(${
-      //   x * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2
-      // }px, ${y * contentScaleRatio.value - (brushSize.value * contentScaleRatio.value) / 2}px)`
     }
   }
 
@@ -710,6 +706,7 @@ const useCanvasUtils = (
           width: maskParams.value.width ?? pageSize.value.width,
           height: maskParams.value.height ?? pageSize.value.height,
         })
+        if (isBiColorEditor.value) fillNonTransparent(drawingColor.value)
       }
     }
   }

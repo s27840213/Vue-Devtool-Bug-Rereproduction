@@ -1,16 +1,16 @@
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
+import { useVideoRcordStore } from '@/stores/videoRecord'
 import { ICmMyDesign, ITmpSubDesign } from '@/types/user'
-import { saveToCameraRoll } from '@/utils/pixiRecorder'
-import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
-import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
 const useActionSheetCm = () => {
   const userStore = useUserStore()
   const { getSubDesignImage, deleteDesign, deleteSubDesign } = userStore
-  const { currOpenSubDesign, isSubDesignOpen } = storeToRefs(userStore)
+  const { currOpenSubDesign, isSubDesignOpen, removeWatermark, highResolutionPhoto } =
+    storeToRefs(userStore)
   const { t } = useI18n()
   const {
     isActionSheetOpen,
@@ -23,31 +23,66 @@ const useActionSheetCm = () => {
   } = useActionSheet()
 
   const editorStore = useEditorStore()
-  const { currGeneratedResults } = storeToRefs(editorStore)
+  const { currGeneratedResult } = storeToRefs(editorStore)
 
   const savePhotoCb = async () => {
     let targetUrl = ''
     if (isSubDesignOpen.value && currOpenSubDesign.value) {
       targetUrl = getSubDesignImage(currOpenSubDesign.value)
     } else {
-      targetUrl = currGeneratedResults.value.url
+      targetUrl = currGeneratedResult.value.url
     }
     if (targetUrl.startsWith('chmix://')) {
       const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.documentToCameraRoll(path, name, type)
+      return cmWVUtils.documentToCameraRoll(
+        path,
+        name,
+        type,
+        !removeWatermark.value,
+        highResolutionPhoto.value ? 2 : 1,
+        'scale',
+      )
     } else {
       return cmWVUtils.saveAssetFromUrl('jpg', await generalUtils.toDataUrlNew(targetUrl, 'jpg'))
     }
   }
   const saveVideoCb = () => {
-    if (currGeneratedResults.value.video) {
-      return saveToCameraRoll(currGeneratedResults.value.video)
+    const { saveToCameraRoll, setGenVideoCb, setIsExportVideo } = useVideoRcordStore()
+    setIsExportVideo(true)
+    if (currGeneratedResult.value.video) {
+      return saveToCameraRoll(currGeneratedResult.value.video)
     } else {
-      throw new Error('video not generated yet')
+      return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
+        setGenVideoCb(() => resolve(saveToCameraRoll(currGeneratedResult.value.video)))
+        console.log('video not generated yet, wait for it generated')
+      })
     }
   }
 
-  const setSavingActions = () => {
+  const sharePhotoCb = async () => {
+    let targetUrl = ''
+    if (isSubDesignOpen.value && currOpenSubDesign.value) {
+      targetUrl = getSubDesignImage(currOpenSubDesign.value)
+    } else {
+      targetUrl = currGeneratedResult.value.url
+    }
+    if (targetUrl.startsWith('chmix://')) {
+      const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
+      return cmWVUtils.shareFile(`${path}/${name}.${type}`)
+    } else {
+      console.log('retry or something else') // TODO: need to discuss with native for this case
+      throw new Error('not implemented yet')
+    }
+  }
+  const shareVideoCb = async () => {
+    console.log('share video')
+  }
+
+  const setSavingActions = (
+    photoCb: () => void,
+    videoCb: () => void,
+    photoAndVideoCb: () => void,
+  ) => {
     setPrimaryActions([
       {
         labels: [
@@ -74,27 +109,7 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
-        cb: () => {
-          savePhotoCb()
-            .then((data) => {
-              const { flag } = data
-              if (flag === '1') {
-                throw new Error(data.msg)
-              }
-              notify({
-                group: 'success',
-                text: `${t('NN0889')}`,
-              })
-              toggleActionSheet()
-            })
-            .catch((e) => {
-              console.log(e)
-              notify({
-                group: 'error',
-                text: e,
-              })
-            })
-        },
+        cb: photoCb,
       },
       {
         labels: [
@@ -104,24 +119,7 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
-        cb: () => {
-          saveVideoCb()
-            .then(() => {
-              notify({
-                group: 'success',
-                text: `${t('NN0889')}`,
-              })
-              toggleActionSheet()
-            })
-            .catch((e) => {
-              console.log(e)
-              // @TODO
-              notify({
-                group: 'error',
-                text: 'gen vedio error',
-              })
-            })
-        },
+        cb: videoCb,
       },
       {
         labels: [
@@ -131,22 +129,64 @@ const useActionSheetCm = () => {
             labelSize: 'typo-btn-lg',
           },
         ],
+        cb: photoAndVideoCb,
+      },
+    ])
+
+    setSecondaryActions([
+      {
+        labels: [
+          {
+            label: t('NN0203'),
+            labelColor: 'yellow-cm',
+            labelSize: 'typo-btn-lg',
+          },
+        ],
         cb: () => {
-          Promise.all([savePhotoCb(), saveVideoCb()])
-            .then(() => {
-              notify({
-                group: 'success',
-                text: `${t('NN0889')}`,
-              })
-              toggleActionSheet()
-            })
-            .catch(() => {
-              notify({
-                group: 'error',
-                text: 'error',
-              })
-            })
+          toggleActionSheet()
         },
+      },
+    ])
+  }
+
+  const setSharingActions = (photoCb: () => void, videoCb: () => void) => {
+    setPrimaryActions([
+      {
+        labels: [
+          {
+            label: `${t('CM0084')}:`,
+            labelColor: 'yellow-cm',
+            labelSize: 'typo-h6',
+          },
+          {
+            label: t('CM0076'),
+            labelColor: 'white',
+            labelSize: 'typo-body-sm',
+          },
+        ],
+        cb: () => {
+          //
+        },
+      },
+      {
+        labels: [
+          {
+            label: t('NN0416'),
+            labelColor: 'white',
+            labelSize: 'typo-btn-lg',
+          },
+        ],
+        cb: photoCb,
+      },
+      {
+        labels: [
+          {
+            label: t('CM0077'),
+            labelColor: 'white',
+            labelSize: 'typo-btn-lg',
+          },
+        ],
+        cb: videoCb,
       },
     ])
 
@@ -273,8 +313,13 @@ const useActionSheetCm = () => {
     primaryActions,
     secondaryActions,
     setSavingActions,
+    setSharingActions,
     setMyDesignActions,
     setSubDesignActions,
+    savePhotoCb,
+    saveVideoCb,
+    sharePhotoCb,
+    shareVideoCb,
     reset,
     toggleActionSheet,
   }

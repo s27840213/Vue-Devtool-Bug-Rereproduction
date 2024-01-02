@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "run-p build-only type-check",
-    "build-only": "vue-cli-service build",
+    "build-only": "vue-cli-service build --silent",
     "type-check": "vue-tsc -p tsconfig.json --composite false",
     "lint": "vue-cli-service lint",
     "build:dev": "vue-cli-service build --mode development",

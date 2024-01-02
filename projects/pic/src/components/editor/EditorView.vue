@@ -391,6 +391,7 @@ export default defineComponent({
       if (e.pointerType === 'mouse' && e.button !== 0) return
       if (this.isImgCtrl) return imageUtils.setImgControlDefault()
       if (this.getInGestureMode) return
+      if ((e.target as HTMLElement | null)?.className?.includes('control-point')) return
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,

@@ -15,10 +15,10 @@ import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import constantData from './constantData'
+import logUtils from './logUtils'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-import logUtils from './logUtils'
 
 declare let window: CustomWindow
 
@@ -189,7 +189,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       case 'screenshot-result':
         this.screenshotMap[(info.options as { imageId: string }).imageId](info.status as string)
         break
-    }
+          }
   }
 
   get inBrowserMode() {
@@ -397,10 +397,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  createUrlForJSON({ page = undefined, noBg = true }: { page?: IPage, noBg?: boolean } = {}): string {
+  createUrlForJSON({ page = undefined, noBg = true, maskUrl = '' }: { page?: IPage, noBg?: boolean, maskUrl?: string } = {}): string {
     page = page ?? pageUtils.currFocusPage
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}`
+    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}&noBg=${noBg}&maskUrl=${encodeURIComponent(maskUrl)}`
   }
 
   async sendScreenshotUrl(query: string, { outputType, quality, forGenImage }: { outputType?: string, quality?: number, forGenImage?: boolean } = {}): Promise<{ flag: string, imageId: string, cleanup: () => void }> {
@@ -637,7 +637,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       uuid,
       txid
     })
-    logUtils.setLogAndConsoleLog(`getTxInfo: ${JSON.stringify({token: store.getters['user/getGetTxToken'], uuid: uuid, txid: txid, res: res?.data})}`)
+    logUtils.setLogAndConsoleLog('getTxInfo', {token: store.getters['user/getGetTxToken'], uuid: uuid, txid: txid, res: res?.data})
     if (res.data.flag === 0) {
       const isSubscribed = res.data.subscribe === 1
       store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
@@ -859,8 +859,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async documentToCameraRoll(path: string, name: string, type: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType }) as GeneralResponse
+  async documentToCameraRoll(path: string, name: string, type: string, watermark: boolean, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType, watermark }) as GeneralResponse
+  }
+
+  async shareFile(path: string) {
+    return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
   }
 
   showUpdateModal(force = false) {
