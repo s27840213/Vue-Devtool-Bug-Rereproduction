@@ -22,7 +22,7 @@ div(
           :class="{ 'is-flipped': !showVideo }"
           v-if="currOpenSubDesign"
           @load="handleThumbLoaded"
-          :src="getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
+          :src="atEditor ? generatedResults[currGenResultIndex].url : getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
         div(
           v-if="atEditor"
           class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
