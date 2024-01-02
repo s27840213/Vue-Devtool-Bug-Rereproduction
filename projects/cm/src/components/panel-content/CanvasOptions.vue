@@ -14,6 +14,7 @@ import vuex from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import resizeUtils from '@nu/vivi-lib/utils/resizeUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 
 const { t } = useI18n()
@@ -33,11 +34,21 @@ const handleApply = () => {
   const initSize = vuex.state.canvasResize.initSize
   const layerOffset = vuex.state.canvasResize.layerOffset
   layerUtils.applyLayerOffset(layerOffset)
+  const { pageIndex, getCurrPage: page } = layerUtils
+  const longerSide = Math.max(page.width, page.height)
+  let ratio = 1
+  if (longerSide > 1600) {
+    ratio = 1600 / longerSide
+    resizeUtils.resizePage(pageIndex, page, {
+      width: page.width * ratio,
+      height: page.height * ratio,
+    })
+  }
   updateMaskParams({
-    x: layerOffset.x,
-    y: layerOffset.y,
-    width: initSize.width,
-    height: initSize.height,
+    x: layerOffset.x * ratio,
+    y: layerOffset.y * ratio,
+    width: initSize.width * ratio,
+    height: initSize.height * ratio,
   })
   vuex.commit('canvasResize/UPDATE_reset')
   vuex.commit('canvasResize/SET_isResizing', false)
