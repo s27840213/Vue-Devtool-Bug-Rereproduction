@@ -157,8 +157,8 @@ import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import pagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { Collapse } from 'vue-collapsed'
 
@@ -331,9 +331,11 @@ const handleGenerate = async () => {
     setCurrDesignId(generalUtils.generateAssetId())
   }
 
+  pagePinchUtils.resetPageScale()
+
   await waitForGenerating()
 
-  setTimeout(() => { 
+  setTimeout(() => {
     setCurrGenResultIndex(0)
     changeEditorState('next')
   }, 3000)
@@ -342,7 +344,6 @@ const handleGenerate = async () => {
       setCurrGenResultIndex(index)
     },
   }).then(() => {
-    pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
     setIsSendingGenImgReq(false)
   })
 }

@@ -594,7 +594,9 @@ const initPagePinchHandler = () => {
   setMobilePysicalSize()
   pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
   pagePinchHandler = (e) => {
-    if (inAspectRatioState.value) return
+    if (inAspectRatioState.value ||
+      isProcessingBgRemove.value ||
+      (inGenResultState.value && currImgSrc.value === '')) return
     setMobilePysicalSize()
     pagePinchUtils?.pinchHandler(e)
   }
