@@ -125,6 +125,12 @@ router.addRoute({
     },
   },
   async beforeEnter(to, from, next) {
+    cmWVUtils.detectIfInApp()
+
+    // redirect from editor to home on refresh if is in app
+    // TODO: remove after implementation of tempDesign
+    if (!cmWVUtils.inBrowserMode && to.name === 'Editor') return next({ name: 'Home' })
+
     loginUtils.checkToken(() => cmWVUtils.restore())
 
     useI18n() // prevent import being removed
@@ -133,7 +139,6 @@ router.addRoute({
     const userStore = useUserStore()
     const { listDesigns } = userStore
 
-    cmWVUtils.detectIfInApp()
     await cmWVUtils.getUserInfo()
     const appLoadedTimeout = store.getters['cmWV/getAppLoadedTimeout']
     if (appLoadedTimeout > 0) {
