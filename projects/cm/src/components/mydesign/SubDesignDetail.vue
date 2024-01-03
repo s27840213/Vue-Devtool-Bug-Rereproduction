@@ -226,11 +226,13 @@ watch(showVideo, (newVal) => {
 
 const handleSwipeLeft = (e: AnyTouchEvent) => {
   e.stopImmediatePropagation()
+  if (!atEditor.value) return
   showVideo.value = false
 }
 
 const handleSwipeRight = (e: AnyTouchEvent) => {
   e.stopImmediatePropagation()
+  if (!atEditor.value) return
   showVideo.value = true
 }
 </script>
