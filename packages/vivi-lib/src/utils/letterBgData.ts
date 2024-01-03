@@ -12,7 +12,7 @@ export const textLetterBgName = [
   'star', 'baby', 'paper-tap', 'paper-tap-point', 'paper-tap-stripe',
   'paper-tap-grid', 'triangle-flag', 'triangle-flag-custom',
   'rectangle-flag', 'rectangle-flag-custom', 'stretch-dog', 'stretch-rabbit',
-  'stretch-cat', 'stretch-dragon', 'mahjong', 'wealth',
+  'stretch-cat', 'stretch-dragon', 'mahjong', 'wealth', 'spring-couplets',
 ] as const
 
 export type ITextLetterBgName = typeof textLetterBgName[number]
@@ -233,10 +233,15 @@ class LetterBGData {
     }, {
       key: 'mahjong',
       label: i18n.global.tc('NN0920'),
+      plan: 1,
       options: withColor,
     }, {
       key: 'wealth',
       label: i18n.global.tc('NN0921'),
+      options: noColor,
+    }, {
+      key: 'spring-couplets',
+      label: i18n.global.tc('NN0922'),
       options: noColor,
     }]
   }
@@ -312,7 +317,7 @@ class LetterBGData {
       case 'stretch-dragon':
         href += head ? '-head' : tail ? '-tail' : '0'
         break
-      // text-book, *-custom
+      // text-book, spring-couplets, *-custom
       default:
     }
     return { href, color }
@@ -538,6 +543,11 @@ class LetterBGData {
         yOffset200: 2,
         size: 155,
       },
+      'spring-couplets': {
+        ...letterBgDefault,
+        yOffset200: 2,
+        size: 155,
+      },
     }
   }
 
@@ -670,6 +680,9 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1050,
       },
       wealth: {
+        lineHeight: 1.96, fontSpacing: 1100,
+      },
+      'spring-couplets': {
         lineHeight: 1.96, fontSpacing: 1100,
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
