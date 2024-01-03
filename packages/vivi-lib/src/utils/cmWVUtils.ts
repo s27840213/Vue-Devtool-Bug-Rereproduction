@@ -373,7 +373,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
         if (action !== 'editorSave') return
-        this.deleteFile('screenshot', imageId ?? '', outputType ?? 'jpg', imagePath)
+        this.deleteFile(`screenshot/${imagePath ?? ''}/${imageId ?? ''}.${outputType ?? 'jpg'}`)
       }
     }
   }
@@ -450,7 +450,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       flag: '0',
       imageId,
       cleanup: () => {
-        this.deleteFile('screenshot', imageId, outputType ?? 'jpg')
+        this.deleteFile(`screenshot/${imageId}/${outputType ?? 'jpg'}`)
       }
     }
   }
@@ -502,9 +502,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     await this.callIOSAsHTTPAPI('SET_STATE', { key, value })
   }
 
-  async deleteFile(key: string, name: string, type: string, subPath?: string) {
+  async deleteFile(path: string) {
     if (this.inBrowserMode) return
-    await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
+    await this.callIOSAsHTTPAPI('DELETE_FILE', { path })
   }
 
   async fetchTutorialFlags() {
