@@ -545,8 +545,8 @@ class LetterBGData {
       },
       'spring-couplets': {
         ...letterBgDefault,
-        yOffset200: 2,
-        size: 155,
+        yOffset200: 1,
+        size: 152,
       },
     }
   }
@@ -683,7 +683,7 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 1100,
       },
       'spring-couplets': {
-        lineHeight: 1.96, fontSpacing: 1100,
+        lineHeight: 1.96, fontSpacing: 617,
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
