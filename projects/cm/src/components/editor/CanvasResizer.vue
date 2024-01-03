@@ -82,7 +82,7 @@ defineProps({
 // #region controllers
 const CONTROLLER_CONFIG = {
   width: 4,
-  length: 40,
+  length: 20,
   margin: 1,
   color: 'bg-white',
 }
