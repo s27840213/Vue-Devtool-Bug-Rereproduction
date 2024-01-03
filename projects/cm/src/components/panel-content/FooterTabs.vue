@@ -220,7 +220,7 @@ export default defineComponent({
           icon: 'cm_remove-bg',
           text: `${this.$t('NN0043')}`,
           panelType: 'cm_remove-bg',
-          forPro: true,
+          forPro: false,
           plan: 'bg-remove',
           hidden: this.inEffectEditingMode || this.isInFrame,
           disabled: this.isProcessing,
