@@ -65,7 +65,7 @@ class LogUtils {
 
   setLogAndConsoleLog(...logContent: any[]) {
     console.log(...logContent)
-    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc)).map(lc => lc.substring(0, 500))
+    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc)).map(lc => lc ? lc.substring(0, 500) : lc)
     // slice every string to 500 characters to avoid localStorage quota exceeds
     this.setLog(logContent.join(' '), false)
   }
