@@ -202,7 +202,7 @@ export default {
         locale: this.getLocale(),
         token: this.getToken(),
         // token: this.getToken(),
-        debug: 1
+        debug: 0
       }
     }))
   },
