@@ -88,6 +88,7 @@ import { notify } from '@kyvg/vue3-notification'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 import type { AnyTouchEvent } from 'any-touch'
 
 const { t } = useI18n()
@@ -166,12 +167,19 @@ const promptContainerLineClamp = computed(() => {
 })
 
 const checkExpandable = () => {
+  logUtils.setLogAndConsoleLog(
+    'SubDesignDetail.vue:169',
+    promptRef.value?.scrollHeight,
+    promptRef.value?.clientHeight,
+    currOpenSubDesign.value?.prompt,
+  )
   if (
     promptRef.value?.scrollHeight ||
     promptRef.value?.clientHeight ||
     currOpenSubDesign.value?.prompt === ''
   ) {
     isExpandable.value = promptRef.value?.scrollHeight !== promptRef.value?.clientHeight
+    logUtils.setLogAndConsoleLog('SubDesignDetail.vue:176', isExpandable.value)
     return
   }
   setTimeout(checkExpandable, 100)
