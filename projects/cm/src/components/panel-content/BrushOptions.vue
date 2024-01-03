@@ -48,6 +48,7 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
 
 enum ControlMode {
@@ -220,6 +221,7 @@ const apply = async () => {
     })
 
     setInBgRemoveMode(false)
+    stepsUtils.record()
   }
   setCurrActiveFeature('none')
   PagePinchUtils.resetPageScale()
