@@ -130,9 +130,8 @@ export type SubscribeResponse = GeneralResponse & {
 }
 
 export type FileSource = {
-  path: string,
-  name: string,
-  type: string
+  path: string
+  ext: string
 } | {
   fileId: string
 }
@@ -851,7 +850,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
+    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_S3', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
   }
 
   getDocumentPath(url: string) {

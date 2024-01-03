@@ -292,7 +292,7 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
     try {
       await cmWVUtils.uploadFileToUrl(
-        { path: 'screenshot', name: imageId, type: 'jpg' },
+        { path: `screenshot/${imageId}`, ext: 'jpg' },
         uploadMap.value ?? {},
         `${userId}/input/${requestId}_init`,
       )
