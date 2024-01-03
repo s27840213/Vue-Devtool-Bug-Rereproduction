@@ -242,7 +242,6 @@ const resizing = (event: PointerEvent) => {
     y: pointerPos.y - anchorPos.y,
   }
   const sizeDiff = { width: 0, height: 0 }
-  const layerOffset = { x: 0, y: 0 }
   const initSize = vuex.getters['canvasResize/getInitSize']
   const currSize = pageSize.value
   const currLayerOffset = vuex.getters['canvasResize/getLayerOffset']
@@ -276,7 +275,7 @@ const resizing = (event: PointerEvent) => {
     newLayerOffsetX = clippedLayerOffsetX
   } else {
     newWidth = Math.min(
-      Math.max(newWidth, newLayerOffsetX + 0.5 * initSize.width),
+      Math.max(newWidth, newLayerOffsetX + 0.75 * initSize.width),
       newLayerOffsetX + 2 * initSize.width,
     )
   }
@@ -289,7 +288,7 @@ const resizing = (event: PointerEvent) => {
     newLayerOffsetY = clippedLayerOffsetY
   } else {
     newHeight = Math.min(
-      Math.max(newHeight, newLayerOffsetY + 0.5 * initSize.height),
+      Math.max(newHeight, newLayerOffsetY + 0.75 * initSize.height),
       newLayerOffsetY + 2 * initSize.height,
     )
   }
