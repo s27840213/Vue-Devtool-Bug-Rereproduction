@@ -1,14 +1,15 @@
 <template lang="pug">
 div(ref="containerRef" class="canvas-resizer overflow-hidden relative select-none")
   page-content(
-    class="absolute top-half left-half -translate-x-half -translate-y-half select-none"
+    class="absolute select-none"
+    :style="offsetStyles"
     :config="pageState.config"
     :pageIndex="pageIndex"
     :contentScaleRatio="contentScaleRatio"
     :noBg="noBg")
   div(
-    class="absolute top-half left-half -translate-x-half -translate-y-half select-none"
-    :style="{ ...sizeStyles }"
+    class="absolute select-none"
+    :style="{ ...sizeStyles, ...offsetStyles }"
     @touchstart.prevent)
     div(
       v-for="controller in controllers"
@@ -54,8 +55,13 @@ const renderedSize = computed(() => {
     height: pageSize.value.height * contentScaleRatio.value,
   }
 })
+const offset = reactive({
+  x: 0,
+  y: 0,
+})
 const MIN_PADDING_X = 24
 const MIN_PADDING_Y = 24
+const MAX_SCALE = 3
 // #endregion
 
 defineProps({
@@ -180,6 +186,12 @@ const controllers = ref<IControllerConfig[]>([...getControllers(), ...getControl
 // #endregion
 
 // #region styles
+const offsetStyles = computed(() => {
+  return {
+    left: `${offset.x}px`,
+    top: `${offset.y}px`,
+  }
+})
 const sizeStyles = computed(() => {
   return {
     width: `${renderedSize.value.width}px`,
@@ -189,16 +201,17 @@ const sizeStyles = computed(() => {
 // #endregion
 
 // #region pos and contentScaleRatio
-watchEffect(() => {
-  if (containerWidth.value === 0 && containerHeight.value === 0) return
+watch([containerWidth, containerHeight], ([newWidth, newHeight]) => {
   const ratio = Math.min(
-    (containerWidth.value - MIN_PADDING_X * 2) / pageSize.value.width,
-    (containerHeight.value - MIN_PADDING_Y * 2) / pageSize.value.height,
+    (newWidth - MIN_PADDING_X * 2) / pageSize.value.width / MAX_SCALE,
+    (newHeight - MIN_PADDING_Y * 2) / pageSize.value.height / MAX_SCALE,
   )
   vuex.commit('SET_contentScaleRatio4Page', {
     pageIndex: layerUtils.pageIndex,
     contentScaleRatio: ratio,
   })
+  offset.x = (newWidth - pageSize.value.width * ratio) / 2
+  offset.y = (newHeight - pageSize.value.height * ratio) / 2
 })
 // #endregion
 
@@ -211,7 +224,6 @@ vuex.commit('canvasResize/SET_initSize', {
 const controllingParams = ref({ vertical: 0, horizontal: 0 } as IControllerConfig['params'])
 const anchorPos = reactive({ x: 0, y: 0 })
 const currentPointerPos = reactive({ x: 0, y: 0 })
-let pressingTimer = -1
 
 const resizeStart = (event: PointerEvent, params: IControllerConfig['params']) => {
   controllingParams.value = params
@@ -220,21 +232,14 @@ const resizeStart = (event: PointerEvent, params: IControllerConfig['params']) =
 }
 
 const resizing = (event: PointerEvent) => {
-  window.clearTimeout(pressingTimer)
   const { horizontal, vertical } = controllingParams.value
-
-  const wider = renderedSize.value.width >= containerWidth.value - 2 * MIN_PADDING_X
-  const higher = renderedSize.value.height >= containerHeight.value - 2 * MIN_PADDING_Y
 
   const pointerPos = mouseUtils.getMouseAbsPoint(event)
   Object.assign(currentPointerPos, pointerPos)
 
   // #region anchor pos
-  const paddingX = (containerWidth.value - renderedSize.value.width) / 2
-  const paddingY = (containerHeight.value - renderedSize.value.height) / 2
-
-  anchorPos.x = containerX.value + paddingX + (renderedSize.value.width / 2) * (horizontal + 1)
-  anchorPos.y = containerY.value + paddingY + (renderedSize.value.height / 2) * (vertical + 1)
+  anchorPos.x = containerX.value + offset.x + (renderedSize.value.width / 2) * (horizontal + 1)
+  anchorPos.y = containerY.value + offset.y + (renderedSize.value.height / 2) * (vertical + 1)
   // #endregion
 
   const diff = {
@@ -247,12 +252,12 @@ const resizing = (event: PointerEvent) => {
   const currLayerOffset = vuex.getters['canvasResize/getLayerOffset']
 
   if (horizontal !== 0) {
-    const amount = diff.x * horizontal * (wider ? 0.25 : 2)
+    const amount = diff.x * horizontal
     sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
   }
 
   if (vertical !== 0) {
-    const amount = diff.y * vertical * (higher ? 0.25 : 2)
+    const amount = diff.y * vertical
     sizeDiff.height = Math.trunc(amount / contentScaleRatio.value)
   }
 
@@ -269,27 +274,27 @@ const resizing = (event: PointerEvent) => {
   if (horizontal < 0) {
     const clippedLayerOffsetX = Math.min(
       Math.max(newLayerOffsetX, -0.25 * initSize.width),
-      initSize.width,
+      ((MAX_SCALE - 1) / 2) * initSize.width,
     )
     newWidth += clippedLayerOffsetX - newLayerOffsetX
     newLayerOffsetX = clippedLayerOffsetX
   } else {
     newWidth = Math.min(
       Math.max(newWidth, newLayerOffsetX + 0.75 * initSize.width),
-      newLayerOffsetX + 2 * initSize.width,
+      newLayerOffsetX + ((MAX_SCALE + 1) / 2) * initSize.width,
     )
   }
   if (vertical < 0) {
     const clippedLayerOffsetY = Math.min(
       Math.max(newLayerOffsetY, -0.25 * initSize.height),
-      initSize.height,
+      ((MAX_SCALE - 1) / 2) * initSize.height,
     )
     newHeight += clippedLayerOffsetY - newLayerOffsetY
     newLayerOffsetY = clippedLayerOffsetY
   } else {
     newHeight = Math.min(
       Math.max(newHeight, newLayerOffsetY + 0.75 * initSize.height),
-      newLayerOffsetY + 2 * initSize.height,
+      newLayerOffsetY + ((MAX_SCALE + 1) / 2) * initSize.height,
     )
   }
 
@@ -301,11 +306,11 @@ const resizing = (event: PointerEvent) => {
     x: newLayerOffsetX,
     y: newLayerOffsetY,
   })
-  pressingTimer = window.setTimeout(() => resizing(event), 10)
+  offset.x -= (newLayerOffsetX - currLayerOffset.x) * contentScaleRatio.value
+  offset.y -= (newLayerOffsetY - currLayerOffset.y) * contentScaleRatio.value
 }
 
 const resizeEnd = (event: PointerEvent) => {
-  window.clearTimeout(pressingTimer)
   window.removeEventListener('pointermove', resizing)
   window.removeEventListener('pointerup', resizeEnd)
 }
