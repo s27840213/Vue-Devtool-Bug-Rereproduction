@@ -140,10 +140,10 @@ export const useUserStore = defineStore('user', () => {
   const getSubDesignConfig = async (
     myDesign: ICmMyDesign | Pick<ICmMyDesign, 'id' | 'type'>,
     subDesignId: string,
-    name = 'original',
+    name: 'original' | 'result' = 'original',
   ) => {
     const { id, type } = myDesign
-    const data = (await cmWVUtils.getJson(`mydesign-${type}/${id}/${subDesignId}`, name)) as
+    const data = (await cmWVUtils.getJson(`mydesign-${type}/${id}/${subDesignId}/${name}`)) as
       | {
           flag: '0' | '1'
           name: string
