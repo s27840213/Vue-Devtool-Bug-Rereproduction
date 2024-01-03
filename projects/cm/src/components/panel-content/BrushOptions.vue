@@ -48,6 +48,7 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
 
 enum ControlMode {
@@ -79,14 +80,23 @@ const modes = [
 const currMode = computed({
   get() {
     if (inBgRemoveMode.value) {
-      return clearMode.value ? ControlMode.Erase : ControlMode.Brush
+      return movingMode.value
+        ? ControlMode.Move
+        : clearMode.value
+        ? ControlMode.Erase
+        : ControlMode.Brush
     } else {
       return canvasMode.value
     }
   },
   set(newVal: PowerfulFillCanvasMode) {
     if (inBgRemoveMode.value) {
-      setClearMode(newVal === ControlMode.Erase)
+      if (newVal === ControlMode.Move) {
+        setMovingMode(true)
+      } else {
+        setMovingMode(false)
+        setClearMode(newVal === ControlMode.Erase)
+      }
     } else {
       setCanvasMode(newVal)
     }
@@ -112,12 +122,16 @@ const { editorType, currDesignId } = storeToRefs(editorStore)
 const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
 const isProcessing = computed(() => store.getters['bgRemove/getIsProcessing'])
 const clearMode = computed(() => store.getters['bgRemove/getClearMode'])
+const movingMode = computed(() => store.getters['bgRemove/getMovingMode'])
 const bgRemoveBrushSize = computed(() => store.getters['bgRemove/getBrushSize'])
 
 const setClearMode = (isClearMode: boolean) => {
   store.commit('bgRemove/SET_clearMode', isClearMode)
 }
 
+const setMovingMode = (isMovingMode: boolean) => {
+  store.commit('bgRemove/SET_movingMode', isMovingMode)
+}
 const setInBgRemoveMode = (isInBgRemoveMode: boolean) => {
   store.commit('bgRemove/SET_inBgRemoveMode', isInBgRemoveMode)
 }
@@ -183,8 +197,7 @@ const apply = async () => {
   if (inBgRemoveMode.value) {
     const { index, pageIndex, layers } = layerUtils.currSelectedInfo
     const targetLayerStyle = layers[0].styles as IImageStyle
-    const { aspectRatio, height, src, trimmedCanvasInfo, width } =
-      bgRemoveUtils.exportCanvasResultInfo(targetLayerStyle)
+    const { src, trimmedCanvasInfo } = bgRemoveUtils.exportCanvasResultInfo(targetLayerStyle)
 
     const bgRemoveAssetId = generalUtils.generateAssetId()
     await saveDesignImageToDocument(src, bgRemoveAssetId, {
@@ -220,6 +233,7 @@ const apply = async () => {
     })
 
     setInBgRemoveMode(false)
+    stepsUtils.record()
   }
   setCurrActiveFeature('none')
   PagePinchUtils.resetPageScale()

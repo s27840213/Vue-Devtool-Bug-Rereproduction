@@ -129,12 +129,23 @@ const useSteps = () => {
   }
 
   const hasUnsavedChanges = computed(() => {
-    return (
-      (stepsUtils.steps.length !== 1 && !stepsUtils.isInFirstStep) ||
-      (canvasSteps.value.length !== 1 && !isInCanvasFirstStep.value)
-    )
+    return stepsUtils.steps.length !== 1 || canvasSteps.value.length !== 1
   })
 
+  /**
+   * @deprecated bcz even if we are in the first step, we still have unsaved changes like bg remove, shadow, those who will create new assets in document
+   * so I remove the inFirstStep check
+   */
+  // const hasUnsavedChanges = computed(() => {
+  //   return (
+  //     (stepsUtils.steps.length !== 1 && !stepsUtils.isInFirstStep) ||
+  //     (canvasSteps.value.length !== 1 && !isInCanvasFirstStep.value)
+  //   )
+  // })
+
+  /**
+   * @TODO clear the steps between checkpoint and result [low priority]
+   */
   // const clearStepsBetweenCheckpointAndResult = () => {
   //   stepsUtils.steps.splice(stepTypeCheckPoint.value + 1, stepsUtils.steps.length - stepTypeCheckPoint.value - 1)
   //   canvasSteps.value.splice(stepTypeCheckPoint.value + 1, canvasSteps.value.length - stepTypeCheckPoint.value - 1)
