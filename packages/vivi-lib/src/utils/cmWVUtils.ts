@@ -855,19 +855,16 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   getDocumentPath(url: string) {
     const urlObj = new URL(url)
-    const paths = (urlObj.hostname + urlObj.pathname).replace('//', '').split('/')
-    const path = paths.slice(0, paths.length - 1).join('/')
-    const name = paths[paths.length - 1]
-    const type = urlObj.searchParams.get('imagetype') ?? 'png'
+    const path = (urlObj.host + urlObj.pathname).replace('//', '')
+    const ext = urlObj.searchParams.get('imagetype') ?? 'png'
     return {
       path,
-      name,
-      type
+      ext
     }
   }
 
-  async documentToCameraRoll(path: string, name: string, type: string, watermark: boolean, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType, watermark }) as GeneralResponse
+  async documentToCameraRoll(path: string, ext: string, watermark: boolean, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType, watermark }) as GeneralResponse
   }
 
   async shareFile(path: string) {
