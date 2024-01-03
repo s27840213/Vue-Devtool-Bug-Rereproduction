@@ -529,10 +529,14 @@ class LetterBGData {
       },
       mahjong: {
         ...letterBgDefault,
+        yOffset200: 10,
+        size: 160,
         color: '#7FB77B'
       },
       wealth: {
         ...letterBgDefault,
+        yOffset200: 2,
+        size: 155,
       },
     }
   }
@@ -663,10 +667,10 @@ class LetterBGData {
         lineHeight: 1.96, fontSpacing: 160,
       },
       mahjong: {
-        lineHeight: 1.96, fontSpacing: 160,
+        lineHeight: 1.96, fontSpacing: 1050,
       },
       wealth: {
-        lineHeight: 1.96, fontSpacing: 160,
+        lineHeight: 1.96, fontSpacing: 1100,
       },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
