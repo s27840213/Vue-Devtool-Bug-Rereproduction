@@ -611,10 +611,7 @@ const useCanvasUtils = (
   const downloadCanvas = async (targetCanvas = canvas.value) => {
     if (targetCanvas) {
       const dataUrl = targetCanvas.toDataURL('image/png')
-      await cmWVUtils.saveAssetFromUrl('png', dataUrl, {
-        key: 'test',
-        name: generalUtils.generateAssetId(),
-      })
+      await cmWVUtils.saveAssetFromUrl('png', dataUrl, `test/${generalUtils.generateAssetId()}`)
       // generalUtils.downloadImage(dataUrl, 'mask.png')
     }
   }

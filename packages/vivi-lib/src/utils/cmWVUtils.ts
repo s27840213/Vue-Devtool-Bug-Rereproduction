@@ -279,11 +279,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return albumList as IAlbumContentResponse
   }
 
-  async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string, options?: { key?: string, subPath?: string, name?: string }): Promise<ISaveAssetFromUrlResponse> {
+  /**
+   * Save the file from `url` to `path`.
+   * @param path If path is udf, save asset to Camera Roll
+   */
+  async saveAssetFromUrl(ext: 'gif' | 'jpg' | 'png' | 'mp4', url: string, path?: string): Promise<ISaveAssetFromUrlResponse> {
     let retryTimes = 0
     let result
     while (retryTimes < 3) {
-      result = await (this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { type, url, ...options }, { timeout: -1 }) as Promise<ISaveAssetFromUrlResponse>)
+      result = await (this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { ext, url, path }, { timeout: -1 }) as Promise<ISaveAssetFromUrlResponse>)
       if (result.flag === '1') {
         retryTimes += 1
       } else {

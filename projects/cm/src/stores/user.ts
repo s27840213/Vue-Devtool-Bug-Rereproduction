@@ -459,7 +459,7 @@ export const useUserStore = defineStore('user', () => {
     },
   ) => {
     const {
-      subDesignId,
+      subDesignId = '',
       type = 'jpg',
       thumbIndex,
       designId = currDesignId.value,
@@ -469,11 +469,10 @@ export const useUserStore = defineStore('user', () => {
     if (thumbIndex !== undefined) {
       setCurrDesignThumbIndex(thumbIndex)
     }
-    const data = (await cmWVUtils.saveAssetFromUrl(type, url, {
-      key: `mydesign-${myDesignEditorType}/${designId}`,
-      ...(subDesignId && { subPath: subDesignId }),
-      name: fileName,
-    })) ?? {
+    const data = (await cmWVUtils.saveAssetFromUrl(
+      type,
+      url,
+      `mydesign-${myDesignEditorType}/${designId}/${subDesignId}/${fileName}`)) ?? {
       flag: '1',
       fileId: '',
     }
