@@ -48,6 +48,13 @@ enum ScreenShotMode {
   BG_REMOVE
 }
 
+type FetchDesignOptions = {
+  imageId?: string
+  outputType?: 'jpg' | 'png'
+  quality?: number
+  forGenImage?: boolean
+}
+
 export default defineComponent({
   name: 'ScreenShot',
   setup() {
@@ -78,7 +85,7 @@ export default defineComponent({
         height: 0
       },
       extraData: undefined as any,
-      options: '' as any,
+      options: {} as FetchDesignOptions,
       params: '',
       toast: undefined as boolean | undefined
     }
@@ -131,7 +138,8 @@ export default defineComponent({
     ...mapMutations({
       setInScreenshotPreview: 'SET_inScreenshotPreview',
     }),
-    fetchDesign(query: string, options = '') {
+    // Will be Called by native using window.fetchDesign.
+    fetchDesign(query: string, options = {} as FetchDesignOptions) {
       this.clearBuffers()
       this.options = options
       this.params = query
@@ -459,16 +467,15 @@ export default defineComponent({
       }
     },
     handleDoneLoading(width: number, height: number) {
+      const { forGenImage, imageId, outputType: ext, quality } = this.options
+      const path = imageId ? `screenshot/${this.options.imageId}` : undefined
+
       cmWVUtils.sendCopyEditorCore(
-        'editorSave',
         {
           width,
           height,
-          snapshotWidth: this.options.forGenImage ? cmWVUtils.getSnapshotWidth({ width, height }, 1080, 'short') : undefined
-        },
-        this.options.imageId,
-        undefined,
-        this.options
+          snapshotWidth: forGenImage ? cmWVUtils.getSnapshotWidth({ width, height }, 1080, 'short') : undefined
+        }, { ext, path, quality}
       ).then(({ flag }) => {
         if (flag === '1') {
           cmWVUtils.callIOSAsHTTPAPI('INFORM_WEB', {

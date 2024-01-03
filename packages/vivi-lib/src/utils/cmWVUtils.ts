@@ -342,7 +342,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async sendCopyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
-    const { flag, cleanup } = await this.sendCopyEditorCore('editorSave', pageSize, imageId)
+    const { flag, cleanup } = await this.sendCopyEditorCore(pageSize, { path: `screenshot/${imageId}` })
     return {
       flag,
       cleanup,
@@ -350,9 +350,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
+  /**
+   * Take screenshot and save it to Camera Roll or Document.
+   * @param pageSize 
+   * @param param1 If path is udf, save asset to Camera Roll
+   */
+  async sendCopyEditorCore(
+    pageSize: { width: number, height: number, snapshotWidth?: number },
+    { ext = 'jpg' as 'jpg' | 'png', quality = 0.85, path = undefined as string | undefined } = {}
+  ): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -362,22 +368,20 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
     const { x, y, width, height } = this.getEditorDimensions(pageSize)
     const data = await this.callIOSAsHTTPAPI('SCREENSHOT', {
-      action,
       width,
       height,
       x,
       y,
-      ...(imageId && { imageId }),
-      ...(imagePath && { imagePath }),
-      ...(outputType && { outputType }),
-      ...(quality && { quality }),
+      path,
+      ext,
+      quality,
       snapshotWidth: pageSize.snapshotWidth ?? width,
     }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
-        if (action !== 'editorSave') return
-        this.deleteFile(`screenshot/${imagePath ?? ''}/${imageId ?? ''}.${outputType ?? 'jpg'}`)
+        if (path === undefined) return
+        this.deleteFile(`screenshot/${path}.${ext}`)
       }
     }
   }
