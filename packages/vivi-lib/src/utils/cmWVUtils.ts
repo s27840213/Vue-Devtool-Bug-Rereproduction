@@ -824,10 +824,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async addJson(path: string ,name: string, content: {[index: string]: any}) {
+  async addJson(path: string , content: {[index: string]: any}) {
     if (this.inBrowserMode) return
     if (this.checkVersion('1.0.14')) {
-      return await this.callIOSAsHTTPAPI('ADD_JSON', { path, name, content })
+      return await this.callIOSAsHTTPAPI('ADD_JSON', { path, content })
     }
   }
 

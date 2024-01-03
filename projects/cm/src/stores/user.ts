@@ -532,7 +532,7 @@ export const useUserStore = defineStore('user', () => {
         width: pages[0].width,
         height: pages[0].height,
       }
-      await cmWVUtils.addJson(`mydesign-${editorType.value}/${path}`, name, json)
+      await cmWVUtils.addJson(`mydesign-${editorType.value}/${path}/${name}`, json)
 
       const newDesign = {
         type: editorType.value,
