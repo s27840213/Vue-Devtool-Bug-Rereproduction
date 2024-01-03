@@ -44,7 +44,12 @@ div(class="cm-footer-tabs flex flex-col pt-8" :class="{ 'px-24': currActivePanel
                 :iconColor="settingTabColor(tab)"
                 :iconWidth="'24px'"
                 :style="{ ...textIconStyle, transition: 'background-color 0.2s, color 0.2s, stroke 0.2s' }")
-              svg-icon(v-if="tab.forPro" class="absolute -bottom-7 -right-11" iconName="crown" iconColor="yellow-cm" iconWidth="14px")
+              svg-icon(
+                v-if="tab.forPro"
+                class="absolute -bottom-7 -right-11"
+                iconName="crown"
+                iconColor="yellow-cm"
+                iconWidth="14px")
             span(
               class="no-wrap click-disabled transition ease-linear delay-100 typo-body-sm"
               :class="`text-${settingTabColor(tab)}`") {{ tab.text }}

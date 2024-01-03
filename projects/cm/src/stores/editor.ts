@@ -13,6 +13,7 @@ import type {
   PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
@@ -60,7 +61,7 @@ interface IEditorStore {
   currGenOptions: GenImageOptions
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
-  currDesignThumbIndex: number,
+  currDesignThumbIndex: number
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -188,7 +189,8 @@ export const useEditorStore = defineStore('editor', {
       this.currStateIndex = 0
       this.editorType = type
       this.designName = designName
-      if (designId) this.currDesignId = designId
+      this.currDesignId = designId || generalUtils.generateAssetId()
+
       this.editorStates = editorStatesMap[this.editorType]
       if (stateTarget && this.editorStates.findIndex((item) => item === stateTarget) !== -1) {
         this.changeToSpecificEditorState(stateTarget)
@@ -351,6 +353,6 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
-    }
+    },
   },
 })

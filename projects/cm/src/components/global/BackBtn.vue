@@ -10,15 +10,16 @@ router-link(
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
+import useSteps from '@/composable/useSteps'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useModalStore } from '@/stores/modal'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { storeToRefs } from 'pinia'
-import { useStore } from 'vuex'
 import { toRefs } from 'vue'
-import useSteps from '@/composable/useSteps'
+import { useStore } from 'vuex'
 
 /**
  * @Note - how to use this component?
@@ -29,12 +30,9 @@ import useSteps from '@/composable/useSteps'
  * Precedence: customCallback > toTarget
  */
 
-const props = withDefaults(
-  defineProps<{ toTarget?: string; customCallback?: () => void }>(),
-  {
-    toTarget: '/',
-  },
-)
+const props = withDefaults(defineProps<{ toTarget?: string; customCallback?: () => void }>(), {
+  toTarget: '/',
+})
 const { toTarget, customCallback } = toRefs(props)
 
 // #region modal
@@ -51,7 +49,8 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #region editor
 const editorStore = useEditorStore()
 const { changeEditorState } = editorStore
-const { inGenResultState, inSavingState } = storeToRefs(editorStore)
+const { inGenResultState, inSavingState, hasGeneratedResults, currDesignId, editorType } =
+  storeToRefs(editorStore)
 const { hasUnsavedChanges } = useSteps()
 // #endregion
 
@@ -102,6 +101,15 @@ const handleBackAction = (navagate: () => void) => {
       confirmText: t('CM0028'),
       cancelText: t('NN0203'),
       confirm: () => {
+        // if we used bg remove, we need to delete the asset, or it will cause memory leak
+        if (!hasGeneratedResults.value) {
+          cmWVUtils.deleteAsset(
+            `mydesign-${editorType.value}`,
+            `${currDesignId.value}`,
+            undefined,
+            false,
+          )
+        }
         navagate()
         closeModal()
       },
@@ -116,5 +124,4 @@ const handleBackAction = (navagate: () => void) => {
   }
 }
 </script>
-<style lang="scss">
-</style>
+<style lang="scss"></style>

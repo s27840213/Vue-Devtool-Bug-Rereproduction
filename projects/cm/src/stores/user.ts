@@ -1,5 +1,6 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
+import { useCanvasStore } from '@/stores/canvas'
 import type { GenImageParams } from '@/types/api'
 import { ICmMyDesign, ICmSubDesign, IMyDesignType, ITmpSubDesign } from '@/types/user'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
@@ -13,7 +14,6 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { defineStore } from 'pinia'
 import { useEditorStore } from './editor'
-import { useCanvasStore } from '@/stores/canvas'
 
 export const useUserStore = defineStore('user', () => {
   const editorStore = useEditorStore()
@@ -25,14 +25,8 @@ export const useUserStore = defineStore('user', () => {
     setCurrGenResultIndex,
     setInitImgSrc,
   } = editorStore
-  const {
-    currDesignId,
-    editorType,
-    currDesignThumbIndex,
-    generatedResults,
-    pageSize,
-    currPrompt,
-  } = storeToRefs(editorStore)
+  const { currDesignId, editorType, currDesignThumbIndex, generatedResults, pageSize, currPrompt } =
+    storeToRefs(editorStore)
 
   const { t } = useI18n()
 
@@ -240,11 +234,14 @@ export const useUserStore = defineStore('user', () => {
 
       // add mask
       if (fileName === 'original') {
-        const maskUrl = type === 'hidden-message' ? getTargetImageUrl(type, id, subId, 'mask') : await convertToPinkBasedMask(
-          getTargetImageUrl(type, id, subId, 'mask', 400),
-          width,
-          height,
-        )
+        const maskUrl =
+          type === 'hidden-message'
+            ? getTargetImageUrl(type, id, subId, 'mask')
+            : await convertToPinkBasedMask(
+                getTargetImageUrl(type, id, subId, 'mask', 400),
+                width,
+                height,
+              )
         setMaskDataUrl(maskUrl)
       }
 
@@ -573,7 +570,8 @@ export const useUserStore = defineStore('user', () => {
 
     let imgSrc = imageUtils.getSrc(srcObj)
 
-    if (imgName === 'thumb') { // Prevent cache
+    if (imgName === 'thumb') {
+      // Prevent cache
       imgSrc = imageUtils.appendQuery(imgSrc, 'rand_ver', `${generalUtils.serialNumber}`)
     }
 

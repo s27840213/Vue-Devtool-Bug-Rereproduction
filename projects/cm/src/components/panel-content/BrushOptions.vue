@@ -34,13 +34,19 @@ import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
 import type { PowerfulFillCanvasMode } from '@/types/editor'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import type { IImageStyle } from '@nu/vivi-lib/interfaces/layer'
 import store from '@nu/vivi-lib/store'
+import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import { storeToRefs } from 'pinia'
 
@@ -51,6 +57,8 @@ enum ControlMode {
 }
 
 const { t } = useI18n()
+const { saveDesignImageToDocument } = useUserStore()
+
 // #region canvas related
 const modes = [
   {
@@ -97,6 +105,7 @@ const { goToCheckpoint } = useSteps()
 
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
+const { editorType, currDesignId } = storeToRefs(editorStore)
 // #endregion
 
 // #region bg remove canvas related
@@ -170,37 +179,47 @@ const cancel = () => {
   groupUtils.deselect()
 }
 
-const apply = () => {
+const apply = async () => {
   if (inBgRemoveMode.value) {
-    // const { index, pageIndex, layers } = layerUtils.currSelectedInfo
-    //     const targetLayerStyle = layers[0].styles as IImageStyle
-    //     setInBgRemoveMode(false)
-    //     // bgRemoveUtils.saveToIOS(designId, async (data, path, aspectRatio, trimmedCanvasInfo) => {
-    //       const srcObj = {
-    //         type: 'ios',
-    //         userId: '',
-    //         assetId: path,
-    //       }
-    //       const [key, id, ...res] = path.split('/')
-    //       const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } = trimmedCanvasInfo
-    //       const { width, height } = targetLayerStyle
-    //       const newImageWidth = width * remainingWidthPercentage
-    //       const newImageHeight = height * remainingHeightPercentage
-    //       layerUtils.updateLayerStyles(pageIndex, index, {
-    //         x: targetLayerStyle.x + xShift,
-    //         y: targetLayerStyle.y + yShift,
-    //         width: newImageWidth,
-    //         height: newImageHeight,
-    //         imgWidth: newImageWidth,
-    //         imgHeight: newImageHeight,
-    //         imgX: 0,
-    //         imgY: 0
-    //       })
-    //       layerUtils.updateLayerProps(pageIndex, index, {
-    //         srcObj,
-    //       })
-    //       return srcObj
-    // }, targetLayerStyle)
+    const { index, pageIndex, layers } = layerUtils.currSelectedInfo
+    const targetLayerStyle = layers[0].styles as IImageStyle
+    const { aspectRatio, height, src, trimmedCanvasInfo, width } =
+      bgRemoveUtils.exportCanvasResultInfo(targetLayerStyle)
+
+    const bgRemoveAssetId = generalUtils.generateAssetId()
+    await saveDesignImageToDocument(src, bgRemoveAssetId, {
+      subDesignId: 'bgRemove',
+      thumbIndex: index,
+      type: 'png',
+    })
+
+    const assetId = `mydesign-${editorType.value}/${currDesignId.value}/bgRemove/${bgRemoveAssetId}`
+    const srcObj: SrcObj = {
+      type: 'ios',
+      assetId,
+      userId: 'png',
+    }
+
+    const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift } =
+      trimmedCanvasInfo
+    // const { width, height } = targetLayerStyle
+    const newImageWidth = targetLayerStyle.width * remainingWidthPercentage
+    const newImageHeight = targetLayerStyle.height * remainingHeightPercentage
+    layerUtils.updateLayerStyles(pageIndex, index, {
+      x: targetLayerStyle.x + xShift,
+      y: targetLayerStyle.y + yShift,
+      width: newImageWidth,
+      height: newImageHeight,
+      imgWidth: newImageWidth,
+      imgHeight: newImageHeight,
+      imgX: 0,
+      imgY: 0,
+    })
+    layerUtils.updateLayerProps(pageIndex, index, {
+      srcObj,
+    })
+
+    setInBgRemoveMode(false)
   }
   setCurrActiveFeature('none')
   PagePinchUtils.resetPageScale()

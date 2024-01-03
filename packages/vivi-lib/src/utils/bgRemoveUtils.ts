@@ -1,4 +1,4 @@
-import useCanvasUtils from '@/composable/useCanvasUtils'
+import useBaseCanvasUtils from '@/composable/useBaseCanvasUtils'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo, ITrimmedCanvasInfo } from '@/interfaces/image'
@@ -270,7 +270,7 @@ class BgRemoveUtils {
     const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
     const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
     const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles as IImageStyle
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
     const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
     console.log(trimCanvas(this.canvas))
     const previewSrc = this.canvas.toDataURL('image/png;base64')
@@ -380,7 +380,7 @@ class BgRemoveUtils {
   }
 
   getTrimmedCanvasInfo(targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     return trimmedCanvasInfo
   }
@@ -396,7 +396,7 @@ class BgRemoveUtils {
 
   // this is for IOS version < 1.35
   saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
@@ -411,7 +411,7 @@ class BgRemoveUtils {
   }
 
   saveToIOS(designId:string, callback?: (data: { flag: string, msg: string, imageId: string }, path: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
@@ -426,6 +426,7 @@ class BgRemoveUtils {
       }
     })
   }
+  
 
   moveOldBgRemoveImages(src: string, callback?: (path: string) => void) {
     const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
@@ -439,6 +440,21 @@ class BgRemoveUtils {
     })
   }
   // #endregion
+
+  exportCanvasResultInfo(targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
+    const src = trimedCanvas.toDataURL('image/png;base64')
+
+    return {
+      src,
+      width,
+      height,
+      aspectRatio: width / height,
+      trimmedCanvasInfo
+    }
+  }
 
   undo() {
       // BgRemoveArea will listen to Ctrl/Cmd + Z event, so I dispatch an event to make the undo function in BgRemoveArea.vue conducted
