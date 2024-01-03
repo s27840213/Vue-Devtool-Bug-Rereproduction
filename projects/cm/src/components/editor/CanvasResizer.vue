@@ -243,26 +243,55 @@ const resizing = (event: PointerEvent) => {
   }
   const sizeDiff = { width: 0, height: 0 }
   const layerOffset = { x: 0, y: 0 }
-  const initSize = pageSize.value
-  const initLayerOffset = vuex.getters['canvasResize/getLayerOffset']
+  const initSize = vuex.getters['canvasResize/getInitSize']
+  const currSize = pageSize.value
+  const currLayerOffset = vuex.getters['canvasResize/getLayerOffset']
 
   if (horizontal !== 0) {
-    const amount = diff.x * horizontal * (wider ? 0.5 : 2)
+    const amount = diff.x * horizontal * (wider ? 0.25 : 2)
     sizeDiff.width = Math.trunc(amount / contentScaleRatio.value)
   }
 
   if (vertical !== 0) {
-    const amount = diff.y * vertical * (higher ? 0.5 : 2)
+    const amount = diff.y * vertical * (higher ? 0.25 : 2)
     sizeDiff.height = Math.trunc(amount / contentScaleRatio.value)
   }
 
-  const newWidth = initSize.width + sizeDiff.width
-  const newHeight = initSize.height + sizeDiff.height
+  let newWidth = currSize.width + sizeDiff.width
+  let newHeight = currSize.height + sizeDiff.height
+  let newLayerOffsetX = currLayerOffset.x
+  let newLayerOffsetY = currLayerOffset.y
   if (horizontal < 0) {
-    layerOffset.x = newWidth - initSize.width
+    newLayerOffsetX = currLayerOffset.x + newWidth - currSize.width
   }
   if (vertical < 0) {
-    layerOffset.y = newHeight - initSize.height
+    newLayerOffsetY = currLayerOffset.y + newHeight - currSize.height
+  }
+  if (horizontal < 0) {
+    const clippedLayerOffsetX = Math.min(
+      Math.max(newLayerOffsetX, -0.25 * initSize.width),
+      initSize.width,
+    )
+    newWidth += clippedLayerOffsetX - newLayerOffsetX
+    newLayerOffsetX = clippedLayerOffsetX
+  } else {
+    newWidth = Math.min(
+      Math.max(newWidth, newLayerOffsetX + 0.5 * initSize.width),
+      newLayerOffsetX + 2 * initSize.width,
+    )
+  }
+  if (vertical < 0) {
+    const clippedLayerOffsetY = Math.min(
+      Math.max(newLayerOffsetY, -0.25 * initSize.height),
+      initSize.height,
+    )
+    newHeight += clippedLayerOffsetY - newLayerOffsetY
+    newLayerOffsetY = clippedLayerOffsetY
+  } else {
+    newHeight = Math.min(
+      Math.max(newHeight, newLayerOffsetY + 0.5 * initSize.height),
+      newLayerOffsetY + 2 * initSize.height,
+    )
   }
 
   pageUtils.updatePageProps({
@@ -270,10 +299,10 @@ const resizing = (event: PointerEvent) => {
     height: newHeight,
   })
   vuex.commit('canvasResize/SET_layerOffset', {
-    x: initLayerOffset.x + layerOffset.x,
-    y: initLayerOffset.y + layerOffset.y,
+    x: newLayerOffsetX,
+    y: newLayerOffsetY,
   })
-  pressingTimer = window.setTimeout(() => resizing(event), 50)
+  pressingTimer = window.setTimeout(() => resizing(event), 10)
 }
 
 const resizeEnd = (event: PointerEvent) => {
