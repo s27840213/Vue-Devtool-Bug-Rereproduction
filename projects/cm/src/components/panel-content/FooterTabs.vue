@@ -67,6 +67,7 @@ div(class="cm-footer-tabs flex flex-col pt-8" :class="{ 'px-24': currActivePanel
 import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useEditorStore } from '@/stores/editor'
+import { useGlobalStore } from '@/stores/global'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
@@ -101,9 +102,11 @@ export default defineComponent({
   setup() {
     const { isBiColorEditor } = useBiColorEditor()
     const { openImgSelecotr } = useImgSelectorStore()
+    const { debugMode } = storeToRefs(useGlobalStore())
     return {
       isBiColorEditor,
       openImgSelecotr,
+      debugMode,
     }
   },
   data() {
@@ -220,7 +223,7 @@ export default defineComponent({
           icon: 'cm_remove-bg',
           text: `${this.$t('NN0043')}`,
           panelType: 'cm_remove-bg',
-          forPro: false,
+          forPro: !this.debugMode,
           plan: 'bg-remove',
           hidden: this.inEffectEditingMode || this.isInFrame,
           disabled: this.isProcessing,

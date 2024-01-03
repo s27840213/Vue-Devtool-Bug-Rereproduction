@@ -27,15 +27,20 @@ export const useVideoRcordStore = defineStore('videoRecord', {
     genVideo() {
       this.isGeningVideo = true
       const editorStore = useEditorStore()
-      const { updateGenResult, currGeneratedResult } = editorStore
+      const { updateGenResult } = editorStore
+      const { currGeneratedResult } = storeToRefs(editorStore)
 
       return pixi.genVideo()
         .then((res) => {
           this.isGeningVideo = false
-          if (res && this.genVideoCb) {
-            updateGenResult(currGeneratedResult.id, { video: res })
-            this.genVideoCb()
-            this.genVideoCb = null
+          if (res) {
+            if (currGeneratedResult.value && currGeneratedResult.value.id) {
+              updateGenResult(currGeneratedResult.value.id, { video: res })
+            }
+            if (this.genVideoCb) {
+              this.genVideoCb()
+              this.genVideoCb = null
+            }
           }
           return res
         })
