@@ -46,16 +46,27 @@ const useActionSheetCm = () => {
       return cmWVUtils.saveAssetFromUrl('jpg', await generalUtils.toDataUrlNew(targetUrl, 'jpg'))
     }
   }
-  const saveVideoCb = () => {
-    const { saveToCameraRoll, setGenVideoCb, setIsExportVideo } = useVideoRcordStore()
+  const saveVideoCb = async () => {
+    const videoRecord = useVideoRcordStore()
+    const { saveToCameraRoll, setGenVideoCb, setIsExportVideo } = videoRecord
+    const { isGeningVideo } = storeToRefs(videoRecord)
     setIsExportVideo(true)
-    if (currGeneratedResult.value.video) {
+    if (currGeneratedResult.value && currGeneratedResult.value.video) {
       return saveToCameraRoll(currGeneratedResult.value.video)
-    } else {
+    } else if (isGeningVideo.value)  {
+      // isGeningVideo but not finished gening
       return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
         setGenVideoCb(() => resolve(saveToCameraRoll(currGeneratedResult.value.video)))
         console.log('video not generated yet, wait for it generated')
       })
+    } else if (currOpenSubDesign.value) {
+      // is not GeningVideo called by mydesign
+      const { addImage, genVideo } = videoRecord
+      const srcInit = getSubDesignImage(currOpenSubDesign.value, 'original')
+      const srcRes = getSubDesignImage(currOpenSubDesign.value, 'thumb')
+      await addImage(srcInit, srcRes)
+      const data = await genVideo()
+      return saveToCameraRoll(data || undefined)
     }
   }
 
