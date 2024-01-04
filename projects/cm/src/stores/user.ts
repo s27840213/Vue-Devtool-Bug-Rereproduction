@@ -585,12 +585,12 @@ export const useUserStore = defineStore('user', () => {
     return getTargetImageUrl(type, id, subId, 'thumb', size)
   }
 
-  const getSubDesignImage = (design: ICmSubDesign) => {
+  const getSubDesignImage = (design: ICmSubDesign, imgName: 'thumb' | 'original' | 'result' | 'mask' = 'thumb') => {
     const { id, subId, type } = design
 
     const srcObj: SrcObj = {
       type: 'ios',
-      assetId: `mydesign-${type}/${id}/${subId}/thumb`,
+      assetId: `mydesign-${type}/${id}/${subId}/${imgName}`,
       userId: 'jpg',
     }
 

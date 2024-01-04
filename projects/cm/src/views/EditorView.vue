@@ -294,6 +294,7 @@ onBeforeRouteLeave((to, from) => {
       editorStore.$reset()
       canvasStore.$reset()
       setPrevGenParams({ requestId: '', params: {} as GenImageParams })
+      store.commit('canvasResize/SET_isResizing', false)
     }, 1000)
   }
 })
