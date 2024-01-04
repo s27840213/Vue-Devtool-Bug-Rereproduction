@@ -33,7 +33,6 @@ div(class="nu-text" draggable="false" :style="textWrapperStyle()")
 import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isTextFill } from '@/interfaces/format'
 import { IGroup, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import cssConverter from '@/utils/cssConverter'
@@ -47,7 +46,6 @@ import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vuexUtils from '@/utils/vuexUtils'
 import _, { isEqual, max, omit, round } from 'lodash'
 import { PropType, defineComponent } from 'vue'
 
@@ -115,19 +113,11 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    ...vuexUtils.mapGetters('stk', {
-      isDuringCopy: false
-    }, {
-      isDuringCopy: 'vivisticker/getIsDuringCopy'
-    }),
     isCurveText(): boolean {
       return textShapeUtils.isCurvedText(this.config.styles.textShape)
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    },
-    isFlipping(): boolean {
-      return this.config.isFlipping
     },
     isLocked(): boolean {
       return this.config.locked
@@ -203,18 +193,10 @@ export default defineComponent({
       return this.config.isAutoResizeNeeded
     },
     getOpacity() {
-      if (this.isDuringCopy) return 1
       const { active, contentEditable } = this.config
-      const checkTextFill = isTextFill(this.config.styles.textFill)
-      if (active && !this.isLocked && !this.inPreview) {
-        if (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) {
-          return contentEditable ? 0.2 : 1
-        } else {
-          return 0
-        }
-      } else {
-        return 1
-      }
+      if (!active || this.isLocked || this.inPreview || !contentEditable) return 1
+      // Display 0.2 opacity only when Tiptap is visible and differs from NuText.
+      return this.isCurveText || this.isFlipped ? 0.2 : 0
     },
     textWrapperStyle(): Record<string, string|number> {
       return {
