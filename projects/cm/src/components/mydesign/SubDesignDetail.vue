@@ -166,6 +166,8 @@ const promptContainerLineClamp = computed(() => {
   return 99
 })
 
+let checkTimer = -1
+
 const checkExpandable = () => {
   logUtils.setLogAndConsoleLog(
     'SubDesignDetail.vue:169',
@@ -182,10 +184,14 @@ const checkExpandable = () => {
     logUtils.setLogAndConsoleLog('SubDesignDetail.vue:176', isExpandable.value)
     return
   }
-  setTimeout(checkExpandable, 100)
+  checkTimer = window.setTimeout(checkExpandable, 100)
 }
 
 checkExpandable()
+
+onBeforeUnmount(() => {
+  clearTimeout(checkTimer)
+})
 
 const togglePrompt = () => {
   isPromptExapnded.value = !isPromptExapnded.value
