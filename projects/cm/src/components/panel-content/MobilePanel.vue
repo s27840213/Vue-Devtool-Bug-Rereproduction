@@ -1,6 +1,8 @@
 <script lang="ts">
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
+import { useEditorStore } from '@/stores/editor'
+import { useUserStore } from '@/stores/user'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
@@ -23,6 +25,8 @@ import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -217,8 +221,10 @@ const component = defineComponent({
           return { pushHistory }
         case 'text-effect':
           return { pushHistory, openExtraColorModal, openExtraPanelReplace, leaveExtraPanel }
-        case 'photo-shadow':
-          return { pushHistory, openExtraColorModal }
+        case 'photo-shadow': {
+          const { uploadShadow } = this
+          return { pushHistory, openExtraColorModal, uploadShadow }
+        }
         default:
           return {}
       }
@@ -340,6 +346,24 @@ const component = defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     _panelParentHeight() {
       return document.querySelector('#app')?.clientHeight ?? 0
+    },
+    uploadShadow() {
+      const saveCb = (canvas: HTMLCanvasElement) => {
+        const { saveDesignImageToDocument } = useUserStore()
+        const { editorType, currDesignId } = storeToRefs(useEditorStore())
+        const name = 'img-shadow-' + generalUtils.generateAssetId()
+        return new Promise<string>(resolve => {
+          saveDesignImageToDocument(canvas.toDataURL('image/png;base64'), name, {
+            subDesignId: 'imgShadow',
+            type: 'png',
+          }).then(() => {
+            resolve(
+              `mydesign-${editorType.value}/${currDesignId.value}/imgShadow/${name}`
+            )
+          })
+        })
+      }
+      imageShadowPanelUtils.handleShadowUpload({ saveCb })
     },
     checkLayerAction(target: HTMLElement | SVGElement): boolean {
       if (target.nodeName === 'body') return false

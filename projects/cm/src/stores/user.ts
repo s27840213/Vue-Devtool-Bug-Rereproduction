@@ -456,9 +456,9 @@ export const useUserStore = defineStore('user', () => {
     },
   ) => {
     const {
-      subDesignId,
       type = 'jpg',
       thumbIndex,
+      subDesignId,
       designId = currDesignId.value,
       myDesignEditorType = editorType.value,
     } = props ?? {}
