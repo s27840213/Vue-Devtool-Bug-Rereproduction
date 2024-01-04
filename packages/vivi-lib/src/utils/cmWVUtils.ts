@@ -15,10 +15,17 @@ import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import constantData from './constantData'
+import imageShadowPanelUtils from './imageShadowPanelUtils'
+import imageUtils from './imageUtils'
 import logUtils from './logUtils'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
+
+export const WATER_MARK = new URL(
+  '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+  import.meta.url,
+).href
 
 declare let window: CustomWindow
 
@@ -863,12 +870,44 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async documentToCameraRoll(path: string, ext: string, watermark: boolean, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType, watermark }) as GeneralResponse
+  async documentToCameraRoll(path: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType }) as GeneralResponse
   }
 
   async shareFile(path: string) {
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
+  }
+
+  async ratingRequest() {
+    return await this.callIOSAsHTTPAPI('RATING_REQUEST')
+  }
+
+  async addWaterMark2Img(url: string, type: string, quality?: number) {
+    return new Promise<string>((resolve) => {
+      const loadImgCb = (img: HTMLImageElement) => {
+        imageUtils.imgLoadHandler(WATER_MARK, (watermark: HTMLImageElement) => loadWatermarkCb(img, watermark))
+      }
+
+      const loadWatermarkCb = (img: HTMLImageElement, watermark: HTMLImageElement) => {
+        const width = img.naturalWidth
+        const height = img.naturalHeight
+        imageShadowPanelUtils.svgImageSizeFormatter(watermark, Math.min(width, height) / 2, () => resizeWatermarkCb(img, watermark, width, height))
+      }
+
+      const resizeWatermarkCb = (img: HTMLImageElement, watermark: HTMLImageElement, width: number, height: number) => {
+        watermark.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          ctx?.drawImage(img, 0, 0, width, height)
+          ctx?.drawImage(watermark, width - watermark.width - 50, height - watermark.height - 50, watermark.width, watermark.height)
+          resolve(canvas.toDataURL(type, quality))
+        }
+      }
+
+      imageUtils.imgLoadHandler(url, loadImgCb)
+    })
   }
 
   showUpdateModal(force = false) {

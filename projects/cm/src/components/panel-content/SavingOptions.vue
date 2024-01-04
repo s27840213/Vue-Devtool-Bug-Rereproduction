@@ -61,6 +61,7 @@ import { notify } from '@kyvg/vue3-notification'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 
 const { t } = useI18n()
 
@@ -85,20 +86,20 @@ cmWVUtils.getState('save_rm_watermark').then((data) => {
 })
 
 watch(highResolutionPhoto, (newVal) => {
-  if (!cmWVUtils.checkPro({ plan: 1 })) {
-    setHighResolutionPhoto(false)
-    newVal && cmWVUtils.setState('save_high_res', { value: false })
-    return
-  }
+  // if (!cmWVUtils.checkPro({ plan: 1 })) {
+  //   setHighResolutionPhoto(false)
+  //   newVal && cmWVUtils.setState('save_high_res', { value: false })
+  //   return
+  // }
   cmWVUtils.setState('save_high_res', { value: newVal })
 })
 
 watch(removeWatermark, (newVal) => {
-  if (!cmWVUtils.checkPro({ plan: 1 })) {
-    setRemoveWatermark(false)
-    newVal && cmWVUtils.setState('save_rm_watermark', { value: false })
-    return
-  }
+  // if (!cmWVUtils.checkPro({ plan: 1 })) {
+  //   setRemoveWatermark(false)
+  //   newVal && cmWVUtils.setState('save_rm_watermark', { value: false })
+  //   return
+  // }
   cmWVUtils.setState('save_rm_watermark', { value: newVal })
 })
 // #endregion
@@ -146,12 +147,13 @@ const close = () => {
   setInMediaOptions(false)
 }
 
-const { savePhotoCb, saveVideoCb, sharePhotoCb, shareVideoCb } = useActionSheetCm()
+const { photoCb, saveVideoCb, shareVideoCb } = useActionSheetCm()
 
 const saveMedia = (media: string) => {
+  const tempId = generalUtils.generateRandomString(6)
   switch (media) {
     case 'photo':
-      savePhotoCb()
+      photoCb('save', tempId)
         .then((data) => {
           const { flag } = data
           if (flag === '1') {
@@ -161,6 +163,7 @@ const saveMedia = (media: string) => {
             group: 'success',
             text: `${t('NN0889')}`,
           })
+          cmWVUtils.ratingRequest()
         })
         .catch((e) => {
           console.log(e)
@@ -177,6 +180,7 @@ const saveMedia = (media: string) => {
             group: 'success',
             text: `${t('NN0889')}`,
           })
+          cmWVUtils.ratingRequest()
         })
         .catch((e) => {
           console.log(e)
@@ -188,12 +192,13 @@ const saveMedia = (media: string) => {
         })
       break
     case 'photo_video':
-      Promise.all([savePhotoCb(), saveVideoCb()])
+      Promise.all([photoCb('save', tempId), saveVideoCb()])
         .then(() => {
           notify({
             group: 'success',
             text: `${t('NN0889')}`,
           })
+          cmWVUtils.ratingRequest()
         })
         .catch(() => {
           notify({
@@ -206,9 +211,10 @@ const saveMedia = (media: string) => {
 }
 
 const shareMedia = (media: string) => {
+  const tempId = generalUtils.generateRandomString(6)
   switch (media) {
     case 'photo':
-      sharePhotoCb()
+      photoCb('share', tempId)
         .then((data) => {
           const { flag } = data
           if (flag === '1') {

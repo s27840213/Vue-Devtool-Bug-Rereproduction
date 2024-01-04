@@ -6,6 +6,7 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
+import useStateInfo from './useStateInfo'
 const useActionSheetCm = () => {
   const userStore = useUserStore()
   const { getSubDesignImage, deleteDesign, deleteSubDesign } = userStore
@@ -25,24 +26,50 @@ const useActionSheetCm = () => {
   const editorStore = useEditorStore()
   const { currGeneratedResult } = storeToRefs(editorStore)
 
-  const savePhotoCb = async () => {
+  const { atEditor } = useStateInfo()
+
+  const photoCb = async (action: string, tempId: string) => {
     let targetUrl = ''
-    if (isSubDesignOpen.value && currOpenSubDesign.value) {
+    if (!atEditor.value && currOpenSubDesign.value) {
       targetUrl = getSubDesignImage(currOpenSubDesign.value)
     } else {
       targetUrl = currGeneratedResult.value.url
     }
     if (targetUrl.startsWith('chmix://')) {
       const { path, ext } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.documentToCameraRoll(
-        path,
-        ext,
-        !removeWatermark.value,
-        highResolutionPhoto.value ? 2 : 1,
-        'scale',
-      )
+      if (!removeWatermark.value) {
+        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg')
+        await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
+      }
+      return action === 'save'
+        ? cmWVUtils.documentToCameraRoll(
+            removeWatermark.value ? path : `screenshot/${tempId}`,
+            ext,
+            highResolutionPhoto.value ? 2 : 1,
+            'scale',
+          )
+        : cmWVUtils.shareFile(
+            removeWatermark.value ? `${path}.${ext}` : `screenshot/${tempId}.${ext}`,
+          )
     } else {
-      return cmWVUtils.saveAssetFromUrl('jpg', await generalUtils.toDataUrlNew(targetUrl, 'jpg'))
+      if (!removeWatermark.value) {
+        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg')
+        await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
+      } else {
+        await cmWVUtils.saveAssetFromUrl(
+          'jpg',
+          await generalUtils.toDataUrlNew(targetUrl, 'jpg'),
+          `screenshot/${tempId}`,
+        )
+      }
+      return action === 'save'
+        ? cmWVUtils.documentToCameraRoll(
+            `screenshot/${tempId}`,
+            'jpg',
+            highResolutionPhoto.value ? 2 : 1,
+            'scale',
+          )
+        : cmWVUtils.shareFile(`screenshot/${tempId}.jpg`)
     }
   }
   const saveVideoCb = async () => {
@@ -52,7 +79,7 @@ const useActionSheetCm = () => {
     setIsExportVideo(true)
     if (currGeneratedResult.value && currGeneratedResult.value.video) {
       return saveToCameraRoll(currGeneratedResult.value.video)
-    } else if (isGeningVideo.value)  {
+    } else if (isGeningVideo.value) {
       // isGeningVideo but not finished gening
       return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
         setGenVideoCb(() => resolve(saveToCameraRoll(currGeneratedResult.value.video)))
@@ -69,21 +96,6 @@ const useActionSheetCm = () => {
     }
   }
 
-  const sharePhotoCb = async () => {
-    let targetUrl = ''
-    if (isSubDesignOpen.value && currOpenSubDesign.value) {
-      targetUrl = getSubDesignImage(currOpenSubDesign.value)
-    } else {
-      targetUrl = currGeneratedResult.value.url
-    }
-    if (targetUrl.startsWith('chmix://')) {
-      const { path, ext } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.shareFile(`${path}.${ext}`)
-    } else {
-      console.log('retry or something else') // TODO: need to discuss with native for this case
-      throw new Error('not implemented yet')
-    }
-  }
   const shareVideoCb = async () => {
     console.log('share video')
   }
@@ -326,9 +338,8 @@ const useActionSheetCm = () => {
     setSharingActions,
     setMyDesignActions,
     setSubDesignActions,
-    savePhotoCb,
+    photoCb,
     saveVideoCb,
-    sharePhotoCb,
     shareVideoCb,
     reset,
     toggleActionSheet,
