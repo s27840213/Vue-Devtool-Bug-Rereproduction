@@ -40,7 +40,7 @@ const useActionSheetCm = () => {
     if (targetUrl.startsWith('chmix://')) {
       const { path, ext } = cmWVUtils.getDocumentPath(targetUrl)
       if (!removeWatermark.value) {
-        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg')
+        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg', 100)
         await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
       }
       if (action === 'save') {
@@ -70,7 +70,7 @@ const useActionSheetCm = () => {
       }
     } else {
       if (!removeWatermark.value) {
-        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg')
+        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg', 100)
         await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
       } else {
         await cmWVUtils.saveAssetFromUrl(

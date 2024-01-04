@@ -1,8 +1,7 @@
 <template lang="pug">
 div(
   v-show="currOpenSubDesign && thumbLoaded"
-  class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20\
-    w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
+  class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20\ w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
   ref="rootRef")
   div(
     v-if="currOpenSubDesign"
@@ -85,9 +84,11 @@ import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import { useVideoRcordStore } from '@/stores/videoRecord'
+import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -237,23 +238,49 @@ const handleSwipe = (e: AnyTouchEvent, dir: 'left' | 'right') => {
   showVideo.value = dir === 'right'
 }
 
-const showcaseImg = computed(() => {
+const watermarkReady = ref(false)
+const showcaseWatermarkImgUrl = ref('')
+
+const showcaseImgUrl = computed(() => {
   if (atEditor.value) {
     return imageUtils.appendQuery(
       generatedResults.value[currGenResultIndex.value].url,
       'rand_ver',
-      `${generalUtils.serialNumber}`
+      `${generalUtils.serialNumber}`,
     )
   }
-  if (currOpenSubDesign.value) { // Always true due to the v-if condition.
+  if (currOpenSubDesign.value) {
+    // Always true due to the v-if condition.
     return getSubDesignThumbUrl(
       currOpenSubDesign.value.type,
       currOpenSubDesign.value.id,
       currOpenSubDesign.value.subId,
-      1000
+      1000,
     )
   }
+  return ''
 })
+
+const showcaseImg = computed(() => {
+  return watermarkReady.value && !vuex.getters['payment/getPayment'].subscribe
+    ? showcaseWatermarkImgUrl.value
+    : showcaseImgUrl.value
+})
+
+const genWatermarkUrl = (url: string) => {
+  if (!url) return
+  watermarkReady.value = false
+  cmWVUtils.addWaterMark2Img(url, 'jpg', 100).then((dataURL) => {
+    showcaseWatermarkImgUrl.value = dataURL
+    watermarkReady.value = true
+  })
+}
+
+watch(showcaseImgUrl, (newVal) => {
+  genWatermarkUrl(newVal)
+})
+
+genWatermarkUrl(showcaseImgUrl.value)
 // #endregion
 </script>
 <style lang="scss">
