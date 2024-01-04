@@ -33,7 +33,7 @@ div(class="nu-text" draggable="false" :style="textWrapperStyle()")
 import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { IGroup, IText } from '@/interfaces/layer'
+import { IGroup, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
@@ -235,7 +235,7 @@ export default defineComponent({
         textBgUtils.fixedWidthStyle(span.styles, p.styles, this.config),
       )
     },
-    pStyle(styles: any) {
+    pStyle(styles: IParagraphStyle) {
       return _.omit(tiptapUtils.textStylesRaw(styles), [
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
