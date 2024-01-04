@@ -150,10 +150,9 @@ const close = () => {
 const { photoCb, saveVideoCb, shareVideoCb } = useActionSheetCm()
 
 const saveMedia = (media: string) => {
-  const tempId = generalUtils.generateRandomString(6)
   switch (media) {
     case 'photo':
-      photoCb('save', tempId)
+      photoCb('save')
         .then((data) => {
           const { flag } = data
           if (flag === '1') {
@@ -192,7 +191,7 @@ const saveMedia = (media: string) => {
         })
       break
     case 'photo_video':
-      Promise.all([photoCb('save', tempId), saveVideoCb()])
+      Promise.all([photoCb('save'), saveVideoCb()])
         .then(() => {
           notify({
             group: 'success',
@@ -211,10 +210,9 @@ const saveMedia = (media: string) => {
 }
 
 const shareMedia = (media: string) => {
-  const tempId = generalUtils.generateRandomString(6)
   switch (media) {
     case 'photo':
-      photoCb('share', tempId)
+      photoCb('share')
         .then((data) => {
           const { flag } = data
           if (flag === '1') {

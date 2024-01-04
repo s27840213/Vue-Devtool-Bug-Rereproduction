@@ -22,11 +22,6 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
 
-export const WATER_MARK = new URL(
-  '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
-  import.meta.url,
-).href
-
 declare let window: CustomWindow
 
 export type GeneralSuccessResponse = {
@@ -874,6 +869,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType }) as GeneralResponse
   }
 
+  async resizeImage(srcPath: string, desPath: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('RESIZE_IMAGE', { srcPath, desPath, ext, size, sizeType }) as GeneralResponse
+  }
+
   async shareFile(path: string) {
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
   }
@@ -883,6 +882,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async addWaterMark2Img(url: string, type: string, quality?: number) {
+    const WATER_MARK = new URL(
+      '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+      import.meta.url,
+    ).href
     return new Promise<string>((resolve) => {
       const loadImgCb = (img: HTMLImageElement) => {
         imageUtils.imgLoadHandler(WATER_MARK, (watermark: HTMLImageElement) => loadWatermarkCb(img, watermark))

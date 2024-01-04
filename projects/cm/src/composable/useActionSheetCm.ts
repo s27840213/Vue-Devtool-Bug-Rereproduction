@@ -28,7 +28,9 @@ const useActionSheetCm = () => {
 
   const { atEditor } = useStateInfo()
 
-  const photoCb = async (action: string, tempId: string) => {
+  const photoCb = async (action: string) => {
+    let tempId = generalUtils.generateRandomString(6)
+    let lastTempId = tempId
     let targetUrl = ''
     if (!atEditor.value && currOpenSubDesign.value) {
       targetUrl = getSubDesignImage(currOpenSubDesign.value)
@@ -41,16 +43,31 @@ const useActionSheetCm = () => {
         const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg')
         await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
       }
-      return action === 'save'
-        ? cmWVUtils.documentToCameraRoll(
-            removeWatermark.value ? path : `screenshot/${tempId}`,
+      if (action === 'save') {
+        return await cmWVUtils.documentToCameraRoll(
+          removeWatermark.value ? path : `screenshot/${tempId}`,
+          ext,
+          highResolutionPhoto.value ? 2 : 1,
+          'scale',
+        )
+      } else {
+        if (highResolutionPhoto.value) {
+          lastTempId = tempId
+          tempId = generalUtils.generateRandomString(6)
+          await cmWVUtils.resizeImage(
+            removeWatermark.value ? `${path}` : `screenshot/${lastTempId}`,
+            `screenshot/${tempId}`,
             ext,
-            highResolutionPhoto.value ? 2 : 1,
+            2,
             'scale',
           )
-        : cmWVUtils.shareFile(
-            removeWatermark.value ? `${path}.${ext}` : `screenshot/${tempId}.${ext}`,
-          )
+        }
+        return await cmWVUtils.shareFile(
+          removeWatermark.value && !highResolutionPhoto.value
+            ? `${path}.${ext}`
+            : `screenshot/${tempId}.${ext}`,
+        )
+      }
     } else {
       if (!removeWatermark.value) {
         const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg')
@@ -62,14 +79,27 @@ const useActionSheetCm = () => {
           `screenshot/${tempId}`,
         )
       }
-      return action === 'save'
-        ? cmWVUtils.documentToCameraRoll(
+      if (action === 'save') {
+        return await cmWVUtils.documentToCameraRoll(
+          `screenshot/${tempId}`,
+          'jpg',
+          highResolutionPhoto.value ? 2 : 1,
+          'scale',
+        )
+      } else {
+        if (highResolutionPhoto.value) {
+          lastTempId = tempId
+          tempId = generalUtils.generateRandomString(6)
+          await cmWVUtils.resizeImage(
+            `screenshot/${lastTempId}`,
             `screenshot/${tempId}`,
             'jpg',
-            highResolutionPhoto.value ? 2 : 1,
+            2,
             'scale',
           )
-        : cmWVUtils.shareFile(`screenshot/${tempId}.jpg`)
+        }
+        return await cmWVUtils.shareFile(`screenshot/${tempId}.jpg`)
+      }
     }
   }
   const saveVideoCb = async () => {
@@ -92,7 +122,7 @@ const useActionSheetCm = () => {
       const srcRes = getSubDesignImage(currOpenSubDesign.value, 'thumb')
       await addImage(srcInit, srcRes)
       const data = await genVideo()
-      return saveToCameraRoll(data || undefined)
+      return await saveToCameraRoll(data || undefined)
     }
   }
 
