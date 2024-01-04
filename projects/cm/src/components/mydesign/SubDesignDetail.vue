@@ -44,16 +44,16 @@ div(
             :src="generatedResults[currGenResultIndex].video")
           div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
             loading-brick(class="z-median")
-      div(
-        v-if="atEditor"
-        class="flex-between-center gap-10"
-        @click="() => (showVideo = !showVideo)")
+      div(v-if="atEditor" class="flex-between-center gap-10 relative")
         div(
-          class="w-8 h-8 rounded-full transition-colors"
+          class="w-8 h-8 rounded-full transition-colors pointer-events-none"
           :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'")
         div(
-          class="w-8 h-8 rounded-full transition-colors"
+          class="w-8 h-8 rounded-full transition-colors pointer-events-none"
           :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'")
+        div(
+          class="w-[100vh] h-[200%] absolute top-half left-half -translate-x-half -translate-y-half"
+          @click="() => (showVideo = !showVideo)")
     div(v-if="isExportingVideo" class="result-showcase__dim-cover")
       loading-brick(class="z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit")
@@ -147,7 +147,7 @@ onBeforeUnmount(() => {
 // #region prompt related when sub desgin is open
 // used to dynamically calculate the line-clamp size of the prompt
 const isPromptExapnded = ref(false)
-const isExpandable = ref(false)
+const isExpandable = ref(true)
 
 const promptContainerRef = ref<HTMLElement | null>(null)
 const promptRef = ref<HTMLElement | null>(null)
