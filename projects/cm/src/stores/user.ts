@@ -215,8 +215,7 @@ export const useUserStore = defineStore('user', () => {
 
     // Try to open result.json.
     const subDesignData = await getSubDesignConfig(currOpenDesign.value, subId, 'result')
-    // if (subDesignData.flag === '0') {
-    if (subDesignData) {
+    if (subDesignData?.flag === '0') {
       initWithSubDesignConfig(subDesignData.content)
       return
     }

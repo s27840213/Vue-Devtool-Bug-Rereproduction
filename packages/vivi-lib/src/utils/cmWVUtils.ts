@@ -457,7 +457,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       flag: '0',
       imageId,
       cleanup: () => {
-        this.deleteFile(`screenshot/${imageId}/${outputType ?? 'jpg'}`)
+        this.deleteFile(`screenshot/${imageId}.${outputType ?? 'jpg'}`)
       }
     }
   }
@@ -849,7 +849,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
   }
 
-  async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+  async uploadFileToS3(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
     return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_S3', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
   }
 

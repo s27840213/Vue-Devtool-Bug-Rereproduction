@@ -202,6 +202,7 @@ const useGenImageUtils = () => {
         try {
           const subDesignId = ids[index]
           const promises = [
+            // TODO: use CLONE_FILE instead.
             (async () => {
               if (!initImgSrc.value.startsWith('data:')) {
                 const dataUrl = await generalUtils.toDataUrlNew(initImgSrc.value, 'jpg')
@@ -291,7 +292,7 @@ const useGenImageUtils = () => {
     setInitImgSrc(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`)
     RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
     try {
-      await cmWVUtils.uploadFileToUrl(
+      await cmWVUtils.uploadFileToS3(
         { path: `screenshot/${imageId}`, ext: 'jpg' },
         uploadMap.value ?? {},
         `${userId}/input/${requestId}_init`,
