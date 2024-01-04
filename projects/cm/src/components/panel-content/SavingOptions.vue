@@ -86,20 +86,20 @@ cmWVUtils.getState('save_rm_watermark').then((data) => {
 })
 
 watch(highResolutionPhoto, (newVal) => {
-  // if (!cmWVUtils.checkPro({ plan: 1 })) {
-  //   setHighResolutionPhoto(false)
-  //   newVal && cmWVUtils.setState('save_high_res', { value: false })
-  //   return
-  // }
+  if (!cmWVUtils.checkPro({ plan: 1 })) {
+    setHighResolutionPhoto(false)
+    newVal && cmWVUtils.setState('save_high_res', { value: false })
+    return
+  }
   cmWVUtils.setState('save_high_res', { value: newVal })
 })
 
 watch(removeWatermark, (newVal) => {
-  // if (!cmWVUtils.checkPro({ plan: 1 })) {
-  //   setRemoveWatermark(false)
-  //   newVal && cmWVUtils.setState('save_rm_watermark', { value: false })
-  //   return
-  // }
+  if (!cmWVUtils.checkPro({ plan: 1 })) {
+    setRemoveWatermark(false)
+    newVal && cmWVUtils.setState('save_rm_watermark', { value: false })
+    return
+  }
   cmWVUtils.setState('save_rm_watermark', { value: newVal })
 })
 // #endregion
