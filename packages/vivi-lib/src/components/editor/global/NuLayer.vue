@@ -299,7 +299,7 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      let clipPath = undefined
+      let clipPath
       if (!this.forRender && this.config.clipPath && !this.config.isFrameImg && this.primaryLayer?.type === 'frame') {
         // vvpic mobile and charmix should consider the pageScaleRatio
         const pathScaleRatio = (this.$isPic && this.$isTouchDevice()) || this.$isCm ? this.contentScaleRatio * this.scaleRatio * 0.01 : this.contentScaleRatio
