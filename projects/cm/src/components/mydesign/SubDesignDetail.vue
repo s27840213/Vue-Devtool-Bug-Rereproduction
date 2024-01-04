@@ -1,14 +1,15 @@
 <template lang="pug">
 div(
   v-show="currOpenSubDesign && thumbLoaded"
-  class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
+  class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20\
+    w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
   ref="rootRef")
   div(
     v-if="currOpenSubDesign"
     class="w-full h-full relative"
     v-touch
-    @swipeleft="handleSwipeLeft"
-    @swiperight="handleSwipeRight")
+    @swipeleft="handleSwipe($event, 'left')"
+    @swiperight="handleSwipe($event, 'right')")
     div(
       class="w-full h-full grid justify-items-center items-center gap-8 overflow-hidden"
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
@@ -22,7 +23,7 @@ div(
           :class="{ 'is-flipped': !showVideo }"
           v-if="currOpenSubDesign"
           @load="handleThumbLoaded"
-          :src="atEditor ? generatedResults[currGenResultIndex].url : getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId, 1000)")
+          :src="showcaseImg")
         div(
           v-if="atEditor"
           class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
@@ -88,6 +89,7 @@ import { notify } from '@kyvg/vue3-notification'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import type { AnyTouchEvent } from 'any-touch'
 
@@ -228,19 +230,31 @@ watch(showVideo, (newVal) => {
     }
   }
 })
+
+const handleSwipe = (e: AnyTouchEvent, dir: 'left' | 'right') => {
+  e.stopImmediatePropagation()
+  if (!atEditor.value) return
+  showVideo.value = dir === 'right'
+}
+
+const showcaseImg = computed(() => {
+  if (atEditor.value) {
+    return imageUtils.appendQuery(
+      generatedResults.value[currGenResultIndex.value].url,
+      'rand_ver',
+      `${generalUtils.serialNumber}`
+    )
+  }
+  if (currOpenSubDesign.value) { // Always true due to the v-if condition.
+    return getSubDesignThumbUrl(
+      currOpenSubDesign.value.type,
+      currOpenSubDesign.value.id,
+      currOpenSubDesign.value.subId,
+      1000
+    )
+  }
+})
 // #endregion
-
-const handleSwipeLeft = (e: AnyTouchEvent) => {
-  e.stopImmediatePropagation()
-  if (!atEditor.value) return
-  showVideo.value = false
-}
-
-const handleSwipeRight = (e: AnyTouchEvent) => {
-  e.stopImmediatePropagation()
-  if (!atEditor.value) return
-  showVideo.value = true
-}
 </script>
 <style lang="scss">
 .result-showcase {
