@@ -75,11 +75,18 @@ const useGenImageUtils = () => {
       unshiftGenResults('', ids[0], currPrompt.value)
     }
     try {
+      let finishedNum = 0
       await genImage(params, showMore, num, {
         onApiResponded,
         onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
-          !onlyUpdate && onSuccess(index, imgSrc)
+          if (!onlyUpdate) {
+            finishedNum++
+            onSuccess(index, imgSrc)
+          }
+          if (finishedNum === num) {
+            cmWVUtils.callIOSAsHTTPAPI('MAKE_VIBRATE')
+          }
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
