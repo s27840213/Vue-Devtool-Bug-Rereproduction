@@ -85,21 +85,22 @@ const setBgRemoveBrushSize = (newVal: number) => {
 }
 // #endregion
 
-const modes = [
-  {
-    label: inBgRemoveMode.value ? t('NN0385') : t('CM0017'),
-    value: inBgRemoveMode.value ? ControlMode.Erase : (ControlMode.Brush as string),
-  },
-  {
-    label: inBgRemoveMode.value ? t('NN0386') : t('CM0018'),
-    value: inBgRemoveMode.value ? ControlMode.Brush : (ControlMode.Erase as string),
-  },
-  {
-    label: t('CM0020'),
-    value: ControlMode.Move as string,
-  },
-]
-
+const modes = computed(() => {
+  return [
+    {
+      label: inBgRemoveMode.value ? t('NN0385') : t('CM0017'),
+      value: inBgRemoveMode.value ? ControlMode.Erase : (ControlMode.Brush as string),
+    },
+    {
+      label: inBgRemoveMode.value ? t('NN0386') : t('CM0018'),
+      value: inBgRemoveMode.value ? ControlMode.Brush : (ControlMode.Erase as string),
+    },
+    {
+      label: t('CM0020'),
+      value: ControlMode.Move as string,
+    },
+  ]
+})
 // const currMode = ref<PowerfulFillCanvasMode>(ControlMode.Brush as PowerfulFillCanvasMode)
 const currMode = computed({
   get() {
