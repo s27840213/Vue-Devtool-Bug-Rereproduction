@@ -33,11 +33,10 @@ const useActionSheetCm = () => {
       targetUrl = currGeneratedResult.value.url
     }
     if (targetUrl.startsWith('chmix://')) {
-      const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
+      const { path, ext } = cmWVUtils.getDocumentPath(targetUrl)
       return cmWVUtils.documentToCameraRoll(
         path,
-        name,
-        type,
+        ext,
         !removeWatermark.value,
         highResolutionPhoto.value ? 2 : 1,
         'scale',
@@ -78,8 +77,8 @@ const useActionSheetCm = () => {
       targetUrl = currGeneratedResult.value.url
     }
     if (targetUrl.startsWith('chmix://')) {
-      const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.shareFile(`${path}/${name}.${type}`)
+      const { path, ext } = cmWVUtils.getDocumentPath(targetUrl)
+      return cmWVUtils.shareFile(`${path}.${ext}`)
     } else {
       console.log('retry or something else') // TODO: need to discuss with native for this case
       throw new Error('not implemented yet')

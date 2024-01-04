@@ -1,11 +1,9 @@
-import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useEditorStore } from '@/stores/editor'
 import type { EditorType, GenImageOptions } from '@/types/editor'
 import { editorTypes } from '@/types/editor'
 import store from '@/vuex'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
-import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import VueRouter from 'vue-router'
 
 const isValidType = (x: any): x is EditorType => editorTypes.includes(x)

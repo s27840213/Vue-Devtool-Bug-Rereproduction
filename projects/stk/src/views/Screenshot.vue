@@ -108,6 +108,7 @@ export default defineComponent({
     ...mapActions({
       fetchUserSettings: 'vivisticker/fetchUserSettings'
     }),
+    // Will be Called by native using window.fetchDesign.
     fetchDesign(query: string, options = '') {
       this.clearBuffers()
       this.options = options
