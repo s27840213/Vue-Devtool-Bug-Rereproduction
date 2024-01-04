@@ -68,7 +68,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['pushHistory'],
+  emits: ['pushHistory', 'uploadShadow'],
   components: {
     ColorPicker,
     ColorBtn
@@ -81,7 +81,11 @@ export default defineComponent({
     // When closing panel, if user has changed the color, add it to recently.
     this.addToRecently()
     if (colorUtils.currEvent === ColorEventType.photoShadow && this.$store.getters['mobileEditor/getCurrActivePanel'] !== 'photo-shadow') {
-      imageShadowPanelUtils.handleShadowUpload()
+      if (this.$isCm) {
+        this.$emit('uploadShadow')
+      } else {
+        imageShadowPanelUtils.handleShadowUpload()
+      }
     }
 
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)

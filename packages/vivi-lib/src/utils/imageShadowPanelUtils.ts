@@ -186,7 +186,6 @@ export default new class ImageShadowPanelUtils {
         imageShadowUtils.setUploadProcess(false)
         return
       }
-
       if (primarylayerId) {
         this.setIsUploading(pageId, primarylayerId, config.id as string, true)
       } else {

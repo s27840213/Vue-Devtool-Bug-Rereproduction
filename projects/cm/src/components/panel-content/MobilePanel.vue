@@ -216,17 +216,17 @@ const component = defineComponent({
     dynamicBindMethod(): { [index: string]: any } {
       const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } =
         this.getBasicBindMethods()
+      const { uploadShadow } = this
       switch (this.currActivePanel) {
         case 'color':
-          return { pushHistory }
+          return { pushHistory, uploadShadow }
         case 'text-effect':
           return { pushHistory, openExtraColorModal, openExtraPanelReplace, leaveExtraPanel }
-        case 'photo-shadow': {
-          const { uploadShadow } = this
+        case 'photo-shadow':
           return { pushHistory, openExtraColorModal, uploadShadow }
-        }
-        default:
+        default: {
           return {}
+        }
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
@@ -311,6 +311,11 @@ const component = defineComponent({
               bgRemoveUtils.setInBgRemoveMode(false)
             }
             break
+          }
+
+          case 'photo-shadow': {
+            // close the photo shadow panel or close the color panel
+            this.uploadShadow()
           }
         }
         if (this.inMultiSelectionMode) {
