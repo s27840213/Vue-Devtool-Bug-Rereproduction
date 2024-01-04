@@ -151,7 +151,7 @@ export const useUserStore = defineStore('user', () => {
   // #endregion
 
   // #region edit sub design
-  const initWithSubDeisgnImage = async (subDesign: ICmSubDesign) => {
+  const initWithSubDesignImage = async (subDesign: ICmSubDesign) => {
     try {
       const { id, subId, type, width, height, prompt } = subDesign
       const thumbUrl = getSubDesignThumbUrl(type, id, subId, Math.max(width, height))
@@ -216,7 +216,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     // Cannot find result.json, use result img to create new design.
-    initWithSubDeisgnImage(currOpenSubDesign.value)
+    initWithSubDesignImage(currOpenSubDesign.value)
   }
   // #endregion
 
@@ -441,9 +441,6 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  /**
-   * @Note this is only used for editor saving the mask and init image
-   */
   const saveDesignImageToDocument = async (
     url: string,
     fileName: string,
@@ -642,7 +639,7 @@ export const useUserStore = defineStore('user', () => {
     getSubDesignConfig,
     currDesigns,
     currNextPages,
-    initWithSubDeisgnImage,
+    initWithSubDesignImage,
     editSubDesignResult,
     initWithSubDesignConfig,
     currOpenDesign,

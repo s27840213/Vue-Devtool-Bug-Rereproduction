@@ -326,7 +326,7 @@ export const useEditorStore = defineStore('editor', {
     },
     async keepEditingInit() {
       // Do the same thing with user.editSubDesignResult.
-      const { initWithSubDeisgnImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
+      const { initWithSubDesignImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
       const { editorType: type, currDesignId: id, currSubDesignId: subId } = this
 
       // Try to open result.json.
@@ -339,7 +339,7 @@ export const useEditorStore = defineStore('editor', {
       // Cannot find result.json, use result img to create new design.
       const originalJson = await getSubDesignConfig({ type, id }, subId)
       if (originalJson && originalJson.flag === '0') {
-        initWithSubDeisgnImage(originalJson.content)
+        initWithSubDesignImage(originalJson.content)
       }
     },
     setCurrDesignId(id: string) {

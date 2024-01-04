@@ -87,7 +87,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- loading for gen result
-        div(v-if="inGenResultState && currImgSrc === ''"
+        div(
+          v-if="inGenResultState && currImgSrc === ''"
           class="w-full h-fit grid grid-rows-2 gap-16 justify-center text-white")
           div(class="typo-body-md grid justify-center gap-8")
             span {{ fakeLoading }}%
@@ -338,18 +339,22 @@ const currImgSrc = computed(() => {
 })
 
 const fakeLoading = ref(5)
-watch(() => isGenerating.value && inGenResultState.value, (val, old) => {
-  if (!val || old) return
+watch(
+  () => isGenerating.value && inGenResultState.value,
+  (val, old) => {
+    if (!val || old) return
 
-  // Start fake loading.
-  fakeLoading.value = 0
-  const fakeLoadingId = window.setInterval(() => {
-    fakeLoading.value += 1
-    if (fakeLoading.value >= 95) { // Stop fake loading.
-      window.clearInterval(fakeLoadingId)
-    }
-  }, 100)
-})
+    // Start fake loading.
+    fakeLoading.value = 0
+    const fakeLoadingId = window.setInterval(() => {
+      fakeLoading.value += 1
+      if (fakeLoading.value >= 95) {
+        // Stop fake loading.
+        window.clearInterval(fakeLoadingId)
+      }
+    }, 100)
+  },
+)
 const fakeLoadingText = computed(() => {
   if (fakeLoading.value > 90) return t('CM0149')
   else if (fakeLoading.value > 50) return t('CM0148')
@@ -426,7 +431,7 @@ const centerBtns = computed<centerBtn[]>(() => {
   retTabs.push(...stepBtns)
   if (inBgRemoveMode.value) {
     retTabs.unshift({
-      icon: showInitImage ? 'eye-slash' : 'eye',
+      icon: !showInitImage.value ? 'eye-slash' : 'eye',
       disabled: false,
       width: 20,
       action: () => {
@@ -519,7 +524,7 @@ const wrapperStyles = computed(() => {
   const { pinchScale, isPinchingEditor } = store.state.mobileEditor
   const transformOrigin = '0 0'
   const page = pageUtils.getCurrPage
-  let transform = `translate(${page.x ?? 0}px, ${page.y?? 0}px)`
+  let transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px)`
   if (isPinchingEditor && pinchScale !== 1) {
     transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
   }
@@ -543,15 +548,18 @@ const fitPage = (ratio: number) => {
     x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
     y: (editorUtils.mobileSize.height - page.height * ratio) * 0.5,
   }
-  const posDiff =  {
+  const posDiff = {
     x: newInitPos.x - page.initPos.x,
-    y: newInitPos.y - page.initPos.y
+    y: newInitPos.y - page.initPos.y,
   }
   const newPos = {
     x: page.x + posDiff.x,
-    y: page.y + posDiff.y
+    y: page.y + posDiff.y,
   }
-  store.commit('SET_contentScaleRatio4Page', { pageIndex: layerUtils.pageIndex, contentScaleRatio: ratio })
+  store.commit('SET_contentScaleRatio4Page', {
+    pageIndex: layerUtils.pageIndex,
+    contentScaleRatio: ratio,
+  })
   pageUtils.updatePageInitPos(0, newInitPos)
   pageUtils.updatePagePos(0, newPos)
   // editorUtils.handleContentScaleRatio(0)
@@ -594,9 +602,12 @@ const initPagePinchHandler = () => {
   setMobilePysicalSize()
   pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
   pagePinchHandler = (e) => {
-    if (inAspectRatioState.value ||
+    if (
+      inAspectRatioState.value ||
       isProcessingBgRemove.value ||
-      (inGenResultState.value && currImgSrc.value === '')) return
+      (inGenResultState.value && currImgSrc.value === '')
+    )
+      return
     setMobilePysicalSize()
     pagePinchUtils?.pinchHandler(e)
   }
