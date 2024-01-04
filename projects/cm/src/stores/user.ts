@@ -134,10 +134,10 @@ export const useUserStore = defineStore('user', () => {
   const getSubDesignConfig = async (
     myDesign: ICmMyDesign | Pick<ICmMyDesign, 'id' | 'type'>,
     subDesignId: string,
-    name = 'original',
+    name: 'original' | 'result' = 'original',
   ) => {
     const { id, type } = myDesign
-    const data = (await cmWVUtils.getJson(`mydesign-${type}/${id}/${subDesignId}`, name)) as
+    const data = (await cmWVUtils.getJson(`mydesign-${type}/${id}/${subDesignId}/${name}`)) as
       | {
           flag: '0' | '1'
           name: string
@@ -209,8 +209,7 @@ export const useUserStore = defineStore('user', () => {
 
     // Try to open result.json.
     const subDesignData = await getSubDesignConfig(currOpenDesign.value, subId, 'result')
-    // if (subDesignData.flag === '0') {
-    if (subDesignData) {
+    if (subDesignData?.flag === '0') {
       initWithSubDesignConfig(subDesignData.content)
       return
     }
@@ -453,7 +452,7 @@ export const useUserStore = defineStore('user', () => {
     },
   ) => {
     const {
-      subDesignId,
+      subDesignId = '',
       type = 'jpg',
       thumbIndex,
       designId = currDesignId.value,
@@ -463,11 +462,10 @@ export const useUserStore = defineStore('user', () => {
     if (thumbIndex !== undefined) {
       setCurrDesignThumbIndex(thumbIndex)
     }
-    const data = (await cmWVUtils.saveAssetFromUrl(type, url, {
-      key: `mydesign-${myDesignEditorType}/${designId}`,
-      ...(subDesignId && { subPath: subDesignId }),
-      name: fileName,
-    })) ?? {
+    const data = (await cmWVUtils.saveAssetFromUrl(
+      type,
+      url,
+      `mydesign-${myDesignEditorType}/${designId}/${subDesignId}/${fileName}`)) ?? {
       flag: '1',
       fileId: '',
     }
@@ -526,7 +524,7 @@ export const useUserStore = defineStore('user', () => {
         width: pages[0].width,
         height: pages[0].height,
       }
-      await cmWVUtils.addJson(`mydesign-${editorType.value}/${path}`, name, json)
+      await cmWVUtils.addJson(`mydesign-${editorType.value}/${path}/${name}`, json)
 
       const newDesign = {
         type: editorType.value,
