@@ -334,7 +334,7 @@ class BgRemoveUtils {
                 config: image,
                 layerInfo
               }
-              imageShadowPanelUtils.handleShadowUpload(layerData, true)
+              imageShadowPanelUtils.handleShadowUpload({ layerData, forceUpload: true })
               notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             }
           }

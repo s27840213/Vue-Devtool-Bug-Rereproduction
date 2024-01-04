@@ -105,8 +105,8 @@ export default new class ImageShadowPanelUtils {
     }
   }
 
-  async handleShadowUpload(options?: {_layerData?: any, forceUpload?: boolean, saveCb?: (c: HTMLCanvasElement) => Promise<string> }) {
-    const { _layerData, forceUpload, saveCb } = options || {}
+  async handleShadowUpload(options?: {layerData?: any, forceUpload?: boolean, saveCb?: (c: HTMLCanvasElement) => Promise<string> }) {
+    const { layerData: _layerData, forceUpload, saveCb } = options || {}
     try {
       return this._handleShadowUpload({ _layerData, forceUpload, saveCb })
     } catch {
