@@ -323,7 +323,7 @@ const {
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = userStore
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } = userStore
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 const fromMyDesign = hasGeneratedResults.value
@@ -393,10 +393,8 @@ const handleNextAction = async function () {
     changeEditorState('next')
     const currGenResult = currGeneratedResult.value
     if (currGenResult) {
-      if (!currGenResult.video) {
-        const src = imageUtils.appendRandomQuery(initImgSrc.value)
-        const res = imageUtils.appendRandomQuery(currGeneratedResult.value.url)
-        await addImage(src, res)
+      if (!currGenResult.video?.src) {
+        await addImage(getInitialImg(), currGeneratedResult.value.url)
         const data = await genVideo()
         if (data) {
           updateGenResult(currGenResult.id, { video: data })
