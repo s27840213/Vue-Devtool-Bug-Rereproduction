@@ -394,11 +394,8 @@ const handleNextAction = async function () {
     const currGenResult = currGeneratedResult.value
     if (currGenResult) {
       if (!currGenResult.video?.src) {
-        await addImage(getInitialImg(), currGeneratedResult.value.url)
-        const data = await genVideo()
-        if (data) {
-          updateGenResult(currGenResult.id, { video: data })
-        }
+        addImage(getInitialImg(), currGeneratedResult.value.url)
+          .then(genVideo)
       }
     }
   }
