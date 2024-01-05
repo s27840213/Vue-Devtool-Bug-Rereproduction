@@ -228,44 +228,30 @@ const useGenImageUtils = () => {
         try {
           const subDesignId = ids[index]
           const promises = [
-            // TODO: use CLONE_FILE instead.
-            (async () => {
-              if (!initImgSrc.value.startsWith('data:')) {
-                const dataUrl = await generalUtils.toDataUrlNew(initImgSrc.value, 'jpg')
-                setInitImgSrc(dataUrl)
-                cleanup && cleanup()
-              }
-              await saveDesignImageToDocument(initImgSrc.value, 'original', {
-                subDesignId,
-              })
-            })(),
+            cmWVUtils.cloneFile(
+              initImgSrc.value,
+              `mydesign-${editorType.value}/${currDesignId.value}/${subDesignId}/original.jpg`
+            ),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
-          if (editorType.value === 'hidden-message') {
-            maskDataUrl.value &&
+
+          if (maskDataUrl.value) {
+            promises.push(
               saveDesignImageToDocument(maskDataUrl.value, 'mask', {
                 type: 'png',
                 subDesignId,
-              })
+              }),
+            )
           } else {
-            const prepareMask = prepareMaskToUpload()
-            if (prepareMask) {
-              promises.push(
-                saveDesignImageToDocument(maskDataUrl.value, 'mask', {
-                  type: 'png',
-                  subDesignId,
-                }),
-              )
-            } else {
-              notify({
-                group: 'error',
-                text: 'save mask to document failed',
-              })
-            }
+            notify({
+              group: 'error',
+              text: 'save mask to document failed',
+            })
           }
 
           await Promise.all(promises)
+          cleanup && cleanup() // Delete screenshot.
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message?.includes('Cancelled')) {

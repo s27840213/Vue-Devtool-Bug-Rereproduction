@@ -73,11 +73,7 @@ const useActionSheetCm = () => {
         const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg', 100)
         await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
       } else {
-        await cmWVUtils.saveAssetFromUrl(
-          'jpg',
-          await generalUtils.toDataUrlNew(targetUrl, 'jpg'),
-          `screenshot/${tempId}`,
-        )
+        await cmWVUtils.saveAssetFromUrl('jpg', targetUrl, `screenshot/${tempId}`)
       }
       if (action === 'save') {
         return await cmWVUtils.documentToCameraRoll(

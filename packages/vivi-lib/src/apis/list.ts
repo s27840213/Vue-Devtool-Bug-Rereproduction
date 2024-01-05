@@ -58,7 +58,7 @@ class ListService {
     return {}
   }
 
-  getInfoList(type: string, designIds: string[], igLayout?: 'story' | 'post') {
+  getInfoList(type: string, designIds: string[], igLayout?: 'story' | 'post', isHm?: 0 | 1) {
     const searchParams = {
       token: '1',
       type,
@@ -67,9 +67,11 @@ class ListService {
       cache: true,
       platform: window.location.host,
       ver: store.getters['user/getVerApi'],
-      app: 1,
+      ...this.app,
       // for vivisticker template
-      ...(igLayout && { ig_layout: igLayout })
+      ...(igLayout && { ig_layout: igLayout }),
+      // for charmix hidden message
+      ...(isHm !== undefined && { is_hm: isHm })
     }
     return axios.request<IListServiceResponse>({
       url: '/list-design',
@@ -186,7 +188,7 @@ class ListService {
         type: 'color',
         design_id: color,
         locale: localeUtils.currLocale(),
-        app: generalUtils.isPic ? '0' : (generalUtils.isStk ? '1' : '2'), // 2 for charmix
+        ...this.app,
         ...(generalUtils.isStk || generalUtils.isCm) && { host_id: uploadUtils.hostId },
       }
     })

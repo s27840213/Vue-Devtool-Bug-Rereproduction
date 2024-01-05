@@ -24,7 +24,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
       @pointer-up="setIsChangingBrushSize(false)")
   footer-bar(
     class="w-full box-border px-24"
-    :title="inBgRemoveMode ? $t('CM0082') : $t('CM0017')"
+    :title="inBgRemoveMode || isProcessing ? $t('CM0082') : $t('CM0017')"
     :disableBtns="disableBtns"
     @cancel="cancel"
     @apply="apply")
@@ -88,12 +88,18 @@ const setBgRemoveBrushSize = (newVal: number) => {
 const modes = computed(() => {
   return [
     {
-      label: inBgRemoveMode.value ? t('NN0385') : t('CM0017'),
-      value: inBgRemoveMode.value ? ControlMode.Erase : (ControlMode.Brush as string),
+      label: inBgRemoveMode.value || isProcessing.value ? t('NN0385') : t('CM0017'),
+      value:
+        inBgRemoveMode.value || isProcessing.value
+          ? ControlMode.Erase
+          : (ControlMode.Brush as string),
     },
     {
-      label: inBgRemoveMode.value ? t('NN0386') : t('CM0018'),
-      value: inBgRemoveMode.value ? ControlMode.Brush : (ControlMode.Erase as string),
+      label: inBgRemoveMode.value || isProcessing.value ? t('NN0386') : t('CM0018'),
+      value:
+        inBgRemoveMode.value || isProcessing.value
+          ? ControlMode.Brush
+          : (ControlMode.Erase as string),
     },
     {
       label: t('CM0020'),
@@ -104,7 +110,7 @@ const modes = computed(() => {
 // const currMode = ref<PowerfulFillCanvasMode>(ControlMode.Brush as PowerfulFillCanvasMode)
 const currMode = computed({
   get() {
-    if (inBgRemoveMode.value) {
+    if (inBgRemoveMode.value || isProcessing.value) {
       return movingMode.value
         ? ControlMode.Move
         : clearMode.value
@@ -115,7 +121,7 @@ const currMode = computed({
     }
   },
   set(newVal: PowerfulFillCanvasMode) {
-    if (inBgRemoveMode.value) {
+    if (inBgRemoveMode.value || isProcessing.value) {
       if (newVal === ControlMode.Move) {
         setMovingMode(true)
       } else {
@@ -144,7 +150,7 @@ const { editorType, currDesignId } = storeToRefs(editorStore)
 // #endregion
 
 const brushSize = computed(() => {
-  if (inBgRemoveMode.value) {
+  if (inBgRemoveMode.value || isProcessing.value) {
     return bgRemoveBrushSize.value
   }
   return maskBrushSize.value
