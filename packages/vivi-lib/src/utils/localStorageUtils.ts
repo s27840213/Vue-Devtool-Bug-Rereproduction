@@ -23,6 +23,20 @@ class LocalStorage {
           obj: {}
         }
       },
+      'objects-hm': {
+        categories: {
+          order: [],
+          obj: {}
+        },
+        tags: {
+          order: [],
+          obj: {}
+        },
+        items: {
+          order: [],
+          obj: {}
+        }
+      },
       giphy: {
         categories: {
           order: [],
@@ -87,6 +101,14 @@ class LocalStorage {
     if (item && typeof item === 'string') {
       try {
         const obj = JSON.parse(item)
+        // for newly added type
+        if (category === 'favorites') {
+          const type = key.split('.')[0]
+          if (!obj[type] && this.defaultValue[category][type]) {
+            obj[type] = this.defaultValue[category][type]
+            localStorage.setItem(category, JSON.stringify(obj))
+          }
+        }
         return _.get(obj, key)
       } catch {
         this.reset(category)
@@ -137,6 +159,14 @@ class LocalStorage {
 
     const item = await getAutoWVUtils().getState(category)
     if (item) {
+      // for newly added type
+      if (category === 'favorites') {
+        const type = key.split('.')[0]
+        if (!item[type] && this.defaultValue[category][type]) {
+          item[type] = this.defaultValue[category][type]
+          await getAutoWVUtils().setState(category, item)
+        }
+      }
       return _.get(item, key)
     } else if (item === undefined) { // init
       this.appReset(category)

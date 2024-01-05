@@ -61,7 +61,6 @@ import { notify } from '@kyvg/vue3-notification'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 
 const { t } = useI18n()
 

@@ -41,7 +41,7 @@ div(
             autoplay
             mutes
             @loadeddata="() => { isVideoLoaded = true }"
-            :src="generatedResults[currGenResultIndex].video")
+            :src="videoSrc")
           div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
             loading-brick(class="z-median")
       div(v-if="atEditor" class="flex-between-center gap-10 relative")
@@ -213,6 +213,13 @@ const video = ref<HTMLVideoElement | null>(null)
 const resultShowcase = ref<HTMLElement | null>(null)
 const isVideoLoaded = ref(false)
 const showVideo = ref(true)
+const videoSrc = computed(() => {
+  return generatedResults.value[currGenResultIndex.value].video?.src
+})
+
+watch(videoSrc, () => {
+  isVideoLoaded.value = false
+})
 
 watch(
   () => inSavingState.value,
