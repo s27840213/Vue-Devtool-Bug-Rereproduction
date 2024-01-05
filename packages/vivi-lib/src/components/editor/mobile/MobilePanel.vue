@@ -370,6 +370,7 @@ export default defineComponent({
       return !(target.matches?.('.header-bar .panel-icon *') || // Skip header-bar icon
         target.matches?.('.modal-container, .modal-container *') || // Skip modal-card
         target.className.includes?.('footer-tabs') || // Skip footer-bar icon
+        target.matches?.('.full-page *') || // Skip full-page popup, like payment in stk/cm.
         target.className === 'inputNode' ||
         this.middlewareCondition(target)
       )
