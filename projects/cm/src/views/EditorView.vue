@@ -422,7 +422,7 @@ const centerBtns = computed<centerBtn[]>(() => {
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
     { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo },
   ]
-  if (editorType.value === 'hidden-message')
+  if (editorType.value === 'hidden-message' && !inBgRemoveMode.value)
     retTabs.push({
       icon: 'question-mark-circle',
       disabled: false,
@@ -449,7 +449,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       },
     })
   }
-  if (currEditorTheme.value && editorType.value === 'hidden-message')
+  if (currEditorTheme.value && editorType.value === 'hidden-message' && !inBgRemoveMode.value)
     retTabs.push({
       icon: currEditorTheme.value.toggleIcon,
       disabled: false,
@@ -587,7 +587,6 @@ watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
-    console.log(' fitScaleRatio.value,')
     fitPage(newVal)
   },
 )
