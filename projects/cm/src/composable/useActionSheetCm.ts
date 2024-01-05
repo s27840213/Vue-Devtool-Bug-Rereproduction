@@ -103,7 +103,9 @@ const useActionSheetCm = () => {
     const videoRecord = useVideoRcordStore()
     const { genVideo, saveToCameraRoll, setGenVideoCb, setIsExportVideo } = videoRecord
     const { isGeningVideo } = storeToRefs(videoRecord)
-    const { removeWatermark } = storeToRefs(useUserStore())
+    const userStore = useUserStore()
+    const { getInitialImg } = userStore
+    const { removeWatermark } = storeToRefs(userStore)
     setIsExportVideo(true)
     if (currGeneratedResult.value && currGeneratedResult.value.video) {
       if (currGeneratedResult.value.video.removeWatermark !== removeWatermark.value) {
@@ -125,9 +127,10 @@ const useActionSheetCm = () => {
     } else if (currOpenSubDesign.value) {
       // is not GeningVideo called by mydesign
       const { addImage, genVideo } = videoRecord
-      const srcInit = getSubDesignImage(currOpenSubDesign.value, 'original')
-      const srcRes = getSubDesignImage(currOpenSubDesign.value, 'thumb')
-      await addImage(srcInit, srcRes)
+      await addImage(
+        getInitialImg(),
+        getSubDesignImage(currOpenSubDesign.value, 'thumb')
+      )
       const data = await genVideo()
       return await saveToCameraRoll(data?.src || undefined)
     }
