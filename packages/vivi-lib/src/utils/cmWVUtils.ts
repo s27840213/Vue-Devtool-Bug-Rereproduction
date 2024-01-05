@@ -511,6 +511,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     await this.callIOSAsHTTPAPI('SET_STATE', { key, value })
   }
 
+  async cloneFile(srcPath: string, desPath: string ) {
+    if (this.inBrowserMode) return
+    if (/:\/\//.test(srcPath)) {
+      const { path, ext } = this.getDocumentPath(srcPath)
+      srcPath = `${path}.${ext}`
+    }
+    await this.callIOSAsHTTPAPI('CLONE_FILE', { srcPath, desPath })
+  }
+  
   async deleteFile(path: string) {
     if (this.inBrowserMode) return
     await this.callIOSAsHTTPAPI('DELETE_FILE', { path })

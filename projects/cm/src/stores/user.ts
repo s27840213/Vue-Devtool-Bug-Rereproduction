@@ -154,19 +154,16 @@ export const useUserStore = defineStore('user', () => {
   const initWithSubDesignImage = async (subDesign: ICmSubDesign) => {
     try {
       const { id, subId, type, width, height, prompt } = subDesign
-      const thumbUrl = getSubDesignThumbUrl(type, id, subId, Math.max(width, height))
-      const resultUrl = getTargetImageUrl(type, id, subId, 'result')
 
       // Copy thumb img to result img.
-      const thumb = await generalUtils.toDataUrlNew(thumbUrl)
-      await saveDesignImageToDocument(thumb, 'result', {
-        designId: id,
-        subDesignId: subId,
-        myDesignEditorType: type,
-      })
+      await cmWVUtils.cloneFile(
+        `mydesign-${type}/${id}/${subId}/thumb.jpg`,
+        `mydesign-${type}/${id}/${subId}/result.jpg`,
+      )
 
       // Create new design with result img.
       pageUtils.setPages([pageUtils.newPage({ width, height })])
+      const resultUrl = getTargetImageUrl(type, id, subId, 'result')
       assetUtils.addImage(resultUrl, width / height, {
         fit: 1,
         record: false,
@@ -501,13 +498,14 @@ export const useUserStore = defineStore('user', () => {
         const screenshot = await cmWVUtils.sendScreenshotUrl(
           cmWVUtils.createUrlForJSON({ noBg: false }),
         )
-        const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
-
         if (screenshot.flag === '0') {
-          const img64 = await generalUtils.toDataUrlNew(
-            `chmix://screenshot/${screenshot.imageId}?imagetype=jpg&ssize=1080`,
+          cmWVUtils.cloneFile(
+            `screenshot/${screenshot.imageId}.jpg`,
+            `mydesign-${editorType.value}/${currDesignId.value}/${subDesignId}/thumb.jpg`,
           )
-          await saveDesignImageToDocument(img64, 'thumb', { subDesignId, thumbIndex })
+
+          const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
+          setCurrDesignThumbIndex(thumbIndex)
         }
       }
 
