@@ -242,27 +242,19 @@ const useGenImageUtils = () => {
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
-          if (editorType.value === 'hidden-message') {
-            maskDataUrl.value &&
+
+          if (maskDataUrl.value) {
+            promises.push(
               saveDesignImageToDocument(maskDataUrl.value, 'mask', {
                 type: 'png',
                 subDesignId,
-              })
+              }),
+            )
           } else {
-            const prepareMask = prepareMaskToUpload()
-            if (prepareMask) {
-              promises.push(
-                saveDesignImageToDocument(maskDataUrl.value, 'mask', {
-                  type: 'png',
-                  subDesignId,
-                }),
-              )
-            } else {
-              notify({
-                group: 'error',
-                text: 'save mask to document failed',
-              })
-            }
+            notify({
+              group: 'error',
+              text: 'save mask to document failed',
+            })
           }
 
           await Promise.all(promises)
