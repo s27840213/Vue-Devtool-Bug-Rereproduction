@@ -559,8 +559,33 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       carouselItems: [
         {
           key: 'powerful-fill',
-          title: 'Powerful Fill',
-          img: require('@img/png/pricing/cm-pro.png')
+          title: i18n.global.t('CM0001'),
+          img: require('@img/png/pricing/cm_pro-powerful-fill.png')
+        },
+        {
+          key: 'ai-reflection',
+          title: i18n.global.t('CM0151'),
+          img: require('@img/png/pricing/cm_pro-ai-reflection.png')
+        },
+        {
+          key: 'ai-reflection',
+          title: i18n.global.t('CM0151'),
+          img: require('@img/png/pricing/cm_pro-ai-reflection2.png')
+        },
+        {
+          key: 'hidden-message',
+          title: i18n.global.t('CM0078'),
+          img: require('@img/png/pricing/cm_pro-hidden-message.png')
+        },
+        {
+          key: 'magic-combined',
+          title: i18n.global.t('CM0152'),
+          img: require('@img/png/pricing/cm_pro-magic-combined.png')
+        },
+        {
+          key: 'magic-combined',
+          title: i18n.global.t('CM0152'),
+          img: require('@img/png/pricing/cm_pro-magic-combined2.png')
         },
       ],
       cards: [
