@@ -86,8 +86,7 @@ export function isITextGooey(object: ITextBg): object is ITextGooey {
   return object && !!object.name && ['gooey'].includes(object.name)
 }
 export function isITextLetterBg(object: ITextBg): object is ITextLetterBg {
-  return object && !!object.name &&
-    (textLetterBgName as unknown as string[]).includes(object.name)
+  return object && !!object.name && textLetterBgName.includes(object.name)
 }
 
 export interface ITextFillConfig {

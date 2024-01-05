@@ -551,7 +551,7 @@ class GroupUtils {
         if (layer.type === 'text') {
           const { widthLimit, styles } = layer as IText
           if (widthLimit === -1) {
-            layer.widthLimit = (styles.writingMode as string).includes('vertical') ? styles.height : styles.width
+            layer.widthLimit = styles.writingMode.includes('vertical') ? styles.height : styles.width
           } else {
             layer.widthLimit = (layer as IText).widthLimit * tmpLayer.styles.scale
           }

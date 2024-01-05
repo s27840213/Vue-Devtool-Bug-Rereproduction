@@ -6,7 +6,7 @@ import constantData from '@nu/vivi-lib/utils/constantData'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import VueRouter from 'vue-router'
 
-const isValidType = (x: any): x is EditorType => editorTypes.includes(x)
+const isValidType = (x: string | null): x is EditorType => editorTypes.includes(x)
 
 export async function editorRouteHandler(
   _to: VueRouter.RouteLocationNormalized,
@@ -29,7 +29,7 @@ export async function editorRouteHandler(
 
     const editorStore = useEditorStore()
     const { editorType } = storeToRefs(editorStore)
-    const { setEditorType, setPageSize, setCurrActiveFeature, stepsReset, setCurrGenOptions } =
+    const { setEditorType, setPageSize, setCurrActiveFeature, setCurrGenOptions } =
       editorStore
     setEditorType(type)
     setPageSize(width, height)
