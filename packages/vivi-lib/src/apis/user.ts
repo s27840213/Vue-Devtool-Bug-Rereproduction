@@ -212,7 +212,7 @@ export default {
       method: 'POST',
       data: {
         ...params,
-        token: params.token || store.getters['user/getGetTxToken']
+        token: params.token || store.getters['user/getToken'] || store.getters['user/getGetTxToken']
       }
     }))
   }
