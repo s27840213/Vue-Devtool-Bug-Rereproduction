@@ -571,6 +571,16 @@ export const useUserStore = defineStore('user', () => {
     return imageUtils.appendQuery(imgSrc, 'lsize', `${size}`)
   }
 
+  const getInitialImg = () => {
+    const assetId = `mydesign-${editorType.value}/${currDesignId.value}/initial`
+    const srcObj: SrcObj = {
+      type: 'ios',
+      assetId,
+      userId: 'jpg',
+    }
+    return imageUtils.getSrc(srcObj)
+  }
+
   const getDesignThumbUrl = (design: ICmMyDesign, size = 400) => {
     const { id, subDesignInfo, thumbIndex, type } = design
     if (thumbIndex === -1) return ''
@@ -650,6 +660,7 @@ export const useUserStore = defineStore('user', () => {
     // #region save option related
     removeWatermark,
     highResolutionPhoto,
+    getInitialImg,
     setRemoveWatermark,
     setHighResolutionPhoto,
     // #endregion
