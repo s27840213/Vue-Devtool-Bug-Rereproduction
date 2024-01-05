@@ -412,7 +412,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
       case 7:
-        return `type=text&id=${item.id}&ver=${item.ver}`
+        return `type=text&id=${item.id}&ver=${item.ver}&noBg=true`
       case 1:
         return `type=background&id=${item.id}&ver=${item.ver}`
       default:
