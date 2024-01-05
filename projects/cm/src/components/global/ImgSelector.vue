@@ -456,10 +456,10 @@ const sendToEditor = async (isBgRemove = false) => {
           uploadUtils.uploadAsset('cm-bg-remove', [dataUrl])
         })
       }
+      if (!initAtEditor || editorType.value === 'hidden-message') {
+        groupUtils.deselect()
+      }
     })
-    if (!initAtEditor || editorType.value === 'hidden-message') {
-      groupUtils.deselect()
-    }
   }
   closeImageSelector()
   srcPreprocessImg.value = null

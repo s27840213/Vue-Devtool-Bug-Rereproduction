@@ -402,6 +402,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   createUrl(item: IAsset): string {
+    console.log(item)
     switch (item.type) {
       case 5:
       case 11:
@@ -411,8 +412,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
         return `type=svgImage2&id=${item.id}&ver=${item.ver}`
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
-      // case 7: deprecated
-      //   return `type=text&id=${item.id}&ver=${item.ver}`
+      case 7:
+        return `type=text&id=${item.id}&ver=${item.ver}`
       case 1:
         return `type=background&id=${item.id}&ver=${item.ver}`
       default:
