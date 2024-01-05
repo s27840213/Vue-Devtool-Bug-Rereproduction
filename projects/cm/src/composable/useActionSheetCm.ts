@@ -7,10 +7,11 @@ import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUti
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
 import useStateInfo from './useStateInfo'
+
 const useActionSheetCm = () => {
   const userStore = useUserStore()
   const { getSubDesignImage, deleteDesign, deleteSubDesign } = userStore
-  const { currOpenSubDesign, isSubDesignOpen, removeWatermark, highResolutionPhoto } =
+  const { currOpenSubDesign, removeWatermark, highResolutionPhoto } =
     storeToRefs(userStore)
   const { t } = useI18n()
   const {
@@ -73,11 +74,7 @@ const useActionSheetCm = () => {
         const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg', 100)
         await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
       } else {
-        await cmWVUtils.saveAssetFromUrl(
-          'jpg',
-          await generalUtils.toDataUrlNew(targetUrl, 'jpg'),
-          `screenshot/${tempId}`,
-        )
+        await cmWVUtils.saveAssetFromUrl('jpg', targetUrl, `screenshot/${tempId}`)
       }
       if (action === 'save') {
         return await cmWVUtils.documentToCameraRoll(

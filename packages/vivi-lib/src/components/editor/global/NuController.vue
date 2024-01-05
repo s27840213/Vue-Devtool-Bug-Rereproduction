@@ -381,7 +381,7 @@ export default defineComponent({
     resizerProfile() {
       return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     },
-    subLayer(): any {
+    subLayer() {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
           const subLayerIdx = (this.config as IGroup).layers.findIndex(l => l.active)

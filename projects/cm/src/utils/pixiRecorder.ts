@@ -109,11 +109,8 @@ export const fragment3 = `
 
 export default class PixiRecorder {
   private pixi = new PIXI.Application()
-  private texture_src = null as null | PIXI.Texture
   private sprite_src = null as null | PIXI.Sprite
   private texture_res = null as null | PIXI.Texture
-  private sprite_res = null as null | PIXI.Sprite
-  private texture_wm = null as null | PIXI.Texture
   private sprite_wm = null as null | PIXI.Sprite
   private filter = null as null | PIXI.Filter
   private uniforms = {} as { [key: string]: any }
@@ -122,8 +119,10 @@ export default class PixiRecorder {
   private canvasRecorder = null as null | CanvasRecorder
   private _animate = null as null | ((delta: number) => void)
   private _genVideoResolver = null as null | (() => void)
+  private reset = null as null | (() => void)
   private isImgReady = false
   private _video = { src: '', removeWatermark: false }
+  private isRecordingVideo = false
   private fragment = fragment_slide
 
   get video() {
@@ -143,6 +142,39 @@ export default class PixiRecorder {
         ]
       ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
     }
+    this.watermarkHandler()
+
+    // if the video is recording already, stop it first
+    if (this.isRecordingVideo && this.sprite_src) {
+      this.canvasRecorder?.stop(true)
+      this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+    }
+
+    this.reset && this.reset()
+    setTimeout(() => {
+      if (this._animate) {
+        this.pixi.ticker.add(this._animate)
+      }
+    }, RECORD_START_DELAY)
+
+    return new Promise<string | 'error'>((resolve) => {
+      const stopCb = (url: string) => {
+        this.isRecordingVideo = false
+        return resolve(url)
+      }
+      this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, stopCb)
+      this.canvasRecorder.start(1000)
+      this.isRecordingVideo = true
+    }).then((res) => {
+      if (res === 'error') {
+        return undefined
+      }
+      this._video.src = res
+      return { src: res, removeWatermark: this._video.removeWatermark }
+    })
+  }
+
+  watermarkHandler() {
     const { removeWatermark } = useUserStore()
     if (removeWatermark && this.sprite_wm) {
       this.pixi.stage.removeChild(this.sprite_wm)
@@ -151,30 +183,6 @@ export default class PixiRecorder {
       this.pixi.stage.addChild(this.sprite_wm)
       this._video.removeWatermark = false
     }
-
-    this.time_start = -1
-    if (RECORD_START_DELAY) {
-      setTimeout(() => {
-        if (this._animate) {
-          this.pixi.ticker.add(this._animate)
-        }
-      }, RECORD_START_DELAY)
-    } else {
-      if (this._animate) {
-        this.pixi.ticker.add(this._animate)
-      }
-    }
-
-    return new Promise<string | 'error'>((resolve) => {
-      this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, resolve)
-      this.canvasRecorder.start(1000)
-    }).then((res) => {
-      if (res === 'error') {
-        return null
-      }
-      this._video.src = res
-      return { src: res, removeWatermark: this._video.removeWatermark }
-    })
   }
 
   async saveToCameraRoll(url = this.video.src) {
@@ -195,7 +203,6 @@ export default class PixiRecorder {
       throw new Error('video not generated yet')
     }
   }
-
 
   addOpacityFilter() {
     if (!this.sprite_src) return
@@ -264,13 +271,17 @@ export default class PixiRecorder {
   addSlideFilter() {
     if (!this.sprite_src) return
 
-    this.uniforms.dispFactor = 0
-    this.uniforms.nextImage = this.texture_res
-    this.filter = new PIXI.Filter(undefined, fragment_slide, this.uniforms)
-    this.sprite_src.filters = [this.filter]
+    this.reset = () => {
+      this.time_start = -1
+      this.uniforms.dispFactor = 0
+      this.uniforms.nextImage = this.texture_res
+      this.filter = new PIXI.Filter(undefined, fragment_slide, this.uniforms)
+      if (this.sprite_src) {
+        this.sprite_src.filters = [this.filter]
+      }
+    }
     this._animate = () => {
       const now = Date.now()
-      // init time
       if (this.time_start === -1) {
         this.time_start = now
       }
@@ -281,6 +292,7 @@ export default class PixiRecorder {
           if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
             this.dynamicAnimateEndTime = -1
             this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+            this.reset && this.reset()
             if (this.canvasRecorder) {
               this.canvasRecorder.stop()
             }
@@ -307,7 +319,6 @@ export default class PixiRecorder {
   loadImgs(img1: string, img2: string) {
     const p1 = new Promise<PIXI.Texture>((resolve) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
-        this.texture_src = texture
         this.sprite_src = new PIXI.Sprite(texture)
         this.sprite_src.width = texture.width
         this.sprite_src.height = texture.height
@@ -317,9 +328,6 @@ export default class PixiRecorder {
     const p2 = new Promise<PIXI.Texture>((resolve) => {
       PIXI.Texture.fromURL(img2).then((texture) => {
         this.texture_res = texture
-        this.sprite_res = new PIXI.Sprite(texture)
-        this.sprite_res.width = texture.width
-        this.sprite_res.height = texture.height
         resolve(texture)
       })
     })
@@ -328,7 +336,7 @@ export default class PixiRecorder {
       // to fix svg blurry error, we need to resize the svg first
       imageUtils.imgLoadHandler(WATER_MARK, async (img: HTMLImageElement) => {
         const { width, height } = await imageUtils.imgLoadHandler(img1, (img) => { return img })
-        imageShadowPanelUtils.svgImageSizeFormatter(img, Math.min(width, height) / 2, () => {
+        imageShadowPanelUtils.svgImageSizeFormatter(img, Math.min(width, height) * 0.5, () => {
           img.onload = () => {
             const canvas = document.createElement('canvas')
             canvas.width = 500
@@ -339,7 +347,6 @@ export default class PixiRecorder {
               // see. https://github.com/pixijs/pixijs/issues/7204
               texture.baseTexture.destroy()
               PIXI.Texture.fromURL(img.src, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
-                this.texture_wm = texture
                 this.sprite_wm = new PIXI.Sprite(texture)
                 this.sprite_wm.width = texture.width
                 this.sprite_wm.height = texture.height
@@ -358,13 +365,13 @@ export default class PixiRecorder {
     return this.loadImgs(src, res)
       .then(() => {
         this.isImgReady = true
-        if (!this.sprite_src || !this.sprite_res) return console.warn('no sprite')
+        if (!this.sprite_src) return console.warn('no sprite')
 
         this.pixi.view.width = this.sprite_src.width
         this.pixi.view.height = this.sprite_src.height
         this.pixi.stage.addChild(this.sprite_src)
-        if (this.sprite_wm && this.texture_wm) {
-          const ratio = this.texture_wm.width / this.texture_wm.height
+        if (this.sprite_wm) {
+          const ratio = this.sprite_wm.width / this.sprite_wm.height
           this.sprite_wm.width = Math.min(this.sprite_src.width, this.sprite_src.height) * 0.5
           this.sprite_wm.height = this.sprite_wm.width / ratio
           this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
@@ -398,16 +405,16 @@ class CanvasRecorder {
   private stream: MediaStream
   private recorder: MediaRecorder
   private chunks = [] as Array<any>
-  private _resolver = null as null | ((value: string | PromiseLike<string> | 'error') => void)
+  // private _resolver = null as null | ((value: string | PromiseLike<string> | 'error') => void)
+  private _stopCb = undefined as undefined | ((url: string) => void)
 
-  constructor(canvas: HTMLCanvasElement, resolver?: ((value: string | PromiseLike<string> | 'error') => void)) {
+  constructor(canvas: HTMLCanvasElement, stopCb?: ((url: string) => void)) {
     this.canvas = canvas
     this.stream = this.canvas.captureStream()
     this.recorder = new MediaRecorder(this.stream, this.getMimeTypeSupportOptions())
     this.recorder.ondataavailable = (e) => this.onDataAvailable(e)
-    this.recorder.onstop = () => this.onRecordStop()
-    if (resolver) {
-      this._resolver = resolver
+    if (stopCb) {
+      this._stopCb = stopCb
     }
   }
 
@@ -415,7 +422,19 @@ class CanvasRecorder {
     this.recorder.start(time)
   }
 
-  stop() {
+  stop(notStoreVideo = false) {
+    this.recorder.onstop = () => {
+      if (notStoreVideo) {
+        if (this._stopCb) {
+          this._stopCb('')
+        }
+      } else {
+        const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
+        if (this._stopCb) {
+          this._stopCb(url)
+        }
+      }
+    }
     this.recorder.stop()
   }
 
@@ -437,13 +456,6 @@ class CanvasRecorder {
       return { mimeType: 'video/mp4' }
     } else {
       console.error('no suitable mimetype found for this device')
-    }
-  }
-
-  onRecordStop() {
-    const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
-    if (this._resolver) {
-      this._resolver(url)
     }
   }
 }

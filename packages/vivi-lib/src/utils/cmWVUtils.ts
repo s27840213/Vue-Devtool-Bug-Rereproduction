@@ -511,6 +511,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     await this.callIOSAsHTTPAPI('SET_STATE', { key, value })
   }
 
+  async cloneFile(srcPath: string, desPath: string ) {
+    if (this.inBrowserMode) return
+    if (/:\/\//.test(srcPath)) {
+      const { path, ext } = this.getDocumentPath(srcPath)
+      srcPath = `${path}.${ext}`
+    }
+    await this.callIOSAsHTTPAPI('CLONE_FILE', { srcPath, desPath })
+  }
+  
   async deleteFile(path: string) {
     if (this.inBrowserMode) return
     await this.callIOSAsHTTPAPI('DELETE_FILE', { path })
@@ -880,8 +889,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
   }
 
-  async ratingRequest() {
-    return await this.callIOSAsHTTPAPI('RATING_REQUEST')
+  async ratingRequest(onlyFirst = true) {
+    return await this.callIOSAsHTTPAPI('RATING_REQUEST', { onlyFirst })
   }
 
   async addWaterMark2Img(url: string, type: string, quality?: number) {
