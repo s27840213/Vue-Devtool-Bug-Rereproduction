@@ -35,7 +35,7 @@ export const useVideoRcordStore = defineStore('videoRecord', {
           this.isGeningVideo = false
           if (res) {
             if (currGeneratedResult.value && currGeneratedResult.value.id) {
-              updateGenResult(currGeneratedResult.value.id, { video: res })
+              updateGenResult(currGeneratedResult.value.id, { video: { ...pixi.video } })
             }
             if (this.genVideoCb) {
               this.genVideoCb()

@@ -104,15 +104,25 @@ const useActionSheetCm = () => {
   }
   const saveVideoCb = async () => {
     const videoRecord = useVideoRcordStore()
-    const { saveToCameraRoll, setGenVideoCb, setIsExportVideo } = videoRecord
+    const { genVideo, saveToCameraRoll, setGenVideoCb, setIsExportVideo } = videoRecord
     const { isGeningVideo } = storeToRefs(videoRecord)
+    const { removeWatermark } = storeToRefs(useUserStore())
     setIsExportVideo(true)
     if (currGeneratedResult.value && currGeneratedResult.value.video) {
-      return saveToCameraRoll(currGeneratedResult.value.video)
+      if (currGeneratedResult.value.video.removeWatermark !== removeWatermark.value) {
+        await genVideo()
+      }
+      return saveToCameraRoll(currGeneratedResult.value.video.src)
     } else if (isGeningVideo.value) {
       // isGeningVideo but not finished gening
       return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
-        setGenVideoCb(() => resolve(saveToCameraRoll(currGeneratedResult.value.video)))
+        setGenVideoCb(async () => {
+          if (currGeneratedResult.value && currGeneratedResult.value.video &&
+            currGeneratedResult.value.video.removeWatermark !== removeWatermark.value) {
+            await genVideo()
+          }
+          resolve(saveToCameraRoll(currGeneratedResult.value.video?.src))
+        })
         console.log('video not generated yet, wait for it generated')
       })
     } else if (currOpenSubDesign.value) {
@@ -122,7 +132,7 @@ const useActionSheetCm = () => {
       const srcRes = getSubDesignImage(currOpenSubDesign.value, 'thumb')
       await addImage(srcInit, srcRes)
       const data = await genVideo()
-      return await saveToCameraRoll(data || undefined)
+      return await saveToCameraRoll(data?.src || undefined)
     }
   }
 
