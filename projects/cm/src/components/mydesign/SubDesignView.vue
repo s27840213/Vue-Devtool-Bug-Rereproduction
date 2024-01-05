@@ -20,8 +20,8 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
     div(class="h-full grid grid-cols-2 gap-20 overflow-scroll")
       div(
         v-for="(col, i) in myDesignCols"
-        :key="i"
-        class="grid gap-20 h-fit")
+        :key="`${currOpenDesign.id}-${i}`"
+        class="grid gap-20 h-fit fade-in")
         div(
           v-for="design in col"
           :key="design.id"
@@ -136,5 +136,9 @@ const editDesign = (design: ITmpSubDesign) => {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-in-out;
 }
 </style>

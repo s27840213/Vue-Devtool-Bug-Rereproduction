@@ -165,6 +165,22 @@
   }
 }
 
+.fade-bottom-in-out {
+  &-enter-active,
+  &-leave-active {
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+
+  &-enter-from ,
+    &-leave-to {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+}
+
+
 .fade-top-in {
   &-enter-active,
   &-leave-active {
@@ -216,5 +232,36 @@
   &-leave-to {
     opacity: 0;
     transform: translateX(50%);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-left-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+
+@keyframes fade-right-in {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
   }
 }
