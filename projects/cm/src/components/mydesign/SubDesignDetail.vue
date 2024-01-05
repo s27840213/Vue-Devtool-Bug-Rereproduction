@@ -214,7 +214,10 @@ const resultShowcase = ref<HTMLElement | null>(null)
 const isVideoLoaded = ref(false)
 const showVideo = ref(true)
 const videoSrc = computed(() => {
-  return generatedResults.value[currGenResultIndex.value].video?.src
+  if (generatedResults.value[currGenResultIndex.value] &&
+    generatedResults.value[currGenResultIndex.value].video) {
+    return generatedResults.value[currGenResultIndex.value].video?.src
+  } else return ''
 })
 
 watch(videoSrc, () => {
