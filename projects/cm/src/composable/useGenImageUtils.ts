@@ -182,6 +182,10 @@ const useGenImageUtils = () => {
           uploadMaskAsImage(userId.value, requestId),
         ])
         cleanup = res[0]
+
+        if (generatedResultsNum.value === num) { // Before first generate, after screenshot.
+          cmWVUtils.cloneFile(initImgSrc.value, `mydesign-${editorType.value}/${currDesignId.value}/initial.jpg`)
+        }
       } catch (error) {
         logUtils.setLogForError(error as Error)
         throw new Error('Upload Images For /gen-image Failed')
