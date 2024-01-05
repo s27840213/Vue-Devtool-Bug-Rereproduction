@@ -14,8 +14,6 @@ div(
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
       div(
         class="result-showcase flex-center"
-        ref="resultShowcase"
-        :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
         :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
         img(
           class="result-showcase__card result-showcase__card--back w-full h-full"
@@ -219,12 +217,14 @@ const copyPrompt = () => {
 
 // #region result showcase
 const video = ref<HTMLVideoElement | null>(null)
-const resultShowcase = ref<HTMLElement | null>(null)
 const isVideoLoaded = ref(false)
 const showVideo = ref(true)
+
 const videoSrc = computed(() => {
-  if (generatedResults.value[currGenResultIndex.value] &&
-    generatedResults.value[currGenResultIndex.value].video) {
+  if (
+    generatedResults.value[currGenResultIndex.value] &&
+    generatedResults.value[currGenResultIndex.value].video
+  ) {
     return generatedResults.value[currGenResultIndex.value].video?.src
   } else return ''
 })
