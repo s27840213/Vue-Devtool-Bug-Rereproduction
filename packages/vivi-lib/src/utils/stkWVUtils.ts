@@ -402,7 +402,6 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   createUrl(item: IAsset): string {
-    console.log(item)
     switch (item.type) {
       case 5:
       case 11:
