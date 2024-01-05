@@ -37,11 +37,9 @@ div(
             playsinline
             loop
             autoplay
-            mutes
-            @loadeddata="() => { isVideoLoaded = true }"
+            muted
+            @loadedmetadata="videoOnload"
             :src="videoSrc")
-          div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
-            loading-brick(class="z-median")
       div(v-if="atEditor" class="flex-between-center gap-10 relative")
         div(
           class="w-8 h-8 rounded-full transition-colors pointer-events-none"
@@ -52,7 +50,7 @@ div(
         div(
           class="w-[100vh] h-[200%] absolute top-half left-half -translate-x-half -translate-y-half"
           @click="() => (showVideo = !showVideo)")
-    div(v-if="isExportingVideo" class="result-showcase__dim-cover")
+    div(v-if="isExportingVideo || (!showVideo && !isVideoLoaded)" class="result-showcase__dim-cover pointer-events-none")
       loading-brick(class="z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit")
     div(class="flex items-center gap-4 w-full")
@@ -228,10 +226,36 @@ const videoSrc = computed(() => {
     return generatedResults.value[currGenResultIndex.value].video?.src
   } else return ''
 })
+const videoOnload = () => {
+  console.warn('video can play')
+  isVideoLoaded.value = true
+}
 
-watch(videoSrc, () => {
-  isVideoLoaded.value = false
-})
+watch(() => videoSrc.value,
+  () => {
+    // const v = document.createElement('video')
+    // v.style.position = 'fixed'
+    // v.style.width = '200px'
+    // v.style.top = '200px'
+    // v.style.zIndex = '10000'
+    // v.src = videoSrc.value as string
+    // v.onloadeddata = () => {
+    //   console.warn('v onloaded')
+    // }
+    // v.autoplay = true
+    // v.loop = true
+    // v.playsInline = true
+    // document.body.appendChild(v)
+    // setTimeout(() => {
+    //   document.body.removeChild(v)
+    // }, 5000)
+
+    isVideoLoaded.value = false
+    if (video.value) {
+      video.value.load()
+    }
+  }
+)
 
 watch(
   () => inSavingState.value,

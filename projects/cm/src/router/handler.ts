@@ -28,12 +28,12 @@ export async function editorRouteHandler(
     if (!isValidType(type)) throw new Error('Invalid editor type.')
 
     const editorStore = useEditorStore()
-    const { editorType } = storeToRefs(editorStore)
+    const { editorType, currDesignId, currGenOptions } = storeToRefs(editorStore)
     const { setEditorType, setPageSize, setCurrActiveFeature, setCurrGenOptions } =
       editorStore
     setEditorType(type)
     setPageSize(width, height)
-    setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOptions) ?? [])
+    if (!currGenOptions.value?.length || !currDesignId.value) setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOptions) ?? [])
 
     store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
     switch (type) {

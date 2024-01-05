@@ -559,22 +559,47 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       carouselItems: [
         {
           key: 'powerful-fill',
-          title: 'Powerful Fill',
-          img: require('@img/png/pricing/cm-pro.png')
+          title: i18n.global.t('CM0001'),
+          img: require('@img/png/pricing/cm_pro-powerful-fill.png')
+        },
+        {
+          key: 'ai-reflection',
+          title: i18n.global.t('CM0151'),
+          img: require('@img/png/pricing/cm_pro-ai-reflection.png')
+        },
+        {
+          key: 'ai-reflection',
+          title: i18n.global.t('CM0151'),
+          img: require('@img/png/pricing/cm_pro-ai-reflection2.png')
+        },
+        {
+          key: 'hidden-message',
+          title: i18n.global.t('CM0078'),
+          img: require('@img/png/pricing/cm_pro-hidden-message.png')
+        },
+        {
+          key: 'magic-combined',
+          title: i18n.global.t('CM0152'),
+          img: require('@img/png/pricing/cm_pro-magic-combined.png')
+        },
+        {
+          key: 'magic-combined',
+          title: i18n.global.t('CM0152'),
+          img: require('@img/png/pricing/cm_pro-magic-combined2.png')
         },
       ],
       cards: [
         {
           iconName: 'unlimited',
-          title: 'Unlimited creation'
+          title: i18n.global.t('CM0033')
         },
         {
           iconName: 'watermark',
-          title: 'Watermark free'
+          title: i18n.global.t('CM0034')
         },
         {
-          iconName: 'backward',
-          title: 'Fast image processing'
+          iconName: 'cm_remove-bg',
+          title: i18n.global.t('CM0035')
         }
       ],
       btnPlans: [
@@ -655,7 +680,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       uuid,
       txid
     })
-    logUtils.setLogAndConsoleLog('getTxInfo', {token: store.getters['user/getGetTxToken'], uuid: uuid, txid: txid, res: res?.data})
+    logUtils.setLogAndConsoleLog('updateSubState', {params: JSON.parse(res.config.data), res: res?.data})
     if (res.data.flag === 0) {
       const isSubscribed = res.data.subscribe === 1
       store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
@@ -679,6 +704,16 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async subscribe(planId: string) {
     if (store.getters['payment/getPaymentPending'].purchase) return
     store.commit('payment/SET_paymentPending', { purchase: true })
+
+    if (await this.checkDupSub()) {
+      store.commit('payment/SET_paymentPending', { purchase: false })
+      logUtils.setLogAndConsoleLog('duplicated subscription')
+      notify({
+        group: 'warn',
+        text: 'duplicated subscription',
+      })
+      return
+    }
 
     const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: planId }, { timeout: -1 }) as SubscribeResponse
 
@@ -747,6 +782,30 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       return false
     }
     return true
+  }
+
+  async checkDupSub(): Promise<boolean> {
+    // check for duplicate subscription
+    const userInfo = this.getUserInfoFromStore()
+    const uuid = store.getters['user/getUuid'] as string
+    const isPro = store.getters['payment/getPayment'].subscribe
+    if (!uuid || !isPro) return false
+
+    const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 }) as SubscribeResponse
+    if (res?.flag !== '0') return false
+    if (!res.txid) return true
+
+    const currUuid = (await userApis.getTxInfo({
+      token: store.getters['user/getGetTxToken'],
+      app: 'charmix',
+      host_id: userInfo.hostId,
+      uuid: '',
+      txid: res.txid
+    })).data.uuid
+    logUtils.setLogAndConsoleLog('checkDupSub', { currUuid, uuid })
+    
+    if (currUuid !== uuid) return true
+    return false
   }
   // #endregion
   
