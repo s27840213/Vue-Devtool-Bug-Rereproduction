@@ -1,16 +1,17 @@
 import { useEditorStore } from '@/stores/editor'
 import PixiRecorder from '@/utils/pixiRecorder'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineStore } from 'pinia'
 
 export interface IVideoRecordState {
   genVideoCb: null | (() => void),
-  isGeningVideo: boolean,
+  isGeningVideo: string,
   isExportingVideo: boolean
 }
 
 const defaultState = {
   genVideoCb: null,
-  isGeningVideo: false,
+  isGeningVideo: '',
   isExportingVideo: false
 } as IVideoRecordState
 
@@ -25,14 +26,15 @@ export const useVideoRcordStore = defineStore('videoRecord', {
       return pixi.addImage(img1, img2)
     },
     genVideo() {
-      this.isGeningVideo = true
+      const currGeningId = generalUtils.generateRandomString(6)
+      this.isGeningVideo = currGeningId
       const editorStore = useEditorStore()
       const { updateGenResult } = editorStore
       const { currGeneratedResult } = storeToRefs(editorStore)
 
       return pixi.genVideo()
         .then((res) => {
-          this.isGeningVideo = false
+          if (currGeningId !== this.isGeningVideo) return
           if (res) {
             if (currGeneratedResult.value && currGeneratedResult.value.id) {
               updateGenResult(currGeneratedResult.value.id, { video: { ...pixi.video } })
