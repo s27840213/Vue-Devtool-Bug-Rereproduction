@@ -138,7 +138,7 @@ class ImageUtils {
     let res = ''
     switch (type) {
       case 'public': {
-        if (typeof size === 'string' && (size as string).includes('ext')) {
+        if (typeof size === 'string' && size.includes('ext')) {
           res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
           const query = generalUtils.isCm ? '' : forBgRemove

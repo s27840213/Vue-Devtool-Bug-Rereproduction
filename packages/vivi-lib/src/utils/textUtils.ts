@@ -449,7 +449,7 @@ class TextUtils {
       if (!noPush) {
         const isAllHorizon = !group.layers
           .some(l => l.type === 'text' &&
-            ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
+            (l.styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
         if (isAllHorizon) {
           const lowLine = config.styles.y + originSize.height
           const diff = textHW.height - originSize.height
