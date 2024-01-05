@@ -132,7 +132,6 @@ class EditorUtils {
         x: (editorUtils.mobileSize.width - width * this.contentScaleRatio) * 0.5,
         y: (editorUtils.mobileSize.height - height * this.contentScaleRatio) * 0.5
       }
-      console.log('editorUtils.mobileSize.width - width * this.contentScaleRatio', editorUtils.mobileSize.width, width, this.contentScaleRatio, width * this.contentScaleRatio)
       // test
       if (!generalUtils.isStk) {
         pageUtils.updatePagePos(pageIndex, pos)

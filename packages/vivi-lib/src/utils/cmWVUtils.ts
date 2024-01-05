@@ -948,8 +948,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
   }
 
-  async ratingRequest() {
-    return await this.callIOSAsHTTPAPI('RATING_REQUEST')
+  async ratingRequest(onlyFirst = true) {
+    return await this.callIOSAsHTTPAPI('RATING_REQUEST', { onlyFirst })
   }
 
   async addWaterMark2Img(url: string, type: string, quality?: number) {

@@ -224,7 +224,7 @@ const aboutOptions: Array<IOptionConfig> = [
     title: t('CM0044'),
     iconName: 'star',
     callback: () => {
-      console.log('callback')
+      cmWVUtils.ratingRequest(false)
     },
   },
   {

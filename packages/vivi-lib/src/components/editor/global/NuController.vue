@@ -22,7 +22,7 @@ div(:layer-index="`${layerIndex}`"
       :layerIndex="subLayer.subLayerIdx"
       :primaryLayerIndex="layerIndex"
       :primaryLayer="config"
-      :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(subLayer.config) ? frameLayerMapper(subLayer.config) : subLayer.config"
+      :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(subLayer.config as IFrame) ? frameLayerMapper(subLayer.config) : subLayer.config"
       :type="config.type"
       :primaryLayerZindex="primaryLayerZindex()"
       :isMoved="isMoved"
@@ -381,7 +381,7 @@ export default defineComponent({
     resizerProfile() {
       return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     },
-    subLayer(): any {
+    subLayer() {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
           const subLayerIdx = (this.config as IGroup).layers.findIndex(l => l.active)
