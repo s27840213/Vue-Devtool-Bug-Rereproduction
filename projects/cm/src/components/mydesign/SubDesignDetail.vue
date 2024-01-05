@@ -91,7 +91,6 @@ import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
 import type { AnyTouchEvent } from 'any-touch'
 
 const { t } = useI18n()
@@ -99,8 +98,20 @@ const { t } = useI18n()
 const { atEditor, inSavingState } = useStateInfo()
 
 const userStore = useUserStore()
-const { getSubDesignThumbUrl, getSubDesignConfig, setCurrOpenSubDesign } = userStore
-const { currOpenSubDesign } = storeToRefs(userStore)
+const {
+  getSubDesignThumbUrl,
+  getSubDesignConfig,
+  setCurrOpenSubDesign,
+  setRemoveWatermark,
+  setHighResolutionPhoto,
+} = userStore
+const { currOpenSubDesign, removeWatermark } = storeToRefs(userStore)
+
+if (!vuex.getters['payment/getPayment'].subscribe) {
+  setRemoveWatermark(false)
+  setHighResolutionPhoto(false)
+  // don't record to localStorage, so that the preference can be restored if subscription is restored.
+}
 
 const editorStore = useEditorStore()
 const {
@@ -172,25 +183,23 @@ const promptContainerLineClamp = computed(() => {
 let checkTimer = -1
 
 const checkExpandable = () => {
-  logUtils.setLogAndConsoleLog(
-    'SubDesignDetail.vue:169',
-    promptRef.value?.scrollHeight,
-    promptRef.value?.clientHeight,
-    currOpenSubDesign.value?.prompt,
-  )
   if (
     promptRef.value?.scrollHeight ||
     promptRef.value?.clientHeight ||
-    currOpenSubDesign.value?.prompt === ''
+    !currOpenSubDesign.value ||
+    currOpenSubDesign.value.prompt === ''
   ) {
     isExpandable.value = promptRef.value?.scrollHeight !== promptRef.value?.clientHeight
-    logUtils.setLogAndConsoleLog('SubDesignDetail.vue:176', isExpandable.value)
     return
   }
   checkTimer = window.setTimeout(checkExpandable, 100)
 }
 
 checkExpandable()
+
+watch(currOpenSubDesign, (newVal) => {
+  if (newVal) checkExpandable()
+})
 
 onBeforeUnmount(() => {
   clearTimeout(checkTimer)
@@ -272,7 +281,7 @@ const showcaseImgUrl = computed(() => {
 })
 
 const showcaseImg = computed(() => {
-  return watermarkReady.value && !vuex.getters['payment/getPayment'].subscribe
+  return watermarkReady.value && !removeWatermark.value
     ? showcaseWatermarkImgUrl.value
     : showcaseImgUrl.value
 })
