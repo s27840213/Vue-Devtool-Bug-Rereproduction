@@ -61,9 +61,15 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = () => { /**/ },
-      onError = () => { /**/ },
-      onApiResponded = () => { /**/ },
+      onSuccess = () => {
+        /**/
+      },
+      onError = () => {
+        /**/
+      },
+      onApiResponded = () => {
+        /**/
+      },
     }: {
       onSuccess?: (index: number, url: string) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -75,11 +81,18 @@ const useGenImageUtils = () => {
       unshiftGenResults('', ids[0], currPrompt.value)
     }
     try {
+      let finishedNum = 0
       await genImage(params, showMore, num, {
         onApiResponded,
         onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
-          !onlyUpdate && onSuccess(index, imgSrc)
+          if (!onlyUpdate) {
+            finishedNum++
+            onSuccess(index, imgSrc)
+          }
+          if (finishedNum === num) {
+            cmWVUtils.callIOSAsHTTPAPI('MAKE_VIBRATE')
+          }
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
@@ -142,9 +155,15 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = () => { /**/ },
-      onError = () => { /**/ },
-      onApiResponded = () => { /**/ },
+      onSuccess = () => {
+        /**/
+      },
+      onError = () => {
+        /**/
+      },
+      onApiResponded = () => {
+        /**/
+      },
     }: {
       onSuccess?: (index: number, url: string, onlyUpdate?: boolean) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -173,7 +192,14 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
     const res = (
-      await genImageApis.genImage(userId.value, requestId, token.value, params, num, useUsBucket.value)
+      await genImageApis.genImage(
+        userId.value,
+        requestId,
+        token.value,
+        params,
+        num,
+        useUsBucket.value,
+      )
     ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
@@ -202,6 +228,7 @@ const useGenImageUtils = () => {
         try {
           const subDesignId = ids[index]
           const promises = [
+            // TODO: use CLONE_FILE instead.
             (async () => {
               if (!initImgSrc.value.startsWith('data:')) {
                 const dataUrl = await generalUtils.toDataUrlNew(initImgSrc.value, 'jpg')
@@ -216,10 +243,11 @@ const useGenImageUtils = () => {
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
           if (editorType.value === 'hidden-message') {
-            maskDataUrl.value && saveDesignImageToDocument(maskDataUrl.value, 'mask', {
-              type: 'png',
-              subDesignId,
-            })
+            maskDataUrl.value &&
+              saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+                type: 'png',
+                subDesignId,
+              })
           } else {
             const prepareMask = prepareMaskToUpload()
             if (prepareMask) {
@@ -249,7 +277,8 @@ const useGenImageUtils = () => {
         // save result image to document
         try {
           onSuccess(index, url)
-          RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
+          RECORD_TIMING &&
+            testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'thumb', {
             subDesignId: ids[index],
             thumbIndex: index,
@@ -277,7 +306,13 @@ const useGenImageUtils = () => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     if (editorType.value === 'hidden-message') setMaskDataUrl(getCanvasDataUrl() ?? '')
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false, ...( editorType.value === 'hidden-message' && { maskUrl: maskDataUrl.value }) }), { forGenImage: true })
+      ? await cmWVUtils.sendScreenshotUrl(
+          cmWVUtils.createUrlForJSON({
+            noBg: false,
+            ...(editorType.value === 'hidden-message' && { maskUrl: maskDataUrl.value }),
+          }),
+          { forGenImage: true },
+        )
       : await cmWVUtils.copyEditor({
           width: pageWidth * contentScaleRatio.value,
           height: pageHeight * contentScaleRatio.value,
@@ -291,8 +326,8 @@ const useGenImageUtils = () => {
     setInitImgSrc(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`)
     RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
     try {
-      await cmWVUtils.uploadFileToUrl(
-        { path: 'screenshot', name: imageId, type: 'jpg' },
+      await cmWVUtils.uploadFileToS3(
+        { path: `screenshot/${imageId}`, ext: 'jpg' },
         uploadMap.value ?? {},
         `${userId}/input/${requestId}_init`,
       )

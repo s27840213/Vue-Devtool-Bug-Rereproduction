@@ -146,12 +146,12 @@ const close = () => {
   setInMediaOptions(false)
 }
 
-const { savePhotoCb, saveVideoCb, sharePhotoCb, shareVideoCb } = useActionSheetCm()
+const { photoCb, saveVideoCb, shareVideoCb } = useActionSheetCm()
 
 const saveMedia = (media: string) => {
   switch (media) {
     case 'photo':
-      savePhotoCb()
+      photoCb('save')
         .then((data) => {
           const { flag } = data
           if (flag === '1') {
@@ -161,6 +161,7 @@ const saveMedia = (media: string) => {
             group: 'success',
             text: `${t('NN0889')}`,
           })
+          cmWVUtils.ratingRequest()
         })
         .catch((e) => {
           console.log(e)
@@ -177,6 +178,7 @@ const saveMedia = (media: string) => {
             group: 'success',
             text: `${t('NN0889')}`,
           })
+          cmWVUtils.ratingRequest()
         })
         .catch((e) => {
           console.log(e)
@@ -188,12 +190,13 @@ const saveMedia = (media: string) => {
         })
       break
     case 'photo_video':
-      Promise.all([savePhotoCb(), saveVideoCb()])
+      Promise.all([photoCb('save'), saveVideoCb()])
         .then(() => {
           notify({
             group: 'success',
             text: `${t('NN0889')}`,
           })
+          cmWVUtils.ratingRequest()
         })
         .catch(() => {
           notify({
@@ -208,7 +211,7 @@ const saveMedia = (media: string) => {
 const shareMedia = (media: string) => {
   switch (media) {
     case 'photo':
-      sharePhotoCb()
+      photoCb('share')
         .then((data) => {
           const { flag } = data
           if (flag === '1') {

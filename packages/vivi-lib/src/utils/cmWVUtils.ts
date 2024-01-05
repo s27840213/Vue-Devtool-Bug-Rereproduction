@@ -15,6 +15,8 @@ import { notify } from '@kyvg/vue3-notification'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import constantData from './constantData'
+import imageShadowPanelUtils from './imageShadowPanelUtils'
+import imageUtils from './imageUtils'
 import logUtils from './logUtils'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
@@ -130,9 +132,8 @@ export type SubscribeResponse = GeneralResponse & {
 }
 
 export type FileSource = {
-  path: string,
-  name: string,
-  type: string
+  path: string
+  ext: string
 } | {
   fileId: string
 }
@@ -279,11 +280,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return albumList as IAlbumContentResponse
   }
 
-  async saveAssetFromUrl(type: 'gif' | 'jpg' | 'png' | 'mp4', url: string, options?: { key?: string, subPath?: string, name?: string }): Promise<ISaveAssetFromUrlResponse> {
+  /**
+   * Save the file from `url` to `path`.
+   * @param path If path is udf, save asset to Camera Roll
+   */
+  async saveAssetFromUrl(ext: 'gif' | 'jpg' | 'png' | 'mp4', url: string, path?: string): Promise<ISaveAssetFromUrlResponse> {
     let retryTimes = 0
     let result
     while (retryTimes < 3) {
-      result = await (this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { type, url, ...options }, { timeout: -1 }) as Promise<ISaveAssetFromUrlResponse>)
+      result = await (this.callIOSAsHTTPAPI('SAVE_FILE_FROM_URL', { ext, url, path }, { timeout: -1 }) as Promise<ISaveAssetFromUrlResponse>)
       if (result.flag === '1') {
         retryTimes += 1
       } else {
@@ -338,7 +343,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async sendCopyEditor(pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void, imageId: string}> {
     const imageId = generalUtils.generateAssetId()
-    const { flag, cleanup } = await this.sendCopyEditorCore('editorSave', pageSize, imageId)
+    const { flag, cleanup } = await this.sendCopyEditorCore(pageSize, { path: `screenshot/${imageId}` })
     return {
       flag,
       cleanup,
@@ -346,9 +351,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async sendCopyEditorCore(action: 'editorSave', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId: string, imagePath?: string, imageFormat?: { outputType?: string, quality?: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }): Promise<{flag: string, cleanup: () => void}>
-  async sendCopyEditorCore(action: 'editorSave' | 'editorDownload', pageSize: { width: number, height: number, snapshotWidth?: number }, imageId?: string, imagePath?: string, { outputType, quality }: { outputType?: string, quality?: number } = {}): Promise<{flag: string, cleanup: () => void}> {
+  /**
+   * Take screenshot and save it to Camera Roll or Document.
+   * @param pageSize 
+   * @param param1 If path is udf, save asset to Camera Roll
+   */
+  async sendCopyEditorCore(
+    pageSize: { width: number, height: number, snapshotWidth?: number },
+    { ext = 'jpg' as 'jpg' | 'png', quality = 0.85, path = undefined as string | undefined } = {}
+  ): Promise<{flag: string, cleanup: () => void}> {
     if (this.inBrowserMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return {
@@ -358,22 +369,20 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
     const { x, y, width, height } = this.getEditorDimensions(pageSize)
     const data = await this.callIOSAsHTTPAPI('SCREENSHOT', {
-      action,
       width,
       height,
       x,
       y,
-      ...(imageId && { imageId }),
-      ...(imagePath && { imagePath }),
-      ...(outputType && { outputType }),
-      ...(quality && { quality }),
+      path,
+      ext,
+      quality,
       snapshotWidth: pageSize.snapshotWidth ?? width,
     }, { timeout: -1 }) as GeneralResponse | null | undefined
     return {
       flag: (data?.flag as string) ?? '0',
       cleanup: () => {
-        if (action !== 'editorSave') return
-        this.deleteFile('screenshot', imageId ?? '', outputType ?? 'jpg', imagePath)
+        if (path === undefined) return
+        this.deleteFile(`screenshot/${path}.${ext}`)
       }
     }
   }
@@ -450,7 +459,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       flag: '0',
       imageId,
       cleanup: () => {
-        this.deleteFile('screenshot', imageId, outputType ?? 'jpg')
+        this.deleteFile(`screenshot/${imageId}.${outputType ?? 'jpg'}`)
       }
     }
   }
@@ -502,9 +511,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     await this.callIOSAsHTTPAPI('SET_STATE', { key, value })
   }
 
-  async deleteFile(key: string, name: string, type: string, subPath?: string) {
+  async deleteFile(path: string) {
     if (this.inBrowserMode) return
-    await this.callIOSAsHTTPAPI('DELETE_FILE', { key, name, type, subPath })
+    await this.callIOSAsHTTPAPI('DELETE_FILE', { path })
   }
 
   async fetchTutorialFlags() {
@@ -827,17 +836,17 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async addJson(path: string ,name: string, content: {[index: string]: any}) {
+  async addJson(path: string , content: {[index: string]: any}) {
     if (this.inBrowserMode) return
     if (this.checkVersion('1.0.14')) {
-      return await this.callIOSAsHTTPAPI('ADD_JSON', { path, name, content })
+      return await this.callIOSAsHTTPAPI('ADD_JSON', { path, content })
     }
   }
 
-  async getJson(path: string ,name: string) {
+  async getJson(path: string) {
     if (this.inBrowserMode) return
     if (this.checkVersion('1.0.14')) {
-      return await this.callIOSAsHTTPAPI('GET_JSON', { path, name })
+      return await this.callIOSAsHTTPAPI('GET_JSON', { path })
     }
   }
 
@@ -845,29 +854,66 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
   }
 
-  async uploadFileToUrl(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_URL', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
+  async uploadFileToS3(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_S3', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
   }
 
   getDocumentPath(url: string) {
     const urlObj = new URL(url)
-    const paths = (urlObj.hostname + urlObj.pathname).replace('//', '').split('/')
-    const path = paths.slice(0, paths.length - 1).join('/')
-    const name = paths[paths.length - 1]
-    const type = urlObj.searchParams.get('imagetype') ?? 'png'
+    const path = (urlObj.host + urlObj.pathname).replace('//', '')
+    const ext = urlObj.searchParams.get('imagetype') ?? 'png'
     return {
       path,
-      name,
-      type
+      ext
     }
   }
 
-  async documentToCameraRoll(path: string, name: string, type: string, watermark: boolean, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, name, type, size, sizeType, watermark }) as GeneralResponse
+  async documentToCameraRoll(path: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType }) as GeneralResponse
+  }
+
+  async resizeImage(srcPath: string, desPath: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    return await this.callIOSAsHTTPAPI('RESIZE_IMAGE', { srcPath, desPath, ext, size, sizeType }) as GeneralResponse
   }
 
   async shareFile(path: string) {
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
+  }
+
+  async ratingRequest() {
+    return await this.callIOSAsHTTPAPI('RATING_REQUEST')
+  }
+
+  async addWaterMark2Img(url: string, type: string, quality?: number) {
+    const WATER_MARK = new URL(
+      '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+      import.meta.url,
+    ).href
+    return new Promise<string>((resolve) => {
+      const loadImgCb = (img: HTMLImageElement) => {
+        imageUtils.imgLoadHandler(WATER_MARK, (watermark: HTMLImageElement) => loadWatermarkCb(img, watermark))
+      }
+
+      const loadWatermarkCb = (img: HTMLImageElement, watermark: HTMLImageElement) => {
+        const width = img.naturalWidth
+        const height = img.naturalHeight
+        imageShadowPanelUtils.svgImageSizeFormatter(watermark, Math.min(width, height) / 2, () => resizeWatermarkCb(img, watermark, width, height))
+      }
+
+      const resizeWatermarkCb = (img: HTMLImageElement, watermark: HTMLImageElement, width: number, height: number) => {
+        watermark.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          ctx?.drawImage(img, 0, 0, width, height)
+          ctx?.drawImage(watermark, width - watermark.width - 50, height - watermark.height - 50, watermark.width, watermark.height)
+          resolve(canvas.toDataURL(type, quality))
+        }
+      }
+
+      imageUtils.imgLoadHandler(url, loadImgCb)
+    })
   }
 
   showUpdateModal(force = false) {

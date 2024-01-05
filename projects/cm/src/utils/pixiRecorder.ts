@@ -1,3 +1,4 @@
+import { useUserStore } from '@/stores/user'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
@@ -12,7 +13,6 @@ const IMG2_EXAMPLE =
 const IMG1_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
 const WATER_MARK = new URL('../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg', import.meta.url).href
-// const WATER_MARK = require('charmix-logo.png')
 
 export const fragment_opacity = `
   varying vec2 vTextureCoord;
@@ -123,8 +123,13 @@ export default class PixiRecorder {
   private _animate = null as null | ((delta: number) => void)
   private _genVideoResolver = null as null | (() => void)
   private isImgReady = false
-  private video = ''
+  private _video = { src: '', removeWatermark: false }
   private fragment = fragment_slide
+
+  get video() {
+    return this._video
+  }
+
   constructor(src: string = IMG1_EXAMPLE, res: string = IMG2_EXAMPLE) {
     this.addImage(src, res)
   }
@@ -137,6 +142,14 @@ export default class PixiRecorder {
           new Promise<void>((resolve, reject) => setTimeout(reject, 60000))
         ]
       ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
+    }
+    const { removeWatermark } = useUserStore()
+    if (removeWatermark && this.sprite_wm) {
+      this.pixi.stage.removeChild(this.sprite_wm)
+      this._video.removeWatermark = true
+    } else if (this.sprite_wm) {
+      this.pixi.stage.addChild(this.sprite_wm)
+      this._video.removeWatermark = false
     }
 
     this.time_start = -1
@@ -159,12 +172,21 @@ export default class PixiRecorder {
       if (res === 'error') {
         return null
       }
-      this.video = res
-      return res
+      this._video.src = res
+      return { src: res, removeWatermark: this._video.removeWatermark }
     })
   }
 
-  async saveToCameraRoll(url = this.video) {
+  async saveToCameraRoll(url = this.video.src) {
+    const { removeWatermark } = useUserStore()
+    if (this.video.removeWatermark !== removeWatermark) {
+      const data = await this.genVideo()
+      if (data) {
+        url = data.src
+      } else {
+        throw new Error('can not generate video')
+      }
+    }
     const blob = await getBlobFromUrl(url)
     const base64 = await blobToBase64(blob)
     if (url) {
@@ -304,8 +326,9 @@ export default class PixiRecorder {
 
     const p3 = new Promise<PIXI.Texture>(resolve => {
       // to fix svg blurry error, we need to resize the svg first
-      imageUtils.imgLoadHandler(WATER_MARK, (img: HTMLImageElement) => {
-        imageShadowPanelUtils.svgImageSizeFormatter(img, 500, () => {
+      imageUtils.imgLoadHandler(WATER_MARK, async (img: HTMLImageElement) => {
+        const { width, height } = await imageUtils.imgLoadHandler(img1, (img) => { return img })
+        imageShadowPanelUtils.svgImageSizeFormatter(img, Math.min(width, height) / 2, () => {
           img.onload = () => {
             const canvas = document.createElement('canvas')
             canvas.width = 500
@@ -342,11 +365,10 @@ export default class PixiRecorder {
         this.pixi.stage.addChild(this.sprite_src)
         if (this.sprite_wm && this.texture_wm) {
           const ratio = this.texture_wm.width / this.texture_wm.height
-          this.sprite_wm.width = this.sprite_src.width * 0.5
+          this.sprite_wm.width = Math.min(this.sprite_src.width, this.sprite_src.height) * 0.5
           this.sprite_wm.height = this.sprite_wm.width / ratio
           this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
           this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
-          this.pixi.stage.addChild(this.sprite_wm)
         }
         const renderer = this.pixi.renderer
         renderer.resize(this.sprite_src.width, this.sprite_src.height)

@@ -35,7 +35,7 @@ export interface IGenResult {
   id: string
   url: string
   prompt: string
-  video?: string
+  video?: { src: string, removeWatermark: boolean }
 }
 
 interface IEditorStore {
@@ -136,7 +136,7 @@ export const useEditorStore = defineStore('editor', {
     currSubDesignId(): string {
       return this.currGeneratedResult.id
     },
-    currGeneratedResult(): { id: string; url: string; video?: string } {
+    currGeneratedResult(): IGenResult {
       return this.generatedResults[this.currGenResultIndex]
     },
     generatedResultsNum(): number {
@@ -237,7 +237,7 @@ export const useEditorStore = defineStore('editor', {
       id: string,
       data: {
         url?: string
-        video?: string
+        video?: { src: string, removeWatermark: boolean }
         updateIndex?: boolean
         saveToDocument?: boolean
         saveMask?: boolean
@@ -250,7 +250,7 @@ export const useEditorStore = defineStore('editor', {
         this.generatedResults[index].url = url
       }
       if (video) {
-        this.generatedResults[index].video = video
+        this.generatedResults[index].video = { ...video }
       }
       if (updateIndex && this.currGenResultIndex === -1) {
         this.currGenResultIndex = index
@@ -326,7 +326,7 @@ export const useEditorStore = defineStore('editor', {
     },
     async keepEditingInit() {
       // Do the same thing with user.editSubDesignResult.
-      const { initWithSubDeisgnImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
+      const { initWithSubDesignImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
       const { editorType: type, currDesignId: id, currSubDesignId: subId } = this
 
       // Try to open result.json.
@@ -339,7 +339,7 @@ export const useEditorStore = defineStore('editor', {
       // Cannot find result.json, use result img to create new design.
       const originalJson = await getSubDesignConfig({ type, id }, subId)
       if (originalJson && originalJson.flag === '0') {
-        initWithSubDeisgnImage(originalJson.content)
+        initWithSubDesignImage(originalJson.content)
       }
     },
     setCurrDesignId(id: string) {

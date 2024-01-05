@@ -432,7 +432,7 @@ const centerBtns = computed<centerBtn[]>(() => {
   retTabs.push(...stepBtns)
   if (inBgRemoveMode.value) {
     retTabs.unshift({
-      icon: showInitImage ? 'eye-slash' : 'eye',
+      icon: !showInitImage.value ? 'eye-slash' : 'eye',
       disabled: false,
       width: 20,
       action: () => {

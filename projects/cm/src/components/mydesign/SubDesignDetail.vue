@@ -1,14 +1,14 @@
 <template lang="pug">
 div(
   v-show="currOpenSubDesign && thumbLoaded"
-  class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20 w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
+  class="grid grid-rows-[minmax(0,1fr),auto] justify-items-center gap-20\ w-full h-full bg-dark-6 z-5 px-24 box-border py-16"
   ref="rootRef")
   div(
     v-if="currOpenSubDesign"
     class="w-full h-full relative"
     v-touch
-    @swipeleft="handleSwipeLeft"
-    @swiperight="handleSwipeRight")
+    @swipeleft="handleSwipe($event, 'left')"
+    @swiperight="handleSwipe($event, 'right')")
     div(
       class="w-full h-full grid justify-items-center items-center gap-8 overflow-hidden"
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
@@ -22,7 +22,7 @@ div(
           :class="{ 'is-flipped': !showVideo }"
           v-if="currOpenSubDesign"
           @load="handleThumbLoaded"
-          :src="atEditor ? generatedResults[currGenResultIndex].url : getSubDesignThumbUrl(currOpenSubDesign.type, currOpenSubDesign.id, currOpenSubDesign.subId)")
+          :src="showcaseImg")
         div(
           v-if="atEditor"
           class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
@@ -41,19 +41,19 @@ div(
             autoplay
             mutes
             @loadeddata="() => { isVideoLoaded = true }"
-            :src="generatedResults[currGenResultIndex].video")
+            :src="videoSrc")
           div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
             loading-brick(class="z-median")
-      div(
-        v-if="atEditor"
-        class="flex-between-center gap-10"
-        @click="() => (showVideo = !showVideo)")
+      div(v-if="atEditor" class="flex-between-center gap-10 relative")
         div(
-          class="w-8 h-8 rounded-full transition-colors"
+          class="w-8 h-8 rounded-full transition-colors pointer-events-none"
           :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'")
         div(
-          class="w-8 h-8 rounded-full transition-colors"
+          class="w-8 h-8 rounded-full transition-colors pointer-events-none"
           :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'")
+        div(
+          class="w-[100vh] h-[200%] absolute top-half left-half -translate-x-half -translate-y-half"
+          @click="() => (showVideo = !showVideo)")
     div(v-if="isExportingVideo" class="result-showcase__dim-cover")
       loading-brick(class="z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit")
@@ -84,10 +84,13 @@ import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import { useVideoRcordStore } from '@/stores/videoRecord'
+import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import type { AnyTouchEvent } from 'any-touch'
 
@@ -147,7 +150,7 @@ onBeforeUnmount(() => {
 // #region prompt related when sub desgin is open
 // used to dynamically calculate the line-clamp size of the prompt
 const isPromptExapnded = ref(false)
-const isExpandable = ref(false)
+const isExpandable = ref(true)
 
 const promptContainerRef = ref<HTMLElement | null>(null)
 const promptRef = ref<HTMLElement | null>(null)
@@ -166,6 +169,8 @@ const promptContainerLineClamp = computed(() => {
   return 99
 })
 
+let checkTimer = -1
+
 const checkExpandable = () => {
   logUtils.setLogAndConsoleLog(
     'SubDesignDetail.vue:169',
@@ -182,10 +187,14 @@ const checkExpandable = () => {
     logUtils.setLogAndConsoleLog('SubDesignDetail.vue:176', isExpandable.value)
     return
   }
-  setTimeout(checkExpandable, 100)
+  checkTimer = window.setTimeout(checkExpandable, 100)
 }
 
 checkExpandable()
+
+onBeforeUnmount(() => {
+  clearTimeout(checkTimer)
+})
 
 const togglePrompt = () => {
   isPromptExapnded.value = !isPromptExapnded.value
@@ -204,6 +213,13 @@ const video = ref<HTMLVideoElement | null>(null)
 const resultShowcase = ref<HTMLElement | null>(null)
 const isVideoLoaded = ref(false)
 const showVideo = ref(true)
+const videoSrc = computed(() => {
+  return generatedResults.value[currGenResultIndex.value].video?.src
+})
+
+watch(videoSrc, () => {
+  isVideoLoaded.value = false
+})
 
 watch(
   () => inSavingState.value,
@@ -222,19 +238,57 @@ watch(showVideo, (newVal) => {
     }
   }
 })
+
+const handleSwipe = (e: AnyTouchEvent, dir: 'left' | 'right') => {
+  e.stopImmediatePropagation()
+  if (!atEditor.value) return
+  showVideo.value = dir === 'right'
+}
+
+const watermarkReady = ref(false)
+const showcaseWatermarkImgUrl = ref('')
+
+const showcaseImgUrl = computed(() => {
+  if (atEditor.value) {
+    return imageUtils.appendQuery(
+      generatedResults.value[currGenResultIndex.value].url,
+      'rand_ver',
+      `${generalUtils.serialNumber}`,
+    )
+  }
+  if (currOpenSubDesign.value) {
+    // Always true due to the v-if condition.
+    return getSubDesignThumbUrl(
+      currOpenSubDesign.value.type,
+      currOpenSubDesign.value.id,
+      currOpenSubDesign.value.subId,
+      1000,
+    )
+  }
+  return ''
+})
+
+const showcaseImg = computed(() => {
+  return watermarkReady.value && !vuex.getters['payment/getPayment'].subscribe
+    ? showcaseWatermarkImgUrl.value
+    : showcaseImgUrl.value
+})
+
+const genWatermarkUrl = (url: string) => {
+  if (!url) return
+  watermarkReady.value = false
+  cmWVUtils.addWaterMark2Img(url, 'jpg', 100).then((dataURL) => {
+    showcaseWatermarkImgUrl.value = dataURL
+    watermarkReady.value = true
+  })
+}
+
+watch(showcaseImgUrl, (newVal) => {
+  genWatermarkUrl(newVal)
+})
+
+genWatermarkUrl(showcaseImgUrl.value)
 // #endregion
-
-const handleSwipeLeft = (e: AnyTouchEvent) => {
-  e.stopImmediatePropagation()
-  if (!atEditor.value) return
-  showVideo.value = false
-}
-
-const handleSwipeRight = (e: AnyTouchEvent) => {
-  e.stopImmediatePropagation()
-  if (!atEditor.value) return
-  showVideo.value = true
-}
 </script>
 <style lang="scss">
 .result-showcase {
