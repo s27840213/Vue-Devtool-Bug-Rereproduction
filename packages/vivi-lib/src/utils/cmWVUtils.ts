@@ -754,7 +754,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (!res) return;
 
     this.handleListAssetResult(res as IListAssetResponse);
-}
+  }
 
   async listMoreAsset(key: string, nextPage: number, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
     if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
@@ -775,8 +775,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
     let igLayout
     if (data.key.startsWith('templates')) igLayout = data.key.split('/')[1] as 'story' | 'post' | undefined
+    const isHm = data.key.includes('-hm')
+    if (isHm) data.key = data.key.replace('-hm', '')
+
     const designIds = data.assets.map(asset => asset.id)
-    listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds, igLayout).then((response) => {
+    listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds, igLayout, isHm ? 1 : 0).then((response) => {
       if (response.data.data.content.length !== 0) {
         const updateList = response.data.data.content[0].list
         data.assets = this.updateAssetContent(data.assets, updateList)

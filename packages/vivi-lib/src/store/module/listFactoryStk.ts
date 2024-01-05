@@ -101,7 +101,7 @@ export default function (this: any) {
     if (isTextUs()) return store.state.isTablet ? 3 : 2
     return undefined
   }
-  const isHm = (): boolean => store.getters['assetPanel/getIsHm']
+  const isHm = () => store.getters['assetPanel/getIsHm'] as 1 | 0
 
   const actions: ActionTree<IListModuleState, unknown> = {
     // For panel template, object, bg, text, only get recently used.
@@ -136,6 +136,7 @@ export default function (this: any) {
             if (keyword) {
               commit('SET_STATE', { keyword })
             }
+            if (isHm()) key += `-hm`
             await getAutoWVUtils().listAsset(key)
           }
         } else {
@@ -192,6 +193,7 @@ export default function (this: any) {
         result.content = recently.content.concat(category.content)
         commit('SET_CATEGORIES', result)
         if (key) {
+          if (isHm()) key += `-hm`
           await getAutoWVUtils().listAsset(key)
         }
         if (category.content.length === 0) {
@@ -377,8 +379,9 @@ export default function (this: any) {
     initFavorites: async ({ state, commit, dispatch }) => {
       commit('SET_pending', { favorites: true })
       for (const target of ['categories', 'tags', 'items']) {
+        const namespace = this.namespace + (isHm() ? `-hm` : '')
         commit('UPDATE_favorites', {
-          [target]: await localStorageUtils.appGet('favorites', `${this.namespace}.${target}`)
+          [target]: await localStorageUtils.appGet('favorites', `${namespace}.${target}`)
         })
       }
       commit('UPDATE_favorites', {
@@ -444,6 +447,7 @@ export default function (this: any) {
         token: '1',
         theme,
         cache: true,
+        isHm: isHm(),
         ...Array.isArray(target) ? { // Multiple categoryies, each category get 10 items.
           locale,
           listAll: 0,
@@ -568,8 +572,9 @@ export default function (this: any) {
             commit('UPDATE_favorites', { itemsContent })
           }
         }
+        const namespace = this.namespace + (isHm() ? `-hm` : '')
         commit('UPDATE_favorites', {
-          [type]: await localStorageUtils.appUpdate('favorites', `${this.namespace}.${type}`, (old: IFavorite) => {
+          [type]: await localStorageUtils.appUpdate('favorites', `${namespace}.${type}`, (old: IFavorite) => {
             if (old.obj[key]) {
               delete old.obj[key]
               old.order = pull(old.order, key)

@@ -1393,7 +1393,8 @@ class AssetUtils {
         recentlyUsed.list.unshift(item)
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
-      if (key) getAutoWVUtils().addAsset(key, item)
+      if (store.getters['assetPanel/getIsHm']) key += '-hm'
+      if (key) getAutoWVUtils().addAsset(key, item, undefined)
       const params = {} as { [key: string]: any }
       if (typeCategory === 'font') {
         params.is_asset = src === 'private' || src === 'admin' ? 1 : 0
