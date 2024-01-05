@@ -322,8 +322,8 @@ const {
   isGenerating,
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
-const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } = userStore
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } =
+  userStore
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 const fromMyDesign = hasGeneratedResults.value
@@ -348,8 +348,9 @@ watch(
     // Start fake loading.
     fakeLoading.value = 0
     const fakeLoadingId = window.setInterval(() => {
-      fakeLoading.value += 1
+      fakeLoading.value += Math.floor(Math.random() * 3)
       if (fakeLoading.value >= 95) {
+        fakeLoading.value = 95
         // Stop fake loading.
         window.clearInterval(fakeLoadingId)
       }
