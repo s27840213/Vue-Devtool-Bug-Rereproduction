@@ -197,13 +197,19 @@ import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import type { IImage } from '@nu/vivi-lib/interfaces/layer'
+import store from '@nu/vivi-lib/store'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import type { IAlbum, IAlbumContent } from '@nu/vivi-lib/utils/cmWVUtils'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { find, pull } from 'lodash'
 
 const props = defineProps({
@@ -412,7 +418,7 @@ const beforeSendToEditor = () => {
   }
 }
 
-const sendToEditor = async () => {
+const sendToEditor = async (isBgRemove = false) => {
   if (replaceImgFlag) {
     imageUtils.replaceImg(
       targetImgs[0],
@@ -441,10 +447,19 @@ const sendToEditor = async () => {
           ...(!initAtEditor && { fit: 1 }),
         })
       })
-      if (!initAtEditor || editorType.value === 'hidden-message') {
-        groupUtils.deselect()
+      if (isBgRemove) {
+        editorUtils.setCurrActivePanel('cm_remove-bg')
+        store.commit('bgRemove/SET_isProcessing', true)
+
+        const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+        generalUtils.toDataURL(src, (dataUrl: string) => {
+          uploadUtils.uploadAsset('cm-bg-remove', [dataUrl])
+        })
       }
     })
+    if (!initAtEditor || editorType.value === 'hidden-message') {
+      groupUtils.deselect()
+    }
   }
   closeImageSelector()
   srcPreprocessImg.value = null
@@ -495,13 +510,10 @@ const cancelPreprocess = () => {
   targetImgs = []
 }
 const applyPreprocess = () => {
-  sendToEditor()
-  if (isBgRemove.value) {
-    // TODO: remove bg
-  }
+  sendToEditor(isBgRemove.value)
 }
 watch(isBgRemove, (newVal) => {
-  if(newVal && !paymentUtils.checkProApp({plan: 1})) {
+  if (newVal && !paymentUtils.checkProApp({ plan: 1 })) {
     isBgRemove.value = false
   }
 })
