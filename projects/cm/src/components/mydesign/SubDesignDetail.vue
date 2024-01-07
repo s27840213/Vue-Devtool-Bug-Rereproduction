@@ -5,6 +5,7 @@ div(
   ref="rootRef")
   div(
     v-if="currOpenSubDesign"
+    ref="containerRef"
     class="w-full h-full relative"
     v-touch
     @swipeleft="handleSwipe($event, 'left')"
@@ -14,6 +15,7 @@ div(
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
       div(
         class="result-showcase flex-center"
+        :class="contentClass"
         :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
         img(
           class="result-showcase__card result-showcase__card--back w-full h-full"
@@ -50,7 +52,9 @@ div(
         div(
           class="w-[100vh] h-[200%] absolute top-half left-half -translate-x-half -translate-y-half"
           @click="() => (showVideo = !showVideo)")
-    div(v-if="isExportingVideo || (!showVideo && !isVideoLoaded)" class="result-showcase__dim-cover pointer-events-none")
+    div(
+      v-if="isExportingVideo || (!showVideo && !isVideoLoaded)"
+      class="result-showcase__dim-cover pointer-events-none")
       loading-brick(class="z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit")
     div(class="flex items-center gap-4 w-full")
@@ -214,6 +218,22 @@ const copyPrompt = () => {
 // #endregion
 
 // #region result showcase
+const containerRef = ref<HTMLElement | null>(null)
+const containerSize = useElementBounding(containerRef)
+const contentClass = computed(() => {
+  console.log(containerSize)
+  if (
+    !currOpenSubDesign.value ||
+    containerSize.width.value === 0 ||
+    containerSize.height.value === 0
+  )
+    return ''
+  return currOpenSubDesign.value.width / currOpenSubDesign.value.height >
+    containerSize.width.value / containerSize.height.value
+    ? 'w-full'
+    : 'h-full'
+})
+
 const video = ref<HTMLVideoElement | null>(null)
 const isVideoLoaded = ref(false)
 const showVideo = ref(true)
@@ -231,7 +251,8 @@ const videoOnload = () => {
   isVideoLoaded.value = true
 }
 
-watch(() => videoSrc.value,
+watch(
+  () => videoSrc.value,
   () => {
     // const v = document.createElement('video')
     // v.style.position = 'fixed'
@@ -254,7 +275,7 @@ watch(() => videoSrc.value,
     if (video.value) {
       video.value.load()
     }
-  }
+  },
 )
 
 watch(
