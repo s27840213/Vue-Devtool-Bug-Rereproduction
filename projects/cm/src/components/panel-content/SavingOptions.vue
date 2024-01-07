@@ -61,6 +61,7 @@ import { notify } from '@kyvg/vue3-notification'
 import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
 
 const { t } = useI18n()
 
@@ -146,7 +147,7 @@ const close = () => {
   setInMediaOptions(false)
 }
 
-const { photoCb, saveVideoCb, shareVideoCb } = useActionSheetCm()
+const { photoCb, videoCb } = useActionSheetCm()
 
 const saveMedia = (media: string) => {
   switch (media) {
@@ -163,42 +164,55 @@ const saveMedia = (media: string) => {
           })
           cmWVUtils.ratingRequest()
         })
-        .catch((e) => {
-          console.log(e)
+        .catch((e: any) => {
+          logUtils.setLogForError(e as Error)
           notify({
             group: 'error',
-            text: e,
+            text: 'error',
           })
         })
       break
     case 'video':
-      saveVideoCb()
-        .then(() => {
+      videoCb('save')
+        .then((data) => {
+          data = data ?? { flag: '1', msg: 'data is undefined' }
+          const { flag } = data
+          if (flag === '1') {
+            throw new Error(data.msg)
+          }
           notify({
             group: 'success',
             text: `${t('NN0889')}`,
           })
           cmWVUtils.ratingRequest()
         })
-        .catch((e) => {
-          console.log(e)
-          // @TODO
+        .catch((e: any) => {
+          logUtils.setLogForError(e as Error)
           notify({
             group: 'error',
-            text: 'gen vedio error',
+            text: 'error',
           })
         })
       break
     case 'photo_video':
-      Promise.all([photoCb('save'), saveVideoCb()])
-        .then(() => {
+      Promise.all([photoCb('save'), videoCb('save')])
+        .then((dataList) => {
+          let [data1, data2] = dataList
+          if (data1.flag === '1') {
+            throw new Error(data1.msg)
+          }
+          data2 = data2 ?? { flag: '1', msg: 'data is undefined' }
+          if (data2.flag === '1') {
+            throw new Error(data2.msg)
+          }
           notify({
             group: 'success',
             text: `${t('NN0889')}`,
           })
           cmWVUtils.ratingRequest()
         })
-        .catch(() => {
+        .catch((e: any) => {
+          logUtils.setLogForError(e as Error)
           notify({
             group: 'error',
             text: 'error',
@@ -218,23 +232,35 @@ const shareMedia = (media: string) => {
             throw new Error(data.msg)
           }
         })
-        .catch((e) => {
-          console.log(e)
+        .catch((e: any) => {
+          logUtils.setLogForError(e as Error)
           notify({
             group: 'error',
-            text: e,
+            text: 'error',
           })
         })
       break
     case 'video':
-      shareVideoCb().catch((e) => {
-        console.log(e)
-        // @TODO
-        notify({
-          group: 'error',
-          text: 'gen vedio error',
+      videoCb('share')
+        .then((data) => {
+          data = data ?? { flag: '1', msg: 'data is undefined' }
+          const { flag } = data
+          if (flag === '1') {
+            throw new Error(data.msg)
+          }
+          notify({
+            group: 'success',
+            text: `${t('NN0889')}`,
+          })
+          cmWVUtils.ratingRequest()
         })
-      })
+        .catch((e: any) => {
+          logUtils.setLogForError(e as Error)
+          notify({
+            group: 'error',
+            text: 'error',
+          })
+        })
       break
   }
 }

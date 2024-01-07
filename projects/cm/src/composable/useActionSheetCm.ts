@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores/user'
 import { useVideoRcordStore } from '@/stores/videoRecord'
 import { ICmMyDesign, ITmpSubDesign } from '@/types/user'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
-import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
+import cmWVUtils, { GeneralResponse, ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
 import useStateInfo from './useStateInfo'
@@ -11,8 +11,7 @@ import useStateInfo from './useStateInfo'
 const useActionSheetCm = () => {
   const userStore = useUserStore()
   const { getSubDesignImage, deleteDesign, deleteSubDesign } = userStore
-  const { currOpenSubDesign, removeWatermark, highResolutionPhoto } =
-    storeToRefs(userStore)
+  const { currOpenSubDesign, removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
   const { t } = useI18n()
   const {
     isActionSheetOpen,
@@ -99,9 +98,10 @@ const useActionSheetCm = () => {
       }
     }
   }
-  const saveVideoCb = async () => {
+  const videoCb = async (action: string) => {
+    const tempId = generalUtils.generateRandomString(6)
     const videoRecord = useVideoRcordStore()
-    const { genVideo, saveToCameraRoll, setGenVideoCb, setIsExportVideo } = videoRecord
+    const { genVideo, saveToDevice, setGenVideoCb, setIsExportVideo } = videoRecord
     const { isGeningVideo } = storeToRefs(videoRecord)
     const userStore = useUserStore()
     const { getInitialImg } = userStore
@@ -111,33 +111,44 @@ const useActionSheetCm = () => {
       if (currGeneratedResult.value.video.removeWatermark !== removeWatermark.value) {
         await genVideo()
       }
-      return saveToCameraRoll(currGeneratedResult.value.video.src)
+      if (action === 'save') {
+        return await saveToDevice(currGeneratedResult.value.video.src)
+      } else {
+        await saveToDevice(currGeneratedResult.value.video.src, `screenshot/${tempId}`)
+        return await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`)
+      }
     } else if (isGeningVideo.value) {
       // isGeningVideo but not finished gening
-      return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
+      return new Promise<ISaveAssetFromUrlResponse | GeneralResponse>((resolve) => {
         setGenVideoCb(async () => {
-          if (currGeneratedResult.value && currGeneratedResult.value.video &&
-            currGeneratedResult.value.video.removeWatermark !== removeWatermark.value) {
+          if (
+            currGeneratedResult.value &&
+            currGeneratedResult.value.video &&
+            currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
+          ) {
             await genVideo()
           }
-          resolve(saveToCameraRoll(currGeneratedResult.value.video?.src))
+          if (action === 'save') {
+            resolve(await saveToDevice(currGeneratedResult.value.video?.src))
+          } else {
+            await saveToDevice(currGeneratedResult.value.video?.src, `screenshot/${tempId}`)
+            resolve(await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`))
+          }
         })
         console.log('video not generated yet, wait for it generated')
       })
     } else if (currOpenSubDesign.value) {
       // is not GeningVideo called by mydesign
       const { addImage, genVideo } = videoRecord
-      await addImage(
-        getInitialImg(),
-        getSubDesignImage(currOpenSubDesign.value, 'thumb')
-      )
+      await addImage(getInitialImg(), getSubDesignImage(currOpenSubDesign.value, 'thumb'))
       const data = await genVideo()
-      return await saveToCameraRoll(data?.src || undefined)
+      if (action === 'save') {
+        return await saveToDevice(data?.src || undefined)
+      } else {
+        await saveToDevice(data?.src || undefined, `screenshot/${tempId}`)
+        return await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`)
+      }
     }
-  }
-
-  const shareVideoCb = async () => {
-    console.log('share video')
   }
 
   const setSavingActions = (
@@ -379,8 +390,7 @@ const useActionSheetCm = () => {
     setMyDesignActions,
     setSubDesignActions,
     photoCb,
-    saveVideoCb,
-    shareVideoCb,
+    videoCb,
     reset,
     toggleActionSheet,
   }
