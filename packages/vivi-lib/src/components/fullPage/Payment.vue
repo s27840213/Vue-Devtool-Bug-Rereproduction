@@ -23,7 +23,7 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
     div(v-if="cards.length" class="payment__content__cards")
       div(v-for="card in cards" :key="card.iconName" class="payment__content__cards__card")
         svg-icon(class="payment__content__cards__card__icon" :class="{'rotate-180': card.iconName === 'cm_remove-bg'}" :iconName="card.iconName" iconWidth="24px" iconColor="black-3")
-        span(class="payment__content__cards__card__title" v-html="card.title")
+        span(class="payment__content__cards__card__title [word-spacing:9999px]") {{ card.title }}
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
         :key="btnPlan.key"
