@@ -7,6 +7,8 @@ export interface INormalModal {
   cancelText: string
   confirm: () => void
   cancel: () => void
+  confirmTextStyle?: string
+  cancelTextStyle?: string
 }
 
 export const useModalStore = defineStore('modal', () => {
