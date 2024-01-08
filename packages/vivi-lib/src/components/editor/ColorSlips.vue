@@ -25,7 +25,8 @@ div(class="color-panel"
                   @click="handleColorEvent(color)")
     template(v-if="!showAllRecentlyColor")
       //- Document colors
-      div(class="color-panel__colors"
+      div(v-if="documentColors.length"
+          class="color-panel__colors"
           :style="{'color': whiteTheme ? '#474A57' : '#ffffff'}")
         div(class="text-left")
           span {{$t('NN0091')}}
@@ -119,12 +120,11 @@ export default defineComponent({
     this.vcoConfig.handler = this.clickOutside
   },
   mounted() {
-    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
+    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: '' })
     this.setIsColorPanelOpened(true)
     this.initRecentlyColors()
   },
   unmounted() {
-    this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setIsColorPanelOpened(false)
   },
   computed: {
