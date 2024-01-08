@@ -392,11 +392,10 @@ const handleNextAction = async function () {
   } else if (inGenResultState.value) {
     changeEditorState('next')
     const currGenResult = currGeneratedResult.value
-    if (currGenResult) {
-      if (!currGenResult.video?.src) {
-        addImage(getInitialImg(), currGeneratedResult.value.url)
-          .then(genVideo)
-      }
+    const isWatermarkMatched = currGenResult.video?.removeWatermark === removeWatermark.value
+    if (!currGenResult.video?.src || !isWatermarkMatched) {
+      addImage(getInitialImg(), currGeneratedResult.value.url)
+        .then(genVideo)
     }
   }
 }
