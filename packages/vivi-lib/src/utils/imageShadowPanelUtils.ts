@@ -472,16 +472,10 @@ export default new class ImageShadowPanelUtils {
               layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
               imageShadowUtils.updateIosShadowUploadBuffer(pageIndex, [srcObj])
               shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles)
-              stkWVUtils.saveDesign()
               this.resetHandleState()
               imageShadowUtils.setUploadProcess(false)
             })
         }
-        // const { currSubDesignId } = storeToRefs(editorStore)
-        // cmWVUtils.saveAssetFromUrl('png', uploadCanvas.toDataURL('image/png;base64'), {
-        //   subPath
-        //   name: 'img-shadow-' + generalUtils.generateAssetId()
-        // })
       }
     } else {
       logUtils.setLog('layerData is undefined')

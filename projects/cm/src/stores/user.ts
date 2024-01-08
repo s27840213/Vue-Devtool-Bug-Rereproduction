@@ -8,6 +8,7 @@ import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import cmWVUtils, { IListAssetResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import imageShadowUtils from '@nu/vivi-lib/utils/imageShadowUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -204,6 +205,7 @@ export const useUserStore = defineStore('user', () => {
     // Do the same thing with editor.keepEditingInit.
     if (!currOpenDesign.value || !currOpenSubDesign.value) return false
     const { subId } = currOpenSubDesign.value
+
 
     // Try to open result.json.
     const subDesignData = await getSubDesignConfig(currOpenDesign.value, subId, 'result')
@@ -479,6 +481,10 @@ export const useUserStore = defineStore('user', () => {
   ) => {
     try {
       if (cmWVUtils.inBrowserMode) return
+      await Promise.race([
+        imageShadowUtils.iosImgDelHandler(),
+        new Promise((resolve) => setTimeout(resolve, 3000))
+      ])
       const pages = uploadUtils.prepareJsonToUpload(pageUtils.getPages)
       const isValidJson = await cmWVUtils.isValidJson(pages)
       if (!isValidJson) {
@@ -488,12 +494,6 @@ export const useUserStore = defineStore('user', () => {
         // this.setLoadingOverlayShow(false)
         throw new Error('save design failed')
       }
-
-      // TODO - ask Nathan this feature is needed for Charimx or not
-      // await Promise.race([
-      //   imageShadowUtils.iosImgDelHandler(),
-      //   new Promise((resolve) => setTimeout(resolve, 3000))
-      // ])
 
       // Update thumb img for saving result.json.
       if (name === 'result') {

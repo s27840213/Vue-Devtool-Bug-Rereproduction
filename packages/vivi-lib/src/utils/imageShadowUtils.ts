@@ -7,6 +7,7 @@ import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { getDilate } from './canvasAlgorithms'
+import cmWVUtils from './cmWVUtils'
 import flipUtils from './flipUtils'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
@@ -915,14 +916,29 @@ class ImageShadowUtils {
     store.commit('shadow/ADD_UPLOAD_IMG', data)
   }
 
-  delIosOldImg(srcObjs: Array<SrcObj>, editorType = stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)) {
-    const promises = [] as Promise<{ key: string, flag: number, name: string }>[]
+  delIosOldImg(srcObjs: Array<SrcObj>, editorType?: string) {
+    const promises = [] as Promise<{ key?: string, flag?: number, name: string }>[]
     srcObjs.forEach(srcObj => {
       if (srcObj.type !== 'ios') return
-      const key = `mydesign-${editorType}`
-      const designId = store.getters['vivisticker/getEditingDesignId']
-      const name = (srcObj.assetId as string).split('/').pop() || ''
-      promises.push(stkWVUtils.deleteImage(key, name, 'png', designId) as Promise<{ key: string, flag: number, name: string }>)
+      if (generalUtils.isStk) {
+        const key = `mydesign-${editorType ?? stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
+        const designId = store.getters['vivisticker/getEditingDesignId']
+        const name = (srcObj.assetId as string).split('/').pop() || ''
+        promises.push(
+          stkWVUtils.deleteImage(
+            key, name, 'png', designId
+          ) as Promise<{ key: string, flag: number, name: string }>
+        )
+      } else if (generalUtils.isCm) {
+        promises.push(
+          new Promise(resolve => {
+            console.warn('delete file', srcObj.assetId as string + '.png')
+            cmWVUtils.deleteFile(
+              srcObj.assetId as string + '.png'
+            ).then(() => { resolve({ name: srcObj.assetId as string })})
+          })
+        )
+      }
     })
     return promises
   }
