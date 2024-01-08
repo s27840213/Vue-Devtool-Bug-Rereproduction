@@ -21,12 +21,12 @@ export const useUserStore = defineStore('user', () => {
     setCurrDesignThumbIndex,
     startEditing,
     setCurrPrompt,
-    setCurrGenOptions,
+    restoreGenOptions,
     setMaskDataUrl,
     setCurrGenResultIndex,
     setInitImgSrc,
   } = editorStore
-  const { currDesignId, editorType, currDesignThumbIndex, generatedResults, pageSize, currPrompt, currGenOptions } =
+  const { currDesignId, editorType, currDesignThumbIndex, generatedResults, pageSize, currPrompt, currGenOptionsToSave } =
     storeToRefs(editorStore)
 
   const { t } = useI18n()
@@ -227,7 +227,7 @@ export const useUserStore = defineStore('user', () => {
       const { pages, type, prompt, genImageOptions, id, fileName, subId, width, height } = subDesign
 
       setCurrPrompt(prompt)
-      setCurrGenOptions(genImageOptions)
+      restoreGenOptions(genImageOptions)
       pageUtils.setPages(pages)
 
       // add mask
@@ -521,7 +521,7 @@ export const useUserStore = defineStore('user', () => {
         ver: cmWVUtils.getUserInfoFromStore().appVer,
         assetInfo: {},
         prompt: currPrompt.value,
-        genImageOptions: currGenOptions.value,
+        genImageOptions: currGenOptionsToSave.value,
         width: pages[0].width,
         height: pages[0].height,
       }
