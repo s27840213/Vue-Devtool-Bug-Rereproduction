@@ -953,13 +953,13 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async addWaterMark2Img(url: string, type: string, quality?: number) {
-    // const WATER_MARK = new URL(
-    //   '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
-    //   import.meta.url,
-    // ).href
+    const WATER_MARK = new URL(
+      '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+      import.meta.url,
+    ).href
     return new Promise<string>((resolve) => {
       const loadImgCb = (img: HTMLImageElement) => {
-        imageUtils.imgLoadHandler('', (watermark: HTMLImageElement) => loadWatermarkCb(img, watermark))
+        imageUtils.imgLoadHandler(WATER_MARK, (watermark: HTMLImageElement) => loadWatermarkCb(img, watermark))
       }
 
       const loadWatermarkCb = (img: HTMLImageElement, watermark: HTMLImageElement) => {

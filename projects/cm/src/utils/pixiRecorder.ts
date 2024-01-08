@@ -12,10 +12,10 @@ const IMG2_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
 const IMG1_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
-// const WATER_MARK = new URL(
-//   '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
-//   import.meta.url,
-// ).href
+const WATER_MARK = new URL(
+  '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+  import.meta.url,
+).href
 
 export const fragment_opacity = `
   varying vec2 vTextureCoord;
@@ -339,7 +339,7 @@ export default class PixiRecorder {
 
     const p3 = new Promise<PIXI.Texture>((resolve) => {
       // to fix svg blurry error, we need to resize the svg first
-      imageUtils.imgLoadHandler('', async (img: HTMLImageElement) => {
+      imageUtils.imgLoadHandler(WATER_MARK, async (img: HTMLImageElement) => {
         const { width, height } = await imageUtils.imgLoadHandler(img1, (img) => {
           return img
         })
