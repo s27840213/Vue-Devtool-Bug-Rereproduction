@@ -332,7 +332,8 @@ export const useEditorStore = defineStore('editor', {
       const defaultOptions = constantData.getGenImageOptions(type) as GenImageOptions | undefined
       if (!defaultOptions) return
       this.currGenOptions = defaultOptions.map((option) => {
-        Object.assign(option, options?.[option.key])
+        const value = options?.[option.key]
+        if (value) option.value = value
         return option
       })
     },
