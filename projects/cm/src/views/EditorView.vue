@@ -394,8 +394,14 @@ const handleNextAction = async function () {
     const currGenResult = currGeneratedResult.value
     const isWatermarkMatched = currGenResult.video?.removeWatermark === removeWatermark.value
     if (!currGenResult.video?.src || !isWatermarkMatched) {
-      addImage(getInitialImg(), currGeneratedResult.value.url)
-        .then(genVideo)
+      await addImage(getInitialImg(), currGeneratedResult.value.url)
+        .catch(async () => {
+          await addImage(
+            initImgSrc.value,
+            currGeneratedResult.value.url
+          )
+        })
+      genVideo()
     }
   }
 }

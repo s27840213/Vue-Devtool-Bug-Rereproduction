@@ -140,7 +140,14 @@ const useActionSheetCm = () => {
     } else if (currOpenSubDesign.value) {
       // is not GeningVideo called by mydesign
       const { addImage, genVideo } = videoRecord
-      await addImage(getInitialImg(), getSubDesignImage(currOpenSubDesign.value, 'thumb'))
+      const subDesignId = currOpenSubDesign.value
+      await addImage(getInitialImg(), getSubDesignImage(subDesignId, 'thumb'))
+        .catch(async () => {
+          await addImage(
+            getSubDesignImage(subDesignId, 'original'),
+            getSubDesignImage(subDesignId, 'thumb')
+          )
+        })
       const data = await genVideo()
       if (action === 'save') {
         return await saveToDevice(data?.src || undefined)

@@ -27,7 +27,9 @@ export interface ICmSubDesign extends IMyDesign {
   subId: string
   fileName: 'original' | 'result'
   prompt: string
-  genImageOptions: GenImageOptions
+  genImageOptions: {
+    [key: string]: number
+  }
   // waterfall UI need this
   width: number
   height: number

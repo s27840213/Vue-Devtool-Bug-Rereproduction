@@ -247,7 +247,6 @@ const videoSrc = computed(() => {
   } else return ''
 })
 const videoOnload = () => {
-  console.warn('video can play')
   isVideoLoaded.value = true
 }
 
