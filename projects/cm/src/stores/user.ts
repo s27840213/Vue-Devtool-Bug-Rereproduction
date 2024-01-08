@@ -575,7 +575,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const getInitialImg = () => {
-    const assetId = `mydesign-${editorType.value}/${currDesignId.value}/initial`
+    const assetId = `mydesign-${editorType.value}/${currOpenDesign.value?.id || currDesignId.value}/initial`
     const srcObj: SrcObj = {
       type: 'ios',
       assetId,

@@ -155,7 +155,7 @@ router.addRoute({
       // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
-    logUtils.setLog('App Start')
+    logUtils.setLog(`App Start: v.${process.env.BITBUCKET_BUILD_NUMBER}`)
     if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
       cmWVUtils.showUpdateModal(true)
     } // else this.showInitPopups()
