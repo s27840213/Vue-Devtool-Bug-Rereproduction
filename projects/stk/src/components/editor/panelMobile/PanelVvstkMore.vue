@@ -101,7 +101,7 @@ export default defineComponent({
       },
       {
         text: `${this.$t('NN0174')}`,
-        icon: 'vivisticker_global',
+        icon: 'global',
         action: () => { this.handleList('locale') }
       }, {
         text: `${this.$t('NN0649')}`,
@@ -119,23 +119,23 @@ export default defineComponent({
       ...this.debugMode ? [
         {
           text: 'domain 選單',
-          icon: 'vivisticker_global',
+          icon: 'global',
           action: () => { this.handleList('domain') }
         }, {
           text: 'App 事件測試',
-          icon: 'vivisticker_global',
+          icon: 'global',
           action: () => { this.handleList('event-test') }
         }, {
           text: '進入 Native 事件測試器',
-          icon: 'vivisticker_global',
+          icon: 'global',
           action: () => { window.location.pathname = 'nativeevttest' }
         }, {
           text: 'import design',
-          icon: 'vivisticker_global',
+          icon: 'global',
           action: this.handleImportDesign
         }, {
           text: 'toggle admin tool',
-          icon: 'vivisticker_global',
+          icon: 'global',
           action: this.toogleAdminTool
         }
       ] : []]
@@ -144,7 +144,7 @@ export default defineComponent({
       return localeUtils.SUPPORTED_LOCALES.map(supported_locale => {
         return {
           text: supported_locale.name,
-          icon: 'vivisticker_global',
+          icon: 'global',
           selected: () => {
             return this.$i18n.locale === supported_locale.abbreviation
           },
@@ -155,28 +155,28 @@ export default defineComponent({
     domainOptions(): OptionConfig[] {
       return [{
         text: 'production',
-        icon: 'vivisticker_global',
+        icon: 'global',
         selected: () => {
           return window.location.hostname === 'sticker.vivipic.com'
         },
         action: () => { this.switchDomain('sticker') }
       }, {
         text: 'rd',
-        icon: 'vivisticker_global',
+        icon: 'global',
         selected: () => {
           return window.location.hostname === 'stkrd.vivipic.com'
         },
         action: () => { this.switchDomain('stkrd') }
       }, {
         text: 'qa',
-        icon: 'vivisticker_global',
+        icon: 'global',
         selected: () => {
           return window.location.hostname === 'stickertest.vivipic.com'
         },
         action: () => { this.switchDomain('stickertest') }
       }, {
         text: 'localhost',
-        icon: 'vivisticker_global',
+        icon: 'global',
         selected: () => {
           return window.location.hostname === 'localhost:8080'
         },
@@ -194,7 +194,7 @@ export default defineComponent({
         const host = `stkdev${index}`
         return {
           text: host,
-          icon: 'vivisticker_global',
+          icon: 'global',
           selected: () => {
             return window.location.hostname === `${host}.vivipic.com`
           },
@@ -205,7 +205,7 @@ export default defineComponent({
     eventOptions(): OptionConfig[] {
       return ['A', 'B', 'C', 'D', 'E'].map(c => ({
         text: c,
-        icon: 'vivisticker_global',
+        icon: 'global',
         action: () => { this.sendTestEvent(c) }
       }))
     },
