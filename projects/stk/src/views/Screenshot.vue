@@ -1,23 +1,45 @@
 <template lang="pug">
 div(class="screenshot")
-  nu-layer(v-if="usingLayer"
-            ref="target"
-            :config="config"
-            :page="page"
-            :pageIndex="0"
-            :layerIndex="0")
-  div(v-if="bgRemoveSrc !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
-    img(:src="backgroundImage" @load="onload")
-  div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
-    img(:src="backgroundImage" @load="onload")
-  div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-  page-content(v-if="usingJSON" :config="page" :pageIndex="0" :noBg="extraData.noBg" :style="pageTransforms()")
+  nu-layer(
+    v-if="usingLayer"
+    ref="target"
+    :config="config"
+    :page="page"
+    :pageIndex="0"
+    :layerIndex="0")
+  div(
+    v-if="bgRemoveSrc !== ''"
+    ref="target"
+    class="screenshot__bg-img"
+    :style="bgStyles()")
+    img(
+      :src="backgroundImage"
+      @load="onload")
+  div(
+    v-if="backgroundImage !== ''"
+    ref="target"
+    class="screenshot__bg-img"
+    :style="bgStyles()")
+    img(
+      :src="backgroundImage"
+      @load="onload")
+  div(
+    v-if="backgroundColor !== ''"
+    ref="target"
+    class="screenshot__bg-color"
+    :style="bgColorStyles()")
+  page-content(
+    v-if="usingJSON"
+    :config="page"
+    :pageIndex="0"
+    :noBg="extraData.noBg"
+    :style="pageTransforms()")
 </template>
 
 <script lang="ts">
 import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
-import { AllLayerTypes, IImageStyle, ILayer } from '@nu/vivi-lib/interfaces/layer'
+import { AllLayerTypes, IGroup, IImageStyle, ILayer, IText } from '@nu/vivi-lib/interfaces/layer'
 import { IPage } from '@nu/vivi-lib/interfaces/page'
 import layerFactary from '@nu/vivi-lib/utils/layerFactary'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -25,6 +47,8 @@ import mathUtils from '@nu/vivi-lib/utils/mathUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import resizeUtils from '@nu/vivi-lib/utils/resizeUtils'
 import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import textShapeUtils from '@nu/vivi-lib/utils/textShapeUtils'
+import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
@@ -35,7 +59,7 @@ enum ScreenShotMode {
   BG_IMG,
   BG_COLOR,
   PAGE,
-  BG_REMOVE
+  BG_REMOVE,
 }
 
 export default defineComponent({
@@ -49,21 +73,21 @@ export default defineComponent({
       usingJSON: false,
       pageTranslate: {
         x: 0,
-        y: 0
+        y: 0,
       },
       pageScale: 1,
       JSONcontentSize: {
         width: 0,
-        height: 0
+        height: 0,
       },
       extraData: undefined as any,
       options: '',
       params: '',
-      toast: undefined as boolean | undefined
+      toast: undefined as boolean | undefined,
     }
   },
   components: {
-    PageContent
+    PageContent,
   },
   async mounted() {
     this.fetchDesign(window.location.search)
@@ -78,10 +102,10 @@ export default defineComponent({
   },
   computed: {
     ...(mapGetters({
-      pages: 'getPages'
+      pages: 'getPages',
     }) as { pages: () => IPage[] }),
     ...mapGetters({
-      bgRemoveCanvas: 'bgRemove/getCanvas'
+      bgRemoveCanvas: 'bgRemove/getCanvas',
     }),
     page(): IPage {
       return this.pages[0]
@@ -99,15 +123,16 @@ export default defineComponent({
       } else {
         return ScreenShotMode.PAGE
       }
-    }
+    },
   },
   methods: {
     ...mapMutations({
       setInScreenshotPreview: 'SET_inScreenshotPreview',
     }),
     ...mapActions({
-      fetchUserSettings: 'vivisticker/fetchUserSettings'
+      fetchUserSettings: 'vivisticker/fetchUserSettings',
     }),
+    // Will be Called by native using window.fetchDesign.
     fetchDesign(query: string, options = '') {
       this.clearBuffers()
       this.options = options
@@ -133,15 +158,23 @@ export default defineComponent({
           this.extraData = { thumbType, designId, key, noBg }
           switch (type) {
             case 'svg': {
-              const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json() as ILayer
+              const json = (await (
+                await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)
+              ).json()) as ILayer
               let vSize = json.vSize as number[] | undefined
               if (!vSize) {
                 vSize = [json.styles.width, json.styles.height]
               }
               const pageAspectRatio = window.outerWidth / window.outerHeight
               const svgAspectRatio = vSize[0] / vSize[1]
-              const svgWidth = svgAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * svgAspectRatio
-              const svgHeight = svgAspectRatio > pageAspectRatio ? window.outerWidth / svgAspectRatio : window.outerHeight
+              const svgWidth =
+                svgAspectRatio > pageAspectRatio
+                  ? window.outerWidth
+                  : window.outerHeight * svgAspectRatio
+              const svgHeight =
+                svgAspectRatio > pageAspectRatio
+                  ? window.outerWidth / svgAspectRatio
+                  : window.outerHeight
               json.ratio = 1
               this.setConfig(
                 layerFactary.newShape({
@@ -153,23 +186,31 @@ export default defineComponent({
                     initHeight: vSize[1],
                     scale: svgWidth / vSize[0],
                     color: json.color,
-                    vSize: json.vSize
-                  }
-                })
+                    vSize: json.vSize,
+                  },
+                }),
               )
-              setTimeout(() => { this.onload() }, 100)
+              setTimeout(() => {
+                this.onload()
+              }, 100)
               break
             }
             case 'svgImage': {
               const pageAspectRatio = window.outerWidth / window.outerHeight
               const photoAspectRatio = parseInt(width ?? '1') / parseInt(height ?? '1')
-              const photoWidth = photoAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * photoAspectRatio
-              const photoHeight = photoAspectRatio > pageAspectRatio ? window.outerWidth / photoAspectRatio : window.outerHeight
+              const photoWidth =
+                photoAspectRatio > pageAspectRatio
+                  ? window.outerWidth
+                  : window.outerHeight * photoAspectRatio
+              const photoHeight =
+                photoAspectRatio > pageAspectRatio
+                  ? window.outerWidth / photoAspectRatio
+                  : window.outerHeight
 
               const srcObj = {
                 type: 'svg',
                 userId: '',
-                assetId: id
+                assetId: id,
               }
 
               layerUtils.initLoadingFlagsForOneLayer(() => {
@@ -187,26 +228,41 @@ export default defineComponent({
                     initWidth: photoWidth,
                     initHeight: photoHeight,
                     imgWidth: photoWidth,
-                    imgHeight: photoHeight
-                  }
-                })
+                    imgHeight: photoHeight,
+                  },
+                }),
               )
               break
             }
             case 'svgImage2': {
-              const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as ILayer
+              const json = (await (
+                await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)
+              ).json()) as ILayer
               const { srcObj, styles } = json
 
-              const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(json.styles)
+              const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(
+                json.styles,
+              )
               const xDiff = (boundingWidth - styles.width) / 2
               const yDiff = (boundingHeight - styles.height) / 2
 
               const pageAspectRatio = window.outerWidth / window.outerHeight
               const photoAspectRatio = boundingWidth / boundingHeight
-              const photoWidth = photoAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * photoAspectRatio
-              const photoHeight = photoAspectRatio > pageAspectRatio ? window.outerWidth / photoAspectRatio : window.outerHeight
+              const photoWidth =
+                photoAspectRatio > pageAspectRatio
+                  ? window.outerWidth
+                  : window.outerHeight * photoAspectRatio
+              const photoHeight =
+                photoAspectRatio > pageAspectRatio
+                  ? window.outerWidth / photoAspectRatio
+                  : window.outerHeight
 
-              const { imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
+              const {
+                imgWidth = photoWidth,
+                imgHeight = photoHeight,
+                imgX = 0,
+                imgY = 0,
+              } = styles as IImageStyle
 
               const scaleRatio = photoWidth / boundingWidth
 
@@ -228,65 +284,89 @@ export default defineComponent({
                     imgWidth: imgWidth * scaleRatio,
                     imgHeight: imgHeight * scaleRatio,
                     imgX: imgX * scaleRatio,
-                    imgY: imgY * scaleRatio
-                  }
-                })
+                    imgY: imgY * scaleRatio,
+                  },
+                }),
               )
               break
             }
-            // case 'text': { deprecated
-            //   const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as IText | IGroup
-            //   const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
-            //   layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-            //   pageUtils.setPages([page])
-            //   layerUtils.initLoadingFlags({ layers: [json] }, () => {
-            //     this.onload()
-            //   })
+            case 'text': {
+              const json = (await (
+                await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)
+              ).json()) as IText | IGroup
+              const page = pageUtils.newPage({
+                width: window.outerWidth,
+                height: window.outerHeight,
+              })
+              layerUtils.setAutoResizeNeededForLayersInPage(page, true)
+              pageUtils.setPages([page])
+              layerUtils.initLoadingFlags({ layers: [json] }, () => {
+                this.onload()
+              })
 
-              //   const { width, height, scale } = json.styles
-              //   const pageAspectRatio = window.outerWidth / window.outerHeight
-              //   const textAspectRatio = width / height
-              //   const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
-              //   const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
-              //   const rescaleFactor = textWidth / width
+              const { width, height, scale } = json.styles
+              const pageAspectRatio = window.outerWidth / window.outerHeight
+              const textAspectRatio = width / height
+              const textWidth =
+                textAspectRatio > pageAspectRatio
+                  ? window.outerWidth
+                  : window.outerHeight * textAspectRatio
+              const textHeight =
+                textAspectRatio > pageAspectRatio
+                  ? window.outerWidth / textAspectRatio
+                  : window.outerHeight
+              const rescaleFactor = textWidth / width
 
-              //   const config = {
-              //     ...json,
-              //     styles: {
-              //       ...json.styles,
-              //       width: textWidth,
-              //       height: textHeight,
-              //       scale: scale * rescaleFactor,
-              //       x: 0,
-              //       y: 0
-              //     }
-              //   }
+              const config = {
+                ...json,
+                styles: {
+                  ...json.styles,
+                  width: textWidth,
+                  height: textHeight,
+                  scale: scale * rescaleFactor,
+                  x: 0,
+                  y: 0,
+                },
+              }
 
-              //   if (config.type === 'text') {
-              //     Object.assign(config, {
-              //       widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
-              //     })
-              //   }
+              if (config.type === 'text') {
+                Object.assign(config, {
+                  widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
+                  isAutoResizeNeeded: !textShapeUtils.isCurvedText(
+                    (config as IText).styles.textShape,
+                  ),
+                })
+              } else if (config.type === 'group') {
+                for (const subLayer of config.layers) {
+                  if (subLayer.type !== 'text') continue
+                  Object.assign(subLayer, {
+                    isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles.textShape),
+                  })
+                }
+              }
 
-              //   const newLayer = config.type === 'group'
-              //     ? layerFactary.newGroup(config, (config as IGroup).layers)
-              //     : layerFactary.newText(config as IText)
-              //   layerUtils.addLayers(0, [newLayer])
+              const newLayer =
+                config.type === 'group'
+                  ? layerFactary.newGroup(config, (config as IGroup).layers, '1.0.0')
+                  : layerFactary.newText(config as IText, '1.0.0')
+              layerUtils.addLayers(0, [textUtils.resetScaleForLayer(newLayer, true)])
 
-            //   this.JSONcontentSize = {
-            //     width: page.width,
-            //     height: page.height
-            //   }
-            //   this.usingJSON = true
-            //   break
-            // }
+              this.JSONcontentSize = {
+                width: page.width,
+                height: page.height,
+              }
+              this.usingJSON = true
+              break
+            }
             case 'background': {
               this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
               break
             }
             case 'backgroundColor': {
               this.backgroundColor = id ?? '#FFFFFFFF'
-              setTimeout(() => { this.onload() }, 100)
+              setTimeout(() => {
+                this.onload()
+              }, 100)
               break
             }
             case 'json': {
@@ -297,14 +377,14 @@ export default defineComponent({
                 if (stkWVUtils.checkVersion('1.31')) {
                   const newSize = {
                     width: page.width * 2,
-                    height: page.height * 2
+                    height: page.height * 2,
                   }
                   resizeUtils.resizePage(0, page, newSize)
                   this.JSONcontentSize = newSize
                 } else {
                   this.JSONcontentSize = {
                     width: page.width,
-                    height: page.height
+                    height: page.height,
                   }
                 }
                 this.usingJSON = true
@@ -316,9 +396,14 @@ export default defineComponent({
                 return
               }
               layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-              layerUtils.initLoadingFlags(page, () => {
-                this.onload()
-              }, () => this.onTimeout(`screenshot-${query}`), noBg)
+              layerUtils.initLoadingFlags(
+                page,
+                () => {
+                  this.onload()
+                },
+                () => this.onTimeout(`screenshot-${query}`),
+                noBg,
+              )
               renderPage()
               break
             }
@@ -327,40 +412,53 @@ export default defineComponent({
               const hasBg = !noBg && page.backgroundImage.config.srcObj?.assetId !== ''
               const newSize = {
                 width: Math.round(page.width / 2),
-                height: Math.round(page.height / 2)
+                height: Math.round(page.height / 2),
               }
               resizeUtils.resizePage(-1, page, newSize)
               const genThumb = () => {
-                stkWVUtils.callIOSAsAPI('GEN_THUMB', {
-                  type: 'mydesign',
-                  id: designId,
-                  width: page.width,
-                  height: page.height,
-                  x: 0,
-                  y: 0,
-                  needCrop: 0
-                }, 'gen-thumb', { timeout: -1 }).then(data => {
-                  stkWVUtils.sendToIOS('INFORM_WEB', {
-                    info: {
-                      event: 'gen-thumb-done',
-                      flag: data?.flag ?? '1',
-                      id: designId
+                stkWVUtils
+                  .callIOSAsAPI(
+                    'GEN_THUMB',
+                    {
+                      type: 'mydesign',
+                      id: designId,
+                      width: page.width,
+                      height: page.height,
+                      x: 0,
+                      y: 0,
+                      needCrop: 0,
                     },
-                    to: 'UI'
+                    'gen-thumb',
+                    { timeout: -1 },
+                  )
+                  .then((data) => {
+                    stkWVUtils.sendToIOS('INFORM_WEB', {
+                      info: {
+                        event: 'gen-thumb-done',
+                        flag: data?.flag ?? '1',
+                        id: designId,
+                      },
+                      to: 'UI',
+                    })
                   })
-                })
               }
               if (page.layers.length === 0 && !hasBg) {
                 this.JSONcontentSize = {
                   width: page.width,
-                  height: page.height
+                  height: page.height,
                 }
                 this.usingJSON = true
                 genThumb()
                 return
               }
               layerUtils.setAutoResizeNeededForLayersInPage(page, true)
-              layerUtils.initLoadingFlags(page, genThumb, () => this.onTimeout('gen-thumb'), false, 10000)
+              layerUtils.initLoadingFlags(
+                page,
+                genThumb,
+                () => this.onTimeout('gen-thumb'),
+                false,
+                10000,
+              )
               pageUtils.setPages([page])
               this.usingJSON = true
               break
@@ -373,25 +471,27 @@ export default defineComponent({
       const screenWidth = window.outerWidth
       const screenHeight = window.outerHeight
       let width = screenWidth
-      let height = width * 16 / 9
+      let height = (width * 16) / 9
       if (height > screenHeight) {
         height = screenHeight
-        width = height * 9 / 16
+        width = (height * 9) / 16
       }
       return {
         width: `${width}px`,
-        height: `${height}px`
+        height: `${height}px`,
       }
     },
     bgColorStyles() {
       return {
         ...this.bgStyles(),
-        backgroundColor: `#${this.backgroundColor}`
+        backgroundColor: `#${this.backgroundColor}`,
       }
     },
     pageTransforms() {
       return {
-        transform: `translate(${this.pageScale * this.pageTranslate.x}px, ${this.pageScale * this.pageTranslate.y}px)`
+        transform: `translate(${this.pageScale * this.pageTranslate.x}px, ${
+          this.pageScale * this.pageTranslate.y
+        }px)`,
       }
     },
     clearBuffers() {
@@ -416,12 +516,18 @@ export default defineComponent({
               event: 'missing-image',
               key: this.extraData.key,
               id: this.extraData.designId,
-              thumbType: this.extraData.thumbType
+              thumbType: this.extraData.thumbType,
             },
-            to: 'UI'
+            to: 'UI',
           })
         } else {
-          stkWVUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, this.params, this.toast)
+          stkWVUtils.sendDoneLoading(
+            this.JSONcontentSize.width,
+            this.JSONcontentSize.height,
+            this.options,
+            this.params,
+            this.toast,
+          )
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
@@ -429,30 +535,37 @@ export default defineComponent({
         const { width, height } = target.getBoundingClientRect()
         stkWVUtils.sendDoneLoading(width, height, this.options, this.params, this.toast)
       } else {
-        stkWVUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options, this.params, this.toast)
+        stkWVUtils.sendDoneLoading(
+          window.outerWidth,
+          window.outerHeight,
+          this.options,
+          this.params,
+          this.toast,
+        )
       }
     },
     onTimeout(srcEvent: string) {
       stkWVUtils.sendToIOS('INFORM_WEB', {
         info: {
           event: 'screenshot-timeout',
-          srcEvent
+          srcEvent,
         },
-        to: 'UI'
+        to: 'UI',
       })
     },
     setConfig(layer: AllLayerTypes) {
       layerUtils.addLayersToPos(0, [layer], 0)
       this.usingLayer = true
-    }
-  }
+    },
+  },
 })
 </script>
 
 <style lang="scss" scoped>
 .screenshot {
   @include size(100%, 100%);
-  &__bg-img, &__bg-color {
+  &__bg-img,
+  &__bg-color {
     @include size(100%, 100%);
   }
   &__bg-img > img {

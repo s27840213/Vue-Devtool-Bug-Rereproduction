@@ -339,13 +339,10 @@ const handleGenerate = async () => {
     setCurrGenResultIndex(0)
     changeEditorState('next')
   }, 3000)
-  await genImageFlow(getGenParams(), false, 2, {
-    onSuccess: (index) => {
-      setCurrGenResultIndex(index)
-    },
-  }).then(() => {
+  await genImageFlow(getGenParams(), false, 2).then(() => {
     setIsSendingGenImgReq(false)
   })
+
 }
 const clearPromt = () => {
   promptText.value = ''

@@ -1,6 +1,7 @@
 import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useModalStore } from '@/stores/modal'
 import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
 import type { GenImageParams, GenImageResult } from '@/types/api'
@@ -50,6 +51,7 @@ const useGenImageUtils = () => {
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign, setAiCredit } = useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
+  const { setNormalModalInfo, openModal, closeModal } = useModalStore()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const hostId = computed(() => store.getters['cmWV/getUserInfo'].hostId)
@@ -61,9 +63,15 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = () => { /**/ },
-      onError = () => { /**/ },
-      onApiResponded = () => { /**/ },
+      onSuccess = () => {
+        /**/
+      },
+      onError = () => {
+        /**/
+      },
+      onApiResponded = () => {
+        /**/
+      },
     }: {
       onSuccess?: (index: number, url: string) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -75,11 +83,18 @@ const useGenImageUtils = () => {
       unshiftGenResults('', ids[0], currPrompt.value)
     }
     try {
+      let finishedNum = 0
       await genImage(params, showMore, num, {
         onApiResponded,
         onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
-          !onlyUpdate && onSuccess(index, imgSrc)
+          if (!onlyUpdate) {
+            finishedNum++
+            onSuccess(index, imgSrc)
+          }
+          if (finishedNum === num) {
+            cmWVUtils.callIOSAsHTTPAPI('MAKE_VIBRATE')
+          }
         },
         onError: (index, url, reason) => {
           const errorId = generalUtils.generateRandomString(6)
@@ -114,8 +129,24 @@ const useGenImageUtils = () => {
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
       logUtils.uploadLog().then(() => {
-        if ((error as Error).message?.includes('no credits')) {
+        if ((error as Error).message?.includes('no free credits')) {
           cmWVUtils.openPayment()
+        } else if ((error as Error).message?.includes('no credits')) {
+          setNormalModalInfo({
+            title: t('CM0153'),
+            content: t('CM0154'),
+            cancelText: t('NN0359'),
+            confirmText: t('NN0742'),
+            cancel() {
+              closeModal()
+            },
+            confirm() {
+              window.open('https://www.instagram.com/charmix.ai/', '_blank')
+              closeModal()
+            },
+            confirmTextStyle: 'text-decoration: underline;',
+          })
+          openModal()
         } else {
           modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
             msg: t('STK0023'),
@@ -142,9 +173,15 @@ const useGenImageUtils = () => {
     showMore: boolean,
     num: number,
     {
-      onSuccess = () => { /**/ },
-      onError = () => { /**/ },
-      onApiResponded = () => { /**/ },
+      onSuccess = () => {
+        /**/
+      },
+      onError = () => {
+        /**/
+      },
+      onApiResponded = () => {
+        /**/
+      },
     }: {
       onSuccess?: (index: number, url: string, onlyUpdate?: boolean) => void
       onError?: (index: number, url: string, reason: string) => void
@@ -163,6 +200,14 @@ const useGenImageUtils = () => {
           uploadMaskAsImage(userId.value, requestId),
         ])
         cleanup = res[0]
+
+        if (generatedResultsNum.value === num) {
+          // Before first generate, after screenshot.
+          cmWVUtils.cloneFile(
+            initImgSrc.value,
+            `mydesign-${editorType.value}/${currDesignId.value}/initial.jpg`,
+          )
+        }
       } catch (error) {
         logUtils.setLogForError(error as Error)
         throw new Error('Upload Images For /gen-image Failed')
@@ -173,7 +218,14 @@ const useGenImageUtils = () => {
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
     const res = (
-      await genImageApis.genImage(userId.value, requestId, token.value, params, num, useUsBucket.value)
+      await genImageApis.genImage(
+        userId.value,
+        requestId,
+        token.value,
+        params,
+        num,
+        useUsBucket.value,
+      )
     ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
@@ -202,42 +254,30 @@ const useGenImageUtils = () => {
         try {
           const subDesignId = ids[index]
           const promises = [
-            (async () => {
-              if (!initImgSrc.value.startsWith('data:')) {
-                const dataUrl = await generalUtils.toDataUrlNew(initImgSrc.value, 'jpg')
-                setInitImgSrc(dataUrl)
-                cleanup && cleanup()
-              }
-              await saveDesignImageToDocument(initImgSrc.value, 'original', {
-                subDesignId,
-              })
-            })(),
+            cmWVUtils.cloneFile(
+              initImgSrc.value,
+              `mydesign-${editorType.value}/${currDesignId.value}/${subDesignId}/original.jpg`,
+            ),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
-          if (editorType.value === 'hidden-message') {
-            maskDataUrl.value && saveDesignImageToDocument(maskDataUrl.value, 'mask', {
-              type: 'png',
-              subDesignId,
-            })
+
+          if (maskDataUrl.value) {
+            promises.push(
+              saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+                type: 'png',
+                subDesignId,
+              }),
+            )
           } else {
-            const prepareMask = prepareMaskToUpload()
-            if (prepareMask) {
-              promises.push(
-                saveDesignImageToDocument(maskDataUrl.value, 'mask', {
-                  type: 'png',
-                  subDesignId,
-                }),
-              )
-            } else {
-              notify({
-                group: 'error',
-                text: 'save mask to document failed',
-              })
-            }
+            notify({
+              group: 'error',
+              text: 'save mask to document failed',
+            })
           }
 
           await Promise.all(promises)
+          cleanup && cleanup() // Delete screenshot.
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message?.includes('Cancelled')) {
@@ -249,7 +289,8 @@ const useGenImageUtils = () => {
         // save result image to document
         try {
           onSuccess(index, url)
-          RECORD_TIMING && testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
+          RECORD_TIMING &&
+            testUtils.start(`save-result ${index}`, { notify: false, setToLog: true })
           await saveDesignImageToDocument(url, 'thumb', {
             subDesignId: ids[index],
             thumbIndex: index,
@@ -277,7 +318,13 @@ const useGenImageUtils = () => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     if (editorType.value === 'hidden-message') setMaskDataUrl(getCanvasDataUrl() ?? '')
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
-      ? await cmWVUtils.sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false, ...( editorType.value === 'hidden-message' && { maskUrl: maskDataUrl.value }) }), { forGenImage: true })
+      ? await cmWVUtils.sendScreenshotUrl(
+          cmWVUtils.createUrlForJSON({
+            noBg: false,
+            ...(editorType.value === 'hidden-message' && { maskUrl: maskDataUrl.value }),
+          }),
+          { forGenImage: true },
+        )
       : await cmWVUtils.copyEditor({
           width: pageWidth * contentScaleRatio.value,
           height: pageHeight * contentScaleRatio.value,
@@ -291,8 +338,8 @@ const useGenImageUtils = () => {
     setInitImgSrc(`chmix://screenshot/${imageId}?imagetype=jpg&ssize=1080`)
     RECORD_TIMING && testUtils.start('upload screenshot', { notify: false, setToLog: true })
     try {
-      await cmWVUtils.uploadFileToUrl(
-        { path: 'screenshot', name: imageId, type: 'jpg' },
+      await cmWVUtils.uploadFileToS3(
+        { path: `screenshot/${imageId}`, ext: 'jpg' },
         uploadMap.value ?? {},
         `${userId}/input/${requestId}_init`,
       )

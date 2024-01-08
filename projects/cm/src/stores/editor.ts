@@ -13,6 +13,7 @@ import type {
   PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
@@ -35,7 +36,7 @@ export interface IGenResult {
   id: string
   url: string
   prompt: string
-  video?: string
+  video?: { src: string, removeWatermark: boolean }
 }
 
 interface IEditorStore {
@@ -136,7 +137,7 @@ export const useEditorStore = defineStore('editor', {
     currSubDesignId(): string {
       return this.currGeneratedResult.id
     },
-    currGeneratedResult(): { id: string; url: string; video?: string } {
+    currGeneratedResult(): IGenResult {
       return this.generatedResults[this.currGenResultIndex]
     },
     generatedResultsNum(): number {
@@ -152,6 +153,9 @@ export const useEditorStore = defineStore('editor', {
     },
     showDescriptionPanel(): boolean {
       return this.descriptionPanel !== null
+    },
+    currGenOptionsToSave(): { [key: string]: any } {
+      return Object.fromEntries(this.currGenOptions.map(({ key, value }) => [key, value]))
     },
   },
   actions: {
@@ -237,7 +241,7 @@ export const useEditorStore = defineStore('editor', {
       id: string,
       data: {
         url?: string
-        video?: string
+        video?: { src: string, removeWatermark: boolean }
         updateIndex?: boolean
         saveToDocument?: boolean
         saveMask?: boolean
@@ -250,7 +254,7 @@ export const useEditorStore = defineStore('editor', {
         this.generatedResults[index].url = url
       }
       if (video) {
-        this.generatedResults[index].video = video
+        this.generatedResults[index].video = { ...video }
       }
       if (updateIndex && this.currGenResultIndex === -1) {
         this.currGenResultIndex = index
@@ -324,9 +328,18 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOptions) {
       this.currGenOptions = options
     },
+    restoreGenOptions(options: { [key: string]: any }, type: EditorType) {
+      const defaultOptions = constantData.getGenImageOptions(type) as GenImageOptions | undefined
+      if (!defaultOptions) return
+      this.currGenOptions = defaultOptions.map((option) => {
+        const value = options?.[option.key]
+        if (value) option.value = value
+        return option
+      })
+    },
     async keepEditingInit() {
       // Do the same thing with user.editSubDesignResult.
-      const { initWithSubDeisgnImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
+      const { initWithSubDesignImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
       const { editorType: type, currDesignId: id, currSubDesignId: subId } = this
 
       // Try to open result.json.
@@ -339,7 +352,7 @@ export const useEditorStore = defineStore('editor', {
       // Cannot find result.json, use result img to create new design.
       const originalJson = await getSubDesignConfig({ type, id }, subId)
       if (originalJson && originalJson.flag === '0') {
-        initWithSubDeisgnImage(originalJson.content)
+        initWithSubDesignImage(originalJson.content)
       }
     },
     setCurrDesignId(id: string) {

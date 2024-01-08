@@ -22,8 +22,8 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
         :class="{ 'payment__content__indicator__item--active': idx === idxCurrImg }")
     div(v-if="cards.length" class="payment__content__cards")
       div(v-for="card in cards" :key="card.iconName" class="payment__content__cards__card")
-        svg-icon(class="payment__content__cards__card__icon" :iconName="card.iconName" iconWidth="24px" iconColor="black-3")
-        span(class="payment__content__cards__card__title") {{ card.title }}
+        svg-icon(class="payment__content__cards__card__icon" :class="{'rotate-180': card.iconName === 'cm_remove-bg'}" :iconName="card.iconName" iconWidth="24px" iconColor="black-3")
+        span(class="payment__content__cards__card__title [word-spacing:9999px]") {{ card.title }}
     div(class="payment__content__plans")
       div(v-for="btnPlan in btnPlans" class="payment__btn-plan"
         :key="btnPlan.key"
@@ -434,24 +434,19 @@ export default defineComponent({
       margin: 6px 0 27px;
       gap: 16px;
       &__card {
+        @apply typo-body-sm text-yellow-0 bg-lighter/20;
         width: 86px;
         height: 80px;
         justify-self: center;
         display: flex;
         flex-direction: column;
-        background-color: #A3A3A333;
         border-radius: 16px;
         gap: 4px;
         padding: 8px;
-        color: #FFFBED;
         text-align: left;
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 16px;
         &__icon {
+          @apply text-yellow-cm;
           margin-top: 10px;
-          color: #FDD248;
         }
       }
     }

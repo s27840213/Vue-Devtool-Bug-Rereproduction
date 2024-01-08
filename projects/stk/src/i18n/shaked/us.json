@@ -474,6 +474,11 @@
   "STK0096": "Go to Settings > Screen Time > Content & Privacy Restrictions > iTunes & App Store Purchases > Tap “In-app Purchases” and set to Allow.",
   "SKT0019": "Cannot find the design",
   "SHR0020": "You need access",
+  "CM0001": "Powerful Fill",
+  "CM0033": "Unlimited creation",
+  "CM0034": "Watermark free",
+  "CM0035": "Background remover",
+  "CM0078": "Hidden Message",
   "CM0109": "Blend",
   "CM0110": "Light",
   "CM0111": "CFG Scale",
@@ -491,5 +496,7 @@
   "CM0142": "Welcome to Charmix PRO",
   "CM0143": "Congrats! Charmix Pro opens up endless possibilities for creating visual content. Better and faster. We hope you enjoy it!",
   "CM0144": "https://vivisticker.com/us/charmix-privacy-policy/",
-  "CM0145": "https://vivisticker.com/us/charmix-terms-of-use/"
+  "CM0145": "https://vivisticker.com/us/charmix-terms-of-use/",
+  "CM0151": "Water reflection with AI",
+  "CM0152": "Combine 2 photos with AI"
 }

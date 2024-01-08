@@ -24,7 +24,7 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
       @pointer-up="setIsChangingBrushSize(false)")
   footer-bar(
     class="w-full box-border px-24"
-    :title="$t('CM0017')"
+    :title="inBgRemoveMode || isProcessing ? $t('CM0082') : $t('CM0017')"
     :disableBtns="disableBtns"
     @cancel="cancel"
     @apply="apply")
@@ -61,25 +61,56 @@ const { t } = useI18n()
 const { saveDesignImageToDocument } = useUserStore()
 
 // #region canvas related
-const modes = [
-  {
-    label: t('CM0017'),
-    value: ControlMode.Brush as string,
-  },
-  {
-    label: t('CM0018'),
-    value: ControlMode.Erase as string,
-  },
-  {
-    label: t('CM0020'),
-    value: ControlMode.Move as string,
-  },
-]
 
+// #region bg remove canvas related
+const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+const isProcessing = computed(() => store.getters['bgRemove/getIsProcessing'])
+const clearMode = computed(() => store.getters['bgRemove/getClearMode'])
+const movingMode = computed(() => store.getters['bgRemove/getMovingMode'])
+const bgRemoveBrushSize = computed(() => store.getters['bgRemove/getBrushSize'])
+
+const setClearMode = (isClearMode: boolean) => {
+  store.commit('bgRemove/SET_clearMode', isClearMode)
+}
+
+const setMovingMode = (isMovingMode: boolean) => {
+  store.commit('bgRemove/SET_movingMode', isMovingMode)
+}
+const setInBgRemoveMode = (isInBgRemoveMode: boolean) => {
+  store.commit('bgRemove/SET_inBgRemoveMode', isInBgRemoveMode)
+}
+
+const setBgRemoveBrushSize = (newVal: number) => {
+  store.commit('bgRemove/SET_brushSize', newVal)
+}
+// #endregion
+
+const modes = computed(() => {
+  return [
+    {
+      label: inBgRemoveMode.value || isProcessing.value ? t('NN0385') : t('CM0017'),
+      value:
+        inBgRemoveMode.value || isProcessing.value
+          ? ControlMode.Erase
+          : (ControlMode.Brush as string),
+    },
+    {
+      label: inBgRemoveMode.value || isProcessing.value ? t('NN0386') : t('CM0018'),
+      value:
+        inBgRemoveMode.value || isProcessing.value
+          ? ControlMode.Brush
+          : (ControlMode.Erase as string),
+    },
+    {
+      label: t('CM0020'),
+      value: ControlMode.Move as string,
+    },
+  ]
+})
 // const currMode = ref<PowerfulFillCanvasMode>(ControlMode.Brush as PowerfulFillCanvasMode)
 const currMode = computed({
   get() {
-    if (inBgRemoveMode.value) {
+    if (inBgRemoveMode.value || isProcessing.value) {
       return movingMode.value
         ? ControlMode.Move
         : clearMode.value
@@ -90,7 +121,7 @@ const currMode = computed({
     }
   },
   set(newVal: PowerfulFillCanvasMode) {
-    if (inBgRemoveMode.value) {
+    if (inBgRemoveMode.value || isProcessing.value) {
       if (newVal === ControlMode.Move) {
         setMovingMode(true)
       } else {
@@ -118,31 +149,8 @@ const { setCurrActiveFeature } = editorStore
 const { editorType, currDesignId } = storeToRefs(editorStore)
 // #endregion
 
-// #region bg remove canvas related
-const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
-const isProcessing = computed(() => store.getters['bgRemove/getIsProcessing'])
-const clearMode = computed(() => store.getters['bgRemove/getClearMode'])
-const movingMode = computed(() => store.getters['bgRemove/getMovingMode'])
-const bgRemoveBrushSize = computed(() => store.getters['bgRemove/getBrushSize'])
-
-const setClearMode = (isClearMode: boolean) => {
-  store.commit('bgRemove/SET_clearMode', isClearMode)
-}
-
-const setMovingMode = (isMovingMode: boolean) => {
-  store.commit('bgRemove/SET_movingMode', isMovingMode)
-}
-const setInBgRemoveMode = (isInBgRemoveMode: boolean) => {
-  store.commit('bgRemove/SET_inBgRemoveMode', isInBgRemoveMode)
-}
-
-const setBgRemoveBrushSize = (newVal: number) => {
-  store.commit('bgRemove/SET_brushSize', newVal)
-}
-// #endregion
-
 const brushSize = computed(() => {
-  if (inBgRemoveMode.value) {
+  if (inBgRemoveMode.value || isProcessing.value) {
     return bgRemoveBrushSize.value
   }
   return maskBrushSize.value

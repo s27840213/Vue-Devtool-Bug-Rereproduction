@@ -22,7 +22,7 @@ div(:layer-index="`${layerIndex}`"
       :layerIndex="subLayer.subLayerIdx"
       :primaryLayerIndex="layerIndex"
       :primaryLayer="config"
-      :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(subLayer.config) ? frameLayerMapper(subLayer.config) : subLayer.config"
+      :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(subLayer.config as IFrame) ? frameLayerMapper(subLayer.config) : subLayer.config"
       :type="config.type"
       :primaryLayerZindex="primaryLayerZindex()"
       :isMoved="isMoved"
@@ -216,7 +216,6 @@ import ActionIcon from '@/components/editor/controlPoint/ActionIcon.vue'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import { IColorKeys, colorTable } from '@/interfaces/color'
 import { IResizer } from '@/interfaces/controller'
-import { isTextFill } from '@/interfaces/format'
 import { ICoordinate } from '@/interfaces/frame'
 import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
@@ -382,7 +381,7 @@ export default defineComponent({
     resizerProfile() {
       return ControlUtils.getResizerProfile(this.config as AllLayerTypes)
     },
-    subLayer(): any {
+    subLayer() {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
           const subLayerIdx = (this.config as IGroup).layers.findIndex(l => l.active)
@@ -469,15 +468,6 @@ export default defineComponent({
             })
       }
       return false
-    },
-    isCurveText(): boolean {
-      return this.checkIfCurve(this.config as IText)
-    },
-    isFlipped(): boolean {
-      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    },
-    isFlipping(): boolean {
-      return this.config.isFlipping
     },
     contentEditable(): boolean {
       return this.config.contentEditable
@@ -727,10 +717,14 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const checkTextFill = isTextFill(this.config.styles.textFill)
       // To fix tiptap focus issue that opacity 0 need one more tap to focus, set opacity to 0.0001.
-      const opacity = (this.isCurveText || this.isFlipped || this.isFlipping || checkTextFill) &&
-        !this.contentEditable && !this.isPinchingEditor ? 0.0001 : 1
+      // const isCurveText = this.checkIfCurve(this.config as IText)
+      // const isFlipped = this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+      // const isFlipping = this.config.isFlipping
+      // const checkTextFill = isTextFill(this.config.styles.textFill)
+      // const opacity = !(isCurveText || isFlipped || isFlipping || checkTextFill) ||
+      //   this.contentEditable || this.isPinchingEditor ? 1 : 0.0001
+      const opacity = this.contentEditable || this.isPinchingEditor ? 1 : 0.0001
       return {
         width: '100%',
         height: '100%',

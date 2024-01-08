@@ -1,4 +1,4 @@
-import { IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { AllLayerTypes, IImage, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
@@ -168,41 +168,42 @@ class ColorUtils {
   }
 }
 
-export default new ColorUtils()
+const colorUtils = new ColorUtils()
+export default colorUtils
 
 export function getDocumentColor(pageIndex: number, color: string): Array<string> {
   const page = store.getters.getPage(pageIndex) as IPage
   const docColors = new Set<string>()
 
-  const handler = (layers: Array<ILayer>) => {
+  const handler = (layers: Array<AllLayerTypes>) => {
     layers
       .forEach(l => {
         switch (l.type) {
           case 'text':
-            (l as IText).paragraphs.forEach(p => {
+            l.paragraphs.forEach(p => {
               p.spans.forEach(s => {
-                if (!docColors.has(s.styles.color)) {
-                  docColors.add(s.styles.color)
-                }
+                docColors.add(s.styles.color)
               })
             })
             break
           case 'shape': {
-            const shape = l as IShape
+            const shape = l 
             for (let i = 0; shape.color && i < shape.color.length && i < 20; i++) {
-              if (!docColors.has(shape.color[i])) {
-                docColors.add(shape.color[i])
-              }
+              docColors.add(shape.color[i])
             }
           }
             break
           case 'group':
-            handler((l as IGroup).layers)
+            handler(l.layers)
         }
       })
   }
 
   handler(page.layers)
+  const { color: bgColor } = colorUtils.globalSelectedColor
+  if (bgColor !== 'multi') { docColors.add(bgColor) }
+
+  // Put the specified color at the beginning of the array.
   docColors.delete(color)
   return color ? [color, ...docColors].splice(0, 50) : [...docColors].splice(0, 50)
 }

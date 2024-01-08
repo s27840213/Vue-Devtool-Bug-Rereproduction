@@ -87,7 +87,8 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         :style="wrapperStyles"
         ref="editorWrapperRef")
         //- loading for gen result
-        div(v-if="inGenResultState && currImgSrc === ''"
+        div(
+          v-if="inGenResultState && currImgSrc === ''"
           class="w-full h-fit grid grid-rows-2 gap-16 justify-center text-white")
           div(class="typo-body-md grid justify-center gap-8")
             span {{ fakeLoading }}%
@@ -293,6 +294,7 @@ onBeforeRouteLeave((to, from) => {
       editorStore.$reset()
       canvasStore.$reset()
       setPrevGenParams({ requestId: '', params: {} as GenImageParams })
+      store.commit('canvasResize/SET_isResizing', false)
     }, 1000)
   }
 })
@@ -321,7 +323,7 @@ const {
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign } = userStore
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } = userStore
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 const fromMyDesign = hasGeneratedResults.value
@@ -338,18 +340,22 @@ const currImgSrc = computed(() => {
 })
 
 const fakeLoading = ref(5)
-watch(() => isGenerating.value && inGenResultState.value, (val, old) => {
-  if (!val || old) return
+watch(
+  () => isGenerating.value && inGenResultState.value,
+  (val, old) => {
+    if (!val || old) return
 
-  // Start fake loading.
-  fakeLoading.value = 0
-  const fakeLoadingId = window.setInterval(() => {
-    fakeLoading.value += 1
-    if (fakeLoading.value >= 95) { // Stop fake loading.
-      window.clearInterval(fakeLoadingId)
-    }
-  }, 100)
-})
+    // Start fake loading.
+    fakeLoading.value = 0
+    const fakeLoadingId = window.setInterval(() => {
+      fakeLoading.value += 1
+      if (fakeLoading.value >= 95) {
+        // Stop fake loading.
+        window.clearInterval(fakeLoadingId)
+      }
+    }, 100)
+  },
+)
 const fakeLoadingText = computed(() => {
   if (fakeLoading.value > 90) return t('CM0149')
   else if (fakeLoading.value > 50) return t('CM0148')
@@ -386,16 +392,16 @@ const handleNextAction = async function () {
   } else if (inGenResultState.value) {
     changeEditorState('next')
     const currGenResult = currGeneratedResult.value
-    if (currGenResult) {
-      if (!currGenResult.video) {
-        const src = imageUtils.appendRandomQuery(initImgSrc.value)
-        const res = imageUtils.appendRandomQuery(currGeneratedResult.value.url)
-        await addImage(src, res)
-        const data = await genVideo()
-        if (data) {
-          updateGenResult(currGenResult.id, { video: data })
-        }
-      }
+    const isWatermarkMatched = currGenResult.video?.removeWatermark === removeWatermark.value
+    if (!currGenResult.video?.src || !isWatermarkMatched) {
+      await addImage(getInitialImg(), currGeneratedResult.value.url)
+        .catch(async () => {
+          await addImage(
+            initImgSrc.value,
+            currGeneratedResult.value.url
+          )
+        })
+      genVideo()
     }
   }
 }
@@ -416,7 +422,7 @@ const centerBtns = computed<centerBtn[]>(() => {
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
     { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo },
   ]
-  if (editorType.value === 'hidden-message')
+  if (editorType.value === 'hidden-message' && !inBgRemoveMode.value)
     retTabs.push({
       icon: 'question-mark-circle',
       disabled: false,
@@ -426,7 +432,7 @@ const centerBtns = computed<centerBtn[]>(() => {
   retTabs.push(...stepBtns)
   if (inBgRemoveMode.value) {
     retTabs.unshift({
-      icon: showInitImage ? 'eye-slash' : 'eye',
+      icon: !showInitImage.value ? 'eye-slash' : 'eye',
       disabled: false,
       width: 20,
       action: () => {
@@ -443,7 +449,7 @@ const centerBtns = computed<centerBtn[]>(() => {
       },
     })
   }
-  if (currEditorTheme.value && editorType.value === 'hidden-message')
+  if (currEditorTheme.value && editorType.value === 'hidden-message' && !inBgRemoveMode.value)
     retTabs.push({
       icon: currEditorTheme.value.toggleIcon,
       disabled: false,
@@ -519,7 +525,7 @@ const wrapperStyles = computed(() => {
   const { pinchScale, isPinchingEditor } = store.state.mobileEditor
   const transformOrigin = '0 0'
   const page = pageUtils.getCurrPage
-  let transform = `translate(${page.x ?? 0}px, ${page.y?? 0}px)`
+  let transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px)`
   if (isPinchingEditor && pinchScale !== 1) {
     transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
   }
@@ -543,15 +549,18 @@ const fitPage = (ratio: number) => {
     x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
     y: (editorUtils.mobileSize.height - page.height * ratio) * 0.5,
   }
-  const posDiff =  {
+  const posDiff = {
     x: newInitPos.x - page.initPos.x,
-    y: newInitPos.y - page.initPos.y
+    y: newInitPos.y - page.initPos.y,
   }
   const newPos = {
     x: page.x + posDiff.x,
-    y: page.y + posDiff.y
+    y: page.y + posDiff.y,
   }
-  store.commit('SET_contentScaleRatio4Page', { pageIndex: layerUtils.pageIndex, contentScaleRatio: ratio })
+  store.commit('SET_contentScaleRatio4Page', {
+    pageIndex: layerUtils.pageIndex,
+    contentScaleRatio: ratio,
+  })
   pageUtils.updatePageInitPos(0, newInitPos)
   pageUtils.updatePagePos(0, newPos)
   // editorUtils.handleContentScaleRatio(0)
@@ -578,7 +587,6 @@ watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
     if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
-    console.log(' fitScaleRatio.value,')
     fitPage(newVal)
   },
 )
@@ -594,9 +602,12 @@ const initPagePinchHandler = () => {
   setMobilePysicalSize()
   pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
   pagePinchHandler = (e) => {
-    if (inAspectRatioState.value ||
+    if (
+      inAspectRatioState.value ||
       isProcessingBgRemove.value ||
-      (inGenResultState.value && currImgSrc.value === '')) return
+      (inGenResultState.value && currImgSrc.value === '')
+    )
+      return
     setMobilePysicalSize()
     pagePinchUtils?.pinchHandler(e)
   }

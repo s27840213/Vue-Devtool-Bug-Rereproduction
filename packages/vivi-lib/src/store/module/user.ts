@@ -31,7 +31,6 @@ export interface IBrowserInfo {
 export interface IUserModule {
   browserInfo: IBrowserInfo,
   token: string,
-  getTxToken?: string, // for stk & cm only
   uname: string,
   shortName: string,
   userId: string,
@@ -79,7 +78,10 @@ export interface IUserModule {
       right: number
     }
   }
-  showForceLogin: boolean
+  showForceLogin: boolean,
+  // below are for cm only
+  getTxToken: string, // public token for get-tx-info
+  uuid: string,
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -152,6 +154,7 @@ const getDefaultState = (): IUserModule => ({
     }
   },
   showForceLogin: false,
+  uuid: ''
 })
 
 const state = getDefaultState()
@@ -280,6 +283,9 @@ const getters: GetterTree<IUserModule, any> = {
       default:
         return family?.includes('Windows') ? DeviceType.Win : DeviceType.Other
     }
+  },
+  getUuid(state) {
+    return state.uuid
   }
 }
 
@@ -449,7 +455,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         })
       } else if (isCmLoginResponse(data)) {
         commit('SET_STATE', {
-          getTxToken: newToken
+          uuid: data.data.uuid
         })
       }
 

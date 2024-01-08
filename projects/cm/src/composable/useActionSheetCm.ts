@@ -3,14 +3,15 @@ import { useUserStore } from '@/stores/user'
 import { useVideoRcordStore } from '@/stores/videoRecord'
 import { ICmMyDesign, ITmpSubDesign } from '@/types/user'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
-import cmWVUtils, { ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
+import cmWVUtils, { GeneralResponse, ISaveAssetFromUrlResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import useActionSheet from './useActionSheet'
+import useStateInfo from './useStateInfo'
+
 const useActionSheetCm = () => {
   const userStore = useUserStore()
   const { getSubDesignImage, deleteDesign, deleteSubDesign } = userStore
-  const { currOpenSubDesign, isSubDesignOpen, removeWatermark, highResolutionPhoto } =
-    storeToRefs(userStore)
+  const { currOpenSubDesign, removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
   const { t } = useI18n()
   const {
     isActionSheetOpen,
@@ -25,68 +26,136 @@ const useActionSheetCm = () => {
   const editorStore = useEditorStore()
   const { currGeneratedResult } = storeToRefs(editorStore)
 
-  const savePhotoCb = async () => {
+  const { atEditor } = useStateInfo()
+
+  const photoCb = async (action: string) => {
+    let tempId = generalUtils.generateRandomString(6)
+    let lastTempId = tempId
     let targetUrl = ''
-    if (isSubDesignOpen.value && currOpenSubDesign.value) {
+    if (!atEditor.value && currOpenSubDesign.value) {
       targetUrl = getSubDesignImage(currOpenSubDesign.value)
     } else {
       targetUrl = currGeneratedResult.value.url
     }
     if (targetUrl.startsWith('chmix://')) {
-      const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.documentToCameraRoll(
-        path,
-        name,
-        type,
-        !removeWatermark.value,
-        highResolutionPhoto.value ? 2 : 1,
-        'scale',
-      )
+      const { path, ext } = cmWVUtils.getDocumentPath(targetUrl)
+      if (!removeWatermark.value) {
+        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg', 100)
+        await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
+      }
+      if (action === 'save') {
+        return await cmWVUtils.documentToCameraRoll(
+          removeWatermark.value ? path : `screenshot/${tempId}`,
+          ext,
+          highResolutionPhoto.value ? 2 : 1,
+          'scale',
+        )
+      } else {
+        if (highResolutionPhoto.value) {
+          lastTempId = tempId
+          tempId = generalUtils.generateRandomString(6)
+          await cmWVUtils.resizeImage(
+            removeWatermark.value ? `${path}` : `screenshot/${lastTempId}`,
+            `screenshot/${tempId}`,
+            ext,
+            2,
+            'scale',
+          )
+        }
+        return await cmWVUtils.shareFile(
+          removeWatermark.value && !highResolutionPhoto.value
+            ? `${path}.${ext}`
+            : `screenshot/${tempId}.${ext}`,
+        )
+      }
     } else {
-      return cmWVUtils.saveAssetFromUrl('jpg', await generalUtils.toDataUrlNew(targetUrl, 'jpg'))
+      if (!removeWatermark.value) {
+        const dataUrl = await cmWVUtils.addWaterMark2Img(targetUrl, 'jpg', 100)
+        await cmWVUtils.saveAssetFromUrl('jpg', dataUrl, `screenshot/${tempId}`)
+      } else {
+        await cmWVUtils.saveAssetFromUrl('jpg', targetUrl, `screenshot/${tempId}`)
+      }
+      if (action === 'save') {
+        return await cmWVUtils.documentToCameraRoll(
+          `screenshot/${tempId}`,
+          'jpg',
+          highResolutionPhoto.value ? 2 : 1,
+          'scale',
+        )
+      } else {
+        if (highResolutionPhoto.value) {
+          lastTempId = tempId
+          tempId = generalUtils.generateRandomString(6)
+          await cmWVUtils.resizeImage(
+            `screenshot/${lastTempId}`,
+            `screenshot/${tempId}`,
+            'jpg',
+            2,
+            'scale',
+          )
+        }
+        return await cmWVUtils.shareFile(`screenshot/${tempId}.jpg`)
+      }
     }
   }
-  const saveVideoCb = async () => {
+  const videoCb = async (action: string) => {
+    const tempId = generalUtils.generateRandomString(6)
     const videoRecord = useVideoRcordStore()
-    const { saveToCameraRoll, setGenVideoCb, setIsExportVideo } = videoRecord
+    const { genVideo, saveToDevice, setGenVideoCb, setIsExportVideo } = videoRecord
     const { isGeningVideo } = storeToRefs(videoRecord)
+    const userStore = useUserStore()
+    const { getInitialImg } = userStore
+    const { removeWatermark } = storeToRefs(userStore)
     setIsExportVideo(true)
     if (currGeneratedResult.value && currGeneratedResult.value.video) {
-      return saveToCameraRoll(currGeneratedResult.value.video)
-    } else if (isGeningVideo.value)  {
+      if (currGeneratedResult.value.video.removeWatermark !== removeWatermark.value) {
+        await genVideo()
+      }
+      if (action === 'save') {
+        return await saveToDevice(currGeneratedResult.value.video.src)
+      } else {
+        await saveToDevice(currGeneratedResult.value.video.src, `screenshot/${tempId}`)
+        return await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`)
+      }
+    } else if (isGeningVideo.value) {
       // isGeningVideo but not finished gening
-      return new Promise<ISaveAssetFromUrlResponse>((resolve) => {
-        setGenVideoCb(() => resolve(saveToCameraRoll(currGeneratedResult.value.video)))
+      return new Promise<ISaveAssetFromUrlResponse | GeneralResponse>((resolve) => {
+        setGenVideoCb(async () => {
+          if (
+            currGeneratedResult.value &&
+            currGeneratedResult.value.video &&
+            currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
+          ) {
+            await genVideo()
+          }
+          if (action === 'save') {
+            resolve(await saveToDevice(currGeneratedResult.value.video?.src))
+          } else {
+            await saveToDevice(currGeneratedResult.value.video?.src, `screenshot/${tempId}`)
+            resolve(await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`))
+          }
+        })
         console.log('video not generated yet, wait for it generated')
       })
     } else if (currOpenSubDesign.value) {
       // is not GeningVideo called by mydesign
       const { addImage, genVideo } = videoRecord
-      const srcInit = getSubDesignImage(currOpenSubDesign.value, 'original')
-      const srcRes = getSubDesignImage(currOpenSubDesign.value, 'thumb')
-      await addImage(srcInit, srcRes)
+      const subDesignId = currOpenSubDesign.value
+      await addImage(getInitialImg(), getSubDesignImage(subDesignId, 'thumb'))
+        .catch(async () => {
+          await addImage(
+            getSubDesignImage(subDesignId, 'original'),
+            getSubDesignImage(subDesignId, 'thumb')
+          )
+        })
       const data = await genVideo()
-      return saveToCameraRoll(data || undefined)
+      if (action === 'save') {
+        return await saveToDevice(data?.src || undefined)
+      } else {
+        await saveToDevice(data?.src || undefined, `screenshot/${tempId}`)
+        return await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`)
+      }
     }
-  }
-
-  const sharePhotoCb = async () => {
-    let targetUrl = ''
-    if (isSubDesignOpen.value && currOpenSubDesign.value) {
-      targetUrl = getSubDesignImage(currOpenSubDesign.value)
-    } else {
-      targetUrl = currGeneratedResult.value.url
-    }
-    if (targetUrl.startsWith('chmix://')) {
-      const { path, name, type } = cmWVUtils.getDocumentPath(targetUrl)
-      return cmWVUtils.shareFile(`${path}/${name}.${type}`)
-    } else {
-      console.log('retry or something else') // TODO: need to discuss with native for this case
-      throw new Error('not implemented yet')
-    }
-  }
-  const shareVideoCb = async () => {
-    console.log('share video')
   }
 
   const setSavingActions = (
@@ -327,10 +396,8 @@ const useActionSheetCm = () => {
     setSharingActions,
     setMyDesignActions,
     setSubDesignActions,
-    savePhotoCb,
-    saveVideoCb,
-    sharePhotoCb,
-    shareVideoCb,
+    photoCb,
+    videoCb,
     reset,
     toggleActionSheet,
   }
