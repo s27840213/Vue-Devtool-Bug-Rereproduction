@@ -227,7 +227,7 @@ export const useUserStore = defineStore('user', () => {
       const { pages, type, prompt, genImageOptions, id, fileName, subId, width, height } = subDesign
 
       setCurrPrompt(prompt)
-      restoreGenOptions(genImageOptions)
+      restoreGenOptions(genImageOptions, type)
       pageUtils.setPages(pages)
 
       // add mask
