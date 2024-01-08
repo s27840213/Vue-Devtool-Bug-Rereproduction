@@ -1083,8 +1083,8 @@
   "CM0031": "You have no projects.",
   "CM0032": "Try PRO now!",
   "CM0033": "Unlimited creation",
-  "CM0034": "No watermark",
-  "CM0035": "Fast image processing",
+  "CM0034": "Watermark free",
+  "CM0035": "Background remover",
   "CM0036": "SUPPORT",
   "CM0037": "Account",
   "CM0038": "Tutorials",
@@ -1201,5 +1201,7 @@
   "CM0149": "Almost done…",
   "CM0150": "Share as",
   "CM0151": "Water reflection with AI",
-  "CM0152": "Combine 2 photos with AI"
+  "CM0152": "Combine 2 photos with AI",
+  "CM0153": "Usage limit reached",
+  "CM0154": "Please contact us for assistance (DM us via Instagram)."
 }

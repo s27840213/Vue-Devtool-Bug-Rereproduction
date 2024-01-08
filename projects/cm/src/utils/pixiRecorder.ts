@@ -12,7 +12,10 @@ const IMG2_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
 const IMG1_EXAMPLE =
   'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
-const WATER_MARK = new URL('../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg', import.meta.url).href
+const WATER_MARK = new URL(
+  '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+  import.meta.url,
+).href
 
 export const fragment_opacity = `
   varying vec2 vTextureCoord;
@@ -135,12 +138,14 @@ export default class PixiRecorder {
 
   async genVideo() {
     if (!this.isImgReady) {
-      await Promise.race(
-        [
-          new Promise<void>(resolve => { this._genVideoResolver = resolve }),
-          new Promise<void>((resolve, reject) => setTimeout(reject, 60000))
-        ]
-      ).catch(() => { throw new Error('pixi-recorder: can not load image as genVideo!') })
+      await Promise.race([
+        new Promise<void>((resolve) => {
+          this._genVideoResolver = resolve
+        }),
+        new Promise<void>((resolve, reject) => setTimeout(reject, 60000)),
+      ]).catch(() => {
+        throw new Error('pixi-recorder: can not load image as genVideo!')
+      })
     }
     this.watermarkHandler()
 
@@ -185,7 +190,7 @@ export default class PixiRecorder {
     }
   }
 
-  async saveToCameraRoll(url = this.video.src) {
+  async saveToDevice(url = this.video.src, path?: string) {
     const { removeWatermark } = useUserStore()
     if (this.video.removeWatermark !== removeWatermark) {
       const data = await this.genVideo()
@@ -198,7 +203,7 @@ export default class PixiRecorder {
     const blob = await getBlobFromUrl(url)
     const base64 = await blobToBase64(blob)
     if (url) {
-      return cmWVUtils.saveAssetFromUrl('mp4', base64)
+      return cmWVUtils.saveAssetFromUrl('mp4', base64, path)
     } else {
       throw new Error('video not generated yet')
     }
@@ -332,21 +337,27 @@ export default class PixiRecorder {
       })
     })
 
-    const p3 = new Promise<PIXI.Texture>(resolve => {
+    const p3 = new Promise<PIXI.Texture>((resolve) => {
       // to fix svg blurry error, we need to resize the svg first
       imageUtils.imgLoadHandler(WATER_MARK, async (img: HTMLImageElement) => {
-        const { width, height } = await imageUtils.imgLoadHandler(img1, (img) => { return img })
+        const { width, height } = await imageUtils.imgLoadHandler(img1, (img) => {
+          return img
+        })
         imageShadowPanelUtils.svgImageSizeFormatter(img, Math.min(width, height) * 0.5, () => {
           img.onload = () => {
             const canvas = document.createElement('canvas')
             canvas.width = 500
             const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
             ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight)
-            PIXI.Texture.fromURL(img.src, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
+            PIXI.Texture.fromURL(img.src, {
+              resourceOptions: { resolution: devicePixelRatio },
+            }).then((texture) => {
               // safari bug: svg partially rendered, need to destroy it and reload it again
               // see. https://github.com/pixijs/pixijs/issues/7204
               texture.baseTexture.destroy()
-              PIXI.Texture.fromURL(img.src, { resourceOptions: { resolution: devicePixelRatio } }).then((texture) => {
+              PIXI.Texture.fromURL(img.src, {
+                resourceOptions: { resolution: devicePixelRatio },
+              }).then((texture) => {
                 this.sprite_wm = new PIXI.Sprite(texture)
                 this.sprite_wm.width = texture.width
                 this.sprite_wm.height = texture.height
@@ -394,7 +405,8 @@ export default class PixiRecorder {
         if (this._genVideoResolver) {
           this._genVideoResolver()
         }
-      }).catch(() => {
+      })
+      .catch(() => {
         throw new Error('pixi-recorder: can not load image!')
       })
   }
@@ -408,7 +420,7 @@ class CanvasRecorder {
   // private _resolver = null as null | ((value: string | PromiseLike<string> | 'error') => void)
   private _stopCb = undefined as undefined | ((url: string) => void)
 
-  constructor(canvas: HTMLCanvasElement, stopCb?: ((url: string) => void)) {
+  constructor(canvas: HTMLCanvasElement, stopCb?: (url: string) => void) {
     this.canvas = canvas
     this.stream = this.canvas.captureStream()
     this.recorder = new MediaRecorder(this.stream, this.getMimeTypeSupportOptions())
@@ -460,26 +472,23 @@ class CanvasRecorder {
   }
 }
 
-const blobToBase64 = (blob: Blob): Promise<string>  => {
+const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onloadend = () => resolve(
-      (reader.result as string)
-        .replace('data:', '')
-        .replace(/^.+,/, '')
-    )
+    reader.onloadend = () =>
+      resolve((reader.result as string).replace('data:', '').replace(/^.+,/, ''))
     reader.onerror = reject
     reader.readAsDataURL(blob)
   })
 }
 
 const getBlobFromUrl = async (url: string) => {
-  return new Promise<Blob>(resolve => {
-    fetch(url).then(r => resolve(r.blob()))
+  return new Promise<Blob>((resolve) => {
+    fetch(url).then((r) => resolve(r.blob()))
   })
 }
 
-export const saveToCameraRoll = async (url: string) => {
+export const saveToDevice = async (url: string) => {
   const blob = await getBlobFromUrl(url)
   const base64 = await blobToBase64(blob)
   return cmWVUtils.saveAssetFromUrl('mp4', base64)

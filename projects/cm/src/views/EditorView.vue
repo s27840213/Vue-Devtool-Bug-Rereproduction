@@ -393,14 +393,16 @@ const handleNextAction = async function () {
   } else if (inGenResultState.value) {
     changeEditorState('next')
     const currGenResult = currGeneratedResult.value
-    if (currGenResult) {
-      if (!currGenResult.video?.src) {
-        await addImage(getInitialImg(), currGeneratedResult.value.url)
-        const data = await genVideo()
-        if (data) {
-          updateGenResult(currGenResult.id, { video: data })
-        }
-      }
+    const isWatermarkMatched = currGenResult.video?.removeWatermark === removeWatermark.value
+    if (!currGenResult.video?.src || !isWatermarkMatched) {
+      await addImage(getInitialImg(), currGeneratedResult.value.url)
+        .catch(async () => {
+          await addImage(
+            initImgSrc.value,
+            currGeneratedResult.value.url
+          )
+        })
+      genVideo()
     }
   }
 }

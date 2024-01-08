@@ -13,6 +13,7 @@ import type {
   PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
+import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
@@ -152,6 +153,9 @@ export const useEditorStore = defineStore('editor', {
     },
     showDescriptionPanel(): boolean {
       return this.descriptionPanel !== null
+    },
+    currGenOptionsToSave(): { [key: string]: any } {
+      return Object.fromEntries(this.currGenOptions.map(({ key, value }) => [key, value]))
     },
   },
   actions: {
@@ -323,6 +327,15 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrGenOptions(options: GenImageOptions) {
       this.currGenOptions = options
+    },
+    restoreGenOptions(options: { [key: string]: any }, type: EditorType) {
+      const defaultOptions = constantData.getGenImageOptions(type) as GenImageOptions | undefined
+      if (!defaultOptions) return
+      this.currGenOptions = defaultOptions.map((option) => {
+        const value = options?.[option.key]
+        if (value) option.value = value
+        return option
+      })
     },
     async keepEditingInit() {
       // Do the same thing with user.editSubDesignResult.

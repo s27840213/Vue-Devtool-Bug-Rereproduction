@@ -1,6 +1,7 @@
 import genImageApis from '@/apis/genImage'
 import useUploadUtils from '@/composable/useUploadUtils'
 import { useEditorStore } from '@/stores/editor'
+import { useModalStore } from '@/stores/modal'
 import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
 import type { GenImageParams, GenImageResult } from '@/types/api'
@@ -50,6 +51,7 @@ const useGenImageUtils = () => {
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign, setAiCredit } = useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
+  const { setNormalModalInfo, openModal, closeModal } = useModalStore()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
   const hostId = computed(() => store.getters['cmWV/getUserInfo'].hostId)
@@ -127,8 +129,24 @@ const useGenImageUtils = () => {
       logUtils.setLog(errorId)
       logUtils.setLogForError(error as Error)
       logUtils.uploadLog().then(() => {
-        if ((error as Error).message?.includes('no credits')) {
+        if ((error as Error).message?.includes('no free credits')) {
           cmWVUtils.openPayment()
+        } else if ((error as Error).message?.includes('no credits')) {
+          setNormalModalInfo({
+            title: t('CM0153'),
+            content: t('CM0154'),
+            cancelText: t('NN0359'),
+            confirmText: t('NN0742'),
+            cancel() {
+              closeModal()
+            },
+            confirm() {
+              window.open('https://www.instagram.com/charmix.ai/', '_blank')
+              closeModal()
+            },
+            confirmTextStyle: 'text-decoration: underline;',
+          })
+          openModal()
         } else {
           modalUtils.setModalInfo(t('CM0087'), `${t('CM0088')}<br/>(${hint})`, {
             msg: t('STK0023'),
@@ -183,8 +201,12 @@ const useGenImageUtils = () => {
         ])
         cleanup = res[0]
 
-        if (generatedResultsNum.value === num) { // Before first generate, after screenshot.
-          cmWVUtils.cloneFile(initImgSrc.value, `mydesign-${editorType.value}/${currDesignId.value}/initial.jpg`)
+        if (generatedResultsNum.value === num) {
+          // Before first generate, after screenshot.
+          cmWVUtils.cloneFile(
+            initImgSrc.value,
+            `mydesign-${editorType.value}/${currDesignId.value}/initial.jpg`,
+          )
         }
       } catch (error) {
         logUtils.setLogForError(error as Error)
@@ -234,7 +256,7 @@ const useGenImageUtils = () => {
           const promises = [
             cmWVUtils.cloneFile(
               initImgSrc.value,
-              `mydesign-${editorType.value}/${currDesignId.value}/${subDesignId}/original.jpg`
+              `mydesign-${editorType.value}/${currDesignId.value}/${subDesignId}/original.jpg`,
             ),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),

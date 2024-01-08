@@ -591,15 +591,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       cards: [
         {
           iconName: 'unlimited',
-          title: 'Unlimited creation'
+          title: i18n.global.t('CM0033')
         },
         {
           iconName: 'watermark',
-          title: 'Watermark free'
+          title: i18n.global.t('CM0034')
         },
         {
-          iconName: 'backward',
-          title: 'Fast image processing'
+          iconName: 'cm_remove-bg',
+          title: i18n.global.t('CM0035')
         }
       ],
       btnPlans: [

@@ -5,6 +5,7 @@ div(
   ref="rootRef")
   div(
     v-if="currOpenSubDesign"
+    ref="containerRef"
     class="w-full h-full relative"
     v-touch
     @swipeleft="handleSwipe($event, 'left')"
@@ -14,8 +15,7 @@ div(
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
       div(
         class="result-showcase flex-center"
-        ref="resultShowcase"
-        :class="currOpenSubDesign.width >= currOpenSubDesign.height ? 'w-full' : 'h-full'"
+        :class="contentClass"
         :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
         img(
           class="result-showcase__card result-showcase__card--back w-full h-full"
@@ -39,11 +39,9 @@ div(
             playsinline
             loop
             autoplay
-            mutes
-            @loadeddata="() => { isVideoLoaded = true }"
+            muted
+            @loadeddata="videoOnload"
             :src="videoSrc")
-          div(v-if="!isVideoLoaded && !isExportingVideo" class="result-showcase__dim-cover")
-            loading-brick(class="z-median")
       div(v-if="atEditor" class="flex-between-center gap-10 relative")
         div(
           class="w-8 h-8 rounded-full transition-colors pointer-events-none"
@@ -54,7 +52,9 @@ div(
         div(
           class="w-[100vh] h-[200%] absolute top-half left-half -translate-x-half -translate-y-half"
           @click="() => (showVideo = !showVideo)")
-    div(v-if="isExportingVideo" class="result-showcase__dim-cover")
+    div(
+      v-if="isExportingVideo || (!showVideo && !isVideoLoaded)"
+      class="result-showcase__dim-cover pointer-events-none")
       loading-brick(class="z-median")
   div(class="flex flex-col gap-8 text-white w-full h-fit")
     div(class="flex items-center gap-4 w-full")
@@ -218,20 +218,68 @@ const copyPrompt = () => {
 // #endregion
 
 // #region result showcase
+const containerRef = ref<HTMLElement | null>(null)
+const containerSize = useElementBounding(containerRef)
+const contentClass = computed(() => {
+  console.log(containerSize)
+  if (
+    !currOpenSubDesign.value ||
+    containerSize.width.value === 0 ||
+    containerSize.height.value === 0
+  )
+    return ''
+  return currOpenSubDesign.value.width / currOpenSubDesign.value.height >
+    containerSize.width.value / containerSize.height.value
+    ? 'w-full'
+    : 'h-full'
+})
+
 const video = ref<HTMLVideoElement | null>(null)
-const resultShowcase = ref<HTMLElement | null>(null)
 const isVideoLoaded = ref(false)
 const showVideo = ref(true)
+
 const videoSrc = computed(() => {
-  if (generatedResults.value[currGenResultIndex.value] &&
-    generatedResults.value[currGenResultIndex.value].video) {
+  if (
+    generatedResults.value[currGenResultIndex.value] &&
+    generatedResults.value[currGenResultIndex.value].video
+  ) {
     return generatedResults.value[currGenResultIndex.value].video?.src
   } else return ''
 })
+const videoOnload = () => {
+  isVideoLoaded.value = true
+}
 
-watch(videoSrc, () => {
-  isVideoLoaded.value = false
-})
+watch(
+  () => videoSrc.value,
+  () => {
+    // const v = document.createElement('video')
+    // v.style.position = 'fixed'
+    // v.style.width = '200px'
+    // v.style.top = '200px'
+    // v.style.zIndex = '10000'
+    // v.src = videoSrc.value as string
+    // v.onloadeddata = () => {
+    //   console.warn('v onloaded')
+    // }
+    // v.autoplay = true
+    // v.loop = true
+    // v.playsInline = true
+    // document.body.appendChild(v)
+    // setTimeout(() => {
+    //   document.body.removeChild(v)
+    // }, 5000)
+
+    isVideoLoaded.value = false
+    setTimeout(() => {
+      // use setTimeout to prevent video not load
+      if (video.value && videoSrc.value) {
+        video.value.src = videoSrc.value
+        video.value.load()
+      }
+    }, 0)
+  },
+)
 
 watch(
   () => inSavingState.value,
