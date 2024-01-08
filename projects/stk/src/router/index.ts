@@ -165,7 +165,7 @@ router.addRoute({
       // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
-    logUtils.setLog('App Start')
+    logUtils.setLog(`App Start: v.${process.env.VUE_APP_BUILD_NUMBER}`)
     let argoError = false
     try {
       const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
