@@ -40,7 +40,7 @@ div(
             loop
             autoplay
             muted
-            @loadedmetadata="videoOnload"
+            @loadeddata="videoOnload"
             :src="videoSrc")
       div(v-if="atEditor" class="flex-between-center gap-10 relative")
         div(
@@ -272,9 +272,13 @@ watch(
     // }, 5000)
 
     isVideoLoaded.value = false
-    if (video.value) {
-      video.value.load()
-    }
+    setTimeout(() => {
+      // use setTimeout to prevent video not load
+      if (video.value && videoSrc.value) {
+        video.value.src = videoSrc.value
+        video.value.load()
+      }
+    }, 0)
   },
 )
 
