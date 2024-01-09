@@ -96,13 +96,13 @@ div(class="prompt-area w-full box-border px-24")
         div(class="w-full flex flex-col")
           div(class="w-full flex-between-center typo-h6")
             div(class="flex items-center gap-4")
+              span {{ option.title }}
               svg-icon(
                 v-if="option.icon"
                 :iconName="option.active && option.iconActive ? option.iconActive : option.icon"
                 iconWidth="24px"
                 iconColor="yellow-2"
                 @click="() => (option.active = !option.active)")
-              span {{ option.title }}
             div(class="grid grid-cols-[24px,auto] items-center justify-between min-w-52")
               transition(name="rotate-right-in")
                 div(v-if="option.key === 'guidance_scale' && isOptionModified(option)" class="flex-center")
@@ -111,7 +111,7 @@ div(class="prompt-area w-full box-border px-24")
                     iconWidth="24px"
                     iconColor="yellow-2"
                     @click="resetOption(option)")
-              span(class="col-start-2 justify-self-end") {{ option.value }}
+              span(v-if="typeof option.value === 'number'" class="col-start-2 justify-self-end") {{ option.value }}
           Collapse(
             :when="!!option.active"
             @collapse="currTransitions.add(`collapse-sub-title-${idx}`)"
@@ -123,16 +123,21 @@ div(class="prompt-area w-full box-border px-24")
               class="w-full text-lighter typo-body-sm mt-8"
               v-html="option.subTitle")
           div(class="mt-8")
-            input(
-              class="input__slider--range"
-              v-progress
+            range-slider(
+              v-if="option.type === 'range'"
               v-model.number="option.value"
               :max="option.max"
               :min="option.min"
-              :step="option.step"
-              type="range")
+              :step="option.step")
+            dual-range-slider(
+              v-else-if="option.type === 'dual-range'"
+              v-model:valueFrom.number="option.value.from"
+              v-model:valueTo.number="option.value.to"
+              :max="option.max"
+              :min="option.min"
+              :step="option.step")
           div(
-            v-if="option.minDescription || option.maxDescription"
+            v-if=" option.minDescription || option.maxDescription"
             class="w-full flex-between-center text-white typo-btn-sm mt-8")
             span(class="typo-body-sm text-left" v-html="option.minDescription")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
@@ -151,7 +156,7 @@ import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import { useModalStore } from '@/stores/modal'
 import type { GenHiddenMessageParams, GenImageParams } from '@/types/api'
-import type { GenImageGroupOption, GenImageOptions, GenImageRangeOption } from '@/types/editor'
+import type { GenImageDualRangeOption, GenImageGroupOption, GenImageOptions, GenImageRangeOption } from '@/types/editor'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
@@ -161,6 +166,8 @@ import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import pagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { Collapse } from 'vue-collapsed'
+import RangeSlider from '@nu/vivi-lib/components/editor/mobile/RangeSlider.vue'
+import DualRangeSlider from '@nu/vivi-lib/components/editor/mobile/DualRangeSlider.vue'
 
 const emit = defineEmits(['disableBtmPanelTransition'])
 const props = defineProps({
@@ -184,7 +191,7 @@ const {
   setCurrPrompt,
   setCurrDesignId,
   setCurrGenResultIndex,
-  setCurrGenOptions,
+  updateCurrGenOption,
 } = editorStore
 const {
   isSendingGenImgReq,
@@ -237,17 +244,22 @@ const getGenParams = (): GenImageParams => {
     action: editorType.value,
     prompt: promptText.value,
   } as GenImageParams
+  const genRangeOptions = currGenOptions.value.filter(o => o.type === 'range')
+  const optGuidanceStep = currGenOptions.value.find(o => o.key === 'guidance_step') as Pick<GenImageDualRangeOption, 'value'>
+  
   switch (editorType.value) {
     case 'hidden-message':
       Object.assign(params, {
         action: genTypes.value?.group[genTypes.value.value].key,
-        ...Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
+        ...Object.fromEntries(genRangeOptions.map(o => [o.key, o.value])),
+        'guidance_start': optGuidanceStep.value.from,
+        'guidance_end': optGuidanceStep.value.to,
       } as GenHiddenMessageParams)
       break
     default:
       Object.assign(
         params,
-        Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
+        Object.fromEntries(genRangeOptions.map(o => [o.key, o.value])),
       )
       break
   }
@@ -397,7 +409,7 @@ const genGroupOptions = computed(() => {
   return currGenOptions.value.filter((o) => o.type === 'group') as GenImageGroupOption[]
 })
 const genRangeOptions = computed(() => {
-  return currGenOptions.value.filter((o) => o.type === 'range') as GenImageRangeOption[]
+  return currGenOptions.value.filter((o) => ['range', 'dual-range'].includes(o.type)) as Array<GenImageRangeOption | GenImageDualRangeOption>
 })
 const genTypes = computed(() => {
   return genGroupOptions.value.find((o) => o.key === 'type')
@@ -407,23 +419,27 @@ const defaultGenImageOptions = computed(() => {
   if (editorType.value === 'hidden-message') {
     const preset = [
       // blend
-      new Map([
-        ['guidance_scale', 7],
-        ['weight', 2],
-        ['guidance_start', 0],
-        ['guidance_end', 1],
-      ]),
+      {
+        guidance_scale: 7,
+        weight: 2,
+        guidance_step: {
+          from: 0,
+          to: 1,
+        }
+      },
       // light
-      new Map([
-        ['guidance_scale', 10],
-        ['weight', 0.7],
-        ['guidance_start', 0.1],
-        ['guidance_end', 0.7],
-      ]),
-    ][idxGenType.value]
+      {
+        guidance_scale: 10,
+        weight: 0.7,
+        guidance_step: {
+          from: 0.1,
+          to: 0.7,
+        }
+      }
+    ][idxGenType.value] as {[key: string]: any}
     const options = (constantData.getGenImageOptions('hidden-message') as GenImageOptions) ?? []
     options.forEach((option) => {
-      const newVal = preset.get(option.key)
+      const newVal = preset[option.key]
       if (newVal) option.value = newVal
     })
     return options
@@ -438,11 +454,9 @@ const defaultGenImageOptions = computed(() => {
 const idxGenType = ref(genTypes.value?.value ?? 0)
 
 watch(idxGenType, (newVal) => {
-  setCurrGenOptions(
-    currGenOptions.value.map((o) => (o.key === 'type' ? Object.assign(o, { value: newVal }) : o)),
-  )
+  updateCurrGenOption({ key: 'type', value: newVal })
   currGenOptions.value.forEach((o) => {
-    if (o.type === 'range') resetOption(o)
+    if (['range', 'dual-range'].includes(o.type)) resetOption(o)
   })
 })
 
@@ -451,13 +465,9 @@ const isOptionModified = (option: { key: string; value: unknown }) => {
 }
 
 const resetOption = (option: { key: string }) => {
-  const defaultOption = defaultGenImageOptions.value.find((o) => o.key === option.key)
+  const defaultOption = defaultGenImageOptions.value.find((o) => o.key === option.key)  
   if (!defaultOption) return
-  setCurrGenOptions(
-    currGenOptions.value.map((o) =>
-      o.key === option.key ? Object.assign(o, { value: defaultOption.value }) : o,
-    ),
-  )
+  updateCurrGenOption(defaultOption)
 }
 
 const idxInspiration = ref(0)

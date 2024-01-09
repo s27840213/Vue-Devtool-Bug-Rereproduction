@@ -1406,22 +1406,19 @@ class ConstantData {
           value: 2,
         },
         {
-          type: 'range',
-          key: 'guidance_start',
-          title: i18n.global.t('CM0116'),
-          min: 0,
-          max: 1,
-          step: 0.1,
-          value: 0,
-        },
-        {
-          type: 'range',
-          key: 'guidance_end',
+          type: 'dual-range',
+          key: 'guidance_step',
           title: i18n.global.t('CM0117'),
+          subTitle: i18n.global.t('CM0156'),
           min: 0,
           max: 1,
-          step: 0.1,
-          value: 1,
+          step: .1,
+          value: {
+            from: 0,
+            to: 1
+          },
+          icon: 'information-circle',
+          iconActive: 'information-circle-solid',
         },
       ]]
     ]).get(editorType)

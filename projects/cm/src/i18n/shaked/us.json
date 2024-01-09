@@ -532,8 +532,7 @@
   "CM0113": "natural color but<newline>fewer details",
   "CM0114": "vibrant color but<newline>more details",
   "CM0115": "Control Weights",
-  "CM0116": "Start Control Step",
-  "CM0117": "Ending Control Step",
+  "CM0117": "Control Step",
   "CM0118": "Something went wrong",
   "CM0119": "The edit area cannot be blank. Please add an element.",
   "CM0120": "Please type a scene.",
@@ -568,5 +567,6 @@
   "CM0150": "Share as",
   "CM0151": "Water reflection with AI",
   "CM0152": "Combine 2 photos with AI",
-  "CM0155": "Repeated Subscription. You’re currently connected to another subscribed AppStore account."
+  "CM0155": "Repeated Subscription. You’re currently connected to another subscribed AppStore account.",
+  "CM0156": "Left dragger - Set start step value<newline>Right dragger - Set ending step value"
 }

@@ -72,11 +72,13 @@
         &::-webkit-slider-thumb {
           border-color: setColor(yellow-cm);
           box-shadow: 0px 0px 4px setColor(gray-1);
+          pointer-events: all;
         }
 
         &::-moz-range-thumb {
           border-color: setColor(yellow-cm);
           box-shadow: 0px 0px 4px setColor(gray-1);
+          pointer-events: all;
         }
 
         &[disabled] {

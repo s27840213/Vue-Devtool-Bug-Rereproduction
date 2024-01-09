@@ -336,11 +336,11 @@ function setProgressStyle(el: HTMLInputElement) {
 }
 
 app.directive('progress', {
-  mounted: (el) => {
-    setProgressStyle(el)
+  mounted: (el, binding) => {
+    if (binding.value === undefined || binding.value) setProgressStyle(el)
   },
-  updated: (el) => {
-    setProgressStyle(el)
+  updated: (el, binding) => {
+    if (binding.value === undefined || binding.value) setProgressStyle(el)
   }
 })
 
