@@ -73,7 +73,7 @@ div(class="panel-download" :style="containerStyles")
       hr(class="full-width")
       nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"
           size="mid-full"
-          :icon="['pro', 'alarm']"
+          :icon="(selectedTypeVal === 'pdf_print' && !inReviewMode) && ['pro', 'alarm']"
           :disabled="isButtonDisabled"
           @click="handleSubmit()") {{$t('NN0010')}}
       template(v-if="isAdmin || onDev")
@@ -86,7 +86,7 @@ div(class="panel-download" :style="containerStyles")
         hr(class="full-width")
         nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"
             size="mid-full"
-            :icon="['pro', 'alarm']"
+            :icon="(selectedTypeVal === 'pdf_print' && !inReviewMode) && ['pro', 'alarm']"
             :disabled="isButtonDisabled"
             @click="handleSubmit(true)") {{`${$t('NN0010')} (${$t('NN0460')})`}}
   template(v-else-if="currState === 'type'")

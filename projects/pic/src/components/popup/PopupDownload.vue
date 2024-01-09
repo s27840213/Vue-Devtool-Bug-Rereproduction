@@ -160,12 +160,11 @@ div(class="popup-download text-left"
         :label="`${$t('NN0129')}`"
         :default-checked="saveSubmission"
         @change="({ checked }) => handleSubmission(checked)")
-    div
-      nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"
-          size="sm-full"
-          :icon="['pro', 'alarm']"
-          :disabled="isButtonDisabled"
-          @click="handleSubmit()") {{$t('NN0010')}}
+    nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"
+        size="sm-full"
+        :icon="(selectedTypeVal === 'pdf_print' && !inReviewMode ) && ['pro', 'alarm']"
+        :disabled="isButtonDisabled"
+        @click="handleSubmit()") {{$t('NN0010')}}
 </template>
 
 <!-- eslint-disable vue/no-unused-properties -->
