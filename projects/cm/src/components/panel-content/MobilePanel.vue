@@ -354,18 +354,17 @@ const component = defineComponent({
     },
     uploadShadow() {
       const saveCb = (canvas: HTMLCanvasElement) => {
-        const { saveDesignImageToDocument } = useUserStore()
+        const { saveImgToTmp } = useUserStore()
         const { editorType, currDesignId } = storeToRefs(useEditorStore())
         const name = 'img-shadow-' + generalUtils.generateAssetId()
+        const path = `imgShadow/${editorType.value}/${currDesignId.value}/${name}`
         return new Promise<string>(resolve => {
-          saveDesignImageToDocument(canvas.toDataURL('image/png;base64'), name, {
-            subDesignId: 'imgShadow',
-            type: 'png',
-          }).then(() => {
-            resolve(
-              `mydesign-${editorType.value}/${currDesignId.value}/imgShadow/${name}`
-            )
-          })
+          saveImgToTmp(canvas.toDataURL('image/png;base64'), path)
+            .then(() => {
+              resolve(
+                `tmp/${path}`
+              )
+            })
         })
       }
       imageShadowPanelUtils.handleShadowUpload({ saveCb })

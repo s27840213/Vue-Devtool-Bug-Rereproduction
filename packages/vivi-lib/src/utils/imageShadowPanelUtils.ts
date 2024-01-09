@@ -119,7 +119,6 @@ export default new class ImageShadowPanelUtils {
 
   async _handleShadowUpload(options?: {_layerData?: any, forceUpload?: boolean, errorCount?: number, saveCb?: (c: HTMLCanvasElement) => Promise<string> }) {
     const { _layerData, forceUpload = false, errorCount = 1, saveCb } = options || {}
-    console.warn('_handleShadowUpload')
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     let layerData = (() => {
       const handleId = store.state.shadow.handleId
@@ -461,7 +460,6 @@ export default new class ImageShadowPanelUtils {
         if (saveCb) {
           saveCb(uploadCanvas)
             .then((path: string) => {
-              console.log('shadow upload path', path)
               const srcObj = {
                 type: 'ios',
                 userId: '',

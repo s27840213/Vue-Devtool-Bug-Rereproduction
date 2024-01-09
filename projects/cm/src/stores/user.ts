@@ -474,6 +474,14 @@ export const useUserStore = defineStore('user', () => {
     return data
   }
 
+  const saveImgToTmp = (url: string, path: string, type: 'png' | 'jpg' = 'png') => {
+    return cmWVUtils.saveAssetFromUrl(
+      type,
+      url,
+      `tmp/${path}`
+    )
+  }
+
   const saveSubDesign = async (
     path: string,
     subDesignId: string,
@@ -482,8 +490,11 @@ export const useUserStore = defineStore('user', () => {
     try {
       if (cmWVUtils.inBrowserMode) return
       await Promise.race([
-        imageShadowUtils.iosImgDelHandler(),
-        new Promise((resolve) => setTimeout(resolve, 3000))
+        imageShadowUtils.iosImgDelHandler_cm({
+          editorType: editorType.value,
+          designId: currDesignId.value
+        }),
+        new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 3000))
       ])
       const pages = uploadUtils.prepareJsonToUpload(pageUtils.getPages)
       const isValidJson = await cmWVUtils.isValidJson(pages)
@@ -638,6 +649,7 @@ export const useUserStore = defineStore('user', () => {
     myDesignBuffer,
     getDesginTypeByKey,
     saveDesignImageToDocument,
+    saveImgToTmp,
     saveSubDesign,
     listDesigns,
     updateDesignsInStore,

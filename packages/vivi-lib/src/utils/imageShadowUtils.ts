@@ -935,7 +935,7 @@ class ImageShadowUtils {
             console.warn('delete file', srcObj.assetId as string + '.png')
             cmWVUtils.deleteFile(
               srcObj.assetId as string + '.png'
-            ).then(() => { resolve({ name: srcObj.assetId as string })})
+            ).then(() => { resolve({ name: srcObj.assetId as string }) })
           })
         )
       }
@@ -962,15 +962,66 @@ class ImageShadowUtils {
       })
       for (const p of this.delIosOldImg(imgBuffs)) {
         promises.push(new Promise(resolve => {
-          p.then(data => {
+          p.then((data) => {
             const target = imgBuffs.find(b => (b.assetId as string).split('/').pop() === data.name)
             this.updateIosShadowUploadBuffer(pageIndex, target ? [target] : [], true)
-            resolve(data)
+            resolve(data.name)
           })
         }))
       }
     })
     return Promise.all(promises)
+  }
+
+  iosImgDelHandler_cm(cmData: {editorType: string, designId: string }) {
+    const { editorType, designId } = cmData
+    const promises = [] as Promise<unknown>[]
+    const pages = pageUtils.getPages
+    const pagesConfigUpdater = [] as Array<(pages: Array<IPage>) => void>
+    pages.forEach((page, pageIndex) => {
+      const imgBuffs = [...page.iosImgUploadBuffer.shadow]
+      for (let layerIndex = 0; layerIndex < page.layers.length; layerIndex++) {
+        const l = page.layers[layerIndex]
+        if (l.type === LayerType.image) {
+          const name = (l.styles.shadow.srcObj.assetId as string).split('/').pop()
+          const index = imgBuffs.findIndex(imgBuff => (imgBuff.assetId as string).split('/').pop() === name)
+          if (index !== -1) {
+            imgBuffs.splice(index, 1)
+
+            // this func used to update the json config after this iosImgDelHandler finished
+            pagesConfigUpdater.push(
+              (pages: Array<IPage>) => {
+                (pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.srcObj = {
+                  type: 'ios',
+                  userId: '',
+                  assetId: `mydesign-${editorType}/${designId}/imgShadow/${name}`
+                }
+              }
+            )
+          }
+        }
+      }
+      for (const p of this.delIosOldImg(imgBuffs)) {
+        promises.push(new Promise(resolve => {
+          p.then((data) => {
+            const target = imgBuffs.find(b => (b.assetId as string) === data.name)
+            this.updateIosShadowUploadBuffer(pageIndex, target ? [target] : [], true)
+            resolve(data.name)
+          })
+        }))
+      }
+    })
+    return Promise.all(promises)
+      .then(async () => {
+        await cmWVUtils.cloneFile(
+          `tmp/imgShadow/${editorType}/${designId}`,
+          `mydesign-${editorType}/${designId}/imgShadow`
+        )
+        await cmWVUtils.deleteFile(
+          `tmp/imgShadow/${editorType}/${designId}`
+        )
+        pagesConfigUpdater.forEach(cb => cb(pages))
+      })
   }
 
   /**
