@@ -68,7 +68,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['pushHistory'],
+  emits: ['pushHistory', 'uploadShadow'],
   components: {
     ColorPicker,
     ColorBtn

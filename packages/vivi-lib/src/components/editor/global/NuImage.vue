@@ -273,6 +273,7 @@ export default defineComponent({
       }
     },
     showCanvas(val) {
+      console.log('show canvas', val)
       if (val) {
         setTimeout(() => {
           this.handleNewShadowEffect(false)
@@ -447,7 +448,7 @@ export default defineComponent({
       return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },
     finalSrc(): string {
-      let src = this.src
+      const src = this.src
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(src)
       }
@@ -599,7 +600,7 @@ export default defineComponent({
           config: this.config,
           layerInfo: this.layerInfo()
         }
-        imageShadowPanelUtils.handleShadowUpload(layerData, true)
+        imageShadowPanelUtils.handleShadowUpload({ layerData, forceUpload: true })
       }
     },
     onError() {
@@ -987,7 +988,7 @@ export default defineComponent({
             config: this.config,
             layerInfo: this.layerInfo
           }
-          imageShadowPanelUtils.handleShadowUpload(layerData)
+          imageShadowPanelUtils.handleShadowUpload({ layerData })
         }
       }
     },
@@ -1255,7 +1256,7 @@ export default defineComponent({
           config: this.config,
           layerInfo: this.layerInfo
         }
-        imageShadowPanelUtils.handleShadowUpload(layerData)
+        imageShadowPanelUtils.handleShadowUpload({ layerData })
       })
     },
     fetchShadowImg() {

@@ -120,7 +120,7 @@ class BgRemoveUtils {
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
             logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
-            
+
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                 inProcess: LayerProcessType.none
@@ -145,11 +145,11 @@ class BgRemoveUtils {
           if (json.flag === 1) {
             logUtils.setLogAndConsoleLog('polling failed')
 
-            
+
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
             logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
-            
+
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                 inProcess: LayerProcessType.none
@@ -168,7 +168,7 @@ class BgRemoveUtils {
         const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
         const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
         logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
-        
+
         if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
           layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
             inProcess: false
@@ -271,8 +271,7 @@ class BgRemoveUtils {
     const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
     const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles as IImageStyle
     const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
-    const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
-    console.log(trimCanvas(this.canvas))
+    const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
     const previewSrc = this.canvas.toDataURL('image/png;base64')
 
     const { pageId, layerId } = this.bgRemoveIdInfo
@@ -306,7 +305,6 @@ class BgRemoveUtils {
         assetId: ''
       }
     })
-    console.log(cropJSON)
     try{
       uploadUtils.uploadAsset('image', [previewSrc], {
         addToPage: false,
@@ -336,7 +334,7 @@ class BgRemoveUtils {
                 config: image,
                 layerInfo
               }
-              imageShadowPanelUtils.handleShadowUpload(layerData, true)
+              imageShadowPanelUtils.handleShadowUpload({ layerData, forceUpload: true })
               notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             }
           }
@@ -426,7 +424,7 @@ class BgRemoveUtils {
       }
     })
   }
-  
+
 
   moveOldBgRemoveImages(src: string, callback?: (path: string) => void) {
     const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
@@ -467,7 +465,7 @@ class BgRemoveUtils {
       })
       window.dispatchEvent(event)
   }
-  
+
   redo() {
     const event = new KeyboardEvent('keydown', {
       ctrlKey: true,

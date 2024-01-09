@@ -23,6 +23,7 @@ import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -219,8 +220,9 @@ const component = defineComponent({
           return { pushHistory, openExtraColorModal, openExtraPanelReplace, leaveExtraPanel }
         case 'photo-shadow':
           return { pushHistory, openExtraColorModal }
-        default:
+        default: {
           return {}
+        }
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
@@ -305,6 +307,11 @@ const component = defineComponent({
               bgRemoveUtils.setInBgRemoveMode(false)
             }
             break
+          }
+
+          case 'photo-shadow': {
+            // close the photo shadow panel or close the color panel
+            imageShadowPanelUtils.handleShadowUpload()
           }
         }
         if (this.inMultiSelectionMode) {
