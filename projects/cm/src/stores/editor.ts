@@ -278,14 +278,14 @@ export const useEditorStore = defineStore('editor', {
       const index = this.generatedResults.findIndex((item) => item.id === id)
       if (index === -1) return
       this.generatedResults.splice(index, 1)
-      if (
-        this.currGenResultIndex === index &&
-        this.currGenResultIndex >= this.generatedResults.length
-      ) {
+      if (this.currGenResultIndex > index) {
         this.currGenResultIndex -= 1
-        if (this.currGenResultIndex < 0) {
-          this.currGenResultIndex = 0
-        }
+      }
+      if (this.currGenResultIndex >= this.generatedResults.length) {
+        this.currGenResultIndex = this.generatedResults.length - 1
+      }
+      if (this.currGenResultIndex < 0) {
+        this.currGenResultIndex = 0
       }
     },
     clearGeneratedResults() {
