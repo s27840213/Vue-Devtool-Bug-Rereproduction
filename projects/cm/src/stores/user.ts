@@ -27,8 +27,16 @@ export const useUserStore = defineStore('user', () => {
     setCurrGenResultIndex,
     setInitImgSrc,
   } = editorStore
-  const { currDesignId, editorType, currDesignThumbIndex, generatedResults, pageSize, currPrompt, currGenOptionsToSave } =
-    storeToRefs(editorStore)
+  const {
+    currDesignId,
+    myDesignSavedRoot,
+    myDesignSavedType,
+    currDesignThumbIndex,
+    generatedResults,
+    pageSize,
+    currPrompt,
+    currGenOptionsToSave,
+  } = storeToRefs(editorStore)
 
   const { t } = useI18n()
 
@@ -179,6 +187,7 @@ export const useUserStore = defineStore('user', () => {
         stateTarget: 'editing',
         designName: 'result',
         designId: id,
+        designType: type,
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
             id: subDesign.id,
@@ -245,10 +254,12 @@ export const useUserStore = defineStore('user', () => {
         setMaskDataUrl(maskUrl)
       }
 
+      console.log(type)
       startEditing(type, {
         stateTarget: 'editing',
         designName: fileName,
         designId: id,
+        designType: type,
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
             id: subDesign.id,
@@ -382,7 +393,7 @@ export const useUserStore = defineStore('user', () => {
         if (isThumb && !isLastSubDesign) myDesignMap[key][index].thumbIndex = 0
         subDesignInfo.splice(subDesignIndex, 1)
         await cmWVUtils.addAsset(
-          `mydesign-${editorType.value}`,
+          myDesignSavedRoot.value,
           currOpenDesign.value,
           undefined,
           'mydesign',
@@ -457,8 +468,12 @@ export const useUserStore = defineStore('user', () => {
       type = 'jpg',
       thumbIndex,
       designId = currDesignId.value,
-      myDesignEditorType = editorType.value,
+      myDesignEditorType,
     } = props ?? {}
+
+    const mydesignRoot = myDesignEditorType
+      ? `mydesign-${myDesignEditorType}`
+      : myDesignSavedRoot.value
 
     if (thumbIndex !== undefined) {
       setCurrDesignThumbIndex(thumbIndex)
@@ -466,7 +481,8 @@ export const useUserStore = defineStore('user', () => {
     const data = (await cmWVUtils.saveAssetFromUrl(
       type,
       url,
-      `mydesign-${myDesignEditorType}/${designId}/${subDesignId}/${fileName}`)) ?? {
+      `${mydesignRoot}/${designId}/${subDesignId}/${fileName}`,
+    )) ?? {
       flag: '1',
       fileId: '',
     }
@@ -514,7 +530,7 @@ export const useUserStore = defineStore('user', () => {
         if (screenshot.flag === '0') {
           cmWVUtils.cloneFile(
             `screenshot/${screenshot.imageId}.jpg`,
-            `mydesign-${editorType.value}/${currDesignId.value}/${subDesignId}/thumb.jpg`,
+            `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/thumb.jpg`,
           )
 
           const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
@@ -523,7 +539,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       const json: ICmSubDesign = {
-        type: editorType.value,
+        type: myDesignSavedType.value,
         id: currDesignId.value,
         subId: subDesignId,
         fileName: name,
@@ -536,10 +552,10 @@ export const useUserStore = defineStore('user', () => {
         width: pages[0].width,
         height: pages[0].height,
       }
-      await cmWVUtils.addJson(`mydesign-${editorType.value}/${path}/${name}`, json)
+      await cmWVUtils.addJson(`${myDesignSavedRoot.value}/${path}/${name}`, json)
 
       const newDesign = {
-        type: editorType.value,
+        type: myDesignSavedType.value,
         id: currDesignId.value,
         subDesignInfo: generatedResults.value.map((result) => {
           return {
@@ -554,7 +570,7 @@ export const useUserStore = defineStore('user', () => {
         updateTime: new Date(Date.now()).toISOString(),
       } as ICmMyDesign
 
-      await cmWVUtils.addAsset(`mydesign-${editorType.value}`, newDesign, undefined, 'mydesign')
+      await cmWVUtils.addAsset(myDesignSavedRoot.value, newDesign, undefined, 'mydesign')
       updateDesignsInStore(newDesign)
     } catch (error) {
       logUtils.setLogForError(error as Error)
@@ -586,7 +602,9 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const getInitialImg = () => {
-    const assetId = `mydesign-${editorType.value}/${currOpenDesign.value?.id || currDesignId.value}/initial`
+    const assetId = `${myDesignSavedRoot.value}/${
+      currOpenDesign.value?.id || currDesignId.value
+    }/initial`
     const srcObj: SrcObj = {
       type: 'ios',
       assetId,
@@ -605,7 +623,10 @@ export const useUserStore = defineStore('user', () => {
     return getTargetImageUrl(type, id, subId, 'thumb', size)
   }
 
-  const getSubDesignImage = (design: ICmSubDesign, imgName: 'thumb' | 'original' | 'result' | 'mask' = 'thumb') => {
+  const getSubDesignImage = (
+    design: ICmSubDesign,
+    imgName: 'thumb' | 'original' | 'result' | 'mask' = 'thumb',
+  ) => {
     const { id, subId, type } = design
 
     const srcObj: SrcObj = {

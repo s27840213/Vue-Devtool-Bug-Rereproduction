@@ -322,8 +322,10 @@ const {
   isGenerating,
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
-const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } = userStore
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } =
+  userStore
+
+const { removeWatermark } = storeToRefs(userStore)
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 const fromMyDesign = hasGeneratedResults.value
@@ -348,8 +350,9 @@ watch(
     // Start fake loading.
     fakeLoading.value = 0
     const fakeLoadingId = window.setInterval(() => {
-      fakeLoading.value += 1
+      fakeLoading.value += Math.floor(Math.random() * 3)
       if (fakeLoading.value >= 95) {
+        fakeLoading.value = 95
         // Stop fake loading.
         window.clearInterval(fakeLoadingId)
       }
@@ -394,13 +397,9 @@ const handleNextAction = async function () {
     const currGenResult = currGeneratedResult.value
     const isWatermarkMatched = currGenResult.video?.removeWatermark === removeWatermark.value
     if (!currGenResult.video?.src || !isWatermarkMatched) {
-      await addImage(getInitialImg(), currGeneratedResult.value.url)
-        .catch(async () => {
-          await addImage(
-            initImgSrc.value,
-            currGeneratedResult.value.url
-          )
-        })
+      await addImage(getInitialImg(), currGeneratedResult.value.url).catch(async () => {
+        await addImage(initImgSrc.value, currGeneratedResult.value.url)
+      })
       genVideo()
     }
   }

@@ -146,7 +146,7 @@ const { goToCheckpoint } = useSteps()
 
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
-const { editorType, currDesignId } = storeToRefs(editorStore)
+const { currDesignId, myDesignSavedRoot } = storeToRefs(editorStore)
 // #endregion
 
 const brushSize = computed(() => {
@@ -214,7 +214,7 @@ const apply = async () => {
       type: 'png',
     })
 
-    const assetId = `mydesign-${editorType.value}/${currDesignId.value}/bgRemove/${bgRemoveAssetId}`
+    const assetId = `${myDesignSavedRoot.value}/${currDesignId.value}/bgRemove/${bgRemoveAssetId}`
     const srcObj: SrcObj = {
       type: 'ios',
       assetId,
