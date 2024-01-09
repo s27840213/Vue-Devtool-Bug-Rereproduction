@@ -57,7 +57,6 @@ div(
         @click="selectImage(img, 'ios')")
         lazy-load(
           class="lazy-load w-full h-full"
-          target=".img-selector__img-grid"
           :rootMargin="'1000px 0px 1000px 0px'")
           img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${img.id}?ssize=200`")
         svg-icon(
@@ -300,7 +299,6 @@ const getAlbumContent = async (album: IAlbum) => {
       if (res.nextPage) {
         nextPage.value = res.nextPage
       } else {
-        console.log('no more content')
         noMoreContent.value = true
       }
       isLoadingContent.value = false
@@ -440,7 +438,7 @@ const sendToEditor = async (isBgRemove = false) => {
           record: initAtEditor,
           styles: {
             adjust: {
-              ...(editorType.value === 'hidden-message' && { saturate: -100 }),
+              ...(editorType.value === 'hidden-message' && { saturate: -100, brightness: 10, contrast: 20 }),
               invert: +isInvert.value,
             },
           },

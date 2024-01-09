@@ -10,39 +10,29 @@ div(class="mobile-slider")
       :name="name"
       @change="handleChangeStop")
   div(class="mobile-slider__range-input-wrapper")
-    input(class="mobile-slider__range-input input__slider--range"
-      v-progress
-      :style="{ 'pointer-events': 'none' }"
-      v-model.number="propsVal"
+    range-slider(
       :name="name"
-      :max="max"
-      :min="min"
-      :step="step"
-      v-ratio-change
-      type="range"
-      :disabled="disabled")
-    input(
-      class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
-      :class="theme"
       v-model.number="propsVal"
-      :name="name"
-      :max="max"
       :min="min"
+      :max="max"
       :step="step"
-      v-ratio-change
-      type="range"
+      :theme="theme"
       :disabled="disabled"
       @pointerdown="$emit('pointerdown', $event)"
-      @pointerup="handlePointerup")
+      @pointerup="$emit('pointerup', handlePointerup)")
 </template>
 
 <script lang="ts">
 import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
+import RangeSlider from '@/components/editor/mobile/RangeSlider.vue'
 
 export default defineComponent({
-  emits: ['pointerdown', 'update' ,'pointerup'],
+  emits: ['pointerdown', 'update', 'pointerup'],
+  components: {
+    RangeSlider
+  },
   data() {
     return {
     }

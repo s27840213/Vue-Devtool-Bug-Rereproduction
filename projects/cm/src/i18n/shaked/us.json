@@ -568,5 +568,7 @@
   "CM0151": "Water reflection with AI",
   "CM0152": "Combine 2 photos with AI",
   "CM0153": "Usage limit reached",
-  "CM0154": "Please contact us for assistance (DM us via Instagram)."
+  "CM0154": "Please contact us for assistance (DM us via Instagram).",
+  "CM0155": "Repeated Subscription. You’re currently connected to another subscribed AppStore account.",
+  "CM0156": "Left dragger - Set start step value<newline>Right dragger - Set ending step value"
 }

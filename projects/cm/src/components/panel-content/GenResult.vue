@@ -24,7 +24,11 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       span(
         class="typo-btn-sm transition-colors duration-[0.4s]"
         :class="[disableShowMoreBtn ? 'text-lighter' : 'text-white']") {{ $t('CM0068') }}
-    scrollable-container(:px="0" :py="0" :gap="10" v-fade-scroller="{ fadeWidth: '24px', prev: false }")
+    scrollable-container(
+      :px="0"
+      :py="0"
+      :gap="10"
+      v-fade-scroller="{ fadeWidth: '24px', prev: false }")
       transition-group(name="list")
         //- Results
         div(
@@ -51,13 +55,14 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       :disabled="isGenerating"
       icon="crown"
       @click="showMoreRes") {{ $t('CM0068') }}
-    span(class="text-white typo-btn-md") {{ `${$t('CM0066')}: ${aiCredit}` }}
+    span(v-if="!isPro" class="text-white typo-btn-md") {{ `${$t('CM0066')}: ${aiCredit}` }}
 </template>
 
 <script setup lang="ts">
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
+import vuex from '@/vuex'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const userStore = useUserStore()
@@ -87,6 +92,8 @@ const toggleOriginalImg = (show: boolean) => {
   }
 }
 
+const isPro = computed(() => vuex.getters['payment/getPayment'].subscribe)
+
 const { genImageFlow } = useGenImageUtils()
 const disableShowMoreBtn = computed(() => {
   return isGenerating.value || prevGenParams.value.requestId === ''
@@ -107,20 +114,22 @@ const handleKeepEditing = () => {
 <style lang="scss" scoped>
 .gen-result__block {
   @apply relative h-80 w-45 rounded-8;
-  &::after { // Highlight outline on the img.
+  &::after {
+    // Highlight outline on the img.
     @apply absolute inset-0 w-full h-full box-border rounded-8;
     content: '';
     transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
     border: 0px solid setColor(yellow-cm);
   }
-  &[active=true]::after {
+  &[active='true']::after {
     border-width: 2px;
   }
 }
 
 .loading-block {
   @apply relative w-full h-full overflow-hidden rounded-8;
-  &::before { // Spinner animation.
+  &::before {
+    // Spinner animation.
     content: '';
     position: absolute;
     top: 0;
@@ -131,7 +140,8 @@ const handleKeepEditing = () => {
     transform: translateX(-50%) rotate(90deg) scale(1.2);
     animation: rotate 1.2s linear infinite;
   }
-  &::after { // Img placeholder on the spinner.
+  &::after {
+    // Img placeholder on the spinner.
     @apply absolute inset-2 rounded-8 bg-dark-3;
     content: '';
   }

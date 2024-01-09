@@ -342,6 +342,10 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOptions) {
       this.currGenOptions = options
     },
+    updateCurrGenOption(option: { key: string, value: any }) {
+      const currOption = this.currGenOptions.find((o) => o.key === option.key)
+      if (currOption) currOption.value = option.value
+    },
     restoreGenOptions(options: { [key: string]: any }, type: EditorType) {
       const defaultOptions = constantData.getGenImageOptions(type) as GenImageOptions | undefined
       if (!defaultOptions) return
