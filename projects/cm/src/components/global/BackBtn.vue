@@ -49,8 +49,14 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #region editor
 const editorStore = useEditorStore()
 const { changeEditorState } = editorStore
-const { inGenResultState, inSavingState, hasGeneratedResults, currDesignId, editorType } =
-  storeToRefs(editorStore)
+const {
+  inGenResultState,
+  inSavingState,
+  hasGeneratedResults,
+  currDesignId,
+  editorType,
+  myDesignSavedRoot,
+} = storeToRefs(editorStore)
 const { hasUnsavedChanges } = useSteps()
 // #endregion
 
@@ -103,12 +109,7 @@ const handleBackAction = (navagate: () => void) => {
       confirm: () => {
         // if we used bg remove, we need to delete the asset, or it will cause memory leak
         if (!hasGeneratedResults.value) {
-          cmWVUtils.deleteAsset(
-            `mydesign-${editorType.value}`,
-            `${currDesignId.value}`,
-            undefined,
-            false,
-          )
+          cmWVUtils.deleteAsset(myDesignSavedRoot.value, `${currDesignId.value}`, undefined, false)
         }
         navagate()
         closeModal()

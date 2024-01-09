@@ -47,6 +47,7 @@ const useGenImageUtils = () => {
     initImgSrc,
     maskDataUrl,
     currPrompt,
+    myDesignSavedRoot,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
   const { saveDesignImageToDocument, saveSubDesign, setAiCredit } = useUserStore()
@@ -205,7 +206,7 @@ const useGenImageUtils = () => {
           // Before first generate, after screenshot.
           cmWVUtils.cloneFile(
             initImgSrc.value,
-            `mydesign-${editorType.value}/${currDesignId.value}/initial.jpg`,
+            `${myDesignSavedRoot.value}/${currDesignId.value}/initial.jpg`,
           )
         }
       } catch (error) {
@@ -256,7 +257,7 @@ const useGenImageUtils = () => {
           const promises = [
             cmWVUtils.cloneFile(
               initImgSrc.value,
-              `mydesign-${editorType.value}/${currDesignId.value}/${subDesignId}/original.jpg`,
+              `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/original.jpg`,
             ),
             saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
@@ -298,7 +299,7 @@ const useGenImageUtils = () => {
           RECORD_TIMING && testUtils.log(`save-result ${index}`, '')
           const srcObj: SrcObj = {
             type: 'ios',
-            assetId: `mydesign-${editorType.value}/${currDesignId.value}/${ids[index]}/thumb`,
+            assetId: `${myDesignSavedRoot.value}/${currDesignId.value}/${ids[index]}/thumb`,
             userId: 'jpg',
           }
 
