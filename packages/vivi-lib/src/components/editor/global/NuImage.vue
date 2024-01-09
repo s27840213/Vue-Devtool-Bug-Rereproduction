@@ -273,6 +273,7 @@ export default defineComponent({
       }
     },
     showCanvas(val) {
+      console.log('show canvas', val)
       if (val) {
         setTimeout(() => {
           this.handleNewShadowEffect(false)

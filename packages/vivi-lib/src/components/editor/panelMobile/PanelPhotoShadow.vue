@@ -70,11 +70,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     if ((this.$isStk || this.$isCm) && colorUtils.currEvent !== ColorEventType.photoShadow) {
-      if (this.$isCm) {
-        this.$emit('uploadShadow')
-      } else {
-        imageShadowPanelUtils.handleShadowUpload()
-      }
+      imageShadowPanelUtils.handleShadowUpload()
       setTimeout(() => {
         const cb = (this.$store.getters['shadow/uploadingCallback'] as Map<string, () => void>).get(layerUtils.getCurrConfig.id)
         if (cb) {

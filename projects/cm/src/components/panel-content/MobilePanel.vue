@@ -1,8 +1,6 @@
 <script lang="ts">
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import { useEditorStore } from '@/stores/editor'
-import { useUserStore } from '@/stores/user'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
 import MobilePanel from '@nu/vivi-lib/components/editor/mobile/MobilePanel.vue'
 import PanelFonts from '@nu/vivi-lib/components/editor/panelFunction/PanelFonts.vue'
@@ -25,7 +23,6 @@ import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
-import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -216,14 +213,13 @@ const component = defineComponent({
     dynamicBindMethod(): { [index: string]: any } {
       const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } =
         this.getBasicBindMethods()
-      const { uploadShadow } = this
       switch (this.currActivePanel) {
         case 'color':
-          return { pushHistory, uploadShadow }
+          return { pushHistory }
         case 'text-effect':
           return { pushHistory, openExtraColorModal, openExtraPanelReplace, leaveExtraPanel }
         case 'photo-shadow':
-          return { pushHistory, openExtraColorModal, uploadShadow }
+          return { pushHistory, openExtraColorModal }
         default: {
           return {}
         }
@@ -315,7 +311,7 @@ const component = defineComponent({
 
           case 'photo-shadow': {
             // close the photo shadow panel or close the color panel
-            this.uploadShadow()
+            imageShadowPanelUtils.handleShadowUpload()
           }
         }
         if (this.inMultiSelectionMode) {
@@ -351,23 +347,6 @@ const component = defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     _panelParentHeight() {
       return document.querySelector('#app')?.clientHeight ?? 0
-    },
-    uploadShadow() {
-      const saveCb = (canvas: HTMLCanvasElement) => {
-        const { saveImgToTmp } = useUserStore()
-        const { editorType, currDesignId } = storeToRefs(useEditorStore())
-        const name = 'img-shadow-' + generalUtils.generateAssetId()
-        const path = `imgShadow/${editorType.value}/${currDesignId.value}/${name}`
-        return new Promise<string>(resolve => {
-          saveImgToTmp(canvas.toDataURL('image/png;base64'), path)
-            .then(() => {
-              resolve(
-                `tmp/${path}`
-              )
-            })
-        })
-      }
-      imageShadowPanelUtils.handleShadowUpload({ saveCb })
     },
     checkLayerAction(target: HTMLElement | SVGElement): boolean {
       if (target.nodeName === 'body') return false

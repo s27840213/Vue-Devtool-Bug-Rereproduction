@@ -30,6 +30,7 @@ export const useUserStore = defineStore('user', () => {
   const {
     currDesignId,
     myDesignSavedRoot,
+    editorType,
     myDesignSavedType,
     currDesignThumbIndex,
     generatedResults,

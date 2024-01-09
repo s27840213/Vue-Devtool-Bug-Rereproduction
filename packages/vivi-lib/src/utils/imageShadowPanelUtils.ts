@@ -457,6 +457,7 @@ export default new class ImageShadowPanelUtils {
           imageShadowUtils.setUploadProcess(false)
         })
       } else if (generalUtils.isCm) {
+        const saveCb = store.state.shadow.saveCb
         if (saveCb) {
           saveCb(uploadCanvas)
             .then((path: string) => {
@@ -473,7 +474,7 @@ export default new class ImageShadowPanelUtils {
               this.resetHandleState()
               imageShadowUtils.setUploadProcess(false)
             })
-        }
+        } else throw new Error('saveCb is undefined')
       }
     } else {
       logUtils.setLog('layerData is undefined')
