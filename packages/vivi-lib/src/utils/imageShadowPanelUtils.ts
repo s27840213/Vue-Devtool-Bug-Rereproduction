@@ -118,7 +118,7 @@ export default new class ImageShadowPanelUtils {
   }
 
   async _handleShadowUpload(options?: {_layerData?: any, forceUpload?: boolean, errorCount?: number, saveCb?: (c: HTMLCanvasElement) => Promise<string> }) {
-    const { _layerData, forceUpload = false, errorCount = 1, saveCb } = options || {}
+    const { _layerData, forceUpload = false, errorCount = 1 } = options || {}
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     let layerData = (() => {
       const handleId = store.state.shadow.handleId
@@ -302,8 +302,6 @@ export default new class ImageShadowPanelUtils {
       setMark('upload', 3)
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
-      const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
-      const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
       logUtils.setLog('phase: finish calculate edge')
       setMark('upload', 4)
 
@@ -317,45 +315,11 @@ export default new class ImageShadowPanelUtils {
       const uploadImg = generalUtils.isPic ? [uploadCanvas.toDataURL('image/png;base64', 1)] : []
       setMark('upload', 5)
 
-      const getShadowImgStyles = () => {
-        const _width = config.styles.width / config.styles.scale
-        const _height = config.styles.height / config.styles.scale
-        const newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
-        const newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
-        let newX = newWidth * 0.5 - _width * (leftShadowThickness + 0.5)
-        let newY = newHeight * 0.5 - _height * (topShadowThickness + 0.5)
-        if ([ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect) && !shadow.isTransparent) {
-          newX = 0
-          newY = 0
-        }
-        return {
-          shadowImgStyles: {
-            imgWidth: newWidth,
-            imgHeight: newHeight,
-            imgX: newX,
-            imgY: newY
-          },
-          newWidth,
-          newHeight,
-        }
-      }
-
-      const shadowUpdater = (pageIndex: number, layerIndex: number, subLayerIdx: number, shadow: IShadowProps, srcObj: SrcObj, shadowImgStyles: ReturnType<typeof getShadowImgStyles>['shadowImgStyles']) => {
-        imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-        imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-        imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
-          effect: shadow.currentEffect,
-          effects: shadow.effects,
-          shadowSrcObj: srcObj,
-          layerSrcObj: config.srcObj,
-          layerState: {
-            imgWidth: config.styles.imgWidth,
-            imgHeight: config.styles.imgHeight,
-            imgX: config.styles.imgX,
-            imgY: config.styles.imgY
-          }
-        })
-      }
+      const { shadowImgStyles, newWidth, newHeight } = this.getShadowImgStyles(
+        config,
+        updateCanvas,
+        { drawCanvasH, drawCanvasW, right, left, top, bottom }
+      )
 
       if (generalUtils.isPic) {
         try {
@@ -373,7 +337,6 @@ export default new class ImageShadowPanelUtils {
                 userId: json.data.team_id || '',
                 assetId: isAdmin ? json.data.id || json.data.asset_index : json.data.asset_index
               }
-              const { shadowImgStyles, newWidth, newHeight } = getShadowImgStyles()
               new Promise<void>((resolve) => {
                 if (!isAdmin) {
                   store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
@@ -397,7 +360,7 @@ export default new class ImageShadowPanelUtils {
                         styles: shadowImgStyles
                       })
                       const shadow = config.styles.shadow
-                      shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles)
+                      this.shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles, config)
 
                       logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
                       src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))}
@@ -447,11 +410,10 @@ export default new class ImageShadowPanelUtils {
             userId: '',
             assetId: path,
           }
-          const { shadowImgStyles } = getShadowImgStyles()
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
           layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
           imageShadowUtils.updateIosShadowUploadBuffer(pageIndex, [srcObj])
-          shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles)
+          this.shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles, config)
           stkWVUtils.saveDesign()
           this.resetHandleState()
           imageShadowUtils.setUploadProcess(false)
@@ -466,11 +428,10 @@ export default new class ImageShadowPanelUtils {
                 userId: '',
                 assetId: path,
               }
-              const { shadowImgStyles } = getShadowImgStyles()
               const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
               layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
               imageShadowUtils.updateIosShadowUploadBuffer(pageIndex, [srcObj])
-              shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles)
+              this.shadowUpdater(pageIndex, layerIndex, subLayerIdx, shadow, srcObj, shadowImgStyles, config)
               this.resetHandleState()
               imageShadowUtils.setUploadProcess(false)
             })
@@ -480,6 +441,64 @@ export default new class ImageShadowPanelUtils {
       logUtils.setLog('layerData is undefined')
       this.resetHandleState()
     }
+  }
+
+  getShadowImgStyles(
+    config: IImage,
+    updateCanvas: HTMLCanvasElement,
+    params: {
+      drawCanvasW: number,
+      drawCanvasH: number,
+      top: number,
+      left: number,
+      right: number,
+      bottom: number,
+    }
+  ) {
+    const { drawCanvasW, drawCanvasH, top, left, right, bottom } = params
+    const shadow = config.styles.shadow
+    const _width = config.styles.width / config.styles.scale
+    const _height = config.styles.height / config.styles.scale
+    const newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
+    const newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
+    const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
+    const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
+    let newX = newWidth * 0.5 - _width * (leftShadowThickness + 0.5)
+    let newY = newHeight * 0.5 - _height * (topShadowThickness + 0.5)
+    if ([ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect) && !shadow.isTransparent) {
+      newX = 0
+      newY = 0
+    }
+    return {
+      shadowImgStyles: {
+        imgWidth: newWidth,
+        imgHeight: newHeight,
+        imgX: newX,
+        imgY: newY
+      },
+      newWidth,
+      newHeight,
+    }
+  }
+
+  shadowUpdater (pageIndex: number, layerIndex: number, subLayerIdx: number,
+    shadow: IShadowProps, srcObj: SrcObj,
+    shadowImgStyles: ReturnType<typeof this.getShadowImgStyles>['shadowImgStyles'], config: IImage
+  ) {
+    imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+    imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+    imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
+      effect: shadow.currentEffect,
+      effects: shadow.effects,
+      shadowSrcObj: srcObj,
+      layerSrcObj: config.srcObj,
+      layerState: {
+        imgWidth: config.styles.imgWidth,
+        imgHeight: config.styles.imgHeight,
+        imgX: config.styles.imgX,
+        imgY: config.styles.imgY
+      }
+    })
   }
 
   async isSVG(src: string, config: IImage) {
