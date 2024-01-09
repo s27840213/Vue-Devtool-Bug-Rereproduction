@@ -117,7 +117,7 @@ const editorStore = useEditorStore()
 const {
   currDesignId,
   currSubDesignId,
-  editorType,
+  myDesignSavedType,
   initImgSrc,
   generatedResults,
   currGenResultIndex,
@@ -137,7 +137,7 @@ onMounted(async () => {
   if (atEditor.value) {
     const data = await getSubDesignConfig(
       {
-        type: editorType.value,
+        type: myDesignSavedType.value,
         id: currDesignId.value,
       },
       currSubDesignId.value,
@@ -221,7 +221,6 @@ const copyPrompt = () => {
 const containerRef = ref<HTMLElement | null>(null)
 const containerSize = useElementBounding(containerRef)
 const contentClass = computed(() => {
-  console.log(containerSize)
   if (
     !currOpenSubDesign.value ||
     containerSize.width.value === 0 ||

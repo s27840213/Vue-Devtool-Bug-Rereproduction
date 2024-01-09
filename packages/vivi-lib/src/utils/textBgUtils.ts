@@ -106,7 +106,7 @@ export class Rect {
     div.style.writingMode = cssConverter.convertVerticalStyle(config.styles.writingMode).writingMode
     let { widthLimit } = config
     if (config.styles.textShape.name !== 'none') widthLimit = -1
-    const { scale, height } = config.styles
+    const { scale, height, width } = config.styles
     if (this.vertical) {
       div.style.width = 'max-content'
       div.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
@@ -136,7 +136,8 @@ export class Rect {
     this.bodyRect = div.getClientRects()[0]
     this.width = this.bodyRect.width
     this.height = this.bodyRect.height
-    this.transform = this.vertical ? 'translate(100%, 0) rotate(90deg)' : ''
+    // Use `matrix` instead of `translate` because of issue ID-591.
+    this.transform = this.vertical ? `matrix(1, 0, 0, 1, ${width}, 0) rotate(90deg)` : ''
     this.rows = []
 
     for (let pIndex = 0; pIndex < div.children.length; pIndex++) {

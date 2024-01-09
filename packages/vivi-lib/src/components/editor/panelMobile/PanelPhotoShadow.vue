@@ -55,7 +55,7 @@ export default defineComponent({
     MobileSlider,
     ColorBtn,
   },
-  emits: ['openExtraColorModal', 'toggleColorPanel'],
+  emits: ['openExtraColorModal', 'toggleColorPanel', 'uploadShadow'],
   data() {
     return {
       imageShadowPanelUtils,

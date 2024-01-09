@@ -276,6 +276,7 @@
   "NN0738": "Endpoints",
   "NN0739": "Front border color",
   "NN0740": "Behind border color",
+  "NN0742": "DM us",
   "NN0744": "Next",
   "NN0746": "Copy, Paste, Voilà!",
   "NN0747": "Keep your stories poppin’ with texts",
@@ -464,7 +465,6 @@
   "CM0043": "ABOUT",
   "CM0044": "Rate us",
   "CM0045": "Feedback",
-  "CM0046": "Term of Service",
   "CM0047": "Settings",
   "CM0048": "Add",
   "CM0049": "Sticker",
@@ -567,6 +567,8 @@
   "CM0150": "Share as",
   "CM0151": "Water reflection with AI",
   "CM0152": "Combine 2 photos with AI",
+  "CM0153": "Usage limit reached",
+  "CM0154": "Please contact us for assistance (DM us via Instagram).",
   "CM0155": "Repeated Subscription. You’re currently connected to another subscribed AppStore account.",
   "CM0156": "Left dragger - Set start step value<newline>Right dragger - Set ending step value"
 }

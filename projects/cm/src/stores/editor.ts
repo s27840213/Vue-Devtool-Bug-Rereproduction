@@ -36,7 +36,7 @@ export interface IGenResult {
   id: string
   url: string
   prompt: string
-  video?: { src: string, removeWatermark: boolean }
+  video?: { src: string; removeWatermark: boolean }
 }
 
 interface IEditorStore {
@@ -56,6 +56,10 @@ interface IEditorStore {
   initImgSrc: string
   useTmpSteps: boolean
   currDesignId: string
+  // only when opening design from mydesign will set this value
+  // used to save design to correct place if we edit the design (editorType will always be 'powerful-fill'
+  // but if we edit a hidden-message design, we should save it to hidden-message folder)
+  opendDesignType: EditorType | ''
   designName: '' | 'original' | 'result'
   // for saving to document and show more results
   currPrompt: string
@@ -85,6 +89,7 @@ export const useEditorStore = defineStore('editor', {
     currPrompt: '',
     currGenOptions: [],
     currDesignId: '',
+    opendDesignType: '',
     designName: '',
     editorTheme: null,
     descriptionPanel: null,
@@ -157,6 +162,12 @@ export const useEditorStore = defineStore('editor', {
     currGenOptionsToSave(): { [key: string]: any } {
       return Object.fromEntries(this.currGenOptions.map(({ key, value }) => [key, value]))
     },
+    myDesignSavedType(): EditorType {
+      return this.opendDesignType ? this.opendDesignType : this.editorType
+    },
+    myDesignSavedRoot(): string {
+      return `mydesign-${this.opendDesignType ? this.opendDesignType : this.editorType}`
+    },
   },
   actions: {
     setPageSize(width: number, height: number) {
@@ -175,6 +186,7 @@ export const useEditorStore = defineStore('editor', {
       options?: {
         stateTarget?: string
         designId?: string
+        designType?: EditorType | ''
         generatedResults?: Array<IGenResult>
         designWidth?: number
         designHeight?: number
@@ -188,12 +200,14 @@ export const useEditorStore = defineStore('editor', {
         designWidth = 900,
         designHeight = 1600,
         designName = '',
+        designType,
       } = options || {}
 
       this.currStateIndex = 0
       this.editorType = type
       this.designName = designName
       this.currDesignId = designId || generalUtils.generateAssetId()
+      this.setOpenedDesignType(designType ?? '')
 
       this.editorStates = editorStatesMap[this.editorType]
       if (stateTarget && this.editorStates.findIndex((item) => item === stateTarget) !== -1) {
@@ -241,7 +255,7 @@ export const useEditorStore = defineStore('editor', {
       id: string,
       data: {
         url?: string
-        video?: { src: string, removeWatermark: boolean }
+        video?: { src: string; removeWatermark: boolean }
         updateIndex?: boolean
         saveToDocument?: boolean
         saveMask?: boolean
@@ -264,14 +278,14 @@ export const useEditorStore = defineStore('editor', {
       const index = this.generatedResults.findIndex((item) => item.id === id)
       if (index === -1) return
       this.generatedResults.splice(index, 1)
-      if (
-        this.currGenResultIndex === index &&
-        this.currGenResultIndex >= this.generatedResults.length
-      ) {
+      if (this.currGenResultIndex > index) {
         this.currGenResultIndex -= 1
-        if (this.currGenResultIndex < 0) {
-          this.currGenResultIndex = 0
-        }
+      }
+      if (this.currGenResultIndex >= this.generatedResults.length) {
+        this.currGenResultIndex = this.generatedResults.length - 1
+      }
+      if (this.currGenResultIndex < 0) {
+        this.currGenResultIndex = 0
       }
     },
     clearGeneratedResults() {
@@ -361,6 +375,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignId(id: string) {
       this.currDesignId = id
+    },
+    setOpenedDesignType(type: EditorType | '') {
+      this.opendDesignType = type
     },
     setEditorTheme(theme: string | null) {
       this.editorTheme = theme

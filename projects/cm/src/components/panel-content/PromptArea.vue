@@ -188,6 +188,7 @@ const {
   setIsSendingGenImgReq,
   unshiftGenResults,
   changeEditorState,
+  changeToSpecificEditorState,
   setCurrPrompt,
   setCurrDesignId,
   setCurrGenResultIndex,
@@ -200,6 +201,8 @@ const {
   isGenerating,
   editorType,
   currGenOptions,
+  inEditingState,
+  generatedResultsNum,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -347,14 +350,24 @@ const handleGenerate = async () => {
 
   await waitForGenerating()
 
-  setTimeout(() => {
-    setCurrGenResultIndex(0)
-    changeEditorState('next')
+  window.setTimeout(() => {
+    if (generatedResultsNum.value !== 0) {
+      setCurrGenResultIndex(0)
+      changeEditorState('next')
+    }
   }, 3000)
-  await genImageFlow(getGenParams(), false, 2).then(() => {
+  await genImageFlow(getGenParams(), false, 2, {
+    onError: (index) => {
+      if (index === -1) {
+        setIsSendingGenImgReq(false)
+        if (!inEditingState.value && generatedResultsNum.value === 0) {
+          changeToSpecificEditorState('editing')
+        }
+      }
+    },
+  }).then(() => {
     setIsSendingGenImgReq(false)
   })
-
 }
 const clearPromt = () => {
   promptText.value = ''

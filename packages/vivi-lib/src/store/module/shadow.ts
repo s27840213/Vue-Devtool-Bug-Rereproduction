@@ -15,6 +15,7 @@ const ADD_SHADOW_IMG = 'ADD_SHADOW_IMG' as const
 const SET_UPLOADING_CB = 'SET_UPLOADING_CB' as const
 const UPDATE_UPLOAD_IMG = 'UPDATE_UPLOAD_IMG' as const
 const SET_UPLOAD_IDENTIFIER = 'SET_UPLOAD_IDENTIFIER' as const
+const SET_SAVE_CALLBACK = 'SET_SAVE_CALLBACK' as const
 
 export interface IUploadShadowImg {
   id: string,
@@ -47,6 +48,7 @@ export interface IShadowState {
   uploadShadowImgs: Array<IUploadShadowImg>,
   shadowImgs: Map<number, IShadowAsset>,
   uploadingCallback: Map<string, () => void>
+  saveCb?: (c: HTMLCanvasElement) => Promise<string>
 }
 
 const getters: GetterTree<IShadowState, IEditorState> = {
@@ -85,7 +87,8 @@ const state: IShadowState = {
   uploadIdentifier: '',
   uploadShadowImgs: [],
   shadowImgs: new Map(),
-  uploadingCallback: new Map()
+  uploadingCallback: new Map(),
+  saveCb: undefined
 }
 
 const mutations: MutationTree<IShadowState> = {
@@ -116,6 +119,9 @@ const mutations: MutationTree<IShadowState> = {
   },
   [SET_UPLOAD_IDENTIFIER] (state, identifier: string) {
     state.uploadIdentifier = identifier
+  },
+  [SET_SAVE_CALLBACK] (state, saveCb: (c: HTMLCanvasElement) => Promise<string>) {
+    state.saveCb = saveCb
   }
 }
 
