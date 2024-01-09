@@ -52,7 +52,7 @@ const component = defineComponent({
     // Case 2: Specify iconName and iconColor, ex :icon="['pro', 'alarm']"
     icon: {
       type: [String, Array] as
-        PropType<string | [string, IColorKeys] | [string, IColorKeys | undefined, string]>,
+        PropType<string | [string, IColorKeys] | [string, IColorKeys | undefined, string] | false>,
     },
     hint: {
       type: String,
@@ -83,7 +83,7 @@ const component = defineComponent({
     sizeClass(): string {
       return this.size.replace('-', ' ')
     },
-    iconName(): string | undefined {
+    iconName(): string | undefined | false {
       return Array.isArray(this.icon) ? this.icon[0] : this.icon
     },
     iconSize(): string {

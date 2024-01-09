@@ -118,8 +118,8 @@ const useGenImageUtils = () => {
             )
           })
           removeGenResult(ids[index])
-          if (generatedResultsNum.value === 0 && inGenResultState.value) {
-            changeEditorState('prev')
+          if (generatedResultsNum.value === 0) {
+            onError(-1, '', 'all error')
           }
           onError(index, url, reason)
         },
@@ -159,7 +159,7 @@ const useGenImageUtils = () => {
           })
         }
       })
-      for (const id of ids) {
+      for (const id of ids.slice(0, num)) {
         removeGenResult(id)
       }
       if (generatedResultsNum.value === 0 && inGenResultState.value) {
