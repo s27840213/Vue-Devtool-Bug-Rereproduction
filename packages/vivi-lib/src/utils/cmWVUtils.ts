@@ -708,10 +708,6 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (await this.checkDupSub()) {
       store.commit('payment/SET_paymentPending', { purchase: false })
       logUtils.setLogAndConsoleLog('duplicated subscription')
-      notify({
-        group: 'warn',
-        text: 'duplicated subscription',
-      })
       return
     }
 
@@ -736,7 +732,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async restore(loginResult?: ICmLoginResult, showResult = false) {
     if (store.getters['payment/getPaymentPending'].restore) return
     store.commit('payment/SET_paymentPending', { restore: true })
-    let result = { subscribe: false, dupBinded: false }
+    let dupBinded = false
     if (loginResult?.has_tx === 1) { 
       // logged in & is binding
       const isSubscribed = loginResult.subscribe === 1
@@ -744,13 +740,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       this.getState('subscribeInfo').then(subscribeInfo => {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
-      result.subscribe = isSubscribed
     } else {
       // not logged in, or logged in but not binding
       const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 })
       if (res) {
         const { flag, txid } = res as SubscribeResponse
-        if(flag === '0' && !!txid) result = await this.updateSubState('', txid, false)
+        if(flag === '0' && !!txid) dupBinded = (await this.updateSubState('', txid, false)).dupBinded
       } else {
         logUtils.setLogAndConsoleLog('restore timeout')
         showResult && notify({
@@ -762,9 +757,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
     store.commit('payment/SET_paymentPending', { restore: false })
     if (showResult) {
-      const title = result.subscribe ? i18n.global.t('CM0135') : i18n.global.t('CM0137')
-      const content = (result.subscribe ? i18n.global.t('CM0136') : i18n.global.t('CM0138')) + 
-        (result.dupBinded ? i18n.global.t('CM0134') : '')
+      const isPro = store.getters['payment/getPayment'].subscribe
+      const title = isPro ? i18n.global.t('CM0135') : i18n.global.t('CM0137')
+      const content = (isPro ? i18n.global.t('CM0136') : i18n.global.t('CM0138')) + 
+        (dupBinded ? ` ${i18n.global.t('CM0134')}` : '')
       modalUtils.setModalInfo(
         title,
         [content],
@@ -793,7 +789,16 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
     const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 }) as SubscribeResponse
     if (res?.flag !== '0') return false
-    if (!res.txid) return true
+    if (!res.txid) {
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [i18n.global.t('CM0155')],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
+      return true
+    }
 
     const currUuid = (await userApis.getTxInfo({
       token: store.getters['user/getGetTxToken'],
@@ -804,7 +809,16 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     })).data.uuid
     logUtils.setLogAndConsoleLog('checkDupSub', { currUuid, uuid })
     
-    if (currUuid !== uuid) return true
+    if (currUuid !== uuid) {
+      modalUtils.setModalInfo(
+        i18n.global.t('STK0024'),
+        [`${i18n.global.t('CM0155')} ${i18n.global.t('CM0134')}`],
+        {
+          msg: i18n.global.t('STK0023'),
+        },
+      )
+      return true
+    }
     return false
   }
   // #endregion

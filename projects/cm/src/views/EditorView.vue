@@ -204,13 +204,13 @@ import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
-import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
-import type { ILayerInfo } from '@nu/vivi-lib/store/types'
+import type { IGroup, IImage } from '@nu/vivi-lib/interfaces/layer'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -218,7 +218,6 @@ import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useEventBus } from '@vueuse/core'
@@ -711,20 +710,6 @@ const selectStart = (e: PointerEvent) => {
     movingUtils.pageMoveStart(e)
   }
   pointerEvent.value.initPos = { x: e.x, y: e.y }
-
-  // layer pinch logic
-  // if (layerUtils.layerIndex !== -1) {
-  //   // when there is an layer being active, the moving logic applied to the EditorView
-  //   movingUtils = new MovingUtils({
-  //     _config: { config: layerUtils.getCurrLayer },
-  //     snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-  //     body: document.getElementById(
-  //       `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-  //     ) as HTMLElement,
-  //   })
-  //   movingUtils.moveStart(e)
-  //   pointerEvent.value.initPos = { x: e.x, y: e.y }
-  // }
 }
 
 // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
@@ -752,73 +737,6 @@ const selectEnd = (e: PointerEvent) => {
     }
     pointerEvent.value.initPos = null
   }
-  // pointerEvtUtils.removePointer(e.pointerId)
-}
-
-const isPinchInit = ref<null | boolean>(false)
-let pinchControlUtils = null as null | PinchControlUtils
-
-const onLayerPinch = (e: AnyTouchEvent) => {
-  if (e.phase === 'end' && isPinchInit.value) {
-    // pinch end handling
-    layerPinchHandler(e)
-    isPinchInit.value = false
-    pinchControlUtils = null
-  } else {
-    const touches = (e.nativeEvent as TouchEvent).touches
-    if (touches.length !== 2 || layerUtils.layerIndex === -1) return
-    if (!isPinchInit.value) {
-      // first pinch initialization
-      isPinchInit.value = true
-      return layerPinchStart(e)
-    } else {
-      // pinch move handling
-      layerPinchHandler(e)
-    }
-  }
-}
-
-const layerPinchHandler = (e: AnyTouchEvent) => {
-  pinchControlUtils?.pinch(e)
-}
-
-const layerPinchStart = (e: AnyTouchEvent) => {
-  if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
-  if (store.getters['bgRemove/getInBgRemoveMode']) return
-
-  const _config = {
-    config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex),
-  } as unknown as { config: ILayer }
-
-  if (_config.config.locked) return
-  if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
-
-  const layerInfo = new Proxy(
-    {
-      pageIndex: layerUtils.pageIndex,
-      layerIndex: layerUtils.layerIndex,
-    },
-    {
-      get(_, key) {
-        if (key === 'pageIndex') return layerUtils.pageIndex
-        else if (key === 'layerIndex') return layerUtils.layerIndex
-      },
-    },
-  ) as ILayerInfo
-  const movingUtils = new MovingUtils({
-    _config,
-    layerInfo,
-    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-    body: document.getElementById(
-      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-    ) as HTMLElement,
-  })
-  const data = {
-    layerInfo,
-    config: undefined,
-    movingUtils: movingUtils as MovingUtils,
-  }
-  pinchControlUtils = new PinchControlUtils(data)
 }
 
 const recordPointer = (e: PointerEvent) => {
@@ -994,6 +912,24 @@ const setRestoreInitState = (val: boolean) => {
   store.commit('bgRemove/SET_restoreInitState', val)
 }
 const previewSrc = ref('')
+// #endregion
+
+// #region imgShadow event
+const saveCb = (canvas: HTMLCanvasElement) => {
+  const { saveImgToTmp } = useUserStore()
+  const { editorType, currDesignId } = storeToRefs(useEditorStore())
+  const name = 'img-shadow-' + generalUtils.generateAssetId()
+  const path = `imgShadow/${editorType.value}/${currDesignId.value}/${name}`
+  return new Promise<string>(resolve => {
+    saveImgToTmp(canvas.toDataURL('image/png;base64'), path)
+      .then(() => {
+        resolve(
+          `tmp/${path}`
+        )
+      })
+  })
+}
+store.commit('shadow/SET_SAVE_CALLBACK', saveCb)
 // #endregion
 </script>
 <style lang="scss" scoped>

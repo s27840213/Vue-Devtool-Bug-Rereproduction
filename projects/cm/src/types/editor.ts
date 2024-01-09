@@ -37,4 +37,11 @@ export type GenImageRangeOption = {
   active?: boolean
   value: number
 }
-export type GenImageOptions = Array<GenImageGroupOption | GenImageRangeOption>
+export type GenImageDualRangeOption = Omit<GenImageRangeOption, 'type' | 'value'> & {
+  type: 'dual-range',
+  value: {
+    from: number,
+    to: number
+  }
+}
+export type GenImageOptions = Array<GenImageGroupOption | GenImageRangeOption | GenImageDualRangeOption>
