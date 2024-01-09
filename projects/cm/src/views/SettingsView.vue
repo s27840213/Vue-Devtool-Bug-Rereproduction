@@ -190,16 +190,16 @@ const supportOptions: Array<IOptionConfig> = [
     title: t('CM0038'),
     iconName: 'film',
     callback: () => {
-      console.log('callback')
+      window.open('https://www.instagram.com/charmix.ai/')
     },
   },
-  {
-    title: t('CM0039'),
-    iconName: 'language',
-    callback: () => {
-      setCurrState('language')
-    },
-  },
+  // {
+  //   title: t('CM0039'),
+  //   iconName: 'language',
+  //   callback: () => {
+  //     setCurrState('language')
+  //   },
+  // },
 ]
 
 const mediaOptions: Array<IOptionConfig> = [
@@ -207,16 +207,16 @@ const mediaOptions: Array<IOptionConfig> = [
     title: t('CM0041'),
     iconName: 'instagram',
     callback: () => {
-      console.log('callback')
+      window.open('https://www.instagram.com/charmix.ai/')
     },
   },
-  {
-    title: t('CM0042'),
-    iconName: 'tiktok',
-    callback: () => {
-      console.log('callback')
-    },
-  },
+  // {
+  //   title: t('CM0042'),
+  //   iconName: 'tiktok',
+  //   callback: () => {
+  //     console.log('callback')
+  //   },
+  // },
 ]
 
 const aboutOptions: Array<IOptionConfig> = [
@@ -231,14 +231,21 @@ const aboutOptions: Array<IOptionConfig> = [
     title: t('CM0045'),
     iconName: 'chat-bubble',
     callback: () => {
-      console.log('callback')
+      window.open('https://www.instagram.com/charmix.ai/')
     },
   },
   {
-    title: t('CM0046'),
+    title: t('NN0160'),
     iconName: 'document-text',
     callback: () => {
-      console.log('callback')
+      window.open('https://vivisticker.com/us/terms-of-use/')
+    },
+  },
+  {
+    title: t('NN0161'),
+    iconName: 'document-text',
+    callback: () => {
+      window.open('https://vivisticker.com/us/privacy-policy/')
     },
   },
 ]
