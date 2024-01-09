@@ -325,6 +325,8 @@ const userStore = useUserStore()
 const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } =
   userStore
 
+const { removeWatermark } = storeToRefs(userStore)
+
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 const fromMyDesign = hasGeneratedResults.value
 
@@ -395,13 +397,9 @@ const handleNextAction = async function () {
     const currGenResult = currGeneratedResult.value
     const isWatermarkMatched = currGenResult.video?.removeWatermark === removeWatermark.value
     if (!currGenResult.video?.src || !isWatermarkMatched) {
-      await addImage(getInitialImg(), currGeneratedResult.value.url)
-        .catch(async () => {
-          await addImage(
-            initImgSrc.value,
-            currGeneratedResult.value.url
-          )
-        })
+      await addImage(getInitialImg(), currGeneratedResult.value.url).catch(async () => {
+        await addImage(initImgSrc.value, currGeneratedResult.value.url)
+      })
       genVideo()
     }
   }
