@@ -440,7 +440,7 @@ const sendToEditor = async (isBgRemove = false) => {
           record: initAtEditor,
           styles: {
             adjust: {
-              ...(editorType.value === 'hidden-message' && { saturate: -100 }),
+              ...(editorType.value === 'hidden-message' && { saturate: -100, brightness: 10, contrast: 20 }),
               invert: +isInvert.value,
             },
           },
