@@ -270,8 +270,14 @@ export default new class ImageShadowPanelUtils {
         const { width, height, imgWidth, imgHeight } = config.styles
         drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
         drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
-        const canvasW = Math.round(img.naturalWidth + CANVAS_SPACE)
-        const canvasH = Math.round(img.naturalHeight + CANVAS_SPACE)
+        let shrinkRatio = 1
+        if (drawCanvasH > 1600 || drawCanvasW > 1600) {
+          shrinkRatio = Math.min(1600 / drawCanvasH, 1600 / drawCanvasW)
+          drawCanvasW *= shrinkRatio
+          drawCanvasH *= shrinkRatio
+        }
+        const canvasW = Math.round(img.naturalWidth * shrinkRatio + CANVAS_SPACE)
+        const canvasH = Math.round(img.naturalHeight * shrinkRatio + CANVAS_SPACE)
         updateCanvas.setAttribute('width', `${canvasW}`)
         updateCanvas.setAttribute('height', `${canvasH}`)
       }
