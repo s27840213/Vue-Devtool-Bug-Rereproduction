@@ -488,7 +488,7 @@
   "CM0115": "Control Weights",
   "CM0116": "Start Control Step",
   "CM0117": "Ending Control Step",
-  "CM0134": "Please contact us if you need to change the account connected with your subscription.",
+  "CM0134": "If you need to change the account connected with your subscription, please contact us.",
   "CM0135": "Subscription Restored",
   "CM0136": "Your subscription access is resumed. Please proceed.",
   "CM0137": "No subscription found",
@@ -499,6 +499,5 @@
   "CM0145": "https://vivisticker.com/us/charmix-terms-of-use/",
   "CM0151": "Water reflection with AI",
   "CM0152": "Combine 2 photos with AI",
-  "CM0155": "Repeated Subscription. You’re currently connected to another subscribed AppStore account.",
-  "CM0156": "If you need to change the account connected with your subscription, please contact us."
+  "CM0155": "Repeated Subscription. You’re currently connected to another subscribed AppStore account."
 }
