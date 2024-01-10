@@ -266,7 +266,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {
-    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST')
+    const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST', undefined, { timeout: -1 })
 
     return albumList as IAlbumListResponse
   }
@@ -275,7 +275,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_CONTENT', {
       albumId,
       pageIndex,
-    })
+    }, { timeout: -1 })
 
     return albumList as IAlbumContentResponse
   }
