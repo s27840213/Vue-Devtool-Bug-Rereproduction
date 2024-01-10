@@ -1051,14 +1051,14 @@ class ImageShadowUtils {
     })
   }
 
-  TEST_showtTestCanvas(canvas: HTMLCanvasElement) {
+  TEST_showtTestCanvas(canvas: HTMLCanvasElement, time = 3000) {
     const canvasTest = document.createElement('canvas')
     canvasTest.setAttribute('width', canvas.width.toString())
     canvasTest.setAttribute('height', canvas.height.toString())
     const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
     ctxText.drawImage(canvas, 0, 0)
     document.body.appendChild(canvasTest)
-    setTimeout(() => document.body.removeChild(canvasTest), 3000)
+    setTimeout(() => document.body.removeChild(canvasTest), time)
     canvasTest.style.position = 'absolute'
     canvasTest.style.top = '0'
     canvasTest.style.zIndex = '10000'
