@@ -240,6 +240,12 @@ export default new class ImageShadowPanelUtils {
             })
           })
         }
+        if (generalUtils.isCm || generalUtils.isStk) {
+          // this code is a workaround for the img load in cm,
+          // to ensure the img be drawn into the canvas
+          // p.s. this might be a webview bug
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
         return img
       }, {
         error: (img) => {
@@ -255,7 +261,6 @@ export default new class ImageShadowPanelUtils {
         }
       })
       logUtils.setLog('phase: finish load max size img')
-
       setMark('upload', 2)
       if (isStaticShadow) {
         const { width, height, imgWidth, imgHeight } = config.styles
@@ -320,7 +325,6 @@ export default new class ImageShadowPanelUtils {
       logUtils.setLog('phase: start uploading result')
       const uploadImg = generalUtils.isPic ? [uploadCanvas.toDataURL('image/png;base64', 1)] : []
       setMark('upload', 5)
-
       const { shadowImgStyles, newWidth, newHeight } = this.getShadowImgStyles(
         config,
         updateCanvas,
