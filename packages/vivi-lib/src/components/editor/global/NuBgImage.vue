@@ -128,24 +128,6 @@ export default defineComponent({
       } else {
         this.setBgImgConfig(undefined)
       }
-    },
-    isBlurImg(val) {
-      const { imgWidth, imgHeight } = this.image.config.styles
-      const srcSize = val ? imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
-      const src = imageUtils.getSrc(this.image.config, srcSize)
-      imageUtils.imgLoadHandler(src, () => {
-        // bcz this is an async operation, need to check if isBlurImg is the same val
-        if (this.isBlurImg === val) {
-          this.src = src
-        }
-      }, {
-        crossOrigin: true,
-        error: () => {
-          if (srcSize === 'xtra') {
-            this.handleXtraErr()
-          }
-        }
-      })
     }
   },
   async created() {
@@ -228,15 +210,15 @@ export default defineComponent({
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
+      if (this.isBlurImg && this.userId !== 'backendRendering') {
+        return imageUtils.getSrcSize(this.image.config.srcObj, Math.max(imgWidth, imgHeight))
+      }
       let renderW = imgWidth * this.contentScaleRatio
       let renderH = imgHeight * this.contentScaleRatio
       const dpiRatio = pageUtils.getImageDpiRatio(this.page)
       renderW *= dpiRatio
       renderH *= dpiRatio
       return imageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
-    },
-    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.removeBleedsFromPageSize(this.page)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -526,8 +508,6 @@ export default defineComponent({
       editorUtils.setInBgSettingMode(true)
     },
     handleDimensionUpdate(newVal: number | string, oldVal: number) {
-      if (this.isBlurImg) return
-
       const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
       if (currUrl) {
         const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
