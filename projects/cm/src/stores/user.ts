@@ -216,7 +216,6 @@ export const useUserStore = defineStore('user', () => {
     if (!currOpenDesign.value || !currOpenSubDesign.value) return false
     const { subId } = currOpenSubDesign.value
 
-
     // Try to open result.json.
     const subDesignData = await getSubDesignConfig(currOpenDesign.value, subId, 'result')
     if (subDesignData?.flag === '0') {
@@ -255,7 +254,6 @@ export const useUserStore = defineStore('user', () => {
         setMaskDataUrl(maskUrl)
       }
 
-      console.log(type)
       startEditing(type, {
         stateTarget: 'editing',
         designName: fileName,
@@ -492,11 +490,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const saveImgToTmp = (url: string, path: string, type: 'png' | 'jpg' = 'png') => {
-    return cmWVUtils.saveAssetFromUrl(
-      type,
-      url,
-      `tmp/${path}`
-    )
+    return cmWVUtils.saveAssetFromUrl(type, url, `tmp/${path}`)
   }
 
   const saveSubDesign = async (
@@ -509,9 +503,9 @@ export const useUserStore = defineStore('user', () => {
       await Promise.race([
         imageShadowUtils.iosImgDelHandler_cm({
           editorType: editorType.value,
-          designId: currDesignId.value
+          designId: currDesignId.value,
         }),
-        new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 3000))
+        new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 3000)),
       ])
       const pages = uploadUtils.prepareJsonToUpload(pageUtils.getPages)
       const isValidJson = await cmWVUtils.isValidJson(pages)
