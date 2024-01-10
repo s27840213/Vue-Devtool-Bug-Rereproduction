@@ -1,8 +1,12 @@
+import i18n from '@/i18n'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import store from '@/store'
+import { notify } from '@kyvg/vue3-notification'
 import { IListAssetResponse } from './cmWVUtils'
 import generalUtils from './generalUtils'
 import logUtils from './logUtils'
+import modalUtils from './modalUtils'
+import uploadUtils from './uploadUtils'
 
 export abstract class WebViewUtils<T extends { [key: string]: any }> {
   abstract DEFAULT_USER_INFO: T
@@ -181,12 +185,47 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
             result = await this.callIOSAsAPI(type, message, event, {
               timeout, retry, retryTimes: retryTimes + 1
             })
+          } else {
+
+            logUtils.uploadLog().then(() => {
+              const errorId = generalUtils.generateRandomString(6)
+              const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
+              modalUtils.setModalInfo(
+                `${i18n.global.t('NN0457')}(999)`,
+                hint,
+                {
+                  msg: i18n.global.t('STK0023'),
+                  action() {
+                    generalUtils.copyText(hint).then(() => {
+                      notify({ group: 'success', text: '已複製' })
+                    })
+                  },
+                },
+              )
+            })
           }
         }
       }
     } catch (error) {
       logUtils.setLog(`Error occurs in callIOSAsAPI with type: ${type}, message: ${message}, event: ${event}`)
       logUtils.setLogForError(error as Error)
+
+      logUtils.uploadLog().then(() => {
+        const errorId = generalUtils.generateRandomString(6)
+        const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
+        modalUtils.setModalInfo(
+          `${i18n.global.t('NN0457')}(500)`,
+          hint,
+          {
+            msg: i18n.global.t('STK0023'),
+            action() {
+              generalUtils.copyText(hint).then(() => {
+                notify({ group: 'success', text: '已複製' })
+              })
+            },
+          },
+        )
+      })
       result = null
     }
     return result

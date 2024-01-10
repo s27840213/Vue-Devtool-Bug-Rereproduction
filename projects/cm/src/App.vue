@@ -197,7 +197,9 @@ const { inMediaOptions } = storeToRefs(mediaStore)
 // #region bottom panel warning modal
 const modalStore = useModalStore()
 const { isModalOpen: wantToQuit } = storeToRefs(modalStore)
-const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean)
+const isModalOpen = computed(
+  () => (vuex.getters['modal/getModalOpen'] as boolean) && !atScreenshot.value,
+)
 const isModalNoClose = computed(() => vuex.getters['modal/getModalInfo'].noClose as boolean)
 // #endregion
 
