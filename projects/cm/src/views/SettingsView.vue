@@ -41,11 +41,19 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           v-else
           :class="op.class"
           @click="op.callback") {{ op.title }}
+  div(v-if="isLoggingOut" class="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-median")
+  transition(name="fade-in")
+    loading-brick(
+      v-if="isLoggingOut"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
 </template>
 
 <script setup lang="ts">
 import { useGlobalStore } from '@/stores/global'
+import { useModalStore } from '@/stores/modal'
+import { useUserStore } from '@/stores/user'
 import vuex from '@/vuex'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
@@ -62,6 +70,8 @@ interface IOptionConfig {
 const { t, tc } = useI18n()
 const router = useRouter()
 const hostname = window.location.hostname
+const { setNormalModalInfo, openModal, closeModal } = useModalStore()
+const { myDesignTags } = storeToRefs(useUserStore())
 // #region userInfo
 const domain = `${hostname.replace('.vivipic.com', '')}`
 const buildNumber = computed(() => {
@@ -290,19 +300,47 @@ const initOptions = computed(
 // #endregion
 
 // #region account options
+const isLoggingOut = ref(false)
+
 const accountOptions = computed(
   () =>
     [
       {
         title: tc('NN0167', 1),
         iconName: 'logout2',
-        callback: loginUtils.logout,
+        callback: () => {
+          isLoggingOut.value = true
+          setTimeout(() => {
+            loginUtils.logout()
+          }, 500)
+        },
       },
       {
         title: tc('NN0317', 1),
         iconName: 'info-warning',
         callback: () => {
-          //
+          setNormalModalInfo({
+            title: t('CM0157'),
+            content: t('CM0158'),
+            cancelText: t('NN0203'),
+            confirmText: t('NN0445'),
+            cancel: () => {
+              closeModal()
+            },
+            confirm: () => {
+              // TODO: handle assets
+              // for (const tag of myDesignTags.value) {
+              //   if (tag.type === 'all') continue
+              //   cmWVUtils.deleteFile(`mydesign-${tag.type}`)
+              // }
+              isLoggingOut.value = true
+              setTimeout(() => {
+                loginUtils.logout()
+              }, 500)
+              closeModal()
+            },
+          })
+          openModal()
         },
       },
     ] as IOptionConfig[],
