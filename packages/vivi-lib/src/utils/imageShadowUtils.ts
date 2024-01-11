@@ -1131,7 +1131,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   frame: {
-    spread: { max: 30, min: 0, weighting: 2 },
+    spread: { max: process.env.VUE_APP_APP_NAME === 'cm' ? 50 : 30, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 2 }
   },
