@@ -5,7 +5,7 @@ import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
 import { IPrices } from '@nu/vivi-lib/interfaces/payment'
-import router from '@nu/vivi-lib/router'
+import router, { commonBeforeEach, commonBeforeEnter } from '@nu/vivi-lib/router'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -137,6 +137,7 @@ router.addRoute({
     },
   },
   async beforeEnter(to, from, next) {
+    commonBeforeEnter()
     if (to.name === 'NativeEventTester') {
       stkWVUtils.enterEventTestMode()
     }
@@ -223,6 +224,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
+  commonBeforeEach(to, from , next)
   /**
    * @Note the following commented codes will cause prerender render error.
    */
@@ -230,7 +232,6 @@ router.beforeEach(async (to, from, next) => {
   //   next()
   //   return
   // }
-  logUtils.setLog(`navigate to route: ${to.path}`)
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.

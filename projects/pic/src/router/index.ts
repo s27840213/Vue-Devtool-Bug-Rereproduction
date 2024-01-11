@@ -3,7 +3,7 @@ import Editor from '@/views/Editor.vue'
 import Home from '@/views/Home.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n from '@nu/vivi-lib/i18n'
-import router from '@nu/vivi-lib/router'
+import router, { commonBeforeEach, commonBeforeEnter } from '@nu/vivi-lib/router'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
@@ -279,6 +279,7 @@ router.addRoute({
     },
   },
   async beforeEnter(to, from, next) {
+    commonBeforeEnter()
     if (to.name === 'NativeEventTester') {
       picWVUtils.enterEventTestMode()
     }
@@ -355,6 +356,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
+  commonBeforeEach(to, from , next)
   /**
    * @Note the following commented codes will cause prerender render error.
    */
@@ -362,7 +364,6 @@ router.beforeEach(async (to, from, next) => {
   //   next()
   //   return
   // }
-  logUtils.setLog(`navigate to route: ${to.path}`)
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
