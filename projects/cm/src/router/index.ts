@@ -5,7 +5,7 @@ import Screenshot from '@/views/ScreenshotView.vue'
 import store from '@/vuex'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { IPrices } from '@nu/vivi-lib/interfaces/payment'
-import router from '@nu/vivi-lib/router'
+import router, { commonBeforeEach, commonBeforeEnter } from '@nu/vivi-lib/router'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -125,6 +125,7 @@ router.addRoute({
     },
   },
   async beforeEnter(to, from, next) {
+    commonBeforeEnter()
     cmWVUtils.detectIfInApp()
 
     // redirect from editor to home on refresh if is in app
@@ -193,7 +194,8 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  logUtils.setLog(`navigate to route: ${to.path}`)
+  commonBeforeEach(to, from , next)
+
   cmWVUtils.setupAPIInterface()
   cmWVUtils.registerCallbacks('base')
   useUploadUtils().getUrlMap()
