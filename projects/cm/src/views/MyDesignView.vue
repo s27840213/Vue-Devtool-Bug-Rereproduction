@@ -26,6 +26,7 @@ div(
           class="w-full rounded-20"
           :src="getDesignThumbUrl(design, 400)"
           @click="selectDesign(design)")
+        //- span(class="text-white text-xs") {{ design.id }}
         svg-icon(
           class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
           iconName="more_horizontal"

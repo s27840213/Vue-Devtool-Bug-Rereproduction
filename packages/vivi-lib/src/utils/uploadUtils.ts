@@ -385,7 +385,6 @@ class UploadUtils {
       const formData = new FormData()
 
       if (['stk-bg-remove', 'stk-bg-remove-face', 'cm-bg-remove'].includes(type)) {
-        console.log(this.loginOutput)
         Object.keys(this.loginOutput.ul_removebg_map.fields).forEach((key) => {
           formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
         })
@@ -411,7 +410,6 @@ class UploadUtils {
           break
         case 'cm-bg-remove':
           key = `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`
-          console.log(key)
           break
         case 'logo':
           if (!brandId) return
@@ -659,14 +657,17 @@ class UploadUtils {
               }
               if(type === 'cm-bg-remove') {
                 console.log(uuid, assetId, src, width, height, type)
-                bgRemoveUtils.removeBgCm(
-                  uuid,
-                  assetId,
-                  src,
-                  width,
-                  height,
-                  type
-                )
+                imageUtils.checkImgAlphaPercentages(imageUtils.getSrc(layerUtils.getCurrLayer as IImage)).then((percentage) => {
+                  bgRemoveUtils.removeBgCm(
+                    uuid,
+                    assetId,
+                    src,
+                    width,
+                    height,
+                    type,
+                    percentage
+                  )
+                })
               }
             })
           }

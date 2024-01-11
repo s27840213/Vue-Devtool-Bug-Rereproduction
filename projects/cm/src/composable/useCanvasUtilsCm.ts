@@ -457,9 +457,37 @@ const useCanvasUtils = (
           const tmpCtx = tmpCanvas.getContext('2d') as CanvasRenderingContext2D
           tmpCtx?.drawImage(img, 0, 0, pageSize.value.width, pageSize.value.height)
 
+          // #region new algo
           tmpCtx.globalCompositeOperation = 'source-out'
           tmpCtx.fillStyle = drawingColor.value
           tmpCtx.fillRect(0, 0, pageSize.value.width, pageSize.value.height)
+          // #endregion
+          // #region old algorithm
+          // const pixels = tmpCtx?.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
+          // const result = new ImageData(
+          //   new Uint8ClampedArray(pixels.data),
+          //   pageSize.value.width,
+          //   pageSize.value.height,
+          // )
+          // // The total number of pixels (RGBA values).
+          // const bufferSize = pixels.data.length
+
+          // // Iterate over every pixel to find the boundaries of the non-transparent content.
+          // for (let i = 0; i < bufferSize; i += 4) {
+          //   // Check the alpha (transparency) value of each pixel.
+          //   if (pixels.data[i + 3] === 0) {
+          //     result.data[i] = 255
+          //     result.data[i + 1] = 114
+          //     result.data[i + 2] = 98
+          //     result.data[i + 3] = 255
+          //   } else {
+          //     // If the pixel is not transparent, set it to transparent.
+          //     result.data[i + 3] = 0
+          //   }
+          // }
+          // // canvasCtx.value.putImageData(result, 0, 0)
+          // tmpCtx?.putImageData(result, 0, 0)
+          // #endregion
 
           canvasCtx.value.save()
           canvasCtx.value.shadowBlur = 0 // Blur level
@@ -534,7 +562,7 @@ const useCanvasUtils = (
       }
     }
   }
-
+  // @Dreprecated function- originally used to backward compatible with old mask(with black and white color)
   const convertToPinkBasedMask = (
     maskUrl: string,
     width: number,
@@ -561,6 +589,7 @@ const useCanvasUtils = (
           )
           // The total number of pixels (RGBA values).
           const bufferSize = result.data.length
+          let unexpectedColorCount = 0
 
           // Check the alpha (transparency) value of each pixel.
           for (let i = 0; i < bufferSize; i += 4) {
@@ -571,7 +600,7 @@ const useCanvasUtils = (
             ) {
               break
             } else {
-              // If the pixel is not transparent or pink, set it We may have 2 cases:
+              // If the pixel is not transparent or pink, we may have 2 cases:
               // 1. The pixel is white, we set it to pink.
               // 2. The pixel is black, we set it to transparent.
               if (
@@ -592,10 +621,20 @@ const useCanvasUtils = (
               ) {
                 result.data[i + 3] = 0
               } else {
-                reject(new Error('Unexpected color'))
+                console.log('unexpected color')
+                console.log(
+                  result.data[i],
+                  result.data[i + 1],
+                  result.data[i + 2],
+                  result.data[i + 3],
+                )
+                unexpectedColorCount++
+                // reject(new Error('Unexpected color'))
               }
             }
           }
+
+          console.log(bufferSize, unexpectedColorCount, unexpectedColorCount / bufferSize)
           maskCtxCopy.putImageData(result, 0, 0)
 
           resolve(canvasCopy.toDataURL('image/png'))

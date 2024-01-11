@@ -512,7 +512,8 @@ const fitScaleRatio = computed(() => {
     return 1
 
   const widthRatio = (editorContainerWidth.value - 8) / pageSize.value.width
-  const heightRatio = editorContainerHeight.value / pageSize.value.height
+  // @Note - 24 is used to prevent the control point being cut off
+  const heightRatio = (editorContainerHeight.value - 24) / pageSize.value.height
 
   const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
@@ -920,13 +921,10 @@ const saveCb = (canvas: HTMLCanvasElement) => {
   const { editorType, currDesignId } = storeToRefs(useEditorStore())
   const name = 'img-shadow-' + generalUtils.generateAssetId()
   const path = `imgShadow/${editorType.value}/${currDesignId.value}/${name}`
-  return new Promise<string>(resolve => {
-    saveImgToTmp(canvas.toDataURL('image/png;base64'), path)
-      .then(() => {
-        resolve(
-          `tmp/${path}`
-        )
-      })
+  return new Promise<string>((resolve) => {
+    saveImgToTmp(canvas.toDataURL('image/png;base64'), path).then(() => {
+      resolve(`tmp/${path}`)
+    })
   })
 }
 store.commit('shadow/SET_SAVE_CALLBACK', saveCb)
