@@ -73,22 +73,24 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
               retryTimes: retryTimes + 1,
             })
           } else {
-            logUtils.uploadLog().then(() => {
-              const errorId = generalUtils.generateRandomString(6)
-              const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
-              modalUtils.setModalInfo(
-                `${i18n.global.t('NN0457')}(999)`,
-                hint,
-                {
-                  msg: i18n.global.t('STK0023'),
-                  action() {
-                    generalUtils.copyText(hint).then(() => {
-                      notify({ group: 'success', text: '已複製' })
-                    })
+            if (!this.filterErrorModal(type, message, true)) {
+              logUtils.uploadLog().then(() => {
+                const errorId = generalUtils.generateRandomString(6)
+                const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
+                modalUtils.setModalInfo(
+                  `${i18n.global.t('NN0457')}(999)`,
+                  hint,
+                  {
+                    msg: i18n.global.t('STK0023'),
+                    action() {
+                      generalUtils.copyText(hint).then(() => {
+                        notify({ group: 'success', text: '已複製' })
+                      })
+                    },
                   },
-                },
-              )
-            })
+                )
+              })
+            }
           }
         }
       }
@@ -97,22 +99,24 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
         `Error occurs in callIOSAsAPI with type: ${type}, message: ${message}, event: ${eventId}`,
       )
       logUtils.setLogForError(error as Error)
-      logUtils.uploadLog().then(() => {
-        const errorId = generalUtils.generateRandomString(6)
-        const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
-        modalUtils.setModalInfo(
-          `${i18n.global.t('NN0457')}(500)`,
-          hint,
-          {
-            msg: i18n.global.t('STK0023'),
-            action() {
-              generalUtils.copyText(hint).then(() => {
-                notify({ group: 'success', text: '已複製' })
-              })
+      if (!this.filterErrorModal(type, message, false)) {
+        logUtils.uploadLog().then(() => {
+          const errorId = generalUtils.generateRandomString(6)
+          const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
+          modalUtils.setModalInfo(
+            `${i18n.global.t('NN0457')}(500)`,
+            hint,
+            {
+              msg: i18n.global.t('STK0023'),
+              action() {
+                generalUtils.copyText(hint).then(() => {
+                  notify({ group: 'success', text: '已複製' })
+                })
+              },
             },
-          },
-        )
-      })
+          )
+        })
+      }
       result = null
     }
     return result

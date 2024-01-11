@@ -176,6 +176,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   tutorialFlags = {} as { [key: string]: boolean }
   isAnyIOSImgOnError = false
 
+  filterErrorModal(type: string, message: Record<string, unknown>, isTimeout: boolean): boolean {
+    return ['SUBSCRIBE', 'GET_PRODUCTS'].includes(type) && isTimeout
+  }
+
   appBecomeActive() {
     console.log('app become active!')
   }
