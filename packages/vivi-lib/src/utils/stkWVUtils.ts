@@ -1650,9 +1650,8 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
       backdropStyle: {
         backgroundColor: 'rgba(24,25,31,0.3)'
       },
-      cardStyle: {
-        backdropFilter: 'blur(10px)',
-        backgroundColor: 'rgba(255,255,255,0.9)'
+      classes: {
+        card: 'bg-white/90 backdrop-blur-[10px]',
       }
     }
     modalUtils.setModalInfo(

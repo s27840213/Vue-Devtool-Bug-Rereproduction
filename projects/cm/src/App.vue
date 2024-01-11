@@ -52,9 +52,8 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
-    v-if="wantToQuit || isModalOpen || inMediaOptions"
+    v-if="wantToQuit || inMediaOptions"
     class="mask"
-    :class="{'for-no-close-modal': isModalOpen && isModalNoClose}"
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
@@ -84,8 +83,8 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
             saving-options(v-else-if="inMediaOptions" :ref="(el: any) => setSlotRef(el)")
     div(class="popup-area")
       popup(class="pointer-events-auto")
-    div(class="modal-container" v-if="isModalOpen")
-      modal-card(class="pointer-events-auto")
+    div(class="modal-container pointer-events-auto" v-if="isModalOpen" :style="backdropStyle")
+      modal-card
     transition(:name="fullpageTransition")
       full-page(v-if="fullPageType !== 'none'" class="pointer-events-auto")
     notifications(
@@ -200,7 +199,9 @@ const { isModalOpen: wantToQuit } = storeToRefs(modalStore)
 const isModalOpen = computed(
   () => (vuex.getters['modal/getModalOpen'] as boolean) && !atScreenshot.value,
 )
-const isModalNoClose = computed(() => vuex.getters['modal/getModalInfo'].noClose as boolean)
+const backdropStyle = computed(() => {
+  return vuex.getters['modal/getModalInfo'].backdropStyle
+})
 // #endregion
 
 const bottomPanelComponent = computed(() => {
@@ -364,8 +365,8 @@ watch(fullPageType, (newVal) => {
 @use '@/assets/scss/transitions.scss';
 
 .mask {
-  @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
-  transition: backdrop-filter 0.25;
+  @apply w-full h-full fixed top-0 left-0 z-modal-mask;
+  animation: blur-in 0.25s forwards;
   background-color: rgba(#050505, 0.5);
   &.for-no-close-modal {
     @apply z-popup;

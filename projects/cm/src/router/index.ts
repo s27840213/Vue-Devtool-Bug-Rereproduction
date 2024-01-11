@@ -158,7 +158,7 @@ router.addRoute({
     logUtils.setLog(`App Start: v.${process.env.BITBUCKET_BUILD_NUMBER}`)
     if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
       cmWVUtils.showUpdateModal(true)
-    } // else this.showInitPopups()
+    } else cmWVUtils.showInitPopups()
     cmWVUtils.fetchTutorialFlags()
     cmWVUtils.setDefaultPrices()
     cmWVUtils.getProducts()
@@ -247,6 +247,7 @@ router.beforeEach(async (to, from, next) => {
     })
 
     store.commit('cmWV/SET_modalInfo', json.modal)
+    store.commit('payment/SET_promote', json.promote)
 
     if (json.default_price && Object.keys(json.default_price).length) {
       const planPostfix = json.default_price.plan_id ? '_' + json.default_price.plan_id : ''

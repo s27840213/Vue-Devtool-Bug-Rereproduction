@@ -201,6 +201,19 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return store.getters['cmWV/getIsDuringCopy']
   }
 
+  get isPromoteCountry(): boolean {
+    return store.getters['payment/getPromote'].includes(this.getUserInfoFromStore().storeCountry ?? '')
+  }
+
+  get isPromoteLanguage(): boolean {
+    const promoteLanguages = [...new Set(store.getters['payment/getPromote'].map(this.getLanguageByCountry))]
+    return promoteLanguages.includes(this.getUserInfoFromStore().locale)
+  }
+
+  get isPromote(): boolean {
+    return this.isPromoteCountry && this.isPromoteLanguage
+  }
+
   getUserInfoFromStore(): IUserInfo {
     return store.getters['cmWV/getUserInfo']
   }
@@ -553,6 +566,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   // #region payment
   openPayment(target?: ICmProFeatures) {
+    const {
+      currency,
+      monthly: monthlyPrice,
+      annually: annuallyPrice,
+      annuallyOriginal: annuallyPriceOriginal
+    } = store.getters['payment/getPayment'].prices as IPrices
     const params = {
       target,
       theme: 'cm',
@@ -607,20 +626,21 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
           key: 'annually',
           title: i18n.global.t('NN0515'),
           subTitle: '',
-          price: store.getters['payment/getPayment'].prices.annually.text
+          price: this.formatPrice(annuallyPrice.value, currency, annuallyPrice.text),
+          originalPrice: this.formatPrice(annuallyPriceOriginal.value, currency, annuallyPriceOriginal.text, 'original')
         },
         {
           key: 'monthly',
           title: i18n.global.t('NN0514'),
           subTitle: '',
-          price: store.getters['payment/getPayment'].prices.monthly.text
+          price: this.formatPrice(monthlyPrice.value, currency, monthlyPrice.text)
         }
       ],
       comparisons: [],
       termsOfServiceUrl: i18n.global.t('CM0145'),
       privacyPolicyUrl: i18n.global.t('CM0144'),
       defaultTrialToggled: false,
-      isPromote: false
+      isPromote: this.isPromoteCountry
     } as IFullPagePaymentConfigParams
     store.commit('SET_fullPageConfig', { type: 'payment', params })
   }
@@ -638,6 +658,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async getProducts() {
+    if (this.inBrowserMode) return
     const res = await this.callIOSAsHTTPAPI('GET_PRODUCTS', {
       planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
     })
@@ -730,6 +751,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async restore(loginResult?: ICmLoginResult, showResult = false) {
+    if (this.inBrowserMode) return
     if (store.getters['payment/getPaymentPending'].restore) return
     store.commit('payment/SET_paymentPending', { restore: true })
     let dupBinded = false
@@ -820,6 +842,149 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       return true
     }
     return false
+  }
+
+  formatPrice(price: number | string, currency: string, fallbackText?: string, theme?: 'modal' | 'original') {
+    const currencyFormatters = {
+      TWD: (value: string) => `${value}元`,
+      USD: (value: string) => `$${(+value).toFixed(2)}`,
+      JPY: (value: string) => {
+        if (theme === 'modal') return `¥${value}`
+        if (theme === 'original') return `¥${value}円`
+        return `¥${value}円(税込)`
+      }
+    } as { [key: string]: (value: string) => string }
+    if (!Object.keys(currencyFormatters).includes(currency)) return fallbackText ?? currencyFormatters.USD(price.toString())
+    return currencyFormatters[currency](price.toString())
+  }
+  // #endregion
+
+  // #region init popup
+  async getPromoteModalInfo(): Promise<{ modalInfoArg: Parameters<typeof modalUtils.setModalInfo>, msg: string } | null> {
+    // parse modal info
+    const userInfo = this.getUserInfoFromStore()
+    const prefix = userInfo.locale + '_'
+    const modalInfo = Object.fromEntries(Object.entries(store.getters['cmWV/getModalInfo']).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as any]
+      })
+    )
+
+    // show popup
+    const prices = store.getters['payment/getPrices'] as IPrices
+    const subscribed = (await this.getState('subscribeInfo'))?.subscribe ?? false
+    const price = this.formatPrice(prices.annually.value, prices.currency, prices.annually.text, 'modal')
+    const priceOriginal = prices.annuallyOriginal ? this.formatPrice(prices.annuallyOriginal.value, prices.currency, prices.annuallyOriginal.text, 'modal') : ''
+    const isCloseBtnOnly = this.isPromote && subscribed
+    const lastModalMsg = await this.getState('lastModalMsg')
+    const lastModalTime = await this.getState('lastModalTime')
+    const isDuplicated = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
+    const isCoolDown = (lastModalTime === undefined || lastModalTime === null) ? false : Date.now() - lastModalTime.value < modalInfo.duration * 3600000
+    const shown = modalInfo.duration === -1 ? isDuplicated : isDuplicated && isCoolDown // ignore cool down if duration is set to -1
+    const isInvalidCountry = !!modalInfo.country.length && !modalInfo.country.includes(userInfo.storeCountry)
+    const isPromoteToBeHide = this.isPromoteLanguage && (!this.isPromoteCountry || this.getLanguageByCountry(userInfo.storeCountry ?? 'USA') !== userInfo.locale)
+    const btn_txt = modalInfo.btn_txt
+    if (!btn_txt || shown || isInvalidCountry || isPromoteToBeHide) return null
+
+    const options = {
+      imgSrc: modalInfo.img_url,
+      noClose: false,
+      noCloseIcon: true,
+      backdropStyle: {},
+      checkboxText: '',
+      checked: false,
+      onCheckedChange: (checked: boolean) => { console.log(checked) },
+      classes: {
+        card: 'bg-white/90 backdrop-blur-[10px]',
+        title: 'text-H6 text-gray-2',
+        desc: 'body-SM text-gray-2',
+        btn: 'bg-black-2 text-gray-7',
+        btn2: 'bg-[#D3D3D3] text-gray-2'
+      }
+    }
+    return {
+      modalInfoArg: [
+        modalInfo.title,
+        this.isPromote && priceOriginal ? [`<del>${priceOriginal}</del> → ${price}`, modalInfo.msg] : [modalInfo.msg],
+        {
+          msg: isCloseBtnOnly ? modalInfo.btn2_txt : btn_txt,
+          action: () => {
+            if(isCloseBtnOnly) return
+            const url = modalInfo.btn_url
+            if (url) { window.open(url, '_blank') }
+          }
+        },
+        isCloseBtnOnly ? undefined : {
+          msg: modalInfo.btn2_txt || '',
+        },
+        options
+      ],
+      msg: modalInfo.msg
+    }
+  }
+
+  async showInitPopups() {
+    const userInfo = this.getUserInfoFromStore()
+    const modalInfo = store.getters['cmWV/getModalInfo']
+    const showPaymentInfo = await this.getState('showPaymentInfo')
+    const isFirstOpen = userInfo.isFirstOpen && showPaymentInfo === undefined
+    const subscribed = (await this.getState('subscribeInfo'))?.subscribe ?? false
+    const m = parseInt(modalInfo[`pop_${userInfo.locale}_m`])
+    const n = parseInt(modalInfo[`pop_${userInfo.locale}_n`])
+    const showPaymentTime = showPaymentInfo?.timestamp ?? 0
+    const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
+    const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
+    let isShowPaymentView = isFirstOpen ? modalInfo[`pop_${userInfo.locale}`] === '1'
+      : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
+    // charmix doesn't have tutorial videos
+    // const isShowTutorial = isFirstOpen && i18n.global.locale !== 'us'
+    const showPayment = (cbClose?: () => void) => {
+      if (isShowPaymentView) {
+        this.openPayment()
+        this.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
+        if (cbClose) {
+          const unwatch = store.watch((state, getters) => getters.getFullPageConfig.type, (newVal, oldVal) => {
+            if (newVal === 'none' && oldVal === 'payment') cbClose()
+            unwatch()
+          })
+        }
+        return true
+      } else this.setState('showPaymentInfo', { count: showPaymentCount, timestamp: showPaymentTime || Date.now() })
+      return false
+    }
+
+    const showPromoteModal = async (cbClose?: () => void) => {
+      const modalInfo = await this.getPromoteModalInfo()
+      if (!modalInfo) return false
+      modalUtils.setModalInfo(...modalInfo.modalInfoArg)
+      this.setState('lastModalMsg', { value: modalInfo.msg })
+      this.setState('lastModalTime', { value: Date.now() })
+      this.sendAppLoaded()
+      if (cbClose) {
+        const unwatch = store.watch((state, getters) => getters['modal/getModalOpen'], (newVal) => {
+          if (!newVal) cbClose()
+          unwatch()
+        })
+      }
+      return true
+    }
+    
+    if (this.isPromote) {
+      // force payment view to show after promote modal closed in promote mode
+      if (!subscribed) isShowPaymentView = true
+      await showPromoteModal(showPayment)
+    } else if (!(showPayment(showPromoteModal) || await showPromoteModal())) {
+      // didn't show promote modal or payment
+      this.sendAppLoaded()
+    }
+  }
+
+  getLanguageByCountry(country: string) {
+    if (['CHN', 'MAC', 'HKG', 'TWN'].includes(country)) return 'tw'
+    if (['JPN'].includes(country)) return 'jp'
+    if (['BRA', 'PRT'].includes(country)) return 'pt'
+    return 'us'
   }
   // #endregion
   
@@ -1014,13 +1179,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       imgSrc: modalInfo.img_url,
       noClose: force,
       noCloseIcon: force,
-      // backdropStyle: {
-      //   backgroundColor: 'rgba(24,25,31,0.3)'
-      // },
-      // cardStyle: {
-      //   backdropFilter: 'blur(10px)',
-      //   backgroundColor: 'rgba(255,255,255,0.9)'
-      // }
+      backdropStyle: {
+        backgroundColor: 'rgba(24,25,31,0.3)'
+      },
     }
     modalUtils.setModalInfo(
       modalInfo.title,

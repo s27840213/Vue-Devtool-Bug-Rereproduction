@@ -353,7 +353,7 @@ export default defineComponent({
         this.showMobilePanelAfterTransitoin = false
       }, 300)
     },
-    async showPushModalInfo(): Promise<boolean> {
+    async showPromoteModal(): Promise<boolean> {
       // parse modal info
       const prefix = this.userInfo.locale + '_'
       const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
@@ -383,13 +383,12 @@ export default defineComponent({
         noClose: false,
         noCloseIcon: true,
         backdropStyle: {},
-        cardStyle: {
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255,255,255,0.9)'
-        },
         checkboxText: '',
         checked: false,
-        onCheckedChange: (checked: boolean) => { console.log(checked) }
+        onCheckedChange: (checked: boolean) => { console.log(checked) },
+        classes: {
+          card: 'bg-white/90 backdrop-blur-[10px]',
+        }
       }
       modalUtils.setModalInfo(
         modalInfo.title,
@@ -442,8 +441,8 @@ export default defineComponent({
         if (!isShowPaymentView && !isShowTutorial) stkWVUtils.sendAppLoaded()
       }
 
-      const isPushModalShown = await this.showPushModalInfo()
-      if (isPushModalShown) {
+      const isPromoteModalShown = await this.showPromoteModal()
+      if (isPromoteModalShown) {
         stkWVUtils.sendAppLoaded()
         if (stkWVUtils.isPromote && !subscribed) {
           isShowPaymentView = true
@@ -512,19 +511,6 @@ export default defineComponent({
     height: 100%;
     width: 100%;
     overflow: hidden;
-    z-index: setZindex("popup");
-  }
-
-  &__push-modal-container {
-    position: fixed;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: setColor(gray-1, 0.3);
     z-index: setZindex("popup");
   }
 }

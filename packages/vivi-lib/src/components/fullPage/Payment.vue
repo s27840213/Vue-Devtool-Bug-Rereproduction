@@ -42,7 +42,7 @@ div(class="payment" :class="theme" v-touch @swipe.stop)
             div(v-if="isPromote && btnPlan.originalPrice" class="payment__btn-plan__content__price__original")
               span 
                 del {{ btnPlan.originalPrice }}
-              svg-icon(iconName="vivisticker_arrow" iconWidth="20px")
+              svg-icon(iconName="arrow-left2" iconWidth="20px")
             span(:class="{'text-alarm': isPromote && btnPlan.originalPrice}") {{ btnPlan.price }}
         div(v-if="btnPlan.key === planSelected && btnPlan.key === 'annually'" class="payment__btn-plan__content__tag flex gap-2")
           svg-icon(v-if="$isCm" iconName="gift" iconWidth="12px")

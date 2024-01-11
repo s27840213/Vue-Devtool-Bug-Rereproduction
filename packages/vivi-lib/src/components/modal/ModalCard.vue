@@ -1,8 +1,7 @@
 <template lang="pug">
 div(v-show="modalInfo.imgSrc ? isImgLoaded : show"
   class="modal-card"
-  :class="classes.bg"
-  :style="modalInfo.cardStyle")
+  :class="classes.card")
   div(v-if="modalInfo.title"
     class="modal-card__row modal-card__title"
     :class="classes.title")
@@ -47,7 +46,7 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : show"
         @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
       button(v-if="modalInfo.cancelButton.msg"
         class="full-width"
-        :class="`${classes.btn} ${modalInfo.cancelButton.class ?? ''}`"
+        :class="`${classes.btn2 || classes.btn} ${modalInfo.cancelButton.class ?? ''}`"
         :style="modalInfo.cancelButton.style"
         @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
     div(v-if="!$isCm && !modalInfo.noClose && !modalInfo.noCloseIcon" class="modal-card__close")
@@ -83,20 +82,20 @@ export default defineComponent({
       _modalInfo: 'modal/getModalInfo',
       pending: 'modal/getIsPending'
     }),
-    classes() {
-      if (this.$isCm) return {
-        bg: 'bg-dark-3',
+    classes(): Exclude<IModalInfo['classes'], undefined>{
+      const res = this.$isCm ? {
+        card: 'bg-dark-3',
         title: 'text-H4 text-yellow-cm',
         desc: 'body-MD text-white',
         btn: 'bg-yellow-cm text-dark rounded-50',
-      }
-
-      return {
-        bg: 'bg-white',
+      } : {
+        card: 'bg-white',
         title: 'text-H6 text-gray-2',
         desc: 'body-SM text-gray-2',
         btn: 'btn-primary-mid',
       }
+      Object.assign(res, this._modalInfo.classes)
+      return res
     },
     modalInfo(): IModalInfo {
       return this.initModalInfo || this._modalInfo
