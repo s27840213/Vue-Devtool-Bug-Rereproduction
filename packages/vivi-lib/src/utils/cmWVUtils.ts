@@ -959,7 +959,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async shareFile(path: string) {
-    return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
+    return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }, { timeout: -1 }) as GeneralResponse
   }
 
   async ratingRequest(onlyFirst = true) {
