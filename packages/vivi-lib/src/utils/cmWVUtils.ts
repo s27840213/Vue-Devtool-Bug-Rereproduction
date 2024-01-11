@@ -642,6 +642,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async getProducts() {
+    if (this.inBrowserMode) return
     const res = await this.callIOSAsHTTPAPI('GET_PRODUCTS', {
       planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
     })
@@ -706,6 +707,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async subscribe(planId: string) {
+    if (this.inBrowserMode) return
     if (store.getters['payment/getPaymentPending'].purchase) return
     store.commit('payment/SET_paymentPending', { purchase: true })
 
@@ -745,6 +747,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
     } else {
+      if (this.inBrowserMode) return
       // not logged in, or logged in but not binding
       const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 })
       if (res) {
@@ -785,6 +788,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async checkDupSub(): Promise<boolean> {
+    if (this.inBrowserMode) return false
     // check for duplicate subscription
     const userInfo = this.getUserInfoFromStore()
     const uuid = store.getters['user/getUuid'] as string
@@ -910,7 +914,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async isValidJson(data: object): Promise<boolean> {
-    if (!this.checkVersion('1.42')) return true
+    if (this.inBrowserMode || !this.checkVersion('1.42')) return true
     const valid = ((await this.callIOSAsHTTPAPI('IS_VALID_JSON', { object: data}))?.valid ?? '0')
     return valid === '1'
   }
@@ -937,10 +941,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
   }
 
   async uploadFileToS3(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_S3', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
   }
 
@@ -955,18 +961,22 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async documentToCameraRoll(path: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType }) as GeneralResponse
   }
 
   async resizeImage(srcPath: string, desPath: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('RESIZE_IMAGE', { srcPath, desPath, ext, size, sizeType }) as GeneralResponse
   }
 
   async shareFile(path: string) {
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }, { timeout: -1 }) as GeneralResponse
   }
 
   async ratingRequest(onlyFirst = true) {
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('RATING_REQUEST', { onlyFirst })
   }
 

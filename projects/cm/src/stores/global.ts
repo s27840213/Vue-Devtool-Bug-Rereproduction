@@ -7,6 +7,7 @@ export const useGlobalStore = defineStore('global', () => {
   const prevScreenshotUrl = ref('')
   let prevScreenshotUrlTimerId = -1
 
+  cmWVUtils.detectIfInApp()
   cmWVUtils.getState('debugMode').then((data) => {
     debugMode.value = data.debugMode
   })
