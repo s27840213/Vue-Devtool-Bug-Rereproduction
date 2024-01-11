@@ -941,12 +941,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) return { flag: '1', msg: 'browserMode' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
   }
 
   async uploadFileToS3(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) return { flag: '1', msg: 'browserMode' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_S3', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
   }
 
@@ -961,17 +961,17 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async documentToCameraRoll(path: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) return { flag: '1', msg: 'browserMode' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType }) as GeneralResponse
   }
 
   async resizeImage(srcPath: string, desPath: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) return { flag: '1', msg: 'browserMode' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('RESIZE_IMAGE', { srcPath, desPath, ext, size, sizeType }) as GeneralResponse
   }
 
   async shareFile(path: string) {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) return { flag: '1', msg: 'browserMode' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }, { timeout: -1 }) as GeneralResponse
   }
 
