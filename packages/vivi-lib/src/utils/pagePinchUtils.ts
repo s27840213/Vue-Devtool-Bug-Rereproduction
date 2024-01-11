@@ -152,7 +152,6 @@ class pagePinchUtils {
         x: page.x,
         y: page.y
       }
-      console.log('isReachLeftEdge', isReachLeftEdge, edgeLimit.left)
       if (isReachLeftEdge) {
         newPos.x = edgeLimit.left
       } else if (isReachRightEdge) {
@@ -287,11 +286,9 @@ class pagePinchUtils {
     if (generalUtils.isCm) {
       const currPageEl = document.getElementById('screenshot-target') as HTMLElement
       currPageEl.classList.add(...TRANSITION_CLASS)
-      // const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
-      // canvasSection.classList.add(...TRANSITION_CLASS)
     } else {
-      const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
-      canvasSection.classList.add(...TRANSITION_CLASS)
+      const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+      currPageEl.classList.add(...TRANSITION_CLASS)
     }
   }
 
@@ -299,8 +296,6 @@ class pagePinchUtils {
     if (generalUtils.isCm) {
       const currPageEl = document.getElementById('screenshot-target') as HTMLElement
       currPageEl.classList.remove(...TRANSITION_CLASS)
-      // const canvasSection = document.getElementById('canvas-section-canvas') as HTMLElement
-      // canvasSection.classList.remove(...TRANSITION_CLASS)
     } else {
       const currPageEl = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
       currPageEl.classList.remove(...TRANSITION_CLASS)
