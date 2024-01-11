@@ -192,15 +192,15 @@ const useGenImageUtils = () => {
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
     RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
-    let cleanup: null | (() => void) = null
-
     if (!showMore) {
       try {
-        const res = await Promise.all([
+        // don't call cleanup() returned by uploadEditorAsImage()
+        // since the screenshot can be used anytime in this session
+        // letting native delete it next time the App is open is already sufficient.
+        await Promise.all([
           uploadEditorAsImage(userId.value, requestId),
           uploadMaskAsImage(userId.value, requestId),
         ])
-        cleanup = res[0]
 
         if (generatedResultsNum.value === num) {
           // Before first generate, after screenshot.
@@ -208,7 +208,6 @@ const useGenImageUtils = () => {
             initImgSrc.value,
             `${myDesignSavedRoot.value}/${currDesignId.value}/initial.jpg`,
           )
-          setInitImgSrc(getInitialImg())
         }
       } catch (error) {
         logUtils.setLogForError(error as Error)
@@ -277,7 +276,6 @@ const useGenImageUtils = () => {
           }
 
           await Promise.all(promises)
-          cleanup && cleanup() // Delete screenshot.
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message?.includes('Cancelled')) {
