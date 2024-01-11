@@ -1377,7 +1377,7 @@ class ConstantData {
             {
               key: 'hidden-light',
               text: i18n.global.t('CM0110'),
-              img: 'hidden-message.png',
+              img: 'hidden-message-light.png',
             }
           ],
           value: 0,

@@ -73,12 +73,12 @@ div(class="prompt-area w-full box-border px-24")
           div(
             v-for="(genType, idx) in genTypes.group"
             :key="idx"
-            class="flex flex-col gap-8 bg-lighter/20 rounded-16 p-12 aspect-square w-full"
-            :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
+            class="gap-8 bg-lighter/20 rounded-16 p-8 aspect-square w-full"
+            :class="{ 'outline outline-4 -outline-offset-4 outline-yellow-cm': idx === genTypes.value }"
             @click="() => (idxGenType = idx)")
             img(
               v-if="genType.img"
-              class="w-full object-cover object-center rounded-16 aspect-[148/116]"
+              class="w-full object-cover object-center rounded-8 aspect-[148/116]"
               :src="require(genType.img)")
             span {{ genType.text }}
   //- gen options
