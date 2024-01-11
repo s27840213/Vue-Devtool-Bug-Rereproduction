@@ -193,6 +193,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
+  logUtils.setLog(`navigate to route: ${to.path}`)
   cmWVUtils.setupAPIInterface()
   cmWVUtils.registerCallbacks('base')
   useUploadUtils().getUrlMap()
