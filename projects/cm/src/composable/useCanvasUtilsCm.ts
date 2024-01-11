@@ -1,5 +1,6 @@
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { useGlobalStore } from '@/stores/global'
 import store from '@nu/vivi-lib/store'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -72,6 +73,8 @@ const useCanvasUtils = (
   // #region page related
   const { pageSize, contentScaleRatio } = storeToRefs(useEditorStore())
   // #endregion
+
+  const { setPrevScreenshotUrl } = useGlobalStore()
 
   watch(
     stepsQueue,
@@ -681,7 +684,10 @@ const useCanvasUtils = (
     }
 
     setIsAutoFilling(false)
-    imageUtils.imgLoadHandler(`chmix://screenshot/${imageId}?lsize=${size}`, async (img) => {
+    const targetImgSrc = `chmix://screenshot/${imageId}?lsize=${size}`
+    setPrevScreenshotUrl(targetImgSrc)
+
+    imageUtils.imgLoadHandler(targetImgSrc, async (img) => {
       if (canvasCtx && canvasCtx.value) {
         cb && cb(img)
         cleanup()
