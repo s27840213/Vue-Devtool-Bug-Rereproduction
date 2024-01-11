@@ -25,18 +25,12 @@ const ids: string[] = []
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
-  const { setPrevGenParams } = userStore
+  const { setPrevGenParams, getInitialImg } = userStore
   const { prevGenParams } = storeToRefs(userStore)
   const { useUsBucket, uploadMap } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
-  const {
-    setInitImgSrc,
-    setMaskDataUrl,
-    unshiftGenResults,
-    removeGenResult,
-    updateGenResult,
-    changeEditorState,
-  } = editorStore
+  const { setInitImgSrc, setMaskDataUrl, unshiftGenResults, removeGenResult, updateGenResult } =
+    editorStore
   const {
     editorType,
     pageSize,
@@ -214,6 +208,7 @@ const useGenImageUtils = () => {
             initImgSrc.value,
             `${myDesignSavedRoot.value}/${currDesignId.value}/initial.jpg`,
           )
+          setInitImgSrc(getInitialImg())
         }
       } catch (error) {
         logUtils.setLogForError(error as Error)
