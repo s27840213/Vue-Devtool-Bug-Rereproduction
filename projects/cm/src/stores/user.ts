@@ -1,5 +1,4 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import { useCanvasStore } from '@/stores/canvas'
 import type { GenImageParams } from '@/types/api'
 import { ICmMyDesign, ICmSubDesign, IMyDesignType, ITmpSubDesign } from '@/types/user'
@@ -234,7 +233,6 @@ export const useUserStore = defineStore('user', () => {
   ) => {
     // const { addMask = true } = options || {}
     try {
-      const { convertToPinkBasedMask } = useCanvasUtils()
       const { pages, type, prompt, genImageOptions, id, fileName, subId, width, height } = subDesign
 
       setCurrPrompt(prompt)
@@ -243,14 +241,7 @@ export const useUserStore = defineStore('user', () => {
 
       // add mask
       if (fileName === 'original') {
-        const maskUrl =
-          type === 'hidden-message'
-            ? getTargetImageUrl(type, id, subId, 'mask')
-            : await convertToPinkBasedMask(
-                getTargetImageUrl(type, id, subId, 'mask', 400),
-                width,
-                height,
-              )
+        const maskUrl = getTargetImageUrl(type, id, subId, 'mask')
         setMaskDataUrl(maskUrl)
       }
 

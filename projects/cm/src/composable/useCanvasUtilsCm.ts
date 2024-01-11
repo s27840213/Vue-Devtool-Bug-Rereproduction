@@ -562,7 +562,7 @@ const useCanvasUtils = (
       }
     }
   }
-
+  // @Dreprecated function- originally used to backward compatible with old mask(with black and white color)
   const convertToPinkBasedMask = (
     maskUrl: string,
     width: number,
@@ -589,6 +589,7 @@ const useCanvasUtils = (
           )
           // The total number of pixels (RGBA values).
           const bufferSize = result.data.length
+          let unexpectedColorCount = 0
 
           // Check the alpha (transparency) value of each pixel.
           for (let i = 0; i < bufferSize; i += 4) {
@@ -599,7 +600,7 @@ const useCanvasUtils = (
             ) {
               break
             } else {
-              // If the pixel is not transparent or pink, set it We may have 2 cases:
+              // If the pixel is not transparent or pink, we may have 2 cases:
               // 1. The pixel is white, we set it to pink.
               // 2. The pixel is black, we set it to transparent.
               if (
@@ -620,10 +621,20 @@ const useCanvasUtils = (
               ) {
                 result.data[i + 3] = 0
               } else {
-                reject(new Error('Unexpected color'))
+                console.log('unexpected color')
+                console.log(
+                  result.data[i],
+                  result.data[i + 1],
+                  result.data[i + 2],
+                  result.data[i + 3],
+                )
+                unexpectedColorCount++
+                // reject(new Error('Unexpected color'))
               }
             }
           }
+
+          console.log(bufferSize, unexpectedColorCount, unexpectedColorCount / bufferSize)
           maskCtxCopy.putImageData(result, 0, 0)
 
           resolve(canvasCopy.toDataURL('image/png'))
