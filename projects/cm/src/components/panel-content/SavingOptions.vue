@@ -231,6 +231,7 @@ const shareMedia = (media: string) => {
           if (flag === '1') {
             throw new Error(data.msg)
           }
+          cmWVUtils.ratingRequest()
         })
         .catch((e: any) => {
           logUtils.setLogForError(e as Error)
@@ -248,10 +249,6 @@ const shareMedia = (media: string) => {
           if (flag === '1') {
             throw new Error(data.msg)
           }
-          notify({
-            group: 'success',
-            text: `${t('NN0889')}`,
-          })
           cmWVUtils.ratingRequest()
         })
         .catch((e: any) => {
