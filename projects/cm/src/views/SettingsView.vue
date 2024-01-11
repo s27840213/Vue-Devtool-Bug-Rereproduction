@@ -53,9 +53,11 @@ import { useGlobalStore } from '@/stores/global'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
 import vuex from '@/vuex'
+import { notify } from '@kyvg/vue3-notification'
 import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import { storeToRefs } from 'pinia'
 
@@ -80,6 +82,10 @@ const buildNumber = computed(() => {
 })
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'])
 const userId = computed(() => vuex.getters['user/getUserId'])
+const debugInfo = computed(
+  () =>
+    `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}:${userId.value}`,
+)
 
 const domainOptions = computed((): IOptionConfig[] => [
   {
@@ -164,6 +170,9 @@ const debugModeTimer = ref(-1)
 const debugModeCounter = ref(0)
 
 const handleDebugMode = () => {
+  generalUtils.copyText(debugInfo.value).then(() => {
+    notify({ group: 'success', text: '已複製' })
+  })
   if (debugModeTimer.value) {
     clearTimeout(debugModeTimer.value)
   }
@@ -290,7 +299,7 @@ const initOptions = computed(
       { title: t('CM0043'), class: segmentTitleStyle },
       ...aboutOptions,
       {
-        title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}:${userId.value}`, // Debug info
+        title: debugInfo.value, // Debug info
         class: 'typo-body-sm text-center text-lighter py-10',
         callback: handleDebugMode,
       },
