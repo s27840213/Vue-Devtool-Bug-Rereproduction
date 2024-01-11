@@ -218,12 +218,16 @@ class BgRemoveUtils {
     // return data
   }
 
-  async removeBgCm(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string): Promise<void> {
+  async removeBgCm(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string, alphaPercentages: number): Promise<void> {
 
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
     logUtils.setLogAndConsoleLog('start removing bg')
-    const data = await store.dispatch('user/removeBgCm', { uuid, assetId, type })
+    const data = alphaPercentages < 0.1 ? await store.dispatch('user/removeBgCm', { uuid, assetId, type }) : {
+      flag: 0,
+      url: initSrc,
+      msg: ''
+    }
     // const data = {
     //   flag: 0,
     //   url: `https://template.vivipic.com/admin/NuVCei56OafXuls19X6r/asset/image/231113094035241OsdlRsXg/full?rand=${generalUtils.generateRandomString(4)}`,
@@ -239,8 +243,10 @@ class BgRemoveUtils {
       this.setIsProcessing(false)
     } else {
       logUtils.setLogAndConsoleLog('failed to remove bg: ' + data.msg)
+      editorUtils.setCurrActivePanel('none')
       notify({ group: 'error', text: data.msg })
       this.setIsProcessing(false)
+      this.setInBgRemoveMode(false)
       this.setPreviewImage({ src: '', width: 0, height: 0 })
     }
     // duration_db => 確認使用者身份的資料庫查詢

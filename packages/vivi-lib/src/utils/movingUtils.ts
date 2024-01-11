@@ -262,7 +262,8 @@ export class MovingUtils {
     formatUtils.clearCopiedFormat()
 
     // the currLayer active target is not exactly the same fire event layer
-    if (generalUtils.isStk && generalUtils.isTouchDevice() && (layerUtils.layerIndex !== this.layerIndex && this.config.locked)) {
+    if (generalUtils.isStk && generalUtils.isTouchDevice() &&
+      (layerUtils.layerIndex !== -1 && layerUtils.layerIndex !== this.layerIndex && this.config.locked)) {
       return this.lockedLayerMoveStart(event as PointerEvent)
     }
 

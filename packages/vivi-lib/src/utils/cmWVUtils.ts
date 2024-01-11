@@ -176,6 +176,10 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   tutorialFlags = {} as { [key: string]: boolean }
   isAnyIOSImgOnError = false
 
+  filterErrorModal(type: string, message: Record<string, unknown>, isTimeout: boolean): boolean {
+    return ['SUBSCRIBE', 'GET_PRODUCTS'].includes(type) && isTimeout
+  }
+
   appBecomeActive() {
     console.log('app become active!')
   }
@@ -256,6 +260,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   // Like picWVUtils, need merge.
   async login(type: 'Apple' | 'Google' | 'Facebook', locale: string) {
+    if (this.inBrowserMode) return { data: undefined, flag: 0, msg: 'browserMode' }
     const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as 
       { data: ICmLoginResult, flag: number, msg?: string }
     if (!loginResult) {
@@ -273,18 +278,20 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   // Like picWVUtils, need merge.
   async updateUserInfo(userInfo: Partial<IUserInfo>): Promise<void> {
-    if (!generalUtils.isCm) return
+    if (this.inBrowserMode || !generalUtils.isCm) return
     store.commit('cmWV/UPDATE_userInfo', userInfo)
     await this.callIOSAsHTTPAPI('UPDATE_USER_INFO', userInfo)
   }
 
   async getAlbumList(): Promise<IAlbumListResponse> {
+    if (this.inBrowserMode) return { flag: 0, smartAlbum: [], myAlbum: [] }
     const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_LIST', undefined, { timeout: -1 })
 
     return albumList as IAlbumListResponse
   }
 
   async getAlbumContent(albumId: string, pageIndex: number): Promise<IAlbumContentResponse> {
+    if (this.inBrowserMode) return { flag: 0, content: [], pageIndex: 0 }
     const albumList = await this.callIOSAsHTTPAPI('GET_ALBUM_CONTENT', {
       albumId,
       pageIndex,
@@ -298,6 +305,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
    * @param path If path is udf, save asset to Camera Roll
    */
   async saveAssetFromUrl(ext: 'gif' | 'jpg' | 'png' | 'mp4', url: string, path?: string): Promise<ISaveAssetFromUrlResponse> {
+    if (this.inBrowserMode) return { flag: '1', msg: 'browserMode', type: ext }
     let retryTimes = 0
     let result
     while (retryTimes < 3) {
@@ -718,6 +726,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async subscribe(planId: string) {
+    if (this.inBrowserMode) return
     if (store.getters['payment/getPaymentPending'].purchase) return
     store.commit('payment/SET_paymentPending', { purchase: true })
 
@@ -763,6 +772,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
         this.setState('subscribeInfo', { ...subscribeInfo, subscribe: isSubscribed })
       })
     } else {
+      if (this.inBrowserMode) return
       // not logged in, or logged in but not binding
       const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 })
       if (res) {
@@ -803,6 +813,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async checkDupSub(): Promise<boolean> {
+    if (this.inBrowserMode) return false
     // check for duplicate subscription
     const userInfo = this.getUserInfoFromStore()
     const uuid = store.getters['user/getUuid'] as string
@@ -1005,15 +1016,15 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async listAsset(key: string, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
-    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return;
-    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group });
+    if (this.inBrowserMode || !this.checkVersion('1.0.14')) return
+    const res = await this.callIOSAsHTTPAPI('LIST_ASSET', { key, group })
 
     if(returnResponse) {
       return res as IListAssetResponse
     }
-    if (!res) return;
+    if (!res) return
 
-    this.handleListAssetResult(res as IListAssetResponse);
+    this.handleListAssetResult(res as IListAssetResponse)
   }
 
   async listMoreAsset(key: string, nextPage: number, group?: string, returnResponse = false): Promise<void | IListAssetResponse> {
@@ -1075,7 +1086,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async isValidJson(data: object): Promise<boolean> {
-    if (!this.checkVersion('1.42')) return true
+    if (this.inBrowserMode || !this.checkVersion('1.42')) return true
     const valid = ((await this.callIOSAsHTTPAPI('IS_VALID_JSON', { object: data}))?.valid ?? '0')
     return valid === '1'
   }
@@ -1102,10 +1113,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async deleteAsset(key: string, id: string, group?: string, updateList = true) {
+    if (this.inBrowserMode) return { flag: '0' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('DELETE_ASSET', { key, id, group, updateList })
   }
 
   async uploadFileToS3(source: FileSource, uploadMap: object, s3SubPath: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    if (this.inBrowserMode) return { flag: '0' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('UPLOAD_FILE_TO_S3', { ...source, s3SubPath, size, sizeType, uploadMap }) as GeneralResponse
   }
 
@@ -1120,18 +1133,22 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async documentToCameraRoll(path: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    if (this.inBrowserMode) return { flag: '0' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('DOCUMENT_TO_CAMERAROLL', { path, ext, size, sizeType }) as GeneralResponse
   }
 
   async resizeImage(srcPath: string, desPath: string, ext: string, size = 1, sizeType: 'short' | 'long' | 'scale' = 'scale') {
+    if (this.inBrowserMode) return { flag: '0' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('RESIZE_IMAGE', { srcPath, desPath, ext, size, sizeType }) as GeneralResponse
   }
 
   async shareFile(path: string) {
-    return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }) as GeneralResponse
+    if (this.inBrowserMode) return { flag: '0' } as GeneralResponse
+    return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }, { timeout: -1 }) as GeneralResponse
   }
 
   async ratingRequest(onlyFirst = true) {
+    if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('RATING_REQUEST', { onlyFirst })
   }
 

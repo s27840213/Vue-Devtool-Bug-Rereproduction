@@ -123,6 +123,11 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           action-sheet(class="pointer-events-auto "
             :primaryActions="primaryActions"
             :secondaryActions="secondaryActions")
+    transition(name="fade-bottom-in-out")
+      div(v-if="prevScreenshotUrl && debugMode && !isDuringCopy" class="screenshot-demo bg-white/80 absolute bottom-[30%] left-0 p-8 pointer-events-none rounded-8 flex-center flex-col gap-8")
+        span(class="typo-btn-xs") Screenshot result
+        img(class="object-contain w-80 shadow-gray-1 shadow-sm shadow-"
+        :src="prevScreenshotUrl")
 </template>
 
 <script setup lang="ts">
@@ -157,6 +162,7 @@ import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
 import router from './router'
 import { useCanvasStore } from './stores/canvas'
+import { useGlobalStore } from './stores/global'
 import { useImgSelectorStore } from './stores/imgSelector'
 import { useMediaStore } from './stores/media'
 import { useModalStore } from './stores/modal'
@@ -358,6 +364,8 @@ watch(fullPageType, (newVal) => {
   })
 })
 // #endregion
+
+const { prevScreenshotUrl, debugMode } = storeToRefs(useGlobalStore())
 </script>
 
 <style lang="scss">

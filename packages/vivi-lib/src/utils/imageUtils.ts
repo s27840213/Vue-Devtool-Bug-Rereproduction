@@ -923,6 +923,28 @@ class ImageUtils {
     return src
   }
 
+  checkImgAlphaPercentages(src: string) {
+    return new Promise<number>((resolve) => {
+      this.imgLoadHandler(src, (img: HTMLImageElement) => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx.drawImage(img, 0, 0)
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+          let alpha = 0
+          for (let i = 3, len = imgData.length; i < len; i += 4) {
+            if (imgData[i] === 0) {
+              alpha++
+            }
+          }
+          resolve(alpha / (imgData.length / 4))
+        }
+      })
+    })
+  }
+
   replaceImg(photo: SrcObj, previewSrc: string, aspectRatio: number) {
     const {
       getCurrLayer: layer,

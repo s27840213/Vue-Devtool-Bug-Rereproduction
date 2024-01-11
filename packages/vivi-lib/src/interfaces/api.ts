@@ -294,7 +294,8 @@ export interface IUserImageContentData {
     original: string,
     prev: string,
     smal: string,
-    tiny: string
+    tiny: string,
+    xtra: string
   },
   asset_index: number
 }

@@ -361,24 +361,6 @@ export default defineComponent({
         }
       },
       deep: true
-    },
-    isBlurImg(val) {
-      const { imgWidth, imgHeight } = this.config.styles
-      const newSize = val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, newSize))
-      imageUtils.imgLoadHandler(src, () => {
-        // bcz this is an async operation, need to check if isBlurImg is the same val
-        if (this.isBlurImg === val) {
-          this.src = src
-        }
-      }, {
-        crossOrigin: true,
-        error: () => {
-          if (newSize === 'xtra') {
-            this.handleXtraErr()
-          }
-        }
-      })
     }
   },
   components: { NuAdjustImage },
@@ -561,8 +543,11 @@ export default defineComponent({
       }
     },
     getImgDimension(): number | string {
-      const { srcObj } = this.config
-      const { imgWidth, imgHeight } = this.config.styles
+      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      if (this.isBlurImg && this.userId !== 'backendRendering') {
+        return imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight))
+      }
+
       let renderW = imgWidth * this.contentScaleRatio
       let renderH = imgHeight * this.contentScaleRatio
       const primaryLayer = this.primaryLayer
@@ -863,7 +848,6 @@ export default defineComponent({
     },
     handleDimensionUpdate(newVal = 0 as number | string, oldVal = 0 as number | string) {
       if (this.config.srcObj.type === 'ios') return
-      if (this.isBlurImg) return
 
       const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
       if (!this.isOnError && currUrl) {

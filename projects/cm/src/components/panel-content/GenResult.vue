@@ -100,7 +100,7 @@ const disableShowMoreBtn = computed(() => {
 })
 
 const showMoreRes = async () => {
-  await genImageFlow({ prompt: '', action: 'powerful-fill' }, true, 2)
+  await genImageFlow(undefined, 2)
 }
 
 const appendSizeQuery = (url: string, size = 200) => {
