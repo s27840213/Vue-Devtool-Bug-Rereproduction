@@ -74,6 +74,10 @@ div(
           class="mb-10"
           :iconName="'loading'"
           iconColor="white")
+      transition(name="fade-in")
+        loading-brick(
+          v-if="isLoadingContent"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
     //- Album selector
     div(v-else class="flex flex-col gap-8 mx-10")
       div(
@@ -192,6 +196,7 @@ import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
@@ -465,38 +470,35 @@ const sendToEditor = async (isBgRemove = false) => {
 // #endregion
 
 // #region get the first album image content
-cmWVUtils
-  .getAlbumList()
-  .then((res) => {
-    if (!res) return // For browser version
-    if (res.flag === 1) {
-      console.error(res.msg)
-    } else {
-      smartAlbum.push(...res.smartAlbum)
-      myAlbum.push(...res.myAlbum)
+isLoadingContent.value = true
+cmWVUtils.getAlbumList().then(async (res) => {
+  isLoadingContent.value = false
+  if (!res) return // For browser version
+  if (res.flag === 1) {
+    modalUtils.setModalInfo('Error', res.msg)
+    return 
+  }
 
-      const recentAlbum = smartAlbum.find((album) =>
-        ['recents', '最近項目'].includes(album.title.toLowerCase()),
-      )
-      Object.assign(currAlbum, recentAlbum)
-      isLoadingContent.value = true
-      if (recentAlbum?.albumId) {
-        getAlbumContent(recentAlbum).then(() => {
-          initLoaded.value = true
-        })
-      } else {
-        if (smartAlbum.length > 0) {
-          getAlbumContent(smartAlbum[0]).then(() => {
-            initLoaded.value = true
-          })
-        }
-      }
-    }
-  })
-  .catch((err) => {
-    console.error(err)
-    isLoadingContent.value = false
-  })
+  smartAlbum.push(...res.smartAlbum)
+  myAlbum.push(...res.myAlbum)
+
+  const recentAlbum = smartAlbum.find((album) =>
+    ['recents', '最近項目'].includes(album.title.toLowerCase()),
+  )
+  Object.assign(currAlbum, recentAlbum)
+  if (recentAlbum?.albumId) {
+    getAlbumContent(recentAlbum).then(() => {
+      initLoaded.value = true
+    })
+  } else if (smartAlbum.length > 0) {
+    getAlbumContent(smartAlbum[0]).then(() => {
+      initLoaded.value = true
+    })
+  }
+}).catch((err) => {
+  console.error(err)
+  isLoadingContent.value = false
+})
 // #endregion
 
 // #region preprocess
