@@ -726,7 +726,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (store.getters['payment/getPaymentPending'].purchase) return
     store.commit('payment/SET_paymentPending', { purchase: true })
 
-    if (await this.checkDupSub()) {
+    if (await this.checkDupSub().catch(err => {
+      notify({
+        group: 'warn',
+        text: err.message,
+      })
+    })) {
       store.commit('payment/SET_paymentPending', { purchase: false })
       logUtils.setLogAndConsoleLog('duplicated subscription')
       return
@@ -810,7 +815,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (!uuid || !isPro) return false
 
     const res = await this.callIOSAsHTTPAPI('SUBSCRIBE', { option: 'restore' }, { timeout: 30000 }) as SubscribeResponse
-    if (res?.flag !== '0') return false
+    if (!res) {
+      logUtils.setLogAndConsoleLog('restore timeout')
+      throw new Error('network timeout')
+    }
+    if (res.flag !== '0') throw new Error('restore failed')
     if (!res.txid) {
       modalUtils.setModalInfo(
         i18n.global.t('STK0024'),
