@@ -587,11 +587,6 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
           img: require('@img/png/pricing/cm_pro-ai-reflection.png')
         },
         {
-          key: 'ai-reflection',
-          title: i18n.global.t('CM0151'),
-          img: require('@img/png/pricing/cm_pro-ai-reflection2.png')
-        },
-        {
           key: 'hidden-message',
           title: i18n.global.t('CM0078'),
           img: require('@img/png/pricing/cm_pro-hidden-message.png')
