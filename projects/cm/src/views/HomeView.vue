@@ -132,8 +132,8 @@ const featureCategories = [
 const isPhaseOne = true
 const phaseOneFeatures: FeatureCard[] = [
   {
-    bgImg: "demo/powerful-fill/cover-a.png",
-    bgImgB: "demo/powerful-fill/cover-b.png",
+    bgImg: "demo/powerful-fill/cover-a.jpg",
+    bgImgB: "demo/powerful-fill/cover-b.jpg",
     title: i18n.global.t('CM0001'),
     subTitle: i18n.global.t('CM0002'),
     action() {
@@ -142,7 +142,7 @@ const phaseOneFeatures: FeatureCard[] = [
   },
   {
     bgImg: "demo/hidden-message/cover-a.png",
-    bgImgB: "demo/hidden-message/cover-b.png",
+    bgImgB: "demo/hidden-message/cover-b.jpg",
     title: i18n.global.t('CM0078'),
     subTitle: i18n.global.t('CM0002'),
     action() {
