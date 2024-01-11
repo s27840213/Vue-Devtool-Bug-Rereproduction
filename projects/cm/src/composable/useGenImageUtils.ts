@@ -25,23 +25,16 @@ const ids: string[] = []
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
-  const { setPrevGenParams } = userStore
+  const { setPrevGenParams, getInitialImg } = userStore
   const { prevGenParams } = storeToRefs(userStore)
   const { useUsBucket, uploadMap } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
-  const {
-    setInitImgSrc,
-    setMaskDataUrl,
-    unshiftGenResults,
-    removeGenResult,
-    updateGenResult,
-    changeEditorState,
-  } = editorStore
+  const { setInitImgSrc, setMaskDataUrl, unshiftGenResults, removeGenResult, updateGenResult } =
+    editorStore
   const {
     editorType,
     pageSize,
     contentScaleRatio,
-    inGenResultState,
     generatedResultsNum,
     currDesignId,
     initImgSrc,
@@ -59,9 +52,16 @@ const useGenImageUtils = () => {
   const token = computed(() => store.getters['user/getToken'])
   const { t } = useI18n()
 
+  /**
+   * genImage with UI and generatedResult flow control
+   * @param params params for /gen-image API call. undefined means 'SHOW MORE', which uses the params stored last time.
+   * @param num number of images to generate.
+   * @param callbacks.onSuccess called when a result image is successfully polled and ready to show. (for each image)
+   * @param callbacks.onError call when one/all image(s) failed to generate. index = -1 means all images failed.
+   * @param callbacks.onApiResponded call when /gen-image API call finished, can be used for UI switching.
+   */
   const genImageFlow = async (
-    params: GenImageParams,
-    showMore: boolean,
+    params: GenImageParams | undefined,
     num: number,
     {
       onSuccess = () => {
@@ -85,7 +85,8 @@ const useGenImageUtils = () => {
     }
     try {
       let finishedNum = 0
-      await genImage(params, showMore, num, {
+      let errorNum = 0
+      await genImage(params, num, {
         onApiResponded,
         onSuccess: (index, imgSrc, onlyUpdate = false) => {
           updateGenResult(ids[index], { url: imgSrc })
@@ -98,6 +99,7 @@ const useGenImageUtils = () => {
           }
         },
         onError: (index, url, reason) => {
+          errorNum++
           const errorId = generalUtils.generateRandomString(6)
           const hint = `${hostId.value}:${
             userId.value
@@ -118,7 +120,7 @@ const useGenImageUtils = () => {
             )
           })
           removeGenResult(ids[index])
-          if (generatedResultsNum.value === 0) {
+          if (errorNum === num) {
             onError(-1, '', 'all error')
           }
           onError(index, url, reason)
@@ -162,16 +164,12 @@ const useGenImageUtils = () => {
       for (const id of ids.slice(0, num)) {
         removeGenResult(id)
       }
-      if (generatedResultsNum.value === 0 && inGenResultState.value) {
-        changeEditorState('prev')
-      }
       onError(-1, '', (error as Error).message)
     }
   }
 
   const genImage = async (
-    params: GenImageParams,
-    showMore: boolean,
+    params_: GenImageParams | undefined,
     num: number,
     {
       onSuccess = () => {
@@ -189,18 +187,20 @@ const useGenImageUtils = () => {
       onApiResponded?: () => void
     } = {},
   ): Promise<string[]> => {
+    const showMore = params_ === undefined
+    const params = showMore ? prevGenParams.value.params : params_!
     const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
     RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
-    let cleanup: null | (() => void) = null
-
     if (!showMore) {
       try {
-        const res = await Promise.all([
+        // don't call cleanup() returned by uploadEditorAsImage()
+        // since the screenshot can be used anytime in this session
+        // letting native delete it next time the App is open is already sufficient.
+        await Promise.all([
           uploadEditorAsImage(userId.value, requestId),
           uploadMaskAsImage(userId.value, requestId),
         ])
-        cleanup = res[0]
 
         if (generatedResultsNum.value === num) {
           // Before first generate, after screenshot.
@@ -213,8 +213,6 @@ const useGenImageUtils = () => {
         logUtils.setLogForError(error as Error)
         throw new Error('Upload Images For /gen-image Failed')
       }
-    } else {
-      params = prevGenParams.value.params
     }
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
@@ -278,7 +276,6 @@ const useGenImageUtils = () => {
           }
 
           await Promise.all(promises)
-          cleanup && cleanup() // Delete screenshot.
         } catch (error: any) {
           logUtils.setLogForError(error)
           if (!error.message?.includes('Cancelled')) {
