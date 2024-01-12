@@ -157,6 +157,18 @@ onMounted(async () => {
   // if the video is udf generate it
   const currGenResult = currGeneratedResult.value
   if (!currGenResult.video?.src && !isGeningVideo.value) {
+    if (currGeneratedResult.value.url === 'uploading') {
+      await Promise.race([
+        new Promise(resolve => {
+          const interval = setInterval(() => {
+            if (currGeneratedResult.value.url !== 'uploading') {
+              resolve(clearInterval(interval))
+            }
+          }, 200)
+        }),
+        new Promise(resolve => setTimeout(resolve, 10000))
+      ])
+    }
     await addImage(getInitialImg(), imageUtils.appendRandomQuery(currGeneratedResult.value.url))
       .catch(async () => {
         await addImage(initImgSrc.value, currGeneratedResult.value.url)
