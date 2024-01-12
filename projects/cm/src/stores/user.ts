@@ -521,6 +521,10 @@ export const useUserStore = defineStore('user', () => {
 
           const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
           setCurrDesignThumbIndex(thumbIndex)
+
+          const { updateGenResult } = editorStore
+          const { currGeneratedResult } = storeToRefs(editorStore)
+          updateGenResult(currGeneratedResult.value.id, { video: null })
         }
       }
 

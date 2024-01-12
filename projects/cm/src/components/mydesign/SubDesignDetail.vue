@@ -28,6 +28,7 @@ div(
           class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
           :class="{ 'is-flipped': showVideo }")
           img(
+            v-show="!isVideoLoaded"
             class="w-full h-full absolute top-0"
             :src="initImgSrc")
           video(
@@ -103,6 +104,7 @@ const {
   setCurrOpenSubDesign,
   setRemoveWatermark,
   setHighResolutionPhoto,
+  getInitialImg
 } = userStore
 const { currOpenSubDesign, removeWatermark } = storeToRefs(userStore)
 
@@ -123,7 +125,9 @@ const {
 } = storeToRefs(editorStore)
 
 const videoRecordStore = useVideoRcordStore()
-const { isExportingVideo } = storeToRefs(videoRecordStore)
+const { addImage, genVideo } = videoRecordStore
+const { isExportingVideo, isGeningVideo } = storeToRefs(videoRecordStore)
+const { currGeneratedResult } = storeToRefs(editorStore)
 
 const thumbLoaded = ref(false)
 // use to prevent the UI shift when the thumb is loaded
@@ -148,6 +152,16 @@ onMounted(async () => {
         setCurrOpenSubDesign(content)
       }
     }
+  }
+
+  // if the video is udf generate it
+  const currGenResult = currGeneratedResult.value
+  if (!currGenResult.video?.src && !isGeningVideo.value) {
+    await addImage(getInitialImg(), imageUtils.appendRandomQuery(currGeneratedResult.value.url))
+      .catch(async () => {
+        await addImage(initImgSrc.value, currGeneratedResult.value.url)
+      })
+    genVideo()
   }
 })
 
@@ -237,11 +251,8 @@ const isVideoLoaded = ref(false)
 const showVideo = ref(true)
 
 const videoSrc = computed(() => {
-  if (
-    generatedResults.value[currGenResultIndex.value] &&
-    generatedResults.value[currGenResultIndex.value].video
-  ) {
-    return generatedResults.value[currGenResultIndex.value].video?.src
+  if (currGeneratedResult.value.video) {
+    return currGeneratedResult.value.video.src
   } else return ''
 })
 const videoOnload = () => {

@@ -255,7 +255,7 @@ export const useEditorStore = defineStore('editor', {
       id: string,
       data: {
         url?: string
-        video?: { src: string; removeWatermark: boolean }
+        video?: null | { src: string; removeWatermark: boolean }
         updateIndex?: boolean
         saveToDocument?: boolean
         saveMask?: boolean
@@ -267,9 +267,13 @@ export const useEditorStore = defineStore('editor', {
       if (url) {
         this.generatedResults[index].url = url
       }
+
       if (video) {
         this.generatedResults[index].video = { ...video }
+      } else if (video === null) {
+        this.generatedResults[index].video = undefined
       }
+
       if (updateIndex && this.currGenResultIndex === -1) {
         this.currGenResultIndex = index
       }

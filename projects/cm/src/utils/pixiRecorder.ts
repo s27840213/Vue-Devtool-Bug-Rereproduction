@@ -1,7 +1,10 @@
 import { useUserStore } from '@/stores/user'
+import { notify } from '@kyvg/vue3-notification'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import logUtils from '@nu/vivi-lib/utils/logUtils'
+import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
 // the time unit is ms
@@ -283,7 +286,7 @@ export default class PixiRecorder {
         this.sprite_src.filters = [this.filter]
       }
     }
-    this._animate = (delta) => {
+    this._animate = () => {
       const now = Date.now()
       if (this.time_start === -1) {
         this.time_start = now
@@ -292,7 +295,6 @@ export default class PixiRecorder {
       if (now - this.time_start < RECORD_START_DELAY) {
         return
       }
-      console.log(now - this.time_start, RECORD_START_DELAY)
 
       if (this.uniforms.dispFactor >= 1) {
         if (this.dynamicAnimateEndTime === -1) {
@@ -324,6 +326,7 @@ export default class PixiRecorder {
         return this.addFragment3Filter()
     }
   }
+
 
   loadImgs(img1: string, img2: string) {
     const p1 = new Promise<PIXI.Texture>((resolve) => {
@@ -411,6 +414,17 @@ export default class PixiRecorder {
         }
       })
       .catch(() => {
+        logUtils.setLogAndConsoleLog('video load images error:', src, res)
+        modalUtils.setModalInfo(
+          'video load images error',
+          'can not load images at addimage before genVideo',
+          {
+            msg: 'okay',
+            action() {
+              notify({ group: 'success', text: 'ok' })
+            }
+          }
+        )
         throw new Error('pixi-recorder: can not load image!')
       })
   }
@@ -488,12 +502,16 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
 
 const getBlobFromUrl = async (url: string) => {
   return new Promise<Blob>((resolve) => {
-    fetch(url).then((r) => resolve(r.blob()))
+    fetch(url).then((r) => resolve(r.blob())).catch(e => { throw e })
   })
 }
 
 export const saveToDevice = async (url: string) => {
-  const blob = await getBlobFromUrl(url)
-  const base64 = await blobToBase64(blob)
-  return cmWVUtils.saveAssetFromUrl('mp4', base64)
+  try {
+    const blob = await getBlobFromUrl(url)
+    const base64 = await blobToBase64(blob)
+    return cmWVUtils.saveAssetFromUrl('mp4', base64)
+  } catch (e) {
+    logUtils.setLogAndConsoleLog('video can not save to device:', e)
+  }
 }
