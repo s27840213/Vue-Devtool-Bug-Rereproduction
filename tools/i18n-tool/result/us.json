@@ -1206,5 +1206,6 @@
   "CM0155": "Repeated Subscription. You’re currently connected to another subscribed AppStore account.",
   "CM0156": "Left dragger - Set start step value<newline>Right dragger - Set ending step value",
   "CM0157": "Delete account?",
-  "CM0158": "If your account is deleted, you will need to sign up again."
+  "CM0158": "If your account is deleted, you will need to sign up again.",
+  "CM0159": "Pinch to zoom and pan the image smoothly during the fill process."
 }
