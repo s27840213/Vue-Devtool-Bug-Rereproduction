@@ -958,6 +958,16 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
     const isShowPaymentView = isFirstOpen ? modalInfo[`pop_${userInfo.locale}`] === '1'
       : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
+    logUtils.setLogAndConsoleLog('showInitPopups', {
+      isFirstOpen,
+      subscribed,
+      showPaymentTime,
+      showPaymentCount,
+      diffShowPaymentTime,
+      isShowPaymentView,
+      isPromoteCountry: this.isPromoteCountry,
+      isPromoteLanguage: this.isPromoteLanguage
+    })
     // charmix doesn't have tutorial videos
     // const isShowTutorial = isFirstOpen && i18n.global.locale !== 'us'
     const showPayment = (cbClose?: () => void, force = false) => {
