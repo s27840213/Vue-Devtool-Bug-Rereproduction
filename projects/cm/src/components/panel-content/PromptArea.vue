@@ -449,8 +449,8 @@ const defaultGenImageOptions = computed(() => {
       },
       // light
       {
-        guidance_scale: 10,
-        weight: 0.7,
+        guidance_scale: 6,
+        weight: 0.5,
         guidance_step: {
           from: 0.1,
           to: 0.7,
