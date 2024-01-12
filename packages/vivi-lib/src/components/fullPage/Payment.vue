@@ -383,6 +383,10 @@ export default defineComponent({
     justify-content: center;
     width: inherit;
     max-height: calc(100vh - 320px);
+    @include app(cm) {
+      min-height: 358px;
+      max-height: calc(100vh - 460px);
+    }
     &__img {
       width: 100%;
       object-fit: cover;
