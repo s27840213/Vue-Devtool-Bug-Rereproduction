@@ -313,7 +313,9 @@ export const useUserStore = defineStore('user', () => {
       const { flag, assets, key, nextPage } = data
       if (flag === '1') throw new Error('list my design failed')
 
-      const designs = assets as ICmMyDesign[]
+      const designs = (assets as ICmMyDesign[]).filter(
+        (design) => design.id !== '' && design.subDesignInfo.length !== 0,
+      )
       const currType = getDesginTypeByKey(key)
       setDesignsByType(currType, designs, overrideDesigns)
       setNextPageByType(currType, nextPage)
@@ -512,26 +514,27 @@ export const useUserStore = defineStore('user', () => {
       // Update thumb img for saving result.json.
       if (name === 'result') {
         updateGenResult(subDesignId, { url: 'uploading', video: null })
-        cmWVUtils.sendScreenshotUrl(
-          cmWVUtils.createUrlForJSON({ noBg: false }),
-        ).then((screenshot) => {
-          if (screenshot.flag === '1') return
+        cmWVUtils
+          .sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }))
+          .then((screenshot) => {
+            if (screenshot.flag === '1') return
 
-          cmWVUtils.cloneFile(
-            `screenshot/${screenshot.imageId}.jpg`,
-            `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/thumb.jpg`,
-          )
+            cmWVUtils.cloneFile(
+              `screenshot/${screenshot.imageId}.jpg`,
+              `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/thumb.jpg`,
+            )
 
-          const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
-          if (thumbIndex === -1) return
-          setCurrDesignThumbIndex(thumbIndex)
-          updateGenResult(subDesignId, {
-            url: getSubDesignThumbUrl(
-              myDesignSavedRoot.value.replace('mydesign-', ''),
-              currDesignId.value,
-              subDesignId)
+            const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
+            if (thumbIndex === -1) return
+            setCurrDesignThumbIndex(thumbIndex)
+            updateGenResult(subDesignId, {
+              url: getSubDesignThumbUrl(
+                myDesignSavedRoot.value.replace('mydesign-', ''),
+                currDesignId.value,
+                subDesignId,
+              ),
+            })
           })
-        })
       }
 
       const json: ICmSubDesign = {
