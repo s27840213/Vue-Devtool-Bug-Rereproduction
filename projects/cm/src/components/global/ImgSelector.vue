@@ -37,7 +37,7 @@ div(
       :key="img.assetId"
       class="relative flex justify-center"
       @click="selectDemo(i)")
-      img(class="w-44 h-44 object-cover rounded-10" :src="img.assetId")
+      img(class="w-44 h-44 object-cover rounded-10" :src="imageUtils.getSrc(img, 'prev')")
       span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
   //- 4-1. Photo
   div(
@@ -55,9 +55,7 @@ div(
         :key="img.id"
         class="aspect-square relative"
         @click="selectImage(img, 'ios')")
-        lazy-load(
-          class="lazy-load w-full h-full"
-          :rootMargin="'1000px 0px 1000px 0px'")
+        lazy-load(class="lazy-load w-full h-full" :rootMargin="'1000px 0px 1000px 0px'")
           img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${img.id}?ssize=200`")
         svg-icon(
           v-if="selected(img, 'ios')"
@@ -231,16 +229,16 @@ const { tc } = useI18n()
 let targetImgs = reactive([] as (SrcObj & { ratio: number })[])
 const demoImgs = [
   {
-    type: 'local-img',
-    assetId: require('@img/jpg/cm demo img1.jpg'),
-    userId: '',
-    ratio: 320 / 480,
+    type: 'public',
+    assetId: '2401121516235673dNRg71v',
+    userId: 'zKocTWh1Ry9ITYr0kaPf',
+    ratio: 3652 / 5477,
   },
   {
-    type: 'local-img',
-    assetId: require('@img/jpg/cm demo img2.jpg'),
-    userId: '',
-    ratio: 384 / 480,
+    type: 'public',
+    assetId: '240112151638444L4OwJ97s',
+    userId: 'zKocTWh1Ry9ITYr0kaPf',
+    ratio: 3376 / 4220,
   },
 ]
 
@@ -443,7 +441,11 @@ const sendToEditor = async (isBgRemove = false) => {
           record: initAtEditor,
           styles: {
             adjust: {
-              ...(editorType.value === 'hidden-message' && { saturate: -100, brightness: 10, contrast: 20 }),
+              ...(editorType.value === 'hidden-message' && {
+                saturate: -100,
+                brightness: 10,
+                contrast: 20,
+              }),
               invert: +isInvert.value,
             },
           },
@@ -471,34 +473,37 @@ const sendToEditor = async (isBgRemove = false) => {
 
 // #region get the first album image content
 isLoadingContent.value = true
-cmWVUtils.getAlbumList().then(async (res) => {
-  isLoadingContent.value = false
-  if (!res) return // For browser version
-  if (res.flag === 1) {
-    modalUtils.setModalInfo('Error', res.msg)
-    return 
-  }
+cmWVUtils
+  .getAlbumList()
+  .then(async (res) => {
+    isLoadingContent.value = false
+    if (!res) return // For browser version
+    if (res.flag === 1) {
+      modalUtils.setModalInfo('Error', res.msg)
+      return
+    }
 
-  smartAlbum.push(...res.smartAlbum)
-  myAlbum.push(...res.myAlbum)
+    smartAlbum.push(...res.smartAlbum)
+    myAlbum.push(...res.myAlbum)
 
-  const recentAlbum = smartAlbum.find((album) =>
-    ['recents', '最近項目'].includes(album.title.toLowerCase()),
-  )
-  Object.assign(currAlbum, recentAlbum)
-  if (recentAlbum?.albumId) {
-    getAlbumContent(recentAlbum).then(() => {
-      initLoaded.value = true
-    })
-  } else if (smartAlbum.length > 0) {
-    getAlbumContent(smartAlbum[0]).then(() => {
-      initLoaded.value = true
-    })
-  }
-}).catch((err) => {
-  console.error(err)
-  isLoadingContent.value = false
-})
+    const recentAlbum = smartAlbum.find((album) =>
+      ['recents', '最近項目'].includes(album.title.toLowerCase()),
+    )
+    Object.assign(currAlbum, recentAlbum)
+    if (recentAlbum?.albumId) {
+      getAlbumContent(recentAlbum).then(() => {
+        initLoaded.value = true
+      })
+    } else if (smartAlbum.length > 0) {
+      getAlbumContent(smartAlbum[0]).then(() => {
+        initLoaded.value = true
+      })
+    }
+  })
+  .catch((err) => {
+    console.error(err)
+    isLoadingContent.value = false
+  })
 // #endregion
 
 // #region preprocess
