@@ -157,13 +157,13 @@ router.addRoute({
       await logUtils.uploadLog()
     }
     logUtils.setLog(`App Start: v.${process.env.BITBUCKET_BUILD_NUMBER}`)
-    if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
-      cmWVUtils.showUpdateModal(true)
-    } else cmWVUtils.showInitPopups()
-    cmWVUtils.fetchTutorialFlags()
-    cmWVUtils.setDefaultPrices()
-    cmWVUtils.getProducts()
     if (to.name !== 'Screenshot') {
+      if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
+        cmWVUtils.showUpdateModal(true)
+      } else cmWVUtils.showInitPopups()
+      cmWVUtils.fetchTutorialFlags()
+      cmWVUtils.setDefaultPrices()
+      cmWVUtils.getProducts()
       listDesigns('all')
     }
     let argoError = false
@@ -225,6 +225,8 @@ router.beforeEach(async (to, from, next) => {
       )}`,
     )
     const json = await response.json()
+    console.log(json);
+    
 
     store.commit('cmWV/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
 
