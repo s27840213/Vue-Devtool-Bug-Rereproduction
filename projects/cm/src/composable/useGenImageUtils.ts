@@ -25,7 +25,7 @@ const ids: string[] = []
 
 const useGenImageUtils = () => {
   const userStore = useUserStore()
-  const { setPrevGenParams, getInitialImg } = userStore
+  const { setPrevGenParams } = userStore
   const { prevGenParams } = storeToRefs(userStore)
   const { useUsBucket, uploadMap } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()

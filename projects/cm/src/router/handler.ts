@@ -1,5 +1,5 @@
 import { useEditorStore } from '@/stores/editor'
-import type { EditorType, GenImageOptions } from '@/types/editor'
+import type { EditorType, GenImageOption } from '@/types/editor'
 import { editorTypes } from '@/types/editor'
 import store from '@/vuex'
 import constantData from '@nu/vivi-lib/utils/constantData'
@@ -33,7 +33,7 @@ export async function editorRouteHandler(
       editorStore
     setEditorType(type)
     setPageSize(width, height)
-    if (!currGenOptions.value?.length || !currDesignId.value) setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOptions) ?? [])
+    if (!currGenOptions.value?.length || !currDesignId.value) setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOption[]) ?? [])
 
     store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
     switch (type) {

@@ -186,7 +186,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 import Headerbar from '@/components/Headerbar.vue'
 import CanvasResizer from '@/components/editor/CanvasResizer.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
@@ -303,7 +302,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, setDescriptionPanel, changeToSpecificEditorState } =
+const { changeEditorState, setDescriptionPanel, changeToSpecificEditorState } =
   editorStore
 const {
   pageSize,
@@ -660,7 +659,7 @@ const selectStart = (e: PointerEvent) => {
   if (inBgRemoveMode.value) return
   recordPointer(e)
   if (pointerEvtUtils.pointerIds.length >= 3) {
-    return pagePinchUtils?.pinchEnd(e as any)
+    return pagePinchUtils?.pinchEnd(e as unknown as AnyTouchEvent)
   }
   if (e.pointerType === 'mouse' && e.button !== 0) return
 
@@ -765,7 +764,6 @@ watch(
 // #region demo brush size section
 const canvasStore = useCanvasStore()
 const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToRefs(canvasStore)
-const { downloadCanvas } = useCanvasUtils()
 
 const demoBrushSizeStyles = computed(() => {
   return {
@@ -785,7 +783,7 @@ const demoBrushSizeOutline = computed(() => {
 
 // #region event bus
 const bus = useEventBus<string>('editor')
-const unsubcribe = bus.on((event: string, { callback }) => {
+const unsubcribe = bus.on((event: string) => {
   if (event === 'fitPage') {
     fitPage(fitScaleRatio.value)
   }
@@ -841,7 +839,7 @@ const assetPanelComponent = computed(() => {
   }
 })
 
-const assetPanelProps = computed((): { [index: string]: any } => {
+const assetPanelProps = computed(() => {
   const monoColor = currEditorTheme.value?.fgColor
   switch (currActiveTab.value) {
     case 'text': {
