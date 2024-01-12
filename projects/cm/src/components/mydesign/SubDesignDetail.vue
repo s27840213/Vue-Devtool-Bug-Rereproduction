@@ -156,6 +156,7 @@ onMounted(async () => {
 
   // if the video is udf generate it
   const currGenResult = currGeneratedResult.value
+
   if (!currGenResult.video?.src && !isGeningVideo.value) {
     if (currGeneratedResult.value.url === 'uploading') {
       await Promise.race([
@@ -263,7 +264,7 @@ const isVideoLoaded = ref(false)
 const showVideo = ref(true)
 
 const videoSrc = computed(() => {
-  if (currGeneratedResult.value.video) {
+  if (currGeneratedResult.value && currGeneratedResult.value.video) {
     return currGeneratedResult.value.video.src
   } else return ''
 })
