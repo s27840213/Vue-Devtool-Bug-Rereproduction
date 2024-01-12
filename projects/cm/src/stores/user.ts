@@ -25,6 +25,7 @@ export const useUserStore = defineStore('user', () => {
     setMaskDataUrl,
     setCurrGenResultIndex,
     setInitImgSrc,
+    updateGenResult,
   } = editorStore
   const {
     currDesignId,
@@ -510,22 +511,27 @@ export const useUserStore = defineStore('user', () => {
 
       // Update thumb img for saving result.json.
       if (name === 'result') {
-        const screenshot = await cmWVUtils.sendScreenshotUrl(
+        updateGenResult(subDesignId, { url: 'uploading', video: null })
+        cmWVUtils.sendScreenshotUrl(
           cmWVUtils.createUrlForJSON({ noBg: false }),
-        )
-        if (screenshot.flag === '0') {
+        ).then((screenshot) => {
+          if (screenshot.flag === '1') return
+
           cmWVUtils.cloneFile(
             `screenshot/${screenshot.imageId}.jpg`,
             `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/thumb.jpg`,
           )
 
           const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
+          if (thumbIndex === -1) return
           setCurrDesignThumbIndex(thumbIndex)
-
-          const { updateGenResult } = editorStore
-          const { currGeneratedResult } = storeToRefs(editorStore)
-          updateGenResult(currGeneratedResult.value.id, { video: null })
-        }
+          updateGenResult(subDesignId, {
+            url: getSubDesignThumbUrl(
+              myDesignSavedRoot.value.replace('mydesign-', ''),
+              currDesignId.value,
+              subDesignId)
+          })
+        })
       }
 
       const json: ICmSubDesign = {

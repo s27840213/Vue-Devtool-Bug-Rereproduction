@@ -746,14 +746,20 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (res.flag === '0') {
       const isSubscribed = !!res.txid && (await this.updateSubState('', res.txid)).subscribe
       if (isSubscribed) store.commit('SET_fullPageConfig', { type: 'welcome', params: {} })
-    } else if (res.msg === 'IAP_DISABLED'){
-      modalUtils.setModalInfo(
+    } else {
+      if (res.msg === 'IAP_DISABLED') modalUtils.setModalInfo(
         i18n.global.t('STK0024'),
         [i18n.global.t('STK0096')],
         {
           msg: i18n.global.t('STK0023'),
         },
       )
+      else if (res.msg === 'RESTORED_DURING_PURCHASING') {
+        notify({
+          group: 'warn',
+          text: 'failed to initialize subscription',
+        })
+      }
     }
 
     store.commit('payment/SET_paymentPending', { purchase: false })

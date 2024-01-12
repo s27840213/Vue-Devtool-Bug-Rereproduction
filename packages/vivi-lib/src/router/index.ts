@@ -23,8 +23,8 @@ export function commonBeforeEach(
   ) {
   logUtils.setLog(`Navigate to href: ${to.fullPath}`)
 
-  // Keep `ver` in query param in URL.
-  const urlParams = new URLSearchParams(location.search);
+  // Keep `ver` in query param in URL, https://www.notion.so/vivipic/a3baa27a8f6946fa9fc3175af3134bbb.
+  const urlParams = new URLSearchParams(location.search)
   const ver = urlParams.get('ver')
   if (ver && !to.query.ver && to.name) {
     next({ name: to.name, query: Object.assign({ ver }, to.query) })
