@@ -356,7 +356,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  commonBeforeEach(to, from , next)
+  if (commonBeforeEach(to, from , next)) return
   /**
    * @Note the following commented codes will cause prerender render error.
    */
