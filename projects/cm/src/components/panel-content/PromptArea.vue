@@ -160,7 +160,7 @@ import type { GenHiddenMessageParams, GenImageParams } from '@/types/api'
 import type {
   GenImageDualRangeOption,
   GenImageGroupOption,
-  GenImageOptions,
+  GenImageOption,
   GenImageRangeOption,
 } from '@/types/editor'
 import vuex from '@/vuex'
@@ -457,7 +457,7 @@ const defaultGenImageOptions = computed(() => {
         },
       },
     ][idxGenType.value] as { [key: string]: any }
-    const options = (constantData.getGenImageOptions('hidden-message') as GenImageOptions) ?? []
+    const options = (constantData.getGenImageOptions('hidden-message') as GenImageOption[]) ?? []
     options.forEach((option) => {
       const newVal = preset[option.key]
       if (newVal) option.value = newVal
