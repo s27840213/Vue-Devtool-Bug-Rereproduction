@@ -956,12 +956,12 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     const showPaymentTime = showPaymentInfo?.timestamp ?? 0
     const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
     const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
-    let isShowPaymentView = isFirstOpen ? modalInfo[`pop_${userInfo.locale}`] === '1'
+    const isShowPaymentView = isFirstOpen ? modalInfo[`pop_${userInfo.locale}`] === '1'
       : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
     // charmix doesn't have tutorial videos
     // const isShowTutorial = isFirstOpen && i18n.global.locale !== 'us'
-    const showPayment = (cbClose?: () => void) => {
-      if (isShowPaymentView) {
+    const showPayment = (cbClose?: () => void, force = false) => {
+      if (isShowPaymentView || force) {
         this.openPayment()
         this.setState('showPaymentInfo', { count: 0, timestamp: Date.now() })
         if (cbClose) {
@@ -993,8 +993,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     
     if (this.isPromote) {
       // force payment view to show after promote modal closed in promote mode
-      if (!subscribed) isShowPaymentView = true
-      await showPromoteModal(showPayment)
+      await showPromoteModal(() => showPayment(undefined, !subscribed)) || showPayment() || this.sendAppLoaded()
     } else if (!(showPayment(showPromoteModal) || await showPromoteModal())) {
       // didn't show promote modal or payment
       this.sendAppLoaded()
