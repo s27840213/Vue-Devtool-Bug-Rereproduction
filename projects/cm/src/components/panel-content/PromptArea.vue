@@ -14,6 +14,7 @@ div(class="prompt-area w-full box-border px-24")
         div(class="w-full grid grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)]")
           svg-icon(
             v-if="showInspirationIcon"
+            class="tutorial-hidden-message-5--highlight"
             iconName="light-bulb"
             @click="handleInspiration")
           span(class="col-start-2" :class="title.class") {{ title.label }}
