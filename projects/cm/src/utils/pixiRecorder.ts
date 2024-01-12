@@ -5,7 +5,7 @@ import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
 // the time unit is ms
-const RECORD_START_DELAY = 200
+const RECORD_START_DELAY = 600
 const RECORD_END_DELAY = 1000
 const TRANSITION_TIME = 2800
 const IMG2_EXAMPLE =
@@ -156,11 +156,9 @@ export default class PixiRecorder {
     }
 
     this.reset && this.reset()
-    setTimeout(() => {
-      if (this._animate) {
-        this.pixi.ticker.add(this._animate)
-      }
-    }, RECORD_START_DELAY)
+    if (this._animate) {
+      this.pixi.ticker.add(this._animate)
+    }
 
     return new Promise<string | 'error'>((resolve) => {
       const stopCb = (url: string) => {
@@ -285,11 +283,17 @@ export default class PixiRecorder {
         this.sprite_src.filters = [this.filter]
       }
     }
-    this._animate = () => {
+    this._animate = (delta) => {
       const now = Date.now()
       if (this.time_start === -1) {
         this.time_start = now
       }
+
+      if (now - this.time_start < RECORD_START_DELAY) {
+        return
+      }
+      console.log(now - this.time_start, RECORD_START_DELAY)
+
       if (this.uniforms.dispFactor >= 1) {
         if (this.dynamicAnimateEndTime === -1) {
           this.dynamicAnimateEndTime = now
@@ -304,7 +308,7 @@ export default class PixiRecorder {
           }
         }
       }
-      this.uniforms.dispFactor = (now - this.time_start) / TRANSITION_TIME
+      this.uniforms.dispFactor = (now - this.time_start - RECORD_START_DELAY) / TRANSITION_TIME
     }
   }
 
