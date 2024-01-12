@@ -6,7 +6,7 @@ const router = createRouter({
   routes: [],
 })
 
-// Run at the begining of `beforeEnter` in every project.
+// Run at the begining of `beforeEnter` in every project, return if redirect needed.
 export function commonBeforeEnter(
   // to: RouteLocationNormalized,
   // from: RouteLocationNormalized,
@@ -15,17 +15,20 @@ export function commonBeforeEnter(
   //
 }
 
-// Run at the begining of `beforeEach` in every project.
+// Run at the begining of `beforeEach` in every project, return if redirect needed.
 export function commonBeforeEach(
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
   next: NavigationGuardNext,
   ) {
-  logUtils.setLog(`navigate to route: ${to.path}`)
+  logUtils.setLog(`Navigate to href: ${to.fullPath}`)
 
   // Keep `ver` in query param in URL.
-  if (from.query.ver && !to.query.ver && to.name) {
-    next({ name: to.name, query: Object.assign({ ver: from.query.ver }, to.query) })
+  const urlParams = new URLSearchParams(location.search);
+  const ver = urlParams.get('ver')
+  if (ver && !to.query.ver && to.name) {
+    next({ name: to.name, query: Object.assign({ ver }, to.query) })
+    return true
   }
 }
 

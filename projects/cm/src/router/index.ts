@@ -194,7 +194,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  commonBeforeEach(to, from , next)
+  if (commonBeforeEach(to, from , next)) return
 
   cmWVUtils.setupAPIInterface()
   cmWVUtils.registerCallbacks('base')

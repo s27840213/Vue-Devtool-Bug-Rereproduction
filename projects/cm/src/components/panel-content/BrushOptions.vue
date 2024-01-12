@@ -10,8 +10,11 @@ div(class="editing-options w-full flex flex-col items-center gap-16")
     :optionWidth="'80px'"
     :optionHeight="'32px'"
     textSize="caption-SM")
-  div(class="w-full box-border px-24")
+  div(class="w-full min-h-28 box-border px-24 flex-center")
+    span(v-if="currMode === ControlMode.Move" class="typo-body-sm text-white") {{ $t('CM0159') }}
     props-slider(
+      class="w-full"
+      v-else
       :title="`${$t('NN0815')}`"
       :borderTouchArea="true"
       :name="'brushSize'"
