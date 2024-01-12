@@ -24,7 +24,7 @@ const useActionSheetCm = () => {
   } = useActionSheet()
 
   const editorStore = useEditorStore()
-  const { currGeneratedResult } = storeToRefs(editorStore)
+  const { currGeneratedResult, currDesignId, myDesignSavedRoot } = storeToRefs(editorStore)
 
   const { atEditor } = useStateInfo()
 
@@ -104,7 +104,6 @@ const useActionSheetCm = () => {
     const { genVideo, saveToDevice, setGenVideoCb, setIsExportVideo } = videoRecord
     const { isGeningVideo } = storeToRefs(videoRecord)
     const userStore = useUserStore()
-    const { getInitialImg } = userStore
     const { removeWatermark } = storeToRefs(userStore)
     setIsExportVideo(true)
     if (currGeneratedResult.value && currGeneratedResult.value.video) {
@@ -135,20 +134,10 @@ const useActionSheetCm = () => {
             resolve(await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`))
           }
         })
-        console.log('video not generated yet, wait for it generated')
       })
     } else if (currOpenSubDesign.value) {
       // is not GeningVideo called by mydesign
-      const { addImage, genVideo } = videoRecord
-      const subDesignId = currOpenSubDesign.value
-      await addImage(getInitialImg(), getSubDesignImage(subDesignId, 'thumb'))
-        .catch(async () => {
-          await addImage(
-            getSubDesignImage(subDesignId, 'original'),
-            getSubDesignImage(subDesignId, 'thumb')
-          )
-        })
-      const data = await genVideo()
+      const data = await genCurrSubDesignVideo()
       if (action === 'save') {
         return await saveToDevice(data?.src || undefined)
       } else {
@@ -156,6 +145,28 @@ const useActionSheetCm = () => {
         return await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`)
       }
     }
+  }
+
+  const genCurrSubDesignVideo = async () => {
+    if (!currOpenSubDesign.value) throw new Error('currOpenSubDesign.value is undefined')
+
+    const { addImage, genVideo } = useVideoRcordStore()
+    const { getInitialImg, getSubDesignThumbUrl } = useUserStore()
+    const subDesign = currOpenSubDesign.value
+
+    const thumbUrl = getSubDesignThumbUrl(
+      myDesignSavedRoot.value.replace('mydesign-', ''),
+      subDesign.id,
+      subDesign.subId,
+    )
+    await addImage(getInitialImg(), thumbUrl)
+      .catch(async () => {
+        await addImage(
+          getSubDesignImage(subDesign, 'original'),
+          thumbUrl
+        )
+      })
+    return genVideo()
   }
 
   const setSavingActions = (
@@ -396,6 +407,7 @@ const useActionSheetCm = () => {
     setSharingActions,
     setMyDesignActions,
     setSubDesignActions,
+    genCurrSubDesignVideo,
     photoCb,
     videoCb,
     reset,

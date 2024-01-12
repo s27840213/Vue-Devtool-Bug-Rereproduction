@@ -193,7 +193,6 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
-import { useVideoRcordStore } from '@/stores/videoRecord'
 import type { GenImageParams } from '@/types/api'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
@@ -379,8 +378,6 @@ const canSaveSubDesign = computed(() => {
     !['cm_brush', 'selection'].includes(currActiveFeature.value)
   )
 })
-const videoRecordStore = useVideoRcordStore()
-const { addImage, genVideo } = videoRecordStore
 const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
     groupUtils.deselect()
@@ -392,14 +389,6 @@ const handleNextAction = async function () {
     changeToSpecificEditorState('saving')
   } else if (inGenResultState.value) {
     changeEditorState('next')
-    const currGenResult = currGeneratedResult.value
-    const isWatermarkMatched = currGenResult.video?.removeWatermark === removeWatermark.value
-    if (!currGenResult.video?.src || !isWatermarkMatched) {
-      await addImage(getInitialImg(), currGeneratedResult.value.url).catch(async () => {
-        await addImage(initImgSrc.value, currGeneratedResult.value.url)
-      })
-      genVideo()
-    }
   }
 }
 

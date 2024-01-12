@@ -80,6 +80,7 @@ div(
         @click="togglePrompt")
 </template>
 <script setup lang="ts">
+import useActionSheetCm from '@/composable/useActionSheetCm'
 import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
@@ -106,7 +107,7 @@ const {
   setHighResolutionPhoto,
   getInitialImg
 } = userStore
-const { currOpenSubDesign, removeWatermark } = storeToRefs(userStore)
+const { currOpenSubDesign, removeWatermark, isDesignOpen } = storeToRefs(userStore)
 
 if (!vuex.getters['payment/getPayment'].subscribe) {
   setRemoveWatermark(false)
@@ -125,9 +126,9 @@ const {
 } = storeToRefs(editorStore)
 
 const videoRecordStore = useVideoRcordStore()
-const { addImage, genVideo } = videoRecordStore
-const { isExportingVideo, isGeningVideo } = storeToRefs(videoRecordStore)
+const { isExportingVideo } = storeToRefs(videoRecordStore)
 const { currGeneratedResult } = storeToRefs(editorStore)
+const { genCurrSubDesignVideo } = useActionSheetCm()
 
 const thumbLoaded = ref(false)
 // use to prevent the UI shift when the thumb is loaded
@@ -154,27 +155,20 @@ onMounted(async () => {
     }
   }
 
+  // console.warn('currOpenSubDesign.value', generalUtils.deepCopy(currGeneratedResult.value))
   // if the video is udf generate it
-  const currGenResult = currGeneratedResult.value
+  if (!currGeneratedResult.value.video ||
+    currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
+  ) {
+    await genCurrSubDesignVideo()
+  }
+})
 
-  if (!currGenResult.video?.src && !isGeningVideo.value) {
-    if (currGeneratedResult.value.url === 'uploading') {
-      await Promise.race([
-        new Promise(resolve => {
-          const interval = setInterval(() => {
-            if (currGeneratedResult.value.url !== 'uploading') {
-              resolve(clearInterval(interval))
-            }
-          }, 200)
-        }),
-        new Promise(resolve => setTimeout(resolve, 10000))
-      ])
-    }
-    await addImage(getInitialImg(), imageUtils.appendRandomQuery(currGeneratedResult.value.url))
-      .catch(async () => {
-        await addImage(initImgSrc.value, currGeneratedResult.value.url)
-      })
-    genVideo()
+// this watcher used to watching if the thumb is edited.
+// p.s. currGeneratedResult.value would be udf in mydesign
+watch(() => currGeneratedResult.value?.url, async (url) => {
+  if (!currGeneratedResult.value.video) {
+    await genCurrSubDesignVideo()
   }
 })
 

@@ -513,7 +513,6 @@ export const useUserStore = defineStore('user', () => {
 
       // Update thumb img for saving result.json.
       if (name === 'result') {
-        updateGenResult(subDesignId, { url: 'uploading', video: null })
         cmWVUtils
           .sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }))
           .then((screenshot) => {
@@ -533,6 +532,7 @@ export const useUserStore = defineStore('user', () => {
                 currDesignId.value,
                 subDesignId,
               ),
+              video: null
             })
           })
       }
