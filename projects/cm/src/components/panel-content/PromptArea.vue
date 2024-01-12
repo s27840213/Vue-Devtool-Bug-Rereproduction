@@ -14,6 +14,7 @@ div(class="prompt-area w-full box-border px-24")
         div(class="w-full grid grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)]")
           svg-icon(
             v-if="showInspirationIcon"
+            class="tutorial-hidden-message-5--highlight"
             iconName="light-bulb"
             @click="handleInspiration")
           span(class="col-start-2" :class="title.class") {{ title.label }}
@@ -159,7 +160,7 @@ import type { GenHiddenMessageParams, GenImageParams } from '@/types/api'
 import type {
   GenImageDualRangeOption,
   GenImageGroupOption,
-  GenImageOptions,
+  GenImageOption,
   GenImageRangeOption,
 } from '@/types/editor'
 import vuex from '@/vuex'
@@ -448,15 +449,15 @@ const defaultGenImageOptions = computed(() => {
       },
       // light
       {
-        guidance_scale: 10,
-        weight: 0.7,
+        guidance_scale: 6,
+        weight: 0.5,
         guidance_step: {
           from: 0.1,
           to: 0.7,
         },
       },
     ][idxGenType.value] as { [key: string]: any }
-    const options = (constantData.getGenImageOptions('hidden-message') as GenImageOptions) ?? []
+    const options = (constantData.getGenImageOptions('hidden-message') as GenImageOption[]) ?? []
     options.forEach((option) => {
       const newVal = preset[option.key]
       if (newVal) option.value = newVal

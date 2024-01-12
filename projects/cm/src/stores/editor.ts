@@ -7,7 +7,8 @@ import type {
   EditorFeature,
   EditorStates,
   EditorType,
-  GenImageOptions,
+  GenImageOptionToSave,
+  GenImageOption,
   HiddenMessageStates,
   MagicCombinedStates,
   PowerfulfillStates,
@@ -63,7 +64,7 @@ interface IEditorStore {
   designName: '' | 'original' | 'result'
   // for saving to document and show more results
   currPrompt: string
-  currGenOptions: GenImageOptions
+  currGenOptions: GenImageOption[]
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
@@ -159,7 +160,7 @@ export const useEditorStore = defineStore('editor', {
     showDescriptionPanel(): boolean {
       return this.descriptionPanel !== null
     },
-    currGenOptionsToSave(): { [key: string]: any } {
+    currGenOptionsToSave(): GenImageOptionToSave {
       return Object.fromEntries(this.currGenOptions.map(({ key, value }) => [key, value]))
     },
     myDesignSavedType(): EditorType {
@@ -343,7 +344,7 @@ export const useEditorStore = defineStore('editor', {
     setCurrPrompt(prompt: string) {
       this.currPrompt = prompt
     },
-    setCurrGenOptions(options: GenImageOptions) {
+    setCurrGenOptions(options: GenImageOption[]) {
       this.currGenOptions = options
     },
     updateCurrGenOption(option: { key: string, value: any }) {
@@ -351,7 +352,7 @@ export const useEditorStore = defineStore('editor', {
       if (currOption) currOption.value = option.value
     },
     restoreGenOptions(options: { [key: string]: any }, type: EditorType) {
-      const defaultOptions = constantData.getGenImageOptions(type) as GenImageOptions | undefined
+      const defaultOptions = constantData.getGenImageOptions(type) as GenImageOption[] | undefined
       if (!defaultOptions) return
       this.currGenOptions = defaultOptions.map((option) => {
         const value = options?.[option.key]

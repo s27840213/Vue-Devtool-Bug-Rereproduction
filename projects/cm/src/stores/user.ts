@@ -535,7 +535,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       const json: ICmSubDesign = {
-        type: myDesignSavedType.value,
+        type: editorType.value,
         id: currDesignId.value,
         subId: subDesignId,
         fileName: name,

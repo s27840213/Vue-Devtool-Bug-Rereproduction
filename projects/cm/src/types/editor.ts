@@ -44,4 +44,8 @@ export type GenImageDualRangeOption = Omit<GenImageRangeOption, 'type' | 'value'
     to: number
   }
 }
-export type GenImageOptions = Array<GenImageGroupOption | GenImageRangeOption | GenImageDualRangeOption>
+
+export type GenImageOption = GenImageGroupOption | GenImageRangeOption | GenImageDualRangeOption
+export type GenImageOptionToSave = {
+  [key: GenImageOption['key']]: GenImageOption['value']
+}
