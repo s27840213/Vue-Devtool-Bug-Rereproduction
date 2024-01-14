@@ -408,7 +408,6 @@ export default defineComponent({
       })
     },
     handleClickWaterfall(template: ITemplate) {
-      console.log('Home.vue:319', template)
       // for product page
       if (template.group_type === 1) {
         if (this.$isTouchDevice()) {
