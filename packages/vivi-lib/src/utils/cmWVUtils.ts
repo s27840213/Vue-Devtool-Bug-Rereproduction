@@ -177,7 +177,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
 
   filterErrorModal(type: string, message: Record<string, unknown>, isTimeout: boolean): boolean {
-    return ['SUBSCRIBE', 'GET_PRODUCTS'].includes(type) && isTimeout
+    return ['SUBSCRIBE'].includes(type) && isTimeout
   }
 
   appBecomeActive() {
@@ -664,7 +664,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (this.inBrowserMode) return
     const res = await this.callIOSAsHTTPAPI('GET_PRODUCTS', {
       planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
-    })
+    }, { timeout: -1 })
     if (!res) return
     const { planInfo, priceCurrency } = res as GetProductResponse
     const planIds = store.getters['payment/getPayment'].planId
