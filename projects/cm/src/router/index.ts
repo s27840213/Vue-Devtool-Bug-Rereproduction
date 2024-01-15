@@ -132,8 +132,6 @@ router.addRoute({
     // TODO: remove after implementation of tempDesign
     if (!cmWVUtils.inBrowserMode && to.name === 'Editor') return next({ name: 'Home' })
 
-    loginUtils.checkToken(() => cmWVUtils.restore())
-
     useI18n() // prevent import being removed
     // useI18n().locale = 'tw'
 
@@ -160,7 +158,7 @@ router.addRoute({
     if (to.name !== 'Screenshot') {
       if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
         cmWVUtils.showUpdateModal(true)
-      } else cmWVUtils.showInitPopups()
+      } else loginUtils.checkToken(async () => await cmWVUtils.restore()).then(() => cmWVUtils.showInitPopups())
       cmWVUtils.fetchTutorialFlags()
       cmWVUtils.setDefaultPrices()
       cmWVUtils.getProducts()
