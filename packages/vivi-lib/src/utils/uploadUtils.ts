@@ -656,7 +656,6 @@ class UploadUtils {
                 )
               }
               if(type === 'cm-bg-remove') {
-                console.log(uuid, assetId, src, width, height, type)
                 imageUtils.checkImgAlphaPercentages(imageUtils.getSrc(layerUtils.getCurrLayer as IImage)).then((percentage) => {
                   bgRemoveUtils.removeBgCm(
                     uuid,
@@ -2147,7 +2146,7 @@ class UploadUtils {
     const interval = window.setInterval(() => {
       if (retryTime === retryLimit) {
         clearInterval(interval)
-        console.log('Polling failed')
+        logUtils.setLogAndConsoleLog('Polling failed')
         return
       }
       retryTime += 1
