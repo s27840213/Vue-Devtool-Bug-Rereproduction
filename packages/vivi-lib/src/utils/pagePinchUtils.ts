@@ -107,7 +107,7 @@ class pagePinchUtils {
 
     // case 1: page smaller than default size
     if (newPageScaleRatio < 100) {
-      this.addEdgingTransition()
+      pagePinchUtils.addEdgingTransition()
 
       pageUtils.updatePagePos(layerUtils.pageIndex, {
         x: this.page.initPos.x,
@@ -116,14 +116,14 @@ class pagePinchUtils {
       const shrinkRatio = 100 / this.initPageScale
       store.commit('mobileEditor/UPDATE_pinchScale', shrinkRatio)
       setTimeout(() => {
-        this.removeEdgingTransition()
+        pagePinchUtils.removeEdgingTransition()
         store.commit('SET_pageScaleRatio', 100)
         this.resetState()
         this.addPageMoveEvt(e)
       }, TRANSITION_TIME)
     // case 2: page bigger than maximum size
     } else if (newPageScaleRatio > MAX_SCALE) {
-      this.addEdgingTransition()
+      pagePinchUtils.addEdgingTransition()
       const sizeDiff = {
         width: (newPageScaleRatio - MAX_SCALE) * (page.width * contentScaleRatio * 0.01),
         height: (newPageScaleRatio - MAX_SCALE) * (page.height * contentScaleRatio * 0.01)
@@ -141,13 +141,13 @@ class pagePinchUtils {
       store.commit('mobileEditor/UPDATE_pinchScale', newPinchScale)
       setTimeout(() => {
         store.commit('SET_pageScaleRatio', MAX_SCALE)
-        this.removeEdgingTransition()
+        pagePinchUtils.removeEdgingTransition()
         this.resetState()
         this.addPageMoveEvt(e)
       }, TRANSITION_TIME)
     // case 3: page size proper but reach edges
     } else if (isReachLeftEdge || isReachRightEdge || isReachTopEdge || isReachBottomEdge) {
-      this.addEdgingTransition()
+      pagePinchUtils.addEdgingTransition()
       const newPos = {
         x: page.x,
         y: page.y
@@ -165,7 +165,7 @@ class pagePinchUtils {
       pageUtils.updatePagePos(layerUtils.pageIndex, newPos)
       setTimeout(() => {
         store.commit('SET_pageScaleRatio', newPageScaleRatio)
-        this.removeEdgingTransition()
+        pagePinchUtils.removeEdgingTransition()
         this.resetState()
         this.addPageMoveEvt(e)
       }, TRANSITION_TIME)
@@ -282,7 +282,7 @@ class pagePinchUtils {
     return this.getLength(p1, p2) / this.initPosLength
   }
 
-  private addEdgingTransition() {
+  static addEdgingTransition() {
     if (generalUtils.isCm) {
       const currPageEl = document.getElementById('screenshot-target') as HTMLElement
       currPageEl.classList.add(...TRANSITION_CLASS)
@@ -292,7 +292,7 @@ class pagePinchUtils {
     }
   }
 
-  private removeEdgingTransition() {
+  static removeEdgingTransition() {
     if (generalUtils.isCm) {
       const currPageEl = document.getElementById('screenshot-target') as HTMLElement
       currPageEl.classList.remove(...TRANSITION_CLASS)
