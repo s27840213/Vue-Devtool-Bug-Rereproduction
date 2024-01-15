@@ -188,7 +188,6 @@ class BgRemoveUtils {
     logUtils.setLogAndConsoleLog('start removing bg')
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
     console.timeEnd('send API ~ get response time')
-    logUtils.setLogAndConsoleLog('finish removing bg')
 
     console.time('generate frontend data time')
     if (data.flag === 0) {
@@ -219,6 +218,7 @@ class BgRemoveUtils {
   }
 
   async removeBgCm(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string, alphaPercentages: number): Promise<void> {
+    console.time('send API ~ get response time')
 
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
@@ -228,12 +228,13 @@ class BgRemoveUtils {
       url: initSrc,
       msg: ''
     }
+    console.timeEnd('send API ~ get response time')
+
     // const data = {
     //   flag: 0,
     //   url: `https://template.vivipic.com/admin/NuVCei56OafXuls19X6r/asset/image/231113094035241OsdlRsXg/full?rand=${generalUtils.generateRandomString(4)}`,
     //   msg: ''
     // }
-    logUtils.setLogAndConsoleLog('finish removing bg')
 
     if (data.flag === 0) {
       logUtils.setLogAndConsoleLog('finish removing bg')
