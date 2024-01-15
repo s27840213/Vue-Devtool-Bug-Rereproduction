@@ -139,23 +139,23 @@ router.addRoute({
     const { listDesigns } = userStore
 
     await cmWVUtils.getUserInfo()
-    const appLoadedTimeout = store.getters['cmWV/getAppLoadedTimeout']
-    if (appLoadedTimeout > 0) {
-      window.setTimeout(() => {
-        if (!cmWVUtils.appLoadedSent) {
-          logUtils.setLogAndConsoleLog(
-            `Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`,
-          )
-        }
-        cmWVUtils.sendAppLoaded()
-      }, appLoadedTimeout)
-    }
     if (logUtils.getLog()) {
       // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
     logUtils.setLog(`App Start: v.${process.env.BITBUCKET_BUILD_NUMBER}`)
     if (to.name !== 'Screenshot') {
+      const appLoadedTimeout = store.getters['cmWV/getAppLoadedTimeout']
+      if (appLoadedTimeout > 0) {
+        window.setTimeout(() => {
+          if (!cmWVUtils.appLoadedSent) {
+            logUtils.setLogAndConsoleLog(
+              `Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`,
+            )
+          }
+          cmWVUtils.sendAppLoaded()
+        }, appLoadedTimeout)
+      }
       if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
         cmWVUtils.showUpdateModal(true)
       } else loginUtils.checkToken(async () => await cmWVUtils.restore()).then(() => cmWVUtils.showInitPopups())
