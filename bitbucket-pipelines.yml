@@ -1371,7 +1371,7 @@ pipelines:
                 - pnpm install
                 - pnpm run build-skip-cache # Replace with your build/test…etc. commands
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-                - projects/stk/dist/**
+                - projects/cm/dist/**
       - parallel:
           - step:
               name: "deploy to qa-cm"
