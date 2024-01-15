@@ -286,7 +286,6 @@ router.addRoute({
     if (logUtils.getLog()) {
       logUtils.uploadLog()
     }
-    logUtils.setLog(`App Start: v.${process.env.VUE_APP_BUILD_NUMBER}`)
     if (!picWVUtils.inBrowserMode) {
       picWVUtils.registerCallbacks('router')
     }

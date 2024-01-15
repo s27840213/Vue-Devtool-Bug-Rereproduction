@@ -143,7 +143,6 @@ router.addRoute({
       // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
-    logUtils.setLog(`App Start: v.${process.env.BITBUCKET_BUILD_NUMBER}`)
     if (to.name !== 'Screenshot') {
       const appLoadedTimeout = store.getters['cmWV/getAppLoadedTimeout']
       if (appLoadedTimeout > 0) {
