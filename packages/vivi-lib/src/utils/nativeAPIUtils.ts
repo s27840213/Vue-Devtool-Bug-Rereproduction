@@ -84,7 +84,7 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
                     msg: i18n.global.t('STK0023'),
                     action() {
                       generalUtils.copyText(hint).then(() => {
-                        notify({ group: 'success', text: '已複製' })
+                        notify({ group: 'success', text: i18n.global.t('NN0923') })
                       })
                     },
                   },
@@ -110,7 +110,7 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
               msg: i18n.global.t('STK0023'),
               action() {
                 generalUtils.copyText(hint).then(() => {
-                  notify({ group: 'success', text: '已複製' })
+                  notify({ group: 'success', text: i18n.global.t('NN0923') })
                 })
               },
             },

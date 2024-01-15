@@ -1,3 +1,4 @@
+import router from '@/router'
 import { reactive } from 'vue'
 import generalUtils from './generalUtils'
 import uploadUtils from './uploadUtils'
@@ -33,7 +34,7 @@ class LogUtils {
 
   setLog(logContent: string, trimLog = true) {
     if (trimLog) logContent = logContent.substring(0, 500)
-    const newContent = `[${generalUtils.generateTimeStamp()}] ${logContent}`
+    const newContent = `[${generalUtils.generateTimeStamp()}] [${router.currentRoute.value.path}] ${logContent}`
     try {
       if (this.isUploadingLog) { // when log is uploading, append to the log buffer
         this.logBuffer = `${this.logBuffer}\n${newContent}`

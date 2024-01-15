@@ -171,7 +171,7 @@ const debugModeCounter = ref(0)
 
 const handleDebugMode = () => {
   generalUtils.copyText(debugInfo.value).then(() => {
-    notify({ group: 'success', text: '已複製' })
+    notify({ group: 'success', text: t('NN0923') })
   })
   if (debugModeTimer.value) {
     clearTimeout(debugModeTimer.value)

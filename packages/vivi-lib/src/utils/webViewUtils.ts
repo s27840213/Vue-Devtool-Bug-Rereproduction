@@ -203,7 +203,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
                     msg: i18n.global.t('STK0023'),
                     action() {
                       generalUtils.copyText(hint).then(() => {
-                        notify({ group: 'success', text: '已複製' })
+                        notify({ group: 'success', text: i18n.global.t('NN0923') })
                       })
                     },
                   },
@@ -228,7 +228,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
               msg: i18n.global.t('STK0023'),
               action() {
                 generalUtils.copyText(hint).then(() => {
-                  notify({ group: 'success', text: '已複製' })
+                  notify({ group: 'success', text: i18n.global.t('NN0923') })
                 })
               },
             },

@@ -35,6 +35,7 @@ import Payment from '@/components/fullPage/Payment.vue'
 import Welcome from '@/components/fullPage/Welcome.vue'
 import { IFullPageConfig } from '@/interfaces/fullPage'
 import store from '@/store'
+import cmWVUtils from '@/utils/cmWVUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -105,7 +106,8 @@ export default defineComponent({
       this.clearFullPageConfig()
     },
     sendAppLoaded() {
-      if( this.$isStk) stkWVUtils.sendAppLoaded()
+      if (this.$isStk) stkWVUtils.sendAppLoaded()
+      else if (this.$isCm) cmWVUtils.sendAppLoaded()
     },
     handleEnded() {
       if (this.showOnVideoFinish) {
