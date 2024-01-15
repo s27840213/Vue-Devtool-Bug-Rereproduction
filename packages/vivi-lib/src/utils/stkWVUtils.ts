@@ -217,7 +217,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
 
   get isPromoteLanguage(): boolean {
     const promoteLanguages = [...new Set(store.getters['payment/getPromote'].map(this.getLanguageByCountry))]
-    return promoteLanguages.includes(this.getUserInfoFromStore().locale)
+    return promoteLanguages.includes(i18n.global.locale)
   }
 
   get isPromote(): boolean {
