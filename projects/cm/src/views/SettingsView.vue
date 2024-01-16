@@ -97,6 +97,14 @@ const domainOptions = computed((): IOptionConfig[] => [
     },
   },
   {
+    title: 'qa',
+    iconName: 'global',
+    selected: hostname.includes('cmqa'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cmqa.vivipic.com/')
+    },
+  },
+  {
     title: 'rd',
     iconName: 'global',
     selected: hostname.includes('cmrd'),
