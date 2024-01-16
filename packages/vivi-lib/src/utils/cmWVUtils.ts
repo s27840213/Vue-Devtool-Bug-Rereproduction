@@ -177,7 +177,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   isAnyIOSImgOnError = false
 
   filterErrorModal(type: string, message: Record<string, unknown>, isTimeout: boolean): boolean {
-    return ['SUBSCRIBE', 'GET_PRODUCTS'].includes(type) && isTimeout
+    return ['SUBSCRIBE'].includes(type) && isTimeout
   }
 
   appBecomeActive() {
@@ -211,7 +211,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   get isPromoteLanguage(): boolean {
     const promoteLanguages = [...new Set(store.getters['payment/getPromote'].map(this.getLanguageByCountry))]
-    return promoteLanguages.includes(this.getUserInfoFromStore().locale)
+    return promoteLanguages.includes(i18n.global.locale)
   }
 
   get isPromote(): boolean {
@@ -664,7 +664,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (this.inBrowserMode) return
     const res = await this.callIOSAsHTTPAPI('GET_PRODUCTS', {
       planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
-    })
+    }, { timeout: -1 })
     if (!res) return
     const { planInfo, priceCurrency } = res as GetProductResponse
     const planIds = store.getters['payment/getPayment'].planId
@@ -883,8 +883,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   // #region init popup
   async getPromoteModalInfo(): Promise<{ modalInfoArg: Parameters<typeof modalUtils.setModalInfo>, msg: string } | null> {
     // parse modal info
-    const userInfo = this.getUserInfoFromStore()
-    const prefix = userInfo.locale + '_'
+    const storeCountry = this.getUserInfoFromStore().storeCountry
+    const locale = i18n.global.locale
+    const prefix = locale + '_'
     const modalInfo = Object.fromEntries(Object.entries(store.getters['cmWV/getModalInfo']).map(
       ([k, v]) => {
         if (k.startsWith(prefix)) k = k.replace(prefix, '')
@@ -903,8 +904,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     const isDuplicated = (lastModalMsg === undefined || lastModalMsg === null) ? false : lastModalMsg.value === modalInfo.msg
     const isCoolDown = (lastModalTime === undefined || lastModalTime === null) ? false : Date.now() - lastModalTime.value < modalInfo.duration * 3600000
     const shown = modalInfo.duration === -1 ? isDuplicated : isDuplicated && isCoolDown // ignore cool down if duration is set to -1
-    const isInvalidCountry = !!modalInfo.country.length && !modalInfo.country.includes(userInfo.storeCountry)
-    const isPromoteToBeHide = this.isPromoteLanguage && (!this.isPromoteCountry || this.getLanguageByCountry(userInfo.storeCountry ?? 'USA') !== userInfo.locale)
+    const isInvalidCountry = !!modalInfo.country.length && !modalInfo.country.includes(storeCountry)
+    const isPromoteToBeHide = this.isPromoteLanguage && (!this.isPromoteCountry || this.getLanguageByCountry(storeCountry ?? 'USA') !== locale)
     const btn_txt = modalInfo.btn_txt
     if (!btn_txt || shown || isInvalidCountry || isPromoteToBeHide) return null
 
@@ -946,17 +947,17 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async showInitPopups() {
-    const userInfo = this.getUserInfoFromStore()
+    const locale = i18n.global.locale
     const modalInfo = store.getters['cmWV/getModalInfo']
     const showPaymentInfo = await this.getState('showPaymentInfo')
-    const isFirstOpen = userInfo.isFirstOpen && showPaymentInfo === undefined
+    const isFirstOpen = this.getUserInfoFromStore().isFirstOpen && showPaymentInfo === undefined
     const subscribed = (await this.getState('subscribeInfo'))?.subscribe ?? false
-    const m = parseInt(modalInfo[`pop_${userInfo.locale}_m`])
-    const n = parseInt(modalInfo[`pop_${userInfo.locale}_n`])
+    const m = parseInt(modalInfo[`pop_${locale}_m`])
+    const n = parseInt(modalInfo[`pop_${locale}_n`])
     const showPaymentTime = showPaymentInfo?.timestamp ?? 0
     const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
     const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
-    const isShowPaymentView = isFirstOpen ? modalInfo[`pop_${userInfo.locale}`] === '1'
+    const isShowPaymentView = isFirstOpen ? modalInfo[`pop_${locale}`] === '1'
       : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
     logUtils.setLogAndConsoleLog('showInitPopups', {
       isFirstOpen,
@@ -966,7 +967,8 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       diffShowPaymentTime,
       isShowPaymentView,
       isPromoteCountry: this.isPromoteCountry,
-      isPromoteLanguage: this.isPromoteLanguage
+      isPromoteLanguage: this.isPromoteLanguage,
+      locale,
     })
     // charmix doesn't have tutorial videos
     // const isShowTutorial = isFirstOpen && i18n.global.locale !== 'us'

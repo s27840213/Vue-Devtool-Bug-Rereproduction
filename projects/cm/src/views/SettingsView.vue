@@ -89,15 +89,14 @@ const debugInfo = computed(
 
 const domainOptions = computed((): IOptionConfig[] => [
   {
-    //   title: 'production',
-    //   iconName: 'global',
-    //   selected: () => {
-    //     return hostname === 'sticker.vivipic.com'
-    //   },
-    //   action: () => {
-    //     // this.switchDomain('sticker')
-    //   },
-    // }, {
+    title: 'production',
+    iconName: 'global',
+    selected: hostname.includes('cm.vivipic.com'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cm.vivipic.com/')
+    },
+  },
+  {
     title: 'rd',
     iconName: 'global',
     selected: hostname.includes('cmrd'),
@@ -171,7 +170,7 @@ const debugModeCounter = ref(0)
 
 const handleDebugMode = () => {
   generalUtils.copyText(debugInfo.value).then(() => {
-    notify({ group: 'success', text: '已複製' })
+    notify({ group: 'success', text: t('NN0923') })
   })
   if (debugModeTimer.value) {
     clearTimeout(debugModeTimer.value)

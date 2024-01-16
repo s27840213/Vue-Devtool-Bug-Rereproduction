@@ -1,18 +1,6 @@
 <template lang="pug">
 div(class="box-border h-full w-full px-16 pt-12 grid gap-16 overflow-scroll scrollbar-hide")
-  div(
-    v-if="isPhaseOne"
-    class="flex flex-col gap-16 px-8")
-    div(class="flex gap-8")
-      //- nubtn(
-      //-   icon="crown"
-      //-   @click="testNotify") Test Img Selector
-      nubtn(
-        icon="crown"
-        @click="exportVedio") Test video Selector
-      nubtn(
-        icon="crown"
-        @click="testPro") Test Pro
+  div(v-if="isPhaseOne" class="flex flex-col gap-16 px-8")
     feature-card(
       v-for="(feature, idx) in phaseOneFeatures"
       :key="idx"
@@ -60,9 +48,6 @@ div(class="box-border h-full w-full px-16 pt-12 grid gap-16 overflow-scroll scro
 import i18n from '@/i18n'
 import router from '@/router'
 import { useImgSelectorStore } from '@/stores/imgSelector'
-import { notify } from '@kyvg/vue3-notification'
-import store from '@nu/vivi-lib/store'
-import PixiRecorder from '@/utils/pixiRecorder'
 
 const { openImgSelecotr } = useImgSelectorStore()
 
@@ -132,8 +117,8 @@ const featureCategories = [
 const isPhaseOne = true
 const phaseOneFeatures: FeatureCard[] = [
   {
-    bgImg: "demo/powerful-fill/cover-a.jpg",
-    bgImgB: "demo/powerful-fill/cover-b.jpg",
+    bgImg: 'demo/powerful-fill/cover-a.jpg',
+    bgImgB: 'demo/powerful-fill/cover-b.jpg',
     title: i18n.global.t('CM0001'),
     subTitle: i18n.global.t('CM0002'),
     action() {
@@ -141,8 +126,8 @@ const phaseOneFeatures: FeatureCard[] = [
     },
   },
   {
-    bgImg: "demo/hidden-message/cover-a.png",
-    bgImgB: "demo/hidden-message/cover-b.jpg",
+    bgImg: 'demo/hidden-message/cover-a.png',
+    bgImgB: 'demo/hidden-message/cover-b.jpg',
     title: i18n.global.t('CM0078'),
     subTitle: i18n.global.t('CM0002'),
     action() {
@@ -151,34 +136,6 @@ const phaseOneFeatures: FeatureCard[] = [
   },
 ]
 // #endregion
-
-// const testNotify = () => {
-//   notify({
-//     group: 'success',
-//     text: 'Test notification',
-//   })
-// }
-const exportVedio = () => {
-  const pixiRecorder = new PixiRecorder()
-  pixiRecorder.genVideo().then((res) => {
-    console.log('gen vedio finished', res)
-  })
-}
-
-const testPro = () => {
-  const isPro = store.getters['payment/getPayment'].subscribe
-  if (isPro) {
-    notify({
-      group: 'success',
-      text: 'Is Pro',
-    })
-  } else {
-    notify({
-      group: 'warn',
-      text: 'Not Pro',
-    })
-  }
-}
 </script>
 <style scoped lang="scss">
 .feature-section {

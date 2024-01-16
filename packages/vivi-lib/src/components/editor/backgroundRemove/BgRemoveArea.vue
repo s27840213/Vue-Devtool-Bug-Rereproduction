@@ -90,7 +90,7 @@ export default defineComponent({
     }
   },
   created() {
-    logUtils.setLog('BgRemoveArea created')
+    logUtils.setLogAndConsoleLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
     if (aspectRatio > 1) {
@@ -103,17 +103,16 @@ export default defineComponent({
 
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
-    logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
-    logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
+    logUtils.setLogAndConsoleLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
-    logUtils.setLog('BgRemoveArea mounted')
+    logUtils.setLogAndConsoleLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
     this.scaleArea = this.$refs.scaleArea as HTMLElement
 
     this.imageElement = new Image()
     this.imageElement.onload = () => {
-      logUtils.setLog('imageElement onload triggered')
+      logUtils.setLogAndConsoleLog('imageElement onload triggered')
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
@@ -122,16 +121,16 @@ export default defineComponent({
       this.loading = false
     }
     this.imageElement.onerror = (ev) => {
-      logUtils.setLog('imageElement onerror triggered')
-      logUtils.setLog(`${JSON.stringify(ev)}`)
+      logUtils.setLogAndConsoleLog('imageElement onerror triggered')
+      logUtils.setLogAndConsoleLog(`${JSON.stringify(ev)}`)
     }
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
-    logUtils.setLog(`set image element src: ${this.imgSrc}`)
+    logUtils.setLogAndConsoleLog(`set image element src: ${this.imgSrc}`)
 
     this.initImageElement = new Image()
     this.initImageElement.onload = () => {
-      logUtils.setLog('initImageElement onload triggered')
+      logUtils.setLogAndConsoleLog('initImageElement onload triggered')
       this.createInitImageCtx()
     }
     this.initImageElement.src = this.initImgSrc
@@ -299,7 +298,7 @@ export default defineComponent({
       }
     },
     clearMode(newVal) {
-      logUtils.setLog('trigger clear mode watch')
+      logUtils.setLogAndConsoleLog('trigger clear mode watch')
       if (newVal) {
         this.contentCtx.globalCompositeOperation = 'destination-out'
         this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -352,7 +351,7 @@ export default defineComponent({
       setInGestureMode: 'SET_inGestureMode'
     }),
     initCanvas() {
-      logUtils.setLog('initCanvas')
+      logUtils.setLogAndConsoleLog('initCanvas')
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
       this.contentCanvas.width = this.canvasWidth
       this.contentCanvas.height = this.canvasHeight
@@ -361,7 +360,7 @@ export default defineComponent({
       ctx.lineWidth = this.brushSize
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
-      logUtils.setLog('setup contentCtx')
+      logUtils.setLogAndConsoleLog('setup contentCtx')
       this.contentCtx = ctx
       // this.ctx.globalCompositeOperation = 'destination-out'
 
@@ -403,7 +402,7 @@ export default defineComponent({
     //   this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
     // },
     createInitImageCtx() {
-      logUtils.setLog('createInitImageCtx')
+      logUtils.setLogAndConsoleLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
       this.initImgCanvas.height = this.size.height
@@ -515,14 +514,14 @@ export default defineComponent({
     },
     drawInClearMode(e: MouseEvent) {
       this.cyReady = false
-      this.setCompositeOperationMode('source-over', this.contentCtx)
+      this.setCompositeOperationMode('source-over', this.contentCtx, false)
       this.contentCtx.filter = 'none'
       this.clearCtx(this.contentCtx)
       this.contentCtx.drawImage(this.currCanvasImageElement ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       // this.ctx.drawImage(this.imageElement, 0, 0, this.size.width, this.size.height)
 
       this.drawLine(e, this.clearModeCtx)
-      this.setCompositeOperationMode('destination-out')
+      this.setCompositeOperationMode('destination-out', this.contentCtx, false)
       this.contentCtx.filter = `blur(${this.blurPx}px)`
       this.contentCtx.drawImage(this.clearModeCanvas, 0 - this.clearModeShift, 0 - this.clearModeShift, this.size.width + 2 * this.clearModeShift, this.size.height + 2 * this.clearModeShift)
       this.cyReady = true
@@ -530,11 +529,11 @@ export default defineComponent({
     drawInRestoreMode(e: MouseEvent) {
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
-      this.setCompositeOperationMode('source-in', this.blurCtx)
+      this.setCompositeOperationMode('source-in', this.blurCtx, false)
       this.blurCtx.filter = 'none'
       this.blurCtx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
 
-      this.setCompositeOperationMode('source-over', this.blurCtx)
+      this.setCompositeOperationMode('source-over', this.blurCtx, false)
       this.blurCtx.filter = `blur(${this.blurPx}px)`
       this.contentCtx.drawImage(this.blurCanvas, 0, 0, this.size.width, this.size.height)
     },
@@ -547,11 +546,14 @@ export default defineComponent({
       this.initImgCtx.drawImage(this.initImageElement as HTMLImageElement, 0, 0, this.size.width, this.size.height)
       this.setCompositeOperationMode('destination-in', this.initImgCtx)
     },
-    setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
+    setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D, setLog = true) {
       /**
-       * @Note GlobalCompositeOperation type has some problems
+       * @Note GlobalCompositeOperation type has some problems, that's why I use any here
        */
-      logUtils.setLog('setCompositeOperationMode: ' + mode)
+      
+       if(setLog) {
+         logUtils.setLogAndConsoleLog('setCompositeOperationMode: ' + mode)
+       }
 
       if (ctx) {
         ctx.globalCompositeOperation = mode as any

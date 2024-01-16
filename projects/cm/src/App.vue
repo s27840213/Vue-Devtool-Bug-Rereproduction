@@ -345,9 +345,6 @@ const userInfo = computed(() => store.getters['cmWV/getUserInfo'] as IUserInfo)
 const statusBarHeight = computed(() => userInfo.value.statusBarHeight)
 const homeIndicatorHeight = computed(() => userInfo.value.homeIndicatorHeight)
 
-router.isReady().then(() => {
-  cmWVUtils.sendAppLoaded()
-})
 // #endregion
 
 // #region pro

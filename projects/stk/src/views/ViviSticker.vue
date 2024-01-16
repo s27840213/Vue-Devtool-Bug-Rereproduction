@@ -355,7 +355,8 @@ export default defineComponent({
     },
     async showPromoteModal(): Promise<boolean> {
       // parse modal info
-      const prefix = this.userInfo.locale + '_'
+      const locale = this.$i18n.locale
+      const prefix = locale + '_'
       const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
         ([k, v]) => {
           if (k.startsWith(prefix)) k = k.replace(prefix, '')
@@ -374,7 +375,7 @@ export default defineComponent({
       const isCoolDown = (lastModalTime === undefined || lastModalTime === null) ? false : Date.now() - lastModalTime.value < modalInfo.duration * 3600000
       const shown = modalInfo.duration === -1 ? isDuplicated : isDuplicated && isCoolDown // ignore cool down if duration is set to -1
       const isInvalidCountry = !!modalInfo.country.length && !modalInfo.country.includes(this.userInfo.storeCountry)
-      const isPromoteToBeHide = stkWVUtils.isPromoteLanguage && (!stkWVUtils.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== this.userInfo.locale)
+      const isPromoteToBeHide = stkWVUtils.isPromoteLanguage && (!stkWVUtils.isPromoteCountry || stkWVUtils.getLanguageByCountry(this.userInfo.storeCountry ?? 'USA') !== locale)
       const btn_txt = modalInfo.btn_txt
       if (!btn_txt || shown || isInvalidCountry || isPromoteToBeHide) return false
 
@@ -421,17 +422,18 @@ export default defineComponent({
       return true
     },
     async showInitPopups() {
+      const locale = this.$i18n.locale
       const showPaymentInfo = await stkWVUtils.getState('showPaymentInfo')
       const isFirstOpen = this.userInfo.isFirstOpen && showPaymentInfo === undefined
       const subscribed = (await stkWVUtils.getState('subscribeInfo'))?.subscribe ?? false
-      const m = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_m`])
-      const n = parseInt(this.modalInfo[`pop_${this.userInfo.locale}_n`])
+      const m = parseInt(this.modalInfo[`pop_${locale}_m`])
+      const n = parseInt(this.modalInfo[`pop_${locale}_n`])
       const showPaymentTime = showPaymentInfo?.timestamp ?? 0
       const showPaymentCount = (showPaymentInfo?.count ?? 0) + 1
       const diffShowPaymentTime = showPaymentTime ? Date.now() - showPaymentTime : 0
-      let isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${this.userInfo.locale}`] === '1'
+      let isShowPaymentView = isFirstOpen ? this.modalInfo[`pop_${locale}`] === '1'
         : !subscribed && showPaymentCount >= m && diffShowPaymentTime >= n * 86400000
-      const isShowTutorial = isFirstOpen && this.$i18n.locale !== 'us'
+      const isShowTutorial = isFirstOpen && locale !== 'us'
       const show = () => {
         if (isShowPaymentView) {
           stkWVUtils.openPayment()

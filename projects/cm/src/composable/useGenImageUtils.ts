@@ -113,7 +113,7 @@ const useGenImageUtils = () => {
                 msg: t('STK0023'),
                 action() {
                   generalUtils.copyText(hint).then(() => {
-                    notify({ group: 'success', text: '已複製' })
+                    notify({ group: 'success', text: t('NN0923') })
                   })
                 },
               },
@@ -155,7 +155,7 @@ const useGenImageUtils = () => {
             msg: t('STK0023'),
             action() {
               generalUtils.copyText(hint).then(() => {
-                notify({ group: 'success', text: '已複製' })
+                notify({ group: 'success', text: t('NN0923') })
               })
             },
           })
