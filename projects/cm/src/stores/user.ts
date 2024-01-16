@@ -99,6 +99,11 @@ export const useUserStore = defineStore('user', () => {
   const currMyDesignType = ref<IMyDesignType>('all')
   const currOpenDesign = ref<ICmMyDesign | undefined>(undefined)
   const currOpenSubDesign = ref<ICmSubDesign | undefined>(undefined)
+  const lastUsedMask = ref('')
+
+  const setLastUsedMask = (mask: string) => {
+    lastUsedMask.value = mask
+  }
 
   const isDesignOpen = computed(() => {
     return currOpenDesign.value !== undefined
@@ -704,5 +709,7 @@ export const useUserStore = defineStore('user', () => {
     setRemoveWatermark,
     setHighResolutionPhoto,
     // #endregion
+    lastUsedMask,
+    setLastUsedMask
   }
 })
