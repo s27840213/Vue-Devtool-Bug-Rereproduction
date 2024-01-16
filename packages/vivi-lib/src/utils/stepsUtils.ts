@@ -226,6 +226,7 @@ class StepsUtils {
         page.x = pageUtils.getCurrPage.x
         page.y = pageUtils.getCurrPage.y
         page.initPos = pageUtils.getCurrPage.initPos
+        page.contentScaleRatio = pageUtils.getCurrPage.contentScaleRatio
       }
       if (pageUtils.isOutOfBound(pageIndex)) continue
       pagePromises.push(new Promise((resolve, reject) => {
