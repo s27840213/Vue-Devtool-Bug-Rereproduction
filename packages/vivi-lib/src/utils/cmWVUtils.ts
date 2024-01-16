@@ -255,6 +255,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
     const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH')
     store.commit('cmWV/SET_userInfo', userInfo)
+    this.sendStatistics()
     return userInfo as IUserInfo
   }
 
@@ -1246,6 +1247,32 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       },
       options
     )
+  }
+
+  async sendStatistics(): Promise<void> {
+    logUtils.setLogAndConsoleLog('sendStatistics')
+    const country = this.getUserInfoFromStore().country
+    const gotUserInfo = this.getUserInfoFromStore().hostId !== ''
+    if (this.inBrowserMode || gotUserInfo) {
+      // if APP_LAUNCH is behind loginSetup (i.e. APP login),
+      // don't send /update-user-charmix if complete is 1.
+      const complete = store.getters['user/getComplete'] as number
+      if (complete === 1) return
+      const data = {
+        token: store.getters['user/getToken'] as string,
+        device: store.getters['user/getDevice'] as number,
+      }
+      // if APP_LAUNCH is ahead of loginSetup (token is empty) (i.e. APP register),
+      // don't send /update-user-charmix when APP_LAUNCH done.
+      if (!data.token || data.token === '') return
+      await store.dispatch('user/updateUser', {
+        ...data,
+        app: this.inBrowserMode ? 0 : 1,
+        country: country === '' ? undefined : country
+        // If inBrowserMode, country = undefined,
+        // otherwise country will be provided from userInfo.
+      }) // If country is undefined in /update-user-charmix, back-end will use the information provided by CloudFlare.
+    }
   }
 }
 

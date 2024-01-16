@@ -114,7 +114,7 @@ export default {
       campaign: localStorage.getItem('campaign') || undefined
     }
   }),
-  updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number, country: string, device: number, app: number): AxiosPromise => axios('/update-user', {
+  updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number, country: string, device: number, app: number): AxiosPromise => axios(generalUtils.isCm ? '/update-user-charmix' : '/update-user', {
     method: 'POST',
     data: {
       token,

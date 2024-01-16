@@ -487,6 +487,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       if (isPicLoginResponse(data) && data.data.complete === 0) {
         picWVUtils.sendStatistics()
       }
+      if (isCmLoginResponse(data) && data.data.complete === 0) {
+        cmWVUtils.sendStatistics()
+      }
     } else {
       logUtils.setLogAndConsoleLog('login failed (loginSetup)')
       commit('SET_TOKEN', '')
