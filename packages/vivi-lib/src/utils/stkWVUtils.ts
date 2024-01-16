@@ -1487,7 +1487,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getSubscribeInfo() {
-    const planIds = Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
+    const planIds = Object.values(store.getters['payment/getPayment'].planId)
     this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
     this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: planIds })
   }
