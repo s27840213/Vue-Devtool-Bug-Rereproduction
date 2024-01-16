@@ -174,7 +174,7 @@ export const useUserStore = defineStore('user', () => {
 
       // Create new design with result img.
       pageUtils.setPages([pageUtils.newPage({ width, height })])
-      const resultUrl = getTargetImageUrl(type, id, subId, 'result')
+      const resultUrl = getTargetImageUrl(type, id, subId, 'result', 1600)
       assetUtils.addImage(resultUrl, width / height, {
         fit: 1,
         record: false,
@@ -192,7 +192,7 @@ export const useUserStore = defineStore('user', () => {
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
             id: subDesign.id,
-            url: getSubDesignThumbUrl(type, id, subDesign.id, Math.max(width, height)),
+            url: getSubDesignThumbUrl(type, id, subDesign.id),
             prompt,
           }
         }),
@@ -254,7 +254,7 @@ export const useUserStore = defineStore('user', () => {
         generatedResults: currOpenDesign.value?.subDesignInfo.map((subDesign) => {
           return {
             id: subDesign.id,
-            url: getSubDesignThumbUrl(type, id, subDesign.id, Math.max(width, height)),
+            url: getSubDesignThumbUrl(type, id, subDesign.id),
             prompt,
           }
         }),
@@ -532,7 +532,7 @@ export const useUserStore = defineStore('user', () => {
                 currDesignId.value,
                 subDesignId,
               ),
-              video: null
+              video: null,
             })
           })
       }
@@ -581,7 +581,7 @@ export const useUserStore = defineStore('user', () => {
     id: string,
     subId: string,
     imgName: string,
-    size = 1600,
+    size: number | undefined = undefined,
   ) => {
     const assetId = `mydesign-${type}/${id}/${subId}/${imgName}`
     const srcObj: SrcObj = {
@@ -597,7 +597,7 @@ export const useUserStore = defineStore('user', () => {
       imgSrc = imageUtils.appendQuery(imgSrc, 'rand_ver', `${generalUtils.serialNumber}`)
     }
 
-    return imageUtils.appendQuery(imgSrc, 'lsize', `${size}`)
+    return size ? imageUtils.appendQuery(imgSrc, 'lsize', `${size}`) : imgSrc
   }
 
   const getInitialImg = () => {
@@ -618,7 +618,12 @@ export const useUserStore = defineStore('user', () => {
     return getTargetImageUrl(type, id, subDesignInfo[thumbIndex].id, 'thumb', size)
   }
 
-  const getSubDesignThumbUrl = (type: string, id: string, subId: string, size = 400) => {
+  const getSubDesignThumbUrl = (
+    type: string,
+    id: string,
+    subId: string,
+    size: number | undefined = undefined,
+  ) => {
     return getTargetImageUrl(type, id, subId, 'thumb', size)
   }
 

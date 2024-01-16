@@ -159,13 +159,9 @@ const useActionSheetCm = () => {
       subDesign.id,
       subDesign.subId,
     )
-    await addImage(getInitialImg(), thumbUrl)
-      .catch(async () => {
-        await addImage(
-          getSubDesignImage(subDesign, 'original'),
-          thumbUrl
-        )
-      })
+    await addImage(getInitialImg(), thumbUrl).catch(async () => {
+      await addImage(getSubDesignImage(subDesign, 'original'), thumbUrl)
+    })
     return genVideo()
   }
 
