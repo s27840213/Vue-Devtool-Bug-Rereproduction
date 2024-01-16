@@ -34,7 +34,8 @@ class LogUtils {
 
   setLog(logContent: string, trimLog = true) {
     if (trimLog) logContent = logContent.substring(0, 500)
-    const newContent = `[${generalUtils.generateTimeStamp()}] [${router.currentRoute.value.path}] ${logContent}`
+    const isShotWeb = router.currentRoute.value.path.includes('screenshot')
+    const newContent = `[${generalUtils.generateTimeStamp()}]:${isShotWeb ? 'SH' : 'UI'}:${logContent}`
     try {
       if (this.isUploadingLog) { // when log is uploading, append to the log buffer
         this.logBuffer = `${this.logBuffer}\n${newContent}`
