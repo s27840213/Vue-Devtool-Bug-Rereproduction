@@ -2,7 +2,9 @@
 div(v-if="!isMobile" class="settings")
   nu-header(v-header-border="true")
   div(class="settings__content")
-    sidebar(class="settings__sidebar" :style="sidebarStyle"
+    sidebar(
+      class="settings__sidebar"
+      :style="sidebarStyle"
       @switch="switchView"
       :current="currentView")
     section(class="settings__view")
@@ -10,7 +12,10 @@ div(v-if="!isMobile" class="settings")
       settings-security(v-if="currentView === 'security'")
       settings-payment(v-if="currentView === 'payment'")
       settings-bill(v-if="currentView === 'billing'")
-div(v-else class="settings-mobile" :style="settingsMobileStyle")
+div(
+  v-else
+  class="settings-mobile"
+  :style="settingsMobileStyle")
   div(v-if="currentView !== ''" class="settings-mobile__header")
     svg-icon(
       :iconName="'chevron-left'"
@@ -23,13 +28,14 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
     template(v-if="currentView === ''")
       div(class="settings-mobile__row mb-10")
         div(class="text-H4")
-          span {{$tc('NN0165', 1)}}
+          span {{ $tc('NN0165', 1) }}
         div(v-if="isLogin")
           mobile-jump-btn(
-              :iconName="'chevron-right'"
-              @click="goToSubSettingView('account')")
+            :iconName="'chevron-right'"
+            @click="goToSubSettingView('account')")
             div(class="user-info")
-              avatar(class="mr-10"
+              avatar(
+                class="mr-10"
                 :textSize="14"
                 :avatarSize="56")
               div(class="user-info__text")
@@ -55,15 +61,22 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
             template(v-else)
               hr
               div(class="body-MD my-5") {{ $t('NN0859') }}
-              nubtn(size="mid-full" @click="buy") {{$t('NN0545')}}
+              nubtn(
+                size="mid-full"
+                @click="buy") {{ $t('NN0545') }}
         div(v-else)
-          nubtn(v-if="!isLogin" size="mid-full"
-                @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
-          nubtn(v-if="!isLogin" theme="text" size="mid-full"
-                @click="goToPage('Login')") {{$tc('NN0168',2)}}
+          nubtn(
+            v-if="!isLogin"
+            size="mid-full"
+            @click="goToPage('SignUp')") {{ $tc('NN0169', 2) }}
+          nubtn(
+            v-if="!isLogin"
+            theme="text"
+            size="mid-full"
+            @click="goToPage('Login')") {{ $tc('NN0168', 2) }}
       div(class="settings-mobile__row my-10")
         div(class="text-H4")
-          span {{$t('NN0670')}}
+          span {{ $t('NN0670') }}
         url(:url="tutorialUrl")
           mobile-jump-btn(
             :title="$t('NN0146')"
@@ -77,11 +90,11 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
         hr
         url(:url="$t('NN0791')")
           mobile-jump-btn(
-            :title="$t('NN0790', {type: $tc('NN0793', 1)})"
+            :title="$t('NN0790', { type: $tc('NN0793', 1) })"
             :iconName="'chevron-right'")
       div(class="settings-mobile__row mt-10")
         div(class="text-H4")
-          span {{$tc('NN0642',2)}}
+          span {{ $tc('NN0642', 2) }}
         //- mobile-jump-btn(
         //-   :title="'Rate our APP(尚未翻譯)'"
         //-   :iconName="'chevron-right'")
@@ -110,14 +123,14 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
           :title="$t('NN0167')"
           :iconName="'chevron-right'"
           @click="onLogoutClicked")
-        template(v-if="isAdmin")
+        template(v-if="canEnterEvtTest")
           hr
           mobile-jump-btn(
             title="進入 Native 事件測試器"
             :iconName="'chevron-right'"
             @click="onEnterNativeEventTester")
       hr
-      div(class="settings-mobile__row mt-10") {{appVersion}}/{{osVer}}/{{modelName}} {{buildNumber}} {{domain}} {{hostId}} {{userId}}
+      div(class="settings-mobile__row mt-10") {{ appVersion }}/{{ osVer }}/{{ modelName }} {{ buildNumber }} {{ domain }} {{ hostId }} {{ userId }}
     settings-account(v-if="currentView === 'account'")
     settings-security(v-if="currentView === 'security'")
     settings-payment(v-if="currentView === 'payment'")
@@ -128,13 +141,13 @@ div(v-else class="settings-mobile" :style="settingsMobileStyle")
 import Avatar from '@/components/Avatar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import MobileJumpBtn from '@/components/editor/mobile/MobileJumpBtn.vue'
-import Url from '@nu/shared-lib/components/Url.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import Sidebar from '@/components/settings/Sidebar.vue'
 import router from '@/router'
+import Url from '@nu/shared-lib/components/Url.vue'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
@@ -147,8 +160,8 @@ export default defineComponent({
   props: {
     view: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   components: {
     Sidebar,
@@ -159,12 +172,15 @@ export default defineComponent({
     SettingsBill,
     MobileJumpBtn,
     Avatar,
-    Url
+    Url,
   },
   data() {
     return {
       currentView: 'account',
-      domain: window.location.hostname !== 'vivipic.com' ? ` - ${window.location.hostname.replace('.vivipic.com', '')}` : '',
+      domain:
+        window.location.hostname !== 'vivipic.com'
+          ? ` - ${window.location.hostname.replace('.vivipic.com', '')}`
+          : '',
     }
   },
   watch: {
@@ -172,16 +188,16 @@ export default defineComponent({
       if (this.currentView !== this.view) {
         this.currentView = this.view
       }
-    }
+    },
   },
   computed: {
     ...mapState({
       isMobile: 'isMobile',
-      _homeTags: 'homeTags'
+      _homeTags: 'homeTags',
     }),
     ...mapState('payment', {
       isPro: 'isPro',
-      usage: 'usage'
+      usage: 'usage',
     }),
     ...mapGetters({
       isLogin: 'user/isLogin',
@@ -210,9 +226,9 @@ export default defineComponent({
     sidebarStyle(): Record<string, string> {
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
     },
-    settingsMobileStyle(): {[key: string]: string} {
+    settingsMobileStyle(): { [key: string]: string } {
       return {
-        paddingTop: `${this.userInfo.statusBarHeight}px`
+        paddingTop: `${this.userInfo.statusBarHeight}px`,
       }
     },
     inReviewMode(): boolean {
@@ -226,7 +242,7 @@ export default defineComponent({
           return this.$t('NN0166') as string
         case 'payment':
           return (this.$t('NN0585', 2) as string).toUpperCase()
-        case 'billing' :
+        case 'billing':
           return (this.$t('NN0614', 2) as string).toUpperCase()
         default:
           return this.$t('NN0165', 2) as string
@@ -261,7 +277,10 @@ export default defineComponent({
       }
 
       return ''
-    }
+    },
+    canEnterEvtTest(): boolean {
+      return this.isAdmin && window.location.host !== 'vivipic.com'
+    },
   },
   created() {
     if (!this.view && !this.isMobile) {
@@ -278,7 +297,7 @@ export default defineComponent({
         this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
       }
     },
-    goToSubSettingView (view: string) {
+    goToSubSettingView(view: string) {
       this.$router.push({ path: `settings/${view}` })
     },
     goBack() {
@@ -295,8 +314,8 @@ export default defineComponent({
     },
     onEnterNativeEventTester() {
       window.location.pathname = 'nativeevttest'
-    }
-  }
+    },
+  },
 })
 </script>
 
@@ -351,7 +370,7 @@ export default defineComponent({
   }
 
   &__row {
-    >div:nth-child(1) {
+    > div:nth-child(1) {
       margin-bottom: 12px;
     }
   }
@@ -373,11 +392,15 @@ export default defineComponent({
 hr {
   margin: 8px 0px;
   border: none;
-  border-bottom: 1px solid setColor(gray-4)
+  border-bottom: 1px solid setColor(gray-4);
 }
 
 @include layout-mobile {
-  .settings__content { grid-template-columns: auto; }
-  .settings__sidebar { display: none; }
+  .settings__content {
+    grid-template-columns: auto;
+  }
+  .settings__sidebar {
+    display: none;
+  }
 }
 </style>
