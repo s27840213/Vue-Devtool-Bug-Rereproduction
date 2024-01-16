@@ -145,7 +145,7 @@ const {
 } = canvasStore
 const { brushSize: maskBrushSize, canvasMode } = storeToRefs(canvasStore)
 
-const { goToCheckpoint } = useSteps()
+const { goToCheckpoint, setCheckpoint } = useSteps()
 
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
@@ -249,6 +249,7 @@ const apply = async () => {
   setCurrActiveFeature('none')
   PagePinchUtils.resetPageScale()
   groupUtils.deselect()
+  setCheckpoint(true)
 }
 
 onMounted(async () => {

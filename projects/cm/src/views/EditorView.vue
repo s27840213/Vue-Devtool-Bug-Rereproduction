@@ -301,8 +301,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, setDescriptionPanel, changeToSpecificEditorState } =
-  editorStore
+const { changeEditorState, setDescriptionPanel, changeToSpecificEditorState } = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -392,7 +391,7 @@ const handleNextAction = async function () {
   }
 }
 
-const useStep = useSteps()
+const useStep = useSteps(true)
 const { undo, redo, reset, isInFirstStep, isInLastStep, hasUnsavedChanges } = useStep
 
 type centerBtn = {
