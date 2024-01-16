@@ -27,13 +27,15 @@ div(class="absolute top-0 left-0 w-full h-full flex flex-col bg-dark-6 box-borde
           :key="design.id"
           class="relative"
           @click="selectDesign(design)")
-          img(class="w-full rounded-20" :src="getSubDesignThumbUrl(design.type, design.id, design.subId)")
+          img(
+            class="w-full rounded-20"
+            :src="getSubDesignThumbUrl(design.type, design.id, design.subId, 400)")
           svg-icon(
             class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
             iconName="more_horizontal"
             iconWidth="22px"
             @click.stop="editDesign(design)")
-    sub-design-detail(class="absolute top-0 left-0")
+    sub-design-detail(v-if="currOpenSubDesign" class="absolute top-0 left-0")
 </template>
 <script setup lang="ts">
 import useActionSheetCm from '@/composable/useActionSheetCm'
