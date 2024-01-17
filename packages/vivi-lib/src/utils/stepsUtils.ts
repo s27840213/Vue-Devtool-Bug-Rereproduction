@@ -32,7 +32,7 @@ class StepsUtils {
     return popupUtils.isPopupOpen
   }
 
-  get isInFirstStep(): boolean {  
+  get isInFirstStep(): boolean {
     return (this.currStep === 0) || this.currStep === this.checkpointStep
   }
 
@@ -225,6 +225,8 @@ class StepsUtils {
       if ((generalUtils.isPic || generalUtils.isCm) && pageIndex === layerUtils.pageIndex) {
         page.x = pageUtils.getCurrPage.x
         page.y = pageUtils.getCurrPage.y
+        page.initPos = pageUtils.getCurrPage.initPos
+        page.contentScaleRatio = pageUtils.getCurrPage.contentScaleRatio
       }
       if (pageUtils.isOutOfBound(pageIndex)) continue
       pagePromises.push(new Promise((resolve, reject) => {

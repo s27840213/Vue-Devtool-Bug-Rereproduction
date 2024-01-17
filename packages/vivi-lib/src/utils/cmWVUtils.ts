@@ -113,7 +113,7 @@ export interface IPlanInfo {
   priceValue: string
 }
 
-export type GetProductResponse = GeneralResponse & { 
+export type GetProductResponse = GeneralResponse & {
   priceCurrency: string,
   monthly: {
     priceValue: string,
@@ -126,7 +126,7 @@ export type GetProductResponse = GeneralResponse & {
   planInfo: IPlanInfo[]
 }
 
-export type SubscribeResponse = GeneralResponse & { 
+export type SubscribeResponse = GeneralResponse & {
   option: string,
   txid?: string,
 }
@@ -255,13 +255,14 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (this.inBrowserMode) return this.DEFAULT_USER_INFO
     const userInfo = await this.callIOSAsHTTPAPI('APP_LAUNCH')
     store.commit('cmWV/SET_userInfo', userInfo)
+    this.sendStatistics()
     return userInfo as IUserInfo
   }
 
   // Like picWVUtils, need merge.
   async login(type: 'Apple' | 'Google' | 'Facebook', locale: string) {
     if (this.inBrowserMode) return { data: undefined, flag: 0, msg: 'browserMode' }
-    const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as 
+    const loginResult = await this.callIOSAsHTTPAPI('LOGIN', { type, locale }, { timeout: -1 }) as
       { data: ICmLoginResult, flag: number, msg?: string }
     if (!loginResult) {
       throw new Error('login failed')
@@ -374,7 +375,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   /**
    * Take screenshot and save it to Camera Roll or Document.
-   * @param pageSize 
+   * @param pageSize
    * @param param1 If path is udf, save asset to Camera Roll
    */
   async sendCopyEditorCore(
@@ -540,7 +541,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
     await this.callIOSAsHTTPAPI('CLONE_FILE', { srcPath, desPath })
   }
-  
+
   async deleteFile(path: string) {
     if (this.inBrowserMode) return
     await this.callIOSAsHTTPAPI('DELETE_FILE', { path })
@@ -770,7 +771,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (store.getters['payment/getPaymentPending'].restore) return
     store.commit('payment/SET_paymentPending', { restore: true })
     let dupBinded = false
-    if (loginResult?.has_tx === 1) { 
+    if (loginResult?.has_tx === 1) {
       // logged in & is binding
       const isSubscribed = loginResult.subscribe === 1
       store.commit('payment/UPDATE_payment', { subscribe: isSubscribed })
@@ -797,7 +798,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     if (showResult) {
       const isPro = store.getters['payment/getPayment'].subscribe
       const title = isPro ? i18n.global.t('CM0135') : i18n.global.t('CM0137')
-      const content = (isPro ? i18n.global.t('CM0136') : i18n.global.t('CM0138')) + 
+      const content = (isPro ? i18n.global.t('CM0136') : i18n.global.t('CM0138')) +
         (dupBinded ? ` ${i18n.global.t('CM0134')}` : '')
       modalUtils.setModalInfo(
         title,
@@ -851,7 +852,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       txid: res.txid
     })).data.uuid
     logUtils.setLogAndConsoleLog('checkDupSub', { currUuid, uuid })
-    
+
     if (currUuid !== uuid) {
       modalUtils.setModalInfo(
         i18n.global.t('STK0024'),
@@ -1002,7 +1003,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       }
       return true
     }
-    
+
     if (this.isPromote) {
       // force payment view to show after promote modal closed in promote mode
       await showPromoteModal(() => showPayment(undefined, !subscribed)) || showPayment() || this.sendAppLoaded()
@@ -1019,7 +1020,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return 'us'
   }
   // #endregion
-  
+
   async fetchDebugModeEntrance() {
     this.everEntersDebugMode = (await this.getState('everEntersDebugMode'))?.value ?? false
     if (!this.everEntersDebugMode && ((await this.getState('debugMode'))?.value ?? false)) {
@@ -1246,6 +1247,32 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
       },
       options
     )
+  }
+
+  async sendStatistics(): Promise<void> {
+    logUtils.setLogAndConsoleLog('sendStatistics')
+    const country = this.getUserInfoFromStore().country
+    const gotUserInfo = this.getUserInfoFromStore().hostId !== ''
+    if (this.inBrowserMode || gotUserInfo) {
+      // if APP_LAUNCH is behind loginSetup (i.e. APP login),
+      // don't send /update-user-charmix if complete is 1.
+      const complete = store.getters['user/getComplete'] as number
+      if (complete === 1) return
+      const data = {
+        token: store.getters['user/getToken'] as string,
+        device: store.getters['user/getDevice'] as number,
+      }
+      // if APP_LAUNCH is ahead of loginSetup (token is empty) (i.e. APP register),
+      // don't send /update-user-charmix when APP_LAUNCH done.
+      if (!data.token || data.token === '') return
+      await store.dispatch('user/updateUser', {
+        ...data,
+        app: this.inBrowserMode ? 0 : 1,
+        country: country === '' ? undefined : country
+        // If inBrowserMode, country = undefined,
+        // otherwise country will be provided from userInfo.
+      }) // If country is undefined in /update-user-charmix, back-end will use the information provided by CloudFlare.
+    }
   }
 }
 

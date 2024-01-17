@@ -1033,6 +1033,7 @@ class ImageShadowUtils {
     const type = stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)
     const key = `mydesign-${type}`
     const designId = store.getters['vivisticker/getEditingDesignId']
+    if (designId === '') return
     const data = await stkWVUtils.getAsset(key, designId, 'config')
     const oldPages = pageUtils.newPages(data.pages) as Array<IPage>
 

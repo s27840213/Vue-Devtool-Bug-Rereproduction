@@ -1,5 +1,6 @@
 import { useUserStore } from '@/stores/user'
 import { notify } from '@kyvg/vue3-notification'
+import { ISize } from '@nu/vivi-lib/interfaces/math'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
@@ -12,9 +13,10 @@ const RECORD_START_DELAY = 600
 const RECORD_END_DELAY = 1000
 const TRANSITION_TIME = 2800
 const IMG2_EXAMPLE =
-  'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
+  'https://images.unsplash.com/photo-1495379572396-5f27a279ee91?cs=tinysrgb&q=80&w=766&origin=true&appver=v922'
+  // 'https://images.unsplash.com/photo-1552300977-cbc8b08d95e7?cs=tinysrgb&q=80&h=76&origin=true&appver=v922'
 const IMG1_EXAMPLE =
-  'https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=766&origin=true&appver=v7576'
+  'https://images.unsplash.com/photo-1552300977-cbc8b08d95e7?cs=tinysrgb&q=80&h=766&origin=true&appver=v922'
 const WATER_MARK = new URL(
   '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
   import.meta.url,
@@ -117,6 +119,7 @@ export default class PixiRecorder {
   private pixi = new PIXI.Application()
   private sprite_src = null as null | PIXI.Sprite
   private texture_res = null as null | PIXI.Texture
+  private sprite_res = null as null | PIXI.Sprite
   private sprite_wm = null as null | PIXI.Sprite
   private filter = null as null | PIXI.Filter
   private uniforms = {} as { [key: string]: any }
@@ -133,10 +136,6 @@ export default class PixiRecorder {
 
   get video() {
     return this._video
-  }
-
-  constructor(src: string = IMG1_EXAMPLE, res: string = IMG2_EXAMPLE) {
-    this.addImage(src, res)
   }
 
   async genVideo() {
@@ -329,22 +328,25 @@ export default class PixiRecorder {
 
 
   loadImgs(img1: string, img2: string) {
-    const p1 = new Promise<PIXI.Texture>((resolve) => {
+    const p1 = new Promise<PIXI.Sprite>((resolve) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
         this.sprite_src = new PIXI.Sprite(texture)
         this.sprite_src.width = texture.width
         this.sprite_src.height = texture.height
-        resolve(texture)
+        resolve(this.sprite_src)
       })
     })
-    const p2 = new Promise<PIXI.Texture>((resolve) => {
+    const p2 = new Promise<PIXI.Sprite>((resolve) => {
       PIXI.Texture.fromURL(img2).then((texture) => {
         this.texture_res = texture
-        resolve(texture)
+        this.sprite_res = new PIXI.Sprite(texture)
+        this.sprite_res.width = texture.width
+        this.sprite_res.height = texture.height
+        resolve(this.sprite_res)
       })
     })
 
-    const p3 = new Promise<PIXI.Texture>((resolve) => {
+    const p3 = new Promise<PIXI.Sprite>((resolve) => {
       // to fix svg blurry error, we need to resize the svg first
       imageUtils.imgLoadHandler(WATER_MARK, async (img: HTMLImageElement) => {
         const { width, height } = await imageUtils.imgLoadHandler(img1, (img) => {
@@ -368,7 +370,7 @@ export default class PixiRecorder {
                 this.sprite_wm = new PIXI.Sprite(texture)
                 this.sprite_wm.width = texture.width
                 this.sprite_wm.height = texture.height
-                resolve(texture)
+                resolve(this.sprite_wm)
               })
             })
           }
@@ -379,11 +381,84 @@ export default class PixiRecorder {
     return Promise.all([p1, p2, p3])
   }
 
+  async preprocessor(sprites: [PIXI.Sprite, PIXI.Sprite, PIXI.Sprite]) {
+    const [src, res, wm] = sprites
+
+    // srcImg size fully contain resImg size
+    if (src.width >= res.width && src.height >= res.height) {
+      // srcImg size is exactly equals to resImg size
+      if (src.width === res.width && src.height === res.height) {
+        console.warn('case 0')
+        return sprites
+      } else {
+        console.warn('case 1', src.width, src.height, 'res size', res.width, res.height)
+        const newResSprite = await PIXI.Texture.fromURL(
+            await this.genImg({ width: src.width, height: src.height }, res)
+          )
+          .then((texture) => {
+            this.texture_res = texture
+            this.sprite_res = new PIXI.Sprite(texture)
+            this.sprite_res.width = texture.width
+            this.sprite_res.height = texture.height
+            return this.sprite_res
+          })
+        return [src, newResSprite, wm]
+      }
+    } else {
+      console.warn('case 2', src.width, src.height, 'res size', res.width, res.height)
+
+      const newSize = {
+        width: Math.max(src.width, res.width),
+        height: Math.max(src.height, res.height)
+      }
+      const newSrcSprite = await PIXI.Texture.fromURL(
+        await this.genImg(newSize, src)
+      )
+      .then((texture) => {
+        this.sprite_src = new PIXI.Sprite(texture)
+        this.sprite_src.width = texture.width
+        this.sprite_src.height = texture.height
+        return this.sprite_src
+      })
+      const newResSprite = await PIXI.Texture.fromURL(
+        await this.genImg(newSize, res)
+      )
+      .then((texture) => {
+        this.texture_res = texture
+        this.sprite_res = new PIXI.Sprite(texture)
+        this.sprite_res.width = texture.width
+        this.sprite_res.height = texture.height
+        return this.sprite_res
+      })
+      return [newSrcSprite, newResSprite, wm]
+    }
+  }
+
+  genImg(containerSize: ISize, sprite: PIXI.Sprite) {
+    const pixi = new PIXI.Application({
+      ...containerSize,
+      backgroundAlpha: 1,
+      backgroundColor: '0xFFFFFF'
+    })
+    pixi.stage.addChild(sprite)
+    const scale = Math.min(
+      containerSize.width / sprite.width,
+      containerSize.height / sprite.height
+    )
+    sprite.width *= scale
+    sprite.height *= scale
+    sprite.x = (containerSize.width - sprite.width) * 0.5
+    sprite.y = (containerSize.height - sprite.height) * 0.5
+    pixi.renderer.render(pixi.stage)
+    return pixi.renderer.extract.base64()
+  }
+
   addImage(src: string, res: string) {
     return this.loadImgs(src, res)
+      .then(sprites => this.preprocessor(sprites))
       .then(() => {
         this.isImgReady = true
-        if (!this.sprite_src) return console.warn('no sprite')
+        if (!this.sprite_src || !this.sprite_res) return console.warn('no sprite')
 
         this.pixi.view.width = this.sprite_src.width
         this.pixi.view.height = this.sprite_src.height
@@ -396,7 +471,7 @@ export default class PixiRecorder {
           this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
         }
         const renderer = this.pixi.renderer
-        renderer.resize(this.sprite_src.width, this.sprite_src.height)
+        renderer.resize(this.pixi.view.width, this.pixi.view.height)
         this.addFilter(this.fragment)
 
         // @TEST use

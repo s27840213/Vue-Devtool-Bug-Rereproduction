@@ -301,8 +301,7 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, setDescriptionPanel, changeToSpecificEditorState } =
-  editorStore
+const { changeEditorState, setDescriptionPanel, changeToSpecificEditorState } = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -392,7 +391,7 @@ const handleNextAction = async function () {
   }
 }
 
-const useStep = useSteps()
+const useStep = useSteps(true)
 const { undo, redo, reset, isInFirstStep, isInLastStep, hasUnsavedChanges } = useStep
 
 type centerBtn = {
@@ -530,46 +529,48 @@ const wrapperStyles = computed(() => {
 const fitPage = (ratio: number) => {
   if (isResizingCanvas.value) return
 
+  const pageScale = pageUtils.scaleRatio * 0.01
   const page = pageUtils.getCurrPage
   editorUtils.setMobilePhysicalData({ size: editorContainerSize.value })
   const newInitPos = {
     x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
     y: (editorUtils.mobileSize.height - page.height * ratio) * 0.5,
   }
-  const posDiff = {
-    x: newInitPos.x - page.initPos.x,
-    y: newInitPos.y - page.initPos.y,
-  }
-  const newPos = {
-    x: page.x + posDiff.x,
-    y: page.y + posDiff.y,
+  if (pageScale !== 1) {
+    // only when the page-scale > 1 needs to conpensate the pagePos
+    const _f = page.contentScaleRatio * pageUtils.scaleRatio * 0.01
+    const translationRatio = {
+      // x: 0.5,
+      // y: 0.5
+      x: ((-page.x) + editorContainerSize.value.width * 0.5) / (page.width * _f),
+      y: ((-page.y) + editorContainerSize.value.height * 0.5) / (page.height * _f),
+    }
+    const sizeDiff = {
+      w: page.width * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01,
+      h: page.height * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01
+    }
+    const posDiff = {
+      x: -sizeDiff.w * translationRatio.x,
+      y: -sizeDiff.h * translationRatio.y
+    }
+    const newPos = {
+      x: page.x + posDiff.x,
+      y: page.y + posDiff.y,
+    }
+    pageUtils.updatePagePos(0, newPos)
+  } else {
+    pageUtils.updatePagePos(0, newInitPos)
   }
   store.commit('SET_contentScaleRatio4Page', {
     pageIndex: layerUtils.pageIndex,
     contentScaleRatio: ratio,
   })
   pageUtils.updatePageInitPos(0, newInitPos)
-  pageUtils.updatePagePos(0, newPos)
-  // editorUtils.handleContentScaleRatio(0)
-  // const { hasBleed } = pageUtils
-  // const page = pageUtils.getPage(0)
-  // const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
-  // const pos = {
-  //   x: (editorUtils.mobileSize.width - width * ratio) * 0.5,
-  //   y: (editorUtils.mobileSize.height - height * ratio) * 0.5
-  // }
-  // test
-  // pageUtils.updatePagePos(0, pos)
-  // pageUtils.updatePageInitPos(0, pos)
 }
 
-// watch(sidebarTabsWidth, () => {
-//   fitPage(fitScaleRatio.value)
-// })
 /**
  * fitPage
  */
-
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {

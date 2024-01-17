@@ -105,9 +105,8 @@ const {
   setCurrOpenSubDesign,
   setRemoveWatermark,
   setHighResolutionPhoto,
-  getInitialImg
 } = userStore
-const { currOpenSubDesign, removeWatermark, isDesignOpen } = storeToRefs(userStore)
+const { currOpenSubDesign, removeWatermark } = storeToRefs(userStore)
 
 if (!vuex.getters['payment/getPayment'].subscribe) {
   setRemoveWatermark(false)
@@ -157,7 +156,8 @@ onMounted(async () => {
 
   // console.warn('currOpenSubDesign.value', generalUtils.deepCopy(currGeneratedResult.value))
   // if the video is udf generate it
-  if (!currGeneratedResult.value.video ||
+  if (
+    !currGeneratedResult.value?.video ||
     currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
   ) {
     await genCurrSubDesignVideo()
@@ -166,11 +166,14 @@ onMounted(async () => {
 
 // this watcher used to watching if the thumb is edited.
 // p.s. currGeneratedResult.value would be udf in mydesign
-watch(() => currGeneratedResult.value?.url, async (url) => {
-  if (!currGeneratedResult.value.video) {
-    await genCurrSubDesignVideo()
-  }
-})
+watch(
+  () => currGeneratedResult.value?.url,
+  async (url) => {
+    if (!currGeneratedResult.value.video) {
+      await genCurrSubDesignVideo()
+    }
+  },
+)
 
 onBeforeUnmount(() => {
   if (atEditor.value) {
@@ -314,7 +317,6 @@ const showcaseImgUrl = computed(() => {
       currOpenSubDesign.value.type,
       currOpenSubDesign.value.id,
       currOpenSubDesign.value.subId,
-      1000,
     )
   }
   return ''

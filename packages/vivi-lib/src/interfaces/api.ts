@@ -529,6 +529,7 @@ export interface ICmLoginResult {
   locale: LocaleName
   ai_credit: number
   has_tx: 0 | 1
+  complete: number
   // following contains if has_tx=1
   subscribe?: 0 | 1
   stop_subscribe?: 0 | 1

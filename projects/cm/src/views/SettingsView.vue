@@ -89,15 +89,22 @@ const debugInfo = computed(
 
 const domainOptions = computed((): IOptionConfig[] => [
   {
-    //   title: 'production',
-    //   iconName: 'global',
-    //   selected: () => {
-    //     return hostname === 'sticker.vivipic.com'
-    //   },
-    //   action: () => {
-    //     // this.switchDomain('sticker')
-    //   },
-    // }, {
+    title: 'production',
+    iconName: 'global',
+    selected: hostname.includes('cm.vivipic.com'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cm.vivipic.com/')
+    },
+  },
+  {
+    title: 'qa',
+    iconName: 'global',
+    selected: hostname.includes('cmqa'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cmqa.vivipic.com/')
+    },
+  },
+  {
     title: 'rd',
     iconName: 'global',
     selected: hostname.includes('cmrd'),
@@ -171,7 +178,7 @@ const debugModeCounter = ref(0)
 
 const handleDebugMode = () => {
   generalUtils.copyText(debugInfo.value).then(() => {
-    notify({ group: 'success', text: '已複製' })
+    notify({ group: 'success', text: t('NN0923') })
   })
   if (debugModeTimer.value) {
     clearTimeout(debugModeTimer.value)
@@ -278,14 +285,18 @@ const debugOptions: Array<IOptionConfig> = [
       setCurrState('domain')
     },
   },
-  {
-    title: '進入 Native 事件測試器',
-    class: 'debug-option',
-    iconName: 'code-bracket-square',
-    callback: () => {
-      router.push({ name: 'NativeEventTester' })
-    },
-  },
+  ...(window.location.host !== 'cm.vivipic.com'
+    ? [
+        {
+          title: '進入 Native 事件測試器',
+          class: 'debug-option',
+          iconName: 'code-bracket-square',
+          callback: () => {
+            router.push({ name: 'NativeEventTester' })
+          },
+        },
+      ]
+    : []),
 ]
 
 const segmentTitleStyle = 'py-4 border-0 border-b-1 border-solid border-lighter/80'

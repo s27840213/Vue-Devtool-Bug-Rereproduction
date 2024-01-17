@@ -66,7 +66,7 @@ window.onerror = function (msg, url, line, colno, error) {
           msg: i18n.global.t('NN0032'),
           action() {
             generalUtils.copyText(hint).then(() => {
-              notify({ group: 'copy', text: '已複製' })
+              notify({ group: 'copy', text: i18n.global.t('NN0923') })
             })
           }
         }

@@ -5,7 +5,7 @@ import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
 import useCanvasUtils from './useCanvasUtilsCm'
 
-const useSteps = () => {
+const useSteps = (enableWatch = false) => {
   const editorStore = useEditorStore()
   const {
     undo: editorUndo,
@@ -15,6 +15,7 @@ const useSteps = () => {
     stepsReset,
     resetStepsTypesArr,
     setStepTypeCheckPoint,
+    setIsRecordingBothSteps,
   } = editorStore
   const {
     editorCurrStep,
@@ -24,6 +25,7 @@ const useSteps = () => {
     isInEditorFirstStep,
     isInEditorLastStep,
     stepTypeCheckPoint,
+    isRecordingBothSteps,
   } = storeToRefs(editorStore)
 
   const {
@@ -40,6 +42,20 @@ const useSteps = () => {
     goToCheckpoint: goToCanvasCheckpoint,
   } = useCanvasUtils()
 
+  // #region recording both related
+  const recordBoth = () => {
+    setIsRecordingBothSteps(true)
+    stepsTypesArr.value.length = currStepTypeIndex.value + 1
+    pushStepType('both')
+    setCurrStepTypeIndex(currStepTypeIndex.value + 1)
+    editorSteps.value.length = editorCurrStep.value + 1
+    canvasSteps.value.length = canvasCurrStep.value + 1
+
+    canvasRecord()
+    stepsUtils.record()
+  }
+  // #endregion
+
   // #region bg remove related
   const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
   const inBgRemoveFirstStep = computed(() => store.getters['bgRemove/inFirstStep'])
@@ -49,16 +65,16 @@ const useSteps = () => {
   const editorStepsNum = computed(() => editorSteps.value.length)
   const canvasStepsNum = computed(() => canvasSteps.value.length)
 
-  const isInFirstStep = computed(() =>
-    inBgRemoveMode.value
+  const isInFirstStep = computed(() => {
+    return inBgRemoveMode.value
       ? inBgRemoveFirstStep.value
-      : isInEditorFirstStep.value && isInCanvasFirstStep.value,
-  )
-  const isInLastStep = computed(() =>
-    inBgRemoveMode.value
+      : isInEditorFirstStep.value && isInCanvasFirstStep.value
+  })
+  const isInLastStep = computed(() => {
+    return inBgRemoveMode.value
       ? inBgRemoveLastStep.value
-      : isInEditorLastStep.value && isInCanvasLastStep.value,
-  )
+      : isInEditorLastStep.value && isInCanvasLastStep.value
+  })
 
   const undo = () => {
     if (isInFirstStep.value || isProcessingStepsQueue.value) return
@@ -66,7 +82,10 @@ const useSteps = () => {
       bgRemoveUtils.undo()
       return
     }
-    if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
+    if (stepsTypesArr.value[currStepTypeIndex.value] === 'both') {
+      editorUndo()
+      canvasUndo()
+    } else if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorFirstStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value - 1)
         undo()
@@ -90,7 +109,10 @@ const useSteps = () => {
       bgRemoveUtils.redo()
       return
     }
-    if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
+    if (stepsTypesArr.value[currStepTypeIndex.value] === 'both') {
+      editorRedo()
+      canvasRedo()
+    } else if (stepsTypesArr.value[currStepTypeIndex.value] === 'editor') {
       if (isInEditorLastStep.value) {
         setCurrStepTypeIndex(currStepTypeIndex.value + 1)
         redo()
@@ -133,17 +155,6 @@ const useSteps = () => {
   })
 
   /**
-   * @deprecated bcz even if we are in the first step, we still have unsaved changes like bg remove, shadow, those who will create new assets in document
-   * so I remove the inFirstStep check
-   */
-  // const hasUnsavedChanges = computed(() => {
-  //   return (
-  //     (stepsUtils.steps.length !== 1 && !stepsUtils.isInFirstStep) ||
-  //     (canvasSteps.value.length !== 1 && !isInCanvasFirstStep.value)
-  //   )
-  // })
-
-  /**
    * @TODO clear the steps between checkpoint and result [low priority]
    */
   // const clearStepsBetweenCheckpointAndResult = () => {
@@ -158,23 +169,33 @@ const useSteps = () => {
     resetStepsTypesArr()
   }
 
-  watch(editorStepsNum, (newVal, oldVal) => {
-    // skip the init state
-    if (oldVal === 0 && newVal === 1) return
-    stepsTypesArr.value.length = currStepTypeIndex.value + 1
-    pushStepType('editor')
-    setCurrStepTypeIndex(currStepTypeIndex.value + 1)
-    canvasSteps.value.length = canvasCurrStep.value + 1
-  })
+  if (enableWatch) {
+    watch(editorStepsNum, (newVal, oldVal) => {
+      if (isRecordingBothSteps.value) {
+        return
+      }
+      // skip the init state
+      if (oldVal === 0 && newVal === 1) return
+      stepsTypesArr.value.length = currStepTypeIndex.value + 1
+      pushStepType('editor')
+      setCurrStepTypeIndex(currStepTypeIndex.value + 1)
+      canvasSteps.value.length = canvasCurrStep.value + 1
+    })
 
-  watch(canvasStepsNum, (newVal, oldVal) => {
-    // skip the init state
-    if (oldVal === 0 && newVal === 1) return
-    stepsTypesArr.value.length = currStepTypeIndex.value + 1
-    pushStepType('canvas')
-    setCurrStepTypeIndex(currStepTypeIndex.value + 1)
-    editorSteps.value.length = editorCurrStep.value + 1
-  })
+    watch(canvasStepsNum, (newVal, oldVal) => {
+      if (isRecordingBothSteps.value) {
+        // if we recorded both steps, the canvas record will be triggered later than editor record bcz it's asynchronous
+        setIsRecordingBothSteps(false)
+        return
+      }
+      // skip the init state
+      if (oldVal === 0 && newVal === 1) return
+      stepsTypesArr.value.length = currStepTypeIndex.value + 1
+      pushStepType('canvas')
+      setCurrStepTypeIndex(currStepTypeIndex.value + 1)
+      editorSteps.value.length = editorCurrStep.value + 1
+    })
+  }
 
   return {
     undo,
@@ -185,6 +206,7 @@ const useSteps = () => {
     setCheckpoint,
     goToCheckpoint,
     canvasRecord,
+    recordBoth,
     hasUnsavedChanges,
   }
 }

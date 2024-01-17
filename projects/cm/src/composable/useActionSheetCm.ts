@@ -158,14 +158,11 @@ const useActionSheetCm = () => {
       myDesignSavedRoot.value.replace('mydesign-', ''),
       subDesign.id,
       subDesign.subId,
+      1920
     )
-    await addImage(getInitialImg(), thumbUrl)
-      .catch(async () => {
-        await addImage(
-          getSubDesignImage(subDesign, 'original'),
-          thumbUrl
-        )
-      })
+    await addImage(getInitialImg(), thumbUrl).catch(async () => {
+      await addImage(getSubDesignImage(subDesign, 'original'), thumbUrl)
+    })
     return genVideo()
   }
 
