@@ -7,8 +7,8 @@ import type {
   EditorFeature,
   EditorStates,
   EditorType,
-  GenImageOptionToSave,
   GenImageOption,
+  GenImageOptionToSave,
   HiddenMessageStates,
   MagicCombinedStates,
   PowerfulfillStates,
@@ -51,7 +51,7 @@ interface IEditorStore {
   isSendingGenImgReq: boolean
   generatedResults: Array<IGenResult>
   currGenResultIndex: number
-  stepsTypesArr: Array<'canvas' | 'editor'>
+  stepsTypesArr: Array<'canvas' | 'editor' | 'both'>
   currStepTypeIndex: number
   stepTypeCheckPoint: number
   initImgSrc: string
@@ -68,6 +68,7 @@ interface IEditorStore {
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
+  isRecordingBothSteps: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -95,6 +96,7 @@ export const useEditorStore = defineStore('editor', {
     editorTheme: null,
     descriptionPanel: null,
     currDesignThumbIndex: 0,
+    isRecordingBothSteps: false,
     // if the user send empty prompt, show warning at fisrt time
   }),
   getters: {
@@ -317,7 +319,7 @@ export const useEditorStore = defineStore('editor', {
     pageReset(width = 900, height = 1600) {
       this.createNewPage(width, height)
     },
-    pushStepType(type: 'canvas' | 'editor') {
+    pushStepType(type: 'canvas' | 'editor' | 'both') {
       this.stepsTypesArr.push(type)
     },
     setCurrStepTypeIndex(index: number) {
@@ -347,7 +349,7 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOption[]) {
       this.currGenOptions = options
     },
-    updateCurrGenOption(option: { key: string, value: any }) {
+    updateCurrGenOption(option: { key: string; value: any }) {
       const currOption = this.currGenOptions.find((o) => o.key === option.key)
       if (currOption) currOption.value = option.value
     },
@@ -392,6 +394,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
+    },
+    setIsRecordingBothSteps(isRecordingBothSteps: boolean) {
+      this.isRecordingBothSteps = isRecordingBothSteps
     },
   },
 })

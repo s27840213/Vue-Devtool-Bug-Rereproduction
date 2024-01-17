@@ -97,6 +97,14 @@ const domainOptions = computed((): IOptionConfig[] => [
     },
   },
   {
+    title: 'qa',
+    iconName: 'global',
+    selected: hostname.includes('cmqa'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cmqa.vivipic.com/')
+    },
+  },
+  {
     title: 'rd',
     iconName: 'global',
     selected: hostname.includes('cmrd'),
@@ -277,14 +285,18 @@ const debugOptions: Array<IOptionConfig> = [
       setCurrState('domain')
     },
   },
-  {
-    title: '進入 Native 事件測試器',
-    class: 'debug-option',
-    iconName: 'code-bracket-square',
-    callback: () => {
-      router.push({ name: 'NativeEventTester' })
-    },
-  },
+  ...(window.location.host !== 'cm.vivipic.com'
+    ? [
+        {
+          title: '進入 Native 事件測試器',
+          class: 'debug-option',
+          iconName: 'code-bracket-square',
+          callback: () => {
+            router.push({ name: 'NativeEventTester' })
+          },
+        },
+      ]
+    : []),
 ]
 
 const segmentTitleStyle = 'py-4 border-0 border-b-1 border-solid border-lighter/80'

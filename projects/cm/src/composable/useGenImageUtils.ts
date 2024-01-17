@@ -26,7 +26,7 @@ const ids: string[] = []
 const useGenImageUtils = () => {
   const userStore = useUserStore()
   const { setPrevGenParams } = userStore
-  const { prevGenParams } = storeToRefs(userStore)
+  const { prevGenParams, lastUsedMask } = storeToRefs(userStore)
   const { useUsBucket, uploadMap } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
   const { setInitImgSrc, setMaskDataUrl, unshiftGenResults, removeGenResult, updateGenResult } =
@@ -43,7 +43,12 @@ const useGenImageUtils = () => {
     myDesignSavedRoot,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
-  const { saveDesignImageToDocument, saveSubDesign, setAiCredit } = useUserStore()
+  const {
+    saveDesignImageToDocument,
+    saveSubDesign,
+    setAiCredit,
+    setLastUsedMask,
+  } = useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const { setNormalModalInfo, openModal, closeModal } = useModalStore()
   const store = useStore()
@@ -214,6 +219,10 @@ const useGenImageUtils = () => {
         throw new Error('Upload Images For /gen-image Failed')
       }
     }
+    if (maskDataUrl.value) {
+      setLastUsedMask(maskDataUrl.value)
+    }
+
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
     const res = (
@@ -261,9 +270,9 @@ const useGenImageUtils = () => {
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
 
-          if (maskDataUrl.value) {
+          if (lastUsedMask.value) {
             promises.push(
-              saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+              saveDesignImageToDocument(lastUsedMask.value, 'mask', {
                 type: 'png',
                 subDesignId,
               }),
