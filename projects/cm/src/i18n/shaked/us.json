@@ -426,7 +426,7 @@
   "SKT0019": "Cannot find the design",
   "SHR0020": "You need access",
   "CM0001": "Powerful Fill",
-  "CM0002": "Smart Object Fill Capability",
+  "CM0002": "Add, expand, or remove content in images",
   "CM0003": "Try now!",
   "CM0004": "Quick start",
   "CM0005": "Background Replace",
@@ -528,10 +528,10 @@
   "CM0108": "Type",
   "CM0109": "Blend",
   "CM0110": "Light",
-  "CM0111": "CFG Scale",
-  "CM0112": "Adjusting CFG scale allows controlling the degree of creativity vs. literalness in image generation.",
-  "CM0113": "natural color but<newline>fewer details",
-  "CM0114": "vibrant color but<newline>more details",
+  "CM0111": "Prompt weight",
+  "CM0112": "Prompt weight controls how closely the output image follows your text prompt. ",
+  "CM0113": "Natural color but<newline>fewer details",
+  "CM0114": "Vibrant color but<newline>more details",
   "CM0115": "Control Weights",
   "CM0116": "Or get inspired!",
   "CM0117": "Control Step",
@@ -575,5 +575,6 @@
   "CM0156": "Left dragger - Set start step value<newline>Right dragger - Set ending step value",
   "CM0157": "Delete account?",
   "CM0158": "If your account is deleted, you will need to sign up again.",
-  "CM0159": "Pinch to zoom and pan the image smoothly during the fill process."
+  "CM0159": "Pinch to zoom and pan the image smoothly during the fill process.",
+  "CM0163": "Create illusion images Art with AI"
 }
