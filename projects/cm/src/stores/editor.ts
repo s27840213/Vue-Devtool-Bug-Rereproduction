@@ -197,6 +197,7 @@ export const useEditorStore = defineStore('editor', {
         designWidth?: number
         designHeight?: number
         designName?: '' | 'result' | 'original'
+        selectedSubDesignId?: string
       },
     ) {
       const {
@@ -207,11 +208,14 @@ export const useEditorStore = defineStore('editor', {
         designHeight = 1600,
         designName = '',
         designType,
+        selectedSubDesignId = '',
       } = options || {}
 
       this.currStateIndex = 0
       this.editorType = type
       this.designName = designName
+      this.selectedSubDesignId = selectedSubDesignId
+      this.editingSubDesignId = selectedSubDesignId
       this.currDesignId = designId || generalUtils.generateAssetId()
       this.setOpenedDesignType(designType ?? '')
 
@@ -222,6 +226,8 @@ export const useEditorStore = defineStore('editor', {
       if (generatedResults) {
         this.generatedResults = generatedResults
       }
+
+      stepsUtils.reset()
 
       router.push({ name: 'Editor', query: { type, width: designWidth, height: designHeight } })
     },

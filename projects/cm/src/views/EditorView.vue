@@ -301,7 +301,12 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, setDescriptionPanel, changeToSpecificEditorState } = editorStore
+const {
+  changeEditorState,
+  setDescriptionPanel,
+  changeToSpecificEditorState,
+  setSelectedSubDesignId,
+} = editorStore
 const {
   pageSize,
   currActiveFeature,
@@ -312,7 +317,7 @@ const {
   editorType,
   hasGeneratedResults,
   currDesignId,
-  currSubDesignId,
+  editingSubDesignId,
   designName,
   currGeneratedResult,
   isGenerating,
@@ -381,10 +386,11 @@ const handleNextAction = async function () {
   if (canSaveSubDesign.value && designName.value !== '') {
     groupUtils.deselect()
     await saveSubDesign(
-      `${currDesignId.value}/${currSubDesignId.value}`,
-      currSubDesignId.value,
+      `${currDesignId.value}/${editingSubDesignId.value}`,
+      editingSubDesignId.value,
       designName.value,
     )
+    setSelectedSubDesignId(editingSubDesignId.value)
     changeToSpecificEditorState('saving')
   } else if (inGenResultState.value) {
     changeEditorState('next')

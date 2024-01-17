@@ -173,6 +173,7 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import pagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
+import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { Collapse } from 'vue-collapsed'
 
 const emit = defineEmits(['disableBtmPanelTransition'])
@@ -355,6 +356,8 @@ const handleGenerate = async () => {
   pagePinchUtils.resetPageScale()
 
   await waitForGenerating()
+
+  stepsUtils.reset()
 
   const timer = window.setTimeout(() => {
     setSelectedSubDesignId(generatedResults.value[0].id)

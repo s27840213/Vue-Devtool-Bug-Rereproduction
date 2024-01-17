@@ -204,6 +204,7 @@ export const useUserStore = defineStore('user', () => {
         }),
         designWidth: width,
         designHeight: height,
+        selectedSubDesignId: subId,
       })
 
       setMaskDataUrl('')
@@ -265,6 +266,7 @@ export const useUserStore = defineStore('user', () => {
         }),
         designWidth: width,
         designHeight: height,
+        selectedSubDesignId: subId,
       })
 
       setInitImgSrc(getTargetImageUrl(type, id, subId, 'original'))
