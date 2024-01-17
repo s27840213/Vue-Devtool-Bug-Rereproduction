@@ -9,6 +9,7 @@ export interface INormalModal {
   cancel: () => void
   confirmTextStyle?: string
   cancelTextStyle?: string
+  extraContentType?: string
 }
 
 export const useModalStore = defineStore('modal', () => {
@@ -24,6 +25,7 @@ export const useModalStore = defineStore('modal', () => {
     cancel: () => {
       console.log('cancel')
     },
+    extraContentType: '',
   })
 
   const setNormalModalInfo = (newModalInfo: INormalModal) => {
@@ -50,6 +52,7 @@ export const useModalStore = defineStore('modal', () => {
       cancel: () => {
         console.log('cancel')
       },
+      extraContentType: '',
     })
   }
   return { isModalOpen, modalInfo, setNormalModalInfo, closeModal, openModal }

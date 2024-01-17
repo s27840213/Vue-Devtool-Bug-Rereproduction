@@ -571,16 +571,16 @@ const fitPage = (ratio: number) => {
     const translationRatio = {
       // x: 0.5,
       // y: 0.5
-      x: ((-page.x) + editorContainerSize.value.width * 0.5) / (page.width * _f),
-      y: ((-page.y) + editorContainerSize.value.height * 0.5) / (page.height * _f),
+      x: (-page.x + editorContainerSize.value.width * 0.5) / (page.width * _f),
+      y: (-page.y + editorContainerSize.value.height * 0.5) / (page.height * _f),
     }
     const sizeDiff = {
       w: page.width * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01,
-      h: page.height * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01
+      h: page.height * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01,
     }
     const posDiff = {
       x: -sizeDiff.w * translationRatio.x,
-      y: -sizeDiff.h * translationRatio.y
+      y: -sizeDiff.h * translationRatio.y,
     }
     const newPos = {
       x: page.x + posDiff.x,
