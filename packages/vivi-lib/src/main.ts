@@ -52,7 +52,6 @@ window.onerror = function (msg, url, line, colno, error) {
   ].join(' - ')
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
-    console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
     if ((generalUtils.isPic && store.getters['user/isAdmin']) ||
         (generalUtils.isStk && store.getters['vivisticker/getDebugMode'])) {
       const id = generalUtils.isPic 

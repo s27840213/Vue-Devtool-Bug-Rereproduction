@@ -34,6 +34,7 @@ import textPropUtils from './textPropUtils'
 import textUtils, { SYSTEM_FONTS } from './textUtils'
 import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
+import { notify } from '@kyvg/vue3-notification'
 
 declare let window: CustomWindow
 
@@ -1487,7 +1488,7 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   }
 
   getSubscribeInfo() {
-    const planIds = Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
+    const planIds = Object.values(store.getters['payment/getPayment'].planId)
     this.sendToIOS('SUBSCRIBE', { option: 'checkState' })
     this.sendToIOS('SUBSCRIBE', { option: 'getProducts', planId: planIds })
   }
@@ -1557,6 +1558,11 @@ class ViviStickerUtils extends WebViewUtils<IUserInfo> {
           msg: i18n.global.t('STK0023'),
         },
       )
+    } else if (data.reason === 'RESTORED_DURING_PURCHASING') {
+      notify({
+        group: 'error',
+        text: 'failed to initialize subscription',
+      })
     }
     store.commit('payment/SET_paymentPending', { purchase: false, restore: false })
   }

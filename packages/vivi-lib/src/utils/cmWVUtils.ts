@@ -664,7 +664,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async getProducts() {
     if (this.inBrowserMode) return
     const res = await this.callIOSAsHTTPAPI('GET_PRODUCTS', {
-      planId: Object.values(store.getters['payment/getPayment'].planId).concat(Object.values(constantData.planId))
+      planId: Object.values(store.getters['payment/getPayment'].planId)
     }, { timeout: -1 })
     if (!res) return
     const { planInfo, priceCurrency } = res as GetProductResponse
