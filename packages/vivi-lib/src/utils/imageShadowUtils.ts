@@ -7,6 +7,8 @@ import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import stkWVUtils from '@/utils/stkWVUtils'
 import { getDilate } from './canvasAlgorithms'
+import cmWVUtils from './cmWVUtils'
+import flipUtils from './flipUtils'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import logUtils from './logUtils'
@@ -146,7 +148,7 @@ class ImageShadowUtils {
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
     const { canvasT, canvasMaxSize } = this
-    const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow } } = config
+    const { styles: { width, height, imgWidth, imgHeight, shadow } } = config
     const { maxsize = 1600, middsize = 510 } = shadow
     const ctxT = this.canvasT.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
 
@@ -202,6 +204,14 @@ class ImageShadowUtils {
         const scaleRatio = img.naturalWidth / imgWidth
         const x = (canvas.width - drawCanvasW) * 0.5
         const y = (canvas.height - drawCanvasH) * 0.5
+        let imgX = config.styles.imgX
+        let imgY = config.styles.imgY
+        if (config.styles.horizontalFlip) {
+          imgX = flipUtils.imgFlipMapper(config, 'h').imgX
+        }
+        if (config.styles.verticalFlip) {
+          imgY = flipUtils.imgFlipMapper(config, 'v').imgY
+        }
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
         ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
       }
@@ -368,11 +378,17 @@ class ImageShadowUtils {
 
     const { styles } = config
     const { timeout = DRAWING_TIMEOUT, cb } = params
-    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
+    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
-
     const scaleRatio = img.naturalWidth / _imgWidth
+    let { imgX: _imgX, imgY: _imgY } = styles
+    if (config.styles.horizontalFlip) {
+      _imgX = flipUtils.imgFlipMapper(config, 'h').imgX
+    }
+    if (config.styles.verticalFlip) {
+      _imgY = flipUtils.imgFlipMapper(config, 'v').imgY
+    }
     const imgX = _imgX * scaleRatio
     const imgY = _imgY * scaleRatio
     const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
@@ -900,14 +916,29 @@ class ImageShadowUtils {
     store.commit('shadow/ADD_UPLOAD_IMG', data)
   }
 
-  delIosOldImg(srcObjs: Array<SrcObj>, editorType = stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)) {
-    const promises = [] as Promise<{ key: string, flag: number, name: string }>[]
+  delIosOldImg(srcObjs: Array<SrcObj>, editorType?: string) {
+    const promises = [] as Promise<{ key?: string, flag?: number, name: string }>[]
     srcObjs.forEach(srcObj => {
       if (srcObj.type !== 'ios') return
-      const key = `mydesign-${editorType}`
-      const designId = store.getters['vivisticker/getEditingDesignId']
-      const name = (srcObj.assetId as string).split('/').pop() || ''
-      promises.push(stkWVUtils.deleteImage(key, name, 'png', designId) as Promise<{ key: string, flag: number, name: string }>)
+      if (generalUtils.isStk) {
+        const key = `mydesign-${editorType ?? stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
+        const designId = store.getters['vivisticker/getEditingDesignId']
+        const name = (srcObj.assetId as string).split('/').pop() || ''
+        promises.push(
+          stkWVUtils.deleteImage(
+            key, name, 'png', designId
+          ) as Promise<{ key: string, flag: number, name: string }>
+        )
+      } else if (generalUtils.isCm) {
+        promises.push(
+          new Promise(resolve => {
+            console.warn('delete file', srcObj.assetId as string + '.png')
+            cmWVUtils.deleteFile(
+              srcObj.assetId as string + '.png'
+            ).then(() => { resolve({ name: srcObj.assetId as string }) })
+          })
+        )
+      }
     })
     return promises
   }
@@ -931,15 +962,66 @@ class ImageShadowUtils {
       })
       for (const p of this.delIosOldImg(imgBuffs)) {
         promises.push(new Promise(resolve => {
-          p.then(data => {
+          p.then((data) => {
             const target = imgBuffs.find(b => (b.assetId as string).split('/').pop() === data.name)
             this.updateIosShadowUploadBuffer(pageIndex, target ? [target] : [], true)
-            resolve(data)
+            resolve(data.name)
           })
         }))
       }
     })
     return Promise.all(promises)
+  }
+
+  iosImgDelHandler_cm(cmData: {editorType: string, designId: string }) {
+    const { editorType, designId } = cmData
+    const promises = [] as Promise<unknown>[]
+    const pages = pageUtils.getPages
+    const pagesConfigUpdater = [] as Array<(pages: Array<IPage>) => void>
+    pages.forEach((page, pageIndex) => {
+      const imgBuffs = [...page.iosImgUploadBuffer.shadow]
+      for (let layerIndex = 0; layerIndex < page.layers.length; layerIndex++) {
+        const l = page.layers[layerIndex]
+        if (l.type === LayerType.image) {
+          const name = (l.styles.shadow.srcObj.assetId as string).split('/').pop()
+          const index = imgBuffs.findIndex(imgBuff => (imgBuff.assetId as string).split('/').pop() === name)
+          if (index !== -1) {
+            imgBuffs.splice(index, 1)
+
+            // this func used to update the json config after this iosImgDelHandler finished
+            pagesConfigUpdater.push(
+              (pages: Array<IPage>) => {
+                (pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.srcObj = {
+                  type: 'ios',
+                  userId: '',
+                  assetId: `mydesign-${editorType}/${designId}/imgShadow/${name}`
+                }
+              }
+            )
+          }
+        }
+      }
+      for (const p of this.delIosOldImg(imgBuffs)) {
+        promises.push(new Promise(resolve => {
+          p.then((data) => {
+            const target = imgBuffs.find(b => (b.assetId as string) === data.name)
+            this.updateIosShadowUploadBuffer(pageIndex, target ? [target] : [], true)
+            resolve(data.name)
+          })
+        }))
+      }
+    })
+    return Promise.all(promises)
+      .then(async () => {
+        await cmWVUtils.cloneFile(
+          `tmp/imgShadow/${editorType}/${designId}`,
+          `mydesign-${editorType}/${designId}/imgShadow`
+        )
+        await cmWVUtils.deleteFile(
+          `tmp/imgShadow/${editorType}/${designId}`
+        )
+        pagesConfigUpdater.forEach(cb => cb(pages))
+      })
   }
 
   /**
@@ -951,6 +1033,7 @@ class ImageShadowUtils {
     const type = stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)
     const key = `mydesign-${type}`
     const designId = store.getters['vivisticker/getEditingDesignId']
+    if (designId === '') return
     const data = await stkWVUtils.getAsset(key, designId, 'config')
     const oldPages = pageUtils.newPages(data.pages) as Array<IPage>
 
@@ -969,14 +1052,14 @@ class ImageShadowUtils {
     })
   }
 
-  TEST_showtTestCanvas(canvas: HTMLCanvasElement) {
+  TEST_showtTestCanvas(canvas: HTMLCanvasElement, time = 3000) {
     const canvasTest = document.createElement('canvas')
     canvasTest.setAttribute('width', canvas.width.toString())
     canvasTest.setAttribute('height', canvas.height.toString())
     const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
     ctxText.drawImage(canvas, 0, 0)
     document.body.appendChild(canvasTest)
-    setTimeout(() => document.body.removeChild(canvasTest), 3000)
+    setTimeout(() => document.body.removeChild(canvasTest), time)
     canvasTest.style.position = 'absolute'
     canvasTest.style.top = '0'
     canvasTest.style.zIndex = '10000'
@@ -1049,7 +1132,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   frame: {
-    spread: { max: 30, min: 0, weighting: 2 },
+    spread: { max: process.env.VUE_APP_APP_NAME === 'cm' ? 50 : 30, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 2 }
   },

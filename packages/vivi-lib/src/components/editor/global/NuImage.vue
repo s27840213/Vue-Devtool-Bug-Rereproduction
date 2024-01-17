@@ -273,6 +273,7 @@ export default defineComponent({
       }
     },
     showCanvas(val) {
+      console.log('show canvas', val)
       if (val) {
         setTimeout(() => {
           this.handleNewShadowEffect(false)
@@ -360,24 +361,6 @@ export default defineComponent({
         }
       },
       deep: true
-    },
-    isBlurImg(val) {
-      const { imgWidth, imgHeight } = this.config.styles
-      const newSize = val ? imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight)) : this.getImgDimension
-      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, newSize))
-      imageUtils.imgLoadHandler(src, () => {
-        // bcz this is an async operation, need to check if isBlurImg is the same val
-        if (this.isBlurImg === val) {
-          this.src = src
-        }
-      }, {
-        crossOrigin: true,
-        error: () => {
-          if (newSize === 'xtra') {
-            this.handleXtraErr()
-          }
-        }
-      })
     }
   },
   components: { NuAdjustImage },
@@ -421,9 +404,11 @@ export default defineComponent({
       // forRender img not apply filter
       if (this.forRender) return false
 
+      // apply for vvpic-mobile/cm only
       if (!this.$isStk && this.$isTouchDevice()) {
+        const isCurrLayerTexting = layerUtils.getCurrConfig.isTyping as boolean
         return this.isAdjustImage && !this.isLayerCtrlling && !this.isPinchingEditor &&
-          !this.isImgCtrl && !this.isBgImgCtrl
+          !this.isImgCtrl && !this.isBgImgCtrl && !isCurrLayerTexting
       } else if (this.$isStk) {
         let isCurrLayerPinched = false
         const { controlState } = this
@@ -445,12 +430,9 @@ export default defineComponent({
       return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },
     finalSrc(): string {
-      let src = this.src
+      const src = this.src
       if (this.$route.name === 'Preview') {
         return imageUtils.appendCompQueryForVivipic(src)
-      }
-      if (!this.config.previewSrc) {
-        src = imageUtils.appendQuery(src, 'ver', generalUtils.generateRandomString(4))
       }
       return src
     },
@@ -561,8 +543,11 @@ export default defineComponent({
       }
     },
     getImgDimension(): number | string {
-      const { srcObj } = this.config
-      const { imgWidth, imgHeight } = this.config.styles
+      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      if (this.isBlurImg && this.userId !== 'backendRendering') {
+        return imageUtils.getSrcSize(this.config.srcObj, Math.max(imgWidth, imgHeight))
+      }
+
       let renderW = imgWidth * this.contentScaleRatio
       let renderH = imgHeight * this.contentScaleRatio
       const primaryLayer = this.primaryLayer
@@ -600,7 +585,7 @@ export default defineComponent({
           config: this.config,
           layerInfo: this.layerInfo()
         }
-        imageShadowPanelUtils.handleShadowUpload(layerData, true)
+        imageShadowPanelUtils.handleShadowUpload({ layerData, forceUpload: true })
       }
     },
     onError() {
@@ -863,7 +848,6 @@ export default defineComponent({
     },
     handleDimensionUpdate(newVal = 0 as number | string, oldVal = 0 as number | string) {
       if (this.config.srcObj.type === 'ios') return
-      if (this.isBlurImg) return
 
       const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
       if (!this.isOnError && currUrl) {
@@ -988,7 +972,7 @@ export default defineComponent({
             config: this.config,
             layerInfo: this.layerInfo
           }
-          imageShadowPanelUtils.handleShadowUpload(layerData)
+          imageShadowPanelUtils.handleShadowUpload({ layerData })
         }
       }
     },
@@ -1256,7 +1240,7 @@ export default defineComponent({
           config: this.config,
           layerInfo: this.layerInfo
         }
-        imageShadowPanelUtils.handleShadowUpload(layerData)
+        imageShadowPanelUtils.handleShadowUpload({ layerData })
       })
     },
     fetchShadowImg() {

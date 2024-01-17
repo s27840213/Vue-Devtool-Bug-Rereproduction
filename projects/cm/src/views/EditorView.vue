@@ -1,11 +1,10 @@
 <template lang="pug">
 div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
-  headerbar(
-    class="editor-header box-border px-24 z-median"
-    :middGap="32"
-    ref="headerbarRef")
+  headerbar(class="editor-header box-border px-24" ref="headerbarRef")
     template(#left)
-      back-btn
+      back-btn(
+        v-if="canBack"
+        :toTarget="fromMyDesign ? '/mydesign' : '/'")
     template(
       v-if="inEditingState && !inGenResultState"
       #middle)
@@ -14,7 +13,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           :title="centerTitle"
           :url="centerUrl")
       div(v-else-if="isResizingCanvas" class="text-white typo-h5 whitespace-nowrap")
-        span {{ `${pageSize.width} x ${pageSize.height}` }}
+        span {{ `${outputSize.width} x ${outputSize.height}` }}
       template(v-else-if="isCropping")
         svg-icon(
           class="layer-action"
@@ -33,25 +32,36 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       template(v-else)
         svg-icon(
           v-for="btn in centerBtns"
+          :class="{ 'pointer-events-none': btn.disabled }"
           :key="btn.icon"
           :iconName="btn.icon"
           :iconColor="btn.disabled ? 'lighter' : 'white'"
           :iconWidth="`${btn.width}px`"
           @click="btn.action")
     template(#right)
-      nubtn(
-        v-if="inGenResultState"
-        @click="handleNextAction") {{ inEditingState ? $t('CM0012') : inGenResultState ? $t('NN0133') : '' }}
-      router-link(
-        v-if="inSavingState"
-        custom
-        :to="'/'"
-        v-slot="{ navigate }")
+      template(v-if="!inBgRemoveMode")
         svg-icon(
+          v-if="canGotoProject"
+          :iconName="'grid-solid'"
+          :iconColor="'transparent'"
+          :strokeColor="'white'"
+          :iconWidth="'24px'"
+          @click="handleProjectBtnAction")
+        svg-icon(
+          v-if="inGenResultState || canSaveSubDesign"
+          iconName="download"
           iconColor="white"
-          iconName="cm_home"
-          iconWidth="22px"
-          @click="handleHomeBtnAction(navigate)")
+          @click="handleNextAction")
+        router-link(
+          v-if="inSavingState"
+          custom
+          :to="'/'"
+          v-slot="{ navigate }")
+          svg-icon(
+            iconColor="white"
+            iconName="cm_home"
+            iconWidth="22px"
+            @click="handleHomeBtnAction(navigate)")
   canvas-resizer(
     v-if="isResizingCanvas"
     :pageIndex="layerUtils.pageIndex"
@@ -59,7 +69,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     :noBg="isDuringCopy && isNoBg")
   div(
     v-else-if="!inSavingState"
-    class="editor-container flex-center relative"
+    class="editor-container flex-center relative overflow-hidden"
     ref="editorContainerRef"
     id="mobile-editor__content"
     @pointerdown="selectStart"
@@ -67,16 +77,30 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
     @pinch="pagePinchHandler"
     @pointerleave="removePointer"
     v-touch)
-    div(class="w-full h-full box-border flex-center" @click.self="outerClick")
+    div(
+      v-show="!inBgRemoveMode"
+      class="w-full h-full box-border flex-center"
+      @click.self="outerClick")
       div(
         id="screenshot-target"
-        class="wrapper relative tutorial-powerful-fill-3--highlight"
+        class="wrapper absolute top-0 left-0 flex-center bg-dark-2/80 tutorial-powerful-fill-3--highlight"
         :style="wrapperStyles"
         ref="editorWrapperRef")
+        //- loading for gen result
+        div(
+          v-if="inGenResultState && currImgSrc === ''"
+          class="w-full h-fit grid grid-rows-2 gap-16 justify-center text-white")
+          div(class="typo-body-md grid justify-center gap-8")
+            span {{ fakeLoading }}%
+            div(class="relative rounded-full bg-yellow-0/50 w-100 h-8")
+              div(class="absolute rounded-full bg-yellow-cm h-8" :style="{ width: fakeLoading + 'px' }")
+          div(class="typo-body-sm max-w-245") {{ fakeLoadingText }}
+        //- Show gen result
         img(
-          v-if="inGenResultState"
+          v-else-if="inGenResultState"
           class="h-full object-cover"
           :src="currImgSrc")
+        //- Editor
         template(v-else)
           nu-page(
             class="z-page"
@@ -87,7 +111,6 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             :noBg="isDuringCopy && isNoBg"
             :hideHighlighter="true")
           canvas-section(
-            v-if="inEditingState"
             class="absolute top-0 left-0 w-full h-full"
             :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
             :containerDOM="editorContainerRef"
@@ -95,86 +118,59 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
             ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
-          class="demo-brush"
           :class="demoBrushSizeOutline"
+          class="demo-brush"
           :style="demoBrushSizeStyles")
     sidebar-tabs(
       v-if="showSidebarTabs"
       class="absolute top-1/2 right-4 -translate-y-1/2 z-siebar-tabs"
       ref="sidebarTabsRef")
+    transition(name="fade-in")
+      loading-brick(
+        v-if="isAutoFilling"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
+    bg-remove-container(
+      v-if="inBgRemoveMode && editorContainerRef"
+      class="absolute top-0 left-0 z-bg-remove bg-dark-6"
+      :containerWH="editorContainerSize"
+      :containerRef="editorContainerRef"
+      :previewSrc="previewSrc")
   div(v-else class="editor-view__saving-state")
-    div(class="w-full h-full flex-center flex-col gap-8 overflow-hidden rounded-8 p-16 box-border")
-      div(class="result-showcase w-fit h-fit rounded-8 overflow-hidden" ref="resultShowcase")
-        img(
-          class="result-showcase__card result-showcase__card--back absolute top-0 left-0"
-          :class="{ 'is-flipped': !showVideo }"
-          :src="currImgSrc")
-        img(
-          class="result-showcase__card result-showcase__card--front"
-          :class="{ 'is-flipped': showVideo }"
-          :src="initImgSrc")
-        //- img(
-        //-   class="result-showcase__card result-showcase__card--front"
-        //-   :class="{ 'is-flipped': !showVideo }"
-        //-   :src="currImgSrc")
-        //- div(class="result-showcase__card result-showcase__card--back" :class="{ 'is-flipped': showVideo }")
-        //-   img(
-        //-     v-if="!isVideoGened"
-        //-     class="w-full h-full absolute top-0 left-0 object-cover"
-        //-     :src="initImgSrc")
-        //-   video(
-        //-     v-else
-        //-     class="w-full h-full absolute top-0 left-0 object-cover"
-        //-     ref="video"
-        //-     webkit-playsinline
-        //-     playsinline
-        //-     loop
-        //-     autoplay
-        //-     mutes
-        //-     :src="generatedResults[currGenResultIndex].video")
-      div(class="flex-between-center gap-10")
-        div(
-          class="w-8 h-8 rounded-full transition-colors"
-          :class="showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = true)")
-        div(
-          class="w-8 h-8 rounded-full transition-colors"
-          :class="!showVideo ? 'bg-yellow-cm' : 'bg-lighter/80'"
-          @click="() => (showVideo = false)")
-    div(class="flex-between-center w-full px-24 py-8 box-border")
-      div(class="flex items-center gap-8")
-        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
-          svg-icon(
-            iconName="crown"
-            :iconColor="'dark-6'"
-            iconWidth="20px")
-        span(class="typo-h5 text-white") {{ $t('CM0071') }}
-      slide-toggle(
-        v-model="removeWatermark"
-        :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
-        margin="2px"
-        optionWidth="22px"
-        optionHeight="22px"
-        :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
-        :toggleMode="true"
-        :overlapSize="'8px'")
-    div(class="flex-between-center w-full px-24 py-8 box-border")
-      div(class="flex items-center gap-8")
-        div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
-          svg-icon(
-            iconName="crown"
-            :iconColor="'dark-6'"
-            iconWidth="20px")
-        span(class="typo-h5 text-white") {{ $t('CM0072') }}
-      slide-toggle(
-        v-model="highResolutionPhoto"
-        :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
-        margin="2px"
-        optionWidth="22px"
-        optionHeight="22px"
-        :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
-        :toggleMode="true"
-        :overlapSize="'8px'")
+    sub-design-detail
+    //- div(class="flex-between-center w-full px-24 py-8 box-border")
+    //-   div(class="flex items-center gap-8")
+    //-     div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
+    //-       svg-icon(
+    //-         iconName="crown"
+    //-         :iconColor="'dark-6'"
+    //-         iconWidth="20px")
+    //-     span(class="typo-h5 text-white") {{ $t('CM0071') }}
+    //-   slide-toggle(
+    //-     v-model="removeWatermark"
+    //-     :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
+    //-     margin="2px"
+    //-     optionWidth="22px"
+    //-     optionHeight="22px"
+    //-     :bgColor="removeWatermark ? 'yellow-cm' : 'lighter'"
+    //-     :toggleMode="true"
+    //-     :overlapSize="'8px'")
+    //- div(class="flex-between-center w-full px-24 py-8 box-border")
+    //-   div(class="flex items-center gap-8")
+    //-     div(class="flex-center rounded-full bg-yellow-cm aspect-square p-4")
+    //-       svg-icon(
+    //-         iconName="crown"
+    //-         :iconColor="'dark-6'"
+    //-         iconWidth="20px")
+    //-     span(class="typo-h5 text-white") {{ $t('CM0072') }}
+    //-   slide-toggle(
+    //-     v-model="highResolutionPhoto"
+    //-     :options="[ { value: false, label: '' }, { value: true, label: '' }, ]"
+    //-     margin="2px"
+    //-     optionWidth="22px"
+    //-     optionHeight="22px"
+    //-     :bgColor="highResolutionPhoto ? 'yellow-cm' : 'lighter'"
+    //-     :toggleMode="true"
+    //-     :overlapSize="'8px'")
   transition(name="bottom-up-down")
     component(
       v-if="showActiveTab && inEditingState"
@@ -182,35 +178,37 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       class="bg-dark-6 absolute left-0 w-full z-asset-panel box-border"
       :style="assetPanelStyles"
       v-bind="assetPanelProps")
+  spinner(
+    v-if="isProcessingBgRemove"
+    :textContent="t('CM0086')")
 </template>
 <script setup lang="ts">
 import Headerbar from '@/components/Headerbar.vue'
 import CanvasResizer from '@/components/editor/CanvasResizer.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import useCanvasUtils from '@/composable/useCanvasUtilsCm'
 import useGenImageUtils from '@/composable/useGenImageUtils'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
-import useTutorial from '@/composable/useTutorial'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
+import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
-import PixiRecorder from '@/utils/pixiRecorder'
+import type { GenImageParams } from '@/types/api'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
+import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
 import PanelObject from '@nu/vivi-lib/components/editor/panelMobile/PanelObject.vue'
 import PanelText from '@nu/vivi-lib/components/editor/panelMobile/PanelText.vue'
 import PanelTextUs from '@nu/vivi-lib/components/editor/panelMobileUs/PanelText.vue'
-import SlideToggle from '@nu/vivi-lib/components/global/SlideToggle.vue'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
-import type { IGroup, IImage, ILayer } from '@nu/vivi-lib/interfaces/layer'
-import type { ILayerInfo } from '@nu/vivi-lib/store/types'
+import type { IGroup, IImage } from '@nu/vivi-lib/interfaces/layer'
 import { LayerType } from '@nu/vivi-lib/store/types'
-import SwipeDetector from '@nu/vivi-lib/utils/SwipeDetector'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import controlUtils from '@nu/vivi-lib/utils/controlUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -218,7 +216,6 @@ import mappingUtils from '@nu/vivi-lib/utils/mappingUtils'
 import { MovingUtils } from '@nu/vivi-lib/utils/movingUtils'
 import PagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import PinchControlUtils from '@nu/vivi-lib/utils/pinchControlUtils'
 import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useEventBus } from '@vueuse/core'
@@ -226,18 +223,23 @@ import type { AnyTouchEvent } from 'any-touch'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
 
+const { t } = useI18n()
 // #region refs & vars
 const headerbarRef = ref<typeof Headerbar | null>(null)
 const editorContainerRef = ref<HTMLElement | null>(null)
 const editorWrapperRef = ref<HTMLElement | null>(null)
 
 // const sidebarTabsRef = ref<HTMLElement | null>(null)
-const video = ref<HTMLVideoElement | null>(null)
 
 // const { width: sidebarTabsWidth } = useElementBounding(sidebarTabsRef)
 
 const { width: editorContainerWidth, height: editorContainerHeight } =
   useElementBounding(editorContainerRef)
+
+const editorContainerSize = computed(() => ({
+  width: editorContainerWidth.value,
+  height: editorContainerHeight.value,
+}))
 
 const i18n = useI18n()
 const isDuringCopy = computed(() => store.getters['cmWV/getIsDuringCopy'])
@@ -246,12 +248,17 @@ const isCropping = computed(() => {
   return store.getters.getPages.length > 0 && imageUtils.isImgControl()
 })
 const currActivePanel = computed(() => store.getters['mobileEditor/getCurrActivePanel'])
+const layerIndex = computed(() => layerUtils.layerIndex)
 const isResizingCanvas = computed(() => store.getters['canvasResize/getIsResizing'])
+const outputSize = computed(() => {
+  const ratio = 1920 / Math.max(pageSize.value.width, pageSize.value.height)
+  return {
+    width: Math.round(ratio * pageSize.value.width),
+    height: Math.round(ratio * pageSize.value.height),
+  }
+})
 
 const { ids } = useGenImageUtils()
-
-const removeWatermark = ref(false)
-const highResolutionPhoto = ref(false)
 
 const showSidebarTabs = computed(
   () =>
@@ -261,8 +268,14 @@ const showSidebarTabs = computed(
     !showSelectionOptions.value &&
     !isCropping.value &&
     !showBrushOptions.value &&
-    editorType.value !== 'magic-combined',
+    layerIndex.value === -1 &&
+    editorType.value !== 'magic-combined' &&
+    !inBgRemoveMode.value,
 )
+
+const modalStore = useModalStore()
+const { closeModal, openModal, setNormalModalInfo } = modalStore
+
 // #endregion
 
 // #region hooks related
@@ -277,6 +290,8 @@ onBeforeRouteLeave((to, from) => {
       editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
+      setPrevGenParams({ requestId: '', params: {} as GenImageParams })
+      store.commit('canvasResize/SET_isResizing', false)
     }, 1000)
   }
 })
@@ -286,18 +301,30 @@ onBeforeRouteLeave((to, from) => {
 const { inEditingState, atEditor, inAspectRatioState, inSavingState, showSelectionOptions } =
   useStateInfo()
 const editorStore = useEditorStore()
-const { changeEditorState, updateGenResult, setDescriptionPanel } = editorStore
+const { changeEditorState, setDescriptionPanel, changeToSpecificEditorState } = editorStore
 const {
   pageSize,
   currActiveFeature,
-  generatedResults,
   inGenResultState,
-  currGenResultIndex,
+  selectedSubDesignId,
   initImgSrc,
   showBrushOptions,
   editorType,
+  hasGeneratedResults,
+  currDesignId,
+  currSubDesignId,
+  designName,
+  currGeneratedResult,
+  isGenerating,
 } = storeToRefs(editorStore)
+const userStore = useUserStore()
+const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } =
+  userStore
+
+const { removeWatermark } = storeToRefs(userStore)
+
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
+const fromMyDesign = hasGeneratedResults.value
 
 watch(
   () => isManipulatingCanvas.value,
@@ -306,45 +333,66 @@ watch(
   },
 )
 
-const isVideoGened = ref(false)
-const handleNextAction = function () {
-  if (inAspectRatioState.value) {
-    changeEditorState('next')
-    useTutorial().runTutorial(editorType.value)
-  } else if (inEditingState.value) {
-    changeEditorState('next')
+const currImgSrc = computed(() => {
+  return selectedSubDesignId.value === '' ? initImgSrc.value : currGeneratedResult.value?.url ?? ''
+})
+
+const fakeLoading = ref(5)
+watch(
+  () => isGenerating.value && inGenResultState.value,
+  (val, old) => {
+    if (!val || old) return
+
+    // Start fake loading.
+    fakeLoading.value = 0
+    const fakeLoadingId = window.setInterval(() => {
+      fakeLoading.value += Math.floor(Math.random() * 3)
+      if (fakeLoading.value >= 95) {
+        fakeLoading.value = 95
+        // Stop fake loading.
+        window.clearInterval(fakeLoadingId)
+      }
+    }, 100)
+  },
+)
+const fakeLoadingText = computed(() => {
+  if (fakeLoading.value > 90) return t('CM0149')
+  else if (fakeLoading.value > 50) return t('CM0148')
+  else return t('CM0147')
+})
+// #endregion
+
+// #region headerbar state & callback
+const canBack = computed(
+  () =>
+    !inBgRemoveMode.value &&
+    !isProcessingBgRemove.value &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value),
+)
+
+const canSaveSubDesign = computed(() => {
+  return (
+    inEditingState.value &&
+    designName.value !== '' &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+  )
+})
+const handleNextAction = async function () {
+  if (canSaveSubDesign.value && designName.value !== '') {
+    groupUtils.deselect()
+    await saveSubDesign(
+      `${currDesignId.value}/${currSubDesignId.value}`,
+      currSubDesignId.value,
+      designName.value,
+    )
+    changeToSpecificEditorState('saving')
   } else if (inGenResultState.value) {
     changeEditorState('next')
-    isVideoGened.value = false
-    const currGenResult = generatedResults.value[currGenResultIndex.value]
-    if (currGenResult) {
-      if (!currGenResult.video) {
-        const src = imageUtils.appendRandomQuery(initImgSrc.value)
-        const res = imageUtils.appendRandomQuery(
-          generatedResults.value[currGenResultIndex.value].url,
-        )
-        const pixiRecorder = new PixiRecorder(src, res)
-        pixiRecorder.genVideo().then((data) => {
-          if (data) {
-            isVideoGened.value = true
-            updateGenResult(currGenResult.id, { video: data })
-          }
-        })
-      } else {
-        isVideoGened.value = true
-      }
-    }
   }
 }
 
-const currImgSrc = computed(() => {
-  return currGenResultIndex.value === -1
-    ? initImgSrc.value
-    : generatedResults.value[currGenResultIndex.value]?.url ?? ''
-})
-
-const useStep = useSteps()
-const { undo, redo, isInFirstStep, isInLastStep } = useStep
+const useStep = useSteps(true)
+const { undo, redo, reset, isInFirstStep, isInLastStep, hasUnsavedChanges } = useStep
 
 type centerBtn = {
   icon: string
@@ -353,20 +401,40 @@ type centerBtn = {
   action?: () => void
 }
 const centerBtns = computed<centerBtn[]>(() => {
+  if (isProcessingBgRemove.value) return []
   const retTabs = []
   const stepBtns = [
     { icon: 'cm_undo', disabled: isInFirstStep.value, width: 20, action: undo },
     { icon: 'cm_redo', disabled: isInLastStep.value, width: 20, action: redo },
   ]
-  if (editorType.value === 'hidden-message')
+  if (editorType.value === 'hidden-message' && !inBgRemoveMode.value)
     retTabs.push({
       icon: 'question-mark-circle',
       disabled: false,
       width: 20,
-      action: () => setDescriptionPanel('hidden-message-help'),
+      action: () => setDescriptionPanel('hidden-message/help'),
     })
   retTabs.push(...stepBtns)
-  if (currEditorTheme.value && editorType.value === 'hidden-message')
+  if (inBgRemoveMode.value) {
+    retTabs.unshift({
+      icon: !showInitImage.value ? 'eye-slash' : 'eye',
+      disabled: false,
+      width: 20,
+      action: () => {
+        setShowInitImage(!showInitImage.value)
+      },
+    })
+
+    retTabs.push({
+      icon: 'reset',
+      disabled: !modifiedFlag.value,
+      width: 20,
+      action: () => {
+        setRestoreInitState(true)
+      },
+    })
+  }
+  if (currEditorTheme.value && editorType.value === 'hidden-message' && !inBgRemoveMode.value)
     retTabs.push({
       icon: currEditorTheme.value.toggleIcon,
       disabled: false,
@@ -375,6 +443,45 @@ const centerBtns = computed<centerBtn[]>(() => {
     })
   return retTabs
 })
+
+const canGotoProject = computed(() => {
+  return (
+    hasGeneratedResults.value &&
+    inEditingState.value &&
+    !['cm_brush', 'selection'].includes(currActiveFeature.value)
+  )
+})
+const handleProjectBtnAction = () => {
+  if (hasUnsavedChanges.value) {
+    setNormalModalInfo({
+      title: t('CM0025'),
+      content: t('CM0026'),
+      confirmText: t('CM0028'),
+      cancelText: t('NN0203'),
+      confirm: () => {
+        groupUtils.deselect()
+        changeEditorState('next')
+        reset()
+        closeModal()
+      },
+      cancel: () => {
+        closeModal()
+      },
+    })
+    openModal()
+    return
+  }
+
+  groupUtils.deselect()
+  reset()
+  changeEditorState('next')
+}
+
+const handleHomeBtnAction = (navagate: () => void) => {
+  setCurrOpenDesign(undefined)
+  setCurrOpenSubDesign(undefined)
+  navagate()
+}
 // #endregion
 
 // #region page related
@@ -392,7 +499,8 @@ const fitScaleRatio = computed(() => {
     return 1
 
   const widthRatio = (editorContainerWidth.value - 8) / pageSize.value.width
-  const heightRatio = editorContainerHeight.value / pageSize.value.height
+  // @Note - 24 is used to prevent the control point being cut off
+  const heightRatio = (editorContainerHeight.value - 24) / pageSize.value.height
 
   const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
   const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
@@ -400,35 +508,69 @@ const fitScaleRatio = computed(() => {
 })
 
 const wrapperStyles = computed(() => {
+  const { pinchScale, isPinchingEditor } = store.state.mobileEditor
+  const transformOrigin = '0 0'
+  const page = pageUtils.getCurrPage
+  let transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px)`
+  if (isPinchingEditor && pinchScale !== 1) {
+    transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
+  }
   return {
-    width: `${pageSize.value.width * contentScaleRatio.value}px`,
-    height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    transformOrigin,
+    transform,
+    // width: `${pageSize.value.width * contentScaleRatio.value}px`,
+    // height: `${pageSize.value.height * contentScaleRatio.value}px`,
+    width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
   }
 })
 
 const fitPage = (ratio: number) => {
-  store.commit('SET_contentScaleRatio4Page', { pageIndex: 0, contentScaleRatio: ratio })
-  // editorUtils.handleContentScaleRatio(0)
-  // const { hasBleed } = pageUtils
-  // const page = pageUtils.getPage(0)
-  // const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
-  // const pos = {
-  //   x: (editorUtils.mobileSize.width - width * ratio) * 0.5,
-  //   y: (editorUtils.mobileSize.height - height * ratio) * 0.5
-  // }
-  // test
-  // pageUtils.updatePagePos(0, pos)
-  // pageUtils.updatePageInitPos(0, pos)
+  if (isResizingCanvas.value) return
+
+  const pageScale = pageUtils.scaleRatio * 0.01
+  const page = pageUtils.getCurrPage
+  editorUtils.setMobilePhysicalData({ size: editorContainerSize.value })
+  const newInitPos = {
+    x: (editorUtils.mobileSize.width - page.width * ratio) * 0.5,
+    y: (editorUtils.mobileSize.height - page.height * ratio) * 0.5,
+  }
+  if (pageScale !== 1) {
+    // only when the page-scale > 1 needs to conpensate the pagePos
+    const _f = page.contentScaleRatio * pageUtils.scaleRatio * 0.01
+    const translationRatio = {
+      // x: 0.5,
+      // y: 0.5
+      x: ((-page.x) + editorContainerSize.value.width * 0.5) / (page.width * _f),
+      y: ((-page.y) + editorContainerSize.value.height * 0.5) / (page.height * _f),
+    }
+    const sizeDiff = {
+      w: page.width * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01,
+      h: page.height * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01
+    }
+    const posDiff = {
+      x: -sizeDiff.w * translationRatio.x,
+      y: -sizeDiff.h * translationRatio.y
+    }
+    const newPos = {
+      x: page.x + posDiff.x,
+      y: page.y + posDiff.y,
+    }
+    pageUtils.updatePagePos(0, newPos)
+  } else {
+    pageUtils.updatePagePos(0, newInitPos)
+  }
+  store.commit('SET_contentScaleRatio4Page', {
+    pageIndex: layerUtils.pageIndex,
+    contentScaleRatio: ratio,
+  })
+  pageUtils.updatePageInitPos(0, newInitPos)
 }
 
-// watch(sidebarTabsWidth, () => {
-//   fitPage(fitScaleRatio.value)
-// })
 /**
  * fitPage
  */
-
 watch(
   () => fitScaleRatio.value,
   (newVal, oldVal) => {
@@ -442,8 +584,23 @@ watch(isDuringCopy, () => {
 })
 
 let pagePinchHandler = null as ((e: AnyTouchEvent) => void) | null
+let pagePinchUtils = null as PagePinchUtils | null
 const initPagePinchHandler = () => {
   if (!editorContainerRef.value) return
+  setMobilePysicalSize()
+  pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
+  pagePinchHandler = (e) => {
+    if (
+      inAspectRatioState.value ||
+      isProcessingBgRemove.value ||
+      (inGenResultState.value && currImgSrc.value === '')
+    )
+      return
+    setMobilePysicalSize()
+    pagePinchUtils?.pinchHandler(e)
+  }
+}
+const setMobilePysicalSize = () => {
   const rect = (editorContainerRef.value as HTMLElement).getBoundingClientRect()
   editorUtils.setMobilePhysicalData({
     size: {
@@ -459,9 +616,17 @@ const initPagePinchHandler = () => {
       y: rect.top,
     },
   })
-  pagePinchHandler = new PagePinchUtils(editorWrapperRef.value as HTMLElement).pinchHandler
+  pagePinchUtils = new PagePinchUtils(editorContainerRef.value as HTMLElement)
+  pagePinchHandler = (e) => {
+    if (inBgRemoveMode.value) return
+    if (inAspectRatioState.value) return
+    pagePinchUtils?.pinchHandler(e)
+  }
 }
-onMounted(initPagePinchHandler)
+onMounted(() => {
+  initPagePinchHandler()
+  reset()
+})
 watch(isResizingCanvas, (newVal) => {
   if (!newVal) {
     nextTick(initPagePinchHandler)
@@ -471,6 +636,7 @@ watch(isResizingCanvas, (newVal) => {
 const isImgCtrl = computed(() => store.getters['imgControl/isImgCtrl'])
 
 const outerClick = () => {
+  console.log('outer click')
   editorUtils.setInBgSettingMode(false)
   pageUtils.setBackgroundImageControlDefault()
 }
@@ -480,7 +646,11 @@ const pointerEvent = ref({
 })
 const movingUtils = null as MovingUtils | null
 const selectStart = (e: PointerEvent) => {
+  if (inBgRemoveMode.value) return
   recordPointer(e)
+  if (pointerEvtUtils.pointerIds.length >= 3) {
+    return pagePinchUtils?.pinchEnd(e as unknown as AnyTouchEvent)
+  }
   if (e.pointerType === 'mouse' && e.button !== 0) return
 
   const layer =
@@ -530,26 +700,13 @@ const selectStart = (e: PointerEvent) => {
     movingUtils.pageMoveStart(e)
   }
   pointerEvent.value.initPos = { x: e.x, y: e.y }
-
-  // layer pinch logic
-  // if (layerUtils.layerIndex !== -1) {
-  //   // when there is an layer being active, the moving logic applied to the EditorView
-  //   movingUtils = new MovingUtils({
-  //     _config: { config: layerUtils.getCurrLayer },
-  //     snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-  //     body: document.getElementById(
-  //       `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-  //     ) as HTMLElement,
-  //   })
-  //   movingUtils.moveStart(e)
-  //   pointerEvent.value.initPos = { x: e.x, y: e.y }
-  // }
 }
 
 // the reason to use pointerdown + pointerup to detect a click/tap for delecting layer,
 // is bcz the native click/tap event is triggered as the event happened in a-short-time even the layer has moved a little position,
 // this would lead to wrong UI/UX as moving-layer-feature no longer needs the touches above at the layer.
 const selectEnd = (e: PointerEvent) => {
+  if (inBgRemoveMode.value) return
   if (pointerEvent.value.initPos) {
     const isSingleTouch = pointerEvtUtils.pointers.length === 1
     const isConsiderNotMoved =
@@ -570,73 +727,6 @@ const selectEnd = (e: PointerEvent) => {
     }
     pointerEvent.value.initPos = null
   }
-  // pointerEvtUtils.removePointer(e.pointerId)
-}
-
-const isPinchInit = ref<null | boolean>(false)
-let pinchControlUtils = null as null | PinchControlUtils
-
-const onLayerPinch = (e: AnyTouchEvent) => {
-  if (e.phase === 'end' && isPinchInit.value) {
-    // pinch end handling
-    layerPinchHandler(e)
-    isPinchInit.value = false
-    pinchControlUtils = null
-  } else {
-    const touches = (e.nativeEvent as TouchEvent).touches
-    if (touches.length !== 2 || layerUtils.layerIndex === -1) return
-    if (!isPinchInit.value) {
-      // first pinch initialization
-      isPinchInit.value = true
-      return layerPinchStart(e)
-    } else {
-      // pinch move handling
-      layerPinchHandler(e)
-    }
-  }
-}
-
-const layerPinchHandler = (e: AnyTouchEvent) => {
-  pinchControlUtils?.pinch(e)
-}
-
-const layerPinchStart = (e: AnyTouchEvent) => {
-  if (store.getters['imgControl/isImgCtrl'] || store.getters['imgControl/isImgCtrl']) return
-  if (store.getters['bgRemove/getInBgRemoveMode']) return
-
-  const _config = {
-    config: layerUtils.getLayer(layerUtils.pageIndex, layerUtils.layerIndex),
-  } as unknown as { config: ILayer }
-
-  if (_config.config.locked) return
-  if (layerUtils.getCurrConfig.type === 'text' && layerUtils.getCurrConfig.contentEditable) return
-
-  const layerInfo = new Proxy(
-    {
-      pageIndex: layerUtils.pageIndex,
-      layerIndex: layerUtils.layerIndex,
-    },
-    {
-      get(_, key) {
-        if (key === 'pageIndex') return layerUtils.pageIndex
-        else if (key === 'layerIndex') return layerUtils.layerIndex
-      },
-    },
-  ) as ILayerInfo
-  const movingUtils = new MovingUtils({
-    _config,
-    layerInfo,
-    snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-    body: document.getElementById(
-      `nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`,
-    ) as HTMLElement,
-  })
-  const data = {
-    layerInfo,
-    config: undefined,
-    movingUtils: movingUtils as MovingUtils,
-  }
-  pinchControlUtils = new PinchControlUtils(data)
 }
 
 const recordPointer = (e: PointerEvent) => {
@@ -645,15 +735,25 @@ const recordPointer = (e: PointerEvent) => {
 const removePointer = (e: PointerEvent) => {
   pointerEvtUtils.removePointer(e.pointerId)
 }
+// #endregion
 
-// toggle editor theme
-const { toggleEditorTheme, currEditorTheme, isBiColorEditor } = useBiColorEditor()
+// #region bi-color-editor
+const { toggleEditorTheme, currEditorTheme, isBiColorEditor, initBiColorEditor } =
+  useBiColorEditor()
+watch(
+  inEditingState,
+  (newVal) => {
+    if (newVal && isBiColorEditor.value) {
+      initBiColorEditor(editorType.value)
+    }
+  },
+  { immediate: true },
+)
 // #endregion
 
 // #region demo brush size section
 const canvasStore = useCanvasStore()
 const { brushSize, isChangingBrushSize, isAutoFilling, drawingColor } = storeToRefs(canvasStore)
-const { downloadCanvas } = useCanvasUtils()
 
 const demoBrushSizeStyles = computed(() => {
   return {
@@ -673,7 +773,7 @@ const demoBrushSizeOutline = computed(() => {
 
 // #region event bus
 const bus = useEventBus<string>('editor')
-const unsubcribe = bus.on((event: string, { callback }) => {
+const unsubcribe = bus.on((event: string) => {
   if (event === 'fitPage') {
     fitPage(fitScaleRatio.value)
   }
@@ -707,6 +807,10 @@ watch(currActiveTab, () => {
   setAssetPanelTop()
 })
 
+watch(currActiveFeature, () => {
+  console.log(currActiveFeature.value)
+})
+
 const assetPanelStyles = computed(() => {
   return {
     top: `${assetPanelTop.value}px`,
@@ -725,7 +829,7 @@ const assetPanelComponent = computed(() => {
   }
 })
 
-const assetPanelProps = computed((): { [index: string]: any } => {
+const assetPanelProps = computed(() => {
   const monoColor = currEditorTheme.value?.fgColor
   switch (currActiveTab.value) {
     case 'text': {
@@ -784,59 +888,35 @@ const centerTitle = computed(() => {
 })
 // #endregion
 
-// #region result showcase
-const resultShowcase = ref<HTMLElement | null>(null)
-const showVideo = ref(true)
-watch(showVideo, (newVal) => {
-  if (video.value) {
-    if (!newVal) {
-      video.value.currentTime = 0
-    }
-  }
-})
-const swipeDetector: SwipeDetector = null as unknown as SwipeDetector
-
-// onMounted(() => {
-//   swipeDetector = new SwipeDetector(
-//     resultShowcase.value as HTMLElement,
-//     {
-//       targetDirection: 'horizontal',
-//     },
-//     handleSwipe,
-//   )
-
-// })
-
-// onBeforeUnmount(() => {
-//   swipeDetector.unbind()
-// })
-
-// watch(resultShowcase, () => {
-//   if (resultShowcase) {
-//     swipeDetector = new SwipeDetector(
-//       resultShowcase.value as HTMLElement,
-//       {
-//         targetDirection: 'horizontal',
-//       },
-//       handleSwipe,
-//     )
-//   } else {
-//     swipeDetector.unbind()
-//   }
-// })
-
-const handleSwipe = (dir: string) => {
-  showVideo.value = !showVideo.value
+// #region bg remove related
+const inBgRemoveMode = computed(() => store.getters['bgRemove/getInBgRemoveMode'])
+const isProcessingBgRemove = computed(() => store.getters['bgRemove/getIsProcessing'])
+const modifiedFlag = computed(() => store.getters['bgRemove/getModifiedFlag'])
+const showInitImage = computed(() => store.getters['bgRemove/getShowInitImage'])
+const setShowInitImage = (val: boolean) => {
+  store.commit('bgRemove/SET_showInitImage', val)
 }
+
+const setRestoreInitState = (val: boolean) => {
+  store.commit('bgRemove/SET_restoreInitState', val)
+}
+const previewSrc = ref('')
 // #endregion
 
-const { setCurrOpenDesign, setCurrOpenSubDesign } = useUserStore()
-
-const handleHomeBtnAction = (navagate: () => void) => {
-  setCurrOpenDesign(undefined)
-  setCurrOpenSubDesign(undefined)
-  navagate()
+// #region imgShadow event
+const saveCb = (canvas: HTMLCanvasElement) => {
+  const { saveImgToTmp } = useUserStore()
+  const { editorType, currDesignId } = storeToRefs(useEditorStore())
+  const name = 'img-shadow-' + generalUtils.generateAssetId()
+  const path = `imgShadow/${editorType.value}/${currDesignId.value}/${name}`
+  return new Promise<string>((resolve) => {
+    saveImgToTmp(canvas.toDataURL('image/png;base64'), path).then(() => {
+      resolve(`tmp/${path}`)
+    })
+  })
 }
+store.commit('shadow/SET_SAVE_CALLBACK', saveCb)
+// #endregion
 </script>
 <style lang="scss" scoped>
 @use '@/assets/scss/transitions.scss';
@@ -849,26 +929,10 @@ const handleHomeBtnAction = (navagate: () => void) => {
 
 .editor-view {
   &__saving-state {
-    @apply grid grid-rows-[minmax(0,1fr),auto,auto] grid-cols-1 justify-items-center items-center h-full w-full gap-16;
+    @apply grid grid-rows-[minmax(0,1fr)] grid-cols-1 justify-items-center items-center h-full w-full;
   }
 }
 
 // @TODO discuss with allen
 //@apply max-w-full max-h-full object-contain;
-.result-showcase {
-  transform-style: preserve-3d;
-
-  &__card {
-    @apply max-h-full object-contain;
-    backface-visibility: hidden;
-    transition: transform 0.6s;
-
-    &--back {
-    }
-  }
-}
-
-.is-flipped {
-  transform: rotateY(180deg);
-}
 </style>

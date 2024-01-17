@@ -3,7 +3,7 @@ import Editor from '@/views/Editor.vue'
 import Home from '@/views/Home.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n from '@nu/vivi-lib/i18n'
-import router from '@nu/vivi-lib/router'
+import router, { commonBeforeEach, commonBeforeEnter } from '@nu/vivi-lib/router'
 import { LayerType } from '@nu/vivi-lib/store/types'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
@@ -28,7 +28,7 @@ const MOBILE_ROUTES = [
   'Preview',
   'MobileEditor',
   'MyDesign',
-  'Pricing'
+  'Pricing',
 ]
 
 const routes: Array<RouteRecordRaw> = [
@@ -42,13 +42,13 @@ const routes: Array<RouteRecordRaw> = [
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
+    },
   },
   {
     path: 'editor',
     name: 'Editor',
     component: Editor,
-    beforeEnter: editorRouteHandler
+    beforeEnter: editorRouteHandler,
   },
   // {
   //   path: 'mobile-editor',
@@ -92,7 +92,16 @@ const routes: Array<RouteRecordRaw> = [
         if (token && teamId && url) {
           // for new version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
-          store.commit('user/SET_STATE', { token, teamId, dpi, backendRenderParams: { isBleed: bleed, isTrim: trim, margin: { bottom: +margins[0] || 0, right: +margins[1] || 0 } } })
+          store.commit('user/SET_STATE', {
+            token,
+            teamId,
+            dpi,
+            backendRenderParams: {
+              isBleed: bleed,
+              isTrim: trim,
+              margin: { bottom: +margins[0] || 0, right: +margins[1] || 0 },
+            },
+          })
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${url}`)).json()
           generalUtils.initializeFlags(LayerType.text, [response], informBackend)
@@ -108,10 +117,13 @@ const routes: Array<RouteRecordRaw> = [
             tokenKey = url.match('&token') ? '&token=' : '?token='
             src = url.substring(0, url.indexOf(tokenKey))
             const querys: { [index: string]: string } = {}
-            url.split('?')[1].split('&').forEach((query: string) => {
-              const [key, val] = query.split('=')
-              querys[key] = val
-            })
+            url
+              .split('?')[1]
+              .split('&')
+              .forEach((query: string) => {
+                const [key, val] = query.split('=')
+                querys[key] = val
+              })
             const token = querys.token
             const teamId = querys.team_id
             const dpi = +(querys.dpi ?? -1)
@@ -119,7 +131,16 @@ const routes: Array<RouteRecordRaw> = [
             const trim = !!+querys.trim
             const margin = querys.margin
             const margins = margin ? margin.split(',') : []
-            store.commit('user/SET_STATE', { token, teamId, dpi, backendRenderParams: { isBleed: bleed, isTrim: trim, margin: { bottom: +margins[0] || 0, right: +margins[1] || 0 } } })
+            store.commit('user/SET_STATE', {
+              token,
+              teamId,
+              dpi,
+              backendRenderParams: {
+                isBleed: bleed,
+                isTrim: trim,
+                margin: { bottom: +margins[0] || 0, right: +margins[1] || 0 },
+              },
+            })
           }
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${src}`)).json()
@@ -131,29 +152,29 @@ const routes: Array<RouteRecordRaw> = [
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
+    },
   },
   {
     path: 'signup',
     name: 'SignUp',
-    props: route => ({ redirect: route.query.redirect }),
+    props: (route) => ({ redirect: route.query.redirect }),
     component: () => import('@/views/Login/SignUp.vue'),
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
-          next({ path: from.query.redirect as string || '/' })
+          next({ path: (from.query.redirect as string) || '/' })
         } else {
           next()
         }
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
+    },
   },
   {
     path: 'login',
     name: 'Login',
-    props: route => ({ redirect: route.query.redirect }),
+    props: (route) => ({ redirect: route.query.redirect }),
     component: () => import('@/views/Login/Login.vue'),
     beforeEnter: async (to, from, next) => {
       try {
@@ -161,7 +182,7 @@ const routes: Array<RouteRecordRaw> = [
           next()
         } else {
           if (store.getters['user/isLogin']) {
-            next({ path: from.query.redirect as string || '/' })
+            next({ path: (from.query.redirect as string) || '/' })
           } else {
             next()
           }
@@ -169,34 +190,34 @@ const routes: Array<RouteRecordRaw> = [
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
+    },
   },
   {
     path: 'mydesign/:view?',
     name: 'MyDesign',
     component: () => import('@/views/MyDesign.vue'),
-    props: true
+    props: true,
   },
   {
     path: 'templates',
     name: 'TemplateCenter',
-    component: () => import('@/views/TemplateCenter.vue')
+    component: () => import('@/views/TemplateCenter.vue'),
   },
   {
     path: 'settings/:view?',
     name: 'Settings',
     component: () => import('@/views/Settings.vue'),
-    props: true
+    props: true,
   },
   {
     path: 'mobilewarning',
     name: 'MobileWarning',
-    component: () => import('@/views/MobileWarning.vue')
+    component: () => import('@/views/MobileWarning.vue'),
   },
   {
     path: 'browserwarning',
     name: 'BrowserWarning',
-    component: () => import('@/views/BrowserWarning.vue')
+    component: () => import('@/views/BrowserWarning.vue'),
   },
   {
     path: 'brandkit',
@@ -212,40 +233,40 @@ const routes: Array<RouteRecordRaw> = [
       } catch (error) {
         logUtils.setLogForError(error as Error)
       }
-    }
+    },
   },
   {
     path: 'pricing',
     name: 'Pricing',
-    component: () => import('@/views/Pricing.vue')
-  }
+    component: () => import('@/views/Pricing.vue'),
+  },
 ]
 
 if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
-    component: () => import('@nu/vivi-lib/views/SvgIconView.vue')
+    component: () => import('@nu/vivi-lib/views/SvgIconView.vue'),
   })
   routes.push({
     path: 'copytool',
     name: 'CopyTool',
-    component: () => import('@/views/CopyTool.vue')
+    component: () => import('@/views/CopyTool.vue'),
   })
   routes.push({
     path: 'nubtnlist',
     name: 'NubtnList',
-    component: () => import('@nu/vivi-lib/views/NubtnList.vue')
+    component: () => import('@nu/vivi-lib/views/NubtnList.vue'),
   })
   routes.push({
     path: 'nativeevttest',
     name: 'NativeEventTester',
-    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue')
+    component: () => import('@nu/vivi-lib/views/NativeEventTester.vue'),
   })
   routes.push({
     path: 'emoji',
     name: 'EmojiTest',
-    component: () => import('@nu/vivi-lib/views/EmojiTest.vue')
+    component: () => import('@nu/vivi-lib/views/EmojiTest.vue'),
   })
 }
 
@@ -253,16 +274,18 @@ router.addRoute({
   // Include the locales you support between ()
   path: `/:locale${localeUtils.getLocaleRegex()}?`,
   component: {
-    render() { return h(resolveComponent('router-view')) }
+    render() {
+      return h(resolveComponent('router-view'))
+    },
   },
   async beforeEnter(to, from, next) {
+    commonBeforeEnter()
     if (to.name === 'NativeEventTester') {
       picWVUtils.enterEventTestMode()
     }
     if (logUtils.getLog()) {
       logUtils.uploadLog()
     }
-    logUtils.setLog('App Start')
     if (!picWVUtils.inBrowserMode) {
       picWVUtils.registerCallbacks('router')
     }
@@ -271,22 +294,32 @@ router.addRoute({
     if (appLoadedTimeout > 0) {
       window.setTimeout(() => {
         if (!picWVUtils.appLoadedSent) {
-          logUtils.setLogAndConsoleLog(`Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`)
+          logUtils.setLogAndConsoleLog(
+            `Timeout for APP_LOADED after ${appLoadedTimeout}ms, send APP_LOADED anyway`,
+          )
         }
         picWVUtils.sendAppLoaded()
       }, appLoadedTimeout)
     }
     let argoError = false
     try {
-      const status = (await fetch(`https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`)).status
+      const status = (
+        await fetch(
+          `https://media.vivipic.cc/hello.txt?ver=${generalUtils.generateRandomString(12)}`,
+        )
+      ).status
       if (status !== 200) {
         argoError = true
-        logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, status code: ${status}`)
+        logUtils.setLog(
+          `Cannot connect to argo, use non-argo domain instead, status code: ${status}`,
+        )
       }
     } catch (error) {
       argoError = true
       logUtils.setLogForError(error as Error)
-      logUtils.setLog(`Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`)
+      logUtils.setLog(
+        `Cannot connect to argo, use non-argo domain instead, error: ${(error as Error).message}`,
+      )
     } finally {
       store.commit('text/SET_isArgoAvailable', !argoError)
     }
@@ -312,13 +345,17 @@ router.addRoute({
     if (window.__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
       // Delete locale in url, will be ignore by prerender.
       delete router.currentRoute.value.params.locale
-      router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
+      router.replace({
+        query: router.currentRoute.value.query,
+        params: router.currentRoute.value.params,
+      })
     }
   },
-  children: routes
+  children: routes,
 })
 
 router.beforeEach(async (to, from, next) => {
+  if (commonBeforeEach(to, from , next)) return
   /**
    * @Note the following commented codes will cause prerender render error.
    */
@@ -326,7 +363,6 @@ router.beforeEach(async (to, from, next) => {
   //   next()
   //   return
   // }
-  logUtils.setLog(`navigate to route: ${to.path}`)
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
@@ -337,19 +373,28 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Force login in these page
-  const needForceLogin = 
+  const needForceLogin =
     ['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string) &&
     !(to.name === 'Settings' && !store.getters['webView/getInBrowserMode']) &&
     window.__PRERENDER_INJECTED === undefined
-  await loginUtils.checkToken(needForceLogin ? () => {
-    next({ name: 'SignUp', query: { redirect: to.fullPath } })
-  } : undefined)
+  await loginUtils.checkToken(
+    needForceLogin
+      ? () => {
+          next({ name: 'SignUp', query: { redirect: to.fullPath } })
+        }
+      : undefined,
+  )
 
-  if (store.getters['user/getImgSizeMap'].length === 0 && window.__PRERENDER_INJECTED === undefined) {
+  if (
+    store.getters['user/getImgSizeMap'].length === 0 &&
+    window.__PRERENDER_INJECTED === undefined
+  ) {
     /**
      * @MobileDebug - comment the following two line, and use const json = appJSON, or the request will be blocked by CORS
      */
-    const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
+    const response = await fetch(
+      `https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`,
+    )
     const json = await response.json()
 
     // eslint-disable-next-line unused-imports/no-unused-vars
@@ -367,30 +412,32 @@ router.beforeEach(async (to, from, next) => {
       verApi: json.ver_api,
       imgSizeMap: json.image_size_map,
       imgSizeMapExtra: json.image_size_map_extra,
-      dimensionMap: json.dimension_map
+      dimensionMap: json.dimension_map,
     })
     textFillUtils.updateFillCategory(json.text_effect, json.text_effect_admin)
     overlayUtils.updateOverlayCategory(json.overlay)
-    let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+    let defaultFontsJson = json.default_font as Array<{ id: string; ver: number }>
 
     // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.
     if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
-      defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
+      defaultFontsJson = defaultFontsJson.filter((font) => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
     }
 
-    defaultFontsJson
-      .forEach(_font => {
-        const font = {
-          type: 'public',
-          face: _font.id,
-          ver: _font.ver
-        }
-        store.commit('text/UPDATE_DEFAULT_FONT', { font })
-      })
+    defaultFontsJson.forEach((_font) => {
+      const font = {
+        type: 'public',
+        face: _font.id,
+        ver: _font.ver,
+      }
+      store.commit('text/UPDATE_DEFAULT_FONT', { font })
+    })
     store.commit('SET_modalInfo', json.modal)
   }
 
-  if (!MOBILE_ROUTES.includes(String(to.name) ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
+  if (
+    !MOBILE_ROUTES.includes(String(to.name) ?? '') &&
+    (to.name === 'Editor' || !localStorage.getItem('not-mobile'))
+  ) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor
     logUtils.setLog(`Read device width: ${window.screen.width}`)
@@ -417,7 +464,10 @@ router.beforeEach(async (to, from, next) => {
         if (isTablet) {
           logUtils.setLog('=> as tablet')
           if (!localStorage.getItem('not-mobile')) {
-            next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
+            next({
+              name: 'MobileWarning',
+              query: { width: window.screen.width.toString(), url: to.fullPath },
+            })
             return
           } else {
             store.commit('SET_useMobileEditor', true)
@@ -427,13 +477,19 @@ router.beforeEach(async (to, from, next) => {
           store.commit('SET_useMobileEditor', true)
         }
       } else {
-        next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
+        next({
+          name: 'MobileWarning',
+          query: { width: window.screen.width.toString(), url: to.fullPath },
+        })
         return
       }
     } else {
       if (to.name === 'Editor') {
         const hasShownBrowserWarning = localStorage.getItem('hasShownBrowserWarning')
-        if (!['Microsoft Edge', 'Chrome'].includes(store.getters['user/getBrowserInfo'].name) && hasShownBrowserWarning !== '1') {
+        if (
+          !['Microsoft Edge', 'Chrome'].includes(store.getters['user/getBrowserInfo'].name) &&
+          hasShownBrowserWarning !== '1'
+        ) {
           next({ name: 'BrowserWarning' })
           return
         }

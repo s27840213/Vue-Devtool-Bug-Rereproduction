@@ -1,9 +1,8 @@
 <template lang="pug">
-div(class="panel-remove-bg" ref="panelRemoveBg")
+div(class="panel-remove-bg w-full h-full overflow-hidden" ref="panelRemoveBgRef")
   bg-remove-container(
     v-if="inBgRemoveMode || isProcessing"
-    :containerWH="containerWH"
-    :containerRef="panelRemoveBg"
+    :containerRef="panelRemoveBgRef"
     :previewSrc="previewSrc")
   div(v-else class="btn-section")
     transition(name="fade-down-up")
@@ -31,7 +30,7 @@ div(class="panel-remove-bg" ref="panelRemoveBg")
 </template>
 
 <script lang="ts">
-import BgRemoveContainer from '@/components/editor/backgroundRemove/BgRemoveContainer.vue'
+import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import { IImage } from '@nu/vivi-lib/interfaces/layer'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
@@ -53,7 +52,7 @@ export default defineComponent({
   },
   data() {
     return {
-      panelRemoveBg: null as unknown as HTMLElement,
+      panelRemoveBgRef: null as unknown as HTMLElement,
       mobilePanelHeight: 0,
       // eslint-disable-next-line vue/no-unused-properties
       initImgSize: { width: 0, height: 0 },
@@ -62,7 +61,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelRemoveBg = this.$refs.panelRemoveBg as HTMLElement
+    this.panelRemoveBgRef = this.$refs.panelRemoveBgRef as HTMLElement
     this.mounted = true
   },
   computed: {
@@ -73,15 +72,6 @@ export default defineComponent({
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       isInEditor: 'vivisticker/getIsInEditor',
     }),
-    containerWH() {
-      return {
-        width: this.panelRemoveBg ? this.panelRemoveBg.offsetWidth : 0,
-        /**
-         * @Note 60 is the height of the footer
-         */
-        height: this.panelRemoveBg ? this.panelRemoveBg.offsetHeight - this.mobilePanelHeight : 0,
-      }
-    },
   },
   methods: {
     ...mapMutations({

@@ -98,7 +98,7 @@ div(class="page-size-selector")
         checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
       nubtn(size="mid-full"
           :theme="inReviewMode ? 'primary' : 'icon_text'"
-          :icon="['pro', 'alarm']"
+          :icon="!inReviewMode && ['pro', 'alarm']"
           :disabled="!isFormatApplicable"
           @click="submit") {{$t('NN0022')}}
 </template>

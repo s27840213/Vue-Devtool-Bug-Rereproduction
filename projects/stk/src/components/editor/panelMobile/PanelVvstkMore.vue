@@ -2,33 +2,38 @@
 div(class="panel-vvstk-more")
   template(v-if="inInitialState")
     div(class="panel-vvstk-more__options")
-      div(v-for="option in mainOptions"
-          :key="option.text"
-          class="panel-vvstk-more__option"
-          @click.prevent.stop="handleOptionAction(option.action)")
+      div(
+        v-for="option in mainOptions"
+        :key="option.text"
+        class="panel-vvstk-more__option"
+        @click.prevent.stop="handleOptionAction(option.action)")
         div(class="panel-vvstk-more__option-icon")
-          svg-icon(:iconName="option.icon"
-                    :iconWidth="iconWidth(option.icon)"
-                    iconColor="white")
+          svg-icon(
+            :iconName="option.icon"
+            :iconWidth="iconWidth(option.icon)"
+            iconColor="white")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
     div(class="horizontal-rule")
     div(class="panel-vvstk-more__option version" @pointerdown.prevent="handleDebugMode")
       div(class="panel-vvstk-more__option-icon")
-        svg-icon(iconName="vivisticker_version"
-                  iconWidth="24px"
-                  iconColor="black-5")
+        svg-icon(
+          iconName="vivisticker_version"
+          iconWidth="24px"
+          iconColor="black-5")
       span(class="panel-vvstk-more__option-title version") {{ `${userInfo.appVer}/${userInfo.osVer}/${userInfo.modelName} ${buildNumber}${domain} ${hostId}` }}
   template(v-else)
     div(class="panel-vvstk-more__options")
-      div(v-for="option in options"
-          :key="option.text"
-          class="panel-vvstk-more__option"
-          :class="{selected: handleOptionSelected(option.selected)}"
-          @click.prevent.stop="handleOptionAction(option.action)")
+      div(
+        v-for="option in options"
+        :key="option.text"
+        class="panel-vvstk-more__option"
+        :class="{ selected: handleOptionSelected(option.selected) }"
+        @click.prevent.stop="handleOptionAction(option.action)")
         div(class="panel-vvstk-more__option-icon")
-          svg-icon(:iconName="option.icon"
-                    iconWidth="24px"
-                    iconColor="white")
+          svg-icon(
+            :iconName="option.icon"
+            iconWidth="24px"
+            iconColor="white")
         div(class="panel-vvstk-more__option-title") {{ option.text }}
 </template>
 
@@ -51,24 +56,24 @@ export default defineComponent({
     return {
       debugModeTimer: -1,
       debugModeCounter: 0,
-      domain: window.location.hostname !== 'sticker.vivipic.com' ? ` ${window.location.hostname.replace('.vivipic.com', '')}` : '',
+      domain:
+        window.location.hostname !== 'sticker.vivipic.com'
+          ? ` ${window.location.hostname.replace('.vivipic.com', '')}`
+          : '',
     }
   },
   props: {
     panelHistory: {
       type: Array as PropType<string[]>,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
   computed: {
-    ...mapState('user', [
-      'uname',
-      'enableAdminView'
-    ]),
+    ...mapState('user', ['uname', 'enableAdminView']),
     ...mapGetters({
       userInfo: 'vivisticker/getUserInfo',
       inReviewMode: 'webView/getInReviewMode',
-      _debugMode: 'vivisticker/getDebugMode'
+      _debugMode: 'vivisticker/getDebugMode',
     }),
     debugMode: {
       get() {
@@ -76,137 +81,184 @@ export default defineComponent({
       },
       set(value: boolean) {
         this.setDebugMode(value)
-      }
+      },
     },
     hostId(): string {
       return this.userInfo.hostId
     },
     mainOptions(): OptionConfig[] {
-      return [...stkWVUtils.checkOSVersion('16.0') ? [
+      return [
+        ...(stkWVUtils.checkOSVersion('16.0')
+          ? [
+              {
+                text: `${this.$t('STK0032')}`,
+                icon: 'vivisticker_play-circle',
+                action: this.handleShowIOS16Tutorial,
+              },
+            ]
+          : []),
         {
-          text: `${this.$t('STK0032')}`,
+          text: `${this.$t('NN0146')}`,
           icon: 'vivisticker_play-circle',
-          action: this.handleShowIOS16Tutorial
-        }
-      ] : [],
-      {
-        text: `${this.$t('NN0146')}`,
-        icon: 'vivisticker_play-circle',
-        action: this.handleShowTutorial
-      },
-      {
-        text: 'Vivisticker Pro',
-        icon: 'pro',
-        action: () => { stkWVUtils.openPayment() }
-      },
-      {
-        text: `${this.$t('NN0174')}`,
-        icon: 'vivisticker_global',
-        action: () => { this.handleList('locale') }
-      }, {
-        text: `${this.$t('NN0649')}`,
-        icon: 'vivisticker_settings',
-        action: this.handleShowUserSettings
-      }, {
-        text: `${this.$t('NN0147')}`,
-        icon: 'vivisticker_info',
-        action: this.handleOpenInfo
-      }, {
-        text: `${this.$t('NN0742')}`,
-        icon: 'vivisticker_mail',
-        action: this.handleOpenInfo
-      },
-      ...this.debugMode ? [
+          action: this.handleShowTutorial,
+        },
         {
-          text: 'domain 選單',
-          icon: 'vivisticker_global',
-          action: () => { this.handleList('domain') }
-        }, {
-          text: 'App 事件測試',
-          icon: 'vivisticker_global',
-          action: () => { this.handleList('event-test') }
-        }, {
-          text: '進入 Native 事件測試器',
-          icon: 'vivisticker_global',
-          action: () => { window.location.pathname = 'nativeevttest' }
-        }, {
-          text: 'import design',
-          icon: 'vivisticker_global',
-          action: this.handleImportDesign
-        }, {
-          text: 'toggle admin tool',
-          icon: 'vivisticker_global',
-          action: this.toogleAdminTool
-        }
-      ] : []]
+          text: 'Vivisticker Pro',
+          icon: 'pro',
+          action: () => {
+            stkWVUtils.openPayment()
+          },
+        },
+        {
+          text: `${this.$t('NN0174')}`,
+          icon: 'global',
+          action: () => {
+            this.handleList('locale')
+          },
+        },
+        {
+          text: `${this.$t('NN0649')}`,
+          icon: 'vivisticker_settings',
+          action: this.handleShowUserSettings,
+        },
+        {
+          text: `${this.$t('NN0147')}`,
+          icon: 'vivisticker_info',
+          action: this.handleOpenInfo,
+        },
+        {
+          text: `${this.$t('NN0742')}`,
+          icon: 'vivisticker_mail',
+          action: this.handleOpenInfo,
+        },
+        ...(this.debugMode
+          ? [
+              {
+                text: 'domain 選單',
+                icon: 'global',
+                action: () => {
+                  this.handleList('domain')
+                },
+              },
+              {
+                text: 'App 事件測試',
+                icon: 'global',
+                action: () => {
+                  this.handleList('event-test')
+                },
+              },
+              {
+                text: 'import design',
+                icon: 'global',
+                action: this.handleImportDesign,
+              },
+              {
+                text: 'toggle admin tool',
+                icon: 'global',
+                action: this.toogleAdminTool,
+              },
+              ...(window.location.host !== 'stk.vivipic.com'
+                ? [
+                    {
+                      text: '進入 Native 事件測試器',
+                      icon: 'global',
+                      action: () => {
+                        window.location.pathname = 'nativeevttest'
+                      },
+                    },
+                  ]
+                : []),
+            ]
+          : []),
+      ]
     },
     localeOptions(): OptionConfig[] {
-      return localeUtils.SUPPORTED_LOCALES.map(supported_locale => {
+      return localeUtils.SUPPORTED_LOCALES.map((supported_locale) => {
         return {
           text: supported_locale.name,
-          icon: 'vivisticker_global',
+          icon: 'global',
           selected: () => {
             return this.$i18n.locale === supported_locale.abbreviation
           },
-          action: () => { this.handleUpdateLocale(supported_locale.abbreviation) }
+          action: () => {
+            this.handleUpdateLocale(supported_locale.abbreviation)
+          },
         }
       })
     },
     domainOptions(): OptionConfig[] {
-      return [{
-        text: 'production',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return window.location.hostname === 'sticker.vivipic.com'
-        },
-        action: () => { this.switchDomain('sticker') }
-      }, {
-        text: 'rd',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return window.location.hostname === 'stkrd.vivipic.com'
-        },
-        action: () => { this.switchDomain('stkrd') }
-      }, {
-        text: 'qa',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return window.location.hostname === 'stickertest.vivipic.com'
-        },
-        action: () => { this.switchDomain('stickertest') }
-      }, {
-        text: 'localhost',
-        icon: 'vivisticker_global',
-        selected: () => {
-          return window.location.hostname === 'localhost:8080'
-        },
-        action: () => {
-          if (process.env.NODE_ENV === 'development') {
-            this.switchDomain('localhost')
-          } else {
-            this.$notify({
-              group: 'error',
-              text: 'Only available in development mode.  '
-            })
-          }
-        }
-      }, ...Array(6).fill(1).map((_, index) => {
-        const host = `stkdev${index}`
-        return {
-          text: host,
-          icon: 'vivisticker_global',
+      return [
+        {
+          text: 'production',
+          icon: 'global',
           selected: () => {
-            return window.location.hostname === `${host}.vivipic.com`
+            return window.location.hostname === 'sticker.vivipic.com'
           },
-          action: () => { this.switchDomain(host) }
-        }
-      })]
+          action: () => {
+            this.switchDomain('sticker')
+          },
+        },
+        {
+          text: 'rd',
+          icon: 'global',
+          selected: () => {
+            return window.location.hostname === 'stkrd.vivipic.com'
+          },
+          action: () => {
+            this.switchDomain('stkrd')
+          },
+        },
+        {
+          text: 'qa',
+          icon: 'global',
+          selected: () => {
+            return window.location.hostname === 'stickertest.vivipic.com'
+          },
+          action: () => {
+            this.switchDomain('stickertest')
+          },
+        },
+        {
+          text: 'localhost',
+          icon: 'global',
+          selected: () => {
+            return window.location.hostname === 'localhost:8080'
+          },
+          action: () => {
+            if (process.env.NODE_ENV === 'development') {
+              this.switchDomain('localhost')
+            } else {
+              this.$notify({
+                group: 'error',
+                text: 'Only available in development mode.  ',
+              })
+            }
+          },
+        },
+        ...Array(6)
+          .fill(1)
+          .map((_, index) => {
+            const host = `stkdev${index}`
+            return {
+              text: host,
+              icon: 'global',
+              selected: () => {
+                return window.location.hostname === `${host}.vivipic.com`
+              },
+              action: () => {
+                this.switchDomain(host)
+              },
+            }
+          }),
+      ]
     },
     eventOptions(): OptionConfig[] {
-      return ['A', 'B', 'C', 'D', 'E'].map(c => ({
+      return ['A', 'B', 'C', 'D', 'E'].map((c) => ({
         text: c,
-        icon: 'vivisticker_global',
-        action: () => { this.sendTestEvent(c) }
+        icon: 'global',
+        action: () => {
+          this.sendTestEvent(c)
+        },
       }))
     },
     options(): OptionConfig[] {
@@ -233,15 +285,15 @@ export default defineComponent({
     },
     lastHistory(): string {
       return this.panelHistory[this.historySize - 1]
-    }
+    },
   },
   methods: {
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setSlideType: 'vivisticker/SET_slideType',
-      setFullPageConfig: 'vivisticker/SET_fullPageConfig',
+      setFullPageConfig: 'SET_fullPageConfig',
       setDebugMode: 'vivisticker/SET_debugMode',
-      setUserState: 'user/SET_STATE'
+      setUserState: 'user/SET_STATE',
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
@@ -328,8 +380,8 @@ export default defineComponent({
         default:
           return '24px'
       }
-    }
-  }
+    },
+  },
 })
 </script>
 

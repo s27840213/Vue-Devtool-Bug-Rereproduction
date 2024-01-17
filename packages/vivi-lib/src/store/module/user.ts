@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import userApis from '@/apis/user'
 import i18n from '@/i18n'
-import { IGroupDesignInputParams, ILoginResponse, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
+import { IGroupDesignInputParams, ILoginResponse, IUserAssetsData, IUserFontContentData, isCmLoginResponse, isPicLoginResponse } from '@/interfaces/api'
 import cmWVUtils from '@/utils/cmWVUtils'
 import { DeviceType } from '@/utils/constantData'
 import generalUtils from '@/utils/generalUtils'
@@ -78,7 +78,10 @@ export interface IUserModule {
       right: number
     }
   }
-  showForceLogin: boolean
+  showForceLogin: boolean,
+  // below are for cm only
+  getTxToken: string, // public token for get-tx-info
+  uuid: string,
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -91,6 +94,7 @@ const getDefaultState = (): IUserModule => ({
     }
   },
   token: '',
+  getTxToken: '',
   uname: '',
   shortName: '',
   userId: '',
@@ -150,6 +154,7 @@ const getDefaultState = (): IUserModule => ({
     }
   },
   showForceLogin: false,
+  uuid: ''
 })
 
 const state = getDefaultState()
@@ -166,6 +171,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getToken(state) {
     return state.token
+  },
+  getGetTxToken(state) {
+    return state.getTxToken
   },
   getComplete(state) {
     return state.complete
@@ -275,6 +283,9 @@ const getters: GetterTree<IUserModule, any> = {
       default:
         return family?.includes('Windows') ? DeviceType.Win : DeviceType.Other
     }
+  },
+  getUuid(state) {
+    return state.uuid
   }
 }
 
@@ -409,35 +420,49 @@ const actions: ActionTree<IUserModule, unknown> = {
       logUtils.setLogAndConsoleLog('login success (loginSetup)')
       logUtils.setLogAndConsoleLog(`login as ${data.data.user_id}`)
       const newToken = data.data.token // token may be refreshed
-      const complete = data.data.complete
       const uname = data.data.user_name
       const shortName = uname.substring(0, 1).toUpperCase()
-      const guestViewGuide = localStorage.guest_view_guide
-      let userViewGuide = data.data.view_guide
       Sentry.setTag('user_name', uname)
       Sentry.setTag('user_id', data.data.user_id)
 
-      if (['1', '2'].includes(guestViewGuide) && userViewGuide === 0) {
-        // 如果先看完導覽(2)/略過(1)再登入, 且原使用者狀態為沒看過(0), 則更新狀態
-        userViewGuide = +guestViewGuide
-        localStorage.removeItem('guest_view_guide')
-        userApis.updateUserViewGuide(newToken, userViewGuide)
+      if (data.data.new_user && generalUtils.isCm) {
+        cmWVUtils.sendAdEvent('register')
       }
 
       commit('SET_STATE', {
         uname: uname,
         shortName: shortName,
-        userId: data.data.user_id,
-        role: data.data.role,
-        roleRaw: data.data.roleRaw,
-        complete,
-        account: data.data.account,
-        email: data.data.email,
-        upassUpdate: data.data.upass_update,
-        subscribe: data.data.subscribe,
-        avatar: data.data.avatar,
-        viewGuide: userViewGuide
+        userId: data.data.user_id
       })
+
+      if (isPicLoginResponse(data)) {
+        const guestViewGuide = localStorage.guest_view_guide
+        let userViewGuide = data.data.view_guide
+  
+        if (['1', '2'].includes(guestViewGuide) && userViewGuide === 0) {
+          // 如果先看完導覽(2)/略過(1)再登入, 且原使用者狀態為沒看過(0), 則更新狀態
+          userViewGuide = +guestViewGuide
+          localStorage.removeItem('guest_view_guide')
+          userApis.updateUserViewGuide(newToken, userViewGuide)
+        }
+  
+        commit('SET_STATE', {
+          role: data.data.role,
+          roleRaw: data.data.roleRaw,
+          complete: data.data.complete,
+          account: data.data.account,
+          email: data.data.email,
+          upassUpdate: data.data.upass_update,
+          subscribe: data.data.subscribe,
+          avatar: data.data.avatar,
+          viewGuide: userViewGuide,
+        })
+      } else if (isCmLoginResponse(data)) {
+        commit('SET_STATE', {
+          uuid: data.data.uuid
+        })
+      }
+
 
       // locale settings
       const locale = localStorage.getItem('locale') as string
@@ -454,15 +479,20 @@ const actions: ActionTree<IUserModule, unknown> = {
       picWVUtils.updateUserInfo(userInfo)
       cmWVUtils.updateUserInfo(userInfo)
 
-      uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
       if (generalUtils.isPic) {
+        uploadUtils.setLoginOutput(data.data)
         dispatch('payment/getBillingInfo', {}, { root: true })
+      } else if (isCmLoginResponse(data)) {
+        cmWVUtils.restore(data.data)
       }
       dispatch('getAllAssets', { token: newToken })
 
-      if (complete === 0) {
+      if (isPicLoginResponse(data) && data.data.complete === 0) {
         picWVUtils.sendStatistics()
+      }
+      if (isCmLoginResponse(data) && data.data.complete === 0) {
+        cmWVUtils.sendStatistics()
       }
     } else {
       logUtils.setLogAndConsoleLog('login failed (loginSetup)')
@@ -510,6 +540,14 @@ const actions: ActionTree<IUserModule, unknown> = {
   async removeBgStk({ state }, { uuid, assetId, type }) {
     try {
       const { data } = await userApis.removeBgStk(uuid, assetId, type)
+      return data
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  async removeBgCm({ state }, { uuid, assetId, type }) {
+    try {
+      const { data } = await userApis.removeBgCm(uuid, assetId, type)
       return data
     } catch (error) {
       console.log(error)

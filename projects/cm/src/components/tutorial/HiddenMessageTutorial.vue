@@ -20,16 +20,23 @@ div(class="hidden-message-tutorial w-screen h-screen")
       class="max-w-96"
       size="sm-full"
       @click="emit('nextStep')") {{ nextBtnText }}
-  div(v-else class="w-full absolute grid grid-rows-2 grid-cols-3 gap-y-8" :style="tutorialStyles")
-    span(class="text-white typo-h6 text-left col-start-2 self-end justify-self-center") {{ text }}
-    div(class="justify-self-end row-start-2")
+  div(v-else class="absolute grid grid-rows-2 grid-cols-[1fr,auto,1fr] gap-y-8" :style="tutorialStyles")
+    span(class="text-white typo-h6 text-left col-start-2 self-end justify-self-center whitespace-nowrap") {{ text }}
+    div(class="justify-self-end row-start-2 flex")
       svg-icon(
+        v-if="step !== 5"
         iconName="tutorial-arrow-down"
         iconWidth="35px"
         iconHeight="61px"
       )
+      svg-icon(
+        v-else
+        iconName="tutorial-arrow-down2"
+        iconWidth="111px"
+        iconHeight="71px"
+      )
     nubtn(
-      class="max-w-96 justify-self-center relative top-9 row-start-2"
+      class="min-w-96 justify-self-center relative top-9 row-start-2"
       size="sm-full"
       @click="emit('nextStep')") {{ nextBtnText }}
 </template>
@@ -67,19 +74,26 @@ const updateStyles = () => {
   const { top } = elTopItem.getBoundingClientRect()
   if (step.value === 4) {
     tutorialStyles.value = {
-      bottom: `calc(100% - ${top}px)`,
+      left: '50%',
+      bottom: `calc(100% - ${top - 6}px)`,
+      transform: 'translateX(-50%)'
+    }
+  } else if (step.value === 5) {
+    tutorialStyles.value = {
+      left: '27px',
+      bottom: `calc(100% - ${top - 12}px)`,
     }
   }
 }
 
 const imgA = computed(() => {
   if (step.value === 4) return ''
-  return require(`demo/hidden-message-help-demo-${step.value - 1}a.jpeg`)
+  return require(`demo/hidden-message/help/${step.value - 1}a.jpeg`)
 })
 
 const imgB = computed(() => {
   if (step.value === 4) return ''
-  return require(`demo/hidden-message-help-demo-${step.value - 1}b.png`)
+  return require(`demo/hidden-message/help/${step.value - 1}b.png`)
 })
 
 const text = computed(() => {
@@ -92,13 +106,15 @@ const text = computed(() => {
       return t('CM0106')
     case 4:
       return t('CM0107')
+    case 5:
+      return t('CM0116')
     default:
       return ''
   }
 })
 
 const nextBtnText = computed(() => {
-  return step.value === 4 ? t('CM0057') : t('CM0012')
+  return step.value === 5 ? t('CM0057') : t('CM0012')
 })
 
 watch(() => trackingFrame.value, updateStyles)

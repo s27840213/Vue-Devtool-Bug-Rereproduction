@@ -4,6 +4,7 @@ import { GetterTree, MutationTree } from 'vuex'
 export interface ICmWVState {
   appLoadedTimeout: number,
   userInfo: IUserInfo,
+  debugMode: boolean,
   inBrowserMode: boolean,
   isDuringCopy: boolean,
   isNoBg: boolean,
@@ -14,6 +15,7 @@ export interface ICmWVState {
 const getDefaultState = (): ICmWVState => ({
   appLoadedTimeout: -1,
   userInfo: cmWVUtils.getDefaultUserInfo(),
+  debugMode: false,
   inBrowserMode: false,
   isDuringCopy: false,
   isNoBg: false,
@@ -28,6 +30,9 @@ const getters: GetterTree<ICmWVState, unknown> = {
   },
   getUserInfo(state: ICmWVState): IUserInfo {
     return state.userInfo
+  },
+  getDebugMode(state: ICmWVState): boolean {
+    return state.debugMode
   },
   getInBrowserMode(state: ICmWVState): boolean {
     return state.inBrowserMode
@@ -55,6 +60,9 @@ const mutations: MutationTree<ICmWVState> = {
   },
   UPDATE_userInfo(state: ICmWVState, userInfo: Partial<IUserInfo>) {
     Object.assign(state.userInfo, userInfo)
+  },
+  SET_debugMode(state: ICmWVState, debugMode: boolean) {
+    state.debugMode = debugMode
   },
   SET_inBrowserMode(state: ICmWVState, inBrowserMode: boolean) {
     state.inBrowserMode = inBrowserMode

@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="footer-tabs")
-  div(class="footer-tabs__content" :style="contentStyles")
+  div(class="footer-tabs__content" :style="contentStyles()")
     div(class="footer-tabs__container"
         :class="{main: !isInEditor}"
         :style="containerStyles()"
-        @scroll.passive="updateContainerOverflow"
+        v-fade-scroller="{ fadeWidth: '56px' }"
         ref="container")
       template(v-for="tab in homeTabs" :key="tab.icon")
         div(v-if="!tab.hidden"
@@ -23,7 +23,7 @@ div(class="footer-tabs")
             :class="`text-${homeTabColor(tab)}`") {{tab.text}}
           pro-item(v-if="tab.forPro" :theme="'top-right-corner'" draggable="false" :style="{right: 'unset', transform: 'translateX(100%)'}")
     transition(name="panel-up")
-      div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs" :style="subTabStyles()")
+      div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs" :style="contentStyles(true)")
         div(class="footer-tabs__unfold"
             :style="innerContainerStyles"
             @click="handleTabAction(mainMenu)")
@@ -34,7 +34,8 @@ div(class="footer-tabs")
             :style="textIconStyle")
         div(class="footer-tabs__container"
             :style="containerStyles(true)"
-            @scroll.passive="updateContainerOverflow" ref="sub-container")
+            v-fade-scroller="{ fadeWidth: '56px' }"
+            ref="sub-container")
           template(v-for="(tab) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
                 class="footer-tabs__item"
@@ -97,8 +98,6 @@ export default defineComponent({
       // eslint-disable-next-line vue/no-unused-properties
       isFontsPanelOpened: false,
       disableTabScroll: false,
-      leftOverflow: false,
-      rightOverflow: false,
       clickedTab: '',
       // eslint-disable-next-line vue/no-unused-properties
       clickedTabTimer: -1,
@@ -289,18 +288,6 @@ export default defineComponent({
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
     },
-    customContentStyles(): { [index: string]: string }  {
-      // used by extending class for their custom styles
-      return {}
-    },
-    contentStyles(): { [index: string]: string }  {
-      // should not be overridden, use customContentStyles to change styles instead
-      return {
-        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
-        opacity: `${this.contentEditable ? 0 : 1}`,
-        ...this.customContentStyles
-      }
-    },
     innerContainerStyles(): { [index: string]: string } {
       return {
         paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px`
@@ -349,9 +336,6 @@ export default defineComponent({
         }
         const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
         if (elContainer) elContainer.scrollTo(0, 0)
-        this.$nextTick(() => {
-          this.updateContainerOverflow()
-        })
       },
       deep: true
     },
@@ -371,13 +355,6 @@ export default defineComponent({
     }),
     extraDisableCondition(tab: IFooterTab): boolean {
       return tab.icon !== 'remove-bg' && this.inBgRemoveMode
-    },
-    updateContainerOverflow() {
-      const elContainer = (this.isSettingTabsOpen ? this.$refs['sub-container'] : this.$refs.container) as HTMLElement
-      if (!elContainer) return
-      const { scrollLeft, scrollWidth, offsetWidth } = elContainer
-      this.leftOverflow = scrollLeft > 0
-      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
       return false
@@ -456,20 +433,35 @@ export default defineComponent({
     settingTabColor(icon: IFooterTab): IColorKeys | undefined {
       return undefined
     },
-    customContainerStyles(isSubContainer: boolean): { [index: string]: string } {
+    BGColor(isSub: boolean) { // Define by child.
+      return {}
+    },
+    // Content outside, container inside.
+    customContentStyles(isSub = false): { [index: string]: string }  {
       // used by extending class for their custom styles
       return {}
     },
-    containerStyles(isSubContainer = false): { [index: string]: string } {
-      // should not be overridden, use customContainerStyles to change styles instead
+    contentStyles(isSub = false): { [index: string]: string }  {
+      // should not be overridden, use customContentStyles to change styles instead
       return {
-        ...(!isSubContainer && !this.isInEditor && { gridTemplateColumns: `repeat(${this.mainTabsSize}, 1fr)` }),
-        ...this.innerContainerStyles,
-        ...this.customContainerStyles(isSubContainer),
+        ...!isSub && { transform: `translate(0,${this.contentEditable ? 100 : 0}%)` },
+        opacity: `${this.contentEditable ? 0 : 1}`,
+        ...this.BGColor(isSub),
+        ...this.customContentStyles(isSub)
       }
     },
-    subTabStyles(): { [index: string]: string } {
+    customContainerStyles(isSub: boolean): { [index: string]: string } {
+      // used by extending class for their custom styles
       return {}
+    },
+    containerStyles(isSub = false): { [index: string]: string } {
+      // should not be overridden, use customContainerStyles to change styles instead
+      return {
+        ...(!isSub && !this.isInEditor && { gridTemplateColumns: `repeat(${this.mainTabsSize}, 1fr)` }),
+        ...this.innerContainerStyles,
+        ...this.BGColor(isSub),
+        ...this.customContainerStyles(isSub),
+      }
     },
   }
 })

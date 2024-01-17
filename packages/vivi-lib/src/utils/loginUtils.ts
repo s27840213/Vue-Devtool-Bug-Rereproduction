@@ -4,7 +4,7 @@ import picWVUtils from '@/utils/picWVUtils'
 import logUtils from './logUtils'
 
 class LoginUtils {
-  async checkToken(redirect = () => { /**/ }) {
+  async checkToken(redirect: () => void | Promise<void> = () => { /**/ }) {
     if (store.getters['user/isLogin']) return
 
     // If is not login try to fetch token
@@ -12,7 +12,7 @@ class LoginUtils {
     if (token) {
       await store.dispatch('user/login', { token: token })
     } else {
-      redirect()
+      await redirect()
     }
   }
 

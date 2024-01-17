@@ -23,6 +23,7 @@ import { IFrame } from '@nu/vivi-lib/interfaces/layer'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import frameUtils from '@nu/vivi-lib/utils/frameUtils'
+import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -86,8 +87,6 @@ const component = defineComponent({
       hideDynamicCompPanels: ['crop-flip', 'multiple-select'],
       // eslint-disable-next-line vue/no-unused-properties
       noRowGapPanels: ['crop-flip', 'color', 'multiple-select'],
-      // eslint-disable-next-line vue/no-unused-properties
-      hideFooterPanels: ['remove-bg'],
       // eslint-disable-next-line vue/no-unused-properties
       hideMobilePanelPanels: ['crop-flip'],
     }
@@ -200,7 +199,7 @@ const component = defineComponent({
             panelHistory: this.panelHistory,
           }
         }
-        case 'adjust': { 
+        case 'adjust': {
           return {
             isBiColorEditor: this.isBiColorEditor,
           }
@@ -221,8 +220,9 @@ const component = defineComponent({
           return { pushHistory, openExtraColorModal, openExtraPanelReplace, leaveExtraPanel }
         case 'photo-shadow':
           return { pushHistory, openExtraColorModal }
-        default:
+        default: {
           return {}
+        }
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
@@ -308,6 +308,11 @@ const component = defineComponent({
             }
             break
           }
+
+          case 'photo-shadow': {
+            // close the photo shadow panel or close the color panel
+            imageShadowPanelUtils.handleShadowUpload()
+          }
         }
         if (this.inMultiSelectionMode) {
           editorUtils.setInMultiSelectionMode(false)
@@ -349,7 +354,11 @@ const component = defineComponent({
       const isLayerAction = isSvg
         ? (target as SVGElement).classList.contains('layer-action')
         : (target as HTMLElement).className.includes?.('layer-action') // Skip layer action icon or element
-      return isLayerAction ? true : (target.parentElement ? this.checkLayerAction(target.parentElement) : false)
+      return isLayerAction
+        ? true
+        : target.parentElement
+        ? this.checkLayerAction(target.parentElement)
+        : false
     },
     // eslint-disable-next-line vue/no-unused-properties
     middlewareCondition(target: HTMLElement | SVGElement): boolean {

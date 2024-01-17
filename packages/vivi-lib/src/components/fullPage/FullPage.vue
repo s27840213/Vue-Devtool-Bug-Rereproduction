@@ -1,5 +1,5 @@
 <template lang="pug">
-div(ref="main" class="full-page relative")
+div(ref="main" class="full-page relative" :class="{welcome: fullPageConfig.type === 'welcome'}")
   template(v-if="fullPageConfig.type === 'video'")
     div(class="full-page__video" :class="fullPageConfig.params.mediaPos ? fullPageConfig.params.mediaPos : ''")
       video(autoplay playsinline muted
@@ -9,24 +9,34 @@ div(ref="main" class="full-page relative")
         @ended="handleEnded"
         @canplay="sendAppLoaded")
   payment(v-if="fullPageConfig.type === 'payment'"
-          :target="fullPageConfig.params.target"
+          :target="fullPageConfig.params.target",
+          :theme="fullPageConfig.params.theme",
+          :defaultTrialToggled="fullPageConfig.params.defaultTrialToggled",
+          :carouselItems="fullPageConfig.params.carouselItems",
+          :cards="fullPageConfig.params.cards",
+          :btnPlans="fullPageConfig.params.btnPlans",
+          :comparisons="fullPageConfig.params.comparisons"
+          :termsOfServiceUrl="fullPageConfig.params.termsOfServiceUrl"
+          :privacyPolicyUrl="fullPageConfig.params.privacyPolicyUrl"
+          :isPromote="fullPageConfig.params.isPromote"
           @canShow="sendAppLoaded")
   welcome(v-if="fullPageConfig.type === 'welcome'")
   div(v-if="showCloseButton"
     class="full-page__close"
-    :class="{'full-page__close--semi-transparent': fullPageConfig.type === 'payment'}"
+    :class="{'full-page__close--semi-transparent': fullPageConfig.type === 'payment' && $isStk}"
     @click.prevent.stop="handleClose")
-    svg-icon(iconName="vivisticker_close"
-            iconColor="white"
+    svg-icon(:iconName="$isStk ? 'vivisticker_close' : 'x-mark'"
+            :iconColor="$isStk ? 'white' : 'dark-1'"
             iconWidth="24px")
 </template>
 
 <script lang="ts">
 import Payment from '@/components/fullPage/Payment.vue'
 import Welcome from '@/components/fullPage/Welcome.vue'
-import { IFullPageConfig } from '@nu/vivi-lib/interfaces/vivisticker'
-import logUtils from '@nu/vivi-lib/utils/logUtils'
-import stkWVUtils from '@nu/vivi-lib/utils/stkWVUtils'
+import { IFullPageConfig } from '@/interfaces/fullPage'
+import store from '@/store'
+import cmWVUtils from '@/utils/cmWVUtils'
+import stkWVUtils from '@/utils/stkWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -45,7 +55,7 @@ export default defineComponent({
     this.initialize()
   },
   watch: {
-    fullPageType() {
+    'fullPageConfig.type'() {
       this.$nextTick(() => {
         this.initialize()
       })
@@ -53,20 +63,20 @@ export default defineComponent({
   },
   computed: {
     ...(mapGetters({
-      fullPageConfig: 'vivisticker/getFullPageConfig',
+      fullPageConfig: 'getFullPageConfig',
     }) as {
       fullPageConfig: () => IFullPageConfig
-    })
+      }),
+    homeIndicatorHeight() {
+      if(this.$isCm) return store.getters['cmWV/getUserInfo'].homeIndicatorHeight
+      return 0
+    }
   },
   methods: {
     ...mapMutations({
-      clearFullPageConfig: 'vivisticker/UPDATE_clearFullPageConfig'
+      clearFullPageConfig: 'UPDATE_clearFullPageConfig'
     }),
     initialize() {
-      logUtils.setLog(`Show full page: {
-        type: ${this.fullPageConfig.type}
-        params: ${JSON.stringify(this.fullPageConfig.params)}
-      }`)
       this.showCloseButton = false
       this.showOnVideoFinish = false
       switch (this.fullPageConfig.type) {
@@ -85,6 +95,9 @@ export default defineComponent({
             this.showCloseButton = true
           }
           break
+        case 'welcome':
+          if (this.$isCm) this.showCloseButton = false
+          break
         default:
           this.showCloseButton = true
       }
@@ -93,7 +106,8 @@ export default defineComponent({
       this.clearFullPageConfig()
     },
     sendAppLoaded() {
-      stkWVUtils.sendAppLoaded()
+      if (this.$isStk) stkWVUtils.sendAppLoaded()
+      else if (this.$isCm) cmWVUtils.sendAppLoaded()
     },
     handleEnded() {
       if (this.showOnVideoFinish) {
@@ -115,7 +129,15 @@ export default defineComponent({
   grid-template-rows: 1fr auto;
   background: setColor(black-1);
   overflow: hidden;
-  z-index: setZindex('popup');
+  @include stk {
+    z-index: setZindex('popup');
+  }
+  @include cm {
+    @apply z-popup;
+    &.welcome {
+      @apply bg-dark-4/70
+    }
+  }
   &__close {
     @include size(24px);
     display: flex;
@@ -123,9 +145,15 @@ export default defineComponent({
     justify-content: center;
     position: absolute;
     top: 20px;
-    right: 20px;
     &--semi-transparent {
       opacity: 0.5;
+    }
+    @include stk {
+      right: 20px;
+    }
+    @include cm {
+      top: v-bind("`${homeIndicatorHeight + 8}px`");
+      left: 16px;
     }
   }
   &__video {

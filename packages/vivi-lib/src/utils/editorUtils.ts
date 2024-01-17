@@ -2,9 +2,9 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IMobileEditorState } from '@/store/module/mobileEditor'
+import { IEditorState } from '@/store/types'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
-import { IEditorState } from '@/store/types'
 
 class EditorUtils {
   private _mobileSize = { width: 0, height: 0 }
@@ -133,10 +133,14 @@ class EditorUtils {
         y: (editorUtils.mobileSize.height - height * this.contentScaleRatio) * 0.5
       }
       // test
-      if (!generalUtils.isCm) {
+      if (!generalUtils.isStk) {
         pageUtils.updatePagePos(pageIndex, pos)
         pageUtils.updatePageInitPos(pageIndex, pos)
       }
+      // if (!generalUtils.isCm) {
+      //   pageUtils.updatePagePos(pageIndex, pos)
+      //   pageUtils.updatePageInitPos(pageIndex, pos)
+      // }
       return contentScaleRatio
     }
     return 1

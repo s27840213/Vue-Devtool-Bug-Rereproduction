@@ -24,7 +24,8 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
         img(src="@/assets/img/crown-3d.png" class="w-128 h-128")
       nubtn(
         icon="crown"
-        size="mid-full") {{ $t('CM0032') }}
+        size="mid-full"
+        @click="handleProBtnClick") {{ $t('CM0032') }}
     div(class="flex flex-col gap-16 text-white text-left typo-h6")
       template(
         v-for="op in config"
@@ -40,13 +41,23 @@ div(class="settings w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           v-else
           :class="op.class"
           @click="op.callback") {{ op.title }}
+  div(v-if="isLoggingOut" class="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-median")
+  transition(name="fade-in")
+    loading-brick(
+      v-if="isLoggingOut"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
 </template>
 
 <script setup lang="ts">
 import { useGlobalStore } from '@/stores/global'
+import { useModalStore } from '@/stores/modal'
+import { useUserStore } from '@/stores/user'
 import vuex from '@/vuex'
+import { notify } from '@kyvg/vue3-notification'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import loginUtils from '@nu/vivi-lib/utils/loginUtils'
 import { storeToRefs } from 'pinia'
 
@@ -61,6 +72,8 @@ interface IOptionConfig {
 const { t, tc } = useI18n()
 const router = useRouter()
 const hostname = window.location.hostname
+const { setNormalModalInfo, openModal, closeModal } = useModalStore()
+const { myDesignTags } = storeToRefs(useUserStore())
 // #region userInfo
 const domain = `${hostname.replace('.vivipic.com', '')}`
 const buildNumber = computed(() => {
@@ -69,18 +82,29 @@ const buildNumber = computed(() => {
 })
 const userInfo = computed(() => vuex.getters['cmWV/getUserInfo'])
 const userId = computed(() => vuex.getters['user/getUserId'])
+const debugInfo = computed(
+  () =>
+    `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}:${userId.value}`,
+)
 
 const domainOptions = computed((): IOptionConfig[] => [
   {
-    //   title: 'production',
-    //   iconName: 'global',
-    //   selected: () => {
-    //     return hostname === 'sticker.vivipic.com'
-    //   },
-    //   action: () => {
-    //     // this.switchDomain('sticker')
-    //   },
-    // }, {
+    title: 'production',
+    iconName: 'global',
+    selected: hostname.includes('cm.vivipic.com'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cm.vivipic.com/')
+    },
+  },
+  {
+    title: 'qa',
+    iconName: 'global',
+    selected: hostname.includes('cmqa'),
+    callback: () => {
+      cmWVUtils.switchDomain('https://cmqa.vivipic.com/')
+    },
+  },
+  {
     title: 'rd',
     iconName: 'global',
     selected: hostname.includes('cmrd'),
@@ -153,6 +177,9 @@ const debugModeTimer = ref(-1)
 const debugModeCounter = ref(0)
 
 const handleDebugMode = () => {
+  generalUtils.copyText(debugInfo.value).then(() => {
+    notify({ group: 'success', text: t('NN0923') })
+  })
   if (debugModeTimer.value) {
     clearTimeout(debugModeTimer.value)
   }
@@ -189,16 +216,16 @@ const supportOptions: Array<IOptionConfig> = [
     title: t('CM0038'),
     iconName: 'film',
     callback: () => {
-      console.log('callback')
+      window.open('https://www.instagram.com/charmix.ai/')
     },
   },
-  {
-    title: t('CM0039'),
-    iconName: 'language',
-    callback: () => {
-      setCurrState('language')
-    },
-  },
+  // {
+  //   title: t('CM0039'),
+  //   iconName: 'language',
+  //   callback: () => {
+  //     setCurrState('language')
+  //   },
+  // },
 ]
 
 const mediaOptions: Array<IOptionConfig> = [
@@ -206,16 +233,16 @@ const mediaOptions: Array<IOptionConfig> = [
     title: t('CM0041'),
     iconName: 'instagram',
     callback: () => {
-      console.log('callback')
+      window.open('https://www.instagram.com/charmix.ai/')
     },
   },
-  {
-    title: t('CM0042'),
-    iconName: 'tiktok',
-    callback: () => {
-      console.log('callback')
-    },
-  },
+  // {
+  //   title: t('CM0042'),
+  //   iconName: 'tiktok',
+  //   callback: () => {
+  //     console.log('callback')
+  //   },
+  // },
 ]
 
 const aboutOptions: Array<IOptionConfig> = [
@@ -223,21 +250,28 @@ const aboutOptions: Array<IOptionConfig> = [
     title: t('CM0044'),
     iconName: 'star',
     callback: () => {
-      console.log('callback')
+      cmWVUtils.ratingRequest(false)
     },
   },
   {
     title: t('CM0045'),
     iconName: 'chat-bubble',
     callback: () => {
-      console.log('callback')
+      window.open('https://www.instagram.com/charmix.ai/')
     },
   },
   {
-    title: t('CM0046'),
+    title: t('NN0160'),
     iconName: 'document-text',
     callback: () => {
-      console.log('callback')
+      window.open('https://vivisticker.com/us/terms-of-use/')
+    },
+  },
+  {
+    title: t('NN0161'),
+    iconName: 'document-text',
+    callback: () => {
+      window.open('https://vivisticker.com/us/privacy-policy/')
     },
   },
 ]
@@ -251,14 +285,18 @@ const debugOptions: Array<IOptionConfig> = [
       setCurrState('domain')
     },
   },
-  {
-    title: '進入 Native 事件測試器',
-    class: 'debug-option',
-    iconName: 'code-bracket-square',
-    callback: () => {
-      router.push({ name: 'NativeEventTester' })
-    },
-  },
+  ...(window.location.host !== 'cm.vivipic.com'
+    ? [
+        {
+          title: '進入 Native 事件測試器',
+          class: 'debug-option',
+          iconName: 'code-bracket-square',
+          callback: () => {
+            router.push({ name: 'NativeEventTester' })
+          },
+        },
+      ]
+    : []),
 ]
 
 const segmentTitleStyle = 'py-4 border-0 border-b-1 border-solid border-lighter/80'
@@ -272,7 +310,7 @@ const initOptions = computed(
       { title: t('CM0043'), class: segmentTitleStyle },
       ...aboutOptions,
       {
-        title: `${userInfo.value.appVer}/${userInfo.value.osVer}/${userInfo.value.modelName} ${buildNumber.value} ${domain} ${userInfo.value.hostId}:${userId.value}`, // Debug info
+        title: debugInfo.value, // Debug info
         class: 'typo-body-sm text-center text-lighter py-10',
         callback: handleDebugMode,
       },
@@ -282,23 +320,57 @@ const initOptions = computed(
 // #endregion
 
 // #region account options
+const isLoggingOut = ref(false)
+
 const accountOptions = computed(
   () =>
     [
       {
         title: tc('NN0167', 1),
         iconName: 'logout2',
-        callback: loginUtils.logout,
+        callback: () => {
+          isLoggingOut.value = true
+          setTimeout(() => {
+            loginUtils.logout()
+          }, 500)
+        },
       },
       {
         title: tc('NN0317', 1),
         iconName: 'info-warning',
         callback: () => {
-          //
+          setNormalModalInfo({
+            title: t('CM0157'),
+            content: t('CM0158'),
+            cancelText: t('NN0203'),
+            confirmText: t('NN0445'),
+            cancel: () => {
+              closeModal()
+            },
+            confirm: () => {
+              // TODO: handle assets
+              // for (const tag of myDesignTags.value) {
+              //   if (tag.type === 'all') continue
+              //   cmWVUtils.deleteFile(`mydesign-${tag.type}`)
+              // }
+              isLoggingOut.value = true
+              setTimeout(() => {
+                loginUtils.logout()
+              }, 500)
+              closeModal()
+            },
+          })
+          openModal()
         },
       },
     ] as IOptionConfig[],
 )
+// #endregion
+
+// #region pro
+const handleProBtnClick = () => {
+  cmWVUtils.openPayment()
+}
 // #endregion
 
 const configs = computed(

@@ -2,7 +2,7 @@
 import { notify } from '@kyvg/vue3-notification'
 import FooterTabs from '@nu/vivi-lib/components/editor/mobile/FooterTabs.vue'
 import i18n from '@nu/vivi-lib/i18n'
-import { IColorKeys } from '@nu/vivi-lib/interfaces/color'
+import { IColorKeys, colorTable } from '@nu/vivi-lib/interfaces/color'
 import { IFooterTab } from '@nu/vivi-lib/interfaces/editor'
 import { IFrame, IGroup, IImage, IShape } from '@nu/vivi-lib/interfaces/layer'
 import { ColorEventType, LayerType } from '@nu/vivi-lib/store/types'
@@ -32,14 +32,6 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     isSettingTabsOpen(): boolean {
       return this.settingTabs.length > 0 || this.inBgRemoveMode
-    },
-    // eslint-disable-next-line vue/no-unused-properties
-    customContentStyles() {
-      return {
-        borderTop: !this.contentEditable && this.isSettingTabsOpen ? '0.5px solid #D9DBE1' : 'none',
-        boxShadow:
-          !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none',
-      }
     },
     groupTab(): IFooterTab {
       return {
@@ -777,16 +769,20 @@ export default defineComponent({
         : 'white'
     },
     // eslint-disable-next-line vue/no-unused-properties
-    customContainerStyles(isSubContainer: boolean): { [index: string]: string } {
-      // used by extending class for their custom styles
+    BGColor(isSub: boolean) {
       return {
-        ...(!isSubContainer && { backgroundColor: '#14182A' }),
+        backgroundColor: isSub ? colorTable['gray-6'] : colorTable.nav
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    subTabStyles(): { [index: string]: string } {
+    customContentStyles(isSub = false) {
+      if (isSub) {
+        return {}
+      }
       return {
-        backgroundColor: '#F4F5F7',
+        borderTop: !this.contentEditable && this.isSettingTabsOpen ? '0.5px solid #D9DBE1' : 'none',
+        boxShadow:
+          !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none',
       }
     },
   },

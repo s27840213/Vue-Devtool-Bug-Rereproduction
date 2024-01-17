@@ -88,6 +88,13 @@ class UploadUtils {
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
   get hostId(): string { return generalUtils.isStk ? store.getters['vivisticker/getUserInfo'].hostId : store.getters['cmWV/getUserInfo'].hostId }
+  get fullId(): string {
+    if (generalUtils.isPic) return this.userId
+    if (generalUtils.isStk) return this.hostId
+    if (generalUtils.isCm) return `${this.hostId}:${this.userId}`
+    return ''
+  }
+
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
@@ -184,9 +191,9 @@ class UploadUtils {
       if (type === 'logo') {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
-        if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
-          store.commit('bgRemove/SET_isProcessing', true)
-        }
+      if (['stk-bg-remove', 'stk-bg-remove-face', 'cm-bg-remove'].includes(type)) {
+        store.commit('bgRemove/SET_isProcessing', true)
+      }
       this.uploadAsset(type, files as FileList, Object.assign(params, { addToPage }))
       document.body.removeChild(inputNode)
     }, false)
@@ -315,7 +322,8 @@ class UploadUtils {
     | 'avatar'
     | 'logo'
     | 'stk-bg-remove'
-    | 'stk-bg-remove-face',
+    | 'stk-bg-remove-face'
+    | 'cm-bg-remove',
     files: FileList | Array<string>,
     {
       addToPage = false,
@@ -376,7 +384,7 @@ class UploadUtils {
       // const uuid = '230511154035471qUvA6TTT'
       const formData = new FormData()
 
-      if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+      if (['stk-bg-remove', 'stk-bg-remove-face', 'cm-bg-remove'].includes(type)) {
         Object.keys(this.loginOutput.ul_removebg_map.fields).forEach((key) => {
           formData.append(key, this.loginOutput.ul_removebg_map.fields[key])
         })
@@ -399,6 +407,9 @@ class UploadUtils {
           break
         case 'stk-bg-remove-face':
           key = `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bgf`
+          break
+        case 'cm-bg-remove':
+          key = `${this.loginOutput.ul_removebg_map.path}${uuid}/${assetId}/bg`
           break
         case 'logo':
           if (!brandId) return
@@ -625,7 +636,7 @@ class UploadUtils {
               })
             }, 2000)
           }
-        } else if (type === 'stk-bg-remove' || type === 'stk-bg-remove-face') {
+        } else if (['stk-bg-remove', 'stk-bg-remove-face', 'cm-bg-remove'].includes(type)) {
           console.time('xhr created')
           xhr.open('POST', this.loginOutput.ul_removebg_map.url, true)
           xhr.send(formData)
@@ -634,14 +645,29 @@ class UploadUtils {
             console.timeEnd('xhr created')
             console.timeEnd('upload IOS image')
             imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
-              bgRemoveUtils.removeBgStk(
-                uuid,
-                assetId,
-                src,
-                width,
-                height,
-                type
-              )
+              if(['stk-bg-remove', 'stk-bg-remove-face'].includes(type)) {
+                bgRemoveUtils.removeBgStk(
+                  uuid,
+                  assetId,
+                  src,
+                  width,
+                  height,
+                  type
+                )
+              }
+              if(type === 'cm-bg-remove') {
+                imageUtils.checkImgAlphaPercentages(imageUtils.getSrc(layerUtils.getCurrLayer as IImage)).then((percentage) => {
+                  bgRemoveUtils.removeBgCm(
+                    uuid,
+                    assetId,
+                    src,
+                    width,
+                    height,
+                    type,
+                    percentage
+                  )
+                })
+              }
             })
           }
         }
@@ -1421,7 +1447,7 @@ class UploadUtils {
           )}`
         )
         const json = await response.json()
-        this.setLoginOutput({ upload_log_map: json.ul_log_map })
+        this.setLoginOutput({ upload_log_map: json.ul_log_map, ul_removebg_map: json.ul_removebg_map })
       }
     }
   }
@@ -2120,7 +2146,7 @@ class UploadUtils {
     const interval = window.setInterval(() => {
       if (retryTime === retryLimit) {
         clearInterval(interval)
-        console.log('Polling failed')
+        logUtils.setLogAndConsoleLog('Polling failed')
         return
       }
       retryTime += 1

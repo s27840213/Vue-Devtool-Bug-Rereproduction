@@ -21,10 +21,10 @@ type ITextShadowCSS = {
   }[]
 }
 
-const focusState = ['none' as const, 'shadow' as const, 'shape' as const, 'bg' as const, 'fill' as const]
+const focusState = ['none', 'shadow', 'shape', 'bg', 'fill'] as const
 export type IFocusState = (typeof focusState)[number]
 export function isFocusState(obj: string): obj is IFocusState {
-  return !!obj && (focusState as string[]).includes(obj)
+  return !!obj && focusState.includes(obj)
 }
 
 class Controller {

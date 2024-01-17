@@ -30,7 +30,9 @@ div(class="panel-remove-bg")
         :value="_brushSize"
         :min="minBrushSize"
         :max="maxBrushSize"
-        @update="setBrushSize")
+        @update="setBrushSize"
+        @pointerdown="setIsChangingBrushSize(true)"
+        @pointerup="setIsChangingBrushSize(false)")
 </template>
 
 <script lang="ts">
@@ -114,7 +116,8 @@ export default defineComponent({
       _setClearMode: 'bgRemove/SET_clearMode',
       setMovingMode: 'bgRemove/SET_movingMode',
       setShowInitImage: 'bgRemove/SET_showInitImage',
-      updatePinchState: 'bgRemove/UPDATE_pinchState'
+      updatePinchState: 'bgRemove/UPDATE_pinchState',
+      setIsChangingBrushSize: 'bgRemove/SET_isChangingBrushSize',
     }),
     setClearMode(bool: boolean) {
       this._setClearMode(bool)

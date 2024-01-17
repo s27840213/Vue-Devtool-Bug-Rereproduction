@@ -47,8 +47,8 @@ const getters: GetterTree<IAssetPanelState, unknown> = {
   getShowAllRecently(state: IAssetPanelState): (tab: string) => boolean {
     return (tab: string): boolean => state.showAllRecentlyDict[tab] ?? false
   },
-  getIsHm(state: IAssetPanelState): string {
-    return state.isHiddenMessage ? '1' : '0'
+  getIsHm(state: IAssetPanelState): number {
+    return state.isHiddenMessage ? 1 : 0
   },
 }
 

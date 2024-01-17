@@ -1,13 +1,12 @@
-import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useEditorStore } from '@/stores/editor'
-import type { EditorType, GenImageOptions } from '@/types/editor'
+import type { EditorType, GenImageOption } from '@/types/editor'
 import { editorTypes } from '@/types/editor'
 import store from '@/vuex'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import VueRouter from 'vue-router'
 
-const isValidType = (x: any): x is EditorType => editorTypes.includes(x)
+const isValidType = (x: string | null): x is EditorType => editorTypes.includes(x)
 
 export async function editorRouteHandler(
   _to: VueRouter.RouteLocationNormalized,
@@ -29,16 +28,13 @@ export async function editorRouteHandler(
     if (!isValidType(type)) throw new Error('Invalid editor type.')
 
     const editorStore = useEditorStore()
-    const { editorType } = storeToRefs(editorStore)
-    const { setEditorType, setPageSize, setCurrActiveFeature, stepsReset, setCurrGenOptions } =
+    const { editorType, currDesignId, currGenOptions } = storeToRefs(editorStore)
+    const { setEditorType, setPageSize, setCurrActiveFeature, setCurrGenOptions } =
       editorStore
-    const { initBiColorEditor, isBiColorEditor } = useBiColorEditor()
     setEditorType(type)
     setPageSize(width, height)
-    stepsReset()
-    setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOptions) ?? [])
+    if (!currGenOptions.value?.length || !currDesignId.value) setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOption[]) ?? [])
 
-    if (isBiColorEditor.value) initBiColorEditor(editorType.value)
     store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
     switch (type) {
       case 'powerful-fill':

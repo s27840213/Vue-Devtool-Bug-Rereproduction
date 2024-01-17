@@ -32,7 +32,6 @@ const getDefaultState = (): IModalState => ({
     noClose: false,
     noCloseIcon: false,
     backdropStyle: {},
-    cardStyle: {},
     checkboxText: '',
     checked: false,
     onCheckedChange: (checked) => {

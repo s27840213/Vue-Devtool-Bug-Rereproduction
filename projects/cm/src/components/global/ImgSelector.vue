@@ -37,7 +37,7 @@ div(
       :key="img.assetId"
       class="relative flex justify-center"
       @click="selectDemo(i)")
-      img(class="w-44 h-44 object-cover rounded-10" :src="img.assetId")
+      img(class="w-44 h-44 object-cover rounded-10" :src="imageUtils.getSrc(img, 'prev')")
       span(class="absolute typo-btn-md bottom-2 text-center") {{ $t('CM0065') }}
   //- 4-1. Photo
   div(
@@ -55,10 +55,7 @@ div(
         :key="img.id"
         class="aspect-square relative"
         @click="selectImage(img, 'ios')")
-        lazy-load(
-          class="lazy-load w-full h-full"
-          target=".img-selector__img-grid"
-          :rootMargin="'1000px 0px 1000px 0px'")
+        lazy-load(class="lazy-load w-full h-full" :rootMargin="'1000px 0px 1000px 0px'")
           img(class="object-cover w-full h-full" :src="`chmix://cameraroll/${img.id}?ssize=200`")
         svg-icon(
           v-if="selected(img, 'ios')"
@@ -75,6 +72,10 @@ div(
           class="mb-10"
           :iconName="'loading'"
           iconColor="white")
+      transition(name="fade-in")
+        loading-brick(
+          v-if="isLoadingContent"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
     //- Album selector
     div(v-else class="flex flex-col gap-8 mx-10")
       div(
@@ -103,7 +104,7 @@ div(
         class="relative")
         img(
           class="w-full"
-          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=320`"
+          :src="`https://images.unsplash.com/${img.id}?cs=tinysrgb&q=80&w=150`"
           @click="selectImage(img, 'unsplash')")
         svg-icon(
           v-if="selected(img, 'unsplash')"
@@ -149,7 +150,7 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-          @click="() => editorStore.setDescriptionPanel('hidden-message-invert')")
+          @click="() => editorStore.setDescriptionPanel('hidden-message/invert')")
       toggle-btn(
         class="payment__trial__toggle"
         v-model="isInvert"
@@ -167,7 +168,7 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
         svg-icon(
           iconName="information-circle"
           iconWidth="24px"
-          @click="() => editorStore.setDescriptionPanel('hidden-message-bgrm')")
+          @click="() => editorStore.setDescriptionPanel('hidden-message/bgrm')")
       toggle-btn(
         class="payment__trial__toggle"
         v-model="isBgRemove"
@@ -193,17 +194,24 @@ import LazyLoad from '@nu/vivi-lib/components/LazyLoad.vue'
 import ObserverSentinel from '@nu/vivi-lib/components/ObserverSentinel.vue'
 import SearchBar from '@nu/vivi-lib/components/SearchBar.vue'
 import Tabs from '@nu/vivi-lib/components/Tabs.vue'
+import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useWaterfall from '@nu/vivi-lib/composable/useWaterfall'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import type { IPhotoItem } from '@nu/vivi-lib/interfaces/api'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import type { IImage } from '@nu/vivi-lib/interfaces/layer'
+import store from '@nu/vivi-lib/store'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import type { IAlbum, IAlbumContent } from '@nu/vivi-lib/utils/cmWVUtils'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
+import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
-import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
+import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
+import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { find, pull } from 'lodash'
 
 const props = defineProps({
@@ -221,16 +229,16 @@ const { tc } = useI18n()
 let targetImgs = reactive([] as (SrcObj & { ratio: number })[])
 const demoImgs = [
   {
-    type: 'local-img',
-    assetId: require('@img/jpg/cm demo img1.jpg'),
-    userId: '',
-    ratio: 320 / 480,
+    type: 'public',
+    assetId: '2401121516235673dNRg71v',
+    userId: 'zKocTWh1Ry9ITYr0kaPf',
+    ratio: 3652 / 5477,
   },
   {
-    type: 'local-img',
-    assetId: require('@img/jpg/cm demo img2.jpg'),
-    userId: '',
-    ratio: 384 / 480,
+    type: 'public',
+    assetId: '240112151638444L4OwJ97s',
+    userId: 'zKocTWh1Ry9ITYr0kaPf',
+    ratio: 3376 / 4220,
   },
 ]
 
@@ -294,7 +302,6 @@ const getAlbumContent = async (album: IAlbum) => {
       if (res.nextPage) {
         nextPage.value = res.nextPage
       } else {
-        console.log('no more content')
         noMoreContent.value = true
       }
       isLoadingContent.value = false
@@ -412,7 +419,7 @@ const beforeSendToEditor = () => {
   }
 }
 
-const sendToEditor = async () => {
+const sendToEditor = async (isBgRemove = false) => {
   if (replaceImgFlag) {
     imageUtils.replaceImg(
       targetImgs[0],
@@ -434,13 +441,26 @@ const sendToEditor = async () => {
           record: initAtEditor,
           styles: {
             adjust: {
-              ...(editorType.value === 'hidden-message' && { saturate: -100 }),
+              ...(editorType.value === 'hidden-message' && {
+                saturate: -100,
+                brightness: 10,
+                contrast: 20,
+              }),
               invert: +isInvert.value,
             },
           },
           ...(!initAtEditor && { fit: 1 }),
         })
       })
+      if (isBgRemove) {
+        editorUtils.setCurrActivePanel('cm_remove-bg')
+        store.commit('bgRemove/SET_isProcessing', true)
+
+        const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
+        generalUtils.toDataURL(src, (dataUrl: string) => {
+          uploadUtils.uploadAsset('cm-bg-remove', [dataUrl])
+        })
+      }
       if (!initAtEditor || editorType.value === 'hidden-message') {
         groupUtils.deselect()
       }
@@ -452,32 +472,32 @@ const sendToEditor = async () => {
 // #endregion
 
 // #region get the first album image content
+isLoadingContent.value = true
 cmWVUtils
   .getAlbumList()
-  .then((res) => {
+  .then(async (res) => {
+    isLoadingContent.value = false
     if (!res) return // For browser version
     if (res.flag === 1) {
-      console.error(res.msg)
-    } else {
-      smartAlbum.push(...res.smartAlbum)
-      myAlbum.push(...res.myAlbum)
+      modalUtils.setModalInfo('Error', res.msg)
+      return
+    }
 
-      const recentAlbum = smartAlbum.find((album) =>
-        ['recents', '最近項目'].includes(album.title.toLowerCase()),
-      )
-      Object.assign(currAlbum, recentAlbum)
-      isLoadingContent.value = true
-      if (recentAlbum?.albumId) {
-        getAlbumContent(recentAlbum).then(() => {
-          initLoaded.value = true
-        })
-      } else {
-        if (smartAlbum.length > 0) {
-          getAlbumContent(smartAlbum[0]).then(() => {
-            initLoaded.value = true
-          })
-        }
-      }
+    smartAlbum.push(...res.smartAlbum)
+    myAlbum.push(...res.myAlbum)
+
+    const recentAlbum = smartAlbum.find((album) =>
+      ['recents', '最近項目'].includes(album.title.toLowerCase()),
+    )
+    Object.assign(currAlbum, recentAlbum)
+    if (recentAlbum?.albumId) {
+      getAlbumContent(recentAlbum).then(() => {
+        initLoaded.value = true
+      })
+    } else if (smartAlbum.length > 0) {
+      getAlbumContent(smartAlbum[0]).then(() => {
+        initLoaded.value = true
+      })
     }
   })
   .catch((err) => {
@@ -495,11 +515,13 @@ const cancelPreprocess = () => {
   targetImgs = []
 }
 const applyPreprocess = () => {
-  sendToEditor()
-  if (isBgRemove.value) {
-    // TODO: remove bg
-  }
+  sendToEditor(isBgRemove.value)
 }
+watch(isBgRemove, (newVal) => {
+  if (newVal && !paymentUtils.checkProApp({ plan: 1 })) {
+    isBgRemove.value = false
+  }
+})
 // #endregion
 </script>
 

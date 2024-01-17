@@ -13,13 +13,13 @@ import groupUtils from './groupUtils'
 import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
 import mouseUtils from './mouseUtils'
+import pagePinchUtils from './pagePinchUtils'
 import pageUtils from './pageUtils'
 import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
 import tiptapUtils from './tiptapUtils'
 
 export class MovingUtils {
-  // private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
   private _config = { config: null as unknown as ILayer }
   private initialPos = { x: 0, y: 0 } as ICoordinate | null
@@ -29,7 +29,6 @@ export class MovingUtils {
   private pointerId = 0
   private initMousePos = { x: 0, y: 0 } as ICoordinate | null
   private initLayerPos = { x: 0, y: 0 }
-  // private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
   private isHandleMovingHandler = false
   private snapUtils = null as any
@@ -55,7 +54,6 @@ export class MovingUtils {
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
-  private get isLocked(): boolean { return this.config.locked }
   private get contentEditable(): boolean { return (this.config as any).contentEditable || false }
   private get getLayerPos(): ICoordinate { return { x: this.config.styles.x, y: this.config.styles.y } }
   private get isDragging(): boolean { return this.config.dragging }
@@ -264,7 +262,8 @@ export class MovingUtils {
     formatUtils.clearCopiedFormat()
 
     // the currLayer active target is not exactly the same fire event layer
-    if (generalUtils.isStk && generalUtils.isTouchDevice() && (layerUtils.layerIndex !== this.layerIndex && this.config.locked)) {
+    if (generalUtils.isStk && generalUtils.isTouchDevice() &&
+      (layerUtils.layerIndex !== -1 && layerUtils.layerIndex !== this.layerIndex && this.config.locked)) {
       return this.lockedLayerMoveStart(event as PointerEvent)
     }
 
@@ -293,7 +292,7 @@ export class MovingUtils {
       this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
     }
 
-    if (this.isTouchDevice && !this.config.locked) {
+    if (this.isTouchDevice) {
       event.stopPropagation()
     }
     if (eventType === 'pointer') {
@@ -310,7 +309,7 @@ export class MovingUtils {
      * @Note - in Mobile version, we can't select the layer directly, we should make it active first
      * The exception is that we are in multi-selection mode
      */
-    if (this.isTouchDevice && !this.isControllerShown && !this.isLocked && !this.inMultiSelectionMode) {
+    if (this.isTouchDevice && !this.isControllerShown && !this.inMultiSelectionMode) {
       this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
       this.initMousePos = mouseUtils.getMouseAbsPoint(event)
       this._moving = this.moving.bind(this)
@@ -324,9 +323,6 @@ export class MovingUtils {
     const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
     const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
     const { inMultiSelectionMode } = this
-    if (!this.isLocked) {
-      event.stopPropagation()
-    }
 
     if (inCopyMode) {
       shortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config)
@@ -354,13 +350,11 @@ export class MovingUtils {
           } else if (this.pageIndex === pageUtils.currFocusPageIndex) {
             groupUtils.select(this.pageIndex, [targetIndex])
           }
-          if (!this.config.locked) {
-            this.initMousePos = mouseUtils.getMouseAbsPoint(event)
-            this._moving = this.moving.bind(this)
-            this._moveEnd = this.moveEnd.bind(this)
-            eventUtils.addPointerEvent('pointerup', this._moveEnd)
-            eventUtils.addPointerEvent('pointermove', this._moving)
-          }
+          this.initMousePos = mouseUtils.getMouseAbsPoint(event)
+          this._moving = this.moving.bind(this)
+          this._moveEnd = this.moveEnd.bind(this)
+          eventUtils.addPointerEvent('pointerup', this._moveEnd)
+          eventUtils.addPointerEvent('pointermove', this._moving)
           return
         }
 
@@ -378,7 +372,6 @@ export class MovingUtils {
         break
       }
       case 'group': {
-        // if (this.subLayerIdx !== -1 && layerUtils.getCurrConfig.contentEditable) {
         if (this.subLayerIdx !== -1 && layerUtils.getCurrConfig.isTyping) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isDraggingCursor: true })
           this._cursorDragEnd = this.onCursorDragEnd.bind(this)
@@ -398,7 +391,7 @@ export class MovingUtils {
     /**
      * @Note InMultiSelection mode should still can move the layer
      */
-    if (!this.config.locked && !inSelectionMode) {
+    if (!inSelectionMode) {
       this.initMousePos = mouseUtils.getMouseAbsPoint(event)
       this._moving = this.moving.bind(this)
       this._moveEnd = this.moveEnd.bind(this)
@@ -424,10 +417,8 @@ export class MovingUtils {
             groupUtils.select(this.pageIndex, [targetIndex])
           } else {
             // this if statement is used to prevent select the layer in another page
-            if (this.pageIndex === pageUtils.currFocusPageIndex && !this.config.locked) {
-              if (!layerUtils.getCurrLayer.locked) {
-                groupUtils.select(this.pageIndex, [targetIndex])
-              }
+            if (this.pageIndex === pageUtils.currFocusPageIndex) {
+              groupUtils.select(this.pageIndex, [targetIndex])
             }
           }
         } else {
@@ -443,7 +434,6 @@ export class MovingUtils {
     if(store.state.allowLayerAction === 'crop-only') return
     const isStartedPointer = this.pointerId === (e as PointerEvent).pointerId
     const isSinglePointer = pointerEvtUtils.pointers.length <= 1
-    if (layerUtils.getCurrLayer.locked) return
     if (!isStartedPointer || !isSinglePointer || store.getters['mobileEditor/getIsPinchingEditor'] || store.getters.getControlState.type === 'pinch' || this.initMousePos === null) {
       if (store.getters.getControlState.type === 'pinch') {
         // if the pinch is started, the moving logic should be turn off
@@ -466,7 +456,7 @@ export class MovingUtils {
       updateConfigData.dragging = true
     }
     // stk always moving the layer
-    if (this.isControllerShown || controlUtils.isClickOnController(e, layerUtils.getCurrLayer) || generalUtils.isStk) {
+    if (!this.config.locked && (this.isControllerShown || controlUtils.isClickOnController(e, layerUtils.getCurrLayer) || generalUtils.isStk)) {
       if (generalUtils.getEventType(e) !== 'touch') {
         e.preventDefault()
       }
@@ -498,7 +488,7 @@ export class MovingUtils {
         x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this._initMousePos.x),
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this._initMousePos.y)
       }
-      if (this.isTouchDevice && !this.isLocked) {
+      if (this.isTouchDevice) {
         const { mobileSize } = editorUtils
         const { getCurrPage: page, scaleRatio } = pageUtils
         const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
@@ -519,6 +509,7 @@ export class MovingUtils {
     if (this.initMousePos === null) return
     if (generalUtils.isTouchDevice() && !generalUtils.isStk &&
       this.layerIndex !== layerUtils.layerIndex && !controlUtils.isClickOnController(e, layerUtils.getCurrLayer)) return
+    if (layerUtils.getCurrLayer.locked) return
 
     const config = layerUtils.getCurrLayer
     const targetLayerIdx = layerUtils.layerIndex
@@ -585,25 +576,24 @@ export class MovingUtils {
       return
     }
     const { getCurrPage: page } = pageUtils
-    const contentScaleRatio = store.getters.getContentScaleRatio
-    const pageScaleRatio = store.state.pageScaleRatio * 0.01
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initMousePos)
+    const edgeLimit = pagePinchUtils.getEdgeLimit(store.state.pageScaleRatio)
 
-    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= 0
-    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= page.width * contentScaleRatio * (1 - pageScaleRatio)
-    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= 0
-    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= page.height * contentScaleRatio * (1 - pageScaleRatio)
+    const isReachLeftEdge = offsetPos.x > 0 && page.x + offsetPos.x >= edgeLimit.left
+    const isReachRightEdge = offsetPos.x < 0 && page.x + offsetPos.x <= edgeLimit.right
+    const isReachTopEdge = offsetPos.y > 0 && page.y + offsetPos.y >= edgeLimit.top
+    const isReachBottomEdge = offsetPos.y < 0 && page.y + offsetPos.y <= edgeLimit.bottom
 
     let x = -1
     let y = -1
     if (isReachRightEdge || isReachLeftEdge) {
-      x = isReachRightEdge ? page.width * contentScaleRatio * (1 - pageScaleRatio) : 0
+      x = isReachRightEdge ? edgeLimit.right : edgeLimit.left
     } else {
       x = offsetPos.x + page.x
     }
 
     if (isReachTopEdge || isReachBottomEdge) {
-      y = isReachBottomEdge ? page.height * contentScaleRatio * (1 - pageScaleRatio) : 0
+      y = isReachBottomEdge ? edgeLimit.bottom : edgeLimit.top
     } else {
       y = offsetPos.y + page.y
     }

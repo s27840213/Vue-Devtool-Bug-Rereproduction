@@ -1,8 +1,8 @@
 import file from '@/apis/file'
+import store from '@/store'
 import userApis from '@nu/vivi-lib/apis/user'
 import { IAssetPhoto, isIAssetPhoto, IUserImageContentData } from '@nu/vivi-lib/interfaces/api'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
-import store from '@/store'
 import apiUtils from '@nu/vivi-lib/utils/apiUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
 import { captureException } from '@sentry/browser'
@@ -61,7 +61,8 @@ function addPerviewUrl(data: any[]) {
         original: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/original` : image.signed_url?.original ?? '',
         midd: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd` : image.signed_url?.midd ?? '',
         smal: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal` : image.signed_url?.smal ?? '',
-        tiny: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? ''
+        tiny: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? '',
+        xtra: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/xtra` : image.signed_url?.xtra ?? ''
       }
     }
   })

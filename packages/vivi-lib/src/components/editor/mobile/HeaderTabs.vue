@@ -10,9 +10,9 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
 </template>
 
 <script lang="ts">
-import LinkOrText from '@/components/LinkOrText.vue';
-import HeaderTab, { TabConfig } from '@/components/editor/mobile/HeaderTab.vue';
-import { PropType, defineComponent } from 'vue';
+import LinkOrText from '@/components/LinkOrText.vue'
+import HeaderTab, { TabConfig } from '@/components/editor/mobile/HeaderTab.vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
@@ -79,6 +79,9 @@ export default defineComponent({
     gap: 8px;
     &.editor {
       gap: 24px;
+      @media screen and (max-width: 360px) {
+        gap: 16px;
+      }
     }
     & > div {
       display: flex;

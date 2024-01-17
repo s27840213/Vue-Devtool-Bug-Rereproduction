@@ -1,5 +1,5 @@
 import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
-import { EditorType } from './editor'
+import { EditorType, GenImageOptionToSave } from './editor'
 
 export type IMyDesignType = 'all' | EditorType
 
@@ -25,7 +25,9 @@ export interface ICmMyDesign {
 export interface ICmSubDesign extends IMyDesign {
   type: EditorType
   subId: string
+  fileName: 'original' | 'result'
   prompt: string
+  genImageOptions: GenImageOptionToSave
   // waterfall UI need this
   width: number
   height: number

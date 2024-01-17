@@ -9,9 +9,10 @@ class NetworkUtils {
     this.event = new EventEmitter()
     this.event.on('networkChange', (online: boolean) => {
       this.online = online
-      if (!online) {
-        this.notifyNetworkError()
-      }
+      // TODO: Improve the display of network error statuses.
+      // if (!online) {
+      //   this.notifyNetworkError()
+      // }
     })
     this.online = navigator.onLine
   }

@@ -1,37 +1,49 @@
 <template lang="pug">
 div(class="home")
-  nu-header(:showCloseIcon="showTemplateList" @close="showTemplateList = false")
+  nu-header(
+    :showCloseIcon="showTemplateList"
+    @close="showTemplateList = false")
   div(class="home-content")
     div(v-if="inBrowserMode && !isLogin" class="home-top")
       div(class="home-top-text")
         span(class="home-top-text__title" v-html="$t('NN0464')")
-        span(class="home-top-text__description") {{$t('NN0465')}}
-        animation(v-for="cb in colorBlock"
+        span(class="home-top-text__description") {{ $t('NN0465') }}
+        animation(
+          v-for="cb in colorBlock"
           :key="cb"
           :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
           :path="'/lottie/' + cb")
-      iframe(title="Vivipic" class="home-top__yt"
-        :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
-        frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-      router-link(v-if="inBrowserMode && !$isTouchDevice()" :to="`/editor?type=new-design-size&width=1080&height=1080`"
-          class="home-top__button rounded btn-primary-sm btn-LG")
-        span {{$t('NN0391')}}
-    div(class="home-list"
-        :class="[isMobileSize ? 'mt-10' : ' mt-100']")
-      scroll-list(v-if="!(!isLogin && isMobile)"
+      iframe(
+        title="Vivipic"
+        class="home-top__yt"
+        :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile ? 0 : 1}&rel=0`"
+        frameborder="0"
+        allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
+      router-link(
+        v-if="inBrowserMode && !$isTouchDevice()"
+        :to="`/editor?type=new-design-size&width=1080&height=1080`"
+        class="home-top__button rounded btn-primary-sm btn-LG")
+        span {{ $t('NN0391') }}
+    div(class="home-list" :class="[isMobileSize ? 'mt-10' : ' mt-100']")
+      scroll-list(
+        v-if="!(!isLogin && isMobile)"
         :gridMode="true"
         type="theme")
-      scroll-list(v-if="isLogin && inBrowserMode && !isMobile"
+      scroll-list(
+        v-if="isLogin && inBrowserMode && !isMobile"
         class="mt-100 mb-65"
         type="mydesign")
-      div(class="px-20"
-          :style="{boxSizing: 'border-box'}")
-        ta-block(v-if="!isLogin" class="tag-title"
+      div(class="px-20" :style="{ boxSizing: 'border-box' }")
+        ta-block(
+          v-if="!isLogin"
+          class="tag-title"
           :class="[isMobileSize ? 'mt-35' : ' mt-100']"
-          :content="templateBlock" :desktop-max-width="'100%'")
+          :content="templateBlock"
+          :desktop-max-width="'100%'")
       hashtag-category-row(
         class="home-list__hashtag"
-        :style="{position: isMobile ? 'sticky' : 'relative'}"
+        :style="{ position: isMobile ? 'sticky' : 'relative' }"
         :type="'tag'"
         :title="''"
         :list="homeTags"
@@ -39,7 +51,8 @@ div(class="home")
         :shinkWidth="0"
         @select="handleSelectTags")
       template(v-if="selectedTags.length !== 0")
-        template-waterfall(:waterfallTemplates="waterfallTemplates"
+        template-waterfall(
+          :waterfallTemplates="waterfallTemplates"
           :isTemplateReady="isTemplateReady"
           :useScrollablePreview="!isMobile"
           :useScrollSpace="isMobile"
@@ -47,38 +60,97 @@ div(class="home")
           @loadMore="handleLoadMore"
           @clickWaterfall="handleClickWaterfall")
       template(v-else)
-        scroll-list(v-for="theme in themeList"
+        scroll-list(
+          v-for="theme in themeList"
           type="template"
           :theme="`${theme}`"
           :key="theme"
           :shuffle="true")
     div(v-if="inBrowserMode && !(isMobile && isLogin)" class="home-block")
-      ta-block(v-for="item in blocklist"
+      ta-block(
+        v-for="item in blocklist"
         :key="item.title"
         :content="item")
-    nu-footer(v-if="inBrowserMode && !(isMobile && isLogin)" :isHome="true")
+    nu-footer(
+      v-if="inBrowserMode && !(isMobile && isLogin)"
+      :isHome="true")
+  transition(name="fade-scale-center")
+    div(
+      v-if="showTemplateList && !isMobile && !showTemplateTheme"
+      class="template-list-pc"
+      v-click-outside="() => { showTemplateList = false }")
+      div(class="template-list-pc__header")
+        div(class="template-list-pc__header__close" @click="() => { showTemplateList = false }")
+          svg-icon(
+            iconName="close"
+            iconWidth="20px"
+            iconColor="gray-2")
+      div(class="template-list-pc__content")
+        div(class="template-list-pc__gallery")
+          div(
+            v-for="content in contentIds"
+            class="template-list-pc__gallery-item"
+            :key="content.id"
+            :style="`background-image: url(${getPrevUrl(content)})`"
+            @click="handleTemplateClick(content)")
+  transition(name="fade-scale-center")
+    div(
+      v-if="showTemplateList && !isMobile && showTemplateTheme"
+      class="template-list-pc-split"
+      v-click-outside="() => { showTemplateList = false }")
+      div(class="template-list-pc__content-left")
+        div(class="template-list-pc__template" :style="`background-image: url(${getPrevUrl(contentBuffer)})`")
+      div(class="template-list-pc__content-right")
+        div(class="template-list-pc__header")
+          div(class="template-list-pc__header__close" @click="() => { showTemplateTheme = false }")
+            svg-icon(
+              iconName="close"
+              iconWidth="20px"
+              iconColor="gray-2")
+        div(class="template-list-pc__title")
+          span {{ $t('NN0228') }}：
+        div(class="template-list-pc__themes")
+          div(
+            v-for="theme in matchedThemes"
+            class="template-list-pc__themes__row"
+            :key="theme.id"
+            :class="checkSelected(theme) ? 'selected' : ''"
+            @click="handleThemeSelect(theme)")
+            div(class="template-list-pc__themes__title")
+              span {{ theme.title }}
+            div(class="template-list-pc__themes__description")
+              span {{ `${theme.width}x${theme.height} ${theme.unit}` }}
+        div(
+          class="template-list-pc__button"
+          :class="selectedTheme ? '' : 'disabled'"
+          @click="handleThemeSubmit")
+          span(:style="multiThemeButtonStyles()") {{ $t('NN0229') }}
   transition(name="fade-slide")
     div(v-if="showTemplateList && isMobile" class="template-list")
       div(class="template-list__content")
         div(class="template-list__gallery")
-          div(v-for="content in contentIds" class="template-list__gallery-item"
+          div(
+            v-for="content in contentIds"
+            class="template-list__gallery-item"
             :key="content.id"
             :style="`background-image: url(${getPrevUrl(content, 2)})`"
             @click="handleTemplateClick(content)")
+  div(v-if="showTemplateList && !isMobile" class="dim-background")
 </template>
 
 <script lang="ts">
 import Animation from '@/components/Animation.vue'
 import NuHeader from '@/components/NuHeader.vue'
+import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
+import templateCenterUtils from '@/utils/templateCenterUtils'
 import { IContentTemplate, ITemplate } from '@nu/vivi-lib/interfaces/template'
 import { Itheme } from '@nu/vivi-lib/interfaces/theme'
 import designUtils from '@nu/vivi-lib/utils/designUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import picWVUtils from '@nu/vivi-lib/utils/picWVUtils'
-import templateCenterUtils from '@/utils/templateCenterUtils'
+import vClickOutside from 'click-outside-vue3'
 import { defineAsyncComponent, defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -88,21 +160,18 @@ export default defineComponent({
   components: {
     NuHeader,
     Animation,
-    ScrollList: defineAsyncComponent(() =>
-      import('@/components/homepage/ScrollList.vue')
+    ScrollList: defineAsyncComponent(() => import('@/components/homepage/ScrollList.vue')),
+    TaBlock: defineAsyncComponent(() => import('@/components/homepage/TaBlock.vue')),
+    NuFooter: defineAsyncComponent(() => import('@/components/NuFooter.vue')),
+    HashtagCategoryRow: defineAsyncComponent(
+      () => import('@/components/templates/HashtagCategoryRow.vue'),
     ),
-    TaBlock: defineAsyncComponent(() =>
-      import('@/components/homepage/TaBlock.vue')
+    TemplateWaterfall: defineAsyncComponent(
+      () => import('@/components/templates/TemplateWaterfall.vue'),
     ),
-    NuFooter: defineAsyncComponent(() =>
-      import('@/components/NuFooter.vue')
-    ),
-    HashtagCategoryRow: defineAsyncComponent(() =>
-      import('@/components/templates/HashtagCategoryRow.vue')
-    ),
-    TemplateWaterfall: defineAsyncComponent(() =>
-      import('@/components/templates/TemplateWaterfall.vue')
-    ),
+  },
+  directives: {
+    clickOutside: vClickOutside.directive,
   },
   data() {
     return {
@@ -111,7 +180,7 @@ export default defineComponent({
         'vector_lightblue2.json',
         'vector_pink1.json',
         'oval_pink4.json',
-        'oval_yellow1.json'
+        'oval_yellow1.json',
       ],
       waterfallTemplatesPC: [] as ITemplate[][],
       waterfallTemplatesTAB: [] as ITemplate[][],
@@ -123,6 +192,7 @@ export default defineComponent({
       contentIds: [] as IContentTemplate[],
       groupId: '',
       showTemplateList: false,
+      showTemplateTheme: false,
       matchedThemes: [] as Itheme[],
       selectedTheme: undefined as Itheme | undefined,
       modalTemplate: {} as ITemplate,
@@ -145,39 +215,48 @@ export default defineComponent({
   metaInfo() {
     return {
       title: `${this.$t('SE0001')}`,
-      meta: [{
-        name: 'description',
-        content: `${this.$t('SE0002')}`,
-        vmid: 'description'
-      }, {
-        property: 'og:title',
-        content: `${this.$t('OG0001')}`,
-        vmid: 'og:title'
-      }, {
-        property: 'og:image',
-        content: `${this.$t('OG0003')}`,
-        vmid: 'og:image'
-      }, {
-        name: 'description',
-        content: `${this.$t('SE0002')}`,
-        vmid: 'description'
-      }, {
-        property: 'twitter:title',
-        content: `${this.$t('OG0001')}`,
-        vmid: 'twitter:title'
-      }, {
-        property: 'twitter:image',
-        content: `${this.$t('OG0003')}`,
-        vmid: 'twitter:image'
-      }, {
-        property: 'twitter:description',
-        content: `${this.$t('OG0002')}`,
-        vmid: 'twitter:description'
-      }, {
-        property: 'og:url',
-        content: `${this.$t('OG0005')}`,
-        vmid: 'og:url'
-      }]
+      meta: [
+        {
+          name: 'description',
+          content: `${this.$t('SE0002')}`,
+          vmid: 'description',
+        },
+        {
+          property: 'og:title',
+          content: `${this.$t('OG0001')}`,
+          vmid: 'og:title',
+        },
+        {
+          property: 'og:image',
+          content: `${this.$t('OG0003')}`,
+          vmid: 'og:image',
+        },
+        {
+          name: 'description',
+          content: `${this.$t('SE0002')}`,
+          vmid: 'description',
+        },
+        {
+          property: 'twitter:title',
+          content: `${this.$t('OG0001')}`,
+          vmid: 'twitter:title',
+        },
+        {
+          property: 'twitter:image',
+          content: `${this.$t('OG0003')}`,
+          vmid: 'twitter:image',
+        },
+        {
+          property: 'twitter:description',
+          content: `${this.$t('OG0002')}`,
+          vmid: 'twitter:description',
+        },
+        {
+          property: 'og:url',
+          content: `${this.$t('OG0005')}`,
+          vmid: 'og:url',
+        },
+      ],
     }
   },
   mounted() {
@@ -194,22 +273,22 @@ export default defineComponent({
       inBrowserMode: 'webView/getInBrowserMode',
       _themeList: 'getShuffledThemesIds',
       themes: 'getMainHiddenThemes',
-      userInfo: 'webView/getUserInfo'
+      userInfo: 'webView/getUserInfo',
     }),
-    statusbarHeight (): string {
+    statusbarHeight(): string {
       return `${this.userInfo.statusBarHeight ?? 0}px`
     },
     ...mapState({
       isMobile: 'isMobile',
-      _homeTags: 'homeTags'
+      _homeTags: 'homeTags',
     }),
     ...mapState('templates', {
-      templates: 'searchResult'
+      templates: 'searchResult',
     }),
-    homeTags(): Array<{name: string}> {
+    homeTags(): Array<{ name: string }> {
       return this._homeTags.map((tag: string) => {
         return {
-          name: tag
+          name: tag,
         }
       })
     },
@@ -233,20 +312,25 @@ export default defineComponent({
           {
             name: 'oval_lightblue1.svg',
             top: -13,
-            left: 17
-          }, {
+            left: 17,
+          },
+          {
             name: 'oval_pink1.svg',
             top: -13,
-            left: 17
-          }
+            left: 17,
+          },
         ],
-        align: 'column'
+        align: 'column',
       }
     },
     ytId() {
-      return this.$i18n.locale === 'us' ? 'GRSlz37Njo0'
-        : this.$i18n.locale === 'jp' ? 'FzPHWU0O1uI'
-          : this.$i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
+      return this.$i18n.locale === 'us'
+        ? 'GRSlz37Njo0'
+        : this.$i18n.locale === 'jp'
+        ? 'FzPHWU0O1uI'
+        : this.$i18n.locale === 'tw'
+        ? 'BBVAwlBk_zA'
+        : 'GRSlz37Njo0'
     },
     waterfallTemplates(): ITemplate[][] {
       if (this.isPCSize) {
@@ -276,8 +360,16 @@ export default defineComponent({
   methods: {
     ...mapActions('templates', {
       getTemplates: 'getThemeContent',
-      getMoreTemplates: 'getMoreContent'
+      getMoreTemplates: 'getMoreContent',
     }),
+    multiThemeButtonStyles() {
+      return this.$i18n.locale === 'tw'
+        ? {
+            letterSpacing: '1.21em',
+            textIndent: '1.21em',
+          }
+        : {}
+    },
     handleLoadMore() {
       this.isTemplateReady = false
       this.getMoreTemplates().then(() => {
@@ -291,7 +383,7 @@ export default defineComponent({
       this.isMobileSize = generalUtils.getWidth() <= 540
       this.isPCSize = generalUtils.getWidth() >= 976
     },
-    handleSelectTags(selectinfo: { title: string, selection: string[] }) {
+    handleSelectTags(selectinfo: { title: string; selection: string[] }) {
       this.selectedTags = [...selectinfo.selection]
       this.composeKeyword()
     },
@@ -319,15 +411,13 @@ export default defineComponent({
       // for product page
       if (template.group_type === 1) {
         if (this.$isTouchDevice()) {
-          modalUtils.setModalInfo(
-            `${this.$t('NN0808')}`,
-            [],
-            {
-              msg: `${this.$t('NN0358')}`,
-              class: 'btn-blue-mid',
-              action: () => { return false }
-            }
-          )
+          modalUtils.setModalInfo(`${this.$t('NN0808')}`, [], {
+            msg: `${this.$t('NN0358')}`,
+            class: 'btn-blue-mid',
+            action: () => {
+              return false
+            },
+          })
           return
         }
         if (!paymentUtils.checkProTemplate(template)) return
@@ -336,25 +426,29 @@ export default defineComponent({
           query: {
             type: 'product-page-template',
             design_id: template.group_id,
-            themeId: template.content_ids[0].themes.join(',')
-          }
+            themeId: template.content_ids[0].themes.join(','),
+          },
         })
         this.openTemplate(route.href)
         generalUtils.fbq('track', 'AddToWishlist', {
-          content_ids: [template.group_id]
+          content_ids: [template.group_id],
         })
         return
       }
       if (template.content_ids.length === 1) {
         if (!paymentUtils.checkProTemplate(template)) return
-        const matchedTheme = this.themes.find((theme: Itheme) => theme.id.toString() === template.theme_id)
-        const format = matchedTheme ? {
-          width: matchedTheme.width.toString(),
-          height: matchedTheme.height.toString()
-        } : {
-          width: template.width.toString(),
-          height: template.height.toString()
-        }
+        const matchedTheme = this.themes.find(
+          (theme: Itheme) => theme.id.toString() === template.theme_id,
+        )
+        const format = matchedTheme
+          ? {
+              width: matchedTheme.width.toString(),
+              height: matchedTheme.height.toString(),
+            }
+          : {
+              width: template.width.toString(),
+              height: template.height.toString(),
+            }
         const route = this.$router.resolve({
           name: 'Editor',
           query: {
@@ -364,26 +458,40 @@ export default defineComponent({
             width: format.width,
             height: format.height,
             unit: matchedTheme?.unit ?? 'px',
-            ...(matchedTheme?.unit !== 'px' && matchedTheme?.bleed !== undefined ? { bleeds: designUtils.convertBleedsToQuery(matchedTheme.bleed) } : {})
-          }
+            ...(matchedTheme?.unit !== 'px' && matchedTheme?.bleed !== undefined
+              ? { bleeds: designUtils.convertBleedsToQuery(matchedTheme.bleed) }
+              : {}),
+          },
         })
         this.openTemplate(route.href)
         generalUtils.fbq('track', 'AddToWishlist', {
-          content_ids: [template.id]
+          content_ids: [template.id],
         })
       } else {
         this.groupId = template.group_id ?? ''
         this.contentIds = template.content_ids
         this.modalTemplate = template
         this.showTemplateList = true
+        this.showTemplateTheme = false
       }
     },
     handleTemplateClick(content: IContentTemplate) {
       if (!paymentUtils.checkProGroupTemplate(this.modalTemplate, content)) return
-      this.matchedThemes = this.themes.filter((theme: Itheme) => content.themes.includes(theme.id.toString()))
-      const allSameSize = this.matchedThemes.reduce<[boolean, number | undefined, number | undefined]>((acc, theme) => {
-        return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
-      }, [true, undefined, undefined])[0]
+      this.matchedThemes = this.themes.filter((theme: Itheme) =>
+        content.themes.includes(theme.id.toString()),
+      )
+      const allSameSize = this.matchedThemes.reduce<
+        [boolean, number | undefined, number | undefined]
+      >(
+        (acc, theme) => {
+          return [
+            acc[0] && (acc[1] === undefined || (acc[1] === theme.width && acc[2] === theme.height)),
+            theme.width,
+            theme.height,
+          ]
+        },
+        [true, undefined, undefined],
+      )[0]
       if (content.themes.length > 1 && !allSameSize) {
         if (this.isMobileSize) {
           const route = this.$router.resolve({
@@ -393,26 +501,31 @@ export default defineComponent({
               design_id: content.id,
               width: this.matchedThemes[0].width.toString(),
               height: this.matchedThemes[0].height.toString(),
-              group_id: this.groupId
-            }
+              group_id: this.groupId,
+            },
           })
           this.openTemplate(route.href)
           generalUtils.fbq('track', 'AddToWishlist', {
-            content_ids: [content.id]
+            content_ids: [content.id],
           })
           return
         }
+        this.showTemplateTheme = true
         this.contentBuffer = content
         this.selectedTheme = undefined
       } else {
-        const matchedTheme = this.themes.find((theme: Itheme) => theme.id.toString() === content.themes[0])
-        const format = matchedTheme ? {
-          width: matchedTheme.width.toString(),
-          height: matchedTheme.height.toString()
-        } : {
-          width: content.width.toString(),
-          height: content.height.toString()
-        }
+        const matchedTheme = this.themes.find(
+          (theme: Itheme) => theme.id.toString() === content.themes[0],
+        )
+        const format = matchedTheme
+          ? {
+              width: matchedTheme.width.toString(),
+              height: matchedTheme.height.toString(),
+            }
+          : {
+              width: content.width.toString(),
+              height: content.height.toString(),
+            }
         const route = this.$router.resolve({
           name: 'Editor',
           query: {
@@ -420,12 +533,12 @@ export default defineComponent({
             design_id: content.id,
             width: format.width,
             height: format.height,
-            group_id: this.groupId
-          }
+            group_id: this.groupId,
+          },
         })
         this.openTemplate(route.href)
         generalUtils.fbq('track', 'AddToWishlist', {
-          content_ids: [content.id]
+          content_ids: [content.id],
         })
       }
     },
@@ -435,8 +548,35 @@ export default defineComponent({
     getPrevUrl(content?: IContentTemplate, scale?: number): string {
       if (!content) return ''
       return templateCenterUtils.getPrevUrl(content, scale)
-    }
-  }
+    },
+    handleThemeSelect(theme: Itheme) {
+      this.selectedTheme = theme
+    },
+    handleThemeSubmit() {
+      if (!this.selectedTheme || !this.contentBuffer) return
+      const route = this.$router.resolve({
+        name: 'Editor',
+        query: {
+          type: 'new-design-template',
+          design_id: this.contentBuffer.id,
+          width: this.selectedTheme.width.toString(),
+          height: this.selectedTheme.height.toString(),
+          group_id: this.groupId,
+          unit: this.selectedTheme.unit,
+          ...(this.selectedTheme.unit !== 'px'
+            ? { bleeds: designUtils.convertBleedsToQuery(this.selectedTheme.bleed) }
+            : {}),
+        },
+      })
+      this.openTemplate(route.href)
+      generalUtils.fbq('track', 'AddToWishlist', {
+        content_ids: [this.contentBuffer.id],
+      })
+    },
+    checkSelected(theme: Itheme): boolean {
+      return this.selectedTheme?.id === theme.id
+    },
+  },
 })
 </script>
 
@@ -536,17 +676,17 @@ export default defineComponent({
   width: 100vw;
   height: 100vh;
   background: #ffffff;
-  z-index: setZindex("popup");
+  z-index: setZindex('popup');
   &__close {
     position: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
-    top: calc((#{($header-height)}  + v-bind(statusbarHeight)) / 2);
+    top: calc((#{($header-height)} + v-bind(statusbarHeight)) / 2);
     right: 55px;
     width: 25px;
     height: 25px;
-    z-index: setZindex("popup");
+    z-index: setZindex('popup');
     transform: translate(0%, -50%);
     cursor: pointer;
   }
@@ -577,6 +717,184 @@ export default defineComponent({
   }
 }
 
+.template-list-pc {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(982px, calc(100vw - 30px));
+  height: 560px;
+  background: #ffffff;
+  box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
+  border-radius: 6px;
+  z-index: setZindex('popup');
+  &-split {
+    @extend .template-list-pc;
+    display: flex;
+  }
+  &__header {
+    position: relative;
+    width: 100%;
+    height: 42px;
+    &__close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+  }
+  &__content {
+    margin-top: 28px;
+    overflow-y: auto;
+    width: 100%;
+    height: calc(100% - 70px);
+  }
+  &__content-left {
+    width: 57%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid setColor(gray-5);
+    box-sizing: border-box;
+  }
+  &__content-right {
+    width: 47%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  &__gallery {
+    display: grid;
+    margin: auto;
+    margin-bottom: 20px;
+    width: min(860px, calc(100% - 40px));
+    grid-gap: 20px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    @media screen and (max-width: 767px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  &__gallery-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 200px;
+    width: 100%;
+    padding-top: calc(100% - 2px);
+    background: white;
+    border: 1px solid setColor(gray-5);
+    box-sizing: border-box;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
+  &__template {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 67%;
+    padding-top: calc(67% - 2px);
+    background: white;
+    border: 1px solid setColor(gray-5);
+    box-sizing: border-box;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
+  &__title {
+    width: 74%;
+    height: 20px;
+    text-align: left;
+    > span {
+      font-weight: 400;
+      font-size: 14px;
+    }
+  }
+  &__themes {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    width: 74%;
+    height: 411px;
+    border: 2px solid setColor(gray-5);
+    border-radius: 3px;
+    &__row {
+      display: flex;
+      align-items: center;
+      height: 30px;
+      color: setColor(gray-2);
+      cursor: pointer;
+      &.selected {
+        color: setColor(blue-1);
+        background-color: setColor(gray-7);
+      }
+      &:hover {
+        background-color: setColor(gray-7);
+      }
+      > div {
+        display: flex;
+        align-items: center;
+        height: 20px;
+        text-align: right;
+        > span {
+          font-weight: 400;
+          font-size: 12px;
+        }
+      }
+    }
+    &__title {
+      margin-left: 17px;
+    }
+    &__description {
+      transform-origin: right;
+      transform: scale(calc(5 / 6));
+      flex-grow: 1;
+      justify-content: flex-end;
+      padding-right: 15px;
+    }
+  }
+  &__button {
+    margin-top: 18px;
+    width: 57%;
+    height: 36px;
+    background-color: setColor(blue-1);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    > span {
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 18px;
+      color: white;
+    }
+    &.disabled {
+      background-color: setColor(gray-5);
+      cursor: not-allowed;
+      > span {
+        color: setColor(gray-3);
+      }
+    }
+  }
+}
+
+.dim-background {
+  position: fixed;
+  @include size(100%, 100%);
+  top: 0px;
+  left: 0px;
+  background: rgba(0, 0, 0, 0.4);
+  transform-style: preserve-3d;
+  z-index: setZindex('popup') - 1;
+}
+
 .tag-title {
   align-self: center;
 }
@@ -599,7 +917,8 @@ export default defineComponent({
       @include no-scrollbar;
     }
   }
-  .home-list, .home-block {
+  .home-list,
+  .home-block {
     width: 100%;
   }
   .home-top {

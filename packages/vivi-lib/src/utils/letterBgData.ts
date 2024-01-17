@@ -1,6 +1,5 @@
 import i18n from '@/i18n'
 import { ITextLetterBg } from '@/interfaces/format'
-import store from '@/store'
 import constantData, { IEffectRaw } from '@/utils/constantData'
 import textUtils from '@/utils/textUtils'
 
@@ -13,7 +12,7 @@ export const textLetterBgName = [
   'star', 'baby', 'paper-tap', 'paper-tap-point', 'paper-tap-stripe',
   'paper-tap-grid', 'triangle-flag', 'triangle-flag-custom',
   'rectangle-flag', 'rectangle-flag-custom', 'stretch-dog', 'stretch-rabbit',
-  'stretch-cat', 'stretch-dragon',
+  'stretch-cat', 'stretch-dragon', 'mahjong', 'wealth', 'spring-couplets',
 ] as const
 
 export type ITextLetterBgName = typeof textLetterBgName[number]
@@ -231,6 +230,19 @@ class LetterBGData {
       key: 'stretch-dragon',
       label: i18n.global.tc('NN0917'),
       options: noColor,
+    }, {
+      key: 'mahjong',
+      label: i18n.global.tc('NN0920'),
+      plan: 1,
+      options: withColor,
+    }, {
+      key: 'wealth',
+      label: i18n.global.tc('NN0921'),
+      options: noColor,
+    }, {
+      key: 'spring-couplets',
+      label: i18n.global.tc('NN0922'),
+      options: noColor,
     }]
   }
 
@@ -278,6 +290,8 @@ class LetterBGData {
         break
       case 'cloud':
       case 'triangle-flag':
+      case 'mahjong':
+      case 'wealth':
         href += index % 4
         break
       case 'penguin':
@@ -303,7 +317,7 @@ class LetterBGData {
       case 'stretch-dragon':
         href += head ? '-head' : tail ? '-tail' : '0'
         break
-      // text-book, *-custom
+      // text-book, spring-couplets, *-custom
       default:
     }
     return { href, color }
@@ -518,6 +532,22 @@ class LetterBGData {
         yOffset200: 10,
         size: 220,
       },
+      mahjong: {
+        ...letterBgDefault,
+        yOffset200: 10,
+        size: 160,
+        color: '#7FB77B'
+      },
+      wealth: {
+        ...letterBgDefault,
+        yOffset200: 2,
+        size: 155,
+      },
+      'spring-couplets': {
+        ...letterBgDefault,
+        yOffset200: 1,
+        size: 152,
+      },
     }
   }
 
@@ -646,6 +676,15 @@ class LetterBGData {
       'stretch-dragon': {
         lineHeight: 1.96, fontSpacing: 160,
       },
+      mahjong: {
+        lineHeight: 1.96, fontSpacing: 1050,
+      },
+      wealth: {
+        lineHeight: 1.96, fontSpacing: 1100,
+      },
+      'spring-couplets': {
+        lineHeight: 1.96, fontSpacing: 617,
+      },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
@@ -666,7 +705,7 @@ class LetterBGData {
   }
 
   isColorChangeable(href: string) {
-    return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star|paper-tap)/
+    return /(cloud|rainbow-circle|solid-heart|text-book|butter-flower|flower-frame|vintage-flower|-custom|star|paper-tap|mahjong)/
       .test(href)
   }
 
