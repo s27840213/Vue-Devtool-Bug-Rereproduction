@@ -32,11 +32,11 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
       transition-group(name="list")
         //- Results
         div(
-          v-for="(genResult, index) in generatedResults"
+          v-for="genResult in generatedResults"
           :key="genResult.id"
           class="gen-result__block overflow-clip"
-          :active="index === currGenResultIndex && !!genResult.url.length"
-          @click="genResult.url.length && setCurrGenResultIndex(index)")
+          :active="genResult.id === currGenResultId && !!genResult.url.length"
+          @click="genResult.url.length && setSelectedSubDesignId(genResult.id)")
           img(
             v-if="genResult.url.length"
             class="w-full h-full object-cover"
@@ -47,7 +47,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
     nubtn(
       v-if="editorStore.editorType === 'powerful-fill'"
       size="mid-full"
-      :disabled="!generatedResults[currGenResultIndex] || generatedResults[currGenResultIndex].url.length === 0"
+      :disabled="!currGeneratedResult || !currGeneratedResult.url"
       @click="handleKeepEditing") {{ $t('CM0067') }}
     nubtn(
       v-else
@@ -69,26 +69,27 @@ const userStore = useUserStore()
 const { prevGenParams, aiCredit } = storeToRefs(userStore)
 
 const editorStore = useEditorStore()
-const { setCurrGenResultIndex, keepEditingInit } = editorStore
+const { setSelectedSubDesignId, keepEditingInit } = editorStore
 const {
   generatedResults,
-  currGenResultIndex: _currGenResultIndex,
+  selectedSubDesignId,
   initImgSrc,
   isGenerating,
+  currGeneratedResult,
 } = storeToRefs(editorStore)
 
-const currGenResultIndex = computed(() => {
-  return _currGenResultIndex.value > -1 ? _currGenResultIndex.value : tempGenResultIndex
+const currGenResultId = computed(() => {
+  return selectedSubDesignId.value !== '' ? selectedSubDesignId.value : tempGenResultId
 })
 
-let tempGenResultIndex = -1
+let tempGenResultId = ''
 const toggleOriginalImg = (show: boolean) => {
   if (show) {
-    tempGenResultIndex = currGenResultIndex.value
-    setCurrGenResultIndex(-1)
+    tempGenResultId = currGenResultId.value
+    setSelectedSubDesignId('')
   } else {
-    setCurrGenResultIndex(tempGenResultIndex)
-    tempGenResultIndex = -1
+    setSelectedSubDesignId(tempGenResultId)
+    tempGenResultId = ''
   }
 }
 

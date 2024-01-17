@@ -23,7 +23,7 @@ export const useUserStore = defineStore('user', () => {
     setCurrPrompt,
     restoreGenOptions,
     setMaskDataUrl,
-    setCurrGenResultIndex,
+    setSelectedSubDesignId,
     setInitImgSrc,
     updateGenResult,
   } = editorStore
@@ -209,8 +209,7 @@ export const useUserStore = defineStore('user', () => {
       setCurrPrompt('')
       setInitImgSrc(getTargetImageUrl(type, id, subId, 'original'))
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
-      index && setCurrGenResultIndex(index)
+      setSelectedSubDesignId(subId)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
@@ -269,8 +268,7 @@ export const useUserStore = defineStore('user', () => {
 
       setInitImgSrc(getTargetImageUrl(type, id, subId, 'original'))
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
-      index && setCurrGenResultIndex(index)
+      setSelectedSubDesignId(subId)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }

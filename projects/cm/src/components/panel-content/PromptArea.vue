@@ -197,7 +197,7 @@ const {
   changeToSpecificEditorState,
   setCurrPrompt,
   setCurrDesignId,
-  setCurrGenResultIndex,
+  setSelectedSubDesignId,
   updateCurrGenOption,
 } = editorStore
 const {
@@ -208,7 +208,7 @@ const {
   editorType,
   currGenOptions,
   inEditingState,
-  generatedResultsNum,
+  generatedResults,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -357,7 +357,7 @@ const handleGenerate = async () => {
   await waitForGenerating()
 
   const timer = window.setTimeout(() => {
-    setCurrGenResultIndex(0)
+    setSelectedSubDesignId(generatedResults.value[0].id)
     changeEditorState('next')
   }, 3000)
   await genImageFlow(getGenParams(), 2, {

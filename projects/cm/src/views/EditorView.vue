@@ -306,7 +306,7 @@ const {
   pageSize,
   currActiveFeature,
   inGenResultState,
-  currGenResultIndex,
+  selectedSubDesignId,
   initImgSrc,
   showBrushOptions,
   editorType,
@@ -334,7 +334,7 @@ watch(
 )
 
 const currImgSrc = computed(() => {
-  return currGenResultIndex.value === -1 ? initImgSrc.value : currGeneratedResult.value?.url ?? ''
+  return selectedSubDesignId.value === '' ? initImgSrc.value : currGeneratedResult.value?.url ?? ''
 })
 
 const fakeLoading = ref(5)

@@ -8,12 +8,12 @@ div(class="w-full h-full grid-cols-1 grid-rows-[auto,1fr] gap-16]")
     template(#right)
       div
   div(class="flex-center w-full h-full")
-    img(:src="generatedResults[currGenResultIndex].url" class="w-240")
+    img(:src="currGeneratedResult?.url" class="w-240")
 </template>
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor'
 
 const editorStore = useEditorStore()
-const { generatedResults, currGenResultIndex } = storeToRefs(editorStore)
+const { currGeneratedResult } = storeToRefs(editorStore)
 </script>
 <style scoped lang="scss"></style>
