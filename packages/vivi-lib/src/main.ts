@@ -22,6 +22,7 @@ import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
 import { useEventListener } from '@vueuse/core'
+import uploadUtils from './utils/uploadUtils'
 // import '@/imports'
 
 // Add variable that bind in vue this and its type define
@@ -53,10 +54,9 @@ window.onerror = function (msg, url, line, colno, error) {
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
     if ((generalUtils.isPic && store.getters['user/isAdmin']) ||
-        (generalUtils.isStk && store.getters['vivisticker/getDebugMode'])) {
-      const id = generalUtils.isPic 
-        ? store.getters['user/getUserId']
-        : stkWVUtils.getUserInfoFromStore().hostId
+        (generalUtils.isStk && store.getters['vivisticker/getDebugMode']) ||
+        (generalUtils.isCm && store.getters['cmWV/getDebugMode'])) {
+      const id = uploadUtils.fullId
       const hint = `${id}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),

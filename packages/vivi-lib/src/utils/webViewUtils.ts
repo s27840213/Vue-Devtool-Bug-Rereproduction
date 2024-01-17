@@ -192,9 +192,10 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
             })
           } else {
             if (!this.filterErrorModal(type, message, true)) {
+              const errorId = generalUtils.generateRandomString(6)
+              logUtils.setLog(errorId)
 
               logUtils.uploadLog().then(() => {
-                const errorId = generalUtils.generateRandomString(6)
                 const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
                 modalUtils.setModalInfo(
                   `${i18n.global.t('NN0457')}(999)`,
@@ -217,9 +218,10 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
       logUtils.setLog(`Error occurs in callIOSAsAPI with type: ${type}, message: ${message}, event: ${event}`)
       logUtils.setLogForError(error as Error)
       if (!this.filterErrorModal(type, message, false)) {
+        const errorId = generalUtils.generateRandomString(6)
+        logUtils.setLog(errorId)
 
         logUtils.uploadLog().then(() => {
-          const errorId = generalUtils.generateRandomString(6)
           const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
           modalUtils.setModalInfo(
             `${i18n.global.t('NN0457')}(500)`,

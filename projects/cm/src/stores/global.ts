@@ -1,3 +1,4 @@
+import vuex from '@/vuex'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { defineStore } from 'pinia'
 
@@ -10,11 +11,13 @@ export const useGlobalStore = defineStore('global', () => {
   cmWVUtils.detectIfInApp()
   cmWVUtils.getState('debugMode').then((data) => {
     debugMode.value = data.debugMode
+    vuex.commit('cmWV/SET_debugMode', data.debugMode)
   })
 
   const setDebugMode = (value: boolean) => {
     debugMode.value = value
     cmWVUtils.setState('debugMode', { debugMode: debugMode.value })
+    vuex.commit('cmWV/SET_debugMode', value)
   }
 
   const setPrevScreenshotUrl = (url: string) => {
