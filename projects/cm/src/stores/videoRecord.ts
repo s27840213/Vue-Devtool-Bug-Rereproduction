@@ -15,7 +15,7 @@ const defaultState = {
   isExportingVideo: false,
 } as IVideoRecordState
 
-const pixi = null as null | PixiRecorder
+const pixi = new PixiRecorder()
 
 export const useVideoRcordStore = defineStore('videoRecord', {
   state: (): IVideoRecordState => ({ ...defaultState }),
@@ -26,9 +26,6 @@ export const useVideoRcordStore = defineStore('videoRecord', {
   },
   actions: {
     addImage(img1: string, img2: string) {
-      if (!pixi) {
-        return (new PixiRecorder(img1, img2))
-      }
       return pixi.addImage(img1, img2)
     },
     genVideo() {

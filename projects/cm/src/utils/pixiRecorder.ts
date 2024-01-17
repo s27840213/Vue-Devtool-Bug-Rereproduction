@@ -138,10 +138,6 @@ export default class PixiRecorder {
     return this._video
   }
 
-  constructor(src: string = IMG1_EXAMPLE, res: string = IMG2_EXAMPLE) {
-    this.addImage(src, res)
-  }
-
   async genVideo() {
     if (!this.isImgReady) {
       await Promise.race([
