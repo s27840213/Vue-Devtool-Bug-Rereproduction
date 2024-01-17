@@ -155,7 +155,7 @@ export default defineComponent({
         return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.writingMode.includes('vertical')
       }
       if (currLayer.type === 'text') {
-        return (currLayer as IText).styles.writingMode.includes('vertical')
+        return currLayer.styles.writingMode.includes('vertical')
       }
       return !(currLayer as IGroup).layers.some(l => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'))
     },
@@ -308,7 +308,7 @@ export default defineComponent({
             const paragraphs = GeneralUtils.deepCopy((l as IText).paragraphs) as IParagraph[]
             paragraphs.forEach(p => {
               p.spans.forEach(s => {
-                if ((l as IText).styles.writingMode.includes('vertical') && (
+                if (l.styles.writingMode.includes('vertical') && (
                   (prop === 'decoration' && newPropVal === 'underline') ||
                   (prop === 'style' && newPropVal === 'italic')
                 )) return

@@ -125,6 +125,9 @@ const imgShadowMutations = {
       (state.pages[pageIndex].config.layers[layerIndex] as IImage).styles.shadow.cb = cb
     }
   },
+  // The stk and charmix need to store the img in local storage
+  // To prevent disk-leak, we record the stored img-buffer as the img saved to document
+  // and compare the stored img-buffer with the img in document as saving config
   [UPDATE_uploadShadowBuffer](state: IEditorState, data: { pageIndex: number, srcObjs: Array<SrcObj>, remove: boolean }) {
     const { pageIndex, srcObjs, remove = false } = data
     if (remove) {

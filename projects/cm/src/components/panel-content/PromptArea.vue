@@ -11,12 +11,17 @@ div(class="prompt-area w-full box-border px-24")
         :class="editorType === 'magic-combined' ? 'gap-24' : 'gap-16'"
         ref="elMain")
         //- header bar
-        div(class="w-full relative flex-center")
-          span(:class="title.class") {{ title.label }}
+        div(class="w-full grid grid-cols-[minmax(0,1fr),auto,minmax(0,1fr)]")
+          svg-icon(
+            v-if="showInspirationIcon"
+            class="tutorial-hidden-message-5--highlight"
+            iconName="light-bulb"
+            @click="handleInspiration")
+          span(class="col-start-2" :class="title.class") {{ title.label }}
           svg-icon(
             v-if="showSettingsIcon"
             :iconName="`cm_settings${isGenSettings ? '-solid' : ''}`"
-            class="text-yellow-0 absolute right-0"
+            class="justify-self-end text-yellow-0"
             @click="isGenSettings = !isGenSettings")
         //- content
         div(class="w-full relative")
@@ -47,7 +52,7 @@ div(class="prompt-area w-full box-border px-24")
           v-if="!preview"
           size="mid-full"
           :disabled="isSendingGenImgReq"
-          @click="handleGenerate") {{ isSendingGenImgReq ? 'Generating...' : $t('CM0023') }}
+          @click="handleGenerate") {{ isSendingGenImgReq ? $t('CM0086') : $t('CM0023') }}
       //- type settings
       div(
         v-else-if="genTypes"
@@ -69,12 +74,12 @@ div(class="prompt-area w-full box-border px-24")
           div(
             v-for="(genType, idx) in genTypes.group"
             :key="idx"
-            class="flex flex-col gap-8 bg-lighter/20 rounded-16 p-12 aspect-square w-full"
-            :class="{ 'outline outline-4 outline-yellow-cm': idx === genTypes.value }"
-            @click="() => idxGenType = idx")
+            class="gap-8 bg-lighter/20 rounded-16 p-8 aspect-square w-full"
+            :class="{ 'outline outline-4 -outline-offset-4 outline-yellow-cm': idx === genTypes.value }"
+            @click="() => (idxGenType = idx)")
             img(
               v-if="genType.img"
-              class="w-full object-cover object-center rounded-16 aspect-[148/116]"
+              class="w-full object-cover object-center rounded-8 aspect-[148/116]"
               :src="require(genType.img)")
             span {{ genType.text }}
   //- gen options
@@ -92,23 +97,22 @@ div(class="prompt-area w-full box-border px-24")
         div(class="w-full flex flex-col")
           div(class="w-full flex-between-center typo-h6")
             div(class="flex items-center gap-4")
+              span {{ option.title }}
               svg-icon(
                 v-if="option.icon"
                 :iconName="option.active && option.iconActive ? option.iconActive : option.icon"
                 iconWidth="24px"
                 iconColor="yellow-2"
                 @click="() => (option.active = !option.active)")
-              span {{ option.title }}
             div(class="grid grid-cols-[24px,auto] items-center justify-between min-w-52")
               transition(name="rotate-right-in")
-                div(v-if="option.key === 'guidance_scale' && isOptionModified(option)"
-                  class="flex-center")
+                div(v-if="option.key === 'guidance_scale' && isOptionModified(option)" class="flex-center")
                   svg-icon(
                     iconName="cm_reset"
                     iconWidth="24px"
                     iconColor="yellow-2"
                     @click="resetOption(option)")
-              span(class="col-start-2 justify-self-end") {{ option.value }}
+              span(v-if="typeof option.value === 'number'" class="col-start-2 justify-self-end") {{ option.value }}
           Collapse(
             :when="!!option.active"
             @collapse="currTransitions.add(`collapse-sub-title-${idx}`)"
@@ -120,14 +124,19 @@ div(class="prompt-area w-full box-border px-24")
               class="w-full text-lighter typo-body-sm mt-8"
               v-html="option.subTitle")
           div(class="mt-8")
-            input(
-              class="input__slider--range"
-              v-progress
+            range-slider(
+              v-if="option.type === 'range'"
               v-model.number="option.value"
               :max="option.max"
               :min="option.min"
-              :step="option.step"
-              type="range")
+              :step="option.step")
+            dual-range-slider(
+              v-else-if="option.type === 'dual-range'"
+              v-model:valueFrom.number="option.value.from"
+              v-model:valueTo.number="option.value.to"
+              :max="option.max"
+              :min="option.min"
+              :step="option.step")
           div(
             v-if="option.minDescription || option.maxDescription"
             class="w-full flex-between-center text-white typo-btn-sm mt-8")
@@ -135,6 +144,9 @@ div(class="prompt-area w-full box-border px-24")
             span(class="typo-body-sm text-right" v-html="option.maxDescription")
         div(v-if="idx !== genRangeOptions.length - 1" class="w-full h-16 flex items-center")
           div(class="w-full h-1 bg-lighter/50")
+  spinner(
+    v-if="isSendingGenImgReq"
+    :textContent="t('CM0086')")
 </template>
 
 <script setup lang="ts">
@@ -144,15 +156,22 @@ import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
 import { useModalStore } from '@/stores/modal'
-import type { GenHiddenMessageParams, GenImageParams, GenPowerfulFillParams } from '@/types/api'
-import type { GenImageGroupOption, GenImageOptions, GenImageRangeOption } from '@/types/editor'
+import type { GenHiddenMessageParams, GenImageParams } from '@/types/api'
+import type {
+  GenImageDualRangeOption,
+  GenImageGroupOption,
+  GenImageOption,
+  GenImageRangeOption,
+} from '@/types/editor'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
+import DualRangeSlider from '@nu/vivi-lib/components/editor/mobile/DualRangeSlider.vue'
+import RangeSlider from '@nu/vivi-lib/components/editor/mobile/RangeSlider.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
+import pagePinchUtils from '@nu/vivi-lib/utils/pagePinchUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { Collapse } from 'vue-collapsed'
 
@@ -168,29 +187,28 @@ const { preview } = toRefs(props)
 
 // #region states, composables, and vars
 const globalStore = useGlobalStore()
-const { setShowSpinner, setSpinnerText, debugMode } = globalStore
+const { debugMode } = globalStore
 
 const editorStore = useEditorStore()
 const {
   setIsSendingGenImgReq,
   unshiftGenResults,
   changeEditorState,
+  changeToSpecificEditorState,
   setCurrPrompt,
   setCurrDesignId,
-  setGenResultIndex,
-  setShowEmptyPromptWarning,
-  setCurrGenOptions,
+  setSelectedSubDesignId,
+  updateCurrGenOption,
 } = editorStore
 const {
   isSendingGenImgReq,
   currPrompt,
   currDesignId,
-  inEditingState,
   isGenerating,
   editorType,
   currGenOptions,
+  inEditingState,
   generatedResults,
-  showEmptyPromptWarning,
 } = storeToRefs(editorStore)
 const promptText = computed({
   // getter
@@ -214,7 +232,8 @@ const modalStore = useModalStore()
 const { closeModal, openModal, setNormalModalInfo } = modalStore
 // #endregion
 
-const checkIsGenerating = () => {
+// #region generating function
+const waitForGenerating = () => {
   return new Promise<void>((resolve) => {
     const check = () => {
       if (isGenerating.value) {
@@ -234,15 +253,23 @@ const getGenParams = (): GenImageParams => {
     action: editorType.value,
     prompt: promptText.value,
   } as GenImageParams
+  const genRangeOptions = currGenOptions.value.filter((o) => o.type === 'range')
+  const optGuidanceStep = currGenOptions.value.find((o) => o.key === 'guidance_step') as Pick<
+    GenImageDualRangeOption,
+    'value'
+  >
+
   switch (editorType.value) {
     case 'hidden-message':
       Object.assign(params, {
         action: genTypes.value?.group[genTypes.value.value].key,
-        ...Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])),
+        ...Object.fromEntries(genRangeOptions.map((o) => [o.key, o.value])),
+        guidance_start: optGuidanceStep.value.from,
+        guidance_end: optGuidanceStep.value.to,
       } as GenHiddenMessageParams)
       break
     default:
-      Object.assign(params, Object.fromEntries(genRangeOptions.value.map((setting) => [setting.key, setting.value])))
+      Object.assign(params, Object.fromEntries(genRangeOptions.map((o) => [o.key, o.value])))
       break
   }
   return params
@@ -273,7 +300,7 @@ const getIsReadyToGen = () => {
       }
       break
     default:
-      if (checkCanvasIsEmpty() && showEmptyPromptWarning.value) {
+      if (checkCanvasIsEmpty()) {
         setNormalModalInfo({
           title: t('CM0091'),
           content: t('CM0092'),
@@ -289,7 +316,6 @@ const getIsReadyToGen = () => {
         })
 
         openModal()
-        setShowEmptyPromptWarning(false)
         return false
       }
       break
@@ -313,51 +339,45 @@ const handleGenerate = async () => {
     unshiftGenResults(
       'https://asset.vivipic.com/charmix/HVDSrQpG4iRTDHkqvU3Y/output/231030115145557ftqnuIbG.png?AWSAccessKeyId=AKIA5ORBN3H3LGND3R5W&Expires=1699242747&Signature=E8P5c%2B3fO9b%2BvF%2BhCi1IJdT79ik%3D&X-Amzn-Trace-Id=Root%3D1-653f287b-585cd2fd4f2337005d01b2fd%3BParent%3D78c0465c20c9e530%3BSampled%3D0%3BLineage%3Dee147589%3A0',
       generalUtils.generateRandomString(4),
+      currPrompt.value,
     )
     changeEditorState('next')
-  } else {
-    if (!getIsReadyToGen()) return
-    setSpinnerText(`${t('CM0086')}`)
-    setShowSpinner(true)
-    setIsSendingGenImgReq(true)
-    const hasDesignId = currDesignId.value !== ''
-    if (!hasDesignId) {
-      setCurrDesignId(generalUtils.generateAssetId())
-    }
-
-    if (isGenerating.value) {
-      await checkIsGenerating()
-    }
-
-    await genImageFlow(getGenParams(), false, 2, {
-      onApiResponded: () => {
-        if (generatedResults.value.filter((r) => r.url.length).length > 0 && inEditingState.value) {
-          changeEditorState('next')
-          setIsSendingGenImgReq(false)
-          setShowSpinner(false)
-        }
-      },
-      onSuccess: (index) => {
-        if (inEditingState.value) {
-          setGenResultIndex(index)
-          changeEditorState('next')
-          setIsSendingGenImgReq(false)
-          setShowSpinner(false)
-        }
-      },
-      onError: () => {
-        setIsSendingGenImgReq(false)
-        setShowSpinner(false)
-      },
-    })
-      .then(() => {
-        pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-      })
+    return
   }
+
+  if (!getIsReadyToGen()) return
+  setIsSendingGenImgReq(true)
+  const hasDesignId = currDesignId.value !== ''
+  if (!hasDesignId) {
+    setCurrDesignId(generalUtils.generateAssetId())
+  }
+
+  pagePinchUtils.resetPageScale()
+
+  await waitForGenerating()
+
+  const timer = window.setTimeout(() => {
+    setSelectedSubDesignId(generatedResults.value[0].id)
+    changeEditorState('next')
+  }, 3000)
+  await genImageFlow(getGenParams(), 2, {
+    onError: (index) => {
+      if (index === -1) {
+        clearTimeout(timer)
+        setIsSendingGenImgReq(false)
+        if (!inEditingState.value) {
+          changeToSpecificEditorState('editing')
+        }
+      }
+    },
+  }).then(() => {
+    setIsSendingGenImgReq(false)
+  })
 }
 const clearPromt = () => {
   promptText.value = ''
 }
+// #endregion
 
 // #region settings
 const isGenSettings = ref(false)
@@ -370,6 +390,9 @@ const isSettings = computed({
     isGenSettings.value = newVal
     isTypeSettings.value = newVal
   },
+})
+const showInspirationIcon = computed(() => {
+  return editorType.value === 'hidden-message'
 })
 const showSettingsIcon = computed(() => {
   return !isTypeSettings.value && ['hidden-message', 'powerful-fill'].includes(editorType.value)
@@ -404,7 +427,9 @@ const genGroupOptions = computed(() => {
   return currGenOptions.value.filter((o) => o.type === 'group') as GenImageGroupOption[]
 })
 const genRangeOptions = computed(() => {
-  return currGenOptions.value.filter((o) => o.type === 'range') as GenImageRangeOption[]
+  return currGenOptions.value.filter((o) => ['range', 'dual-range'].includes(o.type)) as Array<
+    GenImageRangeOption | GenImageDualRangeOption
+  >
 })
 const genTypes = computed(() => {
   return genGroupOptions.value.find((o) => o.key === 'type')
@@ -414,47 +439,62 @@ const defaultGenImageOptions = computed(() => {
   if (editorType.value === 'hidden-message') {
     const preset = [
       // blend
-      new Map([
-        ['guidance_scale', 7],
-        ['weight', 2],
-        ['guidance_start', 0],
-        ['guidance_end', 1],
-      ]),
+      {
+        guidance_scale: 7,
+        weight: 2,
+        guidance_step: {
+          from: 0,
+          to: 1,
+        },
+      },
       // light
-      new Map([
-        ['guidance_scale', 10],
-        ['weight', 0.7],
-        ['guidance_start', 0.1],
-        ['guidance_end', 0.7],
-      ]),
-    ][idxGenType.value]
-    const options = constantData.getGenImageOptions('hidden-message') as GenImageOptions ?? []
+      {
+        guidance_scale: 6,
+        weight: 0.5,
+        guidance_step: {
+          from: 0.1,
+          to: 0.7,
+        },
+      },
+    ][idxGenType.value] as { [key: string]: any }
+    const options = (constantData.getGenImageOptions('hidden-message') as GenImageOption[]) ?? []
     options.forEach((option) => {
-      const newVal = preset.get(option.key)
+      const newVal = preset[option.key]
       if (newVal) option.value = newVal
     })
     return options
   }
-  return constantData.getGenImageOptions(editorType.value)?.filter((o) => o.type === 'range') as GenImageRangeOption[] ?? []
+  return (
+    (constantData
+      .getGenImageOptions(editorType.value)
+      ?.filter((o) => o.type === 'range') as GenImageRangeOption[]) ?? []
+  )
 })
 
 const idxGenType = ref(genTypes.value?.value ?? 0)
 
 watch(idxGenType, (newVal) => {
-  setCurrGenOptions(currGenOptions.value.map((o) => o.key === 'type' ? Object.assign(o, { value: newVal }) : o))
+  updateCurrGenOption({ key: 'type', value: newVal })
   currGenOptions.value.forEach((o) => {
-    if (o.type === 'range') resetOption(o)
+    if (['range', 'dual-range'].includes(o.type)) resetOption(o)
   })
 })
 
-const isOptionModified = (option: { key: string, value: any }) => {
+const isOptionModified = (option: { key: string; value: unknown }) => {
   return option.value !== defaultGenImageOptions.value.find((o) => o.key === option.key)?.value
 }
 
 const resetOption = (option: { key: string }) => {
   const defaultOption = defaultGenImageOptions.value.find((o) => o.key === option.key)
   if (!defaultOption) return
-  setCurrGenOptions(currGenOptions.value.map((o) => (o.key === option.key ? Object.assign(o, {value: defaultOption.value}) : o)))
+  updateCurrGenOption(defaultOption)
+}
+
+const idxInspiration = ref(0)
+const handleInspiration = () => {
+  const inspirationPrompts = constantData.inspirationPrompts
+  promptText.value = inspirationPrompts[idxInspiration.value]
+  idxInspiration.value = (idxInspiration.value + 1) % inspirationPrompts.length
 }
 // #endregion
 
@@ -499,7 +539,7 @@ watch(currTransitions.value, (val) => {
 }
 
 .prompt-text-area {
-  @apply w-full box-border p-10 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
+  @apply w-full box-border px-10 py-4 rounded-10 bg-yellow-2 typo-body-sm h-64  border-none outline-none outline-3 outline-offset-0 focus:outline-yellow-cm;
   transition: outline-color 0.45s;
 }
 </style>

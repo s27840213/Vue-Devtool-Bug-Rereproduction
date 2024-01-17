@@ -23,7 +23,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
             v-slot="{ navigate }")
             svg-icon(iconName="cm_settings"
               :iconColor="'yellow-0'" @click="navigate")
-      nubtn(size="mid" icon="crown") {{ `${$t('CM0030')}`.toUpperCase() }}
+      nubtn(size="mid" icon="crown" @click="handleProBtnClick") {{ `${$t('CM0030')}`.toUpperCase() }}
   router-view(
     class="router-view box-border min-h-full row-start-2 row-end-3"
     :class="{ 'pb-12': !atNonUI  && !atMyDesign}"
@@ -52,7 +52,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
-    v-if="wantToQuit || isModalOpen"
+    v-if="wantToQuit || inMediaOptions"
     class="mask"
     ref="maskRef"
     @click.stop="closeModal")
@@ -65,24 +65,28 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
         class="w-full h-full z-img-selector pointer-events-auto"
         :requireNum="requireImgNum")
     transition(name="fade-in-out")
-      div(v-if="showDescriptionPanel"
-      class="absolute w-full h-full z-desciption-panel pointer-events-auto bg-dark-4/70")
+      div(v-if="showDescriptionPanel || inMediaOptions"
+      class="absolute w-full h-full pointer-events-auto bg-dark-4/70"
+      :class="showDescriptionPanel ? 'z-description-panel' : 'z-popup'")
     transition(name="bottom-up-down")
       bottom-panel(
-        v-if="showDescriptionPanel"
-        class="absolute bottom-0 z-desciption-panel pointer-events-auto"
+        v-if="showDescriptionPanel || inMediaOptions"
+        class="absolute bottom-0 pointer-events-auto"
+        :class="showDescriptionPanel ? 'z-description-panel' : 'z-popup'"
         :gap="statusBarHeight + 150"
-        ignoreHomeIndicator)
+        :ignoreHomeIndicator="showDescriptionPanel")
         template(#content="{setSlotRef}")
           transition(
             name="bottom-panel-transition"
             mode="out-in")
-            panel-description(:ref="(el: any) => setSlotRef(el)")
+            panel-description(v-if="showDescriptionPanel" :ref="(el: any) => setSlotRef(el)")
+            saving-options(v-else-if="inMediaOptions" :ref="(el: any) => setSlotRef(el)")
     div(class="popup-area")
       popup(class="pointer-events-auto")
-    div(class="modal-container" v-if="isModalOpen")
-      modal-card(class="pointer-events-auto")
-    spinner(v-if="showSpinner && !isDuringCopy" :textContent="spinnerText")
+    div(class="modal-container pointer-events-auto" v-if="isModalOpen" :style="backdropStyle")
+      modal-card
+    transition(:name="fullpageTransition")
+      full-page(v-if="fullPageType !== 'none'" class="pointer-events-auto")
     notifications(
       class="notification flex-center "
       position="center center"
@@ -119,11 +123,15 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
           action-sheet(class="pointer-events-auto "
             :primaryActions="primaryActions"
             :secondaryActions="secondaryActions")
+    transition(name="fade-bottom-in-out")
+      div(v-if="prevScreenshotUrl && debugMode && !isDuringCopy" class="screenshot-demo bg-white/80 absolute bottom-[30%] left-0 p-8 pointer-events-none rounded-8 flex-center flex-col gap-8")
+        span(class="typo-btn-xs") Screenshot result
+        img(class="object-contain w-80 shadow-gray-1 shadow-sm shadow-"
+        :src="prevScreenshotUrl")
 </template>
 
 <script setup lang="ts">
 import PanelLogin from '@/components/editor/panelMobile/PanelLogin.vue'
-import { useGlobalStore } from '@/stores/global'
 import type { IUserInfo } from '@/utils/cmWVUtils'
 import vuex from '@/vuex'
 import ModalCard from '@nu/vivi-lib/components/modal/ModalCard.vue'
@@ -134,6 +142,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { storeToRefs } from 'pinia'
 // import VConsole from 'vconsole'
+import FullPage from '@nu/vivi-lib/components/fullPage/FullPage.vue'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import colorUtils from '@nu/vivi-lib/utils/colorUtils'
 import { useStore } from 'vuex'
@@ -146,13 +155,16 @@ import HomeTab from './components/panel-content/HomeTab.vue'
 import ModalTemplate from './components/panel-content/ModalTemplate.vue'
 import PanelDescription from './components/panel-content/PanelDescription.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
+import SavingOptions from './components/panel-content/SavingOptions.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
 import router from './router'
 import { useCanvasStore } from './stores/canvas'
+import { useGlobalStore } from './stores/global'
 import { useImgSelectorStore } from './stores/imgSelector'
+import { useMediaStore } from './stores/media'
 import { useModalStore } from './stores/modal'
 
 const { requireImgNum } = storeToRefs(useImgSelectorStore())
@@ -178,16 +190,24 @@ const {
   isSubDesignOpen,
 } = useStateInfo()
 
-const globalStore = useGlobalStore()
-const { showSpinner, spinnerText } = storeToRefs(globalStore)
+const fullPageType = computed(() => store.getters.getFullPageType)
+
 const canvasStore = useCanvasStore()
 const { isAutoFilling } = storeToRefs(canvasStore)
+
+const mediaStore = useMediaStore()
+const { inMediaOptions } = storeToRefs(mediaStore)
 // #endregion
 
 // #region bottom panel warning modal
 const modalStore = useModalStore()
 const { isModalOpen: wantToQuit } = storeToRefs(modalStore)
-const isModalOpen = computed(() => vuex.getters['modal/getModalOpen'] as boolean)
+const isModalOpen = computed(
+  () => (vuex.getters['modal/getModalOpen'] as boolean) && !atScreenshot.value,
+)
+const backdropStyle = computed(() => {
+  return vuex.getters['modal/getModalInfo'].backdropStyle
+})
 // #endregion
 
 const bottomPanelComponent = computed(() => {
@@ -325,10 +345,24 @@ const userInfo = computed(() => store.getters['cmWV/getUserInfo'] as IUserInfo)
 const statusBarHeight = computed(() => userInfo.value.statusBarHeight)
 const homeIndicatorHeight = computed(() => userInfo.value.homeIndicatorHeight)
 
-router.isReady().then(() => {
-  cmWVUtils.sendAppLoaded()
+// #endregion
+
+// #region pro
+const handleProBtnClick = () => {
+  cmWVUtils.openPayment()
+}
+// #endregion
+
+// #region full page
+const fullpageTransition = ref('bottom-up-down')
+watch(fullPageType, (newVal) => {
+  nextTick(() => {
+    fullpageTransition.value = newVal === 'welcome' ? 'fade-in-out' : 'bottom-up-down'
+  })
 })
 // #endregion
+
+const { prevScreenshotUrl, debugMode } = storeToRefs(useGlobalStore())
 </script>
 
 <style lang="scss">
@@ -336,9 +370,12 @@ router.isReady().then(() => {
 @use '@/assets/scss/transitions.scss';
 
 .mask {
-  @apply w-full h-full fixed top-0 left-0 z-modal-mask  backdrop-blur-sm;
-  transition: backdrop-filter 0.25;
+  @apply w-full h-full fixed top-0 left-0 z-modal-mask;
+  animation: blur-in 0.25s forwards;
   background-color: rgba(#050505, 0.5);
+  &.for-no-close-modal {
+    @apply z-popup;
+  }
 }
 
 .popup-area {

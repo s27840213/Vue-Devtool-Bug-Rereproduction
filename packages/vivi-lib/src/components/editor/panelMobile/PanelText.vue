@@ -343,9 +343,9 @@ export default defineComponent({
       if ((this.$isStk && stkWVUtils.checkVersion('1.5')) || this.$isCm) {
         recentFont = await getAutoWVUtils().getState('recentFont')
       }
-      const color = stkWVUtils.getContrastColor(this.editorBg)
+      const color = this.monoColor || stkWVUtils.getContrastColor(this.editorBg)
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
-        size: 21,
+        size: this.monoColor ? 100 : 21,
         color,
         weight: 'normal',
         ...(recentFont ?? {})

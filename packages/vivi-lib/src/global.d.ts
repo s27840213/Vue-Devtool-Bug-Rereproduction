@@ -1,7 +1,7 @@
 export { }
 
-// Extend Window type, https://bobbyhadz.com/blog/typescript-extend-window
 declare global {
+  // Extend Window type, https://bobbyhadz.com/blog/typescript-extend-window
   interface Window {
     TPDirect: TPDirect
     webkit?: {
@@ -23,5 +23,10 @@ declare global {
       totalJSHeapSize: number
       usedJSHeapSize: number
     }
+  }
+
+  // Fix Array.includes function type: https://stackoverflow.com/a/56745484/22514709.
+  interface ReadonlyArray<T> {
+    includes<U>(x: U & ((T & U) extends never ? never : unknown), fromIndex?: number): boolean;
   }
 }

@@ -35,7 +35,8 @@ const { steps, checkPointStep } = storeToRefs(canvasStore)
 const { drawImageToCtx, setCheckPointStep } = useCanvasUtilsCm()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
-const { goToCheckpoint, canvasRecord, setCheckpoint } = useSteps()
+const { currActiveFeature } = storeToRefs(editorStore)
+const { goToCheckpoint, canvasRecord, setCheckpoint, recordBoth } = useSteps()
 const shapeTypes = ['square', 'rectangle', 'circle', 'triangle', 'pentagon', 'hexagon']
 const enableResizerTypes = ['square', 'rectangle']
 
@@ -91,6 +92,7 @@ const chooseSelectionOption = (icon: string) => {
             opacity: 30,
             ctrlrPadding: 6,
           },
+          record: true,
           hideResizer: !enableResizerTypes.includes(icon),
           ctrlUnmountCb: (pageIndex: number, layerIndex: number, config?: AllLayerTypes) => {
             if (config) {
@@ -105,9 +107,17 @@ const chooseSelectionOption = (icon: string) => {
                 rotate: config.styles.rotate,
               })
 
-              canvasRecord()
+              // prevent the record when click cancel button
+              // if (
+              //   currActiveFeature.value === 'cm_brush' ||
+              //   currActiveFeature.value === 'selection'
+              // ) {
+              //   canvasRecord()
+              // }
 
               layerUtils.deleteLayer(pageIndex, layerIndex)
+
+              recordBoth()
             }
           },
         })

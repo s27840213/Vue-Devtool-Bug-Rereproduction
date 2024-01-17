@@ -41,7 +41,7 @@ class FlipUtils {
 
   getImgToFlip(currLayer: IImage): IImage {
     return imageUtils.isImgControl() ? store.state.imgControl.image! : currLayer
-  } 
+  }
 
   imgFlipMapper(layer: IImage, dir: 'h' | 'v') {
     const { styles: { imgHeight, imgWidth, width, height } } = layer

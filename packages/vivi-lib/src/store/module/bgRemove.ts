@@ -67,12 +67,13 @@ export interface IBgRemoveState {
     height: number
   },
   inEffectEditingMode: boolean
+  isChangingBrushSize: boolean
   pinch: IBgRemovePinchState
 }
 
 const getDefaultState = (): IBgRemoveState => ({
   inBgRemoveMode: false,
-  brushSize: generalUtils.isStk || generalUtils.isCm ? 16: 50,
+  brushSize: generalUtils.isStk || generalUtils.isCm ? 200: 50,
   showInitImage: false,
   clearMode: true,
   movingMode: false,
@@ -101,6 +102,7 @@ const getDefaultState = (): IBgRemoveState => ({
     height: 0
   },
   inEffectEditingMode: false,
+  isChangingBrushSize: false,
   pinch: {
     isPinching: false,
     isTransitioning: false,
@@ -205,6 +207,9 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   getPreviewImage(state: IBgRemoveState): { src: string, width: number, height: number} {
     return state.previewImage
+  },
+  getIsChangingBrushSize(state: IBgRemoveState): boolean {
+    return state.isChangingBrushSize
   }
 }
 
@@ -216,7 +221,7 @@ const mutations: MutationTree<IBgRemoveState> = {
     if (generalUtils.isPic && !bool) {
       Object.assign(state, {
         inBgRemoveMode: false,
-        brushSize: 16,
+        brushSize: generalUtils.isStk || generalUtils.isCm ? 200 : 16,
         showInitImage: false,
         clearMode: true,
         restoreInitState: false,
@@ -277,7 +282,7 @@ const mutations: MutationTree<IBgRemoveState> = {
   CLEAR_bgRemoveState(state: IBgRemoveState) {
     Object.assign(state, {
       inBgRemoveMode: false,
-      brushSize: 16,
+      brushSize: generalUtils.isStk || generalUtils.isCm ? 200 : 16,
       showInitImage: false,
       clearMode: true,
       restoreInitState: false,
@@ -328,6 +333,9 @@ const mutations: MutationTree<IBgRemoveState> = {
     Object.entries(data).forEach(([key, val]) => {
       (state.pinch as any)[key] = val
     })
+  },
+  SET_isChangingBrushSize(state: IBgRemoveState, bool: boolean) {
+    state.isChangingBrushSize = bool
   }
 }
 

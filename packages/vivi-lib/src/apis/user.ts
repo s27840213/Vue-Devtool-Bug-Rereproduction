@@ -1,6 +1,6 @@
 import axios from '@/apis'
 import i18n from '@/i18n'
-import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
+import { IGetTxInfoParams, IGetTxInfoResponse, IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
@@ -114,7 +114,7 @@ export default {
       campaign: localStorage.getItem('campaign') || undefined
     }
   }),
-  updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number, country: string, device: number, app: number): AxiosPromise => axios('/update-user', {
+  updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number, country: string, device: number, app: number): AxiosPromise => axios(generalUtils.isCm ? '/update-user-charmix' : '/update-user', {
     method: 'POST',
     data: {
       token,
@@ -189,4 +189,31 @@ export default {
       }
     }))
   },
+  async removeBgCm(uuid: string, assetId?: number, type = 'cm-bg-remove'): Promise<any> {
+    const typeMap: {[index: string]: string} = {
+      'cm-bg-remove': 'bg',
+      'cm-bg-remove-face': 'bgf'
+    }
+    // console.log(store.getters['cmWV/getUserInfo'].userId)
+    return await apiUtils.requestWithRetry(() => axios('/remove-bg-charmix', {
+      method: 'POST',
+      data: {
+        path: `removebgcm/${uuid}/${assetId}/${typeMap[type]}`,
+        locale: this.getLocale(),
+        token: this.getToken(),
+        // token: this.getToken(),
+        debug: 0
+      }
+    }))
+  },
+  // https://www.notion.so/vivipic/get-tx-info-api-d90d7f64e05946ea8ceaec615d51094f
+  async getTxInfo(params: IGetTxInfoParams): Promise<AxiosPromise<IGetTxInfoResponse>> {
+    return await apiUtils.requestWithRetry<IGetTxInfoResponse>(() => axios('/get-tx-info', {
+      method: 'POST',
+      data: {
+        ...params,
+        token: params.token || store.getters['user/getToken'] || store.getters['user/getGetTxToken']
+      }
+    }))
+  }
 }

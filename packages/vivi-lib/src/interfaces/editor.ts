@@ -1,5 +1,5 @@
-import { IViviStickerProFeatures } from '@/utils/stkWVUtils'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IStkProFeatures } from './payment'
 
 export interface ICurrSelectedInfo {
   pageIndex: number,
@@ -26,7 +26,7 @@ export interface IFooterTab {
   disabled?: boolean,
   props?: IFooterTabProps,
   forPro?: boolean,
-  plan?: IViviStickerProFeatures
+  plan?: IStkProFeatures
 }
 
 export interface CustomElementConfig {

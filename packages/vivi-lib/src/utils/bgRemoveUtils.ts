@@ -1,4 +1,4 @@
-import useCanvasUtils from '@/composable/useCanvasUtils'
+import useBaseCanvasUtils from '@/composable/useBaseCanvasUtils'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo, ITrimmedCanvasInfo } from '@/interfaces/image'
@@ -80,6 +80,7 @@ class BgRemoveUtils {
 
   removeBg(): void {
     console.time('removeBg total time')
+    logUtils.setLogAndConsoleLog('start removing bg')
     const { layers, pageIndex, index } = pageUtils.currSelectedInfo as ICurrSelectedInfo
 
     this.setIsProcessing(true)
@@ -102,16 +103,23 @@ class BgRemoveUtils {
     const aspect = imgWidth >= imgHeight ? 0 : 1
     const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
     const initSrc = imageUtils.getSrc((pageUtils.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
+    logUtils.setLogAndConsoleLog('send API')
     console.time('send API')
     store.dispatch('user/removeBg', { srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
+      logUtils.setLogAndConsoleLog('get API response')
       console.timeEnd('send API')
+
+      logUtils.setLogAndConsoleLog(JSON.stringify(data))
       if (data.flag === 0) {
+        logUtils.setLogAndConsoleLog('API success, start polling')
         console.time('polling')
         uploadUtils.polling(data.url, (json: any) => {
           if (json.flag === 0 && json.data) {
+            logUtils.setLogAndConsoleLog('polling success')
             this.reduceBgrmRemain()
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+            logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
 
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
@@ -135,8 +143,12 @@ class BgRemoveUtils {
             return true
           }
           if (json.flag === 1) {
+            logUtils.setLogAndConsoleLog('polling failed')
+
+
             const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
             const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+            logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
 
             if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
               layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
@@ -152,8 +164,10 @@ class BgRemoveUtils {
           return false
         })
       } else {
+        logUtils.setLogAndConsoleLog('Bg remove failed')
         const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
         const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+        logUtils.setLogAndConsoleLog(`pageIndex: ${targetPageIndex}, layerIndex: ${targetLayerIndex}`)
 
         if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
           layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
@@ -171,20 +185,20 @@ class BgRemoveUtils {
 
     this.setIsProcessing(true)
     this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
-    logUtils.setLog('start removing bg')
+    logUtils.setLogAndConsoleLog('start removing bg')
     const data = await store.dispatch('user/removeBgStk', { uuid, assetId, type })
     console.timeEnd('send API ~ get response time')
-    logUtils.setLog('finish removing bg')
 
     console.time('generate frontend data time')
     if (data.flag === 0) {
       editorUtils.setCurrActivePanel('remove-bg')
-      logUtils.setLog('finish removing bg')
+      logUtils.setLogAndConsoleLog('finish removing bg')
       const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
       this.setAutoRemoveResult(autoRemoveResult)
       this.setInBgRemoveMode(true)
       this.setIsProcessing(false)
     } else {
+      logUtils.setLogAndConsoleLog('failed to remove bg: ' + data.msg)
       notify({ group: 'error', text: data.msg })
       this.setIsProcessing(false)
       this.setPreviewImage({ src: '', width: 0, height: 0 })
@@ -200,6 +214,49 @@ class BgRemoveUtils {
     console.log(`total backend process time: ${duration_db + duration_download + duration_process + duration_upload}ms`)
     console.log(data)
 
+    // return data
+  }
+
+  async removeBgCm(uuid: string, assetId: string, initSrc: string, initWidth: number, initHeight: number, type: string, alphaPercentages: number): Promise<void> {
+    console.time('send API ~ get response time')
+
+    this.setIsProcessing(true)
+    this.setPreviewImage({ src: initSrc, width: initWidth, height: initHeight })
+    logUtils.setLogAndConsoleLog('start removing bg')
+    const data = alphaPercentages < 0.1 ? await store.dispatch('user/removeBgCm', { uuid, assetId, type }) : {
+      flag: 0,
+      url: initSrc,
+      msg: ''
+    }
+    console.timeEnd('send API ~ get response time')
+
+    // const data = {
+    //   flag: 0,
+    //   url: `https://template.vivipic.com/admin/NuVCei56OafXuls19X6r/asset/image/231113094035241OsdlRsXg/full?rand=${generalUtils.generateRandomString(4)}`,
+    //   msg: ''
+    // }
+
+    if (data.flag === 0) {
+      logUtils.setLogAndConsoleLog('finish removing bg')
+      const autoRemoveResult = await imageUtils.getBgRemoveInfoStk(data.url, initSrc)
+      this.setAutoRemoveResult(autoRemoveResult)
+      this.setInBgRemoveMode(true)
+      this.setIsProcessing(false)
+    } else {
+      logUtils.setLogAndConsoleLog('failed to remove bg: ' + data.msg)
+      editorUtils.setCurrActivePanel('none')
+      notify({ group: 'error', text: data.msg })
+      this.setIsProcessing(false)
+      this.setInBgRemoveMode(false)
+      this.setPreviewImage({ src: '', width: 0, height: 0 })
+    }
+    // duration_db => 確認使用者身份的資料庫查詢
+    // duration_download => 從s3下載使用者要去背的圖到lambda
+    // duration_process => 將圖片送給第三方去背api並接收結果
+    // duration_upload => 將去背結果寫回s3，並產生前端可以下載的signed url
+    // const { duration_db, duration_download, duration_process, duration_upload } = data
+
+    // console.log(`total backend process time: ${duration_db + duration_download + duration_process + duration_upload}ms`)
     // return data
   }
 
@@ -220,9 +277,8 @@ class BgRemoveUtils {
     const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
     const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
     const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles as IImageStyle
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
-    const { canvas: trimedCanvas, remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
-    console.log(trimCanvas(this.canvas))
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
     const previewSrc = this.canvas.toDataURL('image/png;base64')
 
     const { pageId, layerId } = this.bgRemoveIdInfo
@@ -256,7 +312,6 @@ class BgRemoveUtils {
         assetId: ''
       }
     })
-    console.log(cropJSON)
     try{
       uploadUtils.uploadAsset('image', [previewSrc], {
         addToPage: false,
@@ -286,7 +341,7 @@ class BgRemoveUtils {
                 config: image,
                 layerInfo
               }
-              imageShadowPanelUtils.handleShadowUpload(layerData, true)
+              imageShadowPanelUtils.handleShadowUpload({ layerData, forceUpload: true })
               notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             }
           }
@@ -330,11 +385,12 @@ class BgRemoveUtils {
   }
 
   getTrimmedCanvasInfo(targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     return trimmedCanvasInfo
   }
 
+  // #region used for vivisticker
   screenshot() {
     const src = this.canvas.toDataURL('image/png;base64')
     stkWVUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
@@ -345,9 +401,9 @@ class BgRemoveUtils {
 
   // this is for IOS version < 1.35
   saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
-    const { canvas: trimedCanvas, width, height, } = trimmedCanvasInfo
+    const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
 
     const assetId = generalUtils.generateAssetId()
@@ -360,7 +416,7 @@ class BgRemoveUtils {
   }
 
   saveToIOS(designId:string, callback?: (data: { flag: string, msg: string, imageId: string }, path: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
@@ -376,6 +432,7 @@ class BgRemoveUtils {
     })
   }
 
+
   moveOldBgRemoveImages(src: string, callback?: (path: string) => void) {
     const key = `mydesign-${stkWVUtils.mapEditorType2MyDesignKey(stkWVUtils.editorType)}`
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
@@ -386,6 +443,45 @@ class BgRemoveUtils {
         return callback(path)
       }
     })
+  }
+  // #endregion
+
+  exportCanvasResultInfo(targetLayerStyle?: IImageStyle) {
+    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const trimmedCanvasInfo = trimCanvas(this.canvas)
+    const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
+    const src = trimedCanvas.toDataURL('image/png;base64')
+
+    return {
+      src,
+      width,
+      height,
+      aspectRatio: width / height,
+      trimmedCanvasInfo
+    }
+  }
+
+  undo() {
+      // BgRemoveArea will listen to Ctrl/Cmd + Z event, so I dispatch an event to make the undo function in BgRemoveArea.vue conducted
+      const event = new KeyboardEvent('keydown', {
+        ctrlKey: true,
+        metaKey: true,
+        shiftKey: false,
+        key: 'z',
+        repeat: false
+      })
+      window.dispatchEvent(event)
+  }
+
+  redo() {
+    const event = new KeyboardEvent('keydown', {
+      ctrlKey: true,
+      metaKey: true,
+      shiftKey: true,
+      key: 'z',
+      repeat: false
+    })
+    window.dispatchEvent(event)
   }
 }
 

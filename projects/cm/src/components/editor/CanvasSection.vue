@@ -4,7 +4,7 @@ div(class="canvas-section absolute top-0 left-0 z-canvas")
     v-show="showCanvas"
     id="canvas-section-canvas"
     class="canvas-section absolute top-0 left-0"
-    :class="isBiColorEditor ? 'opacity-100' : 'opacity-30'"
+    :class="isBiColorEditor || noOpacity ? 'opacity-100' : 'opacity-30'"
     ref="canvasRef"
     :style="canvasStyle")
   div(
@@ -22,31 +22,36 @@ import { toRefs } from 'vue' // Workaround for https://github.com/vuejs/eslint-p
 import { useStore } from 'vuex'
 
 // #region data section
-const props = defineProps<{
-  containerDOM: HTMLElement | null
-  wrapperDOM: HTMLElement | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    containerDOM: HTMLElement | null
+    wrapperDOM: HTMLElement | null
+    noOpacity?: boolean
+    width?: number
+    height?: number
+  }>(),
+  {
+    noOpacity: false,
+  },
+)
 
-const { containerDOM, wrapperDOM } = toRefs(props)
+const { containerDOM, wrapperDOM, noOpacity, width, height } = toRefs(props)
 
 const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 const editorStore = useEditorStore()
 const { pageSize } = storeToRefs(editorStore)
 
 const canvasStyle = computed(() => {
-  const { pinchScale, isPinchingEditor } = store.state.mobileEditor
-  const page = pageUtils.getCurrPage
-  let transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px)`
-  if (isPinchingEditor && pinchScale !== 1) {
-    transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
-  }
   return {
-    // width: `${pageSize.value.width * contentScaleRatio.value}px`,
-    // height: `${pageSize.value.height * contentScaleRatio.value}px`,
-    width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
-    height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    // width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    // height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    width: `${
+      width?.value || pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01
+    }px`,
+    height: `${
+      height?.value || pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01
+    }px`,
     transformOrigin: '0 0',
-    transform,
   }
 })
 

@@ -9,6 +9,7 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 
 class GeneralUtils {
+  private _serialNumber = 0
   flags: { [key: string]: boolean }[] = []
   flagsCallback: (() => void) | undefined = undefined
 
@@ -113,6 +114,11 @@ class GeneralUtils {
 
   generateRandomTime(start: Date, end: Date) {
     return start.getTime() + Math.random() * (end.getTime() - start.getTime())
+  }
+
+  get serialNumber() {
+    this._serialNumber++
+    return this._serialNumber
   }
 
   async asyncForEach(array: Array<any>, callback: (el: any, index?: number, array?: Array<any>) => void) {
@@ -279,31 +285,6 @@ class GeneralUtils {
       callback && callback(dataURL)
     }
     image.src = src
-  }
-
-  async toDataUrlNew(src: string) {
-    return new Promise<string>((resolve, reject) => {
-        const image = new Image();
-        image.crossOrigin = 'Anonymous';
-
-        image.onload = () => {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-
-            canvas.height = image.naturalHeight;
-            canvas.width = image.naturalWidth;
-
-            context?.drawImage(image, 0, 0);
-            const dataURL = canvas.toDataURL('image/png');
-            resolve(dataURL);
-        };
-
-        image.onerror = (error) => {
-            reject(error);
-        };
-
-        image.src = src;
-    });
   }
 
   fbq(type: string, action: string, params?: { [index: string]: any }) {

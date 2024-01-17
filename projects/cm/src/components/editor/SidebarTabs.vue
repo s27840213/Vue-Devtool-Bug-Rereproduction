@@ -1,6 +1,7 @@
 <template lang="pug">
-//- h-358 = 44 (item height) * 7.5 + 4 (gap) * 7 = show 7.5 items
-div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scroll scrollbar-hide")
+//- h-375 = 44 (item height) * 8 + 4 (gap) * 7 - 5 = show 8 items - 5px
+div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-375 w-44 overflow-scroll scrollbar-hide"
+  v-fade-scroller="{ vertical: true }")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
       v-if="!tab.hidden"
@@ -16,11 +17,11 @@ div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scrol
           class="pointer-events-none"
           :style="tab.styles"
           :iconName="tab.icon"
-          :iconColor="tab.disabled ? 'dark' : currActiveFeature === tab.icon || tabsPressed[index] ? 'yellow-cm' : 'white'"
+          :iconColor="tab.disabled ? 'lighter' : currActiveFeature === tab.icon || tabsPressed[index] ? 'yellow-cm' : 'white'"
           iconWidth="20px")
         span(
           class="typo-btn-sm whitespace-nowrap pointer-events-none transition-colors duration-200"
-          :class="tab.disabled ? 'text-dark' : currActiveFeature === tab.icon || tabsPressed[index] ? 'text-yellow-cm' : 'text-white'") {{ tab.text }}
+          :class="tab.disabled ? 'text-lighter' : currActiveFeature === tab.icon || tabsPressed[index] ? 'text-yellow-cm' : 'text-white'") {{ tab.text }}
       div(
         v-if="tab.icon === currActiveFeature && tab.subTabs"
         class="flex-center flex-col gap-4 bg-dark-1/50 rounded-full")
@@ -41,6 +42,7 @@ div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-358 w-44 overflow-scrol
 <script setup lang="ts">
 import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
 import useSteps from '@/composable/useSteps'
+import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import type { EditorFeature } from '@/types/editor'
@@ -71,6 +73,10 @@ const { t } = useI18n()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature, setMaskDataUrl } = editorStore
 const { currActiveFeature, editorType } = storeToRefs(editorStore)
+
+const canvasStore = useCanvasStore()
+const { isAutoFilling } = storeToRefs(canvasStore)
+
 const { openImgSelecotr } = useImgSelectorStore()
 const { setCheckpoint } = useSteps()
 
@@ -127,17 +133,20 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       text: t('CM0019'),
       panelType: '',
       hidden: editorType.value === 'hidden-message',
+      disabled: isAutoFilling.value,
     },
     {
       icon: 'ban',
       text: t('CM0029'),
       panelType: '',
       hidden: editorType.value === 'hidden-message',
+      disabled: isAutoFilling.value,
     },
     {
       icon: 'canvas',
       text: t('CM0053'),
       panelType: '',
+      disabled: isAutoFilling.value,
       // disabled: true,
     },
   ]
@@ -160,6 +169,7 @@ const handleTabAction = (tab: ISidebarTab) => {
       toggleFeature(tab.icon)
       break
     case 'cm_brush':
+      setCheckpoint()
       toggleFeature(tab.icon)
       break
     case 'add': {
@@ -169,14 +179,17 @@ const handleTabAction = (tab: ISidebarTab) => {
     }
     case 'auto-fill': {
       autoFill()
+      toggleFeature('none')
       break
     }
     case 'reverse': {
       reverseSelection()
+      toggleFeature('none')
       break
     }
     case 'ban': {
       clearCtx()
+      toggleFeature('none')
       break
     }
     case 'canvas': {
@@ -188,6 +201,7 @@ const handleTabAction = (tab: ISidebarTab) => {
         x: 0,
         y: 0,
       })
+      toggleFeature('none')
       break
     }
     case 'photo-rect':

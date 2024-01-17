@@ -1,3 +1,4 @@
+import router from '@/router'
 import { reactive } from 'vue'
 import generalUtils from './generalUtils'
 import uploadUtils from './uploadUtils'
@@ -33,7 +34,8 @@ class LogUtils {
 
   setLog(logContent: string, trimLog = true) {
     if (trimLog) logContent = logContent.substring(0, 500)
-    const newContent = `[${generalUtils.generateTimeStamp()}] ${logContent}`
+    const isShotWeb = router.currentRoute.value.path.includes('screenshot')
+    const newContent = `[${generalUtils.generateTimeStamp()}]:${isShotWeb ? 'SH' : 'UI'}:${logContent}`
     try {
       if (this.isUploadingLog) { // when log is uploading, append to the log buffer
         this.logBuffer = `${this.logBuffer}\n${newContent}`
@@ -65,7 +67,7 @@ class LogUtils {
 
   setLogAndConsoleLog(...logContent: any[]) {
     console.log(...logContent)
-    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc)).map(lc => lc.substring(0, 500))
+    logContent = logContent.map(lc => typeof lc === 'string' ? lc : JSON.stringify(lc)).map(lc => lc ? lc.substring(0, 500) : lc)
     // slice every string to 500 characters to avoid localStorage quota exceeds
     this.setLog(logContent.join(' '), false)
   }

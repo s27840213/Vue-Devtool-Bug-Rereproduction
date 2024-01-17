@@ -1322,12 +1322,26 @@ class ConstantData {
     ['TWN', 'TWD'],
   ])
 
-  // plan id for vivisticker payment
+  // plan id for stk/cm payment
   get planId() {
+    if (generalUtils.isStk) {
+      return {
+        monthly: 'com.nuphototw.vivisticker.monthly',
+        annually: 'com.nuphototw.vivisticker.annually',
+        annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
+      }
+    }
+    if (generalUtils.isCm) {
+      return {
+          monthly: 'com.printage.charmix.monthly',
+          annually: 'com.printage.charmix.yearly',
+          annuallyFree0: 'com.printage.charmix.yearly_free0'
+      }
+    }
     return {
-      monthly: 'com.nuphototw.vivisticker.monthly',
-      annually: 'com.nuphototw.vivisticker.annually',
-      annuallyFree0: 'com.nuphototw.vivisticker.yearly_free0'
+      monthly: '',
+      annually: '',
+      annuallyFree0: ''
     }
   }
 
@@ -1363,7 +1377,7 @@ class ConstantData {
             {
               key: 'hidden-light',
               text: i18n.global.t('CM0110'),
-              img: 'hidden-message.png',
+              img: 'hidden-message-light.png',
             }
           ],
           value: 0,
@@ -1392,26 +1406,31 @@ class ConstantData {
           value: 2,
         },
         {
-          type: 'range',
-          key: 'guidance_start',
-          title: i18n.global.t('CM0116'),
-          min: 0,
-          max: 1,
-          step: 0.1,
-          value: 0,
-        },
-        {
-          type: 'range',
-          key: 'guidance_end',
+          type: 'dual-range',
+          key: 'guidance_step',
           title: i18n.global.t('CM0117'),
+          subTitle: i18n.global.t('CM0156'),
           min: 0,
           max: 1,
-          step: 0.1,
-          value: 1,
+          step: .1,
+          value: {
+            from: 0,
+            to: 1
+          },
+          icon: 'information-circle',
+          iconActive: 'information-circle-solid',
         },
       ]]
     ]).get(editorType)
   }
+
+  inspirationPrompts = [
+    'Sea,wave,aerial view',
+    'Cloud,blue sky,sunlight',
+    'snowy mountain',
+    'Lavender fields,aerial view',
+    'Messy clothes on the bedroom ground,aerial view'
+  ]
 }
 
 export default new ConstantData()

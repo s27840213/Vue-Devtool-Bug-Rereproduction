@@ -11,7 +11,7 @@ import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
 import platform from 'platform'
-import { App, ComputedRef, defineAsyncComponent, nextTick } from 'vue'
+import { App, ComputedRef, DirectiveBinding, defineAsyncComponent, nextTick } from 'vue'
 import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
@@ -21,6 +21,8 @@ import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
+import { useEventListener } from '@vueuse/core'
+import uploadUtils from './utils/uploadUtils'
 // import '@/imports'
 
 // Add variable that bind in vue this and its type define
@@ -51,12 +53,10 @@ window.onerror = function (msg, url, line, colno, error) {
   ].join(' - ')
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
-    console.log('showGlobalErrorModal: ', store.getters.getShowGlobalErrorModal)
     if ((generalUtils.isPic && store.getters['user/isAdmin']) ||
-        (generalUtils.isStk && store.getters['vivisticker/getDebugMode'])) {
-      const id = generalUtils.isPic 
-        ? store.getters['user/getUserId']
-        : stkWVUtils.getUserInfoFromStore().hostId
+        (generalUtils.isStk && store.getters['vivisticker/getDebugMode']) ||
+        (generalUtils.isCm && store.getters['cmWV/getDebugMode'])) {
+      const id = uploadUtils.fullId
       const hint = `${id}, ${generalUtils.generateTimeStamp()}, ${errorId}`
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
@@ -65,7 +65,7 @@ window.onerror = function (msg, url, line, colno, error) {
           msg: i18n.global.t('NN0032'),
           action() {
             generalUtils.copyText(hint).then(() => {
-              notify({ group: 'copy', text: '已複製' })
+              notify({ group: 'copy', text: i18n.global.t('NN0923') })
             })
           }
         }
@@ -163,7 +163,7 @@ app.component('hint', defineAsyncComponent(() =>
 
 app.directive('hint', {
   // When the bound element is inserted into the DOM...
-  mounted: (el, binding, vnode) => {
+  mounted: (el, binding) => {
     tooltipUtils.bind(el, binding)
   },
   beforeUpdate: (el, binding) => {
@@ -176,7 +176,7 @@ app.directive('hint', {
 
 app.directive('ratio-change', {
   // When the bound element is inserted into the DOM...
-  mounted: (el, binding, vnode) => {
+  mounted: (el) => {
     el.addEventListener('change', function () {
       el.blur()
     })
@@ -227,7 +227,7 @@ app.directive('touch', {
    * Useage: div(v-touch @tap="..." @swipeleft="...")
    * If you want to prevetDefault, use: div(v-touch="true" ...)
    */
-  mounted: (el, binding, vnode) => {
+  mounted: (el, binding) => {
     // pass preventDefault as function to fix tap event issue of apple pencil for unknown reason
     const preventDefault = () => {
       return Boolean(binding.value)
@@ -236,14 +236,14 @@ app.directive('touch', {
     at.get('tap').maxDistance = 10 // raise max move distance to trigger double tap event more easily for apple pencil
     anyTouchWeakMap.set(el, at)
   },
-  unmounted: (el, binding, vnode) => {
+  unmounted: (el) => {
     (anyTouchWeakMap.get(el) as AnyTouch).destroy()
     anyTouchWeakMap.delete(el)
   }
 })
 
 app.directive('custom-swipe', {
-  mounted: (el, binding, vnode) => {
+  mounted: (el, binding) => {
     const at = new Core(el as HTMLElement, {
       preventDefault: false
     })
@@ -260,7 +260,7 @@ app.directive('custom-swipe', {
       binding.value(event)
     })
   },
-  unmounted: (el, binding, vnode) => {
+  unmounted: (el) => {
     if (anyTouchWeakMap.has(el)) {
       (anyTouchWeakMap.get(el) as Core).off('swipe')
       anyTouchWeakMap.delete(el)
@@ -335,12 +335,48 @@ function setProgressStyle(el: HTMLInputElement) {
 }
 
 app.directive('progress', {
-  mounted: (el) => {
-    setProgressStyle(el)
+  mounted: (el, binding) => {
+    if (binding.value === undefined || binding.value) setProgressStyle(el)
   },
-  updated: (el) => {
-    setProgressStyle(el)
+  updated: (el, binding) => {
+    if (binding.value === undefined || binding.value) setProgressStyle(el)
   }
+})
+
+type FadeScrollerOption = {
+  vertical: boolean
+  fadeWidth: string
+  prev: boolean
+  next: boolean
+}
+function updateFadeScroller(el: HTMLElement, binding: DirectiveBinding<Partial<FadeScrollerOption> | undefined>) {
+  const {
+    vertical = false,
+    fadeWidth = '48px',
+    prev = !0,
+    next = !0,
+  } = binding.value ?? {}
+
+  // Handle vertical case.
+  const [scrollLeft, scrollWidth, offsetWidth, target] = !vertical
+    ? [el.scrollLeft, el.scrollWidth, el.offsetWidth, 'right']
+    : [el.scrollTop, el.scrollHeight, el.offsetHeight, 'bottom']
+
+  const prevOverflow = prev && scrollLeft > 0
+  const nextOverflow = next && scrollLeft + 1 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+
+  // Use mask-image implement fade scroll style, https://stackoverflow.com/a/70971847
+  el.style.maskImage = `
+    linear-gradient(to ${target},
+      transparent 0, black ${prevOverflow ? fadeWidth : 0},
+      black calc(100% - ${nextOverflow ? fadeWidth : '0px'}), transparent 100%)`
+}
+app.directive('fade-scroller', {
+  mounted: (el: HTMLElement, binding) => {
+    nextTick(() => updateFadeScroller(el, binding))
+    useEventListener(el, 'scroll', () => updateFadeScroller(el, binding), { passive: true })
+  },
+  updated: updateFadeScroller,
 })
 
 let token = localStorage.getItem('token') || ''

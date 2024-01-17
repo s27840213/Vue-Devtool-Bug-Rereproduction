@@ -6,11 +6,17 @@ interface ModalOptions {
   noClose?: boolean,
   noCloseIcon?: boolean,
   backdropStyle?: unknown,
-  cardStyle?: unknown,
   checkboxText?: string,
   checked?: boolean,
   onCheckedChange?: (checked: boolean) => void
   ulContent?: string[]
+  classes?: {
+    card?: string,
+    title?: string,
+    desc?: string,
+    btn?: string,
+    btn2?: string
+  }
 }
 class ModalUtils {
   setModalInfo(
@@ -24,11 +30,11 @@ class ModalUtils {
       noClose = false,
       noCloseIcon = false,
       backdropStyle = {},
-      cardStyle = {},
       checkboxText = '',
       checked = false,
       onCheckedChange = undefined,
-      ulContent = []
+      ulContent = [],
+      classes
     } = options || {}
 
     if (typeof content === 'string') content = [content]
@@ -41,11 +47,11 @@ class ModalUtils {
       noClose,
       noCloseIcon,
       backdropStyle,
-      cardStyle,
       checkboxText,
       checked,
       onCheckedChange: onCheckedChange === undefined ? this.generateOnCheckedChangeTemplate() : onCheckedChange,
-      ulContent
+      ulContent,
+      classes
     })
     store.commit('modal/SET_MODAL_OPEN', true)
   }
@@ -85,8 +91,8 @@ class ModalUtils {
       imgSrc: '',
       noClose: false,
       backdropStyle: {},
-      cardStyle: {},
       ulContent: [],
+      classes: undefined
     })
   }
 

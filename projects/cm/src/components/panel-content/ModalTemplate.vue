@@ -7,14 +7,25 @@ div(class="flex-center flex-col box-border px-24")
     nubtn(
       theme="secondary"
       size="mid-full"
-      @click="cancel") {{ cancelText }}
+      @click="cancel")
+      span(:style="cancelTextStyle") {{ cancelText }}
     nubtn(
       size="mid-full"
-      @click="confirm") {{ confirmText }}
+      @click="confirm")
+      span(:style="confirmTextStyle") {{ confirmText }}
 </template>
 <script setup lang="ts">
 import { useModalStore } from '@/stores/modal'
 const modalStore = useModalStore()
-const { cancel, cancelText, confirm, confirmText, content, title } = toRefs(modalStore.modalInfo)
+const {
+  cancel,
+  cancelText,
+  cancelTextStyle,
+  confirm,
+  confirmText,
+  confirmTextStyle,
+  content,
+  title,
+} = toRefs(modalStore.modalInfo)
 </script>
 <style lang="scss"></style>

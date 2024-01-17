@@ -26,7 +26,7 @@ div(class="bg-setting")
     )
   div
     nubtn(theme="edit" size="mid-full"
-      :disabled="!isShowImage || backgroundLocked"
+      :disabled="!isShowImage || backgroundLocked || isHandleShadow"
       @click="handleShow('replaceImg')") {{$t('NN0913')}}
   div(:class="{ 'bg-setting__grid': isAdmin }")
     nubtn(theme="edit" size="mid-full"
@@ -117,6 +117,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       isAdmin: 'user/isAdmin',
+      isHandleShadow: 'shadow/isHandling',
     }),
     backgroundColor(): string {
       return this.currPage.backgroundColor

@@ -10,13 +10,15 @@ router-link(
     @click="handleBackAction(() => navigate())")
 </template>
 <script setup lang="ts">
-import useStateInfo from '@/composable/useStateInfo'
+import useSteps from '@/composable/useSteps'
 import { useEditorStore } from '@/stores/editor'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import { useModalStore } from '@/stores/modal'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
+import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { storeToRefs } from 'pinia'
+import { toRefs } from 'vue'
 import { useStore } from 'vuex'
 
 /**
@@ -28,13 +30,10 @@ import { useStore } from 'vuex'
  * Precedence: customCallback > toTarget
  */
 
-const { toTarget, customCallback } = withDefaults(
-  defineProps<{ toTarget?: string; customCallback?: () => void }>(),
-  {
-    toTarget: '/',
-  },
-)
-const { inEditingState, atSettings } = useStateInfo()
+const props = withDefaults(defineProps<{ toTarget?: string; customCallback?: () => void }>(), {
+  toTarget: '/',
+})
+const { toTarget, customCallback } = toRefs(props)
 
 // #region modal
 const modalStore = useModalStore()
@@ -50,7 +49,15 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 // #region editor
 const editorStore = useEditorStore()
 const { changeEditorState } = editorStore
-const { inGenResultState, inSavingState } = storeToRefs(editorStore)
+const {
+  inGenResultState,
+  inSavingState,
+  hasGeneratedResults,
+  currDesignId,
+  editorType,
+  myDesignSavedRoot,
+} = storeToRefs(editorStore)
+const { hasUnsavedChanges } = useSteps()
 // #endregion
 
 const store = useStore()
@@ -58,8 +65,8 @@ const store = useStore()
 const { t } = useI18n()
 
 const handleBackAction = (navagate: () => void) => {
-  if (customCallback) {
-    customCallback()
+  if (customCallback?.value) {
+    customCallback.value()
     return
   }
 
@@ -93,13 +100,17 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (inEditingState.value) {
+  if (hasUnsavedChanges.value) {
     setNormalModalInfo({
       title: t('CM0025'),
       content: t('CM0026'),
       confirmText: t('CM0028'),
       cancelText: t('NN0203'),
       confirm: () => {
+        // if we used bg remove, we need to delete the asset, or it will cause memory leak
+        if (!hasGeneratedResults.value) {
+          cmWVUtils.deleteAsset(myDesignSavedRoot.value, `${currDesignId.value}`, undefined, false)
+        }
         navagate()
         closeModal()
       },
@@ -114,5 +125,4 @@ const handleBackAction = (navagate: () => void) => {
   }
 }
 </script>
-<style lang="scss">
-</style>
+<style lang="scss"></style>

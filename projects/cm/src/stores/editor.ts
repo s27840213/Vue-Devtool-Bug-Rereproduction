@@ -1,23 +1,25 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
-import useSteps from '@/composable/useSteps'
 import router from '@/router'
+import { useUserStore } from '@/stores/user'
 import type {
   DescriptionPanel,
   EditorFeature,
   EditorStates,
   EditorType,
-  GenImageOptions,
+  GenImageOption,
+  GenImageOptionToSave,
   HiddenMessageStates,
   MagicCombinedStates,
   PowerfulfillStates,
 } from '@/types/editor'
 import type { IStep } from '@nu/vivi-lib/interfaces/steps'
-import assetUtils from '@nu/vivi-lib/utils/assetUtils'
-import groupUtils from '@nu/vivi-lib/utils/groupUtils'
+import constantData from '@nu/vivi-lib/utils/constantData'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
+import { find } from 'lodash'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -35,7 +37,8 @@ export interface MaskParams {
 export interface IGenResult {
   id: string
   url: string
-  video?: string
+  prompt: string
+  video?: { src: string; removeWatermark: boolean }
 }
 
 interface IEditorStore {
@@ -48,22 +51,26 @@ interface IEditorStore {
   maskParams: MaskParams
   isSendingGenImgReq: boolean
   generatedResults: Array<IGenResult>
-  currGenResultIndex: number
-  stepsTypesArr: Array<'canvas' | 'editor'>
+  selectedSubDesignId: string // SubDesign that user selected at (Editor step3) or MyDesign.
+  editingSubDesignId: string // SubDesign that loaded in editor.
+  stepsTypesArr: Array<'canvas' | 'editor' | 'both'>
   currStepTypeIndex: number
   stepTypeCheckPoint: number
   initImgSrc: string
   useTmpSteps: boolean
-  // for my design
   currDesignId: string
-  currSubDesignId: string
+  // only when opening design from mydesign will set this value
+  // used to save design to correct place if we edit the design (editorType will always be 'powerful-fill'
+  // but if we edit a hidden-message design, we should save it to hidden-message folder)
+  opendDesignType: EditorType | ''
+  designName: '' | 'original' | 'result'
   // for saving to document and show more results
   currPrompt: string
-  currGenOptions: GenImageOptions
+  currGenOptions: GenImageOption[]
   editorTheme: null | string
   descriptionPanel: null | DescriptionPanel
   currDesignThumbIndex: number
-  showEmptyPromptWarning: boolean
+  isRecordingBothSteps: boolean
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -75,7 +82,8 @@ export const useEditorStore = defineStore('editor', {
     currActiveFeature: 'none',
     isSendingGenImgReq: false,
     generatedResults: [],
-    currGenResultIndex: 0,
+    selectedSubDesignId: '',
+    editingSubDesignId: '',
     stepsTypesArr: [],
     currStepTypeIndex: -1,
     stepTypeCheckPoint: -1,
@@ -86,12 +94,13 @@ export const useEditorStore = defineStore('editor', {
     currPrompt: '',
     currGenOptions: [],
     currDesignId: '',
-    currSubDesignId: '',
+    opendDesignType: '',
+    designName: '',
     editorTheme: null,
     descriptionPanel: null,
     currDesignThumbIndex: 0,
+    isRecordingBothSteps: false,
     // if the user send empty prompt, show warning at fisrt time
-    showEmptyPromptWarning: true,
   }),
   getters: {
     pageSize(): { width: number; height: number } {
@@ -136,8 +145,11 @@ export const useEditorStore = defineStore('editor', {
     isInEditorLastStep(): boolean {
       return stepsUtils.isInLastStep
     },
-    currGeneratedResults(): { id: string; url: string; video?: string } {
-      return this.generatedResults[this.currGenResultIndex]
+    currSubDesignId(): string {
+      return this.selectedSubDesignId
+    },
+    currGeneratedResult(): IGenResult | undefined {
+      return find(this.generatedResults, ['id', this.selectedSubDesignId])
     },
     generatedResultsNum(): number {
       return this.generatedResults.length
@@ -152,6 +164,15 @@ export const useEditorStore = defineStore('editor', {
     },
     showDescriptionPanel(): boolean {
       return this.descriptionPanel !== null
+    },
+    currGenOptionsToSave(): GenImageOptionToSave {
+      return Object.fromEntries(this.currGenOptions.map(({ key, value }) => [key, value]))
+    },
+    myDesignSavedType(): EditorType {
+      return this.opendDesignType ? this.opendDesignType : this.editorType
+    },
+    myDesignSavedRoot(): string {
+      return `mydesign-${this.opendDesignType ? this.opendDesignType : this.editorType}`
     },
   },
   actions: {
@@ -168,12 +189,14 @@ export const useEditorStore = defineStore('editor', {
     },
     startEditing(
       type: EditorType,
-      props?: {
+      options?: {
         stateTarget?: string
         designId?: string
+        designType?: EditorType | ''
         generatedResults?: Array<IGenResult>
         designWidth?: number
         designHeight?: number
+        designName?: '' | 'result' | 'original'
       },
     ) {
       const {
@@ -182,13 +205,19 @@ export const useEditorStore = defineStore('editor', {
         generatedResults,
         designWidth = 900,
         designHeight = 1600,
-      } = props || {}
+        designName = '',
+        designType,
+      } = options || {}
+
       this.currStateIndex = 0
       this.editorType = type
-      if (designId) this.currDesignId = designId
+      this.designName = designName
+      this.currDesignId = designId || generalUtils.generateAssetId()
+      this.setOpenedDesignType(designType ?? '')
+
       this.editorStates = editorStatesMap[this.editorType]
       if (stateTarget && this.editorStates.findIndex((item) => item === stateTarget) !== -1) {
-        this.changeToSpecificEditorState(type, stateTarget)
+        this.changeToSpecificEditorState(stateTarget)
       }
       if (generatedResults) {
         this.generatedResults = generatedResults
@@ -205,8 +234,8 @@ export const useEditorStore = defineStore('editor', {
         this.currStateIndex--
       }
     },
-    changeToSpecificEditorState(type: EditorType, state: string) {
-      this.editorStates = editorStatesMap[this.editorType]
+    changeToSpecificEditorState(state: string, type?: EditorType) {
+      this.editorStates = editorStatesMap[type ?? this.editorType]
       this.currStateIndex = this.editorStates.findIndex((item) => item === state)
     },
     setCurrActiveFeature(feature: EditorFeature) {
@@ -218,20 +247,18 @@ export const useEditorStore = defineStore('editor', {
     setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
       this.isSendingGenImgReq = isSendingGenImgReq
     },
-    unshiftGenResults(url: string, id: string) {
-      if (this.generatedResults.length > 0) {
-        this.currGenResultIndex += 1
-      }
+    unshiftGenResults(url: string, id: string, prompt: string) {
       this.generatedResults.unshift({
         url,
         id,
+        prompt,
       })
     },
     updateGenResult(
       id: string,
       data: {
         url?: string
-        video?: string
+        video?: null | { src: string; removeWatermark: boolean }
         updateIndex?: boolean
         saveToDocument?: boolean
         saveMask?: boolean
@@ -243,32 +270,30 @@ export const useEditorStore = defineStore('editor', {
       if (url) {
         this.generatedResults[index].url = url
       }
+
       if (video) {
-        this.generatedResults[index].video = video
+        this.generatedResults[index].video = { ...video }
+      } else if (video === null) {
+        this.generatedResults[index].video = undefined
       }
-      if (updateIndex && this.currGenResultIndex === -1) {
-        this.currGenResultIndex = index
+
+      if (updateIndex && this.selectedSubDesignId === '') {
+        this.selectedSubDesignId = id
       }
     },
     removeGenResult(id: string) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
       if (index === -1) return
       this.generatedResults.splice(index, 1)
-      if (
-        this.currGenResultIndex === index &&
-        this.currGenResultIndex >= this.generatedResults.length
-      ) {
-        this.currGenResultIndex -= 1
-        if (this.currGenResultIndex < 0) {
-          this.currGenResultIndex = 0
-        }
+      if (this.selectedSubDesignId === id) {
+        this.selectedSubDesignId = ''
       }
     },
     clearGeneratedResults() {
       this.generatedResults = []
     },
-    setGenResultIndex(index: number) {
-      this.currGenResultIndex = index
+    setSelectedSubDesignId(id: string) {
+      this.selectedSubDesignId = id
     },
     async undo() {
       await stepsUtils.undo()
@@ -288,7 +313,7 @@ export const useEditorStore = defineStore('editor', {
     pageReset(width = 900, height = 1600) {
       this.createNewPage(width, height)
     },
-    pushStepType(type: 'canvas' | 'editor') {
+    pushStepType(type: 'canvas' | 'editor' | 'both') {
       this.stepsTypesArr.push(type)
     },
     setCurrStepTypeIndex(index: number) {
@@ -300,7 +325,7 @@ export const useEditorStore = defineStore('editor', {
     },
     resetStepsTypesArr() {
       this.stepsTypesArr = []
-      this.currGenResultIndex = -1
+      this.currStepTypeIndex = -1
     },
     setInitImgSrc(src: string) {
       this.initImgSrc = src
@@ -315,34 +340,45 @@ export const useEditorStore = defineStore('editor', {
     setCurrPrompt(prompt: string) {
       this.currPrompt = prompt
     },
-    setCurrGenOptions(options: GenImageOptions) {
+    setCurrGenOptions(options: GenImageOption[]) {
       this.currGenOptions = options
     },
-    keepEditingInit() {
-      this.changeToSpecificEditorState(this.editorType, 'editing')
-      this.createNewPage(this.pageSize.width, this.pageSize.height)
-      const targetUrl =
-        this.currGenResultIndex === -1
-          ? this.initImgSrc
-          : this.generatedResults[this.currGenResultIndex].url
-
-      assetUtils.addImage(targetUrl, this.pageAspectRatio, {
-        record: false,
-        fit: 1,
+    updateCurrGenOption(option: { key: string; value: any }) {
+      const currOption = this.currGenOptions.find((o) => o.key === option.key)
+      if (currOption) currOption.value = option.value
+    },
+    restoreGenOptions(options: { [key: string]: any }, type: EditorType) {
+      const defaultOptions = constantData.getGenImageOptions(type) as GenImageOption[] | undefined
+      if (!defaultOptions) return
+      this.currGenOptions = defaultOptions.map((option) => {
+        const value = options?.[option.key]
+        if (value) option.value = value
+        return option
       })
-      groupUtils.deselect()
-      this.maskDataUrl = ''
-      this.initImgSrc = targetUrl
-      this.currPrompt = ''
-      useCanvasUtils().clearCtx()
+    },
+    async keepEditingInit() {
+      // Do the same thing with user.editSubDesignResult.
+      const { initWithSubDesignImage, initWithSubDesignConfig, getSubDesignConfig } = useUserStore()
+      const { editorType: type, currDesignId: id, currSubDesignId: subId } = this
 
-      useSteps().reset()
+      // Try to open result.json.
+      const resultJson = await getSubDesignConfig({ type, id }, subId, 'result')
+      if (resultJson && resultJson.flag === '0') {
+        initWithSubDesignConfig(resultJson.content)
+        return
+      }
+
+      // Cannot find result.json, use result img to create new design.
+      const originalJson = await getSubDesignConfig({ type, id }, subId)
+      if (originalJson && originalJson.flag === '0') {
+        initWithSubDesignImage(originalJson.content)
+      }
     },
     setCurrDesignId(id: string) {
       this.currDesignId = id
     },
-    setCurrSubDesignId(id: string) {
-      this.currSubDesignId = id
+    setOpenedDesignType(type: EditorType | '') {
+      this.opendDesignType = type
     },
     setEditorTheme(theme: string | null) {
       this.editorTheme = theme
@@ -353,8 +389,8 @@ export const useEditorStore = defineStore('editor', {
     setCurrDesignThumbIndex(index: number) {
       this.currDesignThumbIndex = index
     },
-    setShowEmptyPromptWarning(show: boolean) {
-      this.showEmptyPromptWarning = show
+    setIsRecordingBothSteps(isRecordingBothSteps: boolean) {
+      this.isRecordingBothSteps = isRecordingBothSteps
     },
   },
 })

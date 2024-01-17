@@ -9,7 +9,7 @@ export type EditorStates = Array<PowerfulfillStates | HiddenMessageStates | Magi
 export type EditorFeature = 'none' | 'cm_brush' | 'selection' | 'add'
 export type PowerfulFillCanvasMode = 'brush' | 'erase' | 'move'
 
-export type DescriptionPanel = 'hidden-message-help' | 'hidden-message-invert' | 'hidden-message-bgrm'
+export type DescriptionPanel = 'hidden-message/help' | 'hidden-message/invert' | 'hidden-message/bgrm'
 
 // gen image options
 export type GenImageGroupOption = {
@@ -37,4 +37,15 @@ export type GenImageRangeOption = {
   active?: boolean
   value: number
 }
-export type GenImageOptions = Array<GenImageGroupOption | GenImageRangeOption>
+export type GenImageDualRangeOption = Omit<GenImageRangeOption, 'type' | 'value'> & {
+  type: 'dual-range',
+  value: {
+    from: number,
+    to: number
+  }
+}
+
+export type GenImageOption = GenImageGroupOption | GenImageRangeOption | GenImageDualRangeOption
+export type GenImageOptionToSave = {
+  [key: GenImageOption['key']]: GenImageOption['value']
+}

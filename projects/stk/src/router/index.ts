@@ -4,8 +4,8 @@ import ViviSticker from '@/views/ViviSticker.vue'
 import appJson from '@nu/vivi-lib/assets/json/app.json'
 import i18n, { LocaleName } from '@nu/vivi-lib/i18n'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
-import { IPrices } from '@nu/vivi-lib/interfaces/vivisticker'
-import router from '@nu/vivi-lib/router'
+import { IPrices } from '@nu/vivi-lib/interfaces/payment'
+import router, { commonBeforeEach, commonBeforeEnter } from '@nu/vivi-lib/router'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -137,6 +137,7 @@ router.addRoute({
     },
   },
   async beforeEnter(to, from, next) {
+    commonBeforeEnter()
     if (to.name === 'NativeEventTester') {
       stkWVUtils.enterEventTestMode()
     }
@@ -165,7 +166,6 @@ router.addRoute({
       // hostId for uploading log is obtained after getUserInfo
       await logUtils.uploadLog()
     }
-    logUtils.setLog('App Start')
     let argoError = false
     try {
       const status = (await fetch('https://media.vivipic.cc/hello.txt')).status
@@ -223,6 +223,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
+  if (commonBeforeEach(to, from , next)) return
   /**
    * @Note the following commented codes will cause prerender render error.
    */
@@ -230,7 +231,6 @@ router.beforeEach(async (to, from, next) => {
   //   next()
   //   return
   // }
-  logUtils.setLog(`navigate to route: ${to.path}`)
   picWVUtils.detectIfInApp()
   await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
@@ -294,11 +294,11 @@ router.beforeEach(async (to, from, next) => {
     })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
-    store.commit('vivisticker/SET_promote', json.promote)
+    store.commit('payment/SET_promote', json.promote)
 
     if (json.default_price && Object.keys(json.default_price).length) {
       const planPostfix = json.default_price.plan_id ? '_' + json.default_price.plan_id : ''
-      store.commit('vivisticker/UPDATE_payment', {
+      store.commit('payment/UPDATE_payment', {
         defaultPrices: Object.fromEntries(
           Object.entries(
             json.default_price.prices as { [key: string]: { monthly: number; annually: number } },

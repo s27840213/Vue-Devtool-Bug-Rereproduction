@@ -88,7 +88,7 @@ div(class="popup-download text-left"
           :placeholder="colorFormats[selectedTypeVal][0].label"
           :options="colorFormats[selectedTypeVal]"
           @select="handleColorModeSelect")
-        div(v-else-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
+        div(v-else-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format mono")
           span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0].label }}
       div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
         dropdown(class="mt-5"
@@ -160,12 +160,11 @@ div(class="popup-download text-left"
         :label="`${$t('NN0129')}`"
         :default-checked="saveSubmission"
         @change="({ checked }) => handleSubmission(checked)")
-    div
-      nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"
-          size="sm-full"
-          :icon="['pro', 'alarm']"
-          :disabled="isButtonDisabled"
-          @click="handleSubmit()") {{$t('NN0010')}}
+    nubtn(:theme="selectedTypeVal === 'pdf_print' && !inReviewMode ? 'icon_text' : 'primary'"
+        size="sm-full"
+        :icon="(selectedTypeVal === 'pdf_print' && !inReviewMode ) && ['pro', 'alarm']"
+        :disabled="isButtonDisabled"
+        @click="handleSubmit()") {{$t('NN0010')}}
 </template>
 
 <!-- eslint-disable vue/no-unused-properties -->
@@ -254,7 +253,7 @@ export default defineComponent({
   }
   &__color-format {
     width: 65px;
-    &.fixed {
+    &.mono {
       width: auto;
       margin-left: 8px;
       padding: 0px 8px;

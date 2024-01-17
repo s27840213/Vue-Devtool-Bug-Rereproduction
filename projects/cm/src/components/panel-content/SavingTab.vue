@@ -26,36 +26,81 @@ div(class="w-full flex-center gap-64 py-12 box-border")
     span(class="text-yellow-0 typo-body-sm") {{ $t('NN0504') }}
 </template>
 <script setup lang="ts">
-import useActionSheetCm from '@/composable/useActionSheetCm'
-import useStateInfo from '@/composable/useStateInfo'
-import { useEditorStore } from '@/stores/editor'
-import { useUserStore } from '@/stores/user'
-import { notify } from '@kyvg/vue3-notification'
+import useActionSheetCm from '@/composable/useActionSheetCm';
+import useStateInfo from '@/composable/useStateInfo';
+import { useEditorStore } from '@/stores/editor';
+import { useMediaStore } from '@/stores/media';
+import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore()
-const { initWithSubDeisgnImage, initWithSubDesignConfig } = userStore
+const { editSubDesignResult, initWithSubDesignConfig } = userStore
 const { atEditor } = useStateInfo()
 const { currOpenSubDesign } = storeToRefs(userStore)
 const editorStore = useEditorStore()
 const { changeToSpecificEditorState, keepEditingInit } = editorStore
-const { editorType } = storeToRefs(editorStore)
+const { setMediaParams, setInMediaOptions } = useMediaStore()
 
-const { setSavingActions, toggleActionSheet } = useActionSheetCm()
+const {
+  setSavingActions,
+  setSharingActions,
+  toggleActionSheet,
+} = useActionSheetCm()
+
 const save = () => {
-  setSavingActions()
+  setSavingActions(
+    () => {
+      setMediaParams({
+        action: 'save',
+        media: 'photo'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+    () => {
+      setMediaParams({
+        action: 'save',
+        media: 'video'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+    () => {
+      setMediaParams({
+        action: 'save',
+        media: 'photo_video'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+  )
   toggleActionSheet()
 }
 
 const share = () => {
-  notify({
-    group: 'success',
-    text: 'share',
-  })
+  setSharingActions(
+    () => {
+      setMediaParams({
+        action: 'share',
+        media: 'photo'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    },
+    () => {
+      setMediaParams({
+        action: 'share',
+        media: 'video'
+      })
+      setInMediaOptions(true)
+      toggleActionSheet()
+    }
+  )
+  toggleActionSheet()
 }
 
 const recreate = () => {
   if (atEditor.value) {
-    changeToSpecificEditorState(editorType.value, 'editing')
+    changeToSpecificEditorState('editing')
   } else {
     if (!currOpenSubDesign.value) return
     initWithSubDesignConfig(currOpenSubDesign.value)
@@ -66,8 +111,7 @@ const edit = () => {
   if (atEditor.value) {
     keepEditingInit()
   } else {
-    if (!currOpenSubDesign.value) return
-    initWithSubDeisgnImage(currOpenSubDesign.value)
+    editSubDesignResult()
   }
 }
 </script>

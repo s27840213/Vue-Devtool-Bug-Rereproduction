@@ -1,10 +1,10 @@
 import imageApi from '@/apis/image-api'
 import {
-IAssetPhoto,
-IImageSize,
-IPhotoItem,
-IUserImageContentData,
-isIAssetPhoto,
+  IAssetPhoto,
+  IImageSize,
+  IPhotoItem,
+  IUserImageContentData,
+  isIAssetPhoto,
 } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -24,6 +24,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import frameDefaultImg from '@img/svg/frame.svg'
 import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
+import logUtils from './logUtils'
 
 const APP_VER_FOR_REFRESH_CACHE = 'v922'
 
@@ -137,10 +138,10 @@ class ImageUtils {
     let res = ''
     switch (type) {
       case 'public': {
-        if (typeof size === 'string' && (size as string).includes('ext')) {
+        if (typeof size === 'string' && size.includes('ext')) {
           res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
         } else {
-          const query = forBgRemove
+          const query = generalUtils.isCm ? '' : forBgRemove
             ? `?rand_ver=${generalUtils.generateRandomString(6)}`
             : '?origin=true'
           res = `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'
@@ -150,7 +151,7 @@ class ImageUtils {
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        const query = forBgRemove
+        const query = generalUtils.isCm ? '' : forBgRemove
           ? `&rand_ver=${generalUtils.generateRandomString(6)}`
           : '&origin=true'
         res = editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
@@ -203,7 +204,7 @@ class ImageUtils {
       case 'ios':
         if (generalUtils.isCm) {
           // make default size to 1920(longer side)
-          res = `chmix://${assetId}?lsize=1920`
+          res = `chmix://${assetId}?lsize=1920${userId !== '' ? `&imagetype=${userId}` : ''}`
         } else if (generalUtils.isStk) {
           res = `vvstk://${assetId}`
         }
@@ -658,7 +659,7 @@ class ImageUtils {
     setAnonymous = true,
   ): Promise<{ width: number; height: number; exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
-      if (!url.includes('appver')) {
+      if (!url.includes('appver') && !generalUtils.isCm) {
         url = this.appendQuery(url, 'appver', APP_VER_FOR_REFRESH_CACHE)
       }
       this.imgLoadHandler(url, (img) => resolve(img), {
@@ -670,6 +671,7 @@ class ImageUtils {
       const img = await loadImage
       return { width: img.width, height: img.height, exists: true }
     } catch (error) {
+      logUtils.setLogAndConsoleLog(error)
       return { width: defaultWidth, height: defaultHeight, exists: false }
     }
   }
@@ -773,9 +775,12 @@ class ImageUtils {
     }
   }
 
+  // used for vivisticker and charmix
   async getBgRemoveInfoStk(url: string, initSrc: string) {
     const { width, height } = await this.getImageSize(url, 1000, 1000)
-    url = this.appendRandomQuery(url)
+    if(!generalUtils.isCm) {
+      url = this.appendRandomQuery(url)
+    }
     return {
       width: width,
       height: height,
@@ -916,6 +921,28 @@ class ImageUtils {
       return 'https://' + src.slice('https://template.vivipic.com/'.length)
     }
     return src
+  }
+
+  checkImgAlphaPercentages(src: string) {
+    return new Promise<number>((resolve) => {
+      this.imgLoadHandler(src, (img: HTMLImageElement) => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx.drawImage(img, 0, 0)
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+          let alpha = 0
+          for (let i = 3, len = imgData.length; i < len; i += 4) {
+            if (imgData[i] === 0) {
+              alpha++
+            }
+          }
+          resolve(alpha / (imgData.length / 4))
+        }
+      })
+    })
   }
 
   replaceImg(photo: SrcObj, previewSrc: string, aspectRatio: number) {

@@ -1,6 +1,10 @@
+import i18n from '@/i18n'
 import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
+import { notify } from '@kyvg/vue3-notification'
+import modalUtils from './modalUtils'
+import uploadUtils from './uploadUtils'
 import { WebViewUtils } from './webViewUtils'
 
 export interface IRequest {
@@ -68,6 +72,26 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
               retry,
               retryTimes: retryTimes + 1,
             })
+          } else {
+            if (!this.filterErrorModal(type, message, true)) {
+              const errorId = generalUtils.generateRandomString(6)
+              logUtils.setLog(errorId)
+              logUtils.uploadLog().then(() => {
+                const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
+                modalUtils.setModalInfo(
+                  `${i18n.global.t('NN0457')}(999)`,
+                  hint,
+                  {
+                    msg: i18n.global.t('STK0023'),
+                    action() {
+                      generalUtils.copyText(hint).then(() => {
+                        notify({ group: 'success', text: i18n.global.t('NN0923') })
+                      })
+                    },
+                  },
+                )
+              })
+            }
           }
         }
       }
@@ -76,6 +100,25 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
         `Error occurs in callIOSAsAPI with type: ${type}, message: ${message}, event: ${eventId}`,
       )
       logUtils.setLogForError(error as Error)
+      if (!this.filterErrorModal(type, message, false)) {
+        const errorId = generalUtils.generateRandomString(6)
+        logUtils.setLog(errorId)
+        logUtils.uploadLog().then(() => {
+          const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
+          modalUtils.setModalInfo(
+            `${i18n.global.t('NN0457')}(500)`,
+            hint,
+            {
+              msg: i18n.global.t('STK0023'),
+              action() {
+                generalUtils.copyText(hint).then(() => {
+                  notify({ group: 'success', text: i18n.global.t('NN0923') })
+                })
+              },
+            },
+          )
+        })
+      }
       result = null
     }
     return result

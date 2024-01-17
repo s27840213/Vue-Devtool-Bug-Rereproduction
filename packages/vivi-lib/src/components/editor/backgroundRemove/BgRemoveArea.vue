@@ -25,12 +25,12 @@ div(class="bg-remove-area"
 </template>
 
 <script lang="ts">
-import logUtils from '@nu/vivi-lib/utils/logUtils'
-import mouseUtils from '@nu/vivi-lib/utils/mouseUtils'
-import pageUtils from '@nu/vivi-lib/utils/pageUtils'
-import shortcutUtils from '@nu/vivi-lib/utils/shortcutUtils'
-import { IBgRemoveInfo } from '@nu/vivi-lib/interfaces/image'
-import { bgRemoveMoveHandler } from '@nu/vivi-lib/store/module/bgRemove'
+import { IBgRemoveInfo } from '@/interfaces/image'
+import { bgRemoveMoveHandler } from '@/store/module/bgRemove'
+import logUtils from '@/utils/logUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import pageUtils from '@/utils/pageUtils'
+import shortcutUtils from '@/utils/shortcutUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -72,12 +72,6 @@ export default defineComponent({
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
-      brushStyle: {
-        backgroundColor: '#fcaea9',
-        width: '16px',
-        height: '16px',
-        transform: 'translate(0,0)'
-      },
       initImgSrc: '',
       imgSrc: '',
       blurPx: 1,
@@ -92,10 +86,11 @@ export default defineComponent({
       pointerStartY: 0,
       isDrawing: false,
       loading: true,
+      brushPos: { x: 0, y: 0 },
     }
   },
   created() {
-    logUtils.setLog('BgRemoveArea created')
+    logUtils.setLogAndConsoleLog('BgRemoveArea created')
     const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
     if (aspectRatio > 1) {
@@ -108,17 +103,16 @@ export default defineComponent({
 
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
-    logUtils.setLog(`initImgSrc: ${this.initImgSrc}`)
-    logUtils.setLog(`auto remove img src: ${this.imgSrc}`)
+    logUtils.setLogAndConsoleLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
-    logUtils.setLog('BgRemoveArea mounted')
+    logUtils.setLogAndConsoleLog('BgRemoveArea mounted')
     this.root = this.$refs.bgRemoveArea as HTMLElement
     this.scaleArea = this.$refs.scaleArea as HTMLElement
 
     this.imageElement = new Image()
     this.imageElement.onload = () => {
-      logUtils.setLog('imageElement onload triggered')
+      logUtils.setLogAndConsoleLog('imageElement onload triggered')
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
@@ -127,16 +121,16 @@ export default defineComponent({
       this.loading = false
     }
     this.imageElement.onerror = (ev) => {
-      logUtils.setLog('imageElement onerror triggered')
-      logUtils.setLog(`${JSON.stringify(ev)}`)
+      logUtils.setLogAndConsoleLog('imageElement onerror triggered')
+      logUtils.setLogAndConsoleLog(`${JSON.stringify(ev)}`)
     }
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
-    logUtils.setLog(`set image element src: ${this.imgSrc}`)
+    logUtils.setLogAndConsoleLog(`set image element src: ${this.imgSrc}`)
 
     this.initImageElement = new Image()
     this.initImageElement.onload = () => {
-      logUtils.setLog('initImageElement onload triggered')
+      logUtils.setLogAndConsoleLog('initImageElement onload triggered')
       this.createInitImageCtx()
     }
     this.initImageElement.src = this.initImgSrc
@@ -214,6 +208,14 @@ export default defineComponent({
         height: this.canvasHeight
       }
     },
+    brushStyle(): { [index: string]: string } {
+      return {
+        backgroundColor: this.brushColor,
+        width: `${this.brushSize}px`,
+        height: `${this.brushSize}px`,
+        transform: `translate(${this.brushPos.x}px,${this.brushPos.y}px)`
+      }
+    },
     areaStyles(): { [index: string]: string } {
       const { width, height } = this.size
 
@@ -261,19 +263,20 @@ export default defineComponent({
     // }
   },
   watch: {
-    brushSize(newVal: number) {
-      if (this.contentCtx) {
+    brushSize:{
+      handler: function (newVal) {
+        if (this.contentCtx) {
         this.contentCtx.lineWidth = newVal
         this.blurCtx.lineWidth = newVal
         this.clearModeCtx.lineWidth = newVal
-        this.brushStyle.width = `${newVal + this.blurPx}px`
-        this.brushStyle.height = `${newVal + this.blurPx}px`
         if (this.clearMode) {
           this.blurPx = 1
           this.contentCtx.filter = `blur(${this.blurPx}px)`
         }
       }
     },
+    immediate: true
+  },
     restoreInitState(newVal) {
       if (newVal) {
         this.clearCtx()
@@ -295,7 +298,7 @@ export default defineComponent({
       }
     },
     clearMode(newVal) {
-      logUtils.setLog('trigger clear mode watch')
+      logUtils.setLogAndConsoleLog('trigger clear mode watch')
       if (newVal) {
         this.contentCtx.globalCompositeOperation = 'destination-out'
         this.contentCtx.filter = `blur(${this.blurPx}px)`
@@ -310,9 +313,6 @@ export default defineComponent({
       if (val) {
         this.showBrush = false
       }
-    },
-    brushColor(newVal) {
-      this.brushStyle.backgroundColor = newVal
     },
     stepsQueue: {
       async handler(newVal, oldVal) {
@@ -351,7 +351,7 @@ export default defineComponent({
       setInGestureMode: 'SET_inGestureMode'
     }),
     initCanvas() {
-      logUtils.setLog('initCanvas')
+      logUtils.setLogAndConsoleLog('initCanvas')
       this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
       this.contentCanvas.width = this.canvasWidth
       this.contentCanvas.height = this.canvasHeight
@@ -360,7 +360,7 @@ export default defineComponent({
       ctx.lineWidth = this.brushSize
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
-      logUtils.setLog('setup contentCtx')
+      logUtils.setLogAndConsoleLog('setup contentCtx')
       this.contentCtx = ctx
       // this.ctx.globalCompositeOperation = 'destination-out'
 
@@ -402,7 +402,7 @@ export default defineComponent({
     //   this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root, this.fitScaleRatio)
     // },
     createInitImageCtx() {
-      logUtils.setLog('createInitImageCtx')
+      logUtils.setLogAndConsoleLog('createInitImageCtx')
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
       this.initImgCanvas.height = this.size.height
@@ -491,13 +491,16 @@ export default defineComponent({
       this._setCanvas(this.contentCanvas)
       this.pushStep()
       this.isDrawing = false
-      if (this.$isTouchDevice()) {
+      if (this.$isTouchDevice() || this.$isCm) {
         this.showBrush = false
       }
     },
     setBrushPos(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInTarget(e, this.root, this.fitScaleRatio)
-      this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
+      this.brushPos = {
+        x: x - (this.brushSize + this.blurPx) / 2,
+        y: y - (this.brushSize + this.blurPx) / 2
+      }
     },
     drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')
@@ -511,14 +514,14 @@ export default defineComponent({
     },
     drawInClearMode(e: MouseEvent) {
       this.cyReady = false
-      this.setCompositeOperationMode('source-over', this.contentCtx)
+      this.setCompositeOperationMode('source-over', this.contentCtx, false)
       this.contentCtx.filter = 'none'
       this.clearCtx(this.contentCtx)
       this.contentCtx.drawImage(this.currCanvasImageElement ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       // this.ctx.drawImage(this.imageElement, 0, 0, this.size.width, this.size.height)
 
       this.drawLine(e, this.clearModeCtx)
-      this.setCompositeOperationMode('destination-out')
+      this.setCompositeOperationMode('destination-out', this.contentCtx, false)
       this.contentCtx.filter = `blur(${this.blurPx}px)`
       this.contentCtx.drawImage(this.clearModeCanvas, 0 - this.clearModeShift, 0 - this.clearModeShift, this.size.width + 2 * this.clearModeShift, this.size.height + 2 * this.clearModeShift)
       this.cyReady = true
@@ -526,11 +529,11 @@ export default defineComponent({
     drawInRestoreMode(e: MouseEvent) {
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
-      this.setCompositeOperationMode('source-in', this.blurCtx)
+      this.setCompositeOperationMode('source-in', this.blurCtx, false)
       this.blurCtx.filter = 'none'
       this.blurCtx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
 
-      this.setCompositeOperationMode('source-over', this.blurCtx)
+      this.setCompositeOperationMode('source-over', this.blurCtx, false)
       this.blurCtx.filter = `blur(${this.blurPx}px)`
       this.contentCtx.drawImage(this.blurCanvas, 0, 0, this.size.width, this.size.height)
     },
@@ -543,11 +546,14 @@ export default defineComponent({
       this.initImgCtx.drawImage(this.initImageElement as HTMLImageElement, 0, 0, this.size.width, this.size.height)
       this.setCompositeOperationMode('destination-in', this.initImgCtx)
     },
-    setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
+    setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D, setLog = true) {
       /**
-       * @Note GlobalCompositeOperation type has some problems
+       * @Note GlobalCompositeOperation type has some problems, that's why I use any here
        */
-      logUtils.setLog('setCompositeOperationMode: ' + mode)
+      
+       if(setLog) {
+         logUtils.setLogAndConsoleLog('setCompositeOperationMode: ' + mode)
+       }
 
       if (ctx) {
         ctx.globalCompositeOperation = mode as any

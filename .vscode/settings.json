@@ -36,6 +36,7 @@
   "vue.complete.casing.props": "camel",
   // For other Volar setting
   "vue.inlayHints.missingProps": true,
+  "vue.autoInsert.dotValue": true,
   // For configuring Gitlens to ignore specific commits.
   "files.associations": {
     ".git-blame-ignore-revs": "yaml"
