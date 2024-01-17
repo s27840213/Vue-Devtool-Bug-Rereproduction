@@ -1185,6 +1185,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }, { timeout: -1 }) as GeneralResponse
   }
 
+  async sendAdEvent(eventName: string, param: { [key: string]: any } = {}) {
+    if (this.inBrowserMode) return
+    return await this.callIOSAsHTTPAPI('SEND_AD_EVENT', { eventName, param })
+  }
+
   async ratingRequest(onlyFirst = true) {
     if (this.inBrowserMode) return
     return await this.callIOSAsHTTPAPI('RATING_REQUEST', { onlyFirst })
