@@ -260,9 +260,6 @@ export default defineComponent({
     pageIndex(val) {
       this.updateSnapUtilsIndex(val)
     },
-    'config.x'(val) {
-      // console.error('page.x', val)
-    },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()

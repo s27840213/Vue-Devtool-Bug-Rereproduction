@@ -15,7 +15,7 @@ const defaultState = {
   isExportingVideo: false,
 } as IVideoRecordState
 
-const pixi = new PixiRecorder()
+const pixi = null as null | PixiRecorder
 
 export const useVideoRcordStore = defineStore('videoRecord', {
   state: (): IVideoRecordState => ({ ...defaultState }),
@@ -26,9 +26,14 @@ export const useVideoRcordStore = defineStore('videoRecord', {
   },
   actions: {
     addImage(img1: string, img2: string) {
+      if (!pixi) {
+        return (new PixiRecorder(img1, img2))
+      }
       return pixi.addImage(img1, img2)
     },
     genVideo() {
+      if (!pixi) throw new Error('pixi is undefined in genVideo')
+
       const currGeningId = generalUtils.generateRandomString(6)
       this.geningIdentifier = currGeningId
       const editorStore = useEditorStore()
@@ -51,6 +56,8 @@ export const useVideoRcordStore = defineStore('videoRecord', {
       })
     },
     saveToDevice(url?: string, path?: string) {
+      if (!pixi) throw new Error('pixi is undefined in saveToDevice')
+
       return pixi.saveToDevice(url, path).finally(() => {
         this.setIsExportVideo(false)
       })
