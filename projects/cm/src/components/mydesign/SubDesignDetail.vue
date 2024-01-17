@@ -30,7 +30,7 @@ div(
           img(
             v-show="!isVideoLoaded"
             class="w-full h-full object-contain"
-            :src="initImgSrc")
+            :src="videoLoadingImgSrc")
           video(
             v-if="!isExportingVideo"
             class="w-full h-full absolute top-0"
@@ -105,8 +105,9 @@ const {
   setCurrOpenSubDesign,
   setRemoveWatermark,
   setHighResolutionPhoto,
+  getInitialImg
 } = userStore
-const { currOpenSubDesign, removeWatermark } = storeToRefs(userStore)
+const { currOpenSubDesign, removeWatermark, currOpenDesign } = storeToRefs(userStore)
 
 if (!vuex.getters['payment/getPayment'].subscribe) {
   setRemoveWatermark(false)
@@ -119,9 +120,9 @@ const {
   currDesignId,
   currSubDesignId,
   myDesignSavedType,
-  initImgSrc,
   generatedResults,
   currGenResultIndex,
+  initImgSrc
 } = storeToRefs(editorStore)
 
 const videoRecordStore = useVideoRcordStore()
@@ -299,6 +300,14 @@ const handleSwipe = (e: AnyTouchEvent, dir: 'left' | 'right') => {
   if (!atEditor.value) return
   showVideo.value = dir === 'right'
 }
+
+const videoLoadingImgSrc = computed(() => {
+  if (currOpenDesign.value?.id || currDesignId.value) {
+    return getInitialImg()
+  } else {
+    return initImgSrc.value
+  }
+})
 
 const watermarkReady = ref(false)
 const showcaseWatermarkImgUrl = ref('')
