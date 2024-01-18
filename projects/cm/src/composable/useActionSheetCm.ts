@@ -35,7 +35,7 @@ const useActionSheetCm = () => {
     if (!atEditor.value && currOpenSubDesign.value) {
       targetUrl = getSubDesignImage(currOpenSubDesign.value)
     } else {
-      targetUrl = currGeneratedResult.value.url
+      targetUrl = currGeneratedResult.value?.url ?? ''
     }
     if (targetUrl.startsWith('chmix://')) {
       const { path, ext } = cmWVUtils.getDocumentPath(targetUrl)
@@ -123,18 +123,14 @@ const useActionSheetCm = () => {
       // isGeningVideo but not finished gening
       return new Promise<ISaveAssetFromUrlResponse | GeneralResponse>((resolve) => {
         setGenVideoCb(async () => {
-          if (
-            currGeneratedResult.value &&
-            currGeneratedResult.value.video &&
-            currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
-          ) {
+          if (currGeneratedResult.value?.video?.removeWatermark !== removeWatermark.value) {
             await genVideo()
           }
           if (action === 'save') {
-            resolve(await saveToDevice({ url: currGeneratedResult.value.video?.src }))
+            resolve(await saveToDevice({ url: currGeneratedResult.value?.video?.src }))
           } else {
             await saveToDevice({
-              url: currGeneratedResult.value.video?.src,
+              url: currGeneratedResult.value?.video?.src,
               path: `screenshot/${tempId}`
             })
             resolve(await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`))

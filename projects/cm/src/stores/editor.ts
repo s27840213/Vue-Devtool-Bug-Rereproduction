@@ -19,6 +19,7 @@ import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
+import { find } from 'lodash'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -50,7 +51,8 @@ interface IEditorStore {
   maskParams: MaskParams
   isSendingGenImgReq: boolean
   generatedResults: Array<IGenResult>
-  currGenResultIndex: number
+  selectedSubDesignId: string // SubDesign that user selected at (Editor step3) or MyDesign.
+  editingSubDesignId: string // SubDesign that loaded in editor.
   stepsTypesArr: Array<'canvas' | 'editor' | 'both'>
   currStepTypeIndex: number
   stepTypeCheckPoint: number
@@ -80,7 +82,8 @@ export const useEditorStore = defineStore('editor', {
     currActiveFeature: 'none',
     isSendingGenImgReq: false,
     generatedResults: [],
-    currGenResultIndex: 0,
+    selectedSubDesignId: '',
+    editingSubDesignId: '',
     stepsTypesArr: [],
     currStepTypeIndex: -1,
     stepTypeCheckPoint: -1,
@@ -143,10 +146,10 @@ export const useEditorStore = defineStore('editor', {
       return stepsUtils.isInLastStep
     },
     currSubDesignId(): string {
-      return this.currGeneratedResult.id
+      return this.selectedSubDesignId
     },
-    currGeneratedResult(): IGenResult {
-      return this.generatedResults[this.currGenResultIndex]
+    currGeneratedResult(): IGenResult | undefined {
+      return find(this.generatedResults, ['id', this.selectedSubDesignId])
     },
     generatedResultsNum(): number {
       return this.generatedResults.length
@@ -194,6 +197,7 @@ export const useEditorStore = defineStore('editor', {
         designWidth?: number
         designHeight?: number
         designName?: '' | 'result' | 'original'
+        selectedSubDesignId?: string
       },
     ) {
       const {
@@ -204,11 +208,14 @@ export const useEditorStore = defineStore('editor', {
         designHeight = 1600,
         designName = '',
         designType,
+        selectedSubDesignId = '',
       } = options || {}
 
       this.currStateIndex = 0
       this.editorType = type
       this.designName = designName
+      this.selectedSubDesignId = selectedSubDesignId
+      this.editingSubDesignId = selectedSubDesignId
       this.currDesignId = designId || generalUtils.generateAssetId()
       this.setOpenedDesignType(designType ?? '')
 
@@ -219,6 +226,8 @@ export const useEditorStore = defineStore('editor', {
       if (generatedResults) {
         this.generatedResults = generatedResults
       }
+
+      stepsUtils.reset()
 
       router.push({ name: 'Editor', query: { type, width: designWidth, height: designHeight } })
     },
@@ -245,9 +254,6 @@ export const useEditorStore = defineStore('editor', {
       this.isSendingGenImgReq = isSendingGenImgReq
     },
     unshiftGenResults(url: string, id: string, prompt: string) {
-      if (this.generatedResults.length > 0) {
-        this.currGenResultIndex += 1
-      }
       this.generatedResults.unshift({
         url,
         id,
@@ -287,29 +293,23 @@ export const useEditorStore = defineStore('editor', {
         this.generatedResults[index].video = undefined
       }
 
-      if (updateIndex && this.currGenResultIndex === -1) {
-        this.currGenResultIndex = index
+      if (updateIndex && this.selectedSubDesignId === '') {
+        this.selectedSubDesignId = id
       }
     },
     removeGenResult(id: string) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
       if (index === -1) return
       this.generatedResults.splice(index, 1)
-      if (this.currGenResultIndex > index) {
-        this.currGenResultIndex -= 1
-      }
-      if (this.currGenResultIndex >= this.generatedResults.length) {
-        this.currGenResultIndex = this.generatedResults.length - 1
-      }
-      if (this.currGenResultIndex < 0) {
-        this.currGenResultIndex = 0
+      if (this.selectedSubDesignId === id) {
+        this.selectedSubDesignId = ''
       }
     },
     clearGeneratedResults() {
       this.generatedResults = []
     },
-    setCurrGenResultIndex(index: number) {
-      this.currGenResultIndex = index
+    setSelectedSubDesignId(id: string) {
+      this.selectedSubDesignId = id
     },
     async undo() {
       await stepsUtils.undo()

@@ -1112,7 +1112,27 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async addAsset(key: string, asset: any, limit = 100, group?: string) {
     if (this.inBrowserMode) return
     if (this.checkVersion('1.0.14')) {
-      await this.callIOSAsHTTPAPI('ADD_ASSET', { key, asset, limit, group })
+      const res = await this.callIOSAsHTTPAPI('ADD_ASSET', { key, asset, limit, group })
+      if (res?.flag !== '0') {
+        const errorId = generalUtils.generateRandomString(6)
+        logUtils.setLog(errorId)
+        logUtils.setLogForError(new Error('ADD_ASSET Failed: ' + res?.msg ?? ''))
+        logUtils.uploadLog().then(() => {
+          const hint = `${uploadUtils.fullId},${generalUtils.generateTimeStamp()},${errorId}`
+          modalUtils.setModalInfo(
+            `${i18n.global.t('NN0457')}(501)`,
+            hint,
+            {
+              msg: i18n.global.t('STK0023'),
+              action() {
+                generalUtils.copyText(hint).then(() => {
+                  notify({ group: 'success', text: i18n.global.t('NN0923') })
+                })
+              },
+            },
+          )
+        })
+      }
     }
   }
 
@@ -1163,6 +1183,11 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   async shareFile(path: string) {
     if (this.inBrowserMode) return { flag: '0' } as GeneralResponse
     return await this.callIOSAsHTTPAPI('SHARE_FILE', { path }, { timeout: -1 }) as GeneralResponse
+  }
+
+  async sendAdEvent(eventName: string, param: { [key: string]: any } = {}) {
+    if (this.inBrowserMode) return
+    return await this.callIOSAsHTTPAPI('SEND_AD_EVENT', { eventName, param })
   }
 
   async ratingRequest(onlyFirst = true) {

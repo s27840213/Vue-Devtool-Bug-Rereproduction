@@ -120,8 +120,6 @@ const {
   currDesignId,
   currSubDesignId,
   myDesignSavedType,
-  generatedResults,
-  currGenResultIndex,
   initImgSrc
 } = storeToRefs(editorStore)
 
@@ -168,7 +166,7 @@ onMounted(async () => {
 watch(
   () => currGeneratedResult.value?.url,
   async (url) => {
-    if (!currGeneratedResult.value.video) {
+    if (!currGeneratedResult.value?.video) {
       await genCurrSubDesignVideo()
     }
   },
@@ -311,9 +309,9 @@ const watermarkReady = ref(false)
 const showcaseWatermarkImgUrl = ref('')
 
 const showcaseImgUrl = computed(() => {
-  if (atEditor.value) {
+  if (atEditor.value && currGeneratedResult.value) {
     return imageUtils.appendQuery(
-      generatedResults.value[currGenResultIndex.value].url,
+      currGeneratedResult.value.url,
       'rand_ver',
       `${generalUtils.serialNumber}`,
     )

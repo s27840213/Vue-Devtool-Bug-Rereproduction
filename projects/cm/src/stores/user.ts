@@ -23,7 +23,7 @@ export const useUserStore = defineStore('user', () => {
     setCurrPrompt,
     restoreGenOptions,
     setMaskDataUrl,
-    setCurrGenResultIndex,
+    setSelectedSubDesignId,
     setInitImgSrc,
     updateGenResult,
   } = editorStore
@@ -37,6 +37,7 @@ export const useUserStore = defineStore('user', () => {
     pageSize,
     currPrompt,
     currGenOptionsToSave,
+    initImgSrc,
   } = storeToRefs(editorStore)
 
   const { t } = useI18n()
@@ -203,14 +204,14 @@ export const useUserStore = defineStore('user', () => {
         }),
         designWidth: width,
         designHeight: height,
+        selectedSubDesignId: subId,
       })
 
       setMaskDataUrl('')
       setCurrPrompt('')
       setInitImgSrc(getTargetImageUrl(type, id, subId, 'original'))
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
-      index && setCurrGenResultIndex(index)
+      setSelectedSubDesignId(subId)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
@@ -265,12 +266,12 @@ export const useUserStore = defineStore('user', () => {
         }),
         designWidth: width,
         designHeight: height,
+        selectedSubDesignId: subId,
       })
 
       setInitImgSrc(getTargetImageUrl(type, id, subId, 'original'))
 
-      const index = currOpenDesign.value?.subDesignInfo.findIndex((item) => item.id === subId)
-      index && setCurrGenResultIndex(index)
+      setSelectedSubDesignId(subId)
     } catch (error) {
       logUtils.setLogForError(error as Error)
     }
@@ -581,6 +582,25 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const updatePrevGen = async (genConfig: { requestId: string; params: GenImageParams }) => {
+    await Promise.all([
+      cmWVUtils.addJson(`${myDesignSavedRoot.value}/${currDesignId.value}/prev/gen`, genConfig),
+      cmWVUtils.cloneFile(
+        initImgSrc.value,
+        `${myDesignSavedRoot.value}/${currDesignId.value}/prev/input.jpg`,
+      ),
+      ...(lastUsedMask.value
+        ? [
+            cmWVUtils.saveAssetFromUrl(
+              'png',
+              lastUsedMask.value,
+              `${myDesignSavedRoot.value}/${currDesignId.value}/prev/mask`,
+            ),
+          ]
+        : []),
+    ])
+  }
+
   const getTargetImageUrl = (
     type: string,
     id: string,
@@ -681,6 +701,7 @@ export const useUserStore = defineStore('user', () => {
     saveDesignImageToDocument,
     saveImgToTmp,
     saveSubDesign,
+    updatePrevGen,
     listDesigns,
     updateDesignsInStore,
     getTargetImageUrl,
@@ -710,6 +731,6 @@ export const useUserStore = defineStore('user', () => {
     setHighResolutionPhoto,
     // #endregion
     lastUsedMask,
-    setLastUsedMask
+    setLastUsedMask,
   }
 })

@@ -43,12 +43,8 @@ const useGenImageUtils = () => {
     myDesignSavedRoot,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUploadUtils()
-  const {
-    saveDesignImageToDocument,
-    saveSubDesign,
-    setAiCredit,
-    setLastUsedMask,
-  } = useUserStore()
+  const { saveDesignImageToDocument, saveSubDesign, setAiCredit, setLastUsedMask, updatePrevGen } =
+    useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const { setNormalModalInfo, openModal, closeModal } = useModalStore()
   const store = useStore()
@@ -245,6 +241,9 @@ const useGenImageUtils = () => {
 
     setAiCredit(res.ai_credit)
     setPrevGenParams({ requestId, params })
+
+    let prevGenSaved = false
+
     const urls = res.urls.map((urlMap) => urlMap.url)
     const pollingController = getPollingController()
     await Promise.all([
@@ -313,6 +312,17 @@ const useGenImageUtils = () => {
           onSuccess(index, imgSrc, true)
         } catch (error) {
           onError(index, url, 'saveAssetFromUrl failed')
+        }
+        try {
+          if (!prevGenSaved) {
+            prevGenSaved = true
+            await updatePrevGen({ requestId, params })
+          }
+        } catch (error) {
+          // if saving failed, add log but don't make genImage fail
+          // prevGenParams validness will be checked when 'show more'
+          logUtils.setLog('updatePrevGen failed:')
+          logUtils.setLogForError(error as Error)
         }
         RECORD_TIMING && testUtils.log(`gen-image ${requestId}`, '')
       }),

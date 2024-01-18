@@ -425,6 +425,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       Sentry.setTag('user_name', uname)
       Sentry.setTag('user_id', data.data.user_id)
 
+      if (data.data.new_user && generalUtils.isCm) {
+        cmWVUtils.sendAdEvent('register')
+      }
+
       commit('SET_STATE', {
         uname: uname,
         shortName: shortName,

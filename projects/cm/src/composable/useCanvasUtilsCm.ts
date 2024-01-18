@@ -446,55 +446,18 @@ const useCanvasUtils = (
     }
   }
 
-  const autoFill = async () => {
-    if (isAutoFilling.value) return
+  const getAutoFillCanvas = async (targetCanva = canvas.value) => {
+    if (targetCanva) {
+      const tmpCanvas = document.createElement('canvas')
+      tmpCanvas.width = pageSize.value.width
+      tmpCanvas.height = pageSize.value.height
+      const tmpCtx = tmpCanvas.getContext('2d') as CanvasRenderingContext2D
 
-    if (canvas && canvas.value) {
-      groupUtils.deselect()
-      setIsAutoFilling(true)
-      mapEditorToCanvas(async (img) => {
-        if (canvasCtx && canvasCtx.value) {
-          const tmpCanvas = document.createElement('canvas')
-          tmpCanvas.width = pageSize.value.width
-          tmpCanvas.height = pageSize.value.height
-          const tmpCtx = tmpCanvas.getContext('2d') as CanvasRenderingContext2D
-          tmpCtx?.drawImage(img, 0, 0, pageSize.value.width, pageSize.value.height)
-
-          // #region new algo
-          tmpCtx.globalCompositeOperation = 'source-out'
-          tmpCtx.fillStyle = drawingColor.value
-          tmpCtx.fillRect(0, 0, pageSize.value.width, pageSize.value.height)
-          // #endregion
-          // #region old algorithm
-          // const pixels = tmpCtx?.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
-          // const result = new ImageData(
-          //   new Uint8ClampedArray(pixels.data),
-          //   pageSize.value.width,
-          //   pageSize.value.height,
-          // )
-          // // The total number of pixels (RGBA values).
-          // const bufferSize = pixels.data.length
-
-          // // Iterate over every pixel to find the boundaries of the non-transparent content.
-          // for (let i = 0; i < bufferSize; i += 4) {
-          //   // Check the alpha (transparency) value of each pixel.
-          //   if (pixels.data[i + 3] === 0) {
-          //     result.data[i] = 255
-          //     result.data[i + 1] = 114
-          //     result.data[i + 2] = 98
-          //     result.data[i + 3] = 255
-          //   } else {
-          //     // If the pixel is not transparent, set it to transparent.
-          //     result.data[i + 3] = 0
-          //   }
-          // }
-          // // canvasCtx.value.putImageData(result, 0, 0)
-          // tmpCtx?.putImageData(result, 0, 0)
-          // #endregion
-
-          canvasCtx.value.save()
-          canvasCtx.value.shadowBlur = 0 // Blur level
-          canvasCtx.value.shadowColor = drawingColor.value // Color
+      const drawResultToCtx = (ctx = canvasCtx.value) => {
+        if (ctx) {
+          ctx.save()
+          ctx.shadowBlur = 0 // Blur level
+          ctx.shadowColor = drawingColor.value // Color
           const shiftDir = [
             [0, 1],
             [-1, 0],
@@ -511,18 +474,77 @@ const useCanvasUtils = (
 
           for (const dir of shiftDir) {
             const [xDir, yDir] = dir
-            canvasCtx.value.shadowOffsetX = 5 * xDir // X offset
-            canvasCtx.value.shadowOffsetY = 5 * yDir // Y offset
+            ctx.shadowOffsetX = 5 * xDir // X offset
+            ctx.shadowOffsetY = 5 * yDir // Y offset
 
             // don't know why sometimes the drawImage will failed after undo/redo
-            canvasCtx.value.drawImage(tmpCanvas, 0, 0, pageSize.value.width, pageSize.value.height)
+            ctx.drawImage(tmpCanvas, 0, 0, pageSize.value.width, pageSize.value.height)
           }
-          canvasCtx.value.restore()
+          ctx.restore()
           record()
-
-          setIsAutoFilling(false)
           tmpCanvas.remove()
         }
+      }
+
+      await getEditorScreenshot(async (img) => {
+        /**
+         * @Note Alan said: Why I plus 1 to the width and height?
+         * Bcz sometimes globalCompositeOperation modes like source-out will cause a very thin line on the right and bottom side of the canvas
+         * If we didn't add 1 to the width and height, the thin line will casue getCanvasAlphaPercentage function to return a wrong value
+         * (Assume we want the 1, maybe we will get 0.9999999999999999)
+         * (9:16 ratio will always trigger this bug)
+         *
+         * If it's too complicated to understand, just ask me in person
+         */
+        tmpCtx?.drawImage(img, 0, 0, pageSize.value.width + 1, pageSize.value.height + 1)
+        // #region new algo
+        tmpCtx.globalCompositeOperation = 'source-out'
+        tmpCtx.fillStyle = drawingColor.value
+        tmpCtx.fillRect(0, 0, pageSize.value.width + 5, pageSize.value.height + 5)
+        // #endregion
+        // #region old algorithm
+        // const pixels = tmpCtx?.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
+        // const result = new ImageData(
+        //   new Uint8ClampedArray(pixels.data),
+        //   pageSize.value.width,
+        //   pageSize.value.height,
+        // )
+        // // The total number of pixels (RGBA values).
+        // const bufferSize = pixels.data.length
+
+        // // Iterate over every pixel to find the boundaries of the non-transparent content.
+        // for (let i = 0; i < bufferSize; i += 4) {
+        //   // Check the alpha (transparency) value of each pixel.
+        //   if (pixels.data[i + 3] === 0) {
+        //     result.data[i] = 255
+        //     result.data[i + 1] = 114
+        //     result.data[i + 2] = 98
+        //     result.data[i + 3] = 255
+        //   } else {
+        //     // If the pixel is not transparent, set it to transparent.
+        //     result.data[i + 3] = 0
+        //   }
+        // }
+        // // canvasCtx.value.putImageData(result, 0, 0)
+        // tmpCtx?.putImageData(result, 0, 0)
+        // #endregion
+      })
+
+      return {
+        drawResultToCtx,
+        alphaPercentage: getCanvasAlphaPercentage(tmpCtx),
+      }
+    }
+  }
+
+  const autoFill = async () => {
+    if (isAutoFilling.value) return
+
+    if (canvas && canvas.value) {
+      groupUtils.deselect()
+      getAutoFillCanvas().then((result) => {
+        result?.drawResultToCtx()
+        setIsAutoFilling(false)
       })
     }
   }
@@ -664,7 +686,7 @@ const useCanvasUtils = (
     }
   }
 
-  const mapEditorToCanvas = async (cb?: (img: HTMLImageElement) => void) => {
+  const getEditorScreenshot = async (cb?: (img: HTMLImageElement) => void) => {
     const { width: pageWidth, height: pageHeight } = pageSize.value
     const size = Math.max(pageWidth, pageHeight)
     const { flag, imageId, cleanup } = cmWVUtils.checkVersion('1.0.18')
@@ -685,9 +707,11 @@ const useCanvasUtils = (
 
     setIsAutoFilling(false)
     const targetImgSrc = `chmix://screenshot/${imageId}?lsize=${size}`
+
+    // used to debug
     setPrevScreenshotUrl(targetImgSrc)
 
-    imageUtils.imgLoadHandler(targetImgSrc, async (img) => {
+    await imageUtils.imgLoadHandler(targetImgSrc, async (img) => {
       if (canvasCtx && canvasCtx.value) {
         cb && cb(img)
         cleanup()
@@ -695,6 +719,27 @@ const useCanvasUtils = (
     })
   }
 
+  const getCanvasAlphaPercentage = (targetCanvasCtx = canvasCtx.value) => {
+    if (targetCanvasCtx) {
+      const pixels = targetCanvasCtx.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
+      // The total number of pixels (RGBA values).
+      const bufferSize = pixels.data.length
+      let alphaCount = 0
+      // Iterate over every pixel to find the boundaries of the non-transparent content.
+      for (let i = 0; i < bufferSize; i += 4) {
+        // Check the alpha (transparency) value of each pixel.
+        if (pixels.data[i + 3] === 0) {
+          // If the pixel is not transparent, set it to transparent.
+          alphaCount++
+        }
+      }
+
+      return alphaCount / (bufferSize / 4)
+    }
+  }
+
+  // Why I didn't used the getCanvasAlphaPercentage function to implement this function
+  // bcz the getCanvasAlphaPercentage function will loop over each pixel, but this function may not need to loop over each pixel
   const checkCanvasIsEmpty = (targetCanvasCtx = canvasCtx) => {
     if (targetCanvasCtx && targetCanvasCtx.value) {
       const pixels = targetCanvasCtx.value.getImageData(
@@ -831,6 +876,7 @@ const useCanvasUtils = (
     drawImageToCtx,
     updateCanvasSize,
     checkCanvasIsEmpty,
+    getAutoFillCanvas,
     restoreCanvas,
     prepareMaskToUpload,
     convertToPinkBasedMask,
