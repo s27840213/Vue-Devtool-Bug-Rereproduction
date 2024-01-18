@@ -16,7 +16,6 @@ declare module 'vue' {
     CanvasResizer: typeof import('./components/editor/CanvasResizer.vue')['default']
     CanvasSection: typeof import('./components/editor/CanvasSection.vue')['default']
     CompareImage: typeof import('./components/global/CompareImage.vue')['default']
-    copy: typeof import('./components/panel-content/ModalTemplate copy.vue')['default']
     FeatureCard: typeof import('./components/home/FeatureCard.vue')['default']
     FooterBar: typeof import('./components/panel-content/FooterBar.vue')['default']
     FooterTabs: typeof import('./components/panel-content/FooterTabs.vue')['default']

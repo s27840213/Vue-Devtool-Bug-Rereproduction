@@ -1,6 +1,7 @@
 import { useUserStore } from '@/stores/user'
 import { notify } from '@kyvg/vue3-notification'
 import { ISize } from '@nu/vivi-lib/interfaces/math'
+import store from '@nu/vivi-lib/store'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
@@ -166,6 +167,9 @@ export default class PixiRecorder {
       const stopCb = (url: string) => {
         this.isRecordingVideo = false
         this.pixi.stage.removeChildren()
+        if (store.getters['cmWV/getDebugMode'] && document.body.contains(this.pixi.view as HTMLCanvasElement)) {
+          document.body.removeChild(this.pixi.view as HTMLCanvasElement)
+        }
         return resolve(url)
       }
       this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, stopCb)
@@ -484,16 +488,15 @@ export default class PixiRecorder {
         this.addFilter(this.fragment)
 
         // @TEST use
-        const testCanvas = this.pixi.view as HTMLCanvasElement
-        document.body.appendChild(testCanvas)
-        testCanvas.style.position = 'absolute'
-        testCanvas.style.top = '0'
-        testCanvas.style.width = '300px'
-        testCanvas.style.left = '0'
-        testCanvas.style.zIndex = '10000'
-        setTimeout(() => {
-          document.body.removeChild(testCanvas)
-        }, 8000)
+        if (store.getters['cmWV/getDebugMode']) {
+          const testCanvas = this.pixi.view as HTMLCanvasElement
+          document.body.appendChild(testCanvas)
+          testCanvas.style.position = 'absolute'
+          testCanvas.style.top = '0'
+          testCanvas.style.width = '300px'
+          testCanvas.style.left = '0'
+          testCanvas.style.zIndex = '10000'
+        }
 
         // if the genVideo func is called, but the imgs is not loaded yet,
         // the genVideo func will await for the imgs to be loaded
