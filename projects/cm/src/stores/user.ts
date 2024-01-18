@@ -492,19 +492,43 @@ export const useUserStore = defineStore('user', () => {
     path: string,
     subDesignId: string,
     name: 'original' | 'result' = 'original',
+    showMoreData?: {
+      pages: IPage[]
+      prompt: string
+      options: GenImageOptionToSave
+      type: EditorType
+    },
+  ) => {
+    saveSubDesignCore(
+      path,
+      subDesignId,
+      name,
+      showMoreData !== undefined,
+      showMoreData ?? {
+        pages: uploadUtils.prepareJsonToUpload(pageUtils.getPages),
+        prompt: currPrompt.value,
+        options: currGenOptionsToSave.value,
+        type: editorType.value,
+      },
+    )
+  }
+
+  const saveSubDesignCore = async (
+    path: string,
+    subDesignId: string,
+    name: 'original' | 'result' = 'original',
+    showMore: boolean,
     {
-      pages_ = undefined,
-      showMore = false,
-      prompt = undefined,
-      options = undefined,
-      type = undefined,
+      pages,
+      prompt,
+      options,
+      type,
     }: {
-      pages_?: IPage[]
-      showMore?: boolean
-      prompt?: string
-      options?: GenImageOptionToSave
-      type?: EditorType
-    } = {},
+      pages: IPage[]
+      prompt: string
+      options: GenImageOptionToSave
+      type: EditorType
+    },
   ) => {
     try {
       if (cmWVUtils.inBrowserMode) return
@@ -517,7 +541,6 @@ export const useUserStore = defineStore('user', () => {
           new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 3000)),
         ])
       }
-      const pages = pages_ ?? uploadUtils.prepareJsonToUpload(pageUtils.getPages)
       const isValidJson = await cmWVUtils.isValidJson(pages)
       if (!isValidJson) {
         logUtils.setLog('Saving design as myDesign failed, because the design json is invalid')
@@ -554,7 +577,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       const json: ICmSubDesign = {
-        type: type ?? editorType.value,
+        type,
         id: currDesignId.value,
         subId: subDesignId,
         fileName: name,
@@ -562,8 +585,8 @@ export const useUserStore = defineStore('user', () => {
         pages,
         ver: cmWVUtils.getUserInfoFromStore().appVer,
         assetInfo: {},
-        prompt: prompt ?? currPrompt.value,
-        genImageOptions: options ?? currGenOptionsToSave.value,
+        prompt,
+        genImageOptions: options,
         width: pages[0].width,
         height: pages[0].height,
       }

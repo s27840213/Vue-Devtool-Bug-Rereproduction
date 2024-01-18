@@ -480,7 +480,7 @@ const useGenImageUtils = () => {
           uploadImage(maskUrl, `${userId}/input/${requestId}_mask`).then(() => {
             RECORD_TIMING && testUtils.log('upload mask', '')
             if (originalMaskDataUrl) {
-              setMaskDataUrl(originalMaskDataUrl)
+              setMaskDataUrl(originalMaskDataUrl) // record unconverted mask to store on generating
             }
             resolve()
           })
