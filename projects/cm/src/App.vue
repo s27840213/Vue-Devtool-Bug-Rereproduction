@@ -152,7 +152,7 @@ import CanvasOptions from './components/panel-content/CanvasOptions.vue'
 import FooterTabs from './components/panel-content/FooterTabs.vue'
 import GenResult from './components/panel-content/GenResult.vue'
 import HomeTab from './components/panel-content/HomeTab.vue'
-import ModalTemplate from './components/panel-content/ModalTemplate.vue'
+import ModalTemplateCm from './components/panel-content/ModalTemplateCm.vue'
 import PanelDescription from './components/panel-content/PanelDescription.vue'
 import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingOptions from './components/panel-content/SavingOptions.vue'
@@ -160,7 +160,6 @@ import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
 import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
-import router from './router'
 import { useCanvasStore } from './stores/canvas'
 import { useGlobalStore } from './stores/global'
 import { useImgSelectorStore } from './stores/imgSelector'
@@ -215,7 +214,7 @@ const bottomPanelComponent = computed(() => {
     case atDescription.value:
       return null
     case wantToQuit.value:
-      return ModalTemplate
+      return ModalTemplateCm
     case vuex.state.user.showForceLogin:
       return PanelLogin
     case isSubDesignOpen.value:
@@ -240,7 +239,7 @@ const bottomPanelComponent = computed(() => {
     case inSavingState.value:
       return SavingTab
     default:
-      return ModalTemplate
+      return ModalTemplateCm
   }
 })
 

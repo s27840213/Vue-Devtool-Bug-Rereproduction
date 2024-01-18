@@ -25,7 +25,7 @@ div(
         img(
           class="w-full rounded-20"
           :src="getDesignThumbUrl(design, 400)"
-          @click="selectDesign(design)")
+          @click="setCurrOpenDesign(design)")
         //- span(class="text-white text-xs") {{ design.id }}
         svg-icon(
           class="absolute right-10 top-10 bg-white/[0.65] rounded-10 m-1"
@@ -106,10 +106,6 @@ const selectMyDesignType = async (tag: { label: string; type: IMyDesignType }, i
 }
 
 const myDesignCols = computed(() => useWaterfall(currDesigns.value, 2))
-
-const selectDesign = (design: ICmMyDesign) => {
-  currOpenDesign.value = design
-}
 
 const closeSubDesignList = () => {
   currOpenDesign.value = undefined

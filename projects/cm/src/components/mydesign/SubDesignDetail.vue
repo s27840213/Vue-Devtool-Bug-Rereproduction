@@ -91,7 +91,6 @@ import LoadingBrick from '@nu/vivi-lib/components/global/LoadingBrick.vue'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
-import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import type { AnyTouchEvent } from 'any-touch'
 
 const { t } = useI18n()
@@ -151,15 +150,13 @@ onMounted(async () => {
         setCurrOpenSubDesign(content)
       }
     }
-  }
-
-  // console.warn('currOpenSubDesign.value', generalUtils.deepCopy(currGeneratedResult.value))
-  // if the video is udf generate it
-  if (
-    !currGeneratedResult.value?.video ||
-    currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
-  ) {
-    await genCurrSubDesignVideo()
+    // if the video is udf generate it
+    if (
+      !currGeneratedResult.value?.video ||
+      currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
+    ) {
+      await genCurrSubDesignVideo()
+    }
   }
 })
 
@@ -311,13 +308,6 @@ const watermarkReady = ref(false)
 const showcaseWatermarkImgUrl = ref('')
 
 const showcaseImgUrl = computed(() => {
-  if (atEditor.value && currGeneratedResult.value) {
-    return imageUtils.appendQuery(
-      currGeneratedResult.value.url,
-      'rand_ver',
-      `${generalUtils.serialNumber}`,
-    )
-  }
   if (currOpenSubDesign.value) {
     // Always true due to the v-if condition.
     return getSubDesignThumbUrl(

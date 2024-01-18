@@ -129,7 +129,7 @@ const phaseOneFeatures: FeatureCard[] = [
     bgImg: 'demo/hidden-message/cover-a.png',
     bgImgB: 'demo/hidden-message/cover-b.jpg',
     title: i18n.global.t('CM0078'),
-    subTitle: i18n.global.t('CM0002'),
+    subTitle: i18n.global.t('CM0163'),
     action() {
       router.push('/description?target=hidden-message')
     },

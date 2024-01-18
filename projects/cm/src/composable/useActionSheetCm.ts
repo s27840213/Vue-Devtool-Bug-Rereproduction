@@ -111,9 +111,12 @@ const useActionSheetCm = () => {
         await genVideo()
       }
       if (action === 'save') {
-        return await saveToDevice(currGeneratedResult.value.video.src)
+        return await saveToDevice({ url: currGeneratedResult.value.video.src })
       } else {
-        await saveToDevice(currGeneratedResult.value.video.src, `screenshot/${tempId}`)
+        await saveToDevice({
+          url: currGeneratedResult.value.video.src,
+          path: `screenshot/${tempId}`
+        })
         return await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`)
       }
     } else if (isGeningVideo.value) {
@@ -124,9 +127,12 @@ const useActionSheetCm = () => {
             await genVideo()
           }
           if (action === 'save') {
-            resolve(await saveToDevice(currGeneratedResult.value?.video?.src))
+            resolve(await saveToDevice({ url: currGeneratedResult.value?.video?.src }))
           } else {
-            await saveToDevice(currGeneratedResult.value?.video?.src, `screenshot/${tempId}`)
+            await saveToDevice({
+              url: currGeneratedResult.value?.video?.src,
+              path: `screenshot/${tempId}`
+            })
             resolve(await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`))
           }
         })
@@ -135,9 +141,13 @@ const useActionSheetCm = () => {
       // is not GeningVideo called by mydesign
       const data = await genCurrSubDesignVideo()
       if (action === 'save') {
-        return await saveToDevice(data?.src || undefined)
+        return await saveToDevice({ url: data?.src || undefined, revokeUrl: true })
       } else {
-        await saveToDevice(data?.src || undefined, `screenshot/${tempId}`)
+        await saveToDevice({
+          url: data?.src || undefined,
+          path: `screenshot/${tempId}`,
+          revokeUrl: true
+        })
         return await cmWVUtils.shareFile(`screenshot/${tempId}.mp4`)
       }
     }

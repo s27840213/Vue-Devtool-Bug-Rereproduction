@@ -88,7 +88,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
         ref="editorWrapperRef")
         //- loading for gen result
         div(
-          v-if="inGenResultState && currImgSrc === ''"
+          v-if="inGenResultStateDalayed && currImgSrc === ''"
           class="w-full h-fit grid grid-rows-2 gap-16 justify-center text-white")
           div(class="typo-body-md grid justify-center gap-8")
             span {{ fakeLoading }}%
@@ -97,25 +97,25 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           div(class="typo-body-sm max-w-245") {{ fakeLoadingText }}
         //- Show gen result
         img(
-          v-else-if="inGenResultState"
-          class="h-full object-cover"
+          v-else-if="inGenResultStateDalayed"
+          class="absolute top-0 left-0 h-full object-cover z-gen-result"
           :src="currImgSrc")
         //- Editor
-        template(v-else)
-          nu-page(
-            class="z-page"
-            v-show="!inGenResultState"
-            :pageIndex="layerUtils.pageIndex"
-            :pageState="pageState[layerUtils.pageIndex]"
-            :overflowContainer="editorContainerRef"
-            :noBg="isDuringCopy && isNoBg"
-            :hideHighlighter="true")
-          canvas-section(
-            class="absolute top-0 left-0 w-full h-full"
-            :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
-            :containerDOM="editorContainerRef"
-            :wrapperDOM="editorWrapperRef"
-            ref="canvasRef")
+        transition(:name="pageTransition" appear)
+          div(v-if="!inGenResultState" class="absolute top-0 left-0 w-full h-full")
+            nu-page(
+              class="z-page"
+              :pageIndex="layerUtils.pageIndex"
+              :pageState="pageState[layerUtils.pageIndex]"
+              :overflowContainer="editorContainerRef"
+              :noBg="isDuringCopy && isNoBg"
+              :hideHighlighter="true")
+            canvas-section(
+              class="absolute top-0 left-0 w-full h-full"
+              :class="isManipulatingCanvas ? '' : 'pointer-events-none'"
+              :containerDOM="editorContainerRef"
+              :wrapperDOM="editorWrapperRef"
+              ref="canvasRef")
         div(
           v-if="isChangingBrushSize"
           :class="demoBrushSizeOutline"
@@ -365,6 +365,29 @@ const fakeLoadingText = computed(() => {
   else if (fakeLoading.value > 50) return t('CM0148')
   else return t('CM0147')
 })
+
+const pageTransition = ref('fade-in-only') as Ref<string | undefined>
+const inGenResultStateDalayed = ref(inGenResultState.value)
+watch(inGenResultState, (val) => {
+  if (!val) {
+    // delay disappearance of gen result to cover page during rendering
+    pageTransition.value = undefined
+    const duration = 300
+    const start = performance.now();
+    const step = () => {
+      const now = performance.now();
+      const delta = Math.min((now - start) / duration, 1);
+      if (delta < 1) {
+        requestAnimationFrame(step);
+      } else {
+        inGenResultStateDalayed.value = val
+        pageTransition.value = 'fade-in-only'
+      }
+    };
+    step()
+  }
+  else inGenResultStateDalayed.value = val
+})
 // #endregion
 
 // #region headerbar state & callback
@@ -548,16 +571,16 @@ const fitPage = (ratio: number) => {
     const translationRatio = {
       // x: 0.5,
       // y: 0.5
-      x: ((-page.x) + editorContainerSize.value.width * 0.5) / (page.width * _f),
-      y: ((-page.y) + editorContainerSize.value.height * 0.5) / (page.height * _f),
+      x: (-page.x + editorContainerSize.value.width * 0.5) / (page.width * _f),
+      y: (-page.y + editorContainerSize.value.height * 0.5) / (page.height * _f),
     }
     const sizeDiff = {
       w: page.width * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01,
-      h: page.height * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01
+      h: page.height * (ratio - page.contentScaleRatio) * pageUtils.scaleRatio * 0.01,
     }
     const posDiff = {
       x: -sizeDiff.w * translationRatio.x,
-      y: -sizeDiff.h * translationRatio.y
+      y: -sizeDiff.h * translationRatio.y,
     }
     const newPos = {
       x: page.x + posDiff.x,

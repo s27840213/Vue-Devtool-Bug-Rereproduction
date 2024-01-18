@@ -1,6 +1,8 @@
 <template lang="pug">
-div(class="prompt-area w-full box-border px-24")
-  div(class="flex-center flex-col relative" :class="{ 'pointer-events-none': preview }")
+div(class="prompt-area w-full box-border px-24 relative")
+  div(
+    class="flex-center flex-col relative"
+    :class="{ 'pointer-events-none': preview, invisible: isAutoFilling }")
     //- placeholder for absolute contents
     div(class="w-full" :style="{ height: `${mainHeight}px` }")
     //- main
@@ -82,9 +84,18 @@ div(class="prompt-area w-full box-border px-24")
               class="w-full object-cover object-center rounded-8 aspect-[148/116]"
               :src="require(genType.img)")
             span {{ genType.text }}
+  div(
+    v-if="isAutoFilling"
+    class="prompt-area__loading absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2")
+    svg-icon(
+      class="animate-spin"
+      iconName="spinner2"
+      iconWidth="24px"
+      iconColor="yellow-cm")
   //- gen options
-  Collapse(
+  collapse(
     class="w-full"
+    :class="{ invisible: isAutoFilling }"
     :when="isGenSettings && !isTypeSettings"
     @collapse="currTransitions.add('collapse-gen-options')"
     @expand="currTransitions.add('expand-gen-options')"
@@ -224,8 +235,14 @@ const promptText = computed({
 const promptLen = computed(() => currPrompt.value.length)
 const { isDuringTutorial } = useTutorial()
 const { genImageFlow } = useGenImageUtils()
-const { checkCanvasIsEmpty, autoFill } = useCanvasUtils()
+const { checkCanvasIsEmpty, getAutoFillCanvas } = useCanvasUtils()
 const { t } = useI18n()
+
+/**
+ * @Note Why not use the isAutofilling in canvas store?
+ * bcz we don't want the loading brick show in the editor
+ */
+const isAutoFilling = ref(false)
 // #endregion
 
 // #region modal
@@ -276,7 +293,7 @@ const getGenParams = (): GenImageParams => {
   return params
 }
 
-const getIsReadyToGen = () => {
+const getIsReadyToGen = async () => {
   switch (editorType.value) {
     case 'hidden-message':
       if (!promptText.value && checkCanvasIsEmpty() && !pageUtils.getCurrPage.layers.length) {
@@ -300,26 +317,52 @@ const getIsReadyToGen = () => {
         return false
       }
       break
-    default:
+    default: {
       if (checkCanvasIsEmpty()) {
-        setNormalModalInfo({
-          title: t('CM0091'),
-          content: t('CM0092'),
-          confirmText: t('NN0445'),
-          cancelText: t('CM0090'),
-          confirm: () => {
-            autoFill()
-            closeModal()
-          },
-          cancel: () => {
-            closeModal()
-          },
-        })
+        isAutoFilling.value = true
+        const result = await getAutoFillCanvas()
+        isAutoFilling.value = false
+        if (result) {
+          const { alphaPercentage, drawResultToCtx } = result
 
-        openModal()
-        return false
+          if (alphaPercentage === 1) {
+            setNormalModalInfo({
+              title: t('CM0160'),
+              content: t('CM0161'),
+              confirmText: t('CM0162'),
+              cancelText: '',
+              confirm: () => {
+                closeModal()
+              },
+              cancel: () => {
+                closeModal()
+              },
+              extraContentType: 'brush-change',
+            })
+            openModal()
+            return false
+          } else {
+            setNormalModalInfo({
+              title: t('CM0091'),
+              content: t('CM0092'),
+              confirmText: t('NN0445'),
+              cancelText: t('CM0090'),
+              confirm: () => {
+                drawResultToCtx()
+                closeModal()
+              },
+              cancel: () => {
+                closeModal()
+              },
+            })
+
+            openModal()
+            return false
+          }
+        }
       }
       break
+    }
   }
   return true
 }
@@ -345,8 +388,7 @@ const handleGenerate = async () => {
     changeEditorState('next')
     return
   }
-
-  if (!getIsReadyToGen()) return
+  if (!(await getIsReadyToGen())) return
   setIsSendingGenImgReq(true)
   const hasDesignId = currDesignId.value !== ''
   if (!hasDesignId) {
