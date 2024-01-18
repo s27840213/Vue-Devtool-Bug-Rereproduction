@@ -199,6 +199,7 @@ const useGenImageUtils = () => {
     let params = params_!
     let requestId = generalUtils.generateAssetId()
     if (showMore) {
+      RECORD_TIMING && testUtils.start('show more preflight', { notify: false, setToLog: true })
       try {
         const prevGenParms_ = (
           await cmWVUtils.getJson(`${myDesignSavedRoot.value}/${currDesignId.value}/prev/gen`)
@@ -212,6 +213,7 @@ const useGenImageUtils = () => {
         logUtils.setLogForError(error as Error)
         throw new Error('Upload/Check Images For /gen-image Failed')
       }
+      RECORD_TIMING && testUtils.log('show more preflight', '')
     }
     RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
