@@ -37,7 +37,7 @@ export interface MaskParams {
 export interface IGenResult {
   id: string
   url: string
-  prompt: string
+  // prompt: string
   video?: { src: string; removeWatermark: boolean }
 }
 
@@ -51,6 +51,7 @@ interface IEditorStore {
   maskParams: MaskParams
   isSendingGenImgReq: boolean
   generatedResults: Array<IGenResult>
+  currDesignId: string
   selectedSubDesignId: string // SubDesign that user selected at (Editor step3) or MyDesign.
   editingSubDesignId: string // SubDesign that loaded in editor.
   stepsTypesArr: Array<'canvas' | 'editor' | 'both'>
@@ -58,7 +59,6 @@ interface IEditorStore {
   stepTypeCheckPoint: number
   initImgSrc: string
   useTmpSteps: boolean
-  currDesignId: string
   // only when opening design from mydesign will set this value
   // used to save design to correct place if we edit the design (editorType will always be 'powerful-fill'
   // but if we edit a hidden-message design, we should save it to hidden-message folder)
@@ -82,6 +82,7 @@ export const useEditorStore = defineStore('editor', {
     currActiveFeature: 'none',
     isSendingGenImgReq: false,
     generatedResults: [],
+    currDesignId: '',
     selectedSubDesignId: '',
     editingSubDesignId: '',
     stepsTypesArr: [],
@@ -93,7 +94,6 @@ export const useEditorStore = defineStore('editor', {
     useTmpSteps: false,
     currPrompt: '',
     currGenOptions: [],
-    currDesignId: '',
     opendDesignType: '',
     designName: '',
     editorTheme: null,
@@ -257,7 +257,7 @@ export const useEditorStore = defineStore('editor', {
       this.generatedResults.unshift({
         url,
         id,
-        prompt,
+        // prompt,
       })
     },
     updateGenResult(

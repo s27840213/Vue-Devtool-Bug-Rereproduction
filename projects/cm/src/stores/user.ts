@@ -199,7 +199,7 @@ export const useUserStore = defineStore('user', () => {
           return {
             id: subDesign.id,
             url: getSubDesignThumbUrl(type, id, subDesign.id),
-            prompt,
+            // prompt,
           }
         }),
         designWidth: width,
@@ -261,7 +261,7 @@ export const useUserStore = defineStore('user', () => {
           return {
             id: subDesign.id,
             url: getSubDesignThumbUrl(type, id, subDesign.id),
-            prompt,
+            // prompt,
           }
         }),
         designWidth: width,
