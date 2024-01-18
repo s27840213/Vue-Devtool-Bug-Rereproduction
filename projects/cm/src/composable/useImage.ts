@@ -1,4 +1,4 @@
-const useImageUtils = () => {
+const useImage = () => {
   const imgLoadHandler = async <T>(
     src: string,
     cb: (img: HTMLImageElement) => T,
@@ -31,4 +31,4 @@ const useImageUtils = () => {
   }
 }
 
-export default useImageUtils
+export default useImage

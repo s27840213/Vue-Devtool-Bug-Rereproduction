@@ -1,4 +1,4 @@
-import useUploadUtils from '@/composable/useUploadUtils'
+import useUpload from '@/composable/useUpload'
 import { useUserStore } from '@/stores/user'
 import HomeView from '@/views/HomeView.vue'
 import Screenshot from '@/views/ScreenshotView.vue'
@@ -195,7 +195,7 @@ router.beforeEach(async (to, from, next) => {
 
   cmWVUtils.setupAPIInterface()
   cmWVUtils.registerCallbacks('base')
-  useUploadUtils().getUrlMap()
+  useUpload().getUrlMap()
 
   // store scroll position
   const elScrollable = document.getElementsByClassName('overflow-scroll')[0] as HTMLElement

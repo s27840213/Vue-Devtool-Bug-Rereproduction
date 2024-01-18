@@ -31,7 +31,7 @@ div(class="description-page w-full h-full text-white px-24")
       @click="handleNext") {{ $t('CM0055') }}
 </template>
 <script setup lang="ts">
-import useImageUtils from '@/composable/useImageUtils';
+import useImage from '@/composable/useImage';
 import i18n from '@/i18n'
 import { useEditorStore } from '@/stores/editor'
 import type { EditorType } from '@/types/editor'
@@ -73,7 +73,7 @@ const fallbackThumb = (evt: Event, idx: number) => {
 
 onMounted(() => {
   // preload images
-  const imageUtils = useImageUtils()
+  const imageUtils = useImage()
   for (let i = 0; i < 3; i++) {
     imageUtils.imgLoadHandler(getImgs(i).imgA, () => { /* do nothing */ })
     imageUtils.imgLoadHandler(getImgs(i).imgB, () => { /* do nothing */ })

@@ -19,7 +19,7 @@ class PollingController {
   }
 }
 
-const useUploadUtils = () => {
+const useUpload = () => {
   const uploadStore = useUploadStore()
   const { setUploadMap } = uploadStore
   const { uploadMap, useUsBucket } = storeToRefs(uploadStore)
@@ -137,4 +137,4 @@ const useUploadUtils = () => {
   }
 }
 
-export default useUploadUtils
+export default useUpload

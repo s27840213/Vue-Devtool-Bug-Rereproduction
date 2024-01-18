@@ -12,7 +12,7 @@ import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import useBiColorEditor from './useBiColorEditor'
-import useMouseUtils from './useMouseUtils'
+import useMouse from './useMouse'
 
 export interface ICanvasParams {
   width: number
@@ -24,7 +24,7 @@ const useCanvasUtils = (
   editorContainerRef?: Ref<HTMLElement | null>,
 ) => {
   // #region MouseUtils Store & Editor Store
-  const mouseUtils = useMouseUtils()
+  const mouseUtils = useMouse()
   const { getMousePosInTarget } = mouseUtils
   const editorStore = useEditorStore()
   const { showBrushOptions, maskDataUrl, maskParams, currActiveFeature } = storeToRefs(editorStore)
