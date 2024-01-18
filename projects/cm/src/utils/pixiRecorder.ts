@@ -101,8 +101,8 @@ export default class PixiRecorder {
       })
     }
 
-    if (!this.sprite_src) throw new Error('the sprite_src is undefined!')
-    if (!this._animate) throw new Error('the _animate is undefined!')
+    if (!this.sprite_src) throw new Error('the sprite_src in genVideo is undefined!')
+    if (!this._animate) throw new Error('the _animate in genVideo is undefined!')
 
     // if the video is recording already, stop it first
     // this pixi instance only gening one video once a time
@@ -112,6 +112,7 @@ export default class PixiRecorder {
 
     this.reset && this.reset()
     this.watermarkHandler()
+    this.pixi.stage.sortableChildren = true
     this.pixi.stage.addChild(this.sprite_src)
     this.pixi.ticker.add(this._animate)
 
@@ -143,16 +144,21 @@ export default class PixiRecorder {
 
   watermarkHandler() {
     const { removeWatermark } = useUserStore()
-    if (removeWatermark && this.sprite_wm) {
-      this.pixi.stage.removeChild(this.sprite_wm)
+    if (removeWatermark) {
+      if (this.sprite_wm) {
+        this.pixi.stage.removeChild(this.sprite_wm)
+      }
       this._video.removeWatermark = true
-    } else if (this.sprite_wm) {
+    } else {
+      if (!this.sprite_wm) throw new Error('can not find sprite_wm in watermarkHandler!')
       if (!this.sprite_src) throw new Error('can not find sprite_src in watermarkHandler!')
+
       const ratio = this.sprite_wm.width / this.sprite_wm.height
       this.sprite_wm.width = Math.min(this.sprite_src.width, this.sprite_src.height) * 0.5
       this.sprite_wm.height = this.sprite_wm.width / ratio
       this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
       this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
+      this.sprite_wm.zIndex = 1000
 
       this.pixi.stage.addChild(this.sprite_wm)
       this._video.removeWatermark = false

@@ -165,8 +165,11 @@ onMounted(async () => {
 // p.s. currGeneratedResult.value would be udf in mydesign
 watch(
   () => currGeneratedResult.value?.url,
-  async (url) => {
-    if (!currGeneratedResult.value?.video) {
+  async (url, old) => {
+    console.log('watch currGeneratedResult', url, old)
+    // if old === undefined, means the currGeneratedResult is not set yet,
+    // this watcher watchs if the result img is edited. if so, re-gening the video.
+    if (!currGeneratedResult.value?.video && old !== undefined) {
       await genCurrSubDesignVideo()
     }
   },
