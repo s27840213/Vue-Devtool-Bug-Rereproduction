@@ -293,8 +293,7 @@ const useGenImageUtils = () => {
               'original',
               prevGenParms
                 ? {
-                    pages_: prevGenParms.config,
-                    showMore: showMore,
+                    pages: prevGenParms.config,
                     prompt: prevGenParms.prompt,
                     options: prevGenParms.options,
                     type: prevGenParms.type,
