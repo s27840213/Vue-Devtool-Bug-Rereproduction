@@ -165,6 +165,7 @@ export default class PixiRecorder {
     return new Promise<string | 'error'>((resolve) => {
       const stopCb = (url: string) => {
         this.isRecordingVideo = false
+        this.pixi.stage.removeChildren()
         return resolve(url)
       }
       this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, stopCb)
@@ -190,18 +191,25 @@ export default class PixiRecorder {
     }
   }
 
-  async saveToDevice(url = this.video.src, path?: string) {
+  async saveToDevice(data?: { url?: string, path?: string, revokeUrl?: boolean }) {
+    let { url = this.video.src, path, revokeUrl } = data || {}
     const { removeWatermark } = useUserStore()
+
     if (this.video.removeWatermark !== removeWatermark) {
-      const data = await this.genVideo()
-      if (data) {
-        url = data.src
+      const res = await this.genVideo()
+      if (res) {
+        url = res.src
       } else {
         throw new Error('can not generate video')
       }
     }
+
     const blob = await getBlobFromUrl(url)
     const base64 = await blobToBase64(blob)
+    if (revokeUrl) {
+      URL.revokeObjectURL(url)
+    }
+
     if (url) {
       return cmWVUtils.saveAssetFromUrl('mp4', base64, path)
     } else {
@@ -462,6 +470,7 @@ export default class PixiRecorder {
 
         this.pixi.view.width = this.sprite_src.width
         this.pixi.view.height = this.sprite_src.height
+
         this.pixi.stage.addChild(this.sprite_src)
         if (this.sprite_wm) {
           const ratio = this.sprite_wm.width / this.sprite_wm.height
@@ -475,12 +484,16 @@ export default class PixiRecorder {
         this.addFilter(this.fragment)
 
         // @TEST use
-        // const testCanvas = this.pixi.view as HTMLCanvasElement
-        // document.body.appendChild(testCanvas)
-        // testCanvas.style.position = 'absolute'
-        // testCanvas.style.top = '0'
-        // testCanvas.style.width = '300px'
-        // testCanvas.style.left = '0'
+        const testCanvas = this.pixi.view as HTMLCanvasElement
+        document.body.appendChild(testCanvas)
+        testCanvas.style.position = 'absolute'
+        testCanvas.style.top = '0'
+        testCanvas.style.width = '300px'
+        testCanvas.style.left = '0'
+        testCanvas.style.zIndex = '10000'
+        setTimeout(() => {
+          document.body.removeChild(testCanvas)
+        }, 8000)
 
         // if the genVideo func is called, but the imgs is not loaded yet,
         // the genVideo func will await for the imgs to be loaded
@@ -579,14 +592,4 @@ const getBlobFromUrl = async (url: string) => {
   return new Promise<Blob>((resolve) => {
     fetch(url).then((r) => resolve(r.blob())).catch(e => { throw e })
   })
-}
-
-export const saveToDevice = async (url: string) => {
-  try {
-    const blob = await getBlobFromUrl(url)
-    const base64 = await blobToBase64(blob)
-    return cmWVUtils.saveAssetFromUrl('mp4', base64)
-  } catch (e) {
-    logUtils.setLogAndConsoleLog('video can not save to device:', e)
-  }
 }

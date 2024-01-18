@@ -272,8 +272,18 @@ export const useEditorStore = defineStore('editor', {
       }
 
       if (video) {
+        console.warn('this.generatedResults[index].video?.src0', this.generatedResults[index].video?.src)
+        if (this.generatedResults[index].video?.src) {
+          console.warn('this.generatedResults[index].video?.src1', this.generatedResults[index].video?.src)
+          URL.revokeObjectURL(this.generatedResults[index].video?.src || '')
+        }
         this.generatedResults[index].video = { ...video }
       } else if (video === null) {
+        console.warn('this.generatedResults[index].video?.src 2', this.generatedResults[index].video?.src)
+        if (this.generatedResults[index].video?.src) {
+          console.warn('this.generatedResults[index].video?.src 3', this.generatedResults[index].video?.src)
+          URL.revokeObjectURL(this.generatedResults[index].video?.src || '')
+        }
         this.generatedResults[index].video = undefined
       }
 

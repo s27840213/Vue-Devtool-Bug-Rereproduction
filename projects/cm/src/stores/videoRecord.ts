@@ -40,6 +40,7 @@ export const useVideoRcordStore = defineStore('videoRecord', {
       return pixi.genVideo().then((res) => {
         if (currGeningId !== this.geningIdentifier) return
         this.geningIdentifier = ''
+        console.warn('genVideo done')
         if (res) {
           if (currGeneratedResult.value && currGeneratedResult.value.id) {
             updateGenResult(currGeneratedResult.value.id, { video: { ...pixi.video } })
@@ -52,10 +53,11 @@ export const useVideoRcordStore = defineStore('videoRecord', {
         return res
       })
     },
-    saveToDevice(url?: string, path?: string) {
+    saveToDevice(data?: { url?: string, path?: string, revokeUrl?: boolean }) {
       if (!pixi) throw new Error('pixi is undefined in saveToDevice')
+      const { url, path, revokeUrl } = data || {}
 
-      return pixi.saveToDevice(url, path).finally(() => {
+      return pixi.saveToDevice({ url, path, revokeUrl }).finally(() => {
         this.setIsExportVideo(false)
       })
     },

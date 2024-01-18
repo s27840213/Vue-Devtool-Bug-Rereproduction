@@ -153,15 +153,13 @@ onMounted(async () => {
         setCurrOpenSubDesign(content)
       }
     }
-  }
-
-  // console.warn('currOpenSubDesign.value', generalUtils.deepCopy(currGeneratedResult.value))
-  // if the video is udf generate it
-  if (
-    !currGeneratedResult.value?.video ||
-    currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
-  ) {
-    await genCurrSubDesignVideo()
+    // if the video is udf generate it
+    if (
+      !currGeneratedResult.value?.video ||
+      currGeneratedResult.value.video.removeWatermark !== removeWatermark.value
+    ) {
+      await genCurrSubDesignVideo()
+    }
   }
 })
 
