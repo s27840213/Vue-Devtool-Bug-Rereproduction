@@ -35,45 +35,6 @@ export const fragment_opacity = `
     gl_FragColor = mix(image1, image2, opacity);
   }
 `
-// gl_FragColor = mix(image1, image2, opacity);
-export const fragment1 = `
-  precision mediump float;
-
-  varying vec2 vTextureCoord;
-  uniform sampler2D uSampler;
-  uniform highp vec4 inputSize;
-  uniform highp vec4 outputFrame;
-
-  vec2 mapCoord( vec2 coord ) {
-    coord *= inputSize.xy / outputFrame.zw;
-    return coord;
-  }
-
-  vec2 unmapCoord( vec2 coord ) {
-    coord -= outputFrame.xy;
-    coord /= inputSize.xy;
-    return coord;
-  }
-
-  uniform sampler2D nextImage;
-  uniform float dispFactor;
-
-  void main() {
-    vec2 uv = vTextureCoord;
-    vec2 coord = mapCoord(vTextureCoord);
-
-    vec4 _currentImage;
-    vec4 _nextImage;
-    float intensity = .3;
-    vec4 orig1 = texture2D(uSampler, uv);
-    vec4 orig2 = texture2D(nextImage, coord);
-    _currentImage = texture2D(uSampler, vec2(uv.x, uv.y + dispFactor * intensity * orig2));
-    _nextImage = texture2D(nextImage, vec2(coord.x, coord.y + (1.0 - dispFactor) * intensity * orig1));
-    gl_FragColor = mix(_currentImage, _nextImage, dispFactor);
-  }
-  `
-// _currentImage = texture2D(uSampler, vec2(uv.x - dispFactor * intensity * orig2.r * orig2.g * orig2.b, uv.y));
-// _nextImage = texture2D(nextImage, vec2(coord.x - (1.0 - dispFactor) * intensity * orig1.r * orig1.g * orig1.b, coord.y));
 
 export const fragment_slide = `
   varying vec2 vTextureCoord;
@@ -103,18 +64,6 @@ export const fragment_slide = `
     }
   }
   `
-export const fragment3 = `
-  varying vec2 vTextureCoord;
-  uniform sampler2D uSampler;
-  void main() {
-    vec2 uv = vTextureCoord;
-    if ( vTextureCoord.x < 0.5 ) {
-      gl_FragColor = texture2D(uSampler,uv);
-    } else {
-      gl_FragColor = vec4(0, 0.5, 0, 1.0);
-    }
-  }
-`
 
 export default class PixiRecorder {
   private pixi = new PIXI.Application()
@@ -140,6 +89,7 @@ export default class PixiRecorder {
   }
 
   async genVideo() {
+    console.error('genvideo')
     if (!this.isImgReady) {
       await Promise.race([
         new Promise<void>((resolve) => {
@@ -150,31 +100,32 @@ export default class PixiRecorder {
         throw new Error('pixi-recorder: can not load image as genVideo!')
       })
     }
-    this.watermarkHandler()
+
+    if (!this.sprite_src) throw new Error('the sprite_src is undefined!')
+    if (!this._animate) throw new Error('the _animate is undefined!')
 
     // if the video is recording already, stop it first
-    if (this.isRecordingVideo && this.sprite_src) {
-      this.canvasRecorder?.stop(true)
-      this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+    // this pixi instance only gening one video once a time
+    if (this.isRecordingVideo) {
+      this.shutGeningVideo()
     }
 
     this.reset && this.reset()
-    if (this._animate) {
-      this.pixi.ticker.add(this._animate)
-    }
+    this.watermarkHandler()
+    this.pixi.stage.addChild(this.sprite_src)
+    this.pixi.ticker.add(this._animate)
 
     return new Promise<string | 'error'>((resolve) => {
       const stopCb = (url: string) => {
         this.isRecordingVideo = false
         this.pixi.stage.removeChildren()
-        if (store.getters['cmWV/getDebugMode'] && document.body.contains(this.pixi.view as HTMLCanvasElement)) {
+        if (store.getters['cmWV/getDebugMode']) {
           document.body.removeChild(this.pixi.view as HTMLCanvasElement)
         }
         return resolve(url)
       }
       this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, stopCb)
-      this.canvasRecorder.start(1000)
-      this.isRecordingVideo = true
+      this.canvasRecorder.start(1000, () => { this.isRecordingVideo = true })
     }).then((res) => {
       if (res === 'error') {
         return undefined
@@ -184,12 +135,25 @@ export default class PixiRecorder {
     })
   }
 
+  shutGeningVideo() {
+    this.canvasRecorder?.stop(true)
+    this.pixi.stage.removeChildren()
+    this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+  }
+
   watermarkHandler() {
     const { removeWatermark } = useUserStore()
     if (removeWatermark && this.sprite_wm) {
       this.pixi.stage.removeChild(this.sprite_wm)
       this._video.removeWatermark = true
     } else if (this.sprite_wm) {
+      if (!this.sprite_src) throw new Error('can not find sprite_src in watermarkHandler!')
+      const ratio = this.sprite_wm.width / this.sprite_wm.height
+      this.sprite_wm.width = Math.min(this.sprite_src.width, this.sprite_src.height) * 0.5
+      this.sprite_wm.height = this.sprite_wm.width / ratio
+      this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
+      this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
+
       this.pixi.stage.addChild(this.sprite_wm)
       this._video.removeWatermark = false
     }
@@ -251,40 +215,6 @@ export default class PixiRecorder {
     }
   }
 
-  addFragment1Filter() {
-    if (!this.sprite_src) return
-    this.uniforms.dispFactor = 0
-    this.uniforms.nextImage = this.texture_res
-    this.filter = new PIXI.Filter(undefined, fragment1, this.uniforms)
-    this.sprite_src.filters = [this.filter]
-    this._animate = () => {
-      const now = Date.now()
-      if (this.uniforms.dispFactor >= 1) {
-        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
-        if (this.canvasRecorder) {
-          this.canvasRecorder.stop()
-        }
-      }
-      this.uniforms.dispFactor = (now - this.time_start) / TRANSITION_TIME
-    }
-  }
-
-  addFragment3Filter() {
-    if (!this.sprite_src) return
-
-    this.filter = new PIXI.Filter(undefined, fragment3, this.uniforms)
-    this.sprite_src.filters = [this.filter]
-    this._animate = () => {
-      const now = Date.now()
-      if (now / TRANSITION_TIME >= Math.PI * 0.5) {
-        this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
-        if (this.canvasRecorder) {
-          this.canvasRecorder.stop()
-        }
-      }
-    }
-  }
-
   addSlideFilter() {
     if (!this.sprite_src) return
 
@@ -331,10 +261,6 @@ export default class PixiRecorder {
         return this.addOpacityFilter()
       case fragment_slide:
         return this.addSlideFilter()
-      case fragment1:
-        return this.addFragment1Filter()
-      case fragment3:
-        return this.addFragment3Filter()
     }
   }
 
@@ -475,14 +401,6 @@ export default class PixiRecorder {
         this.pixi.view.width = this.sprite_src.width
         this.pixi.view.height = this.sprite_src.height
 
-        this.pixi.stage.addChild(this.sprite_src)
-        if (this.sprite_wm) {
-          const ratio = this.sprite_wm.width / this.sprite_wm.height
-          this.sprite_wm.width = Math.min(this.sprite_src.width, this.sprite_src.height) * 0.5
-          this.sprite_wm.height = this.sprite_wm.width / ratio
-          this.sprite_wm.x = this.sprite_src.width - this.sprite_wm.width - 50
-          this.sprite_wm.y = this.sprite_src.height - this.sprite_wm.height - 50
-        }
         const renderer = this.pixi.renderer
         renderer.resize(this.pixi.view.width, this.pixi.view.height)
         this.addFilter(this.fragment)
@@ -539,8 +457,11 @@ class CanvasRecorder {
     }
   }
 
-  start(time: number) {
+  start(time: number, startCb?: () => void) {
     this.recorder.start(time)
+    this.recorder.onstart = () => {
+      startCb && startCb()
+    }
   }
 
   stop(notStoreVideo = false) {
