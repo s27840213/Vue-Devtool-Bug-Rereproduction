@@ -290,7 +290,6 @@ onBeforeRouteLeave((to, from) => {
       editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
-      setPrevGenParams({ requestId: '', params: {} as GenImageParams })
       store.commit('canvasResize/SET_isResizing', false)
     }, 1000)
   }
@@ -323,7 +322,7 @@ const {
   isGenerating,
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } =
+const { setCurrOpenDesign, setCurrOpenSubDesign, saveSubDesign, getInitialImg } =
   userStore
 
 const { removeWatermark } = storeToRefs(userStore)

@@ -549,14 +549,21 @@ const useCanvasUtils = (
     }
   }
 
-  const prepareMaskToUpload = () => {
-    if (canvas && canvas.value) {
+  const prepareMaskToUpload = (src?: string) => {
+    let source: HTMLCanvasElement | HTMLImageElement | null = canvas?.value
+    if (src) {
+      const img = new Image()
+      img.crossOrigin = 'Anonymous'
+      img.src = src
+      source = img
+    }
+    if (source) {
       const canvasCopy = document.createElement('canvas')
-      canvasCopy.width = canvas.value.width
-      canvasCopy.height = canvas.value.height
+      canvasCopy.width = source.width
+      canvasCopy.height = source.height
       const maskCtxCopy = canvasCopy.getContext('2d')
       if (maskCtxCopy) {
-        maskCtxCopy.drawImage(canvas.value, 0, 0)
+        maskCtxCopy.drawImage(source, 0, 0)
         const pixels = maskCtxCopy.getImageData(0, 0, pageSize.value.width, pageSize.value.height)
         const result = new ImageData(
           new Uint8ClampedArray(pixels.data),

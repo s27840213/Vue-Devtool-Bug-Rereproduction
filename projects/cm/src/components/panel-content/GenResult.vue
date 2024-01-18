@@ -66,17 +66,12 @@ import vuex from '@/vuex'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 
 const userStore = useUserStore()
-const { prevGenParams, aiCredit } = storeToRefs(userStore)
+const { aiCredit } = storeToRefs(userStore)
 
 const editorStore = useEditorStore()
 const { setSelectedSubDesignId, keepEditingInit } = editorStore
-const {
-  generatedResults,
-  selectedSubDesignId,
-  initImgSrc,
-  isGenerating,
-  currGeneratedResult,
-} = storeToRefs(editorStore)
+const { generatedResults, selectedSubDesignId, initImgSrc, isGenerating, currGeneratedResult } =
+  storeToRefs(editorStore)
 
 const currGenResultId = computed(() => {
   return selectedSubDesignId.value !== '' ? selectedSubDesignId.value : tempGenResultId
@@ -97,7 +92,7 @@ const isPro = computed(() => vuex.getters['payment/getPayment'].subscribe)
 
 const { genImageFlow } = useGenImageUtils()
 const disableShowMoreBtn = computed(() => {
-  return isGenerating.value || prevGenParams.value.requestId === ''
+  return isGenerating.value
 })
 
 const showMoreRes = async () => {

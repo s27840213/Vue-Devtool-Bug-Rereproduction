@@ -1,9 +1,17 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import { useCanvasStore } from '@/stores/canvas'
 import type { GenImageParams } from '@/types/api'
-import { ICmMyDesign, ICmSubDesign, IMyDesignType, ITmpSubDesign } from '@/types/user'
+import type { EditorType, GenImageOptionToSave } from '@/types/editor'
+import {
+  ICmMyDesign,
+  ICmSubDesign,
+  IMyDesignType,
+  IPrevGenParams,
+  ITmpSubDesign,
+} from '@/types/user'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
+import type { IPage } from '@nu/vivi-lib/interfaces/page'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
 import cmWVUtils, { IListAssetResponse } from '@nu/vivi-lib/utils/cmWVUtils'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
@@ -38,18 +46,10 @@ export const useUserStore = defineStore('user', () => {
     currPrompt,
     currGenOptionsToSave,
     initImgSrc,
+    maskDataUrl,
   } = storeToRefs(editorStore)
 
   const { t } = useI18n()
-
-  const prevGenParams = reactive({
-    requestId: '',
-    params: {} as GenImageParams,
-  })
-
-  const setPrevGenParams = (params: { requestId: string; params: GenImageParams }) => {
-    Object.assign(prevGenParams, params)
-  }
 
   const aiCredit = ref(0)
 
@@ -100,11 +100,6 @@ export const useUserStore = defineStore('user', () => {
   const currMyDesignType = ref<IMyDesignType>('all')
   const currOpenDesign = ref<ICmMyDesign | undefined>(undefined)
   const currOpenSubDesign = ref<ICmSubDesign | undefined>(undefined)
-  const lastUsedMask = ref('')
-
-  const setLastUsedMask = (mask: string) => {
-    lastUsedMask.value = mask
-  }
 
   const isDesignOpen = computed(() => {
     return currOpenDesign.value !== undefined
@@ -497,17 +492,32 @@ export const useUserStore = defineStore('user', () => {
     path: string,
     subDesignId: string,
     name: 'original' | 'result' = 'original',
+    {
+      pages_ = undefined,
+      showMore = false,
+      prompt = undefined,
+      options = undefined,
+      type = undefined,
+    }: {
+      pages_?: IPage[]
+      showMore?: boolean
+      prompt?: string
+      options?: GenImageOptionToSave
+      type?: EditorType
+    } = {},
   ) => {
     try {
       if (cmWVUtils.inBrowserMode) return
-      await Promise.race([
-        imageShadowUtils.iosImgDelHandler_cm({
-          editorType: editorType.value,
-          designId: currDesignId.value,
-        }),
-        new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 3000)),
-      ])
-      const pages = uploadUtils.prepareJsonToUpload(pageUtils.getPages)
+      if (!showMore) {
+        await Promise.race([
+          imageShadowUtils.iosImgDelHandler_cm({
+            editorType: editorType.value,
+            designId: currDesignId.value,
+          }),
+          new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 3000)),
+        ])
+      }
+      const pages = pages_ ?? uploadUtils.prepareJsonToUpload(pageUtils.getPages)
       const isValidJson = await cmWVUtils.isValidJson(pages)
       if (!isValidJson) {
         logUtils.setLog('Saving design as myDesign failed, because the design json is invalid')
@@ -544,7 +554,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       const json: ICmSubDesign = {
-        type: editorType.value,
+        type: type ?? editorType.value,
         id: currDesignId.value,
         subId: subDesignId,
         fileName: name,
@@ -552,8 +562,8 @@ export const useUserStore = defineStore('user', () => {
         pages,
         ver: cmWVUtils.getUserInfoFromStore().appVer,
         assetInfo: {},
-        prompt: currPrompt.value,
-        genImageOptions: currGenOptionsToSave.value,
+        prompt: prompt ?? currPrompt.value,
+        genImageOptions: options ?? currGenOptionsToSave.value,
         width: pages[0].width,
         height: pages[0].height,
       }
@@ -583,17 +593,27 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const updatePrevGen = async (genConfig: { requestId: string; params: GenImageParams }) => {
+    const json: IPrevGenParams = {
+      ...genConfig,
+      config: uploadUtils.prepareJsonToUpload(pageUtils.getPages),
+      prompt: currPrompt.value,
+      options: currGenOptionsToSave.value,
+      type: editorType.value,
+    }
+    if (!(await cmWVUtils.isValidJson(json))) {
+      throw new Error('JSON to save is invalid')
+    }
     await Promise.all([
-      cmWVUtils.addJson(`${myDesignSavedRoot.value}/${currDesignId.value}/prev/gen`, genConfig),
+      cmWVUtils.addJson(`${myDesignSavedRoot.value}/${currDesignId.value}/prev/gen`, json),
       cmWVUtils.cloneFile(
         initImgSrc.value,
         `${myDesignSavedRoot.value}/${currDesignId.value}/prev/input.jpg`,
       ),
-      ...(lastUsedMask.value
+      ...(maskDataUrl.value
         ? [
             cmWVUtils.saveAssetFromUrl(
               'png',
-              lastUsedMask.value,
+              maskDataUrl.value,
               `${myDesignSavedRoot.value}/${currDesignId.value}/prev/mask`,
             ),
           ]
@@ -683,8 +703,6 @@ export const useUserStore = defineStore('user', () => {
   // #endregion
 
   return {
-    prevGenParams,
-    setPrevGenParams,
     aiCredit,
     setAiCredit,
     increaseAiCredit,
@@ -730,7 +748,5 @@ export const useUserStore = defineStore('user', () => {
     setRemoveWatermark,
     setHighResolutionPhoto,
     // #endregion
-    lastUsedMask,
-    setLastUsedMask,
   }
 })

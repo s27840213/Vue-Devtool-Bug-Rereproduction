@@ -8,6 +8,10 @@ type IGenImageV3Response = ApiResponse<{
   ai_credit: number
 }>
 
+type IGenImagePreflightResponse = ApiResponse<{
+  ok: boolean
+}>
+
 export default new (class Utils {
   async genImage(
     userId: string,
@@ -27,6 +31,27 @@ export default new (class Utils {
           token,
           ...params,
           num,
+          us: us ? '1' : '0',
+          accelerate: '1',
+        },
+      }),
+    )
+  }
+
+  async genImagePreflight(
+    userId: string,
+    requestId: string,
+    names: string,
+    us: boolean,
+  ): Promise<AxiosResponse<IGenImagePreflightResponse>> {
+    return apiUtils.requestWithRetry(() =>
+      axios.request<IGenImagePreflightResponse>({
+        url: '/gen-image-preflight',
+        method: 'POST',
+        data: {
+          user_id: userId,
+          request_id: requestId,
+          names,
           us: us ? '1' : '0',
           accelerate: '1',
         },
