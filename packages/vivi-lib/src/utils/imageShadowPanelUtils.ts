@@ -183,6 +183,7 @@ export default new class ImageShadowPanelUtils {
       if (shadow.currentEffect === ShadowEffectType.none) {
         this.resetHandleState()
         imageShadowUtils.setUploadProcess(false)
+        stepsUtils.record()
         return
       }
       if (primarylayerId) {
