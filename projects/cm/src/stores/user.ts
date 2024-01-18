@@ -100,6 +100,7 @@ export const useUserStore = defineStore('user', () => {
   const currMyDesignType = ref<IMyDesignType>('all')
   const currOpenDesign = ref<ICmMyDesign | undefined>(undefined)
   const currOpenSubDesign = ref<ICmSubDesign | undefined>(undefined)
+  const isSaving = ref(false)
 
   const isDesignOpen = computed(() => {
     return currOpenDesign.value !== undefined
@@ -141,6 +142,10 @@ export const useUserStore = defineStore('user', () => {
 
   const setCurrOpenDesign = (design: ICmMyDesign | undefined) => {
     currOpenDesign.value = design
+  }
+
+  const setIsSaving = (value: boolean) => {
+    isSaving.value = value
   }
 
   const getSubDesignConfig = async (
@@ -499,7 +504,8 @@ export const useUserStore = defineStore('user', () => {
       type: EditorType
     },
   ) => {
-    saveSubDesignCore(
+    setIsSaving(true)
+    await saveSubDesignCore(
       path,
       subDesignId,
       name,
@@ -511,6 +517,7 @@ export const useUserStore = defineStore('user', () => {
         type: editorType.value,
       },
     )
+    setIsSaving(false)
   }
 
   const saveSubDesignCore = async (
@@ -552,16 +559,17 @@ export const useUserStore = defineStore('user', () => {
 
       // Update thumb img for saving result.json.
       if (name === 'result') {
-        cmWVUtils
+        await cmWVUtils
           .sendScreenshotUrl(cmWVUtils.createUrlForJSON({ noBg: false }))
           .then((screenshot) => {
             if (screenshot.flag === '1') return
 
-            cmWVUtils.cloneFile(
+            return cmWVUtils.cloneFile(
               `screenshot/${screenshot.imageId}.jpg`,
               `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/thumb.jpg`,
             )
-
+          })
+          .then(() => {
             const thumbIndex = generatedResults.value.findIndex((gr) => gr.id === subDesignId)
             if (thumbIndex === -1) return
             setCurrDesignThumbIndex(thumbIndex)
@@ -763,6 +771,8 @@ export const useUserStore = defineStore('user', () => {
     setCurrOpenSubDesign,
     deleteDesign,
     deleteSubDesign,
+    isSaving,
+    setIsSaving,
     // #endregion
     // #region save option related
     removeWatermark,
