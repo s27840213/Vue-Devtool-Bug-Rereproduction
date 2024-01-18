@@ -34,8 +34,7 @@ export async function editorRouteHandler(
     setEditorType(type)
     setPageSize(width, height)
     if (!currGenOptions.value?.length || !currDesignId.value) setCurrGenOptions((constantData.getGenImageOptions(editorType.value) as GenImageOption[]) ?? [])
-
-    store.dispatch('assetPanel/setIsHiddenMessage', editorType.value === 'hidden-message')
+    
     switch (type) {
       case 'powerful-fill':
         break

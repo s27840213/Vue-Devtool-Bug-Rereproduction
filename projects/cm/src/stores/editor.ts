@@ -20,6 +20,7 @@ import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { defineStore } from 'pinia'
 import { find } from 'lodash'
+import store from '@nu/vivi-lib/store'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -212,7 +213,7 @@ export const useEditorStore = defineStore('editor', {
       } = options || {}
 
       this.currStateIndex = 0
-      this.editorType = type
+      this.setEditorType(type)
       this.designName = designName
       this.selectedSubDesignId = selectedSubDesignId
       this.editingSubDesignId = selectedSubDesignId
@@ -249,6 +250,9 @@ export const useEditorStore = defineStore('editor', {
     },
     setEditorType(type: EditorType) {
       this.editorType = type
+
+      // update isHm for asset panels
+      store.dispatch('assetPanel/setIsHiddenMessage', this.editorType === 'hidden-message')
     },
     setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
       this.isSendingGenImgReq = isSendingGenImgReq
