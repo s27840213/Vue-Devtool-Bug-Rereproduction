@@ -365,7 +365,7 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOption[]) {
       this.currGenOptions = options
     },
-    updateCurrGenOption(option: GenImageOption) {
+    updateCurrGenOption(option: Pick<GenImageOption, 'key'| 'value'>) {
       const currOption = this.currGenOptions.find((o) => o.key === option.key)
       if (currOption) currOption.value = option.value
     },
