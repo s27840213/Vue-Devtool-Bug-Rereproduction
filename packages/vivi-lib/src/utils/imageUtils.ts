@@ -48,7 +48,7 @@ class ImageUtils {
     const { error, crossOrigin = true } = options || {}
     return new Promise<T>((resolve, reject) => {
       const image = new Image()
-      if (crossOrigin && store.getters['user/getUserId'] !== 'backendRendering' && !src.includes('data:image/png;base64')) {
+      if (crossOrigin && !src.includes('data:image/png;base64')) {
         image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
