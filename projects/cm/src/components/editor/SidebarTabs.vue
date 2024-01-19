@@ -40,7 +40,7 @@ div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-375 w-44 overflow-scrol
           span(class="typo-btn-sm whitespace-nowrap" :class="true ? 'text-yellow-0' : 'text-lighter'") {{ subTab.text }}
 </template>
 <script setup lang="ts">
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useCanvasCm from '@/composable/useCanvasCm'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
@@ -152,7 +152,7 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
   ]
 })
 
-const { clearCtx, reverseSelection, autoFill, getCanvasDataUrl } = useCanvasUtilsCm()
+const { clearCtx, reverseSelection, autoFill, getCanvasDataUrl } = useCanvasCm()
 
 const toggleFeature = (feature: EditorFeature) => {
   if (currActiveFeature.value === feature) {

@@ -1,4 +1,4 @@
-import useBaseCanvasUtils from '@/composable/useBaseCanvasUtils'
+import useBaseCanvas from '@/composable/useBaseCanvas'
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo, ITrimmedCanvasInfo } from '@/interfaces/image'
@@ -277,7 +277,7 @@ class BgRemoveUtils {
     const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
     const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
     const targetLayerStyle = layerUtils.getLayer(pageIndex, index).styles as IImageStyle
-    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvas(targetLayerStyle)
     const { remainingHeightPercentage, remainingWidthPercentage, xShift, yShift, cropJSON, bound } = trimCanvas(this.canvas)
     const previewSrc = this.canvas.toDataURL('image/png;base64')
 
@@ -385,7 +385,7 @@ class BgRemoveUtils {
   }
 
   getTrimmedCanvasInfo(targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvas(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     return trimmedCanvasInfo
   }
@@ -401,7 +401,7 @@ class BgRemoveUtils {
 
   // this is for IOS version < 1.35
   saveToIOSOld(callback?: (data: { flag: string, msg: string, imageId: string }, assetId: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvas(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
@@ -416,7 +416,7 @@ class BgRemoveUtils {
   }
 
   saveToIOS(designId:string, callback?: (data: { flag: string, msg: string, imageId: string }, path: string, aspectRatio: number, trimCanvasInfo: ITrimmedCanvasInfo) => any, targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvas(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')
@@ -447,7 +447,7 @@ class BgRemoveUtils {
   // #endregion
 
   exportCanvasResultInfo(targetLayerStyle?: IImageStyle) {
-    const { trimCanvas } = useBaseCanvasUtils(targetLayerStyle)
+    const { trimCanvas } = useBaseCanvas(targetLayerStyle)
     const trimmedCanvasInfo = trimCanvas(this.canvas)
     const { canvas: trimedCanvas, width, height } = trimmedCanvasInfo
     const src = trimedCanvas.toDataURL('image/png;base64')

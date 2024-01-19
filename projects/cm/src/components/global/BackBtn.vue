@@ -48,13 +48,13 @@ const { showImgSelector } = storeToRefs(imgSelectorStore)
 
 // #region editor
 const editorStore = useEditorStore()
-const { changeEditorState } = editorStore
+const { changeEditorState, changeToSpecificEditorState } = editorStore
 const {
   inGenResultState,
   inSavingState,
   hasGeneratedResults,
   currDesignId,
-  editorType,
+  prevState,
   myDesignSavedRoot,
 } = storeToRefs(editorStore)
 const { hasUnsavedChanges } = useSteps()
@@ -70,9 +70,13 @@ const handleBackAction = (navagate: () => void) => {
     return
   }
 
-  if (inSavingState.value || inGenResultState.value) {
-    changeEditorState('prev')
+  if (inSavingState.value) {
+    changeToSpecificEditorState(prevState.value)
+    return
+  }
 
+  if (inGenResultState.value) {
+    changeEditorState('prev')
     return
   }
 

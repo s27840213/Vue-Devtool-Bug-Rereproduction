@@ -3,7 +3,7 @@ import store from '@nu/vivi-lib/store'
 import bgRemoveUtils from '@nu/vivi-lib/utils/bgRemoveUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
 import { storeToRefs } from 'pinia'
-import useCanvasUtils from './useCanvasUtilsCm'
+import useCanvasCm from './useCanvasCm'
 
 const useSteps = (enableWatch = false) => {
   const editorStore = useEditorStore()
@@ -40,7 +40,7 @@ const useSteps = (enableWatch = false) => {
     isProcessingStepsQueue,
     setCheckPointStep: setCanvasCheckPointStep,
     goToCheckpoint: goToCanvasCheckpoint,
-  } = useCanvasUtils()
+  } = useCanvasCm()
 
   // #region recording both related
   const recordBoth = () => {

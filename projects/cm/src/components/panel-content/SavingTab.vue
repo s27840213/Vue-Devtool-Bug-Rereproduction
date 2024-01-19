@@ -99,20 +99,12 @@ const share = () => {
 }
 
 const recreate = () => {
-  if (atEditor.value) {
-    changeToSpecificEditorState('editing')
-  } else {
-    if (!currOpenSubDesign.value) return
-    initWithSubDesignConfig(currOpenSubDesign.value)
-  }
+  if (!currOpenSubDesign.value) return
+  initWithSubDesignConfig(currOpenSubDesign.value)
 }
 
 const edit = () => {
-  if (atEditor.value) {
-    keepEditingInit()
-  } else {
-    editSubDesignResult()
-  }
+  editSubDesignResult()
 }
 </script>
 <style lang="scss"></style>

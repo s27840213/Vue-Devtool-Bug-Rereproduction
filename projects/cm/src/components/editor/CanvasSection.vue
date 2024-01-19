@@ -14,7 +14,7 @@ div(class="canvas-section absolute top-0 left-0 z-canvas")
 </template>
 <script setup lang="ts">
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useCanvasCm from '@/composable/useCanvasCm'
 import { useEditorStore } from '@/stores/editor'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -60,7 +60,7 @@ const { isBiColorEditor } = useBiColorEditor()
 
 // #region Canvas feature section
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const { brushStyle, showBrush, restoreCanvas } = useCanvasUtilsCm(
+const { brushStyle, showBrush, restoreCanvas } = useCanvasCm(
   canvasRef,
   wrapperDOM,
   containerDOM,

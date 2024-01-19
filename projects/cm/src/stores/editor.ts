@@ -1,5 +1,5 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import useCanvasUtils from '@/composable/useCanvasUtilsCm'
+import useCanvasCm from '@/composable/useCanvasCm'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import type {
@@ -46,6 +46,7 @@ interface IEditorStore {
   imgAspectRatio: number
   editorStates: EditorStates
   currStateIndex: number
+  prevState: string
   currActiveFeature: EditorFeature
   editorType: EditorType
   maskDataUrl: string
@@ -80,6 +81,7 @@ export const useEditorStore = defineStore('editor', {
     editorType: 'powerful-fill',
     editorStates: editorStatesMap['powerful-fill'],
     currStateIndex: 0,
+    prevState: '',
     currActiveFeature: 'none',
     isSendingGenImgReq: false,
     generatedResults: [],
@@ -178,7 +180,7 @@ export const useEditorStore = defineStore('editor', {
   },
   actions: {
     setPageSize(width: number, height: number) {
-      const { updateCanvasSize } = useCanvasUtils()
+      const { updateCanvasSize } = useCanvasCm()
       pageUtils.setPageSize(0, width, height)
       updateCanvasSize()
     },
@@ -234,6 +236,7 @@ export const useEditorStore = defineStore('editor', {
     },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
+      this.prevState = this.editorStates[this.currStateIndex]
       const toNext = dir === 'next'
       if (toNext && this.currStateIndex < statesLen - 1) {
         this.currStateIndex++
@@ -242,6 +245,7 @@ export const useEditorStore = defineStore('editor', {
       }
     },
     changeToSpecificEditorState(state: string, type?: EditorType) {
+      this.prevState = this.editorStates[this.currStateIndex]
       this.editorStates = editorStatesMap[type ?? this.editorType]
       this.currStateIndex = this.editorStates.findIndex((item) => item === state)
     },

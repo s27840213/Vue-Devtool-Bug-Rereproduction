@@ -1,5 +1,7 @@
 import { IMyDesign } from '@nu/vivi-lib/interfaces/vivisticker'
 import { EditorType, GenImageOptionToSave } from './editor'
+import { IPage } from '@nu/vivi-lib/interfaces/page'
+import { GenImageParams } from './api'
 
 export type IMyDesignType = 'all' | EditorType
 
@@ -40,4 +42,13 @@ export interface ITmpSubDesign {
   height: number
   type: string
   thumbIndex: number
+}
+
+export interface IPrevGenParams {
+  params: GenImageParams
+  requestId: string
+  config: IPage[]
+  prompt: string
+  options: GenImageOptionToSave
+  type: EditorType
 }
