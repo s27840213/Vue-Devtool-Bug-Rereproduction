@@ -28,7 +28,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
         draggable="false"
-        :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
+        :crossorigin="needCrossOrigin ? 'anonymous' : undefined"
         @error="onError"
         @load="onLoad($event, 'main')"
         :src="finalSrc")
@@ -55,7 +55,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
           class="nu-image__img full-size"
-          :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
+          :crossorigin="needCrossOrigin ? 'anonymous' : undefined"
           draggable="false"
           @error="onError"
           @load="onAdjustImgLoad($event, 'main')"
@@ -533,6 +533,9 @@ export default defineComponent({
     },
     isBlurImg(): boolean {
       return !!this.config.styles.adjust?.blur
+    },
+    needCrossOrigin(): boolean {
+      return this.$isPic ? this.userId !== 'backendRendering' : imageUtils.needCrossOrigin(this.finalSrc)
     }
   },
   methods: {
@@ -899,7 +902,7 @@ export default defineComponent({
           this.src = src
         }, {
           // stk screenshot need the cross-origin as UI
-          crossOrigin: this.$isStk,
+          crossOrigin: false,
           error: () => {
             this._onError()
         } })
