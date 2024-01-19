@@ -101,7 +101,9 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
           class="absolute top-0 left-0 h-full object-cover z-gen-result"
           :src="currImgSrc")
         //- Editor
-        transition(:name="pageTransition" appear)
+        transition(
+          :name="pageTransition"
+          appear)
           div(v-if="!inGenResultState" class="absolute top-0 left-0 w-full h-full")
             nu-page(
               class="z-page"
@@ -127,7 +129,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
       ref="sidebarTabsRef")
     transition(name="fade-in")
       loading-brick(
-        v-if="isAutoFilling"
+        v-if="isAutoFilling || isSaving"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-median")
     bg-remove-container(
       v-if="inBgRemoveMode && editorContainerRef"
@@ -193,7 +195,6 @@ import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUserStore } from '@/stores/user'
-import type { GenImageParams } from '@/types/api'
 import LinkOrText from '@nu/vivi-lib/components/LinkOrText.vue'
 import BgRemoveContainer from '@nu/vivi-lib/components/editor/backgroundRemove/BgRemoveContainer.vue'
 import NuPage from '@nu/vivi-lib/components/editor/global/NuPage.vue'
@@ -290,7 +291,6 @@ onBeforeRouteLeave((to, from) => {
       editorStore.pageReset()
       editorStore.$reset()
       canvasStore.$reset()
-      setPrevGenParams({ requestId: '', params: {} as GenImageParams })
       store.commit('canvasResize/SET_isResizing', false)
     }, 1000)
   }
@@ -323,10 +323,9 @@ const {
   isGenerating,
 } = storeToRefs(editorStore)
 const userStore = useUserStore()
-const { setCurrOpenDesign, setCurrOpenSubDesign, setPrevGenParams, saveSubDesign, getInitialImg } =
-  userStore
+const { setCurrOpenDesign, setCurrOpenSubDesign, saveSubDesign } = userStore
 
-const { removeWatermark } = storeToRefs(userStore)
+const { isSaving } = storeToRefs(userStore)
 
 const isManipulatingCanvas = computed(() => currActiveFeature.value === 'cm_brush')
 const fromMyDesign = hasGeneratedResults.value
@@ -373,20 +372,19 @@ watch(inGenResultState, (val) => {
     // delay disappearance of gen result to cover page during rendering
     pageTransition.value = undefined
     const duration = 300
-    const start = performance.now();
+    const start = performance.now()
     const step = () => {
-      const now = performance.now();
-      const delta = Math.min((now - start) / duration, 1);
+      const now = performance.now()
+      const delta = Math.min((now - start) / duration, 1)
       if (delta < 1) {
-        requestAnimationFrame(step);
+        requestAnimationFrame(step)
       } else {
         inGenResultStateDalayed.value = val
         pageTransition.value = 'fade-in-only'
       }
-    };
+    }
     step()
-  }
-  else inGenResultStateDalayed.value = val
+  } else inGenResultStateDalayed.value = val
 })
 // #endregion
 

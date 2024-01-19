@@ -5,6 +5,7 @@ import { useModalStore } from '@/stores/modal'
 import { useUploadStore } from '@/stores/upload'
 import { useUserStore } from '@/stores/user'
 import type { GenImageParams, GenImageResult } from '@/types/api'
+import { IPrevGenParams } from '@/types/user'
 import { notify } from '@kyvg/vue3-notification'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
@@ -24,9 +25,6 @@ const ids: string[] = []
 // #endregion
 
 const useGenImageUtils = () => {
-  const userStore = useUserStore()
-  const { setPrevGenParams } = userStore
-  const { prevGenParams, lastUsedMask } = storeToRefs(userStore)
   const { useUsBucket, uploadMap } = storeToRefs(useUploadStore())
   const editorStore = useEditorStore()
   const { setInitImgSrc, setMaskDataUrl, unshiftGenResults, removeGenResult, updateGenResult } =
@@ -41,10 +39,16 @@ const useGenImageUtils = () => {
     maskDataUrl,
     currPrompt,
     myDesignSavedRoot,
+    myDesignSavedType,
   } = storeToRefs(useEditorStore())
   const { uploadImage, polling, getPollingController } = useUpload()
-  const { saveDesignImageToDocument, saveSubDesign, setAiCredit, setLastUsedMask, updatePrevGen } =
-    useUserStore()
+  const {
+    saveDesignImageToDocument,
+    saveSubDesign,
+    setAiCredit,
+    updatePrevGen,
+    getTargetImageUrl,
+  } = useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
   const { setNormalModalInfo, openModal, closeModal } = useModalStore()
   const store = useStore()
@@ -189,11 +193,27 @@ const useGenImageUtils = () => {
     } = {},
   ): Promise<string[]> => {
     const showMore = params_ === undefined
-    const params = showMore ? prevGenParams.value.params : params_!
-    const requestId = showMore ? prevGenParams.value.requestId : generalUtils.generateAssetId()
-    RECORD_TIMING && testUtils.start(`gen-image ${requestId}`, { notify: false, setToLog: true })
 
-    if (!showMore) {
+    let prevGenParms: IPrevGenParams | undefined
+
+    let params = params_!
+    let requestId = generalUtils.generateAssetId()
+    RECORD_TIMING && testUtils.start('gen-image', { notify: false, setToLog: true })
+
+    if (showMore) {
+      try {
+        const prevGenParms_ = (
+          await cmWVUtils.getJson(`${myDesignSavedRoot.value}/${currDesignId.value}/prev/gen`)
+        )?.content
+        if (!prevGenParms_) throw new Error('Parameters for SHOW MORE not found!')
+        prevGenParms = prevGenParms_ as IPrevGenParams
+        params = prevGenParms.params
+        requestId = prevGenParms.requestId
+      } catch (error) {
+        logUtils.setLogForError(error as Error)
+        throw new Error('Load params For SHOW MORE Failed')
+      }
+    } else {
       try {
         // don't call cleanup() returned by uploadEditorAsImage()
         // since the screenshot can be used anytime in this session
@@ -215,13 +235,11 @@ const useGenImageUtils = () => {
         throw new Error('Upload Images For /gen-image Failed')
       }
     }
-    if (maskDataUrl.value) {
-      setLastUsedMask(maskDataUrl.value)
-    }
 
     RECORD_TIMING && testUtils.start('call API', { notify: false, setToLog: true })
+    const fileNames = getFileNames(params.action)
     logUtils.setLogAndConsoleLog(`#${requestId}: ${JSON.stringify(params)}`)
-    const res = (
+    let res = (
       await genImageApis.genImage(
         userId.value,
         requestId,
@@ -229,20 +247,42 @@ const useGenImageUtils = () => {
         params,
         num,
         useUsBucket.value,
+        showMore ? fileNames : undefined,
       )
     ).data
     RECORD_TIMING && testUtils.log('call API', '')
 
     if (res.flag !== 0) {
-      throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
+      if (showMore && res.msg === 'preflight failed') {
+        await reuploadInputImages(userId.value, requestId, fileNames)
+        RECORD_TIMING &&
+          testUtils.start('call API after re-upload', { notify: false, setToLog: true })
+        res = (
+          await genImageApis.genImage(
+            userId.value,
+            requestId,
+            token.value,
+            params,
+            num,
+            useUsBucket.value,
+            showMore ? fileNames : undefined,
+          )
+        ).data
+        RECORD_TIMING && testUtils.log('call API after re-upload', '')
+
+        if (res.flag !== 0) {
+          throw new Error('Call /gen-image after Re-upload Failed, ' + res.msg ?? '')
+        }
+      } else {
+        throw new Error('Call /gen-image Failed, ' + res.msg ?? '')
+      }
     }
 
     onApiResponded()
 
     setAiCredit(res.ai_credit)
-    setPrevGenParams({ requestId, params })
 
-    let prevGenSaved = false
+    let prevGenSaved = showMore // if show more, don't updatePrevGen
 
     const urls = res.urls.map((urlMap) => urlMap.url)
     const pollingController = getPollingController()
@@ -262,25 +302,48 @@ const useGenImageUtils = () => {
           const subDesignId = ids[index]
           const promises = [
             cmWVUtils.cloneFile(
-              initImgSrc.value,
+              showMore
+                ? `${myDesignSavedRoot.value}/${currDesignId.value}/prev/input.jpg`
+                : initImgSrc.value,
               `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/original.jpg`,
             ),
-            saveSubDesign(`${currDesignId.value}/${subDesignId}`, subDesignId, 'original'),
+            saveSubDesign(
+              `${currDesignId.value}/${subDesignId}`,
+              subDesignId,
+              'original',
+              prevGenParms
+                ? {
+                    pages: prevGenParms.config,
+                    prompt: prevGenParms.prompt,
+                    options: prevGenParms.options,
+                    type: prevGenParms.type,
+                  }
+                : undefined,
+            ),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
 
-          if (lastUsedMask.value) {
+          if (showMore) {
             promises.push(
-              saveDesignImageToDocument(lastUsedMask.value, 'mask', {
-                type: 'png',
-                subDesignId,
-              }),
+              cmWVUtils.cloneFile(
+                `${myDesignSavedRoot.value}/${currDesignId.value}/prev/mask.png`,
+                `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/mask.png`,
+              ),
             )
           } else {
-            notify({
-              group: 'error',
-              text: 'save mask to document failed',
-            })
+            if (maskDataUrl.value) {
+              promises.push(
+                saveDesignImageToDocument(maskDataUrl.value, 'mask', {
+                  type: 'png',
+                  subDesignId,
+                }),
+              )
+            } else {
+              notify({
+                group: 'error',
+                text: 'save mask to document failed',
+              })
+            }
           }
 
           await Promise.all(promises)
@@ -324,10 +387,63 @@ const useGenImageUtils = () => {
           logUtils.setLog('updatePrevGen failed:')
           logUtils.setLogForError(error as Error)
         }
-        RECORD_TIMING && testUtils.log(`gen-image ${requestId}`, '')
+        RECORD_TIMING && testUtils.log('gen-image', '')
       }),
     ])
     return urls
+  }
+
+  const getFileNames = (action: string) => {
+    switch (action) {
+      case 'hidden-message':
+        return 'init'
+      case 'mask':
+        return 'init,mask'
+      default:
+        return 'init,mask'
+    }
+  }
+
+  const reuploadInputImages = async (userId: string, requestId: string, fileNames: string) => {
+    const FILENAME_MAP = {
+      init: ['input', 'jpg'],
+      mask: ['mask', 'png'],
+    } as { [key: string]: [string, string] }
+
+    const promises = []
+    for (const fileName of fileNames.split(',')) {
+      const s3path = `${userId}/input/${requestId}_${fileName}`
+      if (fileName === 'mask') {
+        promises.push(
+          prepareMaskToUpload(
+            getTargetImageUrl(myDesignSavedType.value, currDesignId.value, 'prev', 'mask'),
+          ).then((maskUrl) => {
+            try {
+              if (maskUrl === undefined) return
+              return uploadImage(maskUrl, s3path)
+            } catch (error) {
+              throw new Error('Upload Mask Image Failed')
+            }
+          }),
+        )
+      } else {
+        promises.push(
+          cmWVUtils
+            .uploadFileToS3(
+              {
+                path: `${myDesignSavedRoot.value}/${currDesignId.value}/prev/${FILENAME_MAP[fileName][0]}`,
+                ext: FILENAME_MAP[fileName][1],
+              },
+              uploadMap.value ?? {},
+              s3path,
+            )
+            .then((data) => {
+              if (data.flag !== '0') throw new Error(`Upload image ${fileName} failed`)
+            }),
+        )
+      }
+    }
+    await Promise.all(promises)
   }
 
   const uploadEditorAsImage = async (userId: string, requestId: string) => {
@@ -373,28 +489,24 @@ const useGenImageUtils = () => {
     if (editorType.value === 'hidden-message') return
 
     RECORD_TIMING && testUtils.start('mask to dataUrl', { notify: false, setToLog: true })
-    return new Promise<void>((resolve, reject) => {
-      try {
-        const originalMaskDataUrl = getCanvasDataUrl()
-        const maskUrl = prepareMaskToUpload()
-        if (maskUrl !== undefined) {
-          RECORD_TIMING && testUtils.log('mask to dataUrl', '')
-          RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
-          uploadImage(maskUrl, `${userId}/input/${requestId}_mask`).then(() => {
-            RECORD_TIMING && testUtils.log('upload mask', '')
-            if (originalMaskDataUrl) {
-              setMaskDataUrl(originalMaskDataUrl)
-            }
-            resolve()
-          })
-        } else {
-          throw new Error('Upload Mask Image Failed')
+    try {
+      const originalMaskDataUrl = getCanvasDataUrl()
+      const maskUrl = await prepareMaskToUpload()
+      if (maskUrl !== undefined) {
+        RECORD_TIMING && testUtils.log('mask to dataUrl', '')
+        RECORD_TIMING && testUtils.start('upload mask', { notify: false, setToLog: true })
+        await uploadImage(maskUrl, `${userId}/input/${requestId}_mask`)
+        RECORD_TIMING && testUtils.log('upload mask', '')
+        if (originalMaskDataUrl) {
+          setMaskDataUrl(originalMaskDataUrl) // record unconverted mask to store on generating
         }
-      } catch (error) {
-        logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
-        reject(error)
+      } else {
+        throw new Error('Upload Mask Image Failed')
       }
-    })
+    } catch (error) {
+      logUtils.setLogAndConsoleLog('Upload Mask Image Failed')
+      throw error
+    }
   }
 
   return {
