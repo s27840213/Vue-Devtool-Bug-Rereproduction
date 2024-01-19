@@ -59,7 +59,7 @@ div(class="gen-result w-full px-24 flex flex-col gap-16 border-box")
 </template>
 
 <script setup lang="ts">
-import useGenImageUtils from '@/composable/useGenImageUtils'
+import useGenImage from '@/composable/useGenImage'
 import { useEditorStore } from '@/stores/editor'
 import { useUserStore } from '@/stores/user'
 import vuex from '@/vuex'
@@ -95,7 +95,7 @@ const toggleOriginalImg = (show: boolean) => {
 
 const isPro = computed(() => vuex.getters['payment/getPayment'].subscribe)
 
-const { genImageFlow } = useGenImageUtils()
+const { genImageFlow } = useGenImage()
 const disableShowMoreBtn = computed(() => {
   return isGenerating.value || prevGenParams.value.requestId === ''
 })

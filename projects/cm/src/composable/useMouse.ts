@@ -1,7 +1,7 @@
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import { useStore } from 'vuex'
 
-const useMouseUtils = () => {
+const useMouse = () => {
   const store = useStore()
   const contentScaleRatio = computed(() => store.getters.getContentScaleRatio)
 
@@ -89,4 +89,4 @@ const useMouseUtils = () => {
   }
 }
 
-export default useMouseUtils
+export default useMouse

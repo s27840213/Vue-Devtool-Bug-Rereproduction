@@ -186,7 +186,7 @@ div(class="w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)]")
 import Headerbar from '@/components/Headerbar.vue'
 import CanvasResizer from '@/components/editor/CanvasResizer.vue'
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import useGenImageUtils from '@/composable/useGenImageUtils'
+import useGenImage from '@/composable/useGenImage'
 import useStateInfo from '@/composable/useStateInfo'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
@@ -258,7 +258,7 @@ const outputSize = computed(() => {
   }
 })
 
-const { ids } = useGenImageUtils()
+const { ids } = useGenImage()
 
 const showSidebarTabs = computed(
   () =>

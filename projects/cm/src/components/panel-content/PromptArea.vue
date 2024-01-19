@@ -162,7 +162,7 @@ div(class="prompt-area w-full box-border px-24 relative")
 
 <script setup lang="ts">
 import useCanvasUtils from '@/composable/useCanvasUtilsCm'
-import useGenImageUtils from '@/composable/useGenImageUtils'
+import useGenImage from '@/composable/useGenImage'
 import useTutorial from '@/composable/useTutorial'
 import { useEditorStore } from '@/stores/editor'
 import { useGlobalStore } from '@/stores/global'
@@ -234,7 +234,7 @@ const promptText = computed({
 
 const promptLen = computed(() => currPrompt.value.length)
 const { isDuringTutorial } = useTutorial()
-const { genImageFlow } = useGenImageUtils()
+const { genImageFlow } = useGenImage()
 const { checkCanvasIsEmpty, getAutoFillCanvas } = useCanvasUtils()
 const { t } = useI18n()
 

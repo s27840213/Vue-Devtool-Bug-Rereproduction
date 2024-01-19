@@ -1,5 +1,5 @@
 import genImageApis from '@/apis/genImage'
-import useUploadUtils from '@/composable/useUploadUtils'
+import useUpload from '@/composable/useUpload'
 import { useEditorStore } from '@/stores/editor'
 import { useModalStore } from '@/stores/modal'
 import { useUploadStore } from '@/stores/upload'
@@ -42,7 +42,7 @@ const useGenImageUtils = () => {
     currPrompt,
     myDesignSavedRoot,
   } = storeToRefs(useEditorStore())
-  const { uploadImage, polling, getPollingController } = useUploadUtils()
+  const { uploadImage, polling, getPollingController } = useUpload()
   const { saveDesignImageToDocument, saveSubDesign, setAiCredit, setLastUsedMask, updatePrevGen } =
     useUserStore()
   const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
