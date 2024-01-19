@@ -549,13 +549,20 @@ const useCanvasUtils = (
     }
   }
 
-  const prepareMaskToUpload = (src?: string) => {
+  const prepareMaskToUpload = async (src?: string) => {
     let source: HTMLCanvasElement | HTMLImageElement | null = canvas?.value
     if (src) {
-      const img = new Image()
-      img.crossOrigin = 'Anonymous'
-      img.src = src
-      source = img
+      source = await new Promise((resolve) => {
+        const img = new Image()
+        img.crossOrigin = 'Anonymous'
+        img.onload = () => {
+          resolve(img)
+        }
+        img.onerror = () => {
+          throw new Error('Mask image load failed')
+        }
+        img.src = src
+      })
     }
     if (source) {
       const canvasCopy = document.createElement('canvas')
