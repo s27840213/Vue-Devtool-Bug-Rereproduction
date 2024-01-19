@@ -67,6 +67,11 @@ export const fragment_slide = `
 
 export default class PixiRecorder {
   private pixi = new PIXI.Application()
+  private pixi_imgGen = new PIXI.Application({
+    backgroundAlpha: 1,
+    backgroundColor: '0xFFFFFF'
+  })
+
   private sprite_src = null as null | PIXI.Sprite
   private texture_res = null as null | PIXI.Texture
   private sprite_res = null as null | PIXI.Sprite
@@ -89,7 +94,6 @@ export default class PixiRecorder {
   }
 
   async genVideo() {
-    console.error('genvideo')
     if (!this.isImgReady) {
       await Promise.race([
         new Promise<void>((resolve) => {
@@ -100,9 +104,7 @@ export default class PixiRecorder {
         throw new Error('pixi-recorder: can not load image as genVideo!')
       })
     }
-
     if (!this.sprite_src) throw new Error('the sprite_src in genVideo is undefined!')
-    if (!this._animate) throw new Error('the _animate in genVideo is undefined!')
 
     // if the video is recording already, stop it first
     // this pixi instance only gening one video once a time
@@ -110,17 +112,34 @@ export default class PixiRecorder {
       await this.shutGeningVideo()
     }
 
-    this.reset && this.reset()
+    // TEST use
+    this.addTestCanvas()
+
+    // resizing canavs
+    this.pixi.view.width = this.sprite_src.width
+    this.pixi.view.height = this.sprite_src.height
+    const renderer = this.pixi.renderer
+    renderer.resize(this.pixi.view.width, this.pixi.view.height)
+
+    // canvas/sprite setup
     this.watermarkHandler()
     this.pixi.stage.sortableChildren = true
+    this.pixi.stage.removeChildren()
     this.pixi.stage.addChild(this.sprite_src)
-    this.pixi.ticker.add(this._animate)
+    this.addFilter(this.fragment)
+    this.reset && this.reset()
+    this.pixi.render()
+
+    if (this._animate) {
+      this.pixi.ticker.add(this._animate)
+    } else {
+      throw new Error('the _animate in genVideo is undefined!')
+    }
 
     return new Promise<string | 'error'>((resolve) => {
       const stopCb = (url: string) => {
         this.isRecordingVideo = false
-        this.pixi.stage.removeChildren()
-        if (store.getters['cmWV/getDebugMode']) {
+        if (store.getters['cmWV/getDebugMode'] && document.body.contains(this.pixi.view as HTMLCanvasElement)) {
           document.body.removeChild(this.pixi.view as HTMLCanvasElement)
         }
         return resolve(url)
@@ -137,7 +156,6 @@ export default class PixiRecorder {
   }
 
   shutGeningVideo() {
-    this.pixi.stage.removeChildren()
     this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
     return this.canvasRecorder?.stop(true)
   }
@@ -379,12 +397,9 @@ export default class PixiRecorder {
   }
 
   genImg(containerSize: ISize, sprite: PIXI.Sprite) {
-    const pixi = new PIXI.Application({
-      ...containerSize,
-      backgroundAlpha: 1,
-      backgroundColor: '0xFFFFFF'
-    })
-    pixi.stage.addChild(sprite)
+    this.pixi_imgGen.view.width = containerSize.width
+    this.pixi_imgGen.view.height = containerSize.height
+    this.pixi_imgGen.stage.addChild(sprite)
     const scale = Math.min(
       containerSize.width / sprite.width,
       containerSize.height / sprite.height
@@ -393,8 +408,12 @@ export default class PixiRecorder {
     sprite.height *= scale
     sprite.x = (containerSize.width - sprite.width) * 0.5
     sprite.y = (containerSize.height - sprite.height) * 0.5
-    pixi.renderer.render(pixi.stage)
-    return pixi.renderer.extract.base64()
+    // pixi.renderer.render(pixi.stage)
+    this.pixi_imgGen.render()
+    return this.pixi_imgGen.renderer.extract.base64()
+      .finally(() => {
+        this.pixi_imgGen.stage.removeChildren()
+      })
   }
 
   addImage(src: string, res: string) {
@@ -402,26 +421,6 @@ export default class PixiRecorder {
       .then(sprites => this.preprocessor(sprites))
       .then(() => {
         this.isImgReady = true
-        if (!this.sprite_src || !this.sprite_res) return console.warn('no sprite')
-
-        this.pixi.view.width = this.sprite_src.width
-        this.pixi.view.height = this.sprite_src.height
-
-        const renderer = this.pixi.renderer
-        renderer.resize(this.pixi.view.width, this.pixi.view.height)
-        this.addFilter(this.fragment)
-
-        // @TEST use
-        if (store.getters['cmWV/getDebugMode']) {
-          const testCanvas = this.pixi.view as HTMLCanvasElement
-          document.body.appendChild(testCanvas)
-          testCanvas.style.position = 'absolute'
-          testCanvas.style.top = '0'
-          testCanvas.style.width = '300px'
-          testCanvas.style.left = '0'
-          testCanvas.style.zIndex = '10000'
-        }
-
         // if the genVideo func is called, but the imgs is not loaded yet,
         // the genVideo func will await for the imgs to be loaded
         if (this._genVideoResolver) {
@@ -442,6 +441,19 @@ export default class PixiRecorder {
         )
         throw new Error('pixi-recorder: can not load image!')
       })
+  }
+
+  private addTestCanvas() {
+    // @TEST use
+    if (store.getters['cmWV/getDebugMode']) {
+      const testCanvas = this.pixi.view as HTMLCanvasElement
+      document.body.appendChild(testCanvas)
+      testCanvas.style.position = 'absolute'
+      testCanvas.style.top = '0'
+      testCanvas.style.width = '300px'
+      testCanvas.style.left = '0'
+      testCanvas.style.zIndex = '10000'
+    }
   }
 }
 
