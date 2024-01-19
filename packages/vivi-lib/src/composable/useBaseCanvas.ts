@@ -1,6 +1,6 @@
 import { IStyle } from '@/interfaces/layer'
 
-const useBaseCanvasUtils = (targetLayerStyle?: IStyle) => {
+const useBaseCanvas = (targetLayerStyle?: IStyle) => {
   // This function takes an HTMLCanvasElement as input and returns a trimmed version of it.
   const trimCanvas = (canvas: HTMLCanvasElement) => {
     // Get the 2D rendering context of the input canvas.
@@ -108,4 +108,4 @@ const useBaseCanvasUtils = (targetLayerStyle?: IStyle) => {
   }
 }
 
-export default useBaseCanvasUtils
+export default useBaseCanvas

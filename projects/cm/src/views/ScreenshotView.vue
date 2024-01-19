@@ -23,7 +23,7 @@ div(class="screenshot relative")
 </template>
 
 <script lang="ts">
-import useCanvasUtils from '@/composable/useCanvasUtilsCm'
+import useCanvasCm from '@/composable/useCanvasCm'
 import { useEditorStore } from '@/stores/editor'
 import PageContent from '@nu/vivi-lib/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@nu/vivi-lib/interfaces/customWindow'
@@ -59,7 +59,7 @@ export default defineComponent({
   name: 'ScreenShot',
   setup() {
     const { setMaskDataUrl, updateMaskParams } = useEditorStore()
-    const { restoreCanvas, updateCanvasSize } = useCanvasUtils()
+    const { restoreCanvas, updateCanvasSize } = useCanvasCm()
     return {
       setMaskDataUrl,
       restoreCanvas,

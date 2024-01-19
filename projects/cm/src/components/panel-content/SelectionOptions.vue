@@ -19,7 +19,7 @@ div(class="editing-options w-full")
 </template>
 <script setup lang="ts">
 import FooterBar from '@/components/panel-content/FooterBar.vue'
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useCanvasCm from '@/composable/useCanvasCm'
 import useSteps from '@/composable/useSteps'
 import { useCanvasStore } from '@/stores/canvas'
 import { useEditorStore } from '@/stores/editor'
@@ -32,7 +32,7 @@ import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 
 const canvasStore = useCanvasStore()
 const { steps, checkPointStep } = storeToRefs(canvasStore)
-const { drawImageToCtx, setCheckPointStep } = useCanvasUtilsCm()
+const { drawImageToCtx, setCheckPointStep } = useCanvasCm()
 const editorStore = useEditorStore()
 const { setCurrActiveFeature } = editorStore
 const { currActiveFeature } = storeToRefs(editorStore)

@@ -27,7 +27,7 @@ div(class="aspect-ratio-selector grid gap-16")
 </template>
 
 <script setup lang="ts">
-import useCanvasUtilsCm from '@/composable/useCanvasUtilsCm'
+import useCanvasCm from '@/composable/useCanvasCm'
 import useTutorial from '@/composable/useTutorial'
 import i18n from '@/i18n'
 import { useEditorStore } from '@/stores/editor'
@@ -41,7 +41,7 @@ import { storeToRefs } from 'pinia'
 
 const editorStore = useEditorStore()
 const { imgAspectRatio, pageSize, editorType } = storeToRefs(editorStore)
-const { updateCanvasSize } = useCanvasUtilsCm()
+const { updateCanvasSize } = useCanvasCm()
 
 const _aspectRatioTypes = ['9:16', 'original', '16:9', '1:1', '2:3', '3:2', '4:5', '5:4'].map(
   (asp) => ({ label: asp, val: asp }),
