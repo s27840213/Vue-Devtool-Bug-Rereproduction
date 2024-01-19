@@ -18,7 +18,8 @@ div(class="w-full flex-center gap-64 py-12 box-border")
       :iconColor="'yellow-0'"
       :iconWidth="'24px'")
     span(class="text-yellow-0 typo-body-sm") {{ $t('CM0127') }}
-  div(class="flex-center flex-col gap-4" @click="edit")
+  div(v-if="currOpenSubDesign?.type === 'powerful-fill'"
+    class="flex-center flex-col gap-4" @click="edit")
     svg-icon(
       :iconName="'pencil'"
       :iconColor="'yellow-0'"
@@ -27,17 +28,12 @@ div(class="w-full flex-center gap-64 py-12 box-border")
 </template>
 <script setup lang="ts">
 import useActionSheetCm from '@/composable/useActionSheetCm';
-import useStateInfo from '@/composable/useStateInfo';
-import { useEditorStore } from '@/stores/editor';
 import { useMediaStore } from '@/stores/media';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore()
 const { editSubDesignResult, initWithSubDesignConfig } = userStore
-const { atEditor } = useStateInfo()
 const { currOpenSubDesign } = storeToRefs(userStore)
-const editorStore = useEditorStore()
-const { changeToSpecificEditorState, keepEditingInit } = editorStore
 const { setMediaParams, setInMediaOptions } = useMediaStore()
 
 const {
