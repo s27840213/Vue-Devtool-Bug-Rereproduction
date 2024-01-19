@@ -33,10 +33,11 @@ import logUtils from '@/utils/logUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import vuexUtils from '@/utils/vuexUtils'
 import imagePreview from '@img/svg/image-preview.svg'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -60,7 +61,9 @@ export default defineComponent({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
-    ...mapGetters('brandkit', {
+    ...vuexUtils.mapGetters('pic', {
+      isSettingsOpen: false
+    }, 'brandkit', {
       isSettingsOpen: 'getIsSettingsOpen'
     }),
     getPreview(): string {
