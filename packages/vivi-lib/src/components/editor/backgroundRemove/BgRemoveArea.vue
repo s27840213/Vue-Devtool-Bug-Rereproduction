@@ -103,7 +103,6 @@ export default defineComponent({
 
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
-    logUtils.setLogAndConsoleLog(`auto remove img src: ${this.imgSrc}`)
   },
   mounted() {
     logUtils.setLogAndConsoleLog('BgRemoveArea mounted')

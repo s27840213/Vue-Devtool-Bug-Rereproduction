@@ -542,6 +542,7 @@ const useCanvasUtils = (
 
     if (canvas && canvas.value) {
       groupUtils.deselect()
+      setIsAutoFilling(true)
       getAutoFillCanvas().then((result) => {
         result?.drawResultToCtx()
         setIsAutoFilling(false)

@@ -190,6 +190,7 @@ export const useUserStore = defineStore('user', () => {
       // reset drawing color
       if (useBiColorEditor().isBiColorEditor) useCanvasStore().reset(['drawingColor'])
 
+      logUtils.setLogAndConsoleLog('start edit the deisgn')
       startEditing('powerful-fill', {
         stateTarget: 'editing',
         designName: 'result',

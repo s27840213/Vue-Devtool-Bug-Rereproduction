@@ -1,12 +1,12 @@
 import colorUtils from '@/utils/colorUtils'
 import modalUtils from '@/utils/modalUtils'
-import stkWVUtils from '@/utils/stkWVUtils'
 import Core from '@any-touch/core'
 import swipe from '@any-touch/swipe'
 import Notifications, { notify } from '@kyvg/vue3-notification'
 import PropertyBar from '@nu/shared-lib/components/PropertyBar.vue'
 import SvgIcon from '@nu/shared-lib/components/SvgIcon.vue'
 import '@nu/shared-lib/css'
+import { useEventListener } from '@vueuse/core'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import mitt, { Emitter, EventType } from 'mitt'
@@ -21,7 +21,6 @@ import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import TooltipUtils from './utils/tooltipUtils'
-import { useEventListener } from '@vueuse/core'
 import uploadUtils from './utils/uploadUtils'
 // import '@/imports'
 
@@ -51,6 +50,7 @@ window.onerror = function (msg, url, line, colno, error) {
     'Col: ' + colno,
     'Stack: ' + error?.stack
   ].join(' - ')
+  console.log(msg)
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   logUtils.uploadLog().then(() => {
     if ((generalUtils.isPic && store.getters['user/isAdmin']) ||
@@ -58,6 +58,13 @@ window.onerror = function (msg, url, line, colno, error) {
         (generalUtils.isCm && store.getters['cmWV/getDebugMode'])) {
       const id = uploadUtils.fullId
       const hint = `${id}, ${generalUtils.generateTimeStamp()}, ${errorId}`
+      /**
+       * @Note if the error is from the library, the error message will be script error due to sercurity reason
+       * Currently, we need to skip the error of Resize Observer in the @vuese
+       */
+      const skipModal = generalUtils.isCm && typeof msg === 'string'  && ['Script error.'].includes(msg)
+      
+      if(!skipModal) {
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
         hint,
@@ -70,6 +77,7 @@ window.onerror = function (msg, url, line, colno, error) {
           }
         }
       )
+      }
     }
   })
 }
@@ -87,6 +95,7 @@ app.config.globalProperties.$isPic = generalUtils.isPic
 app.config.globalProperties.$isStk = generalUtils.isStk
 app.config.globalProperties.$isCm = generalUtils.isCm
 app.config.globalProperties.$eventBus = eventBus
+
 
 const tooltipUtils = new TooltipUtils()
 
