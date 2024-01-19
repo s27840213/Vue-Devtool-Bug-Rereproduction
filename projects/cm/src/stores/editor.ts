@@ -18,8 +18,8 @@ import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import { defineStore } from 'pinia'
 import { find } from 'lodash'
+import { defineStore } from 'pinia'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -45,6 +45,7 @@ interface IEditorStore {
   imgAspectRatio: number
   editorStates: EditorStates
   currStateIndex: number
+  prevState: string
   currActiveFeature: EditorFeature
   editorType: EditorType
   maskDataUrl: string
@@ -79,6 +80,7 @@ export const useEditorStore = defineStore('editor', {
     editorType: 'powerful-fill',
     editorStates: editorStatesMap['powerful-fill'],
     currStateIndex: 0,
+    prevState: '',
     currActiveFeature: 'none',
     isSendingGenImgReq: false,
     generatedResults: [],
@@ -233,6 +235,7 @@ export const useEditorStore = defineStore('editor', {
     },
     changeEditorState(dir: 'next' | 'prev') {
       const statesLen = this.editorStates.length
+      this.prevState = this.editorStates[this.currStateIndex]
       const toNext = dir === 'next'
       if (toNext && this.currStateIndex < statesLen - 1) {
         this.currStateIndex++
@@ -241,6 +244,7 @@ export const useEditorStore = defineStore('editor', {
       }
     },
     changeToSpecificEditorState(state: string, type?: EditorType) {
+      this.prevState = this.editorStates[this.currStateIndex]
       this.editorStates = editorStatesMap[type ?? this.editorType]
       this.currStateIndex = this.editorStates.findIndex((item) => item === state)
     },
@@ -278,16 +282,28 @@ export const useEditorStore = defineStore('editor', {
       }
 
       if (video) {
-        console.warn('this.generatedResults[index].video?.src0', this.generatedResults[index].video?.src)
+        console.warn(
+          'this.generatedResults[index].video?.src0',
+          this.generatedResults[index].video?.src,
+        )
         if (this.generatedResults[index].video?.src) {
-          console.warn('this.generatedResults[index].video?.src1', this.generatedResults[index].video?.src)
+          console.warn(
+            'this.generatedResults[index].video?.src1',
+            this.generatedResults[index].video?.src,
+          )
           URL.revokeObjectURL(this.generatedResults[index].video?.src || '')
         }
         this.generatedResults[index].video = { ...video }
       } else if (video === null) {
-        console.warn('this.generatedResults[index].video?.src 2', this.generatedResults[index].video?.src)
+        console.warn(
+          'this.generatedResults[index].video?.src 2',
+          this.generatedResults[index].video?.src,
+        )
         if (this.generatedResults[index].video?.src) {
-          console.warn('this.generatedResults[index].video?.src 3', this.generatedResults[index].video?.src)
+          console.warn(
+            'this.generatedResults[index].video?.src 3',
+            this.generatedResults[index].video?.src,
+          )
           URL.revokeObjectURL(this.generatedResults[index].video?.src || '')
         }
         this.generatedResults[index].video = undefined
