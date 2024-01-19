@@ -63,7 +63,7 @@ window.onerror = function (msg, url, line, colno, error) {
        * Currently, we need to skip the error of Resize Observer in the @vuese
        */
       const skipModal = generalUtils.isCm && typeof msg === 'string'  && ['Script error.'].includes(msg)
-      logUtils.setLogAndConsoleLog(generalUtils.isCm, typeof msg === 'string', ['Script error.'].includes(msg as string) )
+      logUtils.setLogAndConsoleLog(generalUtils.isCm, typeof msg === 'string', ['Script error.', 'ResizeObserver loop completed with undelivered notifications.'].includes(msg as string) )
       if(!skipModal) {
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
