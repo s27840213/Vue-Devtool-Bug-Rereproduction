@@ -18,8 +18,8 @@ import constantData from '@nu/vivi-lib/utils/constantData'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
 import stepsUtils from '@nu/vivi-lib/utils/stepsUtils'
-import { defineStore } from 'pinia'
 import { find } from 'lodash'
+import { defineStore } from 'pinia'
 
 const editorStatesMap = {
   'powerful-fill': ['aspectRatio', 'editing', 'genResult', 'saving'] as PowerfulfillStates[],
@@ -278,16 +278,14 @@ export const useEditorStore = defineStore('editor', {
       }
 
       if (video) {
-        console.warn('this.generatedResults[index].video?.src0', this.generatedResults[index].video?.src)
         if (this.generatedResults[index].video?.src) {
-          console.warn('this.generatedResults[index].video?.src1', this.generatedResults[index].video?.src)
+          console.warn('updateGenResult 1', this.generatedResults[index].video?.src, video)
           URL.revokeObjectURL(this.generatedResults[index].video?.src || '')
         }
         this.generatedResults[index].video = { ...video }
       } else if (video === null) {
-        console.warn('this.generatedResults[index].video?.src 2', this.generatedResults[index].video?.src)
         if (this.generatedResults[index].video?.src) {
-          console.warn('this.generatedResults[index].video?.src 3', this.generatedResults[index].video?.src)
+          console.warn('updateGenResult 2', this.generatedResults[index].video?.src)
           URL.revokeObjectURL(this.generatedResults[index].video?.src || '')
         }
         this.generatedResults[index].video = undefined

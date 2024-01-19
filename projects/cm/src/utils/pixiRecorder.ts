@@ -107,7 +107,7 @@ export default class PixiRecorder {
     // if the video is recording already, stop it first
     // this pixi instance only gening one video once a time
     if (this.isRecordingVideo) {
-      this.shutGeningVideo()
+      await this.shutGeningVideo()
     }
 
     this.reset && this.reset()
@@ -137,9 +137,9 @@ export default class PixiRecorder {
   }
 
   shutGeningVideo() {
-    this.canvasRecorder?.stop(true)
     this.pixi.stage.removeChildren()
     this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+    return this.canvasRecorder?.stop(true)
   }
 
   watermarkHandler() {
@@ -471,19 +471,22 @@ class CanvasRecorder {
   }
 
   stop(notStoreVideo = false) {
-    this.recorder.onstop = () => {
-      if (notStoreVideo) {
-        if (this._stopCb) {
-          this._stopCb('')
+    return new Promise<void>(resolve => {
+      this.recorder.onstop = () => {
+        if (notStoreVideo) {
+          if (this._stopCb) {
+            this._stopCb('')
+          }
+        } else {
+          const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
+          if (this._stopCb) {
+            this._stopCb(url)
+          }
         }
-      } else {
-        const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
-        if (this._stopCb) {
-          this._stopCb(url)
-        }
+        resolve()
       }
-    }
-    this.recorder.stop()
+      this.recorder.stop()
+    })
   }
 
   onDataAvailable(e: any) {
