@@ -219,11 +219,11 @@ export const useUserStore = defineStore('user', () => {
 
   const editSubDesignResult = async () => {
     // Do the same thing with editor.keepEditingInit.
-    if (!currOpenDesign.value || !currOpenSubDesign.value) return false
-    const { subId } = currOpenSubDesign.value
+    if (!currOpenSubDesign.value) return false
+    const { subId, type, id } = currOpenSubDesign.value
 
     // Try to open result.json.
-    const subDesignData = await getSubDesignConfig(currOpenDesign.value, subId, 'result')
+    const subDesignData = await getSubDesignConfig({ type, id }, subId, 'result')
     if (subDesignData?.flag === '0') {
       initWithSubDesignConfig(subDesignData.content)
       return
