@@ -1,5 +1,5 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
-import useCanvasUtils from '@/composable/useCanvasUtilsCm'
+import useCanvasCm from '@/composable/useCanvasCm'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import type {
@@ -180,7 +180,7 @@ export const useEditorStore = defineStore('editor', {
   },
   actions: {
     setPageSize(width: number, height: number) {
-      const { updateCanvasSize } = useCanvasUtils()
+      const { updateCanvasSize } = useCanvasCm()
       pageUtils.setPageSize(0, width, height)
       updateCanvasSize()
     },

@@ -16,7 +16,7 @@ import logUtils from '@nu/vivi-lib/utils/logUtils'
 import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import testUtils from '@nu/vivi-lib/utils/testUtils'
 import { useStore } from 'vuex'
-import useCanvasUtils from './useCanvasUtilsCm'
+import useCanvasCm from './useCanvasCm'
 
 export const RECORD_TIMING = true
 
@@ -49,7 +49,7 @@ const useGenImageUtils = () => {
     updatePrevGen,
     getTargetImageUrl,
   } = useUserStore()
-  const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasUtils()
+  const { prepareMaskToUpload, getCanvasDataUrl } = useCanvasCm()
   const { setNormalModalInfo, openModal, closeModal } = useModalStore()
   const store = useStore()
   const userId = computed(() => store.getters['user/getUserId'])
