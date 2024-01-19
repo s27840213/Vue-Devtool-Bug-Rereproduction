@@ -261,7 +261,7 @@ export const useEditorStore = defineStore('editor', {
     setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
       this.isSendingGenImgReq = isSendingGenImgReq
     },
-    unshiftGenResults(url: string, id: string, prompt: string) {
+    unshiftGenResults(url: string, id: string/*, prompt: string */) {
       this.generatedResults.unshift({
         url,
         id,
@@ -365,11 +365,11 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOption[]) {
       this.currGenOptions = options
     },
-    updateCurrGenOption(option: { key: string; value: any }) {
+    updateCurrGenOption(option: GenImageOption) {
       const currOption = this.currGenOptions.find((o) => o.key === option.key)
       if (currOption) currOption.value = option.value
     },
-    restoreGenOptions(options: { [key: string]: any }, type: EditorType) {
+    restoreGenOptions(options: GenImageOptionToSave, type: EditorType) {
       const defaultOptions = constantData.getGenImageOptions(type) as GenImageOption[] | undefined
       if (!defaultOptions) return
       this.currGenOptions = defaultOptions.map((option) => {
