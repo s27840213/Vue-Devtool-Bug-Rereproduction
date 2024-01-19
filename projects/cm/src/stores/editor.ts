@@ -1,5 +1,6 @@
 import useBiColorEditor from '@/composable/useBiColorEditor'
 import useCanvasCm from '@/composable/useCanvasCm'
+import useSteps from '@/composable/useSteps'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import type {
@@ -230,7 +231,7 @@ export const useEditorStore = defineStore('editor', {
         this.generatedResults = generatedResults
       }
 
-      stepsUtils.reset()
+      useSteps().reset()
 
       router.push({ name: 'Editor', query: { type, width: designWidth, height: designHeight } })
     },
@@ -261,7 +262,7 @@ export const useEditorStore = defineStore('editor', {
     setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
       this.isSendingGenImgReq = isSendingGenImgReq
     },
-    unshiftGenResults(url: string, id: string/*, prompt: string */) {
+    unshiftGenResults(url: string, id: string /*, prompt: string */) {
       this.generatedResults.unshift({
         url,
         id,
@@ -365,7 +366,7 @@ export const useEditorStore = defineStore('editor', {
     setCurrGenOptions(options: GenImageOption[]) {
       this.currGenOptions = options
     },
-    updateCurrGenOption(option: Pick<GenImageOption, 'key'| 'value'>) {
+    updateCurrGenOption(option: Pick<GenImageOption, 'key' | 'value'>) {
       const currOption = this.currGenOptions.find((o) => o.key === option.key)
       if (currOption) currOption.value = option.value
     },
