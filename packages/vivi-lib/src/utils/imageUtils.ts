@@ -1,10 +1,10 @@
 import imageApi from '@/apis/image-api'
 import {
-  IAssetPhoto,
-  IImageSize,
-  IPhotoItem,
-  IUserImageContentData,
-  isIAssetPhoto,
+IAssetPhoto,
+IImageSize,
+IPhotoItem,
+IUserImageContentData,
+isIAssetPhoto,
 } from '@/interfaces/api'
 import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
@@ -26,7 +26,7 @@ import { AxiosPromise } from 'axios'
 import { cloneDeep, findLastIndex } from 'lodash'
 import logUtils from './logUtils'
 
-const APP_VER_FOR_REFRESH_CACHE = 'v922'
+const APP_VER_FOR_REFRESH_CACHE = 'v1573'
 
 class ImageUtils {
   get imageSizeMap(): { [key: string]: number } {
@@ -48,7 +48,10 @@ class ImageUtils {
     const { error, crossOrigin = true } = options || {}
     return new Promise<T>((resolve, reject) => {
       const image = new Image()
-      if (crossOrigin && !src.includes('data:image/png;base64')) {
+      if (
+        (generalUtils.isPic ? crossOrigin : this.needCrossOrigin(src)) &&
+        !src.includes('data:image/png;base64')
+      ) {
         image.crossOrigin = 'anonymous'
       }
       image.onload = () => resolve(cb(image))
@@ -1002,6 +1005,14 @@ class ImageUtils {
     }
     store.commit('mobileEditor/SET_closeMobilePanelFlag', true)
     stepsUtils.record()
+  }
+
+  needCrossOrigin(src: string) {
+    // sizes larger than xtra don't need crossOrigin
+    return !(
+      (src.includes('template.vivipic.com') || src.includes('asset.vivipic.com')) &&
+      (src.includes('/xtra') || src.includes('/ext'))
+    )
   }
 }
 
