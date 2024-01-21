@@ -402,8 +402,8 @@ const useCanvasUtils = (
   }
   // #endregion
 
-  onMounted(() => {
-    if (wrapperRef && editorContainerRef) {
+  if (wrapperRef && editorContainerRef) {
+    onMounted(() => {
       createInitCanvas(sourceCanvas?.value, pageSize.value.width, pageSize.value.height)
       clearDrawStart = useEventListener(editorContainerRef, 'pointerdown', drawStart)
       useEventListener(editorContainerRef, 'pointermove', setBrushPos)
@@ -412,14 +412,14 @@ const useCanvasUtils = (
         canvasCtx.value.fillStyle = drawingColor.value
       }
       restoreCanvas()
-    }
 
-    watch(isManipulatingCanvas, (newVal) => {
-      if (!newVal) {
-        setCompositeOperationMode('source-over')
-      }
+      watch(isManipulatingCanvas, (newVal) => {
+        if (!newVal) {
+          setCompositeOperationMode('source-over')
+        }
+      })
     })
-  })
+  }
 
   const reverseSelection = () => {
     if (canvasCtx && canvasCtx.value) {
@@ -874,6 +874,7 @@ const useCanvasUtils = (
 
   const reset = () => {
     clearStep()
+    clearCtx()
     record()
   }
 

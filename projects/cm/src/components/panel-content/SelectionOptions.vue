@@ -26,6 +26,7 @@ import { useEditorStore } from '@/stores/editor'
 import type { SrcObj } from '@nu/vivi-lib/interfaces/gallery'
 import type { AllLayerTypes } from '@nu/vivi-lib/interfaces/layer'
 import assetUtils from '@nu/vivi-lib/utils/assetUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
@@ -130,12 +131,14 @@ const cancel = () => {
   setCurrActiveFeature('none')
   goToCheckpoint()
   groupUtils.deselect()
+  editorUtils.setAllowLayerAction('all')
 }
 
 const apply = () => {
   setCurrActiveFeature('none')
   groupUtils.deselect()
   setCheckpoint(true)
+  editorUtils.setAllowLayerAction('all')
 }
 </script>
 <style lang="scss"></style>

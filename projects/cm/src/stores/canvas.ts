@@ -80,10 +80,10 @@ export const useCanvasStore = defineStore('canvas', {
     setIsDrawing(isDrawing: boolean) {
       this.isDrawing = isDrawing
     },
-    setCanvas(canvas: HTMLCanvasElement) {
+    setCanvas(canvas: HTMLCanvasElement | null) {
       this.canvas = canvas
     },
-    setCanvasCtx(ctx: CanvasRenderingContext2D) {
+    setCanvasCtx(ctx: CanvasRenderingContext2D | null) {
       this.canvasCtx = ctx
     },
     setCurrCanvasImageElement(img: HTMLImageElement) {

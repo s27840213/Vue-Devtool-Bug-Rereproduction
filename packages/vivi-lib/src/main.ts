@@ -52,6 +52,12 @@ window.onerror = function (msg, url, line, colno, error) {
   ].join(' - ')
   logUtils.setLogAndConsoleLog(msg)
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
+  const isScriptError = typeof msg === 'string' && msg.includes('Script error.')
+  const isResizeObserverError = typeof msg === 'string' && msg.includes('ResizeObserver loop completed with undelivered notifications.')
+  logUtils.setLogAndConsoleLog('isScriptError: ' + isScriptError)
+  logUtils.setLogAndConsoleLog('isResizeObserverError: ' + isResizeObserverError)
+
+  
   logUtils.uploadLog().then(() => {
     if ((generalUtils.isPic && store.getters['user/isAdmin']) ||
         (generalUtils.isStk && store.getters['vivisticker/getDebugMode']) ||
@@ -62,9 +68,8 @@ window.onerror = function (msg, url, line, colno, error) {
        * @Note if the error is from the library, the error message will be script error due to sercurity reason
        * Currently, we need to skip the error of Resize Observer in the @vuese
        */
-      const skipModal = generalUtils.isCm && typeof msg === 'string'  && ['Script error.'].includes(msg)
-      logUtils.setLogAndConsoleLog(generalUtils.isCm, typeof msg === 'string', ['Script error.', 'ResizeObserver loop completed with undelivered notifications.'].includes(msg as string) )
-      if(!skipModal) {
+
+      if(!isScriptError && !isResizeObserverError) {
       modalUtils.setModalInfo(
         i18n.global.t('NN0866'),
         hint,

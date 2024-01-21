@@ -537,7 +537,7 @@ export default defineComponent({
         doubleClickCallback: () => {
           if (this.getLayerType !== LayerType.image ||
             this.prePrimaryLayerIndex !== -1 ||
-            this.$store.state.allowLayerAction === 'none') return
+            ['none', 'crop-exclude'].includes(this.$store.state.allowLayerAction )) return
 
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
           if (generalUtils.isCm) {
