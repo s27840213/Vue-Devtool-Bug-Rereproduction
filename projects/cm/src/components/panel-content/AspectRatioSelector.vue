@@ -153,7 +153,7 @@ const updateLayerStyleToFitPage = () => {
 
   // For other editor types.
   const img = layerUtils.getLayer(layerUtils.pageIndex, 0) as IImage
-  const { width, height } = mathUtils.calcFit(
+  let { width, height } = mathUtils.calcFit(
     'contain',
     {
       width: img.styles.initWidth,
@@ -161,6 +161,17 @@ const updateLayerStyleToFitPage = () => {
     },
     pageSize.value,
   )
+
+  // scale 1 px to cut white edges caused by render issue of safari
+  const scalePx = {
+    width: 2,
+    height: 2,
+  }
+  if (imgAspectRatio.value < 1) scalePx.height = scalePx.width / imgAspectRatio.value
+  else scalePx.width = scalePx.height * imgAspectRatio.value
+  width += scalePx.width
+  height += scalePx.height
+
   layerUtils.updateLayerStyles(layerUtils.pageIndex, 0, {
     width,
     height,
@@ -181,10 +192,8 @@ const handleNextAction = function () {
 
 onMounted(() => {
   editorUtils.setAllowLayerAction('none')
-  if (editorType.value === 'magic-combined') {
-    // Init img position.
-    updateLayerStyleToFitPage()
-  }
+  // Init img position.
+  updateLayerStyleToFitPage()
 })
 onBeforeUnmount(() => {
   if (editorType.value === 'magic-combined') {
