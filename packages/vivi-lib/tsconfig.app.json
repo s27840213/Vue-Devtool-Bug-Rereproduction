@@ -44,7 +44,8 @@
       ]
     },
     "types": [
-      "vite/client"
+      "vite/client",
+      "wicg-file-system-access"
     ],
     "lib": [
       "ESNext",

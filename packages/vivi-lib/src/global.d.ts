@@ -1,19 +1,21 @@
 export { }
 
 declare global {
+  import opfsUtils from "@/utils/opfsUtils"
   // Extend Window type, https://bobbyhadz.com/blog/typescript-extend-window
   interface Window {
     TPDirect: TPDirect
     webkit?: {
       messageHandlers: {
         [key: string]: {
-          postMessage: (message: any) => void
+          postMessage: (message: unknown) => void
         }
       }
     }
     consoleLog: () => void
     consoleLogBuffer: () => void
     testEvent: () => void
+    opfs: opfsUtils
     __PRERENDER_INJECTED?: { PRERENDER: 1 }
   }
   interface Performance {

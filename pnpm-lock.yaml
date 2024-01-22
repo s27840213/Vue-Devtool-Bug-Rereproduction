@@ -78,6 +78,9 @@ importers:
       '@types/node':
         specifier: ^18.17.0
         version: 18.17.4
+      '@types/wicg-file-system-access':
+        specifier: ~2023.10.4
+        version: 2023.10.4
       '@vue/eslint-config-prettier':
         specifier: ^8.0.0
         version: 8.0.0(eslint@8.46.0)(prettier@3.0.1)
@@ -7884,6 +7887,10 @@ packages:
 
   /@types/webpack-env@1.18.1:
     resolution: {integrity: sha512-D0HJET2/UY6k9L6y3f5BL+IDxZmPkYmPT4+qBrRdmRLYRuV0qNKizMgTvYxXZYn+36zjPeoDZAEYBCM6XB+gww==}
+    dev: true
+
+  /@types/wicg-file-system-access@2023.10.4:
+    resolution: {integrity: sha512-ewOj7hWhsUTS2+aY6zY+7BwlgqGBj5ZXxKuHt3TAWpIJH0bDW/6bO1N1SdUDAzV8r0Nc+/ZtpAEETYTwrehBMw==}
     dev: true
 
   /@types/ws@8.5.5:

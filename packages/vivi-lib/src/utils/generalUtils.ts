@@ -261,7 +261,7 @@ class GeneralUtils {
 
   dataURLtoBlob(dataurl: string) {
     const arr = dataurl.split(',')
-    const mime = (arr[0] as any).match(/:(.*?);/)[1]
+    const mime = arr[0].match(/:(.*?);/)![1]
 
     const bstr = atob(arr[1])
     let n = bstr.length
