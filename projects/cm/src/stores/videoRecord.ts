@@ -63,6 +63,7 @@ export const useVideoRcordStore = defineStore('videoRecord', {
           if (res.flag === '1') {
             notify({ group: 'error', text: 'video request url is empty!' })
           }
+          return res
         })
         .finally(() => {
           this.setIsExportVideo(false)
