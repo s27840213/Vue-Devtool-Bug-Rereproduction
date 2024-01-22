@@ -317,7 +317,7 @@ export default defineComponent({
         ...pageUtils.getPageSizeWithBleeds(this.pageState.config)
       }
     },
-    lazyloadSize(): unknown {
+    lazyloadSize() {
       // the following code is a workaround for page-zooming flickering bug
       if (this.$store.getters['mobileEditor/getIsPinchingEditor']) {
         return {

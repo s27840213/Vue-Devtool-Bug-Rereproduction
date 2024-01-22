@@ -1,6 +1,7 @@
 import generalUtils from "@/utils/generalUtils"
 
 // The actual file in Mac Chrome is located at: ~/Library/Application Support/Google/Chrome/Default/File System
+// To debug OPFS, install https://chromewebstore.google.com/detail/opfs-explorer/acndjpgkpaclldomagafnognkcgjignd.
 class OPFS {
   opfsRoot: Promise<FileSystemDirectoryHandle> | undefined
     = navigator.storage?.getDirectory() // storage is udf in app.
@@ -31,6 +32,9 @@ class OPFS {
       : await dir.getDirectoryHandle(path, { create: true })
   }
 
+  /**
+   * Return the Blob for a file with an image extension.
+   */
   async read(path: string): Promise<unknown> {
     if (!this.checkRoot()) return
     const fileHandle = await this.find('file', path, await this.opfsRoot)
@@ -51,6 +55,9 @@ class OPFS {
     return generalUtils.dataURLtoBlob(data)
   }
 
+  /**
+   * @param content Can be Blob, base64, Object, Array, string, number.
+   */
   async write(path: string, content: unknown) {
     if (!this.checkRoot()) return
     const file = await this.find('file', path, await this.opfsRoot)
@@ -65,6 +72,9 @@ class OPFS {
     await writable.close()
   }
 
+  /**
+   * Support folder recursive delete.
+   */
   async delete(path: string) {
     if (!this.checkRoot()) return
     const file = await this.find(
@@ -113,6 +123,9 @@ class OPFS {
     return str
   }
 
+  /**
+   * Print folder tree for debugging purposes.
+   */
   async ls() {
     if (!this.checkRoot()) return
     const tree = await (this.lsInner(await this.opfsRoot))
