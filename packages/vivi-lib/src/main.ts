@@ -70,18 +70,18 @@ window.onerror = function (msg, url, line, colno, error) {
        */
 
       if(!isScriptError && !isResizeObserverError) {
-      modalUtils.setModalInfo(
-        i18n.global.t('NN0866'),
-        hint,
-        {
-          msg: i18n.global.t('NN0032'),
-          action() {
-            generalUtils.copyText(hint).then(() => {
-              notify({ group: 'copy', text: i18n.global.t('NN0923') })
-            })
+        modalUtils.setModalInfo(
+          i18n.global.t('NN0866'),
+          hint,
+          {
+            msg: i18n.global.t('NN0032'),
+            action() {
+              generalUtils.copyText(hint).then(() => {
+                notify({ group: 'copy', text: i18n.global.t('NN0923') })
+              })
+            }
           }
-        }
-      )
+        )
       }
     }
   })
