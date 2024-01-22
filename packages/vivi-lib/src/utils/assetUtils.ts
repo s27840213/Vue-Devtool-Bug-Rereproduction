@@ -2,14 +2,14 @@ import listApi from '@/apis/list'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import {
-  IGroup,
-  IImage,
-  IImageStyle,
-  IShape,
-  ISpanStyle,
-  IStyle,
-  IText,
-  ITmp,
+IGroup,
+IImage,
+IImageStyle,
+IShape,
+ISpanStyle,
+IStyle,
+IText,
+ITmp,
 } from '@/interfaces/layer'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
@@ -879,7 +879,7 @@ class AssetUtils {
       if (!generalUtils.isPic) {
         setTimeout(() => {
           tiptapUtils.agent((editor) => editor.commands.selectAll())
-        }, 100)
+        }, 500)
       }
     } catch (error) {
       logUtils.setLogForError(error as Error)
