@@ -186,6 +186,7 @@ div(v-else class="preprocess w-full h-full bg-dark-6 text-white")
 import FooterBar from '@/components/panel-content/FooterBar.vue'
 import useStateInfo from '@/composable/useStateInfo'
 import { useEditorStore } from '@/stores/editor'
+import { useGlobalStore } from '@/stores/global'
 import { useImgSelectorStore } from '@/stores/imgSelector'
 import vuex from '@/vuex'
 import { notify } from '@kyvg/vue3-notification'
@@ -213,6 +214,9 @@ import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import paymentUtils from '@nu/vivi-lib/utils/paymentUtils'
 import uploadUtils from '@nu/vivi-lib/utils/uploadUtils'
 import { find, pull } from 'lodash'
+
+const globalStore = useGlobalStore()
+const { debugMode } = storeToRefs(globalStore)
 
 const props = defineProps({
   requireNum: {
@@ -282,6 +286,7 @@ const isLoadingContent = ref(false)
 const initLoaded = ref(false)
 // Var from store
 const editorStore = useEditorStore()
+const { setCurrActiveFeature } = editorStore
 const { editorType } = storeToRefs(editorStore)
 const { setImgAspectRatio, setPageSize } = editorStore
 const { replaceImgFlag } = useImgSelectorStore()
@@ -458,10 +463,11 @@ const sendToEditor = async (isBgRemove = false) => {
 
         const src = imageUtils.getSrc(layerUtils.getCurrLayer as IImage, 'larg')
         generalUtils.toDataURL(src, (dataUrl: string) => {
+          setCurrActiveFeature('cm_brush')
           uploadUtils.uploadAsset('cm-bg-remove', [dataUrl])
         })
       }
-      if (!initAtEditor || editorType.value === 'hidden-message') {
+      if (!initAtEditor || (editorType.value === 'hidden-message' && !isBgRemove)) {
         groupUtils.deselect()
       }
     })
@@ -518,6 +524,7 @@ const applyPreprocess = () => {
   sendToEditor(isBgRemove.value)
 }
 watch(isBgRemove, (newVal) => {
+  if (debugMode.value) return
   if (newVal && !paymentUtils.checkProApp({ plan: 1 })) {
     isBgRemove.value = false
   }
