@@ -1,5 +1,6 @@
 import { useEditorStore } from '@/stores/editor'
 import PixiRecorder from '@/utils/pixiRecorder'
+import { notify } from '@kyvg/vue3-notification'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import { defineStore } from 'pinia'
 
@@ -57,9 +58,15 @@ export const useVideoRcordStore = defineStore('videoRecord', {
       if (!pixi) throw new Error('pixi is undefined in saveToDevice')
       const { url, path, revokeUrl } = data || {}
 
-      return pixi.saveToDevice({ url, path, revokeUrl }).finally(() => {
-        this.setIsExportVideo(false)
-      })
+      return pixi.saveToDevice({ url, path, revokeUrl })
+        .then((res) => {
+          if (res.flag === '1') {
+            notify({ group: 'error', text: 'video request url is empty!' })
+          }
+        })
+        .finally(() => {
+          this.setIsExportVideo(false)
+        })
     },
     setGenVideoCb(cb: () => void) {
       this.genVideoCb = cb
