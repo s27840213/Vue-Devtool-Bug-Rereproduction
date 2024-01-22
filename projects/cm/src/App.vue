@@ -105,7 +105,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       :duration="2000")
       template(v-slot:body="{ item }")
         div(class="notification__content bg-red-cm/80 text-white")
-          svg-icon(iconName="ok-hand")
+          svg-icon(iconName="warning")
           span( v-html="item.text")
     notifications(
       class="notification flex-center "
