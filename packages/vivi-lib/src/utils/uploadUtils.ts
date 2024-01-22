@@ -644,10 +644,7 @@ class UploadUtils {
           xhr.onload = () => {
             console.timeEnd('xhr created')
             console.timeEnd('upload IOS image')
-            console.log('fuck')
             imageUtils.getImageSize(src, 0, 0).then(({ width, height }) => {
-              console.log('hahaha')
-              console.log(type)
               if(['stk-bg-remove', 'stk-bg-remove-face'].includes(type)) {
                 bgRemoveUtils.removeBgStk(
                   uuid,
