@@ -196,14 +196,22 @@ export default class PixiRecorder {
       }
     }
 
-    const blob = await getBlobFromUrl(url)
-    const base64 = await blobToBase64(blob)
+    const base64 = await blobToBase64(
+      await getBlobFromUrl(url)
+    )
+
     if (revokeUrl) {
       URL.revokeObjectURL(url)
     }
 
     if (url) {
       return cmWVUtils.saveAssetFromUrl('mp4', base64, path)
+        .then((res) => {
+          if (res.flag === '1') {
+            notify({ group: 'error', text: 'video request url is empty!' })
+          }
+          return res
+        })
     } else {
       throw new Error('video not generated yet')
     }
@@ -408,8 +416,9 @@ export default class PixiRecorder {
     sprite.height *= scale
     sprite.x = (containerSize.width - sprite.width) * 0.5
     sprite.y = (containerSize.height - sprite.height) * 0.5
-    // pixi.renderer.render(pixi.stage)
-    this.pixi_imgGen.render()
+    const renderer = this.pixi_imgGen.renderer
+    renderer.resize(this.pixi_imgGen.view.width, this.pixi_imgGen.view.height)
+    renderer.render(this.pixi_imgGen.stage)
     return this.pixi_imgGen.renderer.extract.base64()
       .finally(() => {
         this.pixi_imgGen.stage.removeChildren()
