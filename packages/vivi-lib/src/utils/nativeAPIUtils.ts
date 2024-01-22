@@ -23,6 +23,23 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
     }
   }
 
+  logForCallback(callbackName: string, ...args: any[]) {
+    if (callbackName === 'nativeResponse') {
+      const response = args[0]
+      logUtils.setLogAndConsoleLog('N=>F:', response.event ?? '', response)
+    } else {
+      super.logForCallback(callbackName, ...args)
+    }
+  }
+
+  logForSendToIOS(messageType: string, message: any) {
+    if (messageType === 'REQUEST') {
+      logUtils.setLogAndConsoleLog('F=>N:', message.event ?? '', message)
+    } else {
+      super.logForSendToIOS(messageType, message)
+    }
+  }
+
   async sendRequest(
     eventId: string,
     request: IRequest,

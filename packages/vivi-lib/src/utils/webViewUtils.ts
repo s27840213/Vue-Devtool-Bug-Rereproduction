@@ -58,10 +58,14 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     }
   }
 
+  logForCallback(callbackName: string, ...args: any[]) {
+    logUtils.setLogAndConsoleLog(callbackName, ...args)
+  }
+
   registerCallbacksCore(callbackName: string) {
     (window as any)[callbackName] = (...args: any[]) => {
       if (!this.filterCallbackLog(callbackName)) {
-        logUtils.setLogAndConsoleLog(callbackName, ...args)
+        this.logForCallback(callbackName, ...args)
       }
       this.eventTestMode && this.callbackRecordHook(callbackName, ...args)
       const self = this as any
@@ -77,9 +81,13 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
     return { empty: '' }
   }
 
+  logForSendToIOS(messageType: string, message: any) {
+    logUtils.setLogAndConsoleLog(messageType, message)
+  }
+
   sendToIOS(messageType: string, message: any, throwsError = false) {
     if (!this.filterLog(messageType, message)) {
-      logUtils.setLogAndConsoleLog(messageType, message)
+      this.logForSendToIOS(messageType, message)
     }
     try {
       const webkit = window.webkit
