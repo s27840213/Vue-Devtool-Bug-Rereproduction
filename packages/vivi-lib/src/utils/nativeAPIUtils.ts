@@ -26,7 +26,7 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
   logForCallback(callbackName: string, ...args: any[]) {
     if (callbackName === 'nativeResponse') {
       const response = args[0]
-      logUtils.setLogAndConsoleLog('N=>F:', response.event ?? '', response)
+      logUtils.setLogAndConsoleLog('🟢:', response.event ?? '', response)
     } else {
       super.logForCallback(callbackName, ...args)
     }
@@ -34,7 +34,7 @@ export abstract class HTTPLikeWebViewUtils<T extends Record<string, unknown>> ex
 
   logForSendToIOS(messageType: string, message: any) {
     if (messageType === 'REQUEST') {
-      logUtils.setLogAndConsoleLog('F=>N:', message.event ?? '', message)
+      logUtils.setLogAndConsoleLog('🔵:', message.event ?? '', message)
     } else {
       super.logForSendToIOS(messageType, message)
     }
