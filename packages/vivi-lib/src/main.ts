@@ -50,12 +50,11 @@ window.onerror = function (msg, url, line, colno, error) {
     'Col: ' + colno,
     'Stack: ' + error?.stack
   ].join(' - ')
-  logUtils.setLogAndConsoleLog(msg)
   logUtils.setLog(message, false) // don't trim the log for stack to be entirely shown
   const isScriptError = typeof msg === 'string' && msg.includes('Script error.')
   const isResizeObserverError = typeof msg === 'string' && msg.includes('ResizeObserver loop completed with undelivered notifications.')
-  logUtils.setLogAndConsoleLog('isScriptError: ' + isScriptError)
-  logUtils.setLogAndConsoleLog('isResizeObserverError: ' + isResizeObserverError)
+  logUtils.setLog('isScriptError: ' + isScriptError)
+  logUtils.setLog('isResizeObserverError: ' + isResizeObserverError)
 
   
   logUtils.uploadLog().then(() => {

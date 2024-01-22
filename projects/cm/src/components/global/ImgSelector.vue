@@ -125,7 +125,7 @@ div(
   div(v-if="requireNum > 1 && targetImgs.length" class="mx-16 mt-10 mb-20 grid gap-20")
     div(class="flex-between-center h-32")
       span {{ $t('CM0062', { num: requireNum }) }}
-      nubtn(@click="sendToEditor") {{ $t('NN0744') }}
+      nubtn(@click="sendToEditor()") {{ $t('NN0744') }}
     div(class="flex flex-row gap-20")
       div(
         v-for="img in targetImgs"
@@ -424,7 +424,8 @@ const beforeSendToEditor = () => {
   }
 }
 
-const sendToEditor = async (isBgRemove = false) => {
+const sendToEditor = async (isForBgRemove = false) => {
+  console.log('isForBgRemove', isForBgRemove)
   if (replaceImgFlag) {
     imageUtils.replaceImg(
       targetImgs[0],
@@ -457,7 +458,7 @@ const sendToEditor = async (isBgRemove = false) => {
           ...(!initAtEditor && { fit: 1 }),
         })
       })
-      if (isBgRemove) {
+      if (isForBgRemove) {
         editorUtils.setCurrActivePanel('cm_remove-bg')
         store.commit('bgRemove/SET_isProcessing', true)
 
@@ -467,7 +468,7 @@ const sendToEditor = async (isBgRemove = false) => {
           uploadUtils.uploadAsset('cm-bg-remove', [dataUrl])
         })
       }
-      if (!initAtEditor || (editorType.value === 'hidden-message' && !isBgRemove)) {
+      if (!initAtEditor || (editorType.value === 'hidden-message' && !isForBgRemove)) {
         groupUtils.deselect()
       }
     })
@@ -521,7 +522,7 @@ const cancelPreprocess = () => {
   targetImgs = []
 }
 const applyPreprocess = () => {
-  sendToEditor(isBgRemove.value)
+  sendToEditor()
 }
 watch(isBgRemove, (newVal) => {
   if (debugMode.value) return
