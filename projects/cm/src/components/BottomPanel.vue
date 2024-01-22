@@ -12,9 +12,9 @@ div(class="bottom-panel" ref="bottomPanelRef")
  * Here pass setSlotRef to the parent
  * and parent use setSlotRef to pass the ref here
  */
-import vuex from '@/vuex';
-import type { IUserInfo } from '@nu/vivi-lib/utils/cmWVUtils';
-import { useElementBounding } from '@vueuse/core';
+import vuex from '@/vuex'
+import type { IUserInfo } from '@nu/vivi-lib/utils/cmWVUtils'
+import { useElementBounding } from '@vueuse/core'
 
 const bottomPanelRef = ref<HTMLElement | null>(null)
 const slotRef = ref<HTMLElement | null>(null)
@@ -34,16 +34,19 @@ const props = defineProps({
   },
   gap: {
     type: Number,
-    default: 0
+    default: 0,
   },
   ignoreHomeIndicator: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
-watch(() => props.disableTransition, value => {
-  noTransition.value = value
-})
+watch(
+  () => props.disableTransition,
+  (value) => {
+    noTransition.value = value
+  },
+)
 
 watch(
   [height, () => userInfo.value.homeIndicatorHeight],
@@ -67,6 +70,6 @@ watch(
 .bottom-panel {
   @apply bg-dark-3 w-full rounded-t-24 box-border pt-16;
   transition: v-bind("noTransition ? 'none' : 'all 0.3s'");
-  max-height: v-bind("`calc(100% - ${gap}px)`");
+  max-height: v-bind('`calc(100% - ${gap}px)`');
 }
 </style>

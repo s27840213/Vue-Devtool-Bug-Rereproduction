@@ -86,7 +86,7 @@ const useGenImageUtils = () => {
   ): Promise<void> => {
     for (let i = 0; i < num; i++) {
       ids.unshift(generalUtils.generateRandomString(8))
-      unshiftGenResults('', ids[0], currPrompt.value)
+      unshiftGenResults('', ids[0]/* , currPrompt.value */)
     }
     try {
       let finishedNum = 0

@@ -119,7 +119,7 @@ export interface IEditorState {
   newTemplateShownMode: boolean,
   modalInfo: { [key: string]: any },
   fullPageConfig: IFullPageConfig,
-  allowLayerAction: 'all' | 'none' | 'crop-only',
+  allowLayerAction: 'all' | 'none' | 'crop-only' | 'crop-exclude',
 }
 
 export enum SidebarPanelType {

@@ -5,7 +5,7 @@ div(class="nu-background-image" draggable="false" :style="mainStyles"
   @pointerup="bgPointerUp")
   div(v-show="!isColorBackground" class="nu-background-image__image" :style="imgStyles")
     img(v-if="finalSrc" v-show="isShowImg" ref="img"
-        :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
+        :crossorigin="needCrossOrigin ? 'anonymous' : undefined"
         draggable="false"
         @error="onError"
         @load="onLoad"
@@ -27,7 +27,7 @@ div(class="nu-background-image" draggable="false" :style="mainStyles"
               :is="child.tag"
               v-bind="child.attrs")
       image(ref="adjust-img"
-        :crossorigin="userId !== 'backendRendering' ? 'anonymous' : undefined"
+        :crossorigin="needCrossOrigin ? 'anonymous' : undefined"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
         :width="imgNaturalSize.width"
@@ -297,6 +297,9 @@ export default defineComponent({
     },
     isBlurImg(): boolean {
       return !!this.image.config.styles.adjust?.blur
+    },
+    needCrossOrigin(): boolean {
+      return this.$isPic ? this.userId !== 'backendRendering' : imageUtils.needCrossOrigin(this.finalSrc)
     }
   },
   methods: {

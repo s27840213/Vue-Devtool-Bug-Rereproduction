@@ -1,6 +1,7 @@
 <template lang="pug">
 //- h-375 = 44 (item height) * 8 + 4 (gap) * 7 - 5 = show 8 items - 5px
-div(class="sidebar-tabs flex-ini-center flex-col gap-4 h-375 w-44 overflow-scroll scrollbar-hide"
+div(
+  class="sidebar-tabs flex-ini-center flex-col gap-4 h-375 w-44 overflow-scroll scrollbar-hide"
   v-fade-scroller="{ vertical: true }")
   template(v-for="(tab, index) in defaultEditorTabs")
     div(
@@ -51,6 +52,7 @@ import useTapTransition from '@nu/vivi-lib/composable/useTapTransition'
 import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import assetPanelUtils from '@nu/vivi-lib/utils/assetPanelUtils'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import editorUtils from '@nu/vivi-lib/utils/editorUtils'
 import groupUtils from '@nu/vivi-lib/utils/groupUtils'
 import layerUtils from '@nu/vivi-lib/utils/layerUtils'
 import pageUtils from '@nu/vivi-lib/utils/pageUtils'
@@ -167,6 +169,7 @@ const handleTabAction = (tab: ISidebarTab) => {
     case 'selection':
       setCheckpoint()
       toggleFeature(tab.icon)
+      editorUtils.setAllowLayerAction('crop-exclude')
       break
     case 'cm_brush':
       setCheckpoint()
