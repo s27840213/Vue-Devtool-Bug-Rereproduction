@@ -618,14 +618,13 @@ class LayerUtils {
     }
     /**  If the layerIndex === -1 means the layer is grouped or deleted */
     if (layerIndex === -1) {
-      logUtils.setLogAndConsoleLog(
-        'debugInfo@getLayerInfoById',
-        JSON.stringify({
+      if (pageIndex === -1) { /** If the pageIndex === -1 means the page is deleted */
+        return {
           pageIndex,
-          pageId,
-          pages: pageUtils.getPages.map(page => page.id)
-        })
-      )
+          layerIndex: -1,
+          subLayerIdx: -1
+        }
+      }
       layerIndex = (pages ? pages[pageIndex] : pageUtils.getPage(pageIndex)).layers
         .findIndex(l => [LayerType.group, LayerType.tmp].includes(l.type as LayerType) && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
       subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, layerId, pages)
