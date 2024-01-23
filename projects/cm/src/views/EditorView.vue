@@ -221,8 +221,10 @@ import pointerEvtUtils from '@nu/vivi-lib/utils/pointerEvtUtils'
 import textUtils from '@nu/vivi-lib/utils/textUtils'
 import { useEventBus } from '@vueuse/core'
 import type { AnyTouchEvent } from 'any-touch'
+import { isEqual } from 'lodash'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
+
 
 const { t } = useI18n()
 // #region refs & vars
@@ -599,10 +601,10 @@ const fitPage = (ratio: number) => {
  * fitPage
  */
 watch(
-  () => fitScaleRatio.value,
+  () => [fitScaleRatio.value, editorContainerHeight.value],
   (newVal, oldVal) => {
-    if (newVal === oldVal || !atEditor.value || isResizingCanvas.value) return
-    fitPage(newVal)
+    if (isEqual(newVal, oldVal) || !atEditor.value || isResizingCanvas.value) return
+    fitPage(newVal[0])
   },
 )
 
