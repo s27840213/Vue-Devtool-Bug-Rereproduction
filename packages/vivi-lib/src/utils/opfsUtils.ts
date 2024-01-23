@@ -2,7 +2,7 @@ import generalUtils from "@/utils/generalUtils"
 
 // The actual file in Mac Chrome is located at: ~/Library/Application Support/Google/Chrome/Default/File System
 // To debug OPFS, install https://chromewebstore.google.com/detail/opfs-explorer/acndjpgkpaclldomagafnognkcgjignd.
-class OPFS {
+class OPFSUtils {
   opfsRoot: Promise<FileSystemDirectoryHandle> | undefined
     = navigator.storage?.getDirectory() // storage is udf in app.
 
@@ -156,6 +156,6 @@ class OPFS {
   }
 }
 
-const opfs = new OPFS()
-window.opfs = opfs
-export default opfs
+const opfsUtils = new OPFSUtils()
+window.opfs = opfsUtils
+export default opfsUtils

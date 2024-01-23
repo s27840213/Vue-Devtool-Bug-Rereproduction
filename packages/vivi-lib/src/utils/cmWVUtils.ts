@@ -19,6 +19,7 @@ import imageShadowPanelUtils from './imageShadowPanelUtils'
 import imageUtils from './imageUtils'
 import logUtils from './logUtils'
 import modalUtils from './modalUtils'
+import opfsUtils from './opfsUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
 
@@ -534,16 +535,23 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async cloneFile(srcPath: string, desPath: string ) {
-    if (this.inBrowserMode) return
     if (/:\/\//.test(srcPath)) {
       const { path, ext } = this.getDocumentPath(srcPath)
       srcPath = `${path}.${ext}`
+    }
+    if (this.inBrowserMode) {
+      const data = await opfsUtils.read(srcPath)
+      opfsUtils.write(desPath, data)
+      return
     }
     await this.callIOSAsHTTPAPI('CLONE_FILE', { srcPath, desPath })
   }
 
   async deleteFile(path: string) {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) {
+      await opfsUtils.delete(path)
+      return
+    }
     await this.callIOSAsHTTPAPI('DELETE_FILE', { path })
   }
 
@@ -1137,14 +1145,19 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
   }
 
   async addJson(path: string , content: {[index: string]: any}) {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) {
+      await opfsUtils.write(path, content)
+      return
+    }
     if (this.checkVersion('1.0.14')) {
       return await this.callIOSAsHTTPAPI('ADD_JSON', { path, content })
     }
   }
 
   async getJson(path: string) {
-    if (this.inBrowserMode) return
+    if (this.inBrowserMode) {
+      return await opfsUtils.read(path)
+    }
     if (this.checkVersion('1.0.14')) {
       return await this.callIOSAsHTTPAPI('GET_JSON', { path })
     }
