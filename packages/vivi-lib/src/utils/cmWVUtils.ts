@@ -7,6 +7,7 @@ import { IFullPagePaymentConfigParams } from '@/interfaces/fullPage'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import { ICmProFeatures, IPrices } from '@/interfaces/payment'
+import { WEBVIEW_API_RESULT } from '@/interfaces/webView'
 import router from '@/router'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
@@ -1154,9 +1155,9 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
     }
   }
 
-  async getJson(path: string) {
+  async getJson(path: string): Promise<WEBVIEW_API_RESULT> {
     if (this.inBrowserMode) {
-      return await opfsUtils.read(path)
+      return (await opfsUtils.read(path)) as WEBVIEW_API_RESULT
     }
     if (this.checkVersion('1.0.14')) {
       return await this.callIOSAsHTTPAPI('GET_JSON', { path })
