@@ -104,6 +104,7 @@ const {
   setCurrOpenSubDesign,
   setRemoveWatermark,
   setHighResolutionPhoto,
+  getSubDesignImage,
   getInitialImg
 } = userStore
 const { currOpenSubDesign, removeWatermark, currOpenDesign } = storeToRefs(userStore)
@@ -119,6 +120,7 @@ const {
   currDesignId,
   currSubDesignId,
   myDesignSavedType,
+  editorType,
   initImgSrc
 } = storeToRefs(editorStore)
 
@@ -300,10 +302,19 @@ const handleSwipe = (e: AnyTouchEvent, dir: 'left' | 'right') => {
 }
 
 const videoLoadingImgSrc = computed(() => {
-  if (currOpenDesign.value?.id || currDesignId.value) {
-    return getInitialImg()
+  if (editorType.value === 'powerful-fill') {
+    if (currOpenDesign.value?.id || currDesignId.value) {
+      return getInitialImg()
+    } else {
+      return initImgSrc.value ??
+      (currOpenSubDesign.value && getSubDesignImage(currOpenSubDesign.value, 'original'))
+    }
   } else {
-    return initImgSrc.value
+    if (currOpenSubDesign.value) {
+      return getSubDesignImage(currOpenSubDesign.value, 'original')
+    } else {
+      return initImgSrc.value ?? getInitialImg()
+    }
   }
 })
 

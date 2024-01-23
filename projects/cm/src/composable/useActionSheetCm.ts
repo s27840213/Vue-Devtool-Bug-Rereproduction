@@ -24,7 +24,7 @@ const useActionSheetCm = () => {
   } = useActionSheet()
 
   const editorStore = useEditorStore()
-  const { currGeneratedResult, currDesignId, myDesignSavedRoot } = storeToRefs(editorStore)
+  const { currGeneratedResult, currDesignId, myDesignSavedRoot, editorType } = storeToRefs(editorStore)
 
   const { atEditor } = useStateInfo()
 
@@ -166,9 +166,22 @@ const useActionSheetCm = () => {
       subDesign.subId,
       1920
     )
-    await addImage(getInitialImg(), thumbUrl).catch(async () => {
+
+    if (editorType.value === 'powerful-fill') {
+      await addImage(getInitialImg(), thumbUrl)
+        .catch(async () => {
+          await addImage(getSubDesignImage(subDesign, 'original'), thumbUrl)
+        })
+    } else if (editorType.value === 'hidden-message' || editorType.value === 'magic-combined') {
       await addImage(getSubDesignImage(subDesign, 'original'), thumbUrl)
-    })
+        .catch(async () => {
+          await addImage(getInitialImg(), thumbUrl)
+        })
+    } else {
+      throw new Error(
+        'the editorType in genCurrSubDesignVideo is not valid, editorType:' + editorType.value
+      )
+    }
     return genVideo()
   }
 
