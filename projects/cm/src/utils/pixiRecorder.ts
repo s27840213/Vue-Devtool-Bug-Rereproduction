@@ -3,6 +3,7 @@ import { notify } from '@kyvg/vue3-notification'
 import { ISize } from '@nu/vivi-lib/interfaces/math'
 import store from '@nu/vivi-lib/store'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
+import generalUtils from '@nu/vivi-lib/utils/generalUtils'
 import imageShadowPanelUtils from '@nu/vivi-lib/utils/imageShadowPanelUtils'
 import imageUtils from '@nu/vivi-lib/utils/imageUtils'
 import logUtils from '@nu/vivi-lib/utils/logUtils'
@@ -64,6 +65,23 @@ export const fragment_slide = `
     }
   }
   `
+const errLoging = (title: string, content: string) => {
+  const errorId = generalUtils.generateRandomString(6)
+  const hint = `${store.getters['user/getUserId']}:${store.getters['cmWV/getUserInfo'].hostId},${generalUtils.generateTimeStamp()},${errorId}`
+  logUtils.setLog(errorId)
+  logUtils.setLogForError(new Error('pixi-recorder: can not load image as genVideo!'))
+  logUtils.uploadLog().then(() => {
+    modalUtils.setModalInfo(title, `${content}<br/>(${hint})`, {
+      msg: 'Okay!',
+      action() {
+        generalUtils.copyText(hint).then(() => {
+          notify({ group: 'success', text: 'copy' })
+        })
+      },
+    })
+  })
+  return `${title}<br/>(${content})<br/>(${hint})`
+}
 
 export default class PixiRecorder {
   private pixi = new PIXI.Application()
@@ -101,10 +119,12 @@ export default class PixiRecorder {
         }),
         new Promise<void>((resolve, reject) => setTimeout(reject, 60000)),
       ]).catch(() => {
-        throw new Error('pixi-recorder: can not load image as genVideo!')
+        throw new Error(errLoging('Generate video failed', 'pixi-recorder: can not load image as genVideo!'))
       })
     }
-    if (!this.sprite_src) throw new Error('the sprite_src in genVideo is undefined!')
+    if (!this.sprite_src) {
+      throw new Error(errLoging('Generate video failed', 'the sprite_src in genVideo is undefined!'))
+    }
 
     // if the video is recording already, stop it first
     // this pixi instance only gening one video once a time
@@ -133,7 +153,7 @@ export default class PixiRecorder {
     if (this._animate) {
       this.pixi.ticker.add(this._animate)
     } else {
-      throw new Error('the _animate in genVideo is undefined!')
+      throw new Error(errLoging('Generate video failed', 'the _animate in genVideo is undefined!'))
     }
 
     return new Promise<string | 'error'>((resolve) => {
@@ -168,8 +188,8 @@ export default class PixiRecorder {
       }
       this._video.removeWatermark = true
     } else {
-      if (!this.sprite_wm) throw new Error('can not find sprite_wm in watermarkHandler!')
-      if (!this.sprite_src) throw new Error('can not find sprite_src in watermarkHandler!')
+      if (!this.sprite_wm) throw new Error(errLoging('Add watermark failed', 'can not find sprite_wm!'))
+      if (!this.sprite_src) throw new Error(errLoging('Add watermark failed', 'can not find sprite_src!'))
 
       const ratio = this.sprite_wm.width / this.sprite_wm.height
       this.sprite_wm.width = Math.min(this.sprite_src.width, this.sprite_src.height) * 0.5
@@ -192,7 +212,7 @@ export default class PixiRecorder {
       if (res) {
         url = res.src
       } else {
-        throw new Error('can not generate video')
+        throw new Error(errLoging('Save video to device failed', 'can not generate video'))
       }
     }
 
@@ -213,7 +233,7 @@ export default class PixiRecorder {
           return res
         })
     } else {
-      throw new Error('video not generated yet')
+      throw new Error(errLoging('Save video to device failed', 'video not generated yet'))
     }
   }
 
@@ -298,23 +318,23 @@ export default class PixiRecorder {
 
 
   loadImgs(img1: string, img2: string) {
-    const p1 = new Promise<PIXI.Sprite>((resolve) => {
+    const p1 = new Promise<PIXI.Sprite>((resolve, reject) => {
       PIXI.Texture.fromURL(img1).then((texture) => {
         this.sprite_src = new PIXI.Sprite(texture)
         this.sprite_src.width = texture.width
         this.sprite_src.height = texture.height
         resolve(this.sprite_src)
-      })
-    })
-    const p2 = new Promise<PIXI.Sprite>((resolve) => {
+      }).catch((e) => reject(e))
+    }).catch((e) => { throw e })
+    const p2 = new Promise<PIXI.Sprite>((resolve, reject) => {
       PIXI.Texture.fromURL(img2).then((texture) => {
         this.texture_res = texture
         this.sprite_res = new PIXI.Sprite(texture)
         this.sprite_res.width = texture.width
         this.sprite_res.height = texture.height
         resolve(this.sprite_res)
-      })
-    })
+      }).catch((e) => reject(e))
+    }).catch((e) => { throw e })
 
     const p3 = new Promise<PIXI.Sprite>((resolve) => {
       // to fix svg blurry error, we need to resize the svg first
@@ -346,7 +366,7 @@ export default class PixiRecorder {
           }
         })
       })
-    })
+    }).catch((e) => { throw e })
 
     return Promise.all([p1, p2, p3])
   }
@@ -448,7 +468,7 @@ export default class PixiRecorder {
             }
           }
         )
-        throw new Error('pixi-recorder: can not load image!')
+        throw new Error(errLoging('Add image to video failed', 'can not load image!'))
       })
   }
 
