@@ -113,13 +113,17 @@ export default defineComponent({
           let toRecord = false
           const pages = stepsUtils.getPrevPages()
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(this.pageId, this.layerId, this.subLayerId, pages)
-          let currLayerInPrevStep = pages[pageIndex].layers[layerIndex]
-          if (subLayerIdx !== -1) {
-            currLayerInPrevStep = (currLayerInPrevStep as IGroup).layers[subLayerIdx] as IText
+          if (pageIndex !== -1 && layerIndex !== -1) {
+            let currLayerInPrevStep = pages[pageIndex].layers[layerIndex]
+            if (subLayerIdx !== -1) {
+              currLayerInPrevStep = (currLayerInPrevStep as IGroup).layers[subLayerIdx] as IText
+            } else {
+              currLayerInPrevStep = currLayerInPrevStep as IText
+            }
+            if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor.getJSON())) { // record only when the updated text has not been recorded yet
+              toRecord = true
+            }
           } else {
-            currLayerInPrevStep = currLayerInPrevStep as IText
-          }
-          if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor.getJSON())) { // record only when the updated text has not been recorded yet
             toRecord = true
           }
           const res = tiptapUtils.toIParagraph(editor.getJSON())

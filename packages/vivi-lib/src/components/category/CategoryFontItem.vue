@@ -241,14 +241,14 @@ export default defineComponent({
             TextUtils.waitGroupFontLoadingAndRecord(group, () => {
               for (const subId of subIds) {
                 const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subId)
-                if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+                if (pageIndex === -1 || layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
                 TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
               }
             })
           } else {
             TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
               const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
-              if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+              if (pageIndex === -1 || layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
               TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
             })
           }
@@ -304,7 +304,7 @@ export default defineComponent({
         }, (this.$isStk || this.$isCm) ? 'font' : undefined)
         TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
-          if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+          if (pageIndex === -1 || layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
           TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
         })
         TextPropUtils.updateTextPropsState({
