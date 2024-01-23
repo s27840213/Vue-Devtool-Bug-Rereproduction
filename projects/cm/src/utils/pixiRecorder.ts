@@ -462,6 +462,11 @@ export default class PixiRecorder {
       testCanvas.style.width = '300px'
       testCanvas.style.left = '0'
       testCanvas.style.zIndex = '10000'
+      setTimeout(() => {
+        if (store.getters['cmWV/getDebugMode'] && document.body.contains(this.pixi.view as HTMLCanvasElement)) {
+          document.body.removeChild(this.pixi.view as HTMLCanvasElement)
+        }
+      }, 15000)
     }
   }
 }
