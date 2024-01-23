@@ -1,4 +1,5 @@
-import { ILayer, IParagraph, IText } from '@/interfaces/layer'
+import { IParagraph, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from './layerUtils'
@@ -15,9 +16,9 @@ class TemplateUtils {
   get pageIndex() { return store.getters.getMiddlemostPageIndex }
   get getCurrPageLayers() { return store.getters.getLayers(this.pageIndex) }
 
-  updateTemplate(json: any): any {
-    if (!json) { return }
-    const layers = json.layers as Array<ILayer>
+  updateTemplate(json: IPage | undefined): IPage | undefined {
+    if (!json) { return json }
+    const layers = json.layers
     for (const field of this.fields) {
       let isAssignField = false
       for (const layer of layers) {
@@ -26,6 +27,19 @@ class TemplateUtils {
           if (!isAssignField) {
             isAssignField = true
           }
+        }
+        switch (layer.type) {
+          case 'text':
+            layer.isEdited = true
+            break
+          case 'group':
+          case 'tmp':
+            for (const subLayer of layer.layers) {
+              if (subLayer.type === 'text') {
+                subLayer.isEdited = true
+              }
+            }
+            break
         }
         layer.id = GeneralUtils.generateRandomString(8)
       }
