@@ -39,6 +39,7 @@ import cssConverter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
+import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -205,6 +206,7 @@ export default defineComponent({
     },
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
+      logUtils.setLogAndConsoleLog('NuText.vue:208', opacity)
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textEffectStyles = omit(textEffectUtils.convertTextEffect(this.config), ['duplicatedTexts'])
       const maxFontSize = max(this.config.paragraphs.flatMap(p => p.spans.map(s => s.styles.size))) as number
