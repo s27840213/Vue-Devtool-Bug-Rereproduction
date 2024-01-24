@@ -278,7 +278,7 @@ export default class PixiRecorder {
 
     // @TODO: reset()
     this.reset = () => {
-      this.dynamicAnimateEndTime = -1
+      // this.dynamicAnimateEndTime = -1
       this.time_start = -1
       this.uniforms.dispFactor = 0
       this.uniforms.nextImage = this.texture_res
