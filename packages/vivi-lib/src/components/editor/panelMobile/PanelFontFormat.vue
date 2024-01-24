@@ -167,27 +167,26 @@ export default defineComponent({
             break
         }
       }
-      this.updateLayerProps({ isEdited: true })
     },
-    updateLayerProps(props: { [key: string]: string | number | boolean }) {
-      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = layerUtils
-      switch (currLayer.type) {
-        case 'text':
-          layerUtils.updateLayerProps(pageIndex, layerIndex, props)
-          break
-        case 'group':
-          if (subLayerIdx !== -1) {
-            layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
-          } else {
-            const layers = currLayer.layers as ILayer[]
-            layers.forEach((layer, index) => {
-              if (layer.type === 'text') {
-                layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, props)
-              }
-            })
-          }
-      }
-    },
+    // updateLayerProps(props: { [key: string]: string | number | boolean }) {
+    //   const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = layerUtils
+    //   switch (currLayer.type) {
+    //     case 'text':
+    //       layerUtils.updateLayerProps(pageIndex, layerIndex, props)
+    //       break
+    //     case 'group':
+    //       if (subLayerIdx !== -1) {
+    //         layerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
+    //       } else {
+    //         const layers = currLayer.layers as ILayer[]
+    //         layers.forEach((layer, index) => {
+    //           if (layer.type === 'text') {
+    //             layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, props)
+    //           }
+    //         })
+    //       }
+    //   }
+    // },
     handleSpanPropClick(prop: string, pair: [string, string]) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = layerUtils
       const newPropVal = this.props[prop] === pair[0] ? pair[1] : pair[0]

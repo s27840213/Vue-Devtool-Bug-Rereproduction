@@ -91,8 +91,8 @@ export default defineComponent({
         })
       }
       this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord })
+      console.log('NuTextEditor.vue:94', newJSON, tiptapUtils.prevJSON)
       if (!isEqual(newJSON, tiptapUtils.prevJSON)) {
-        this.updateLayerProps({ isEdited: true })
         if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
           this.updateLayerProps({ loadFontEdited: true })
         }

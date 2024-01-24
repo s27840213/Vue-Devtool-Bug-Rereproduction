@@ -149,7 +149,7 @@ export default defineComponent({
   },
   watch: {
     'config.paragraphs'(newVal) {
-      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false, isEdited: true }, this.subLayerIndex)
       this.drawTextBg()
       textUtils.untilFontLoaded(newVal).then(async () => {
         this.drawTextBg()
@@ -162,12 +162,19 @@ export default defineComponent({
     },
     focus() { this.drawTextFill() },
     'config.styles.textShape'() {
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true }, this.subLayerIndex)
       if (this.config.styles.textBg.name !== 'none') {
         this.drawTextBg()
       }
     },
-    'config.styles.textBg'() { this.drawTextBg() },
-    'config.styles.textFill'() { this.drawTextFill() },
+    'config.styles.textBg'() {
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true }, this.subLayerIndex)
+      this.drawTextBg()
+    },
+    'config.styles.textFill'() {
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isEdited: true }, this.subLayerIndex)
+      this.drawTextFill()
+    },
   },
   methods: {
     drawTextBg(): Promise<void> {
