@@ -1633,7 +1633,7 @@ export default defineComponent({
       const layerId = this.config.id
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
-        if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+        if (pageIndex === -1 || layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
         TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
         TextUtils.handleAutoRescale()
       })
@@ -1644,7 +1644,7 @@ export default defineComponent({
       TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
           const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
-          if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+          if (pageIndex === -1 || layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
           TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
           TextUtils.handleAutoRescale()
         }, 100)
