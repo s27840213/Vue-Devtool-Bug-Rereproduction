@@ -163,11 +163,9 @@ const useActionSheetCm = () => {
     const thumbUrl = getSubDesignThumbUrl(
       subDesign.type,
       subDesign.id,
-      subDesign.subId,
-      1920
+      subDesign.subId
     )
 
-    // console.warn(subDesign.type, myDesignSavedRoot.value, thumbUrl)
     if (subDesign.type === 'powerful-fill') {
       await addImage(getInitialImg(), thumbUrl)
         .catch(async () => {

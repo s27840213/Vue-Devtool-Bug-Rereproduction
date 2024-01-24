@@ -11,9 +11,9 @@ import modalUtils from '@nu/vivi-lib/utils/modalUtils'
 import * as PIXI from 'pixi.js'
 const ENABLE_RECORDING = true
 // the time unit is ms
-const RECORD_START_DELAY = 600
-const RECORD_END_DELAY = 1000
-const TRANSITION_TIME = 2800
+const RECORD_START_DELAY = 600 as const
+const RECORD_END_DELAY = 1000 as const
+const TRANSITION_TIME = 2800 as const
 const IMG2_EXAMPLE =
   'https://images.unsplash.com/photo-1495379572396-5f27a279ee91?cs=tinysrgb&q=80&w=766&origin=true&appver=v922'
   // 'https://images.unsplash.com/photo-1552300977-cbc8b08d95e7?cs=tinysrgb&q=80&h=76&origin=true&appver=v922'
@@ -57,11 +57,11 @@ export const fragment_slide = `
     vec4 img1 = texture2D(uSampler, vec2(uv.x, uv.y));
     vec4 img2 = texture2D(nextImage, vec2(coord.x, coord.y));
     if (uv.x < dispFactor) {
-      gl_FragColor = texture2D(nextImage, vec2(coord.x, coord.y));
+      gl_FragColor = img2;
     } else if (uv.x == dispFactor) {
       gl_FragColor = mix(img1, img2, 0.5);
     } else {
-      gl_FragColor = texture2D(uSampler, vec2(uv.x, uv.y));
+      gl_FragColor = img1;
     }
   }
   `
@@ -82,7 +82,7 @@ const errLoging = (title: string, content: string, err?: Error) => {
       },
     })
   })
-  return `${title}<br/>(${content})<br/>(${hint})`
+  return `${title}/n${content}/n${hint}`
 }
 
 export default class PixiRecorder {
@@ -133,6 +133,9 @@ export default class PixiRecorder {
     // this pixi instance only gening one video once a time
     if (this.isRecordingVideo) {
       await this.shutGeningVideo()
+    } else if (this.pixi.ticker.count !== 0 && this._animate) {
+      // check if the ticker has _animate not removed
+      this.pixi.ticker.remove(this._animate)
     }
 
     // TEST use
@@ -242,7 +245,7 @@ export default class PixiRecorder {
 
   addOpacityFilter() {
     if (!this.sprite_src) return
-
+    this.dynamicAnimateEndTime = -1
     this.uniforms.opacity = 0
     this.uniforms.nextImage = this.texture_res
     this.filter = new PIXI.Filter(undefined, fragment_opacity, this.uniforms)
@@ -273,7 +276,9 @@ export default class PixiRecorder {
   addSlideFilter() {
     if (!this.sprite_src) return
 
+    // @TODO: reset()
     this.reset = () => {
+      this.dynamicAnimateEndTime = -1
       this.time_start = -1
       this.uniforms.dispFactor = 0
       this.uniforms.nextImage = this.texture_res
@@ -282,6 +287,7 @@ export default class PixiRecorder {
         this.sprite_src.filters = [this.filter]
       }
     }
+    // @TODO: animation()
     this._animate = () => {
       try {
         const now = Date.now()
@@ -293,12 +299,22 @@ export default class PixiRecorder {
           return
         }
 
+        logUtils.setLogAndConsoleLog(
+          '_animate: animating',
+          'this.time_start:' + this.time_start,
+          'this.uniforms.dispFactor: ' + this.uniforms.dispFactor,
+          'this.dynamicAnimateEndTime: ' + this.dynamicAnimateEndTime
+        )
+
         if (this.uniforms.dispFactor >= 1) {
+          logUtils.setLogAndConsoleLog('_animate: finish sliding')
           if (this.dynamicAnimateEndTime === -1) {
+            logUtils.setLogAndConsoleLog('_animate: dynamicAnimateEndTime')
+            // @TODO: remove
             this.dynamicAnimateEndTime = now
           } else {
             if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
-              this.dynamicAnimateEndTime = -1
+              logUtils.setLogAndConsoleLog('_animate: finished all animation')
               this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
               this.reset && this.reset()
               if (this.canvasRecorder) {

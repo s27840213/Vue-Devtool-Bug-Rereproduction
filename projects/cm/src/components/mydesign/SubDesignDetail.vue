@@ -16,7 +16,7 @@ div(
       div(
         class="w-full h-full result-showcase flex-center"
         :class="contentClass")
-        div(class="h-full w-full h-full" :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
+        div(class="h-full w-full" :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
           img(
             class="result-showcase__card result-showcase__card--back w-full h-full object-contain"
             :class="{ 'is-flipped': !showVideo }"
@@ -162,6 +162,7 @@ onMounted(async () => {
   }
 })
 
+// TODO: check if still needed
 // this watcher used to watching if the thumb is edited.
 // p.s. currGeneratedResult.value would be udf in mydesign
 watch(
