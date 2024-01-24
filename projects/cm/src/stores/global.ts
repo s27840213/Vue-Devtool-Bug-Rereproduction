@@ -10,7 +10,7 @@ export const useGlobalStore = defineStore('global', () => {
 
   cmWVUtils.detectIfInApp()
   cmWVUtils.getState('debugMode').then((data) => {
-    debugMode.value = data.debugMode
+    debugMode.value = data?.debugMode ?? false // if debugMode not written before, set to false
     vuex.commit('cmWV/SET_debugMode', data.debugMode)
   })
 
