@@ -16,6 +16,7 @@ export default new (class Utils {
   async genImage(
     userId: string,
     requestId: string,
+    batchId: string,
     token: string,
     params: GenImageParams,
     num: number,
@@ -29,6 +30,7 @@ export default new (class Utils {
         data: {
           user_id: userId,
           request_id: requestId,
+          batch_id: batchId,
           token,
           ...params,
           num,

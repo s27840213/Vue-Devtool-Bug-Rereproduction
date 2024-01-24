@@ -86,7 +86,7 @@ const useGenImageUtils = () => {
   ): Promise<void> => {
     for (let i = 0; i < num; i++) {
       ids.unshift(generalUtils.generateRandomString(8))
-      unshiftGenResults('', ids[0]/* , currPrompt.value */)
+      unshiftGenResults('', ids[0] /* , currPrompt.value */)
     }
     try {
       let finishedNum = 0
@@ -192,6 +192,8 @@ const useGenImageUtils = () => {
       onApiResponded?: () => void
     } = {},
   ): Promise<string[]> => {
+    const batchId = generalUtils.generateRandomString(6)
+
     const showMore = params_ === undefined
 
     let prevGenParms: IPrevGenParams | undefined
@@ -243,6 +245,7 @@ const useGenImageUtils = () => {
       await genImageApis.genImage(
         userId.value,
         requestId,
+        batchId,
         token.value,
         params,
         num,
@@ -261,6 +264,7 @@ const useGenImageUtils = () => {
           await genImageApis.genImage(
             userId.value,
             requestId,
+            batchId,
             token.value,
             params,
             num,
@@ -319,6 +323,13 @@ const useGenImageUtils = () => {
                     type: prevGenParms.type,
                   }
                 : undefined,
+            ),
+            cmWVUtils.addJson(
+              `${myDesignSavedRoot.value}/${currDesignId.value}/${subDesignId}/ids`,
+              {
+                requestId,
+                batchId,
+              },
             ),
             polling(url, { isJson: false, useVer: !useUsBucket.value, pollingController }),
           ]
