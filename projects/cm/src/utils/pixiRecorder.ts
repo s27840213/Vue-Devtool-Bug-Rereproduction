@@ -65,11 +65,13 @@ export const fragment_slide = `
     }
   }
   `
-const errLoging = (title: string, content: string) => {
+const errLoging = (title: string, content: string, err?: Error) => {
   const errorId = generalUtils.generateRandomString(6)
   const hint = `${store.getters['user/getUserId']}:${store.getters['cmWV/getUserInfo'].hostId},${generalUtils.generateTimeStamp()},${errorId}`
-  logUtils.setLog(errorId)
-  logUtils.setLogForError(new Error('pixi-recorder: can not load image as genVideo!'))
+  logUtils.setLog(`${errorId}<br/>(${title})<br/>(${content})<br/>(${hint})`)
+  if (err) {
+    logUtils.setLogForError(err)
+  }
   logUtils.uploadLog().then(() => {
     modalUtils.setModalInfo(title, `${content}<br/>(${hint})`, {
       msg: 'Okay!',
@@ -106,6 +108,7 @@ export default class PixiRecorder {
   private _video = { src: '', removeWatermark: false }
   private isRecordingVideo = false
   private fragment = fragment_slide
+  private testCanvasId = ''
 
   get video() {
     return this._video
@@ -118,8 +121,8 @@ export default class PixiRecorder {
           this._genVideoResolver = resolve
         }),
         new Promise<void>((resolve, reject) => setTimeout(reject, 60000)),
-      ]).catch(() => {
-        throw new Error(errLoging('Generate video failed', 'pixi-recorder: can not load image as genVideo!'))
+      ]).catch((e) => {
+        throw new Error(errLoging('Generate video failed', 'pixi-recorder: can not load image as genVideo!'), e as Error)
       })
     }
     if (!this.sprite_src) {
@@ -142,10 +145,10 @@ export default class PixiRecorder {
     renderer.resize(this.pixi.view.width, this.pixi.view.height)
 
     // canvas/sprite setup
-    this.watermarkHandler()
     this.pixi.stage.sortableChildren = true
     this.pixi.stage.removeChildren()
     this.pixi.stage.addChild(this.sprite_src)
+    this.watermarkHandler()
     this.addFilter(this.fragment)
     this.reset && this.reset()
     this.pixi.render()
@@ -181,8 +184,8 @@ export default class PixiRecorder {
   }
 
   watermarkHandler() {
-    const { removeWatermark } = useUserStore()
-    if (removeWatermark) {
+    const { removeWatermark } = storeToRefs(useUserStore())
+    if (removeWatermark.value) {
       if (this.sprite_wm) {
         this.pixi.stage.removeChild(this.sprite_wm)
       }
@@ -205,9 +208,9 @@ export default class PixiRecorder {
 
   async saveToDevice(data?: { url?: string, path?: string, revokeUrl?: boolean }) {
     let { url = this.video.src, path, revokeUrl } = data || {}
-    const { removeWatermark } = useUserStore()
+    const { removeWatermark } = storeToRefs(useUserStore())
 
-    if (this.video.removeWatermark !== removeWatermark) {
+    if (this.video.removeWatermark !== removeWatermark.value) {
       const res = await this.genVideo()
       if (res) {
         url = res.src
@@ -280,30 +283,34 @@ export default class PixiRecorder {
       }
     }
     this._animate = () => {
-      const now = Date.now()
-      if (this.time_start === -1) {
-        this.time_start = now
-      }
+      try {
+        const now = Date.now()
+        if (this.time_start === -1) {
+          this.time_start = now
+        }
 
-      if (now - this.time_start < RECORD_START_DELAY) {
-        return
-      }
+        if (now - this.time_start < RECORD_START_DELAY) {
+          return
+        }
 
-      if (this.uniforms.dispFactor >= 1) {
-        if (this.dynamicAnimateEndTime === -1) {
-          this.dynamicAnimateEndTime = now
-        } else {
-          if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
-            this.dynamicAnimateEndTime = -1
-            this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
-            this.reset && this.reset()
-            if (this.canvasRecorder) {
-              this.canvasRecorder.stop()
+        if (this.uniforms.dispFactor >= 1) {
+          if (this.dynamicAnimateEndTime === -1) {
+            this.dynamicAnimateEndTime = now
+          } else {
+            if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
+              this.dynamicAnimateEndTime = -1
+              this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
+              this.reset && this.reset()
+              if (this.canvasRecorder) {
+                this.canvasRecorder.stop()
+              }
             }
           }
         }
+        this.uniforms.dispFactor = (now - this.time_start - RECORD_START_DELAY) / TRANSITION_TIME
+      } catch (e) {
+        throw new Error(errLoging('Generate animation fail', 'error ocurred as animating'), e as Error)
       }
-      this.uniforms.dispFactor = (now - this.time_start - RECORD_START_DELAY) / TRANSITION_TIME
     }
   }
 
@@ -456,7 +463,7 @@ export default class PixiRecorder {
           this._genVideoResolver()
         }
       })
-      .catch(() => {
+      .catch((e) => {
         logUtils.setLogAndConsoleLog('video load images error:', src, res)
         modalUtils.setModalInfo(
           'video load images error',
@@ -468,7 +475,7 @@ export default class PixiRecorder {
             }
           }
         )
-        throw new Error(errLoging('Add image to video failed', 'can not load image!'))
+        throw new Error(errLoging('Add image to video failed', 'can not load image!'), e as Error)
       })
   }
 
@@ -477,14 +484,22 @@ export default class PixiRecorder {
     if (store.getters['cmWV/getDebugMode']) {
       const testCanvas = this.pixi.view as HTMLCanvasElement
       document.body.appendChild(testCanvas)
+      const id = generalUtils.generateRandomString(6)
+      this.testCanvasId = id
       testCanvas.style.position = 'absolute'
       testCanvas.style.top = '0'
       testCanvas.style.width = '300px'
       testCanvas.style.left = '0'
       testCanvas.style.zIndex = '10000'
       setTimeout(() => {
-        if (store.getters['cmWV/getDebugMode'] && document.body.contains(this.pixi.view as HTMLCanvasElement)) {
+        if (
+          store.getters['cmWV/getDebugMode'] &&
+          this.testCanvasId === id &&
+          document.body.contains(this.pixi.view as HTMLCanvasElement)
+        ) {
+          errLoging('Generate video error', 'test canvas not remove properly')
           document.body.removeChild(this.pixi.view as HTMLCanvasElement)
+          this.canvasRecorder?.stop()
         }
       }, 15000)
     }

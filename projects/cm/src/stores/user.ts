@@ -124,7 +124,7 @@ export const useUserStore = defineStore('user', () => {
     return myDesignFilesMap[type] ?? []
   }
 
-  const getDesginTypeByKey = (key: string) => {
+  const getDesignTypeByKey = (key: string) => {
     return key === 'all' ? 'all' : (key.replace('mydesign-', '') as IMyDesignType)
   }
 
@@ -323,7 +323,7 @@ export const useUserStore = defineStore('user', () => {
       const designs = (assets as ICmMyDesign[]).filter(
         (design) => design.id !== '' && design.subDesignInfo.length !== 0,
       )
-      const currType = getDesginTypeByKey(key)
+      const currType = getDesignTypeByKey(key)
       setDesignsByType(currType, designs, overrideDesigns)
       setNextPageByType(currType, nextPage)
     } catch (error) {
@@ -747,7 +747,7 @@ export const useUserStore = defineStore('user', () => {
     currMyDesignType,
     setCurrMyDesignType,
     myDesignBuffer,
-    getDesginTypeByKey,
+    getDesignTypeByKey,
     saveDesignImageToDocument,
     saveImgToTmp,
     saveSubDesign,
