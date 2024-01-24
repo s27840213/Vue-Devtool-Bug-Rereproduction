@@ -310,7 +310,6 @@ class ShortcutUtils {
       navigator.clipboard.writeText(sel.toString().replace(/\n\n/g, '\n'))
       tiptapUtils.agent(editor => {
         editor.commands.deleteSelection()
-        layerUtils.updatecCurrTypeLayerProp({ isEdited: true })
       })
     }
   }
@@ -332,7 +331,6 @@ class ShortcutUtils {
       nextTick(() => {
         editor.commands.scrollIntoView()
       })
-      layerUtils.updatecCurrTypeLayerProp({ isEdited: true })
     })
   }
 

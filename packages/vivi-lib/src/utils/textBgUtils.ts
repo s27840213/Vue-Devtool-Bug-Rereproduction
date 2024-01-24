@@ -106,7 +106,8 @@ export class Rect {
     div.style.writingMode = cssConverter.convertVerticalStyle(config.styles.writingMode).writingMode
     let { widthLimit } = config
     if (config.styles.textShape.name !== 'none') widthLimit = -1
-    const { scale, height, width } = config.styles
+    const { scale } = config.styles
+    const [height, width] = [config.styles.height / scale, config.styles.width / scale]
     if (this.vertical) {
       div.style.width = 'max-content'
       div.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
@@ -117,13 +118,12 @@ export class Rect {
     await this.waitForRender(div)
 
     // Add width limit to try to fit element height with config height.
-    const heightLimit = height / scale
     const target = this.vertical ? 'height' : 'width'
     let resizeTimes = 1
     while (widthLimit !== -1 && resizeTimes < 100 &&
-      Math.abs(div.clientHeight - heightLimit) > 5 * scale) {
+      Math.abs(div.clientHeight - height) > 5 * scale) {
       resizeTimes++
-      if (div.clientHeight > heightLimit) {
+      if (div.clientHeight > height) {
         widthLimit += scale * resizeTimes
       } else {
         widthLimit -= scale * resizeTimes

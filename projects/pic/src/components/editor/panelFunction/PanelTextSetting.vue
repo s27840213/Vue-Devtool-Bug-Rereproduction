@@ -1,63 +1,90 @@
 <template lang="pug">
-div(class="text-setting" ref='body')
-  span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
+div(class="text-setting" ref="body")
+  span(class="text-setting__title text-blue-1 text-H6") {{ $t('NN0062') }}
   div(class="text-setting__row1")
     property-bar(class="pointer record-selection" @click="openFontsPanel")
-      img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl" @error="onError")
+      img(
+        v-if="props.font[0] !== '_'"
+        class="text-setting__text-preview"
+        :src="fontPrevUrl"
+        @error="onError")
       span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
-      svg-icon(class="pointer"
-        :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+      svg-icon(
+        class="pointer"
+        :iconName="'caret-down'"
+        :iconWidth="'10px'"
+        :iconColor="'gray-2'")
     font-size-selector
   div(class="text-setting__row2")
-    div(class="text-setting__color"
-        v-hint="$t('NN0099')")
-      div(class="color-slip record-selection"
-        @click="handleColorModal")
-        svg-icon(iconName="text-color"
-                iconWidth="24px"
-                iconColor="gray-1")
-        div(class="color-slip__bar"
-            :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000', 'border': props.color === '#FFFFFF' ? '1px solid #EEEFF4' : ''}")
+    div(class="text-setting__color" v-hint="$t('NN0099')")
+      div(class="color-slip record-selection" @click="handleColorModal")
+        svg-icon(
+          iconName="text-color"
+          iconWidth="24px"
+          iconColor="gray-1")
+        div(
+          class="color-slip__bar"
+          :style="{ 'background-color': isValidHexColor(props.color) ? props.color : '#000000', border: props.color === '#FFFFFF' ? '1px solid #EEEFF4' : '' }")
       div(class="text-setting__color__hex text-left overflow-hidden")
         button(class="text-setting__range-input-button input-color" @click="handleColorModal")
-          input(class="body-3 text-gray-2 record-selection input-color" type="text" ref="input-color"
-          :value="props.color" @change="inputColor")
+          input(
+            class="body-3 text-gray-2 record-selection input-color"
+            type="text"
+            ref="input-color"
+            :value="props.color"
+            @change="inputColor")
           //-  v-model.lazy="props.color v-model.lazy="props.color
       div(class="text-setting__color__copy-wrapper")
-        svg-icon(class="text-setting__color__copy"
-                iconName="copy"
-                iconWidth="16px"
-                iconColor="gray-4"
-                @click="copyColor")
+        svg-icon(
+          class="text-setting__color__copy"
+          iconName="copy"
+          iconWidth="16px"
+          iconColor="gray-4"
+          @click="copyColor")
     div(class="action-bar action-bar--small flex-evenly")
-      svg-icon(class="pointer record-selection btn-lh feature-button p-5"
-        :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
+      svg-icon(
+        class="pointer record-selection btn-lh feature-button p-5"
+        :iconName="'font-height'"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
         @click="openLineHeightSliderPopup()"
         v-hint="$t('NN0110')")
-      svg-icon(class="pointer record-selection btn-ls feature-button p-5"
-        :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
+      svg-icon(
+        class="pointer record-selection btn-ls feature-button p-5"
+        :iconName="'font-spacing'"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
         @click="openSpacingSliderPopup()"
         v-hint="$t('NN0109')")
   div(class="action-bar flex-evenly")
-    svg-icon(v-for="(icon,index) in mappingIcons('font')"
+    svg-icon(
+      v-for="(icon, index) in mappingIcons('font')"
       class="record-selection feature-button p-5"
       :class="{ pointer: iconClickable(icon), active: iconIsActived(icon) }"
       :key="`gp-action-icon-${index}`"
       :id="`icon-${icon}`"
       v-hint="hintMap[icon]"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown="onPropertyClick(icon)")
+      :iconName="icon"
+      :iconWidth="'20px'"
+      :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'"
+      @mousedown="onPropertyClick(icon)")
   div(class="action-bar flex-evenly")
-    svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
+    svg-icon(
+      v-for="(icon, index) in mappingIcons('font-align')"
       class="pointer feature-button p-5"
       :class="{ active: iconIsActived(icon) }"
       :key="`gp-action-icon-${index}`"
       v-hint="hintMap[icon]"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown="onParaPropsClick(icon)")
+      :iconName="icon"
+      :iconWidth="'20px'"
+      :iconColor="'gray-2'"
+      @mousedown="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">
+import { notify } from '@kyvg/vue3-notification'
 import FontSizeSelector from '@nu/vivi-lib/components/input/FontSizeSelector.vue'
-import { IGroup, ILayer, IParagraph, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
+import { IGroup, IParagraph, IText, ITmp } from '@nu/vivi-lib/interfaces/layer'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@nu/vivi-lib/store/types'
 import brandkitUtils from '@nu/vivi-lib/utils/brandkitUtils'
 import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@nu/vivi-lib/utils/colorUtils'
@@ -71,7 +98,6 @@ import TextPropUtils from '@nu/vivi-lib/utils/textPropUtils'
 import textShapeUtils from '@nu/vivi-lib/utils/textShapeUtils'
 import TextUtils from '@nu/vivi-lib/utils/textUtils'
 import tiptapUtils from '@nu/vivi-lib/utils/tiptapUtils'
-import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import { parseInt } from 'lodash'
 import { defineComponent } from 'vue'
@@ -79,10 +105,10 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
-    FontSizeSelector
+    FontSizeSelector,
   },
   directives: {
-    clickOutside: vClickOutside.directive
+    clickOutside: vClickOutside.directive,
   },
   emits: ['openFontsPanel', 'toggleColorPanel'],
   data() {
@@ -96,9 +122,9 @@ export default defineComponent({
         'text-align-left': `${this.$t('NN0105')}`,
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
-        'text-align-justify': `${this.$t('NN0108')}`
+        'text-align-justify': `${this.$t('NN0108')}`,
       } as Record<string, string>,
-      fontPrevUrl: ''
+      fontPrevUrl: '',
     }
   },
   mounted() {
@@ -120,8 +146,12 @@ export default defineComponent({
     })
     popupUtils.on(PopupSliderEventType.stop, () => {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
-      if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
-        currLayer.layers[subLayerIdx].type === 'text')) {
+      if (
+        currLayer.type === 'text' ||
+        (currLayer.type === 'group' &&
+          subLayerIdx !== -1 &&
+          currLayer.layers[subLayerIdx].type === 'text')
+      ) {
         tiptapUtils.focus({ scrollIntoView: false })
       }
     })
@@ -142,22 +172,30 @@ export default defineComponent({
     hasCurveText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (subLayerIdx !== -1) {
-        return textShapeUtils.isCurvedText(((currLayer as IGroup).layers[subLayerIdx] as IText).styles.textShape)
+        return textShapeUtils.isCurvedText(
+          ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.textShape,
+        )
       }
       if (currLayer.type === 'text') {
         return textShapeUtils.isCurvedText(currLayer.styles.textShape)
       }
-      return (currLayer as IGroup).layers.some(l => l.type === 'text' && textShapeUtils.isCurvedText(l.styles.textShape))
+      return (currLayer as IGroup).layers.some(
+        (l) => l.type === 'text' && textShapeUtils.isCurvedText(l.styles.textShape),
+      )
     },
     hasOnlyVerticalText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (subLayerIdx !== -1) {
-        return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.writingMode.includes('vertical')
+        return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.writingMode.includes(
+          'vertical',
+        )
       }
       if (currLayer.type === 'text') {
         return currLayer.styles.writingMode.includes('vertical')
       }
-      return !(currLayer as IGroup).layers.some(l => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'))
+      return !(currLayer as IGroup).layers.some(
+        (l) => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'),
+      )
     },
     hasTextFill(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
@@ -167,31 +205,36 @@ export default defineComponent({
       if (currLayer.type === 'text') {
         return (currLayer as IText).styles.textFill.name !== 'none'
       }
-      return (currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
+      return (currLayer as IGroup).layers.some(
+        (l) => l.type === 'text' && (l as IText).styles.textFill.name !== 'none',
+      )
     },
   },
   watch: {
     'props.font': function () {
       this.getFontPrev()
-    }
+    },
   },
   methods: {
     ...mapMutations({
-      setCurrFunctionPanel: 'SET_currFunctionPanelType'
+      setCurrFunctionPanel: 'SET_currFunctionPanelType',
     }),
     ...mapActions('brandkit', {
-      refreshFontAsset: 'refreshFontAsset'
+      refreshFontAsset: 'refreshFontAsset',
     }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
     getFontPrev() {
-      const url = brandkitUtils.getFontPrevUrlByFontFamily(brandkitUtils.fillFontVer({
-        fontFamily: this.props.font,
-        type: this.props.type,
-        userId: this.props.userId,
-        assetId: this.props.assetId
-      }), 'prev-name')
+      const url = brandkitUtils.getFontPrevUrlByFontFamily(
+        brandkitUtils.fillFontVer({
+          fontFamily: this.props.font,
+          type: this.props.type,
+          userId: this.props.userId,
+          assetId: this.props.assetId,
+        }),
+        'prev-name',
+      )
       if (this.props.type === 'private' && url === '') {
         this.refreshFont(this.props.assetId)
       }
@@ -201,7 +244,7 @@ export default defineComponent({
       const assetIndex = parseInt(assetId)
       this.refreshFontAsset({
         id: assetId,
-        asset_index: assetIndex
+        asset_index: assetIndex,
       }).then((urlMap) => {
         if (!urlMap['prev-name']) return
         this.fontPrevUrl = urlMap['prev-name']
@@ -232,7 +275,6 @@ export default defineComponent({
       input.focus()
       input.select()
       editorUtils.toggleColorSlips(true)
-      this.updateLayerProps({ isEdited: true })
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
@@ -271,7 +313,12 @@ export default defineComponent({
     onPropertyClick(iconName: string) {
       if (iconName === 'font-vertical') {
         if (this.hasCurveText) return
-        TextPropUtils.onPropertyClick(iconName, this.props.isVertical ? 0 : 1, this.sel.start, this.sel.end)
+        TextPropUtils.onPropertyClick(
+          iconName,
+          this.props.isVertical ? 0 : 1,
+          this.sel.start,
+          this.sel.end,
+        )
       } else {
         switch (iconName) {
           case 'bold':
@@ -287,7 +334,6 @@ export default defineComponent({
             break
         }
       }
-      this.updateLayerProps({ isEdited: true })
       StepsUtils.record()
     },
     handleSpanPropClick(prop: string, pair: [string, string]) {
@@ -306,12 +352,14 @@ export default defineComponent({
         layers.forEach((l, idx) => {
           if (l.type === 'text') {
             const paragraphs = GeneralUtils.deepCopy((l as IText).paragraphs) as IParagraph[]
-            paragraphs.forEach(p => {
-              p.spans.forEach(s => {
-                if (l.styles.writingMode.includes('vertical') && (
-                  (prop === 'decoration' && newPropVal === 'underline') ||
-                  (prop === 'style' && newPropVal === 'italic')
-                )) return
+            paragraphs.forEach((p) => {
+              p.spans.forEach((s) => {
+                if (
+                  l.styles.writingMode.includes('vertical') &&
+                  ((prop === 'decoration' && newPropVal === 'underline') ||
+                    (prop === 'style' && newPropVal === 'italic'))
+                )
+                  return
                 s.styles[prop] = newPropVal
               })
             })
@@ -323,25 +371,25 @@ export default defineComponent({
       }
       TextPropUtils.updateTextPropsState({ [prop]: newPropVal })
     },
-    updateLayerProps(props: { [key: string]: string | number | boolean }) {
-      const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
-      switch (currLayer.type) {
-        case 'text':
-          LayerUtils.updateLayerProps(pageIndex, layerIndex, props)
-          break
-        case 'group':
-          if (subLayerIdx !== -1) {
-            LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
-          } else {
-            const layers = currLayer.layers as ILayer[]
-            layers.forEach((layer, index) => {
-              if (layer.type === 'text') {
-                LayerUtils.updateSubLayerProps(pageIndex, layerIndex, index, props)
-              }
-            })
-          }
-      }
-    },
+    // updateLayerProps(props: { [key: string]: string | number | boolean }) {
+    //   const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
+    //   switch (currLayer.type) {
+    //     case 'text':
+    //       LayerUtils.updateLayerProps(pageIndex, layerIndex, props)
+    //       break
+    //     case 'group':
+    //       if (subLayerIdx !== -1) {
+    //         LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, props)
+    //       } else {
+    //         const layers = currLayer.layers as ILayer[]
+    //         layers.forEach((layer, index) => {
+    //           if (layer.type === 'text') {
+    //             LayerUtils.updateSubLayerProps(pageIndex, layerIndex, index, props)
+    //           }
+    //         })
+    //       }
+    //   }
+    // },
     onParaPropsClick(iconName: string) {
       switch (iconName) {
         case 'text-align-left':
@@ -366,7 +414,7 @@ export default defineComponent({
         layers.forEach((l, idx) => {
           if (l.type === 'text') {
             const paragraphs = GeneralUtils.deepCopy(l.paragraphs) as Array<IParagraph>
-            paragraphs.forEach(p => (p.styles.align = prop))
+            paragraphs.forEach((p) => (p.styles.align = prop))
             LayerUtils.updateSubLayerProps(pageIndex, layerIndex, idx, { paragraphs })
           }
         })
@@ -384,25 +432,34 @@ export default defineComponent({
     },
     openLineHeightSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.lineHeight, step: 0.01, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('lineHeight')))
+      popupUtils.setSliderConfig(
+        Object.assign(
+          { value: this.props.lineHeight, step: 0.01, width: GeneralUtils.getSliderWidth() },
+          MappingUtils.mappingMinMax('lineHeight'),
+        ),
+      )
       popupUtils.openPopup('slider', {
         posX: 'right',
-        target: '.text-setting__row2'
+        target: '.text-setting__row2',
       })
     },
     openSpacingSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.letterSpacing)
-      popupUtils.setSliderConfig(Object.assign({ value: this.props.fontSpacing, step: 1, width: GeneralUtils.getSliderWidth() }, MappingUtils.mappingMinMax('letterSpacing')))
+      popupUtils.setSliderConfig(
+        Object.assign(
+          { value: this.props.fontSpacing, step: 1, width: GeneralUtils.getSliderWidth() },
+          MappingUtils.mappingMinMax('letterSpacing'),
+        ),
+      )
       popupUtils.openPopup('slider', {
         posX: 'right',
-        target: '.text-setting__row2'
+        target: '.text-setting__row2',
       })
     },
     copyColor() {
-      GeneralUtils.copyText(this.props.color)
-        .then(() => {
-          notify({ group: 'copy', text: `${this.props.color} 已複製` })
-        })
+      GeneralUtils.copyText(this.props.color).then(() => {
+        notify({ group: 'copy', text: `${this.props.color} 已複製` })
+      })
     },
     iconClickable(icon: string): boolean {
       switch (icon) {
@@ -416,7 +473,7 @@ export default defineComponent({
           return true
       }
     },
-  }
+  },
 })
 </script>
 
@@ -520,7 +577,9 @@ export default defineComponent({
     height: 35px;
     background-color: #ffffff;
     background-color: white;
-    box-shadow: 0 0 0 1px rgb(64 87 109 / 7%), 0 2px 12px rgb(53 71 90 / 20%);
+    box-shadow:
+      0 0 0 1px rgb(64 87 109 / 7%),
+      0 2px 12px rgb(53 71 90 / 20%);
     border: 1px solid #d9dbe1;
     border-radius: 3px;
   }

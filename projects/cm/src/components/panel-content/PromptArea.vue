@@ -32,7 +32,6 @@ div(class="prompt-area w-full box-border px-24 relative")
             class="prompt-text-area tutorial-powerful-fill-4--clickable tutorial-hidden-message-4--clickable"
             v-else
             :placeholder="editorType === 'hidden-message' ? $t('CM0125') : $t('CM0024')"
-            :autofocus="!isDuringTutorial"
             v-model="promptText")
           transition(name="clear-btn-transition")
             div(
