@@ -130,13 +130,13 @@ export default defineComponent({
       return ['us', 'pt'].includes(this.$i18n.locale)
     },
     isTextInCategory(): boolean {
-      return this.isInCategory('text')
+      return this.currActivePanel === 'text' && this.isInCategory('text')
     },
     isObjectInCategory(): boolean {
-      return this.isInCategory('object')
+      return this.currActivePanel === 'object' && this.isInCategory('object')
     },
     isBackgroundInCategory(): boolean {
-      return this.isInCategory('background')
+      return this.currActivePanel === 'background' && this.isInCategory('background')
     },
     isTemplateInCategory(): boolean {
       return this.isInCategory('template')
@@ -197,9 +197,9 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     showLeftBtn(): boolean {
       if (this.extraPanel === 'replace') return true
-      if (this.currActivePanel === 'text' && this.isTextInCategory) return true
-      if (this.currActivePanel === 'object' && this.isObjectInCategory) return true
-      if (this.currActivePanel === 'background' && this.isBackgroundInCategory) return true
+      if (this.isTextInCategory) return true
+      if (this.isObjectInCategory) return true
+      if (this.isBackgroundInCategory) return true
       if (this.currActivePanel === 'template-content' && (this.isTemplateInCategory || this.isInGroupTemplate)) return true
       return this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.extraPanel !== ''
     },
@@ -240,7 +240,7 @@ export default defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    dynamicBindProps(): { [index: string]: any } {
+    dynamicBindProps(): { [index: string]: unknown } {
       if (this.extraPanel === 'color') {
         return {
           currEvent: this.extraColorEvent,
@@ -275,7 +275,7 @@ export default defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    dynamicBindMethod(): { [index: string]: any } {
+    dynamicBindMethod(): { [index: string]: unknown } {
       const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } = this.getBasicBindMethods()
       switch (this.currActivePanel) {
         case 'color':
@@ -318,29 +318,26 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     leftButtonAction(): (e: PointerEvent) => void {
-      if (this.currActivePanel === 'text' && this.isTextInCategory) {
+      if (this.isTextInCategory) {
         return () => {
           this.setIsInCategory({ tab: 'text', bool: false })
           this.setShowAllRecently({ tab: 'text', bool: false })
           this.resetTextsSearch({ resetCategoryInfo: true })
         }
-      }
-      if (this.currActivePanel === 'object' && this.isObjectInCategory) {
+      } else if (this.isObjectInCategory) {
         return () => {
           this.setIsInCategory({ tab: 'object', bool: false })
           this.setShowAllRecently({ tab: 'object', bool: false })
           if (this.currActiveObjectFavTab) this.resetObjectsFavSearch()
           else this.resetObjectsSearch({ resetCategoryInfo: true })
         }
-      }
-      if (this.currActivePanel === 'background' && this.isBackgroundInCategory) {
+      } else if (this.isBackgroundInCategory) {
         return () => {
           this.setIsInCategory({ tab: 'background', bool: false })
           this.setShowAllRecently({ tab: 'background', bool: false })
           this.resetBackgroundSearch()
         }
-      }
-      if (this.currActivePanel === 'template-content') {
+      } else if (this.currActivePanel === 'template-content') {
         if (this.isInGroupTemplate) return () => this.setIsInGroupTemplate(false)
         if (this.isTemplateInCategory) {
           return () => {
@@ -349,33 +346,29 @@ export default defineComponent({
             this.$store.dispatch(`templates/${this.templatesIgLayout}/resetSearch`, { resetCategoryInfo: true })
           }
         }
-      }
-      if (this.extraPanel === 'color') {
+      } else if (this.extraPanel === 'color') {
         return () => {
           this.extraPanel = ''
           this.panelHistory.pop()
         }
-      }
-      if (this.extraPanel === 'replace') {
+      } else if (this.extraPanel === 'replace') {
         return () => {
           if (this.currHistory === 'stock') this.panelHistory.pop()
           else this.extraPanel = ''
         }
-      }
-      if (this.currActivePanel === 'color-picker') {
+      } else if (this.currActivePanel === 'color-picker') {
         return () => {
           stkWVUtils.setHasNewBgColor(false)
           this.closeMobilePanel()
         }
-      }
-      if (this.panelHistory.length > 0) {
+      } else if (this.panelHistory.length > 0) {
         return () => {
           this.panelHistory.pop()
         }
-      } else {
-        return () => {
-          this.closeMobilePanel()
-        }
+      }
+      
+      return () => {
+        this.closeMobilePanel()
       }
     },
     // eslint-disable-next-line vue/no-unused-properties

@@ -175,7 +175,7 @@ const component = defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    dynamicBindProps(): { [index: string]: any } {
+    dynamicBindProps(): { [index: string]: unknown } {
       if (this.extraPanel === 'color') {
         return {
           currEvent: this.extraColorEvent,
@@ -210,7 +210,7 @@ const component = defineComponent({
       }
     },
     // eslint-disable-next-line vue/no-unused-properties
-    dynamicBindMethod(): { [index: string]: any } {
+    dynamicBindMethod(): { [index: string]: unknown } {
       const { pushHistory, leaveExtraPanel, openExtraColorModal, openExtraPanelReplace } =
         this.getBasicBindMethods()
       switch (this.currActivePanel) {

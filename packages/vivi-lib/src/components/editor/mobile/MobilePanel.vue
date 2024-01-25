@@ -264,11 +264,11 @@ export default defineComponent({
       return ''
     },
     // eslint-disable-next-line vue/no-unused-properties
-    dynamicBindProps(): { [index: string]: any } {
+    dynamicBindProps(): { [index: string]: unknown } {
       return {}
     },
     // eslint-disable-next-line vue/no-unused-properties
-    dynamicBindMethod(): { [index: string]: any } {
+    dynamicBindMethod(): { [index: string]: unknown } {
       return {}
     },
     // eslint-disable-next-line vue/no-unused-properties
@@ -356,6 +356,7 @@ export default defineComponent({
           ...window.location.host.startsWith('localhost') ? [] : ['contextmenu']]
       }
     },
+    // eslint-disable-next-line unused-imports/no-unused-vars
     middlewareCondition(target: HTMLElement): boolean {
       return false
     },
