@@ -77,14 +77,6 @@ const userStore = useUserStore()
 const { removeWatermark, highResolutionPhoto } = storeToRefs(userStore)
 const { setRemoveWatermark, setHighResolutionPhoto } = userStore
 
-cmWVUtils.getState('save_high_res').then((data) => {
-  setHighResolutionPhoto(data?.value ?? false)
-})
-
-cmWVUtils.getState('save_rm_watermark').then((data) => {
-  setRemoveWatermark(data?.value ?? false)
-})
-
 watch(highResolutionPhoto, (newVal) => {
   if (!cmWVUtils.checkPro({ plan: 1 })) {
     setHighResolutionPhoto(false)

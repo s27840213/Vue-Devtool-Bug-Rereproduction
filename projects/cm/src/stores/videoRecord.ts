@@ -26,7 +26,14 @@ export const useVideoRcordStore = defineStore('videoRecord', {
   },
   actions: {
     addImage(img1: string, img2: string) {
-      return pixi.addImage(img1, img2)
+      const editorStore = useEditorStore()
+      const { updateGenResult } = editorStore
+      const { currGeneratedResult } = storeToRefs(editorStore)
+      return pixi.addImage(img1, img2).then(() => {
+        if (currGeneratedResult.value && currGeneratedResult.value.id) {
+          updateGenResult(currGeneratedResult.value.id, { videoSize: { ...pixi.videoSize } })
+        }
+      })
     },
     genVideo() {
       if (!pixi) throw new Error('pixi is undefined in genVideo')
@@ -53,14 +60,13 @@ export const useVideoRcordStore = defineStore('videoRecord', {
         return res
       })
     },
-    saveToDevice(data?: { url?: string, path?: string, revokeUrl?: boolean }) {
+    saveToDevice(data?: { url?: string; path?: string; revokeUrl?: boolean }) {
       if (!pixi) throw new Error('pixi is undefined in saveToDevice')
       const { url, path, revokeUrl } = data || {}
 
-      return pixi.saveToDevice({ url, path, revokeUrl })
-        .finally(() => {
-          this.setIsExportVideo(false)
-        })
+      return pixi.saveToDevice({ url, path, revokeUrl }).finally(() => {
+        this.setIsExportVideo(false)
+      })
     },
     setGenVideoCb(cb: () => void) {
       this.genVideoCb = cb
