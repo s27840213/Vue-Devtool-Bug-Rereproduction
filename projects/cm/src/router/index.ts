@@ -1,5 +1,6 @@
 import useUpload from '@/composable/useUpload'
 import { useUserStore } from '@/stores/user'
+import { editorTypes } from '@/types/editor'
 import HomeView from '@/views/HomeView.vue'
 import Screenshot from '@/views/ScreenshotView.vue'
 import store from '@/vuex'
@@ -157,11 +158,21 @@ router.addRoute({
       }
       if (!cmWVUtils.checkVersion(store.getters['cmWV/getModalInfo'].ver_min || '0')) {
         cmWVUtils.showUpdateModal(true)
-      } else loginUtils.checkToken(async () => await cmWVUtils.restore()).then(() => cmWVUtils.showInitPopups())
+      } else
+        loginUtils
+          .checkToken(async () => await cmWVUtils.restore())
+          .then(() => cmWVUtils.showInitPopups())
       cmWVUtils.fetchTutorialFlags()
       cmWVUtils.setDefaultPrices()
       cmWVUtils.getProducts()
       listDesigns('all')
+      /**
+       * @Note - why not just use a function to get all designs in each type?
+       * bcz we're afraid that the type becomes too many, causing the request will get too much design at the same time
+       */
+      editorTypes.forEach((type) => {
+        listDesigns(type)
+      })
     }
     let argoError = false
     try {
@@ -191,7 +202,7 @@ router.addRoute({
 })
 
 router.beforeEach(async (to, from, next) => {
-  if (commonBeforeEach(to, from , next)) return
+  if (commonBeforeEach(to, from, next)) return
 
   cmWVUtils.setupAPIInterface()
   cmWVUtils.registerCallbacks('base')
@@ -222,8 +233,7 @@ router.beforeEach(async (to, from, next) => {
       )}`,
     )
     const json = await response.json()
-    console.log(json);
-    
+    console.log(json)
 
     store.commit('cmWV/SET_appLoadedTimeout', json.app_loaded_timeout ?? 8000)
 

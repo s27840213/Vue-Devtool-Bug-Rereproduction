@@ -93,9 +93,13 @@ const selectMyDesignType = async (tag: { label: string; type: IMyDesignType }, i
   if (tag.type === currMyDesignType.value) return
   prevTagIndex.value = currTagIndex.value
   currTagIndex.value = index
-  if (getDesignsByType(tag.type).length === 0) {
-    await listDesigns(tag.type)
-  }
+  /**
+   * @Note -bcz we will get all designs' first page now, so the following code is deprecated
+   * But in case that we will change the logic in the future, I keep the code here until the project launch
+   */
+  // if (getDesignsByType(tag.type).length === 0) {
+  //   await listDesigns(tag.type)
+  // }
 
   if (designsContainer.value) {
     designsContainer.value.scrollTo({
