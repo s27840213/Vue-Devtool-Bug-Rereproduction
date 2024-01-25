@@ -13,35 +13,40 @@ div(
     div(
       class="w-full h-full grid justify-items-center items-center gap-8 overflow-hidden"
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
-      div(
-        class="result-showcase flex-center"
-        :class="contentClass"
-        :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
-        img(
-          class="result-showcase__card result-showcase__card--back w-full h-full"
-          :class="{ 'is-flipped': !showVideo }"
-          v-if="currOpenSubDesign"
-          @load="handleThumbLoaded"
-          :src="showcaseImg")
+      div(class="result-showcase w-full h-full flex-center")
         div(
-          v-if="atEditor"
-          class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
-          :class="{ 'is-flipped': showVideo }")
+          class="flex-center"
+          :class="imgContentClass"
+          :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
           img(
-            v-show="!isVideoLoaded"
-            class="w-full h-full absolute top-0"
-            :src="videoLoadingImgSrc")
-          video(
-            v-if="!isExportingVideo"
-            class="w-full h-full absolute top-0"
-            ref="video"
-            webkit-playsinline
-            playsinline
-            loop
-            autoplay
-            muted
-            @loadeddata="videoOnload"
-            :src="videoSrc")
+            class="result-showcase__card result-showcase__card--back w-full h-full"
+            :class="{ 'is-flipped': !showVideo }"
+            v-if="currOpenSubDesign"
+            @load="handleThumbLoaded"
+            :src="showcaseImg")
+        div(
+          class="absolute flex-center"
+          :class="videoContentClass"
+          :style="{ aspectRatio: `${videoSize.width}/${videoSize.height}` }")
+          div(
+            v-if="atEditor"
+            class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
+            :class="{ 'is-flipped': showVideo }")
+            img(
+              v-show="!isVideoLoaded"
+              class="w-full h-full absolute top-0 left-0 object-contain"
+              :src="videoLoadingImgSrc")
+            video(
+              v-if="!isExportingVideo"
+              class="w-full h-full absolute top-0"
+              ref="video"
+              webkit-playsinline
+              playsinline
+              loop
+              autoplay
+              muted
+              @loadeddata="videoOnload"
+              :src="videoSrc")
       div(v-if="atEditor" class="flex-between-center gap-10 relative")
         div(
           class="w-8 h-8 rounded-full transition-colors pointer-events-none"
@@ -238,30 +243,21 @@ const copyPrompt = () => {
 // #endregion
 
 // #region result showcase
-const containerRef = ref<HTMLElement | null>(null)
-const containerSize = useElementBounding(containerRef)
-const contentClass = computed(() => {
-  if (
-    !currOpenSubDesign.value ||
-    containerSize.width.value === 0 ||
-    containerSize.height.value === 0
-  )
-    return ''
-  return currOpenSubDesign.value.width / currOpenSubDesign.value.height >
-    containerSize.width.value / containerSize.height.value
-    ? 'w-full'
-    : 'h-full'
-})
-
 const video = ref<HTMLVideoElement | null>(null)
 const isVideoLoaded = ref(false)
 const showVideo = ref(true)
 
 const videoSrc = computed(() => {
-  if (currGeneratedResult.value && currGeneratedResult.value.video) {
-    return currGeneratedResult.value.video.src
-  } else return ''
+  return currGeneratedResult.value?.video?.src ?? ''
 })
+const videoSize = computed(() => {
+  const videoSize = currGeneratedResult.value?.videoSize
+  return {
+    width: videoSize?.width ?? currOpenSubDesign.value?.width ?? 0,
+    height: videoSize?.height ?? currOpenSubDesign.value?.height ?? 0,
+  }
+})
+
 const videoOnload = () => {
   isVideoLoaded.value = true
 }
@@ -289,6 +285,35 @@ watch(showVideo, (newVal) => {
       video.value.currentTime = 0
     }
   }
+})
+
+const containerRef = ref<HTMLElement | null>(null)
+const containerSize = useElementBounding(containerRef)
+const imgContentClass = computed(() => {
+  if (
+    !currOpenSubDesign.value ||
+    containerSize.width.value === 0 ||
+    containerSize.height.value === 0
+  )
+    return ''
+  return currOpenSubDesign.value.width / currOpenSubDesign.value.height >
+    containerSize.width.value / containerSize.height.value
+    ? 'w-full'
+    : 'h-full'
+})
+
+const videoContentClass = computed(() => {
+  if (
+    containerSize.width.value === 0 ||
+    containerSize.height.value === 0 ||
+    videoSize.value.width === 0 ||
+    videoSize.value.height === 0
+  )
+    return ''
+  return videoSize.value.width / videoSize.value.height >
+    containerSize.width.value / containerSize.height.value
+    ? 'w-full'
+    : 'h-full'
 })
 
 const handleSwipe = (e: AnyTouchEvent, dir: 'left' | 'right') => {

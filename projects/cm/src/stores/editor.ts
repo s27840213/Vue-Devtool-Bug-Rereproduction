@@ -41,6 +41,7 @@ export interface IGenResult {
   url: string
   // prompt: string
   video?: { src: string; removeWatermark: boolean }
+  videoSize?: { width: number; height: number }
 }
 
 interface IEditorStore {
@@ -274,6 +275,7 @@ export const useEditorStore = defineStore('editor', {
       data: {
         url?: string
         video?: null | { src: string; removeWatermark: boolean }
+        videoSize?: null | { width: number; height: number }
         updateIndex?: boolean
         saveToDocument?: boolean
         saveMask?: boolean
@@ -281,7 +283,7 @@ export const useEditorStore = defineStore('editor', {
     ) {
       const index = this.generatedResults.findIndex((item) => item.id === id)
       if (index === -1) return
-      const { url, video, updateIndex } = data
+      const { url, video, videoSize, updateIndex } = data
       if (url) {
         this.generatedResults[index].url = url
       }
@@ -298,6 +300,12 @@ export const useEditorStore = defineStore('editor', {
           URL.revokeObjectURL(this.generatedResults[index].video?.src || '')
         }
         this.generatedResults[index].video = undefined
+      }
+
+      if (videoSize) {
+        this.generatedResults[index].videoSize = videoSize
+      } else if (videoSize === null) {
+        this.generatedResults[index].videoSize = undefined
       }
 
       if (updateIndex && this.selectedSubDesignId === '') {
