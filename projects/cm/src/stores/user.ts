@@ -732,6 +732,15 @@ export const useUserStore = defineStore('user', () => {
   const setHighResolutionPhoto = (value: boolean) => {
     highResolutionPhoto.value = value
   }
+
+  cmWVUtils.detectIfInApp()
+  cmWVUtils.getState('save_rm_watermark').then((data) => {
+    removeWatermark.value = data?.value ?? false
+  })
+
+  cmWVUtils.getState('save_high_res').then((data) => {
+    highResolutionPhoto.value = data?.value ?? false
+  })
   // #endregion
 
   return {
