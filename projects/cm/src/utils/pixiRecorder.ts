@@ -314,6 +314,7 @@ export default class PixiRecorder {
             this.dynamicAnimateEndTime = now
           } else {
             if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
+              this.dynamicAnimateEndTime = -1
               logUtils.setLogAndConsoleLog('_animate: finished all animation')
               this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
               this.reset && this.reset()
@@ -395,56 +396,42 @@ export default class PixiRecorder {
   }
 
   async preprocessor(sprites: [PIXI.Sprite, PIXI.Sprite, PIXI.Sprite]) {
-    const [src, res, wm] = sprites
-
-    // srcImg size fully contain resImg size
-    if (src.width >= res.width && src.height >= res.height) {
-      // srcImg size is exactly equals to resImg size
-      if (src.width === res.width && src.height === res.height) {
-        console.warn('case 0')
-        return sprites
-      } else {
-        console.warn('case 1', src.width, src.height, 'res size', res.width, res.height)
-        const newResSprite = await PIXI.Texture.fromURL(
-            await this.genImg({ width: src.width, height: src.height }, res)
-          )
-          .then((texture) => {
-            this.texture_res = texture
-            this.sprite_res = new PIXI.Sprite(texture)
-            this.sprite_res.width = texture.width
-            this.sprite_res.height = texture.height
-            return this.sprite_res
-          })
-        return [src, newResSprite, wm]
-      }
-    } else {
-      console.warn('case 2', src.width, src.height, 'res size', res.width, res.height)
-
-      const newSize = {
-        width: Math.max(src.width, res.width),
-        height: Math.max(src.height, res.height)
-      }
-      const newSrcSprite = await PIXI.Texture.fromURL(
-        await this.genImg(newSize, src)
-      )
-      .then((texture) => {
+    const [src_origin, res_origin, wm] = sprites
+    const newSize = {
+      width: Math.max(src_origin.width, res_origin.width),
+      height: Math.max(src_origin.height, res_origin.height)
+    }
+    let src = src_origin
+    if (newSize.width !== src_origin.width || newSize.height !== src_origin.height) {
+      src = await PIXI.Texture.fromURL(
+        await this.genImg(newSize, src_origin)
+      ).then((texture) => {
         this.sprite_src = new PIXI.Sprite(texture)
         this.sprite_src.width = texture.width
         this.sprite_src.height = texture.height
         return this.sprite_src
       })
-      const newResSprite = await PIXI.Texture.fromURL(
-        await this.genImg(newSize, res)
-      )
-      .then((texture) => {
+    }
+    let res = res_origin
+    if (newSize.width !== res_origin.width || newSize.height !== res_origin.height) {
+      res = await PIXI.Texture.fromURL(
+        await this.genImg(newSize, res_origin)
+      ).then((texture) => {
         this.texture_res = texture
         this.sprite_res = new PIXI.Sprite(texture)
         this.sprite_res.width = texture.width
         this.sprite_res.height = texture.height
         return this.sprite_res
       })
-      return [newSrcSprite, newResSprite, wm]
     }
+    logUtils.setLogAndConsoleLog(
+      'video: addimg preprocessor, ',
+      `src_origin size: ${src_origin.width}, ${src_origin.height}`,
+      `res_origin size: ${res_origin.width}, ${res_origin.height}`,
+      `src size: ${src.width}, ${src.height}`,
+      `res size: ${res.width}, ${res.height}`
+    )
+    return [src, res, wm]
   }
 
   genImg(containerSize: ISize, sprite: PIXI.Sprite) {
