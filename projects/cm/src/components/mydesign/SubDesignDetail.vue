@@ -14,22 +14,22 @@ div(
       class="w-full h-full grid justify-items-center items-center gap-8 overflow-hidden"
       :class="atEditor ? 'grid-rows-[minmax(0,1fr),auto]' : 'grid-rows-1'")
       div(
-        class="w-full h-full result-showcase flex-center"
-        :class="contentClass")
-        div(class="h-full w-full" :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
-          img(
-            class="result-showcase__card result-showcase__card--back w-full h-full object-contain"
-            :class="{ 'is-flipped': !showVideo }"
-            v-if="currOpenSubDesign"
-            @load="handleThumbLoaded"
-            :src="showcaseImg")
+        class="result-showcase flex-center"
+        :class="contentClass"
+        :style="{ aspectRatio: `${currOpenSubDesign.width}/${currOpenSubDesign.height}` }")
+        img(
+          class="result-showcase__card result-showcase__card--back w-full h-full"
+          :class="{ 'is-flipped': !showVideo }"
+          v-if="currOpenSubDesign"
+          @load="handleThumbLoaded"
+          :src="showcaseImg")
         div(
           v-if="atEditor"
           class="result-showcase__card result-showcase__card--front w-full h-full absolute flex-center"
           :class="{ 'is-flipped': showVideo }")
           img(
             v-show="!isVideoLoaded"
-            class="w-full h-full object-contain"
+            class="w-full h-full absolute top-0"
             :src="videoLoadingImgSrc")
           video(
             v-if="!isExportingVideo"
@@ -105,7 +105,7 @@ const {
   setRemoveWatermark,
   setHighResolutionPhoto,
   getSubDesignImage,
-  getInitialImg
+  getInitialImg,
 } = userStore
 const { currOpenSubDesign, removeWatermark, currOpenDesign } = storeToRefs(userStore)
 
@@ -116,13 +116,8 @@ if (!vuex.getters['payment/getPayment'].subscribe) {
 }
 
 const editorStore = useEditorStore()
-const {
-  currDesignId,
-  currSubDesignId,
-  myDesignSavedType,
-  editorType,
-  initImgSrc
-} = storeToRefs(editorStore)
+const { currDesignId, currSubDesignId, myDesignSavedType, editorType, initImgSrc } =
+  storeToRefs(editorStore)
 
 const videoRecordStore = useVideoRcordStore()
 const { isExportingVideo } = storeToRefs(videoRecordStore)
@@ -307,8 +302,10 @@ const videoLoadingImgSrc = computed(() => {
     if (currOpenDesign.value?.id || currDesignId.value) {
       return getInitialImg()
     } else {
-      return initImgSrc.value ??
-      (currOpenSubDesign.value && getSubDesignImage(currOpenSubDesign.value, 'original'))
+      return (
+        initImgSrc.value ??
+        (currOpenSubDesign.value && getSubDesignImage(currOpenSubDesign.value, 'original'))
+      )
     }
   } else {
     if (currOpenSubDesign.value) {
