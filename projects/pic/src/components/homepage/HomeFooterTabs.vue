@@ -1,21 +1,21 @@
 <template lang="pug">
 div(class="home-footer-tabs" :style="footerTabsStyles")
-  router-link(:to="'/'" custom v-slot="{navigate, isExactActive}")
+  router-link(:to="'/'" custom v-slot="{navigate}")
     div(class="home-footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
-        :iconName="isExactActive ? 'home-tap' :'home'"
-        :iconColor="isExactActive ? 'blue-1' : 'gray-2'"
+        :iconName="activeRouteName === 'Home' ? 'home-tap' :'home'"
+        :iconColor="activeRouteName === 'Home' ? 'blue-1' : 'gray-2'"
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
-      :class="isExactActive ? 'text-blue-1' : 'text-gray-2'") {{$t('NN0846')}}
-  router-link(:to="'/templates'" custom v-slot="{navigate, isExactActive}")
+      :class="activeRouteName === 'Home' ? 'text-blue-1' : 'text-gray-2'") {{$t('NN0846')}}
+  router-link(:to="'/templates'" custom v-slot="{navigate}")
     div(class="home-footer-tabs__item" @click="navigate")
       svg-icon(class="click-disabled"
-        :iconName="isExactActive ? 'template-tap' :'template'"
-        :iconColor="isExactActive ? 'blue-1' : 'gray-2'"
+        :iconName="activeRouteName === 'TemplateCenter' ? 'template-tap' :'template'"
+        :iconColor="activeRouteName === 'TemplateCenter' ? 'blue-1' : 'gray-2'"
         :iconWidth="'22px'")
       span(class="body-XXS no-wrap click-disabled"
-      :class="isExactActive ? 'text-blue-1' : 'text-gray-2'") {{$tc('NN0001', 1)}}
+      :class="activeRouteName === 'TemplateCenter' ? 'text-blue-1' : 'text-gray-2'") {{$tc('NN0001', 1)}}
   btn-new-design(class="home-footer-tabs__plus" v-slot="slotProps")
     svg-icon(
       :iconName="'insert-cross'"
@@ -41,10 +41,10 @@ div(class="home-footer-tabs" :style="footerTabsStyles")
 </template>
 
 <script lang="ts" setup>
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue';
-import router from '@/router';
-import { computed } from 'vue';
-import { useStore } from 'vuex';
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import router from '@/router'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 const store = useStore()
 

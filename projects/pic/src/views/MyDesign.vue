@@ -5,10 +5,10 @@ div(class="my-design")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MyDesignPc from '@/components/mydesign/MyDesignPC.vue'
 import MyDesignMobile from '@/components/mydesign/MyDesignMobile.vue'
+import MyDesignPc from '@/components/mydesign/MyDesignPC.vue'
 import generalUtils from '@nu/vivi-lib/utils/generalUtils'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
@@ -21,7 +21,7 @@ export default defineComponent({
   props: {
     view: {
       type: String,
-      required: true
+      default: '',
     }
   },
   components: {

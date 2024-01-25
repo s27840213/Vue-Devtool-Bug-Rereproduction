@@ -160,7 +160,7 @@ export default defineComponent({
   props: {
     view: {
       type: String,
-      required: true,
+      default: '',
     },
   },
   components: {
