@@ -195,12 +195,6 @@ export default defineComponent({
     noRoundTheme(): boolean {
       return false
     },
-    fixSize(): boolean {
-      return this.fixSizePanels.includes(this.currActivePanel)
-    },
-    extraFixSizeCondition(): boolean { // For panel that fix in some condition
-      return false
-    },
     halfSizeInInitState(): boolean {
       return this.extraPanel !== '' || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
@@ -244,8 +238,8 @@ export default defineComponent({
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : this.panelBg,
-          maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px',
+          maxHeight: this.fixSize() ? '100%'
+            : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px',
           ...(this.hideFooter && { zIndex: '100' }),
           ...(this.hideFooter && { paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px` })
         },
@@ -296,7 +290,7 @@ export default defineComponent({
       return () => {}
     },
     overflowY(): string {
-      return this.insertTheme || this.fixSize || this.extraFixSizeCondition ? 'hidden' : 'scroll'
+      return this.insertTheme || this.fixSize() ? 'hidden' : 'scroll'
     },
     hideMobilePanel(): boolean {
       return this.hideMobilePanelPanels.includes(this.currActivePanel)
@@ -311,9 +305,9 @@ export default defineComponent({
     currActivePanel(newVal, oldVal) {
       this.panelHistory = []
       this.innerTabIndex = 0
-      // Use v-show to show MobilePanel will cause
-      // mounted not triggered, use watch to reset height.
-      if (oldVal === 'none') { // Prevent reset height when switch panel
+      // Reset the panel height when switching panels, except when both panels are not fixed size.
+      const bothAreNonFixSize = !this.fixSize(newVal) && !this.fixSize(oldVal)
+      if (oldVal === 'none' || !bothAreNonFixSize) {
         this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
       }
     },
@@ -382,6 +376,10 @@ export default defineComponent({
     headerbarHeight() {
       return document.querySelector('.mobile-editor .header-bar')?.clientHeight ?? 0
     },
+    fixSize(panel = null as string | null): boolean {
+      if (panel === null) panel = this.currActivePanel
+      return this.fixSizePanels.includes(panel)
+    },
     initPanelHeight() {
       const parentElementHeight = this.panelParentHeight()
       if (this.halfSizeInInitState) return parentElementHeight * 0.5
@@ -398,7 +396,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     dragPanelStart(event: MouseEvent | PointerEvent) {
-      if (this.fixSize) {
+      if (this.fixSize()) {
         return
       }
       this.isDraggingPanel = true

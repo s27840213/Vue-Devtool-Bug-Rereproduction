@@ -123,7 +123,7 @@ const component = defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideDragBar(): boolean {
-      return (!this.isUs && this.panelTitle !== '') || this.fixSize || this.extraFixSizeCondition
+      return (!this.isUs && this.panelTitle !== '') || this.fixSize()
     },
     panelTitle(): string {
       switch (this.currActivePanel) {

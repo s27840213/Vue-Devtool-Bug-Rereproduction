@@ -151,7 +151,7 @@ export default defineComponent({
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideDragBar(): boolean {
-      return (!this.insertTheme && !this.useUsPanel && this.panelTitle !== '') || this.fixSize || this.extraFixSizeCondition
+      return (!this.insertTheme && !this.useUsPanel && this.panelTitle !== '') || this.fixSize()
     },
     // eslint-disable-next-line vue/no-unused-properties
     hideTopSection(): boolean {
