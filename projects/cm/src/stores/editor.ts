@@ -176,7 +176,7 @@ export const useEditorStore = defineStore('editor', {
       return this.opendDesignType ? this.opendDesignType : this.editorType
     },
     myDesignSavedRoot(): string {
-      return `mydesign-${this.opendDesignType ? this.opendDesignType : this.editorType}`
+      return `mydesign-${this.myDesignSavedType}`
     },
   },
   actions: {
