@@ -17,7 +17,7 @@ div(class="panel-font-format")
 
 <script lang="ts">
 import { IColorKeys } from '@/interfaces/color'
-import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
@@ -56,7 +56,8 @@ export default defineComponent({
       if (currLayer.type === 'text') {
         return textShapeUtils.isCurvedText(currLayer.styles.textShape)
       }
-      return (currLayer as IGroup).layers.some(l => l.type === 'text' && textShapeUtils.isCurvedText(l.styles.textShape))
+      return currLayer.type === 'group' &&
+        currLayer.layers.some(l => l.type === 'text' && textShapeUtils.isCurvedText(l.styles.textShape))
     },
     hasOnlyVerticalText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
@@ -66,7 +67,8 @@ export default defineComponent({
       if (currLayer.type === 'text') {
         return currLayer.styles.writingMode.includes('vertical')
       }
-      return !(currLayer as IGroup).layers.some(l => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'))
+      return currLayer.type === 'group' &&
+        !currLayer.layers.some(l => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'))
     },
     hasTextFill(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
@@ -76,7 +78,8 @@ export default defineComponent({
       if (currLayer.type === 'text') {
         return (currLayer as IText).styles.textFill.name !== 'none'
       }
-      return (currLayer as IGroup).layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
+      return currLayer.type === 'group' &&
+        currLayer.layers.some(l => l.type === 'text' && (l as IText).styles.textFill.name !== 'none')
     },
     content(): IFontFormatIcon[][] {
       const fontAlign = mappingUtils.mappingIconSet('font-align')
@@ -191,7 +194,7 @@ export default defineComponent({
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = layerUtils
       const newPropVal = this.props[prop] === pair[0] ? pair[1] : pair[0]
       if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
-        const layers = (currLayer as IGroup | ITmp).layers
+        const layers = currLayer.layers
         // const newPropVal = layers
         //   .filter(l => l.type === 'text')
         //   .every(text => {
@@ -201,19 +204,19 @@ export default defineComponent({
         //   }) ? pair[1] : pair[0]
 
         layers.forEach((l, idx) => {
-          if (l.type === 'text') {
-            const paragraphs = generalUtils.deepCopy((l as IText).paragraphs) as IParagraph[]
-            paragraphs.forEach(p => {
-              p.spans.forEach(s => {
-                if (l.styles.writingMode.includes('vertical') && (
-                  (prop === 'decoration' && newPropVal === 'underline') ||
-                  (prop === 'style' && newPropVal === 'italic')
-                )) return
-                s.styles[prop] = newPropVal
-              })
+          if (l.type !== 'text') return
+
+          const paragraphs = generalUtils.deepCopy(l.paragraphs) as IParagraph[]
+          paragraphs.forEach(p => {
+            p.spans.forEach(s => {
+              if (l.styles.writingMode.includes('vertical') && (
+                (prop === 'decoration' && newPropVal === 'underline') ||
+                (prop === 'style' && newPropVal === 'italic')
+              )) return
+              s.styles[prop] = newPropVal
             })
-            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs })
-          }
+          })
+          layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs })
         })
       } else {
         tiptapUtils.applySpanStyle(prop, newPropVal)
