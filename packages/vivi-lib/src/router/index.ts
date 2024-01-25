@@ -12,7 +12,7 @@ export function commonBeforeEnter(
   // from: RouteLocationNormalized,
   // next: NavigationGuardNext
   ) {
-  logUtils.setLog(`App Start: v.${process.env.VUE_APP_BUILD_NUMBER}`)
+  logUtils.setLog(`App Start: v.${process.env.VUE_APP_BUILD_NUMBER ?? process.env.BITBUCKET_BUILD_NUMBER}`)
 }
 
 // Run at the begining of `beforeEach` in every project, return if redirect needed.
