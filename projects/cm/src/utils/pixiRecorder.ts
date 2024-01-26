@@ -137,6 +137,8 @@ export default class PixiRecorder {
       )
     }
 
+    logUtils.setLogAndConsoleLog('genVideo in pixirecorder.ts')
+
     // if the video is recording already, stop it first
     // this pixi instance only gening one video once a time
     if (this.isRecordingVideo) {
@@ -179,6 +181,7 @@ export default class PixiRecorder {
         ) {
           document.body.removeChild(this.pixi.view as HTMLCanvasElement)
         }
+        logUtils.setLogAndConsoleLog('stop recording')
         return resolve(url)
       }
       this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, stopCb)
@@ -360,8 +363,8 @@ export default class PixiRecorder {
       PIXI.Texture.fromURL(img1)
         .then((texture) => {
           this.sprite_src = new PIXI.Sprite(texture)
-          this.sprite_src.width = texture.width
-          this.sprite_src.height = texture.height
+          this.sprite_src.width = texture.width * 0.5
+          this.sprite_src.height = texture.height * 0.5
           resolve(this.sprite_src)
         })
         .catch((e) => reject(e))
@@ -373,8 +376,8 @@ export default class PixiRecorder {
         .then((texture) => {
           this.texture_res = texture
           this.sprite_res = new PIXI.Sprite(texture)
-          this.sprite_res.width = texture.width
-          this.sprite_res.height = texture.height
+          this.sprite_res.width = texture.width * 0.5
+          this.sprite_res.height = texture.height * 0.5
           resolve(this.sprite_res)
         })
         .catch((e) => reject(e))
@@ -574,7 +577,9 @@ class CanvasRecorder {
   }
 
   onDataAvailable(e: any) {
+    logUtils.setLogAndConsoleLog('recording: ondataavailable 0')
     if (e.data && e.data.size) {
+      logUtils.setLogAndConsoleLog('recording: ondataavailable 1')
       this.chunks.push(e.data)
     }
   }
