@@ -11,9 +11,15 @@ div(class="panel-login flex-center mx-24 my-8" v-out="close")
       tag="span"
       class="body-SM text-white")
       template(#use)
-        a(class="text-white" :href="termsPage") {{ $t('NN0162') }}
+        a(
+          class="text-white"
+          :href="termsPage"
+          target="_blank") {{ $t('NN0162') }}
       template(#privacy)
-        a(class="text-white" :href="privacyPage") {{ $t('NN0161') }}
+        a(
+          class="text-white"
+          :href="privacyPage"
+          target="_blank") {{ $t('NN0161') }}
   svg-icon(
     class="absolute animate-spin"
     :class="{ hidden: !waiting }"
@@ -27,8 +33,8 @@ import vuex from '@/vuex'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { directive as vOut } from 'click-outside-vue3'
 
-const termsPage = ''
-const privacyPage = ''
+const termsPage = 'https://vivisticker.com/us/terms-of-use/'
+const privacyPage = 'https://vivisticker.com/us/privacy-policy/'
 const waiting = ref(false)
 
 const close = () => {
