@@ -368,24 +368,28 @@ const fakeLoadingText = computed(() => {
 
 const pageTransition = ref('fade-in-only') as Ref<string | undefined>
 const inGenResultStateDalayed = ref(inGenResultState.value)
+const inGenResultStateDalayStart = ref(0)
 watch(inGenResultState, (val) => {
   if (!val) {
     // delay disappearance of gen result to cover page during rendering
     pageTransition.value = undefined
+    inGenResultStateDalayStart.value = performance.now()
     const duration = 300
-    const start = performance.now()
     const step = () => {
-      const now = performance.now()
-      const delta = Math.min((now - start) / duration, 1)
-      if (delta < 1) {
-        requestAnimationFrame(step)
-      } else {
+      if (!inGenResultStateDalayStart.value) return
+      const runtime = performance.now() - inGenResultStateDalayStart.value
+      if (runtime < duration) window.requestAnimationFrame(step)
+      else {
+        inGenResultStateDalayStart.value = 0
         inGenResultStateDalayed.value = val
         pageTransition.value = 'fade-in-only'
       }
     }
-    step()
-  } else inGenResultStateDalayed.value = val
+    window.requestAnimationFrame(step)
+  } else {
+    inGenResultStateDalayStart.value = 0
+    inGenResultStateDalayed.value = val
+  }
 })
 // #endregion
 
@@ -552,23 +556,25 @@ const wrapperStyles = computed(() => {
     transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
   }
 
-  const rawWidth =
-    inGenResultState.value && currGeneratedResult.value
-      ? currGeneratedResult.value?.width
-      : pageSize.value.width
-  const rawHeight =
-    inGenResultState.value && currGeneratedResult.value
-      ? currGeneratedResult.value?.height
-      : pageSize.value.height
+  const isGenResult = inGenResultStateDalayed.value && currGeneratedResult.value && currImgSrc.value !== ''
+  const rawSize = isGenResult ? {
+    width: currGeneratedResult.value.width,
+    height: currGeneratedResult.value.height
+  } : pageSize.value
 
   return {
     transformOrigin,
     transform,
     // width: `${pageSize.value.width * contentScaleRatio.value}px`,
     // height: `${pageSize.value.height * contentScaleRatio.value}px`,
-    width: `${rawWidth * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
-    height: `${rawHeight * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
-    boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
+    width: `${rawSize.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${rawSize.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    boxShadow: isDuringCopy.value || isGenResult ? `0px 0px 0px 2000px #050505` : 'none',
+    ...(isGenResult ? {
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%) scale(1)'
+    } : {})
   }
 })
 
