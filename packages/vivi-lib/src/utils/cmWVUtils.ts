@@ -1211,7 +1211,7 @@ class CmWVUtils extends HTTPLikeWebViewUtils<IUserInfo> {
 
   async addWaterMark2Img(url: string, type: string, quality?: number) {
     const WATER_MARK = new URL(
-      '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+      '../../../../packages/vivi-lib/src/assets/icon/cm/genpix-watermark.svg',
       import.meta.url,
     ).href
     return new Promise<string>((resolve) => {

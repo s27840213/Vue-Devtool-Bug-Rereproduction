@@ -590,7 +590,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "deploy charmix to cmrd"
+            name: "deploy genpix to cmrd"
             deployment: cmrd
             trigger: manual
             condition:
@@ -627,7 +627,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "charmix to dev5 (Alan)"
+            name: "genpix to dev5 (Alan)"
             deployment: cmdev5
             trigger: manual
             script:
@@ -657,7 +657,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "charmix to dev4 (Gary)"
+            name: "genpix to dev4 (Gary)"
             deployment: cmdev4
             trigger: manual
             script:
@@ -687,7 +687,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "charmix to dev3 (HsingChi)"
+            name: "genpix to dev3 (HsingChi)"
             deployment: cmdev3
             trigger: manual
             script:
@@ -717,7 +717,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "charmix to dev2 (TingAn)"
+            name: "genpix to dev2 (TingAn)"
             deployment: cmdev2
             trigger: manual
             script:
@@ -747,7 +747,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "charmix to dev1 (Nathan)"
+            name: "genpix to dev1 (Nathan)"
             deployment: cmdev1
             trigger: manual
             script:
@@ -777,7 +777,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "charmix to dev0 (ZhengYan)"
+            name: "genpix to dev0 (ZhengYan)"
             deployment: cmdev0
             trigger: manual
             script:
@@ -971,7 +971,7 @@ pipelines:
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - projects/cm/dist/**
       - step:
-          name: "deploy charmix to prod"
+          name: "deploy genpix to prod"
           deployment: cmprod
           trigger: manual
           script:
@@ -1104,7 +1104,7 @@ pipelines:
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
-              name: "deploy charmix to cmrd"
+              name: "deploy genpix to cmrd"
               deployment: cmrd
               trigger: manual
               script:
@@ -1149,7 +1149,7 @@ pipelines:
               script:
                 - ./tools/bash/pr_develop_to_qa-stk.sh
           - step:
-              name: "pr to qa-cm (Charmix)"
+              name: "pr to qa-cm (GenPix)"
               trigger: manual
               script:
                 - ./tools/bash/pr_develop_to_qa-cm.sh
@@ -1211,7 +1211,7 @@ pipelines:
               script:
                 - ./tools/bash/pr_hotfix_to_stk.sh
           - step:
-              name: "pr to main/cm (Charmix)"
+              name: "pr to main/cm (GenPix)"
               trigger: manual
               script:
                 - ./tools/bash/pr_hotfix_to_cm.sh

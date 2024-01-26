@@ -20,7 +20,7 @@ const IMG2_EXAMPLE =
 const IMG1_EXAMPLE =
   'https://images.unsplash.com/photo-1552300977-cbc8b08d95e7?cs=tinysrgb&q=80&h=766&origin=true&appver=v922'
 const WATER_MARK = new URL(
-  '../../../../packages/vivi-lib/src/assets/icon/cm/charmix-logo.svg',
+  '../../../../packages/vivi-lib/src/assets/icon/cm/genpix-watermark.svg',
   import.meta.url,
 ).href
 
@@ -423,13 +423,11 @@ export default class PixiRecorder {
     const [src_origin, res_origin, wm] = sprites
     const newSize = {
       width: Math.max(src_origin.width, res_origin.width),
-      height: Math.max(src_origin.height, res_origin.height)
+      height: Math.max(src_origin.height, res_origin.height),
     }
     let src = src_origin
     if (newSize.width !== src_origin.width || newSize.height !== src_origin.height) {
-      src = await PIXI.Texture.fromURL(
-        await this.genImg(newSize, src_origin)
-      ).then((texture) => {
+      src = await PIXI.Texture.fromURL(await this.genImg(newSize, src_origin)).then((texture) => {
         this.sprite_src = new PIXI.Sprite(texture)
         this.sprite_src.width = texture.width
         this.sprite_src.height = texture.height
@@ -438,9 +436,7 @@ export default class PixiRecorder {
     }
     let res = res_origin
     if (newSize.width !== res_origin.width || newSize.height !== res_origin.height) {
-      res = await PIXI.Texture.fromURL(
-        await this.genImg(newSize, res_origin)
-      ).then((texture) => {
+      res = await PIXI.Texture.fromURL(await this.genImg(newSize, res_origin)).then((texture) => {
         this.texture_res = texture
         this.sprite_res = new PIXI.Sprite(texture)
         this.sprite_res.width = texture.width
@@ -453,7 +449,7 @@ export default class PixiRecorder {
       `src_origin size: ${src_origin.width}, ${src_origin.height}`,
       `res_origin size: ${res_origin.width}, ${res_origin.height}`,
       `src size: ${src.width}, ${src.height}`,
-      `res size: ${res.width}, ${res.height}`
+      `res size: ${res.width}, ${res.height}`,
     )
     return [src, res, wm]
   }

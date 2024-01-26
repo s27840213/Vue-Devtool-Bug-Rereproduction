@@ -216,7 +216,7 @@ const supportOptions: Array<IOptionConfig> = [
     title: t('CM0038'),
     iconName: 'film',
     callback: () => {
-      window.open('https://www.instagram.com/charmix.ai/')
+      window.open('https://www.instagram.com/genpix.ai/')
     },
   },
   // {
@@ -233,7 +233,7 @@ const mediaOptions: Array<IOptionConfig> = [
     title: t('CM0041'),
     iconName: 'instagram',
     callback: () => {
-      window.open('https://www.instagram.com/charmix.ai/')
+      window.open('https://www.instagram.com/genpix.ai/')
     },
   },
   // {
@@ -257,7 +257,7 @@ const aboutOptions: Array<IOptionConfig> = [
     title: t('CM0045'),
     iconName: 'chat-bubble',
     callback: () => {
-      window.open('https://www.instagram.com/charmix.ai/')
+      window.open('https://www.instagram.com/genpix.ai/')
     },
   },
   {

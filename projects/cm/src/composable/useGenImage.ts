@@ -149,7 +149,7 @@ const useGenImageUtils = () => {
               closeModal()
             },
             confirm() {
-              window.open('https://www.instagram.com/charmix.ai/', '_blank')
+              window.open('https://www.instagram.com/genpix.ai/', '_blank')
               closeModal()
             },
             confirmTextStyle: 'text-decoration: underline;',

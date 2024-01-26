@@ -1,13 +1,13 @@
 import axios from '@/apis'
 import { IListServiceParams, IListServiceResponse } from '@/interfaces/api'
 import store from '@/store'
+import { getAutoWVUtils } from '@/utils/autoWVUtils'
+import cmWVUtils from '@/utils/cmWVUtils'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import stkWVUtils from '@/utils/stkWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import authToken from './auth-token'
-import { getAutoWVUtils } from '@/utils/autoWVUtils'
-import cmWVUtils from '@/utils/cmWVUtils'
 
 class ListService {
   getList(params: IListServiceParams) {

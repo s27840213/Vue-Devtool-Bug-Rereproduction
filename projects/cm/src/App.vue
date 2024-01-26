@@ -11,7 +11,7 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
       custom
       :to="'/'"
       v-slot="{ navigate }")
-      img(src="@/assets/img/logo.png" class="w-44" @click="navigate")
+      img(src="@/assets/img/logo.png" class="w-30" @click="navigate")
     div(class="flex-center gap-18")
       transition(
           name="rotate-right-in"

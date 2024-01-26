@@ -17,7 +17,7 @@ LANG_COUNT = 4
 google_sheet_name = 'Vivipic Summary (nuDesign)'
 works_sheet_name = 'i18n'
 
-work_sheets = ['i18n', 'charmix-i18n']
+work_sheets = ['i18n', 'genpix-i18n']
 print(google_sheet_name, works_sheet_name)
 gc = gspread.service_account(
     filename=f'{ROOT}/tools/i18n-tool/config/client-secret.json')
