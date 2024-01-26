@@ -111,6 +111,7 @@ export default class PixiRecorder {
   private isRecordingVideo = false
   private fragment = fragment_slide
   private testCanvasId = ''
+  videoSize = { width: 0, height: 0 }
 
   get video() {
     return this._video
@@ -197,6 +198,7 @@ export default class PixiRecorder {
   }
 
   shutGeningVideo() {
+    logUtils.setLogAndConsoleLog('shutGeningVideo called')
     this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
     return this.canvasRecorder?.stop(true)
   }
