@@ -607,8 +607,8 @@ export const useUserStore = defineStore('user', () => {
         subDesignInfo: generatedResults.value.map((result) => {
           return {
             id: result.id,
-            width: pages[0].width,
-            height: pages[0].height,
+            width: result.width,
+            height: result.height,
           }
         }),
         thumbIndex: currDesignThumbIndex.value,

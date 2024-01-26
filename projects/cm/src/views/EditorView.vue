@@ -225,7 +225,6 @@ import { isEqual } from 'lodash'
 import { storeToRefs } from 'pinia'
 import { useStore } from 'vuex'
 
-
 const { t } = useI18n()
 // #region refs & vars
 const headerbarRef = ref<typeof Headerbar | null>(null)
@@ -527,12 +526,20 @@ const fitScaleRatio = computed(() => {
   )
     return 1
 
-  const widthRatio = (editorContainerWidth.value - 8) / pageSize.value.width
-  // @Note - 24 is used to prevent the control point being cut off
-  const heightRatio = (editorContainerHeight.value - 24) / pageSize.value.height
+  const contentWidth =
+    inGenResultState.value && currGeneratedResult.value
+      ? currGeneratedResult.value.width
+      : pageSize.value.width
+  const contentHeight =
+    inGenResultState.value && currGeneratedResult.value
+      ? currGeneratedResult.value.height
+      : pageSize.value.height
 
-  const reductionRatio = isDuringCopy.value && !isAutoFilling.value ? 1 : 1
-  const ratio = Math.min(widthRatio, heightRatio) * reductionRatio
+  const widthRatio = (editorContainerWidth.value - 8) / contentWidth
+  // @Note - 24 is used to prevent the control point being cut off
+  const heightRatio = (editorContainerHeight.value - 24) / contentHeight
+
+  const ratio = Math.min(widthRatio, heightRatio)
   return ratio
 })
 
@@ -544,13 +551,23 @@ const wrapperStyles = computed(() => {
   if (isPinchingEditor && pinchScale !== 1) {
     transform = `translate(${page.x ?? 0}px, ${page.y ?? 0}px) scale(${pinchScale})`
   }
+
+  const rawWidth =
+    inGenResultState.value && currGeneratedResult.value
+      ? currGeneratedResult.value?.width
+      : pageSize.value.width
+  const rawHeight =
+    inGenResultState.value && currGeneratedResult.value
+      ? currGeneratedResult.value?.height
+      : pageSize.value.height
+
   return {
     transformOrigin,
     transform,
     // width: `${pageSize.value.width * contentScaleRatio.value}px`,
     // height: `${pageSize.value.height * contentScaleRatio.value}px`,
-    width: `${pageSize.value.width * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
-    height: `${pageSize.value.height * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    width: `${rawWidth * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
+    height: `${rawHeight * contentScaleRatio.value * pageUtils.scaleRatio * 0.01}px`,
     boxShadow: isDuringCopy.value ? `0px 0px 0px 2000px #050505` : 'none',
   }
 })

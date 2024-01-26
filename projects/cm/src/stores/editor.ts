@@ -39,6 +39,8 @@ export interface MaskParams {
 export interface IGenResult {
   id: string
   url: string
+  width: number
+  height: number
   // prompt: string
   video?: { src: string; removeWatermark: boolean }
   videoSize?: { width: number; height: number }
@@ -263,10 +265,13 @@ export const useEditorStore = defineStore('editor', {
     setIsSendingGenImgReq(isSendingGenImgReq: boolean) {
       this.isSendingGenImgReq = isSendingGenImgReq
     },
-    unshiftGenResults(url: string, id: string /*, prompt: string */) {
+    async unshiftGenResults(url: string, id: string /*, prompt: string */) {
+      const { width, height } = this.pageSize
       this.generatedResults.unshift({
         url,
         id,
+        width,
+        height,
         // prompt,
       })
     },
