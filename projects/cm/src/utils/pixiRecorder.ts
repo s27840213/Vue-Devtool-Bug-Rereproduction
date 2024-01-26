@@ -111,7 +111,6 @@ export default class PixiRecorder {
   private isRecordingVideo = false
   private fragment = fragment_slide
   private testCanvasId = ''
-  videoSize = { width: 0, height: 0 }
 
   get video() {
     return this._video
@@ -185,7 +184,7 @@ export default class PixiRecorder {
         return resolve(url)
       }
       this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, stopCb)
-      this.canvasRecorder.start(1000, () => {
+      this.canvasRecorder.start(500, () => {
         this.isRecordingVideo = true
       })
     }).then((res) => {
@@ -330,7 +329,7 @@ export default class PixiRecorder {
           } else {
             if (now - this.dynamicAnimateEndTime >= RECORD_END_DELAY) {
               this.dynamicAnimateEndTime = -1
-              logUtils.setLogAndConsoleLog('_animate: finished all animation')
+              logUtils.setLogAndConsoleLog('_animate: finished all animation', this.canvasRecorder)
               this.pixi.ticker.remove(this._animate as PIXI.TickerCallback<PixiRecorder>)
               this.reset && this.reset()
               if (this.canvasRecorder) {
