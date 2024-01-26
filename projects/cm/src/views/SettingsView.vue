@@ -264,14 +264,14 @@ const aboutOptions: Array<IOptionConfig> = [
     title: t('NN0160'),
     iconName: 'document-text',
     callback: () => {
-      window.open('https://vivisticker.com/us/terms-of-use/')
+      window.open(t('CM0145'))
     },
   },
   {
     title: t('NN0161'),
     iconName: 'document-text',
     callback: () => {
-      window.open('https://vivisticker.com/us/privacy-policy/')
+      window.open(t('CM0144'))
     },
   },
 ]

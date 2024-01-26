@@ -30,11 +30,13 @@ div(class="panel-login flex-center mx-24 my-8" v-out="close")
 
 <script lang="ts" setup>
 import vuex from '@/vuex'
+import useI18n from '@nu/vivi-lib/i18n/useI18n'
 import cmWVUtils from '@nu/vivi-lib/utils/cmWVUtils'
 import { directive as vOut } from 'click-outside-vue3'
 
-const termsPage = 'https://vivisticker.com/us/terms-of-use/'
-const privacyPage = 'https://vivisticker.com/us/privacy-policy/'
+const { t } = useI18n()
+const termsPage = t('CM0145')
+const privacyPage = t('CM0144')
 const waiting = ref(false)
 
 const close = () => {
