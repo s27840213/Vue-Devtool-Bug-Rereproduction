@@ -1,5 +1,4 @@
 import { IText } from '@/interfaces/layer'
-import logUtils from '@/utils/logUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textUtils, { ITextHW } from '@/utils/textUtils'
 
@@ -59,7 +58,7 @@ abstract class AutoResize {
     if (this.isDebugMode) {
       console.log(...messages)
     } else {
-      logUtils.setLog(messages.join(' '))
+      // logUtils.setLog(messages.join(' '))
     }
   }
 
