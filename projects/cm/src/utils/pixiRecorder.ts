@@ -552,21 +552,27 @@ class CanvasRecorder {
   }
 
   start(time: number, startCb?: () => void) {
-    this.recorder.start(time)
     this.recorder.onstart = () => {
       startCb && startCb()
     }
+    this.recorder.start(time)
   }
 
   stop(notStoreVideo = false) {
+    logUtils.setLogAndConsoleLog('on stop all chuncks: -1', this.chunks, this.chunks.length)
     return new Promise<void>((resolve) => {
+      logUtils.setLogAndConsoleLog('on stop all chuncks: 0', this.chunks, this.chunks.length)
       this.recorder.onstop = () => {
         if (notStoreVideo) {
+          logUtils.setLogAndConsoleLog('on stop all chuncks: 1', this.chunks, this.chunks.length)
+          this.chunks = []
           if (this._stopCb) {
             this._stopCb('')
           }
         } else {
           const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
+          this.chunks = []
+          logUtils.setLogAndConsoleLog('on stop all chuncks: 2', this.chunks, this.chunks.length)
           if (this._stopCb) {
             this._stopCb(url)
           }
@@ -580,7 +586,7 @@ class CanvasRecorder {
   onDataAvailable(e: any) {
     logUtils.setLogAndConsoleLog('recording: ondataavailable 0')
     if (e.data && e.data.size) {
-      logUtils.setLogAndConsoleLog('recording: ondataavailable 1')
+      logUtils.setLogAndConsoleLog('recording: ondataavailable 1', e.data.size)
       this.chunks.push(e.data)
     }
   }
