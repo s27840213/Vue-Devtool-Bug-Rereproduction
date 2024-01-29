@@ -25,7 +25,7 @@ export function commonBeforeEach(
   const urlParams = new URLSearchParams(location.search)
   const ver = urlParams.get('ver')
   if (ver && !to.query.ver && to.name) {
-    next({ name: to.name, query: Object.assign({ ver }, to.query) })
+    next({ path: to.path, query: Object.assign({ ver }, to.query) })
     return true
   }
 
