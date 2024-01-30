@@ -29,6 +29,7 @@ const useStateInfo = () => {
     showBrushOptions,
     showSelectionOptions,
     showDescriptionPanel,
+    showRecognizingCheck,
   } = storeToRefs(editorStore)
 
   const showHomeTabs = computed(() => atHome.value || atMyDesign.value)
@@ -62,6 +63,7 @@ const useStateInfo = () => {
     showSelectionOptions,
     showImgSelector,
     showDescriptionPanel,
+    showRecognizingCheck,
     isDesignOpen,
     isSubDesignOpen,
   }

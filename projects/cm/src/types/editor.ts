@@ -6,7 +6,7 @@ export type HiddenMessageStates = 'aspectRatio' | 'editing' | 'genResult' | 'sav
 export type MagicCombinedStates = 'aspectRatio' | 'editing' | 'genResult' | 'saving'
 export type EditorStates = Array<PowerfulfillStates | HiddenMessageStates | MagicCombinedStates>
 //
-export type EditorFeature = 'none' | 'cm_brush' | 'selection' | 'add'
+export type EditorFeature = 'none' | 'cm_brush' | 'selection' | 'add' | 'eye-square'
 export type PowerfulFillCanvasMode = 'brush' | 'erase' | 'move'
 
 export type DescriptionPanel = 'hidden-message/help' | 'hidden-message/invert' | 'hidden-message/bgrm'

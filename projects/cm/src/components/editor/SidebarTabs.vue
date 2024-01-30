@@ -151,6 +151,14 @@ const defaultEditorTabs = computed((): Array<ISidebarTab> => {
       disabled: isAutoFilling.value,
       // disabled: true,
     },
+    {
+      icon: 'eye-square',
+      text: t('CM0167'),
+      panelType: '',
+      hidden: editorType.value !== 'hidden-message',
+      disabled: isAutoFilling.value,
+      // disabled: true,
+    },
   ]
 })
 
@@ -216,6 +224,10 @@ const handleTabAction = (tab: ISidebarTab) => {
     }
     case 'text': {
       assetPanelUtils.setCurrActiveTab('text')
+      break
+    }
+    case 'eye-square': { 
+      toggleFeature(tab.icon)
       break
     }
   }

@@ -1212,6 +1212,12 @@
   "CM0159": "Pinch to zoom and pan the image smoothly during the fill process.",
   "CM0160": "Brush and change",
   "CM0161": "Brush the area you want to change.<newline>Then text a prompt for the object or scene you wish to create.",
-  "CM0162": "Okay, I got it.",
-  "CM0163": "Create illusion images Art with AI"
+  "CM0162": "You can check your creation in project later.",
+  "CM0163": "Create illusion images Art with AI",
+  "CM0164": "Want to leave?",
+  "CM0165": "Your creation is still processing. Are you sure you want to leave?",
+  "CM0166": "Stay here",
+  "CM0167": "Check",
+  "CM0168": "Recognizing Check",
+  "CM0169": "If your hidden message is easily identifiable in this thumbnail, you will generate clear and recognizable images. If not, please adjust your hidden message."
 }

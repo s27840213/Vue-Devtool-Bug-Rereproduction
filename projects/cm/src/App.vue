@@ -52,8 +52,9 @@ div(class="app-root w-full h-full grid grid-cols-1 grid-rows-[auto,minmax(0,1fr)
   tutorial
   //- mask cannot be moved to abs container bcz bottom panel should overlay mask
   div(
-    v-if="wantToQuit || inMediaOptions"
+    v-if="wantToQuit || inMediaOptions || showRecognizingCheck"
     class="mask"
+    :class="{'no-blur': showRecognizingCheck}"
     ref="maskRef"
     @click.stop="closeModal")
   //- why we need this is to make the status bar height could work to every overlay element
@@ -158,6 +159,7 @@ import PromptArea from './components/panel-content/PromptArea.vue'
 import SavingOptions from './components/panel-content/SavingOptions.vue'
 import SavingTab from './components/panel-content/SavingTab.vue'
 import SelectionOptions from './components/panel-content/SelectionOptions.vue'
+import RecognizingCheck from './components/panel-content/RecognizingCheck.vue'
 import useActionSheetCm from './composable/useActionSheetCm'
 import useStateInfo from './composable/useStateInfo'
 import { useCanvasStore } from './stores/canvas'
@@ -187,6 +189,7 @@ const {
   showDescriptionPanel,
   isDesignOpen,
   isSubDesignOpen,
+  showRecognizingCheck,
 } = useStateInfo()
 
 const fullPageType = computed(() => store.getters.getFullPageType)
@@ -234,6 +237,8 @@ const bottomPanelComponent = computed(() => {
       return FooterTabs
     case inGenResultState.value:
       return GenResult
+    case showRecognizingCheck.value:
+      return RecognizingCheck
     case inEditingState.value:
       return PromptArea
     case inSavingState.value:
@@ -372,8 +377,9 @@ const { prevScreenshotUrl, debugMode } = storeToRefs(useGlobalStore())
   @apply w-full h-full fixed top-0 left-0 z-modal-mask;
   animation: blur-in 0.25s forwards;
   background-color: rgba(#050505, 0.5);
-  &.for-no-close-modal {
-    @apply z-popup;
+  &.no-blur {
+    animation: none;
+    @apply bg-dark-4/70
   }
 }
 

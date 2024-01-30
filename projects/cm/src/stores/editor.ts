@@ -128,6 +128,9 @@ export const useEditorStore = defineStore('editor', {
     showSelectionOptions(): boolean {
       return this.currActiveFeature === 'selection'
     },
+    showRecognizingCheck(): boolean {
+      return this.currActiveFeature === 'eye-square'
+    },
     inAspectRatioState(): boolean {
       return this.editorStates[this.currStateIndex] === 'aspectRatio'
     },

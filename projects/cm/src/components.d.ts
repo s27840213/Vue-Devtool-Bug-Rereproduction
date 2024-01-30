@@ -36,6 +36,7 @@ declare module 'vue' {
     PowerfulFillTutorial: typeof import('./components/tutorial/PowerfulFillTutorial.vue')['default']
     PromptArea: typeof import('./components/panel-content/PromptArea.vue')['default']
     PropsSlider: typeof import('./components/global/PropsSlider.vue')['default']
+    RecognizingCheck: typeof import('./components/panel-content/RecognizingCheck.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SavingOptions: typeof import('./components/panel-content/SavingOptions.vue')['default']
