@@ -12,7 +12,7 @@ div(class="recognizing-check relative flex-center flex-col gap-16 px-16 pt-8")
     img(v-if="imgLoaded" :src="imgSrc" class="w-full h-full object-contain" :style="{ filter: `blur(${blur}px)` }")
   div(v-if="debugMode" class="w-full grid grid-cols-[auto,1fr,35px] items-center gap-8 text-white")
     span blur
-    range-slider(v-model="blur" :min="0" :max="16")
+    range-slider(v-model="blur" :min="0" :max="8" :step="0.1")
     span {{ `${blur}px` }}
 </template>
 <script setup lang="ts">
