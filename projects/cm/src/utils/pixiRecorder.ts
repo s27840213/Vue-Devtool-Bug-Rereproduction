@@ -185,7 +185,7 @@ export default class PixiRecorder {
         return resolve(url)
       }
       this.canvasRecorder = new CanvasRecorder(this.pixi.view as HTMLCanvasElement, stopCb)
-      this.canvasRecorder.start(250, () => {
+      this.canvasRecorder.start(undefined, () => {
         this.isRecordingVideo = true
       })
     }).then((res) => {
@@ -545,13 +545,14 @@ class CanvasRecorder {
     this.canvas = canvas
     this.stream = this.canvas.captureStream()
     this.recorder = new MediaRecorder(this.stream, this.getMimeTypeSupportOptions())
+    logUtils.setLogAndConsoleLog('recording: this.getMimeTypeSupportOptions()', this.getMimeTypeSupportOptions())
     this.recorder.ondataavailable = (e) => this.onDataAvailable(e)
     if (stopCb) {
       this._stopCb = stopCb
     }
   }
 
-  start(time: number, startCb?: () => void) {
+  start(time?: number, startCb?: () => void) {
     this.recorder.onstart = () => {
       startCb && startCb()
     }
@@ -570,9 +571,10 @@ class CanvasRecorder {
             this._stopCb('')
           }
         } else {
-          const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
-          this.chunks = []
+          // const url = URL.createObjectURL(new Blob(this.chunks, { type: 'video/mp4' }))
+          const url = URL.createObjectURL(new Blob(this.chunks, { type: this.getMimeTypeSupportOptions()?.mimeType }))
           logUtils.setLogAndConsoleLog('on stop all chuncks: 2', this.chunks, this.chunks.length)
+          this.chunks = []
           if (this._stopCb) {
             this._stopCb(url)
           }
@@ -584,9 +586,9 @@ class CanvasRecorder {
   }
 
   onDataAvailable(e: any) {
-    logUtils.setLogAndConsoleLog('recording: ondataavailable 0')
+    logUtils.setLogAndConsoleLog('recording: ondataavailable 0', e.data, e.data.size)
     if (e.data && e.data.size) {
-      logUtils.setLogAndConsoleLog('recording: ondataavailable 1', e.data.size)
+      logUtils.setLogAndConsoleLog('recording: ondataavailable 1', e.data.size, e.data)
       this.chunks.push(e.data)
     }
   }
