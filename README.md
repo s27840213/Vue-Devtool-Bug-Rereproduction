@@ -1,7 +1,7 @@
 # Vue Devtool Bug Reproduction with Pug
 <!-- Give me a README template -->
 ## Description
-This is a bug reproduction for new Vue Devtool. When it's used with Pug, vite will throw a critical error.
+This is a bug reproduction for new Vue Devtool. When it's used with Pug, vite-plugin-vue-inspector will throw a critical error.
 
 ## Steps to reproduce
 1. Clone this repo
