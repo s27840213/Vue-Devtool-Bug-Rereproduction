@@ -3,7 +3,10 @@
     "default": {
       "runner": "nx-cloud",
       "options": {
-        "cacheableOperations": ["build", "build-storybook"],
+        "cacheableOperations": [
+          "build",
+          "build-storybook"
+        ],
         "accessToken": "MGMyNGMwZDAtMTM3My00M2Y3LTgyZjMtZjcxYTZmYTE3N2I1fHJlYWQtd3JpdGU="
       }
     }
@@ -13,15 +16,26 @@
   },
   "targetDefaults": {
     "dev": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "serve": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "build": {
-      "input": ["noMarkdown", "^noMarkdown"],
-      "dependsOn": ["^build"],
-      "outputs": ["{projectRoot}/dist"]
+      "input": [
+        "noMarkdown",
+        "^noMarkdown"
+      ],
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ]
     }
   },
   "affected": {

@@ -2,11 +2,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.vue",
-    "src/**/*.json",
-    "../../packages/vivi-lib/src/**/*.vue",
-    "../../packages/vivi-lib/src/**/*.ts",
-    "../../packages/shared-lib/src/**/*.vue",
-    "../../packages/shared-lib/src/**/*.ts"
+    "src/**/*.json"
   ],
   "exclude": [
     "src/**/__tests__/*"
@@ -24,35 +20,6 @@
     "composite": true,
     "rootDir": "../../",
     "baseUrl": ".",
-    "paths": {
-      "//": ["Write @nu/vivi-lib/ paths before @/ for import auto complete."],
-      "@nu/vivi-lib/*": [
-        "../../packages/vivi-lib/src/*",
-        "../../packages/vivi-lib/src/index"
-      ],
-      "@/*": [
-        "./src/*",
-        "../../packages/vivi-lib/src/*"
-      ],
-      "@nu/tailwind-lib/*": [
-        "../../packages/tailwind-lib/*"
-      ],
-      "@nu/shared-lib/*": [
-        "../../packages/shared-lib/src/*"
-      ],
-      "@nu/shared-lib": [
-        "../../packages/shared-lib/src/index"
-      ],
-      "@i18n/*": [
-        "./src/i18n/shaked/*"
-      ],
-      "@img/*": [
-        "../../packages/vivi-lib/src/assets/img/*"
-      ],
-      "@json/*": [
-        "../../packages/vivi-lib/src/assets/json/*"
-      ]
-    },
     "types": [
       "vite/client",
       "wicg-file-system-access"
@@ -64,8 +31,6 @@
     ]
   },
   "vueCompilerOptions": {
-    "plugins": [
-      "@vue/language-plugin-pug"
-    ]
+    "plugins": []
   }
 }
